@@ -75,7 +75,8 @@ class HomePageState extends State<HomePage> {
 }
 
 _launchUrl(String plusCode) async {
-  final url = 'https://www.google.com/maps/dir/?api=1&destination=$plusCode&travelmode=walking';
+  String encodedPlusCode = Uri.encodeComponent(plusCode);
+  final url = 'https://www.google.com/maps/dir/?api=1&destination=$encodedPlusCode&travelmode=walking';
   if (!await launchUrl(Uri.parse(url))) {
     throw Exception('Could not launch $url');
   }
