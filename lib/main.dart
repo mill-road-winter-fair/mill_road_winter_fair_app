@@ -2,8 +2,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+// Declare googleApiKey after dotenv is loaded
+late final String googleApiKey;
+
+Future<void> main() async {
+  await dotenv.load();
+  googleApiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
   runApp(const MyApp());
 }
 
@@ -15,7 +22,29 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mill Road Winter Fair',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        useMaterial3: true,
+        colorScheme: const ColorScheme(
+          brightness: Brightness.light,
+          primary: Color.fromRGBO(204, 51, 51, 1),
+          onPrimary: Colors.black,
+          secondary: Colors.yellow,
+          onSecondary: Colors.black,
+          error: Colors.red,
+          onError: Colors.white,
+          surface: Colors.white,
+          onSurface: Colors.black,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color.fromRGBO(204, 51, 51, 1),
+          foregroundColor: Colors.white,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          selectedItemColor: Color.fromRGBO(204, 51, 51, 1),
+          unselectedItemColor: Colors.grey,
+        ),
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: Color.fromRGBO(204, 51, 51, 1),
+        ),
       ),
       home: const HomePage(),
     );
@@ -30,7 +59,92 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  List listings = [];
+  int _currentIndex = 0;
+  final List<Widget> _pages = [
+    const MapPage(),
+    //const FilteredListingsPage(filterPrimaryType: "Vendor"),
+    const FilteredListingsPage(filterPrimaryType: "Vendor", filterSecondaryType: "Food"),
+    //const FilteredListingsPage(filterPrimaryType: "Vendor"),
+    const FilteredListingsPage(filterPrimaryType: "Vendor", filterSecondaryType: "Retail"),
+    const FilteredListingsPage(filterPrimaryType: "Performer", filterSecondaryType: ""),
+    const FilteredListingsPage(filterPrimaryType: "Event", filterSecondaryType: ""),
+    const FilteredListingsPage(filterPrimaryType: "Service", filterSecondaryType: ""),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mill Road Winter Fair'),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
+        ),
+      ),
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.map), label: "Map"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.fastfood), label: "Food"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_bag),
+              label: "Shopping"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.music_note), label: "Music"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.event), label: "Events"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.wheelchair_pickup),
+              label: "Services"),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.red),
+              child: Text('Menu'),
+            ),
+            ListTile(
+              title: const Text('About Us'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AboutUsPage()));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MapPage extends StatefulWidget {
+  const MapPage({super.key});
+
+  @override
+  _MapPageState createState() => _MapPageState();
+}
+
+class _MapPageState extends State<MapPage> {
+  late GoogleMapController _controller;
+  final Set<Marker> _markers = {};
 
   @override
   void initState() {
@@ -41,43 +155,150 @@ class HomePageState extends State<HomePage> {
   fetchListings() async {
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
     if (response.statusCode == 200) {
-      setState(() {
-        listings = json.decode(response.body);
-      });
+      final listings = json.decode(response.body);
+      for (var listing in listings) {
+        final plusCode = Uri.encodeComponent(listing['plusCode']);
+        LatLng? coordinates =
+            await getCoordinatesFromPlusCode(plusCode, googleApiKey);
+
+        if (coordinates != null) {
+          setState(() {
+            _markers.add(
+              Marker(
+                markerId: MarkerId(listing['id'].toString()),
+                position: coordinates,
+                infoWindow: InfoWindow(
+                  title: listing['displayName'],
+                ),
+              ),
+            );
+          });
+        }
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Mill Road Winter Fair')),
-      body: ListView.builder(
-        itemCount: listings.length,
-        itemBuilder: (context, index) {
-          final listing = listings[index];
-          return ListTile(
-            title: Text(listing['displayName']),
-            subtitle: Text(listing['tertiaryType'] +
-                ' (' +
-                listing['startTime'] +
-                ' - ' +
-                listing['endTime'] +
-                ')'),
-            trailing: IconButton(
-              onPressed: () => _launchUrl(listing['plusCode']),
-              icon: const Icon(Icons.directions),
-            ),
-          );
-        },
+    return GoogleMap(
+      onMapCreated: (GoogleMapController controller) {
+        _controller = controller;
+      },
+      initialCameraPosition: const CameraPosition(
+        target:
+            LatLng(52.199212, 0.139342), // Example coordinates for Mill Road
+        zoom: 15,
       ),
+      markers: _markers,
     );
   }
 }
 
 _launchUrl(String plusCode) async {
   String encodedPlusCode = Uri.encodeComponent(plusCode);
-  final url = 'https://www.google.com/maps/dir/?api=1&destination=$encodedPlusCode&travelmode=walking';
+  final url =
+      'https://www.google.com/maps/dir/?api=1&destination=$encodedPlusCode&travelmode=walking';
   if (!await launchUrl(Uri.parse(url))) {
     throw Exception('Could not launch $url');
   }
+}
+
+class FilteredListingsPage extends StatelessWidget {
+  final String filterPrimaryType;
+  final String filterSecondaryType;
+
+  const FilteredListingsPage({required this.filterPrimaryType, required this.filterSecondaryType, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: fetchFilteredListings(filterPrimaryType, filterSecondaryType),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return const Center(child: Text("Error fetching listings"));
+        } else {
+          final listings = snapshot.data as List;
+          return ListView.builder(
+            itemCount: listings.length,
+            itemBuilder: (context, index) {
+              final listing = listings[index];
+              return ExpansionTile(
+                title: Text(listing['displayName']),
+                subtitle: Text(
+                  '${listing['startTime']} - ${listing['endTime']}',
+                ),
+                children: [
+                  Text("Details: ${listing['details']}"),
+                  IconButton(
+                    onPressed: () => _launchUrl(listing['plusCode']),
+                    icon: const Icon(Icons.directions),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      },
+    );
+  }
+
+  Future<List> fetchFilteredListings(String primaryType, String secondaryType) async {
+    // Fetch all listings from the API
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+
+    if (response.statusCode == 200) {
+      // Decode the full list of listings
+      final allListings = json.decode(response.body) as List;
+
+      // Filter the listings based on the primaryType
+      final filteredListings = allListings
+          .where((listing) => listing['primaryType'] == primaryType)
+          .toList();
+
+      if (secondaryType != "") {
+        final doubleFilteredListings = filteredListings
+          .where ((listing) => listing['secondaryType'] == secondaryType)
+          .toList();
+        return doubleFilteredListings;
+      }
+
+      return filteredListings;
+    } else {
+      throw Exception("Failed to load listings");
+    }
+  }
+}
+
+class AboutUsPage extends StatelessWidget {
+  const AboutUsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("About Us")),
+      body: const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Text(
+            "Mill Road Winter Fair is an annual event ..."), // Add event details here
+      ),
+    );
+  }
+}
+
+Future<LatLng?> getCoordinatesFromPlusCode(
+    String plusCode, String apiKey) async {
+  final url =
+      'https://maps.googleapis.com/maps/api/geocode/json?address=$plusCode&key=$apiKey';
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    if (data['results'] != null && data['results'].isNotEmpty) {
+      final location = data['results'][0]['geometry']['location'];
+      return LatLng(location['lat'], location['lng']);
+    }
+  }
+  return null;
 }
