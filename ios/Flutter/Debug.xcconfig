@@ -1,1 +1,2 @@
 #include "Generated.xcconfig"
+        GOOGLE_API_KEY=$(DART_DEFINES_GOOGLE_API_KEY)

@@ -15,6 +15,9 @@ if (project.hasProperty('dart-defines')) {
             }
 }
 
+def iosDartDefines = dartDefines.collect { k, v -> "${k}=${v}" }.join(",")
+project.ext.set("dart-defines-ios", iosDartDefines)
+
 android {
     namespace = "com.example.mill_road_winter_fair_app"
     compileSdk = flutter.compileSdkVersion
