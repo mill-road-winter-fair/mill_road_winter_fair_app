@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Declare googleApiKey after dotenv is loaded
@@ -62,13 +64,16 @@ class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
     const MapPage(),
-    //const FilteredListingsPage(filterPrimaryType: "Vendor"),
-    const FilteredListingsPage(filterPrimaryType: "Vendor", filterSecondaryType: "Food"),
-    //const FilteredListingsPage(filterPrimaryType: "Vendor"),
-    const FilteredListingsPage(filterPrimaryType: "Vendor", filterSecondaryType: "Retail"),
-    const FilteredListingsPage(filterPrimaryType: "Performer", filterSecondaryType: ""),
-    const FilteredListingsPage(filterPrimaryType: "Event", filterSecondaryType: ""),
-    const FilteredListingsPage(filterPrimaryType: "Service", filterSecondaryType: ""),
+    const FilteredListingsPage(
+        filterPrimaryType: "Vendor", filterSecondaryType: "Food"),
+    const FilteredListingsPage(
+        filterPrimaryType: "Vendor", filterSecondaryType: "Retail"),
+    const FilteredListingsPage(
+        filterPrimaryType: "Performer", filterSecondaryType: ""),
+    const FilteredListingsPage(
+        filterPrimaryType: "Event", filterSecondaryType: ""),
+    const FilteredListingsPage(
+        filterPrimaryType: "Service", filterSecondaryType: ""),
   ];
 
   @override
@@ -99,15 +104,13 @@ class HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
               icon: Icon(Icons.fastfood), label: "Food"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_bag),
-              label: "Shopping"),
+              icon: Icon(Icons.shopping_bag), label: "Shopping"),
           BottomNavigationBarItem(
               icon: Icon(Icons.music_note), label: "Music"),
           BottomNavigationBarItem(
               icon: Icon(Icons.event), label: "Events"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.wheelchair_pickup),
-              label: "Services"),
+              icon: Icon(Icons.wheelchair_pickup), label: "Services"),
         ],
       ),
       drawer: Drawer(
@@ -135,6 +138,34 @@ class HomePageState extends State<HomePage> {
   }
 }
 
+Future<Position> _getCurrentLocation() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Check if location services are enabled
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    await Geolocator.openLocationSettings();
+    throw Exception("Location services are disabled.");
+  }
+
+  // Request permissions
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      throw Exception("Location permissions are denied.");
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    throw Exception("Location permissions are permanently denied.");
+  }
+
+  // Get current position
+  return await Geolocator.getCurrentPosition();
+}
+
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -145,10 +176,13 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   late GoogleMapController _controller;
   final Set<Marker> _markers = {};
+  final Set<Polyline> _polylines = {}; // For displaying the route polyline
+  late PolylinePoints polylinePoints; // For decoding points
 
   @override
   void initState() {
     super.initState();
+    polylinePoints = PolylinePoints();
     fetchListings();
   }
 
@@ -169,6 +203,11 @@ class _MapPageState extends State<MapPage> {
                 position: coordinates,
                 infoWindow: InfoWindow(
                   title: listing['displayName'],
+                  snippet: 'Let\'s go!',
+                  onTap: () async {
+                    // Assuming you have the user's current location as origin
+                    await _getDirections(coordinates);
+                  },
                 ),
               ),
             );
@@ -178,9 +217,73 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  Future<void> _getDirections(LatLng destination) async {
+    // Get the user's current location
+    Position position = await _getCurrentLocation();
+    LatLng origin = LatLng(position.latitude, position.longitude);
+
+    // Fetch directions from Google Directions API
+    final result = await polylinePoints.getRouteBetweenCoordinates(
+      googleApiKey: googleApiKey,
+      request: PolylineRequest(
+          origin: PointLatLng(origin.latitude, origin.longitude),
+          destination: PointLatLng(destination.latitude, destination.longitude),
+          mode: TravelMode.walking),
+    );
+
+    // Check if route points were fetched successfully
+    if (result.points.isNotEmpty) {
+      setState(() {
+        _polylines.clear(); // Clear any existing route
+        _polylines.add(Polyline(
+          polylineId: const PolylineId('route'),
+          points: result.points
+              .map((point) => LatLng(point.latitude, point.longitude))
+              .toList(),
+          color: Colors.blue,
+          width: 5,
+        ));
+      });
+    } else {
+      throw Exception("Failed to fetch directions");
+    }
+  }
+
+// Helper function to get the current location
+  Future<Position> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check if location services are enabled
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      throw Exception("Location services are disabled.");
+    }
+
+    // Request permissions
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception("Location permissions are denied.");
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception("Location permissions are permanently denied.");
+    }
+
+    // Get current position
+    return await Geolocator.getCurrentPosition();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GoogleMap(
+      myLocationEnabled: true,
+      myLocationButtonEnabled: true,
+      mapToolbarEnabled: false,
       onMapCreated: (GoogleMapController controller) {
         _controller = controller;
       },
@@ -190,6 +293,7 @@ class _MapPageState extends State<MapPage> {
         zoom: 15,
       ),
       markers: _markers,
+      polylines: _polylines, // Display polylines
     );
   }
 }
@@ -207,7 +311,10 @@ class FilteredListingsPage extends StatelessWidget {
   final String filterPrimaryType;
   final String filterSecondaryType;
 
-  const FilteredListingsPage({required this.filterPrimaryType, required this.filterSecondaryType, super.key});
+  const FilteredListingsPage(
+      {required this.filterPrimaryType,
+      required this.filterSecondaryType,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -244,7 +351,8 @@ class FilteredListingsPage extends StatelessWidget {
     );
   }
 
-  Future<List> fetchFilteredListings(String primaryType, String secondaryType) async {
+  Future<List> fetchFilteredListings(
+      String primaryType, String secondaryType) async {
     // Fetch all listings from the API
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
 
@@ -259,8 +367,8 @@ class FilteredListingsPage extends StatelessWidget {
 
       if (secondaryType != "") {
         final doubleFilteredListings = filteredListings
-          .where ((listing) => listing['secondaryType'] == secondaryType)
-          .toList();
+            .where((listing) => listing['secondaryType'] == secondaryType)
+            .toList();
         return doubleFilteredListings;
       }
 
