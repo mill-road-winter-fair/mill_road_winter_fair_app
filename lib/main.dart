@@ -240,7 +240,7 @@ class _MapPageState extends State<MapPage> {
           points: result.points
               .map((point) => LatLng(point.latitude, point.longitude))
               .toList(),
-          color: Colors.blue,
+          color: const Color.fromRGBO(204, 51, 51, 1),
           width: 5,
         ));
       });
