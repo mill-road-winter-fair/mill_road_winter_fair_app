@@ -5,6 +5,16 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def dartDefines = [:]
+if (project.hasProperty('dart-defines')) {
+    dartDefines = dartDefines + project.property('dart-defines')
+            .split(',')
+            .collectEntries { entry ->
+                def pair = new String(entry.decodeBase64(), 'UTF-8').split('=')
+                pair.length == 2 ? [(pair[0]): pair[1]] : [:]
+            }
+}
+
 android {
     namespace = "com.example.mill_road_winter_fair_app"
     compileSdk = flutter.compileSdkVersion
@@ -28,6 +38,13 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Check for dartDefines in case the key is not set
+        if (dartDefines.containsKey('GOOGLE_API_KEY')) {
+            resValue "string", "GOOGLE_API_KEY", dartDefines['GOOGLE_API_KEY']
+        } else {
+            throw new GradleException("GOOGLE_API_KEY is missing from dart-defines.")
+        }
     }
 
     buildTypes {
