@@ -19,7 +19,7 @@ Currently the aim is for the app to provides listings of the various stalls, mus
 
 3. Clone this repository to your local environment using `git clone`.
 
-4. Install 9Flutter](https://flutter.dev/).
+4. Install [Flutter](https://flutter.dev/).
 
 5. Install [Android Studio](https://developer.android.com/studio).
 
@@ -45,7 +45,7 @@ The app currently uses the the Google Maps Platform within GCP in order to acces
 2. Maps SDK for Android (To render the interactive map on the app's homepage.)
 
 ## Other Links
-- [Mill Road Winter Fair App DB & API](https://github.com/MarauderOne/mill_road_winter_fair_app_db_api) (the backend)
+- [Mill Road Winter Fair App DB & API](https://github.com/MarauderOne/mill_road_winter_fair_app_db_api) (the app's "backend")
 - [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
 - [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 - [Flutter online documentation](https://docs.flutter.dev/)
