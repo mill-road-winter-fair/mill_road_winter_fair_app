@@ -192,8 +192,7 @@ class _MapPageState extends State<MapPage> {
       final listings = json.decode(response.body);
       for (var listing in listings) {
         final plusCode = Uri.encodeComponent(listing['plusCode']);
-        LatLng? coordinates =
-            await getCoordinatesFromPlusCode(plusCode, googleApiKey);
+        LatLng? coordinates = await getCoordinatesFromPlusCode(plusCode, googleApiKey);
 
         if (coordinates != null) {
           setState(() {
@@ -201,14 +200,21 @@ class _MapPageState extends State<MapPage> {
               Marker(
                 markerId: MarkerId(listing['id'].toString()),
                 position: coordinates,
-                infoWindow: InfoWindow(
-                  title: listing['displayName'],
-                  snippet: 'Let\'s go!',
-                  onTap: () async {
-                    // Assuming you have the user's current location as origin
-                    await _getDirections(coordinates);
-                  },
-                ),
+                onTap: () {
+                  // Show bottom sheet with listing information
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return ListingInfoSheet(
+                        title: listing['displayName'],
+                        categories: listing['secondaryType']+' • '+listing['tertiaryType'],
+                        openingtimes: listing['startTime']+' - '+listing['endTime'],
+                        coordinates: coordinates,
+                        onGetDirections: () => _getDirections(coordinates),
+                      );
+                    },
+                  );
+                },
               ),
             );
           });
@@ -376,6 +382,66 @@ class FilteredListingsPage extends StatelessWidget {
     } else {
       throw Exception("Failed to load listings");
     }
+  }
+}
+
+class ListingInfoSheet extends StatelessWidget {
+  final String title;
+  final String categories;
+  final String openingtimes;
+  final LatLng coordinates;
+  final Function onGetDirections;
+
+  const ListingInfoSheet({
+    required this.title,
+    required this.categories,
+    required this.coordinates,
+    required this.openingtimes,
+    required this.onGetDirections,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(categories),
+          const SizedBox(height: 8),
+          Text(openingtimes),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  onGetDirections();
+                  Navigator.pop(context); // Close the bottom sheet
+                },
+                icon: const Icon(Icons.directions),
+                label: const Text('Get Directions'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  _launchUrl(title); // Open Google Maps in a browser or app
+                  Navigator.pop(context); // Close the bottom sheet
+                },
+                icon: const Icon(Icons.map),
+                label: const Text('Open in Maps'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
