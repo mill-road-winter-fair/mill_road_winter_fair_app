@@ -10,7 +10,7 @@ late final String googleApiKey;
 
 Future<void> main() async {
   await dotenv.load();
-  googleApiKey = dotenv.env['GOOGLE_API_KEY'] ?? '';
+  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   runApp(const MyApp());
 }
 
