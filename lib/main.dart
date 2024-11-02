@@ -99,16 +99,12 @@ class HomePageState extends State<HomePage> {
           });
         },
         items: const [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.map), label: "Map"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.fastfood), label: "Food"),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+          BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
           BottomNavigationBarItem(
               icon: Icon(Icons.shopping_bag), label: "Shopping"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.music_note), label: "Music"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.event), label: "Events"),
+          BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
+          BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
           BottomNavigationBarItem(
               icon: Icon(Icons.wheelchair_pickup), label: "Services"),
         ],
@@ -192,7 +188,8 @@ class _MapPageState extends State<MapPage> {
       final listings = json.decode(response.body);
       for (var listing in listings) {
         final plusCode = Uri.encodeComponent(listing['plusCode']);
-        LatLng? coordinates = await getCoordinatesFromPlusCode(plusCode, googleApiKey);
+        LatLng? coordinates =
+            await getCoordinatesFromPlusCode(plusCode, googleApiKey);
 
         if (coordinates != null) {
           setState(() {
@@ -207,8 +204,11 @@ class _MapPageState extends State<MapPage> {
                     builder: (BuildContext context) {
                       return ListingInfoSheet(
                         title: listing['displayName'],
-                        categories: listing['secondaryType']+' • '+listing['tertiaryType'],
-                        openingTimes: listing['startTime']+' - '+listing['endTime'],
+                        categories: listing['secondaryType'] +
+                            ' • ' +
+                            listing['tertiaryType'],
+                        openingTimes:
+                            listing['startTime'] + ' - ' + listing['endTime'],
                         phoneNumber: listing['phone'],
                         website: listing['website'],
                         coordinates: coordinates,
@@ -420,7 +420,8 @@ class ListingInfoSheet extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
                 openingTimes,
@@ -461,14 +462,14 @@ class ListingInfoSheet extends StatelessWidget {
                 icon: const Icon(Icons.directions),
                 label: const Text('Get Directions'),
               ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  _launchUrl(title);
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.map),
-                label: const Text('Open in Maps'),
-              ),
+              if (website.isNotEmpty)
+                ElevatedButton.icon(
+                  onPressed: () {
+                    launchUrl(Uri.parse(website));
+                  },
+                  icon: const Icon(Icons.public),
+                  label: const Text('Open website'),
+                ),
             ],
           ),
         ],
