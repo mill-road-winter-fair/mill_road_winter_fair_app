@@ -208,7 +208,9 @@ class _MapPageState extends State<MapPage> {
                       return ListingInfoSheet(
                         title: listing['displayName'],
                         categories: listing['secondaryType']+' • '+listing['tertiaryType'],
-                        openingtimes: listing['startTime']+' - '+listing['endTime'],
+                        openingTimes: listing['startTime']+' - '+listing['endTime'],
+                        phoneNumber: listing['phone'],
+                        website: listing['website'],
                         coordinates: coordinates,
                         onGetDirections: () => _getDirections(coordinates),
                       );
@@ -388,7 +390,9 @@ class FilteredListingsPage extends StatelessWidget {
 class ListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;
-  final String openingtimes;
+  final String openingTimes;
+  final String phoneNumber;
+  final String website;
   final LatLng coordinates;
   final Function onGetDirections;
 
@@ -396,10 +400,12 @@ class ListingInfoSheet extends StatelessWidget {
     required this.title,
     required this.categories,
     required this.coordinates,
-    required this.openingtimes,
+    required this.openingTimes,
+    required this.phoneNumber,
+    required this.website,
     required this.onGetDirections,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -409,14 +415,40 @@ class ListingInfoSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                openingTimes,
+                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(categories),
           const SizedBox(height: 8),
-          Text(openingtimes),
+          if (phoneNumber.isNotEmpty)
+            GestureDetector(
+              onTap: () async {
+                final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+                if (await canLaunchUrl(phoneUri)) {
+                  await launchUrl(phoneUri);
+                } else {
+                  throw Exception('Could not launch $phoneNumber');
+                }
+              },
+              child: Row(
+                children: [
+                  const Icon(Icons.phone, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Text(phoneNumber),
+                ],
+              ),
+            ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -424,15 +456,15 @@ class ListingInfoSheet extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   onGetDirections();
-                  Navigator.pop(context); // Close the bottom sheet
+                  Navigator.pop(context);
                 },
                 icon: const Icon(Icons.directions),
                 label: const Text('Get Directions'),
               ),
               ElevatedButton.icon(
                 onPressed: () {
-                  _launchUrl(title); // Open Google Maps in a browser or app
-                  Navigator.pop(context); // Close the bottom sheet
+                  _launchUrl(title);
+                  Navigator.pop(context);
                 },
                 icon: const Icon(Icons.map),
                 label: const Text('Open in Maps'),
