@@ -132,6 +132,13 @@ class HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  void navigateToMapAndGetDirections(LatLng destination) {
+    setState(() {
+      _currentIndex = 0; // Switch to the Map page
+    });
+    (_pages[0] as MapPage).createState()._getDirections(destination);
+  }
 }
 
 Future<Position> _getCurrentLocation() async {
@@ -211,7 +218,6 @@ class _MapPageState extends State<MapPage> {
                             listing['startTime'] + ' - ' + listing['endTime'],
                         phoneNumber: listing['phone'],
                         website: listing['website'],
-                        coordinates: coordinates,
                         onGetDirections: () => _getDirections(coordinates),
                       );
                     },
@@ -306,23 +312,15 @@ class _MapPageState extends State<MapPage> {
   }
 }
 
-_launchUrl(String plusCode) async {
-  String encodedPlusCode = Uri.encodeComponent(plusCode);
-  final url =
-      'https://www.google.com/maps/dir/?api=1&destination=$encodedPlusCode&travelmode=walking';
-  if (!await launchUrl(Uri.parse(url))) {
-    throw Exception('Could not launch $url');
-  }
-}
-
 class FilteredListingsPage extends StatelessWidget {
   final String filterPrimaryType;
   final String filterSecondaryType;
 
-  const FilteredListingsPage(
-      {required this.filterPrimaryType,
-      required this.filterSecondaryType,
-      super.key});
+  const FilteredListingsPage({
+    required this.filterPrimaryType,
+    required this.filterSecondaryType,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -335,22 +333,32 @@ class FilteredListingsPage extends StatelessWidget {
           return const Center(child: Text("Error fetching listings"));
         } else {
           final listings = snapshot.data as List;
+          final homePageState =
+              context.findAncestorStateOfType<HomePageState>();
           return ListView.builder(
             itemCount: listings.length,
             itemBuilder: (context, index) {
               final listing = listings[index];
-              return ExpansionTile(
-                title: Text(listing['displayName']),
-                subtitle: Text(
-                  '${listing['startTime']} - ${listing['endTime']}',
-                ),
-                children: [
-                  Text("Details: ${listing['details']}"),
-                  IconButton(
-                    onPressed: () => _launchUrl(listing['plusCode']),
-                    icon: const Icon(Icons.directions),
-                  ),
-                ],
+              return ListingInfoSheet(
+                title: listing['displayName'],
+                categories: listing['secondaryType'] +
+                    ' • ' +
+                    listing['tertiaryType'],
+                openingTimes:
+                listing['startTime'] + ' - ' + listing['endTime'],
+                phoneNumber: listing['phone'],
+                website: listing['website'],
+                onGetDirections: () async {
+                  if (homePageState != null) {
+                    final encodedPlusCode =
+                        Uri.encodeComponent(listing['plusCode']);
+                    LatLng? coordinates = await getCoordinatesFromPlusCode(
+                        encodedPlusCode, googleApiKey);
+                    if (coordinates != null) {
+                      homePageState.navigateToMapAndGetDirections(coordinates);
+                    }
+                  }
+                },
               );
             },
           );
@@ -373,11 +381,10 @@ class FilteredListingsPage extends StatelessWidget {
           .where((listing) => listing['primaryType'] == primaryType)
           .toList();
 
-      if (secondaryType != "") {
-        final doubleFilteredListings = filteredListings
+      if (secondaryType.isNotEmpty) {
+        return filteredListings
             .where((listing) => listing['secondaryType'] == secondaryType)
             .toList();
-        return doubleFilteredListings;
       }
 
       return filteredListings;
@@ -393,13 +400,11 @@ class ListingInfoSheet extends StatelessWidget {
   final String openingTimes;
   final String phoneNumber;
   final String website;
-  final LatLng coordinates;
   final Function onGetDirections;
 
   const ListingInfoSheet({
     required this.title,
     required this.categories,
-    required this.coordinates,
     required this.openingTimes,
     required this.phoneNumber,
     required this.website,
