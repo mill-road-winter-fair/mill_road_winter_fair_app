@@ -62,6 +62,15 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
+
+  Future<void> navigateToMapAndGetDirections(LatLng destination) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePage()),
+    );
+      //TODO: Need something here that calls the getDirections function and actually works
+  }
+
   final List<Widget> _pages = [
     const MapPage(),
     const FilteredListingsPage(
@@ -132,13 +141,6 @@ class HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  void navigateToMapAndGetDirections(LatLng destination) {
-    setState(() {
-      _currentIndex = 0; // Switch to the Map page
-    });
-    (_pages[0] as MapPage).createState()._getDirections(destination);
-  }
 }
 
 Future<Position> _getCurrentLocation() async {
@@ -173,10 +175,10 @@ class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
   @override
-  _MapPageState createState() => _MapPageState();
+  MapPageState createState() => MapPageState();
 }
 
-class _MapPageState extends State<MapPage> {
+class MapPageState extends State<MapPage> {
   late GoogleMapController _controller;
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
@@ -194,9 +196,8 @@ class _MapPageState extends State<MapPage> {
     if (response.statusCode == 200) {
       final listings = json.decode(response.body);
       for (var listing in listings) {
-        final plusCode = Uri.encodeComponent(listing['plusCode']);
         LatLng? coordinates =
-            await getCoordinatesFromPlusCode(plusCode, googleApiKey);
+            await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey);
 
         if (coordinates != null) {
           setState(() {
@@ -341,19 +342,15 @@ class FilteredListingsPage extends StatelessWidget {
               final listing = listings[index];
               return ListingInfoSheet(
                 title: listing['displayName'],
-                categories: listing['secondaryType'] +
-                    ' • ' +
-                    listing['tertiaryType'],
-                openingTimes:
-                listing['startTime'] + ' - ' + listing['endTime'],
+                categories:
+                    listing['secondaryType'] + ' • ' + listing['tertiaryType'],
+                openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
                 phoneNumber: listing['phone'],
                 website: listing['website'],
                 onGetDirections: () async {
                   if (homePageState != null) {
-                    final encodedPlusCode =
-                        Uri.encodeComponent(listing['plusCode']);
                     LatLng? coordinates = await getCoordinatesFromPlusCode(
-                        encodedPlusCode, googleApiKey);
+                        listing['plusCode'], googleApiKey);
                     if (coordinates != null) {
                       homePageState.navigateToMapAndGetDirections(coordinates);
                     }
@@ -501,8 +498,9 @@ class AboutUsPage extends StatelessWidget {
 
 Future<LatLng?> getCoordinatesFromPlusCode(
     String plusCode, String apiKey) async {
+  final encodedPlusCode = Uri.encodeComponent(plusCode);
   final url =
-      'https://maps.googleapis.com/maps/api/geocode/json?address=$plusCode&key=$apiKey';
+      'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$apiKey';
   final response = await http.get(Uri.parse(url));
 
   if (response.statusCode == 200) {
