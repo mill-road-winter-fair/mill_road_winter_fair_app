@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -20,6 +21,8 @@ class MapPageState extends State<MapPage> {
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
+  MapType _mapType = MapType.normal;
+  IconData _layersIcon = Icons.satellite_alt;
 
   @override
   void initState() {
@@ -34,7 +37,7 @@ class MapPageState extends State<MapPage> {
       final listings = json.decode(response.body);
       for (var listing in listings) {
         LatLng? coordinates =
-        await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey);
+            await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey);
 
         if (coordinates != null) {
           setState(() {
@@ -53,7 +56,7 @@ class MapPageState extends State<MapPage> {
                             ' • ' +
                             listing['tertiaryType'],
                         openingTimes:
-                        listing['startTime'] + ' - ' + listing['endTime'],
+                            listing['startTime'] + ' - ' + listing['endTime'],
                         phoneNumber: listing['phone'],
                         website: listing['website'],
                         onGetDirections: () => getDirections(coordinates),
@@ -71,7 +74,7 @@ class MapPageState extends State<MapPage> {
 
   Future<void> getDirections(LatLng destination) async {
     // Get the user's current location
-    Position position = await _getCurrentLocation();
+    Position position = await getCurrentLocation();
     LatLng origin = LatLng(position.latitude, position.longitude);
 
     // Fetch directions from Google Directions API
@@ -92,7 +95,7 @@ class MapPageState extends State<MapPage> {
           points: result.points
               .map((point) => LatLng(point.latitude, point.longitude))
               .toList(),
-          color: const Color.fromRGBO(204, 51, 51, 1),
+          color: const Color.fromRGBO(204, 51, 51, 1.0),
           width: 5,
         ));
       });
@@ -101,50 +104,41 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-// Helper function to get the current location
-  Future<Position> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Check if location services are enabled
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      throw Exception("Location services are disabled.");
-    }
-
-    // Request permissions
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        throw Exception("Location permissions are denied.");
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      throw Exception("Location permissions are permanently denied.");
-    }
-
-    // Get current position
-    return await Geolocator.getCurrentPosition();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(
-      myLocationEnabled: true,
-      myLocationButtonEnabled: true,
-      mapToolbarEnabled: false,
-      onMapCreated: (GoogleMapController controller) {
-      },
-      initialCameraPosition: const CameraPosition(
-        target:
-        LatLng(52.199212, 0.139342), // Example coordinates for Mill Road
-        zoom: 15,
-      ),
-      markers: _markers,
-      polylines: _polylines, // Display polylines
+    return Scaffold(
+        body: GoogleMap(
+          mapType: _mapType,
+          myLocationEnabled: true,
+          myLocationButtonEnabled: true,
+          mapToolbarEnabled: false,
+          onMapCreated: (GoogleMapController controller) {},
+          initialCameraPosition: const CameraPosition(
+            target: LatLng(
+                52.199212, 0.139342), // Example coordinates for Mill Road
+            zoom: 15,
+          ),
+          markers: _markers,
+          polylines: _polylines, // Display polylines
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
+        floatingActionButton: IconButton.filled(
+            onPressed: () {
+              setState(() {
+                if (_mapType == MapType.normal) {
+                  _mapType = MapType.satellite;
+                  _layersIcon = Icons.map;
+                } else {
+                  _mapType = MapType.normal;
+                  _layersIcon = Icons.satellite_alt;
+                }
+              });
+            },
+            icon: Icon(
+              _layersIcon,
+              color: const Color.fromRGBO(255, 255, 255, 1.0),
+            )
+        )
     );
   }
 }
