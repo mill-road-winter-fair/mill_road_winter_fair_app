@@ -146,7 +146,22 @@ class MapPageState extends State<MapPage> {
                           color: const Color.fromRGBO(255, 255, 255, 1.0),
                         ))
                   ],
-                )
+                ),
+                Row(
+                    children: [
+                      if (_polylines.isNotEmpty)
+                        IconButton.filled(
+                            onPressed: () {
+                              setState(() {
+                                _polylines.clear();
+                              });
+                              },
+                            icon: const Icon(
+                              Icons.wrong_location,
+                              color: Color.fromRGBO(255, 255, 255, 1.0),
+                            ))
+                      ],
+    )
               ],
             )));
   }
