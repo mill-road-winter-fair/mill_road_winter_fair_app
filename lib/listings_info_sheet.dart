@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ListingInfoSheet extends StatelessWidget {
@@ -68,6 +69,9 @@ class ListingInfoSheet extends StatelessWidget {
             children: [
               ElevatedButton.icon(
                 onPressed: () {
+                  if (currentIndex == 0) {
+                    Navigator.pop(context);
+                  }
                   onGetDirections();
                 },
                 icon: const Icon(Icons.directions),
