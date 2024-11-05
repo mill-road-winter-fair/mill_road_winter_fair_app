@@ -115,30 +115,39 @@ class MapPageState extends State<MapPage> {
           onMapCreated: (GoogleMapController controller) {},
           initialCameraPosition: const CameraPosition(
             target: LatLng(
-                52.199212, 0.139342), // Example coordinates for Mill Road
+                52.199212, 0.139342),
             zoom: 15,
           ),
           markers: _markers,
-          polylines: _polylines, // Display polylines
+          polylines: _polylines,
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
-        floatingActionButton: IconButton.filled(
-            onPressed: () {
-              setState(() {
-                if (_mapType == MapType.normal) {
-                  _mapType = MapType.satellite;
-                  _layersIcon = Icons.map;
-                } else {
-                  _mapType = MapType.normal;
-                  _layersIcon = Icons.satellite_alt;
-                }
-              });
-            },
-            icon: Icon(
-              _layersIcon,
-              color: const Color.fromRGBO(255, 255, 255, 1.0),
-            )
-        )
-    );
+        floatingActionButton: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    IconButton.filled(
+                        onPressed: () {
+                          setState(() {
+                            if (_mapType == MapType.normal) {
+                              _mapType = MapType.satellite;
+                              _layersIcon = Icons.map;
+                            } else {
+                              _mapType = MapType.normal;
+                              _layersIcon = Icons.satellite_alt;
+                            }
+                          });
+                        },
+                        icon: Icon(
+                          _layersIcon,
+                          color: const Color.fromRGBO(255, 255, 255, 1.0),
+                        ))
+                  ],
+                )
+              ],
+            )));
   }
 }
