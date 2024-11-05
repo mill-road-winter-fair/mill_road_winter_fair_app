@@ -97,6 +97,7 @@ class MapPageState extends State<MapPage> {
               .toList(),
           color: const Color.fromRGBO(204, 51, 51, 1.0),
           width: 5,
+          patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)]
         ));
       });
     } else {
