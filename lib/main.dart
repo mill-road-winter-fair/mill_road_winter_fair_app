@@ -359,7 +359,9 @@ class FilteredListingsPage extends StatelessWidget {
           final listings = snapshot.data as List;
           final homePageState =
               context.findAncestorStateOfType<HomePageState>();
-          return ListView.builder(
+          return ListView.separated(
+            padding: const EdgeInsets.all(8),
+            separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
             itemCount: listings.length,
             itemBuilder: (context, index) {
               final listing = listings[index];
