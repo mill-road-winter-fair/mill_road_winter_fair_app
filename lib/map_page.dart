@@ -125,6 +125,8 @@ class MapPageState extends State<MapPage> {
     return Scaffold(
         body: GoogleMap(
           mapType: _mapType,
+          rotateGesturesEnabled: false,
+          compassEnabled: false,
           myLocationEnabled: true,
           myLocationButtonEnabled: true,
           mapToolbarEnabled: false,
