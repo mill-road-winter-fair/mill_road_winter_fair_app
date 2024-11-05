@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mill_road_winter_fair_app/aboutUs.dart';
-import 'package:mill_road_winter_fair_app/filteredListings.dart';
-import 'package:mill_road_winter_fair_app/mapPage.dart';
-import 'package:mill_road_winter_fair_app/plusCodeHandlers.dart';
+import 'package:mill_road_winter_fair_app/about_us.dart';
+import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 //Initialize Google Map API Key variable

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mill_road_winter_fair_app/listingsInfoSheet.dart';
+import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 
 class FilteredListingsPage extends StatelessWidget {

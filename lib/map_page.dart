@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mill_road_winter_fair_app/listingsInfoSheet.dart';
-import 'package:mill_road_winter_fair_app/plusCodeHandlers.dart';
+import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
+import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -17,7 +17,6 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  late GoogleMapController _controller;
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
@@ -138,7 +137,6 @@ class MapPageState extends State<MapPage> {
       myLocationButtonEnabled: true,
       mapToolbarEnabled: false,
       onMapCreated: (GoogleMapController controller) {
-        _controller = controller;
       },
       initialCameraPosition: const CameraPosition(
         target:
