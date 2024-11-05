@@ -10,6 +10,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Declare googleApiKey after dotenv is loaded
 late final String googleApiKey;
 
+//Define a GlobalKey for MapPageState:
+final GlobalKey<MapPageState> _mapPageKey = GlobalKey<MapPageState>();
+
 Future<void> main() async {
   await dotenv.load();
   googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
@@ -63,12 +66,17 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  Future<void> navigateToMapAndGetDirections(LatLng destination) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HomePage()),
-    );
-      //TODO: Need something here that calls the getDirections function and actually works
+  Future<void> navigateToMapAndGetDirections(String plusCode) async {
+    setState(() {
+      _currentIndex = 0;
+    });
+
+    LatLng? coordinates =
+        await getCoordinatesFromPlusCode(plusCode, googleApiKey);
+
+    if (coordinates != null) {
+      _mapPageKey.currentState?._getDirections(coordinates);
+    }
   }
 
   final List<Widget> _pages = [
@@ -99,7 +107,22 @@ class HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: _pages[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          MapPage(key: _mapPageKey),
+          const FilteredListingsPage(
+              filterPrimaryType: "Vendor", filterSecondaryType: "Food"),
+          const FilteredListingsPage(
+              filterPrimaryType: "Vendor", filterSecondaryType: "Retail"),
+          const FilteredListingsPage(
+              filterPrimaryType: "Performer", filterSecondaryType: ""),
+          const FilteredListingsPage(
+              filterPrimaryType: "Event", filterSecondaryType: ""),
+          const FilteredListingsPage(
+              filterPrimaryType: "Service", filterSecondaryType: ""),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -347,14 +370,12 @@ class FilteredListingsPage extends StatelessWidget {
                 openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
                 phoneNumber: listing['phone'],
                 website: listing['website'],
-                onGetDirections: () async {
-                  if (homePageState != null) {
-                    LatLng? coordinates = await getCoordinatesFromPlusCode(
-                        listing['plusCode'], googleApiKey);
-                    if (coordinates != null) {
-                      homePageState.navigateToMapAndGetDirections(coordinates);
+                onGetDirections: () => {
+                  if (homePageState != null)
+                    {
+                      homePageState
+                          .navigateToMapAndGetDirections(listing['plusCode']),
                     }
-                  }
                 },
               );
             },
@@ -459,7 +480,6 @@ class ListingInfoSheet extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   onGetDirections();
-                  Navigator.pop(context);
                 },
                 icon: const Icon(Icons.directions),
                 label: const Text('Get Directions'),
