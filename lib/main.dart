@@ -67,7 +67,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
 
-  Future<void> navigateToMapAndGetDirections(String plusCode) async {
+  Future<void> navigateToMapAndGetDirections(int id, String plusCode) async {
     setState(() {
       currentIndex = 0;
     });
@@ -76,7 +76,7 @@ class HomePageState extends State<HomePage> {
         await getCoordinatesFromPlusCode(plusCode, googleApiKey);
 
     if (coordinates != null) {
-      _mapPageKey.currentState?.getDirections(coordinates);
+      _mapPageKey.currentState?.getDirections(id, coordinates);
     }
   }
 

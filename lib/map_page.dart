@@ -31,48 +31,52 @@ class MapPageState extends State<MapPage> {
     fetchListings();
   }
 
+  addMarker(listing) async {
+    LatLng? coordinates =
+        await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey);
+
+    if (coordinates != null) {
+      setState(() {
+        _markers.add(
+          Marker(
+            markerId: MarkerId(listing['id'].toString()),
+            position: coordinates,
+            onTap: () {
+              // Show bottom sheet with listing information
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return ListingInfoSheet(
+                    title: listing['displayName'],
+                    categories: listing['secondaryType'] +
+                        ' • ' +
+                        listing['tertiaryType'],
+                    openingTimes:
+                    listing['startTime'] + ' - ' + listing['endTime'],
+                    phoneNumber: listing['phone'],
+                    website: listing['website'],
+                    onGetDirections: () => getDirections(listing['id'], coordinates),
+                  );
+                },
+              );
+            },
+          ),
+        );
+      });
+    }
+  }
+
   fetchListings() async {
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
     if (response.statusCode == 200) {
       final listings = json.decode(response.body);
       for (var listing in listings) {
-        LatLng? coordinates =
-            await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey);
-
-        if (coordinates != null) {
-          setState(() {
-            _markers.add(
-              Marker(
-                markerId: MarkerId(listing['id'].toString()),
-                position: coordinates,
-                onTap: () {
-                  // Show bottom sheet with listing information
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return ListingInfoSheet(
-                        title: listing['displayName'],
-                        categories: listing['secondaryType'] +
-                            ' • ' +
-                            listing['tertiaryType'],
-                        openingTimes:
-                            listing['startTime'] + ' - ' + listing['endTime'],
-                        phoneNumber: listing['phone'],
-                        website: listing['website'],
-                        onGetDirections: () => getDirections(coordinates),
-                      );
-                    },
-                  );
-                },
-              ),
-            );
-          });
-        }
+        addMarker(listing);
       }
     }
   }
 
-  Future<void> getDirections(LatLng destination) async {
+  Future<void> getDirections(int id, LatLng destination) async {
     // Get the user's current location
     Position position = await getCurrentLocation();
     LatLng origin = LatLng(position.latitude, position.longitude);
@@ -88,7 +92,18 @@ class MapPageState extends State<MapPage> {
 
     // Check if route points were fetched successfully
     if (result.points.isNotEmpty) {
-      setState(() {
+      setState(() async {
+        _markers.clear(); // Clear any existing markers
+        final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+        if (response.statusCode == 200) {
+          final listings = json.decode(response.body);
+          //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
+          for (var listing in listings) {
+            if (listing['id'] == id) {
+              addMarker(listing);
+            }
+          }
+        }
         _polylines.clear(); // Clear any existing route
         _polylines.add(Polyline(
           polylineId: const PolylineId('route'),
@@ -155,6 +170,8 @@ class MapPageState extends State<MapPage> {
                             onPressed: () {
                               setState(() {
                                 _polylines.clear();
+                                _markers.clear();
+                                fetchListings();
                               });
                               },
                             icon: const Icon(
