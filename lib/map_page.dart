@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:async'; // For StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -21,6 +21,9 @@ class MapPageState extends State<MapPage> {
   final Set<Marker> _markers = {};
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
+  StreamSubscription<Position>? _positionStream;
+  LatLng? _currentLocation; // To store the user's current location
+  LatLng? _destination; // To store the destination
   MapType _mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
 
@@ -29,6 +32,58 @@ class MapPageState extends State<MapPage> {
     super.initState();
     polylinePoints = PolylinePoints();
     fetchListings();
+  }
+
+  @override
+  void dispose() {
+    // Cancel the location subscription when the page is disposed
+    _positionStream?.cancel();
+    super.dispose();
+  }
+
+  Future<void> startLocationUpdates(LatLng destination) async {
+    // Store the destination
+    _destination = destination;
+
+    // Start listening for location updates
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
+    ).listen((Position position) async {
+      // Update the user's current location
+      _currentLocation = LatLng(position.latitude, position.longitude);
+
+      // If a destination is set, get new directions and update the polyline
+      if (_destination != null) {
+        await updatePolyline(_currentLocation!, _destination!);
+      }
+    });
+  }
+
+  Future<void> updatePolyline(LatLng origin, LatLng destination) async {
+    // Fetch new directions from the Google Directions API
+    final result = await polylinePoints.getRouteBetweenCoordinates(
+      googleApiKey: googleApiKey,
+      request: PolylineRequest(
+        origin: PointLatLng(origin.latitude, origin.longitude),
+        destination: PointLatLng(destination.latitude, destination.longitude),
+        mode: TravelMode.walking,
+      ),
+    );
+
+    if (result.points.isNotEmpty) {
+      setState(() {
+        _polylines.clear();
+        _polylines.add(Polyline(
+          polylineId: const PolylineId('route'),
+          points: result.points
+              .map((point) => LatLng(point.latitude, point.longitude))
+              .toList(),
+          color: const Color.fromRGBO(204, 51, 51, 1.0),
+          width: 5,
+          patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
+        ));
+      });
+    }
   }
 
   addMarker(listing) async {
@@ -52,10 +107,11 @@ class MapPageState extends State<MapPage> {
                         ' • ' +
                         listing['tertiaryType'],
                     openingTimes:
-                    listing['startTime'] + ' - ' + listing['endTime'],
+                        listing['startTime'] + ' - ' + listing['endTime'],
                     phoneNumber: listing['phone'],
                     website: listing['website'],
-                    onGetDirections: () => getDirections(listing['id'], coordinates),
+                    onGetDirections: () =>
+                        getDirections(listing['id'], coordinates),
                   );
                 },
               );
@@ -77,47 +133,27 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> getDirections(int id, LatLng destination) async {
-    // Get the user's current location
-    Position position = await getCurrentLocation();
-    LatLng origin = LatLng(position.latitude, position.longitude);
+    // Clear any existing polylines and start location updates
+    setState(() {
+      _polylines.clear();
+    });
 
-    // Fetch directions from Google Directions API
-    final result = await polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey: googleApiKey,
-      request: PolylineRequest(
-          origin: PointLatLng(origin.latitude, origin.longitude),
-          destination: PointLatLng(destination.latitude, destination.longitude),
-          mode: TravelMode.walking),
-    );
+    await startLocationUpdates(destination);
 
-    // Check if route points were fetched successfully
-    if (result.points.isNotEmpty) {
-      setState(() async {
-        _markers.clear(); // Clear any existing markers
-        final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
-        if (response.statusCode == 200) {
-          final listings = json.decode(response.body);
-          //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
-          for (var listing in listings) {
-            if (listing['id'] == id) {
-              addMarker(listing);
-            }
+    setState(() async {
+      _markers.clear(); // Clear any existing markers
+      final response =
+          await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+      if (response.statusCode == 200) {
+        final listings = json.decode(response.body);
+        //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
+        for (var listing in listings) {
+          if (listing['id'] == id) {
+            addMarker(listing);
           }
         }
-        _polylines.clear(); // Clear any existing route
-        _polylines.add(Polyline(
-          polylineId: const PolylineId('route'),
-          points: result.points
-              .map((point) => LatLng(point.latitude, point.longitude))
-              .toList(),
-          color: const Color.fromRGBO(204, 51, 51, 1.0),
-          width: 5,
-          patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)]
-        ));
-      });
-    } else {
-      throw Exception("Failed to fetch directions");
-    }
+      }
+    });
   }
 
   @override
@@ -132,8 +168,7 @@ class MapPageState extends State<MapPage> {
           mapToolbarEnabled: false,
           onMapCreated: (GoogleMapController controller) {},
           initialCameraPosition: const CameraPosition(
-            target: LatLng(
-                52.199212, 0.139342),
+            target: LatLng(52.199212, 0.139342),
             zoom: 15,
           ),
           markers: _markers,
@@ -166,22 +201,23 @@ class MapPageState extends State<MapPage> {
                   ],
                 ),
                 Row(
-                    children: [
-                      if (_polylines.isNotEmpty)
-                        IconButton.filled(
-                            onPressed: () {
-                              setState(() {
-                                _polylines.clear();
-                                _markers.clear();
-                                fetchListings();
-                              });
-                              },
-                            icon: const Icon(
-                              Icons.wrong_location,
-                              color: Color.fromRGBO(255, 255, 255, 1.0),
-                            ))
-                      ],
-    )
+                  children: [
+                    if (_polylines.isNotEmpty)
+                      IconButton.filled(
+                          onPressed: () {
+                            setState(() {
+                              _positionStream?.cancel();
+                              _polylines.clear();
+                              _markers.clear();
+                              fetchListings();
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.wrong_location,
+                            color: Color.fromRGBO(255, 255, 255, 1.0),
+                          ))
+                  ],
+                )
               ],
             )));
   }
