@@ -123,10 +123,14 @@ class MapPageState extends State<MapPage> {
 
     if (coordinates != null) {
       setState(() {
+        Color markerColor =
+            getMarkerColor(listing['primaryType'], listing['secondaryType']);
         _markers.add(
           Marker(
             markerId: MarkerId(listing['id'].toString()),
             position: coordinates,
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              HSVColor.fromColor(markerColor).hue), // Set marker color
             onTap: () {
               // Show bottom sheet with listing information
               showModalBottomSheet(
@@ -151,6 +155,23 @@ class MapPageState extends State<MapPage> {
         );
       });
     }
+  }
+
+  Color getMarkerColor(String primaryType, String secondaryType) {
+    if (primaryType == "Vendor" && secondaryType == "Food") {
+      return const Color.fromRGBO(204, 110, 51, 1.0);
+    } else if (primaryType == "Vendor" && secondaryType == "Retail") {
+      return const Color.fromRGBO(204, 51, 51, 1);
+    } else if (primaryType == "Performer") {
+      return const Color.fromRGBO(204, 51, 120, 1.0);
+    } else if (primaryType == "Event") {
+      return const Color.fromRGBO(204, 161, 51, 1.0);
+    } else if (primaryType == "Service") {
+      return const Color.fromRGBO(120, 120, 120, 1.0);
+    }
+
+    //Default colour
+    return Colors.white;
   }
 
   fetchListings() async {
