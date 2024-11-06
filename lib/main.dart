@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mill_road_winter_fair_app/aboutUs.dart';
-import 'package:mill_road_winter_fair_app/filteredListings.dart';
-import 'package:mill_road_winter_fair_app/mapPage.dart';
-import 'package:mill_road_winter_fair_app/plusCodeHandlers.dart';
+import 'package:mill_road_winter_fair_app/about_us.dart';
+import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 //Initialize Google Map API Key variable
@@ -18,6 +17,9 @@ Future<void> main() async {
 
 //Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> _mapPageKey = GlobalKey<MapPageState>();
+
+//Set the default page number (0 is the map page)
+int currentIndex = 0;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -64,18 +66,17 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  int _currentIndex = 0;
 
-  Future<void> navigateToMapAndGetDirections(String plusCode) async {
+  Future<void> navigateToMapAndGetDirections(int id, String plusCode) async {
     setState(() {
-      _currentIndex = 0;
+      currentIndex = 0;
     });
 
     LatLng? coordinates =
         await getCoordinatesFromPlusCode(plusCode, googleApiKey);
 
     if (coordinates != null) {
-      _mapPageKey.currentState?.getDirections(coordinates);
+      _mapPageKey.currentState?.getDirections(id, coordinates);
     }
   }
 
@@ -94,7 +95,7 @@ class HomePageState extends State<HomePage> {
         ),
       ),
       body: IndexedStack(
-        index: _currentIndex,
+        index: currentIndex,
         children: [
           MapPage(key: _mapPageKey),
           const FilteredListingsPage(
@@ -110,10 +111,10 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: currentIndex,
         onTap: (index) {
           setState(() {
-            _currentIndex = index;
+            currentIndex = index;
           });
         },
         items: const [
