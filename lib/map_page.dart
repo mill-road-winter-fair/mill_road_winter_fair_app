@@ -136,24 +136,21 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines and start location updates
     setState(() {
       _polylines.clear();
+      _markers.clear(); // Clear any existing markers
     });
 
     await startLocationUpdates(destination);
 
-    setState(() async {
-      _markers.clear(); // Clear any existing markers
-      final response =
-          await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
-      if (response.statusCode == 200) {
-        final listings = json.decode(response.body);
-        //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
-        for (var listing in listings) {
-          if (listing['id'] == id) {
-            addMarker(listing);
-          }
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+    if (response.statusCode == 200) {
+      final listings = json.decode(response.body);
+      //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
+      for (var listing in listings) {
+        if (listing['id'] == id) {
+          addMarker(listing);
         }
       }
-    });
+    }
   }
 
   @override
