@@ -24,6 +24,7 @@ class MapPageState extends State<MapPage> {
   StreamSubscription<Position>? _positionStream;
   LatLng? _currentLocation; // To store the user's current location
   LatLng? _destination; // To store the destination
+  GoogleMapController? _controller; // Declare _controller here
   MapType _mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
 
@@ -83,7 +84,37 @@ class MapPageState extends State<MapPage> {
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
         ));
       });
+
+      // Adjust the map camera to fit the polyline
+      // TODO: Might need to change this later as it will adjust the camera every time the device location updates
+      _setMapFitToPolyline(_polylines);
     }
+  }
+
+  void _setMapFitToPolyline(Set<Polyline> polylines) {
+    double minLat = polylines.first.points.first.latitude;
+    double minLong = polylines.first.points.first.longitude;
+    double maxLat = polylines.first.points.first.latitude;
+    double maxLong = polylines.first.points.first.longitude;
+
+    for (var polyline in polylines) {
+      for (var point in polyline.points) {
+        if (point.latitude < minLat) minLat = point.latitude;
+        if (point.latitude > maxLat) maxLat = point.latitude;
+        if (point.longitude < minLong) minLong = point.longitude;
+        if (point.longitude > maxLong) maxLong = point.longitude;
+      }
+    }
+
+    _controller?.moveCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(minLat, minLong),
+          northeast: LatLng(maxLat, maxLong),
+        ),
+        75, // Padding around the bounds
+      ),
+    );
   }
 
   addMarker(listing) async {
@@ -133,14 +164,16 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> getDirections(int id, LatLng destination) async {
-    // Clear any existing polylines and start location updates
+    // Clear any existing polylines
     setState(() {
-      _polylines.clear();
+      _polylines.clear(); // Clear any existing polylines
       _markers.clear(); // Clear any existing markers
     });
 
+    // Start location updates
     await startLocationUpdates(destination);
 
+    // Re-add destination marker
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
     if (response.statusCode == 200) {
       final listings = json.decode(response.body);
@@ -163,7 +196,9 @@ class MapPageState extends State<MapPage> {
           myLocationEnabled: true,
           myLocationButtonEnabled: true,
           mapToolbarEnabled: false,
-          onMapCreated: (GoogleMapController controller) {},
+          onMapCreated: (GoogleMapController controller) {
+            _controller = controller; // Assign the controller here
+          },
           initialCameraPosition: const CameraPosition(
             target: LatLng(52.199212, 0.139342),
             zoom: 15,
