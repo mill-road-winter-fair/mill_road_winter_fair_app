@@ -70,14 +70,13 @@ class MapPageState extends State<MapPage> {
 
       if (coordinates != null) {
         setState(() {
-          Color markerColor =
-              getMarkerColor(listing['primaryType'], listing['secondaryType']);
+          double hue =
+              getMarkerColorHue(listing['primaryType'], listing['secondaryType']);
           _markers.add(
             Marker(
               markerId: MarkerId(listing['id'].toString()),
               position: coordinates,
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                  HSVColor.fromColor(markerColor).hue), // Set marker color
+              icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
               onTap: () {
                 // Show bottom sheet with listing information
                 showModalBottomSheet(
@@ -105,28 +104,40 @@ class MapPageState extends State<MapPage> {
     }
   }
 
+  double getMarkerColorHue(String primaryType, String secondaryType) {
+    if (primaryType == "Vendor" && secondaryType == "Food") {
+      Color color = const Color.fromRGBO(204, 110, 51, 1.0);
+      double hue = HSVColor.fromColor(color).hue;
+      return hue;
+    } else if (primaryType == "Vendor" && secondaryType == "Retail") {
+      Color color = const Color.fromRGBO(204, 51, 51, 1);
+      double hue = HSVColor.fromColor(color).hue;
+      return hue;
+    } else if (primaryType == "Performer") {
+      Color color = const Color.fromRGBO(204, 51, 120, 1.0);
+      double hue = HSVColor.fromColor(color).hue;
+      return hue;
+    } else if (primaryType == "Event") {
+      Color color = const Color.fromRGBO(204, 161, 51, 1.0);
+      double hue = HSVColor.fromColor(color).hue;
+      return hue;
+    } else if (primaryType == "Service") {
+      Color color = const Color.fromRGBO(153, 0, 255, 1.0);
+      double hue = HSVColor.fromColor(color).hue;
+      return hue;
+    }
+
+    //Default colour
+    Color color = const Color.fromRGBO(255, 255, 255, 1.0);
+    double hue = HSVColor.fromColor(color).hue;
+    return hue;
+  }
+
   //The Remove All filters button seems to prefer using this function rather than doing it's own setState
   void clearAllMarkers() {
     setState(() {
       _markers.clear();
     });
-  }
-
-  Color getMarkerColor(String primaryType, String secondaryType) {
-    if (primaryType == "Vendor" && secondaryType == "Food") {
-      return const Color.fromRGBO(204, 110, 51, 1.0);
-    } else if (primaryType == "Vendor" && secondaryType == "Retail") {
-      return const Color.fromRGBO(204, 51, 51, 1);
-    } else if (primaryType == "Performer") {
-      return const Color.fromRGBO(204, 51, 120, 1.0);
-    } else if (primaryType == "Event") {
-      return const Color.fromRGBO(204, 161, 51, 1.0);
-    } else if (primaryType == "Service") {
-      return const Color.fromRGBO(120, 120, 120, 1.0);
-    }
-
-    //Default colour
-    return Colors.white;
   }
 
   void showFilterMenu() {
@@ -152,6 +163,7 @@ class MapPageState extends State<MapPage> {
                           )
                         ]),
                     CheckboxListTile(
+                      activeColor: const Color.fromRGBO(204, 110, 51, 1.0),
                       title: const Text("Food"),
                       value: _filterSettings["Vendor_Food"],
                       onChanged: (value) {
@@ -162,6 +174,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
+                      activeColor: const Color.fromRGBO(204, 51, 51, 1.0),
                       title: const Text("Shopping"),
                       value: _filterSettings["Vendor_Retail"],
                       onChanged: (value) {
@@ -172,6 +185,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
+                      activeColor: const Color.fromRGBO(204, 51, 120, 1.0),
                       title: const Text("Music"),
                       value: _filterSettings["Performer_*"],
                       onChanged: (value) {
@@ -182,6 +196,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
+                      activeColor: const Color.fromRGBO(204, 161, 51, 1.0),
                       title: const Text("Events"),
                       value: _filterSettings["Event_*"],
                       onChanged: (value) {
@@ -192,6 +207,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
+                      activeColor: const Color.fromRGBO(153, 0, 255, 1.0),
                       title: const Text("Services"),
                       value: _filterSettings["Service_*"],
                       onChanged: (value) {
@@ -215,7 +231,7 @@ class MapPageState extends State<MapPage> {
                             Navigator.pop(context);
                           },
                           icon: const Icon(Icons.filter_alt),
-                          label: const Text('Select All'),
+                          label: const Text('Show All'),
                         ),
                         ElevatedButton.icon(
                           onPressed: () {
@@ -228,7 +244,7 @@ class MapPageState extends State<MapPage> {
                             Navigator.pop(context);
                           },
                           icon: const Icon(Icons.filter_alt_off),
-                          label: const Text('Remove All'),
+                          label: const Text('Hide All'),
                         ),
                       ],
                     ),
