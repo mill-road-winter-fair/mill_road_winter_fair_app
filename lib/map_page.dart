@@ -18,7 +18,7 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  final Set<Marker> _markers = {}; // For displaying the map markers
+  final Set<Marker> markers = {}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
   StreamSubscription<Position>? _positionStream;
@@ -28,7 +28,7 @@ class MapPageState extends State<MapPage> {
   MapType _mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
   // Declare default filters
-  final Map<String, bool> _filterSettings = {
+  final Map<String, bool> filterSettings = {
     'Vendor_Food': true,
     'Vendor_Retail': true,
     'Performer_*': true,
@@ -43,9 +43,9 @@ class MapPageState extends State<MapPage> {
     fetchListings();
   }
 
-  fetchListings() async {
+  Future<void> fetchListings() async {
     setState(() {
-      _markers.clear();
+      markers.clear();
     });
     final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
     if (response.statusCode == 200) {
@@ -56,23 +56,26 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  addMarker(listing) async {
+  Future<void> addMarker(listing, {Future<LatLng?> Function(String, String)? getCoordinates}) async {
+    // Option to use a mock function (for tests)
+    getCoordinates ??= getCoordinatesFromPlusCode;
+
     // Determine the primary and secondary types
     String typeKey =
         '${listing['primaryType']}_${listing['secondaryType'] ?? '*'}';
 
-    bool isVisible = _filterSettings[typeKey] ??
-        _filterSettings['${listing['primaryType']}_*'] == true;
+    bool isVisible = filterSettings[typeKey] ??
+        filterSettings['${listing['primaryType']}_*'] == true;
 
     if (isVisible) {
       LatLng? coordinates =
-          await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey);
+          await getCoordinates(listing['plusCode'], googleApiKey);
 
       if (coordinates != null) {
         setState(() {
           double hue =
               getMarkerColorHue(listing['primaryType'], listing['secondaryType']);
-          _markers.add(
+          markers.add(
             Marker(
               markerId: MarkerId(listing['id'].toString()),
               position: coordinates,
@@ -136,7 +139,7 @@ class MapPageState extends State<MapPage> {
   //The Remove All filters button seems to prefer using this function rather than doing it's own setState
   void clearAllMarkers() {
     setState(() {
-      _markers.clear();
+      markers.clear();
     });
   }
 
@@ -165,10 +168,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 110, 51, 1.0),
                       title: const Text("Food"),
-                      value: _filterSettings["Vendor_Food"],
+                      value: filterSettings["Vendor_Food"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Vendor_Food"] = value!;
+                          filterSettings["Vendor_Food"] = value!;
                         });
                         fetchListings();
                       },
@@ -176,10 +179,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 51, 51, 1.0),
                       title: const Text("Shopping"),
-                      value: _filterSettings["Vendor_Retail"],
+                      value: filterSettings["Vendor_Retail"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Vendor_Retail"] = value!;
+                          filterSettings["Vendor_Retail"] = value!;
                         });
                         fetchListings();
                       },
@@ -187,10 +190,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 51, 120, 1.0),
                       title: const Text("Music"),
-                      value: _filterSettings["Performer_*"],
+                      value: filterSettings["Performer_*"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Performer_*"] = value!;
+                          filterSettings["Performer_*"] = value!;
                         });
                         fetchListings();
                       },
@@ -198,10 +201,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 161, 51, 1.0),
                       title: const Text("Events"),
-                      value: _filterSettings["Event_*"],
+                      value: filterSettings["Event_*"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Event_*"] = value!;
+                          filterSettings["Event_*"] = value!;
                         });
                         fetchListings();
                       },
@@ -209,10 +212,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(153, 0, 255, 1.0),
                       title: const Text("Services"),
-                      value: _filterSettings["Service_*"],
+                      value: filterSettings["Service_*"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Service_*"] = value!;
+                          filterSettings["Service_*"] = value!;
                         });
                         fetchListings();
                       },
@@ -223,8 +226,8 @@ class MapPageState extends State<MapPage> {
                         ElevatedButton.icon(
                           onPressed: () {
                             setState(() {
-                              _filterSettings.forEach((key, _) {
-                                _filterSettings[key] = true;
+                              filterSettings.forEach((key, _) {
+                                filterSettings[key] = true;
                               });
                             });
                             fetchListings();
@@ -236,8 +239,8 @@ class MapPageState extends State<MapPage> {
                         ElevatedButton.icon(
                           onPressed: () {
                             setState(() {
-                              _filterSettings.forEach((key, _) {
-                                _filterSettings[key] = false;
+                              filterSettings.forEach((key, _) {
+                                filterSettings[key] = false;
                               });
                             });
                             clearAllMarkers();
@@ -261,7 +264,7 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines
     setState(() {
       _polylines.clear(); // Clear any existing polylines
-      _markers.clear(); // Clear any existing markers
+      markers.clear(); // Clear any existing markers
     });
 
     // Start location updates
@@ -379,7 +382,7 @@ class MapPageState extends State<MapPage> {
             target: LatLng(52.199212, 0.139342),
             zoom: 15,
           ),
-          markers: _markers,
+          markers: markers,
           polylines: _polylines,
         ),
         floatingActionButton: Padding(
@@ -428,7 +431,7 @@ class MapPageState extends State<MapPage> {
                             setState(() {
                               _positionStream?.cancel();
                               _polylines.clear();
-                              _markers.clear();
+                              markers.clear();
                               fetchListings();
                             });
                           },
