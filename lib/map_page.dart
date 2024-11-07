@@ -18,7 +18,7 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  final Set<Marker> _markers = {};
+  final Set<Marker> _markers = {}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
   StreamSubscription<Position>? _positionStream;
@@ -27,12 +27,241 @@ class MapPageState extends State<MapPage> {
   GoogleMapController? _controller; // Declare _controller here
   MapType _mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
+  // Declare default filters
+  final Map<String, bool> _filterSettings = {
+    'Vendor_Food': true,
+    'Vendor_Retail': true,
+    'Performer_*': true,
+    'Event_*': true,
+    'Service_*': true,
+  };
 
   @override
   void initState() {
     super.initState();
     polylinePoints = PolylinePoints();
     fetchListings();
+  }
+
+  fetchListings() async {
+    setState(() {
+      _markers.clear();
+    });
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+    if (response.statusCode == 200) {
+      final listings = json.decode(response.body);
+      for (var listing in listings) {
+        addMarker(listing);
+      }
+    }
+  }
+
+  addMarker(listing) async {
+    // Determine the primary and secondary types
+    String typeKey =
+        '${listing['primaryType']}_${listing['secondaryType'] ?? '*'}';
+
+    bool isVisible = _filterSettings[typeKey] ??
+        _filterSettings['${listing['primaryType']}_*'] == true;
+
+    if (isVisible) {
+      LatLng? coordinates =
+          await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey);
+
+      if (coordinates != null) {
+        setState(() {
+          Color markerColor =
+              getMarkerColor(listing['primaryType'], listing['secondaryType']);
+          _markers.add(
+            Marker(
+              markerId: MarkerId(listing['id'].toString()),
+              position: coordinates,
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                  HSVColor.fromColor(markerColor).hue), // Set marker color
+              onTap: () {
+                // Show bottom sheet with listing information
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return ListingInfoSheet(
+                      title: listing['displayName'],
+                      categories: listing['secondaryType'] +
+                          ' • ' +
+                          listing['tertiaryType'],
+                      openingTimes:
+                          listing['startTime'] + ' - ' + listing['endTime'],
+                      phoneNumber: listing['phone'],
+                      website: listing['website'],
+                      onGetDirections: () =>
+                          getDirections(listing['id'], coordinates),
+                    );
+                  },
+                );
+              },
+            ),
+          );
+        });
+      }
+    }
+  }
+
+  //The Remove All filters button seems to prefer using this function rather than doing it's own setState
+  void clearAllMarkers() {
+    setState(() {
+      _markers.clear();
+    });
+  }
+
+  Color getMarkerColor(String primaryType, String secondaryType) {
+    if (primaryType == "Vendor" && secondaryType == "Food") {
+      return const Color.fromRGBO(204, 110, 51, 1.0);
+    } else if (primaryType == "Vendor" && secondaryType == "Retail") {
+      return const Color.fromRGBO(204, 51, 51, 1);
+    } else if (primaryType == "Performer") {
+      return const Color.fromRGBO(204, 51, 120, 1.0);
+    } else if (primaryType == "Event") {
+      return const Color.fromRGBO(204, 161, 51, 1.0);
+    } else if (primaryType == "Service") {
+      return const Color.fromRGBO(120, 120, 120, 1.0);
+    }
+
+    //Default colour
+    return Colors.white;
+  }
+
+  void showFilterMenu() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Filter Map Pins",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.left,
+                          )
+                        ]),
+                    CheckboxListTile(
+                      title: const Text("Food"),
+                      value: _filterSettings["Vendor_Food"],
+                      onChanged: (value) {
+                        setState(() {
+                          _filterSettings["Vendor_Food"] = value!;
+                        });
+                        fetchListings();
+                      },
+                    ),
+                    CheckboxListTile(
+                      title: const Text("Shopping"),
+                      value: _filterSettings["Vendor_Retail"],
+                      onChanged: (value) {
+                        setState(() {
+                          _filterSettings["Vendor_Retail"] = value!;
+                        });
+                        fetchListings();
+                      },
+                    ),
+                    CheckboxListTile(
+                      title: const Text("Music"),
+                      value: _filterSettings["Performer_*"],
+                      onChanged: (value) {
+                        setState(() {
+                          _filterSettings["Performer_*"] = value!;
+                        });
+                        fetchListings();
+                      },
+                    ),
+                    CheckboxListTile(
+                      title: const Text("Events"),
+                      value: _filterSettings["Event_*"],
+                      onChanged: (value) {
+                        setState(() {
+                          _filterSettings["Event_*"] = value!;
+                        });
+                        fetchListings();
+                      },
+                    ),
+                    CheckboxListTile(
+                      title: const Text("Services"),
+                      value: _filterSettings["Service_*"],
+                      onChanged: (value) {
+                        setState(() {
+                          _filterSettings["Service_*"] = value!;
+                        });
+                        fetchListings();
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _filterSettings.forEach((key, _) {
+                                _filterSettings[key] = true;
+                              });
+                            });
+                            fetchListings();
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.filter_alt),
+                          label: const Text('Select All'),
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _filterSettings.forEach((key, _) {
+                                _filterSettings[key] = false;
+                              });
+                            });
+                            clearAllMarkers();
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.filter_alt_off),
+                          label: const Text('Remove All'),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> getDirections(int id, LatLng destination) async {
+    // Clear any existing polylines
+    setState(() {
+      _polylines.clear(); // Clear any existing polylines
+      _markers.clear(); // Clear any existing markers
+    });
+
+    // Start location updates
+    await startLocationUpdates(destination);
+
+    // Re-add destination marker
+    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+    if (response.statusCode == 200) {
+      final listings = json.decode(response.body);
+      //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
+      for (var listing in listings) {
+        if (listing['id'] == id) {
+          addMarker(listing);
+        }
+      }
+    }
   }
 
   @override
@@ -117,96 +346,6 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  addMarker(listing) async {
-    LatLng? coordinates =
-        await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey);
-
-    if (coordinates != null) {
-      setState(() {
-        Color markerColor =
-            getMarkerColor(listing['primaryType'], listing['secondaryType']);
-        _markers.add(
-          Marker(
-            markerId: MarkerId(listing['id'].toString()),
-            position: coordinates,
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              HSVColor.fromColor(markerColor).hue), // Set marker color
-            onTap: () {
-              // Show bottom sheet with listing information
-              showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  return ListingInfoSheet(
-                    title: listing['displayName'],
-                    categories: listing['secondaryType'] +
-                        ' • ' +
-                        listing['tertiaryType'],
-                    openingTimes:
-                        listing['startTime'] + ' - ' + listing['endTime'],
-                    phoneNumber: listing['phone'],
-                    website: listing['website'],
-                    onGetDirections: () =>
-                        getDirections(listing['id'], coordinates),
-                  );
-                },
-              );
-            },
-          ),
-        );
-      });
-    }
-  }
-
-  Color getMarkerColor(String primaryType, String secondaryType) {
-    if (primaryType == "Vendor" && secondaryType == "Food") {
-      return const Color.fromRGBO(204, 110, 51, 1.0);
-    } else if (primaryType == "Vendor" && secondaryType == "Retail") {
-      return const Color.fromRGBO(204, 51, 51, 1);
-    } else if (primaryType == "Performer") {
-      return const Color.fromRGBO(204, 51, 120, 1.0);
-    } else if (primaryType == "Event") {
-      return const Color.fromRGBO(204, 161, 51, 1.0);
-    } else if (primaryType == "Service") {
-      return const Color.fromRGBO(120, 120, 120, 1.0);
-    }
-
-    //Default colour
-    return Colors.white;
-  }
-
-  fetchListings() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
-    if (response.statusCode == 200) {
-      final listings = json.decode(response.body);
-      for (var listing in listings) {
-        addMarker(listing);
-      }
-    }
-  }
-
-  Future<void> getDirections(int id, LatLng destination) async {
-    // Clear any existing polylines
-    setState(() {
-      _polylines.clear(); // Clear any existing polylines
-      _markers.clear(); // Clear any existing markers
-    });
-
-    // Start location updates
-    await startLocationUpdates(destination);
-
-    // Re-add destination marker
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
-    if (response.statusCode == 200) {
-      final listings = json.decode(response.body);
-      //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
-      for (var listing in listings) {
-        if (listing['id'] == id) {
-          addMarker(listing);
-        }
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -233,6 +372,18 @@ class MapPageState extends State<MapPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  children: [
+                    IconButton.filled(
+                        onPressed: () {
+                          showFilterMenu();
+                        },
+                        icon: const Icon(
+                          Icons.filter_alt,
+                          color: Color.fromRGBO(255, 255, 255, 1.0),
+                        ))
+                  ],
+                ),
                 Row(
                   children: [
                     IconButton.filled(
