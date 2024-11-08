@@ -58,7 +58,7 @@ class FilteredListingsPage extends StatelessWidget {
   Future<List> fetchFilteredListings(
       String primaryType, String secondaryType) async {
     // Fetch all listings from the API
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+    final response = await http.get(Uri.parse('$mrwfApi/listings'));
 
     if (response.statusCode == 200) {
       // Decode the full list of listings

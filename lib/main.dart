@@ -7,11 +7,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 //Initialize Google Map API Key variable
-String googleApiKey = "";
+late String googleApiKey;
+late String mrwfApi;
+
 Future<void> main() async {
   // Declare googleApiKey after dotenv is loaded
   await dotenv.load();
   googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+  mrwfApi = dotenv.env['MRWF_API'] ?? '';
   runApp(const MyApp());
 }
 

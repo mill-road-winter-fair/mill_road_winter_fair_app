@@ -47,7 +47,7 @@ class MapPageState extends State<MapPage> {
     setState(() {
       markers.clear();
     });
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+    final response = await http.get(Uri.parse('$mrwfApi/listings'));
     if (response.statusCode == 200) {
       final listings = json.decode(response.body);
       for (var listing in listings) {
@@ -271,7 +271,7 @@ class MapPageState extends State<MapPage> {
     await startLocationUpdates(destination);
 
     // Re-add destination marker
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+    final response = await http.get(Uri.parse('$mrwfApi/listings'));
     if (response.statusCode == 200) {
       final listings = json.decode(response.body);
       //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
