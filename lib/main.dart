@@ -19,10 +19,10 @@ Future<void> main() async {
 }
 
 //Define a GlobalKey for MapPageState:
-final GlobalKey<MapPageState> _mapPageKey = GlobalKey<MapPageState>();
+final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
 //Set the default page number (0 is the map page)
-int currentIndex = 0;
+int globalIndex = 0;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -69,17 +69,21 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  int get currentIndex => globalIndex;
 
-  Future<void> navigateToMapAndGetDirections(int id, String plusCode) async {
+  Future<void> navigateToMapAndGetDirections(int id, String plusCode, {Future<LatLng?> Function(String, String)? getCoordinates}) async {
+    // Option to use a mock function (for tests)
+    getCoordinates ??= getCoordinatesFromPlusCode;
+
     setState(() {
-      currentIndex = 0;
+      globalIndex = 0;
     });
 
     LatLng? coordinates =
-        await getCoordinatesFromPlusCode(plusCode, googleApiKey);
+        await getCoordinates(plusCode, googleApiKey);
 
     if (coordinates != null) {
-      _mapPageKey.currentState?.getDirections(id, coordinates);
+      mapPageKey.currentState?.getDirections(id, coordinates);
     }
   }
 
@@ -98,9 +102,9 @@ class HomePageState extends State<HomePage> {
         ),
       ),
       body: IndexedStack(
-        index: currentIndex,
+        index: globalIndex,
         children: [
-          MapPage(key: _mapPageKey),
+          MapPage(key: mapPageKey),
           const FilteredListingsPage(
               filterPrimaryType: "Vendor", filterSecondaryType: "Food"),
           const FilteredListingsPage(
@@ -114,10 +118,10 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
+        currentIndex: globalIndex,
         onTap: (index) {
           setState(() {
-            currentIndex = index;
+            globalIndex = index;
           });
         },
         items: const [

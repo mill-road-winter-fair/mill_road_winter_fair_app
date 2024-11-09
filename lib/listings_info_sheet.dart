@@ -69,7 +69,7 @@ class ListingInfoSheet extends StatelessWidget {
             children: [
               ElevatedButton.icon(
                 onPressed: () {
-                  if (currentIndex == 0) {
+                  if (globalIndex == 0) {
                     Navigator.pop(context);
                   }
                   onGetDirections();

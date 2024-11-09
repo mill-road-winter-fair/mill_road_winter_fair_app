@@ -3,12 +3,11 @@ import 'dart:async'; // For StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-
-import 'main.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
