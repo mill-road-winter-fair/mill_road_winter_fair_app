@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Mocks for dependencies
 class MockClient extends Mock implements http.Client {}
@@ -17,7 +19,13 @@ class MockGetCoordinatesFunction extends Mock {
 }
 
 @GenerateMocks([http.Client])
-void main() {
+void main() async {
+
+  TestWidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+  mrwfApi = dotenv.env['MRWF_API'] ?? '';
+
   group('MapPage tests', () {
     late MapPageState mapPageState;
     late MockClient mockClient;
