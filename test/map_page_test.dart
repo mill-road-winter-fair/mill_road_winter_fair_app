@@ -18,7 +18,6 @@ class MockGetCoordinatesFunction extends Mock {
   }
 }
 
-@GenerateMocks([http.Client])
 void main() async {
 
   TestWidgetsFlutterBinding.ensureInitialized();
