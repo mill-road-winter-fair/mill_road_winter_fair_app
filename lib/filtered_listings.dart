@@ -46,7 +46,7 @@ class FilteredListingsPage extends StatelessWidget {
                   if (homePageState != null)
                     {
                       homePageState
-                          .navigateToMapAndGetDirections(listing['id'], listing['plusCode']),
+                          .navigateToMapAndGetDirections(listing['id'], listing['plusCode'], http.Client()),
                     }
                 },
               );

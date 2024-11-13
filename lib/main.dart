@@ -72,16 +72,16 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int get currentIndex => globalIndex;
 
-  Future<void> navigateToMapAndGetDirections(int id, String plusCode, {Future<LatLng?> Function(String, String)? getCoordinates}) async {
+  Future<void> navigateToMapAndGetDirections(int id, String plusCode, http.Client client) async {
     // Option to use a mock function (for tests)
-    getCoordinates ??= getCoordinatesFromPlusCode;
+    client ??= http.Client();
 
     setState(() {
       globalIndex = 0;
     });
 
     LatLng? coordinates =
-        await getCoordinates(plusCode, googleApiKey);
+        await getCoordinatesFromPlusCode(plusCode, googleApiKey, client);
 
     if (coordinates != null) {
       mapPageKey.currentState?.getDirections(id, coordinates);

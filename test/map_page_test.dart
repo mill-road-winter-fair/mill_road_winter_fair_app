@@ -1,21 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:http/http.dart' as http;
-import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mockito/mockito.dart';
 
-// Mocks for dependencies
-class MockClient extends Mock implements http.Client {}
-
-//Mock Plus Code Converter (so that Google's API is not called during tests)
-class MockGetCoordinatesFunction extends Mock {
-  Future<LatLng?> call(String plusCode, String apiKey) {
-    return Future.value(const LatLng(52.199687,0.138813)); // Mocked coordinates
-  }
-}
+@GenerateMocks([http.Client])
+import 'map_page_test.mocks.dart';
 
 void main() async {
 
@@ -34,7 +30,6 @@ void main() async {
     });
 
     testWidgets('addMarker filters and adds marker based on filter settings', (tester) async {
-      final mockGetCoordinates = MockGetCoordinatesFunction();
 
       // Define a test listing
       final listing = {
@@ -52,6 +47,23 @@ void main() async {
         "website": "https://www.glazedandconfused.com"
       };
 
+      const plusCode = '9F4254XQ+VG';
+      final encodedPlusCode = Uri.encodeComponent(plusCode);
+      final url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
+      const lat = 52.199687;
+      const lng = 0.138813;
+      final responseBody = {
+        "results": [
+          {
+            "geometry": {
+              "location": {"lat": lat, "lng": lng}
+            }
+          }
+        ]
+      };
+
+      when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
+
       // Build the widget and trigger the state
       await tester.pumpWidget(
         const MaterialApp(
@@ -67,7 +79,7 @@ void main() async {
 
       // Set up filter and add the marker
       mapPageState.filterSettings["Vendor_Food"] = true;
-      await mapPageState.addMarker(listing, getCoordinates: mockGetCoordinates.call);
+      await mapPageState.addMarker(listing, mockClient);
 
       // Verify that the marker was added
       expect(mapPageState.markers.isNotEmpty, true);

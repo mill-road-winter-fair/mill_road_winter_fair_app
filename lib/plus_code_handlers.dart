@@ -3,11 +3,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
 Future<LatLng?> getCoordinatesFromPlusCode(
-    String plusCode, String apiKey) async {
+    String plusCode, String apiKey, http.Client client) async {
   final encodedPlusCode = Uri.encodeComponent(plusCode);
   final url =
       'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$apiKey';
-  final response = await http.get(Uri.parse(url));
+  final response = await client.get(Uri.parse(url));
 
   if (response.statusCode == 200) {
     final data = json.decode(response.body);

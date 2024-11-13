@@ -17,6 +17,7 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
+  late http.Client client;
   final Set<Marker> markers = {}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
@@ -50,14 +51,14 @@ class MapPageState extends State<MapPage> {
     if (response.statusCode == 200) {
       final listings = json.decode(response.body);
       for (var listing in listings) {
-        addMarker(listing);
+        addMarker(listing, http.Client());
       }
     }
   }
 
-  Future<void> addMarker(listing, {Future<LatLng?> Function(String, String)? getCoordinates}) async {
+  addMarker(listing, client) async {
     // Option to use a mock function (for tests)
-    getCoordinates ??= getCoordinatesFromPlusCode;
+    client ??= http.Client();
 
     // Determine the primary and secondary types
     String typeKey =
@@ -68,7 +69,7 @@ class MapPageState extends State<MapPage> {
 
     if (isVisible) {
       LatLng? coordinates =
-          await getCoordinates(listing['plusCode'], googleApiKey);
+          await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey, client);
 
       if (coordinates != null) {
         setState(() {
@@ -276,7 +277,7 @@ class MapPageState extends State<MapPage> {
       //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
       for (var listing in listings) {
         if (listing['id'] == id) {
-          addMarker(listing);
+          addMarker(listing, http.Client());
         }
       }
     }
