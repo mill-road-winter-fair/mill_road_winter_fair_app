@@ -7,17 +7,19 @@ import 'package:mill_road_winter_fair_app/main.dart';
 class FilteredListingsPage extends StatelessWidget {
   final String filterPrimaryType;
   final String filterSecondaryType;
+  final http.Client client;
 
   const FilteredListingsPage({
     required this.filterPrimaryType,
     required this.filterSecondaryType,
+    required this.client,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchFilteredListings(filterPrimaryType, filterSecondaryType),
+      future: fetchFilteredListings(filterPrimaryType, filterSecondaryType, client),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -56,9 +58,9 @@ class FilteredListingsPage extends StatelessWidget {
   }
 
   Future<List> fetchFilteredListings(
-      String primaryType, String secondaryType) async {
+      String primaryType, String secondaryType, http.Client client) async {
     // Fetch all listings from the API
-    final response = await http.get(Uri.parse('$mrwfApi/listings'));
+    final response = await client.get(Uri.parse('$mrwfApi/listings'));
 
     if (response.statusCode == 200) {
       // Decode the full list of listings

@@ -5,6 +5,7 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
 //Initialize API Key variables
 late String googleApiKey;
@@ -105,16 +106,16 @@ class HomePageState extends State<HomePage> {
         index: globalIndex,
         children: [
           MapPage(key: mapPageKey),
-          const FilteredListingsPage(
-              filterPrimaryType: "Vendor", filterSecondaryType: "Food"),
-          const FilteredListingsPage(
-              filterPrimaryType: "Vendor", filterSecondaryType: "Retail"),
-          const FilteredListingsPage(
-              filterPrimaryType: "Performer", filterSecondaryType: ""),
-          const FilteredListingsPage(
-              filterPrimaryType: "Event", filterSecondaryType: ""),
-          const FilteredListingsPage(
-              filterPrimaryType: "Service", filterSecondaryType: ""),
+          FilteredListingsPage(
+              filterPrimaryType: "Vendor", filterSecondaryType: "Food", client: http.Client()),
+          FilteredListingsPage(
+              filterPrimaryType: "Vendor", filterSecondaryType: "Retail", client: http.Client()),
+          FilteredListingsPage(
+              filterPrimaryType: "Performer", filterSecondaryType: "", client: http.Client()),
+          FilteredListingsPage(
+              filterPrimaryType: "Event", filterSecondaryType: "", client: http.Client()),
+          FilteredListingsPage(
+              filterPrimaryType: "Service", filterSecondaryType: "", client: http.Client()),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
