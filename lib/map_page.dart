@@ -275,7 +275,8 @@ class MapPageState extends State<MapPage> {
                                 filterSettings[key] = true;
                               });
                             });
-                            fetchListings();
+                            final idList = foodMarkerIds+shoppingMarkerIds+musicMarkerIds+eventMarkerIds+serviceMarkerIds;
+                            updateMarkerVisibility(idList, true);
                             Navigator.pop(context);
                           },
                           icon: const Icon(Icons.filter_alt),
@@ -288,7 +289,8 @@ class MapPageState extends State<MapPage> {
                                 filterSettings[key] = false;
                               });
                             });
-                            clearAllMarkers();
+                            final idList = foodMarkerIds+shoppingMarkerIds+musicMarkerIds+eventMarkerIds+serviceMarkerIds;
+                            updateMarkerVisibility(idList, false);
                             Navigator.pop(context);
                           },
                           icon: const Icon(Icons.filter_alt_off),
