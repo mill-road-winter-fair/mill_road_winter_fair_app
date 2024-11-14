@@ -1,8 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mill_road_winter_fair_app/about_us.dart';
 import 'package:http/http.dart' as http;
@@ -13,25 +14,26 @@ import 'package:mockito/mockito.dart';
 import 'main_test.mocks.dart';
 
 void main() async {
-
+  // Load environment variables
   TestWidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   mrwfApi = dotenv.env['MRWF_API'] ?? '';
 
+  // Set up mocks
   late MockClient mockClient;
-
   setUp(() {
     mockClient = MockClient();
   });
 
-  testWidgets('HomePage displays correct title and BottomNavigationBar', (WidgetTester tester) async {
+  testWidgets('HomePage displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Verify that the title is shown
     expect(find.text('Mill Road Winter Fair'), findsOneWidget);
 
-    // Verify that BottomNavigationBar has correct items
+    expect(find.byIcon(Icons.filter_alt), findsOneWidget);
+    expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
+
     expect(find.text('Map'), findsOneWidget);
     expect(find.text('Food'), findsOneWidget);
     expect(find.text('Shopping'), findsOneWidget);
@@ -43,31 +45,53 @@ void main() async {
   testWidgets('HomePage navigates to AboutUsPage when About Us in drawer is tapped', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Open drawer
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
-    // Tap on About Us and navigate
     await tester.tap(find.text('About Us'));
     await tester.pumpAndSettle();
 
-    // Check if AboutUsPage is displayed
     expect(find.byType(AboutUsPage), findsOneWidget);
   });
 
   testWidgets('HomePage BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    // Tap on the "Food" tab
     await tester.tap(find.text('Food'));
     await tester.pumpAndSettle();
 
-    // Verify the currentIndex is updated (Food tab is FilteredListingsPage with filter 'Vendor', 'Food')
+    // Obtain the state after mounting
     final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
     expect(homePageState.currentIndex, 1);
+
+    await tester.tap(find.text('Shopping'));
+    await tester.pumpAndSettle();
+
+    expect(homePageState.currentIndex, 2);
+
+    await tester.tap(find.text('Music'));
+    await tester.pumpAndSettle();
+
+    expect(homePageState.currentIndex, 3);
+
+    await tester.tap(find.text('Events'));
+    await tester.pumpAndSettle();
+
+    expect(homePageState.currentIndex, 4);
+
+    await tester.tap(find.text('Services'));
+    await tester.pumpAndSettle();
+
+    expect(homePageState.currentIndex, 5);
+
+    await tester.tap(find.text('Map'));
+    await tester.pumpAndSettle();
+
+    expect(homePageState.currentIndex, 0);
   });
 
-  testWidgets('HomePage navigateToMapAndGetDirections changes to MapPage and calls getDirections', (WidgetTester tester) async {
+  testWidgets('HomePage navigateToMapAndGetDirections function changes to MapPage and calls getDirections', (WidgetTester tester) async {
+    // Define mock values
     const plusCode = '9F4254XQ+VG';
     final encodedPlusCode = Uri.encodeComponent(plusCode);
     final url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
@@ -83,17 +107,18 @@ void main() async {
       ]
     };
 
+    // Specify when to mock
     when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
+    // Obtain the state after mounting
     final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
 
     // Trigger the navigation to map and fetch directions
     await homePageState.navigateToMapAndGetDirections(1, plusCode, mockClient);
 
-    // Verify that the BottomNavigationBar switched to the MapPage
     expect(homePageState.currentIndex, 0);
   });
 }

@@ -12,25 +12,25 @@ import 'package:mockito/mockito.dart';
 import 'plus_code_handlers_test.mocks.dart';
 
 Future<void> main() async {
-
+  // Load environment variables
   TestWidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
+  // Set up mocks
+  late MockClient mockClient;
+  setUp(() {
+    mockClient = MockClient();
+  });
+
+  // Define mock values
   const validPlusCode = '9F4254XQ+VG';
   final encodedValidPlusCode = Uri.encodeComponent(validPlusCode);
   const invalidPlusCode = 'INVALID_CODE';
   final encodedInvalidPlusCode = Uri.encodeComponent(invalidPlusCode);
-  final urlWithValidPlusCode = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedValidPlusCode&key=$googleApiKey';
-  final urlWithInvalidPlusCode = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedInvalidPlusCode&key=$googleApiKey';
+  const googleMapsApi = 'https://maps.googleapis.com/maps/api/geocode/json';
   const lat = 52.199687;
   const lng = 0.138813;
-
-  late MockClient mockClient;
-
-  setUp(() {
-    mockClient = MockClient();
-  });
 
   test('returns coordinates for a valid plus code', () async {
     final responseBody = {
@@ -43,7 +43,7 @@ Future<void> main() async {
       ]
     };
 
-    when(mockClient.get(Uri.parse(urlWithValidPlusCode)))
+    when(mockClient.get(Uri.parse('$googleMapsApi?address=$encodedValidPlusCode&key=$googleApiKey')))
         .thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     final result = await getCoordinatesFromPlusCode(validPlusCode, googleApiKey, mockClient);
@@ -57,8 +57,7 @@ Future<void> main() async {
       'results': [],
     });
 
-    when(mockClient.get(Uri.parse(urlWithValidPlusCode)))
-        .thenAnswer((_) async => http.Response(responseBody, 200));
+    when(mockClient.get(Uri.parse('$googleMapsApi?address=$encodedValidPlusCode&key=$googleApiKey'))).thenAnswer((_) async => http.Response(responseBody, 200));
 
     final result = await getCoordinatesFromPlusCode(validPlusCode, googleApiKey, mockClient);
 
@@ -66,8 +65,7 @@ Future<void> main() async {
   });
 
   test('returns null if response status is not 200', () async {
-    when(mockClient.get(Uri.parse(urlWithInvalidPlusCode)))
-        .thenAnswer((_) async => http.Response('Error', 404));
+    when(mockClient.get(Uri.parse('$googleMapsApi?address=$encodedInvalidPlusCode&key=$googleApiKey'))).thenAnswer((_) async => http.Response('Error', 404));
 
     final result = await getCoordinatesFromPlusCode(invalidPlusCode, googleApiKey, mockClient);
 
@@ -79,8 +77,7 @@ Future<void> main() async {
       'results': [],
     });
 
-    when(mockClient.get(Uri.parse(urlWithValidPlusCode)))
-        .thenAnswer((_) async => http.Response(responseBody, 200));
+    when(mockClient.get(Uri.parse('$googleMapsApi?address=$encodedValidPlusCode&key=$googleApiKey'))).thenAnswer((_) async => http.Response(responseBody, 200));
 
     final result = await getCoordinatesFromPlusCode(validPlusCode, googleApiKey, mockClient);
 

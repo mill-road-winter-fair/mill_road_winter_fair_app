@@ -73,8 +73,6 @@ class HomePageState extends State<HomePage> {
   int get currentIndex => globalIndex;
 
   Future<void> navigateToMapAndGetDirections(int id, String plusCode, http.Client client) async {
-    // Option to use a mock function (for tests)
-    client ??= http.Client();
 
     setState(() {
       globalIndex = 0;
