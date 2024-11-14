@@ -226,11 +226,7 @@ class MapPageState extends State<MapPage> {
                           filterSettings["Vendor_Retail"] = value!;
                         });
                         final idList = shoppingMarkerIds;
-                        if (value == true) {
-                          updateMarkerVisibility(idList, true);
-                        } else {
-                          updateMarkerVisibility(idList, false);
-                        }
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     CheckboxListTile(
@@ -242,11 +238,7 @@ class MapPageState extends State<MapPage> {
                           filterSettings["Performer_*"] = value!;
                         });
                         final idList = musicMarkerIds;
-                        if (value == true) {
-                          updateMarkerVisibility(idList, true);
-                        } else {
-                          updateMarkerVisibility(idList, false);
-                        }
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     CheckboxListTile(
@@ -258,11 +250,7 @@ class MapPageState extends State<MapPage> {
                           filterSettings["Event_*"] = value!;
                         });
                         final idList = eventMarkerIds;
-                        if (value == true) {
-                          updateMarkerVisibility(idList, true);
-                        } else {
-                          updateMarkerVisibility(idList, false);
-                        }
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     CheckboxListTile(
@@ -274,11 +262,7 @@ class MapPageState extends State<MapPage> {
                           filterSettings["Service_*"] = value!;
                         });
                         final idList = serviceMarkerIds;
-                        if (value == true) {
-                          updateMarkerVisibility(idList, true);
-                        } else {
-                          updateMarkerVisibility(idList, false);
-                        }
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     Row(
