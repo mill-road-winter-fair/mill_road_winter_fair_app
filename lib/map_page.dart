@@ -18,7 +18,12 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late http.Client client;
-  final Set<Marker> markers = {}; // For displaying the map markers
+  List<MarkerId> foodMarkerIds = [];
+  List<MarkerId> shoppingMarkerIds = [];
+  List<MarkerId> musicMarkerIds = [];
+  List<MarkerId> eventMarkerIds = [];
+  List<MarkerId> serviceMarkerIds = [];
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
   StreamSubscription<Position>? _positionStream;
@@ -52,7 +57,37 @@ class MapPageState extends State<MapPage> {
       final listings = json.decode(response.body);
       for (var listing in listings) {
         addMarker(listing, http.Client());
+        if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Food") {
+          foodMarkerIds.add(MarkerId(listing['id'].toString()));
+        } else if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Retail") {
+          shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
+        } else if (listing['primaryType'] == "Performer") {
+          musicMarkerIds.add(MarkerId(listing['id'].toString()));
+        } else if (listing['primaryType'] == "Event") {
+          eventMarkerIds.add(MarkerId(listing['id'].toString()));
+        } else if (listing['primaryType'] == "Service") {
+          serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+        }
       }
+    }
+  }
+
+  void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
+    for (var id in idList) {
+
+      final currentMarker = markers.values.toList().firstWhere((item) => item.markerId == id);
+
+      Marker updatedMarker = Marker(
+        markerId: id,
+        position: currentMarker.position,
+        icon: currentMarker.icon,
+        visible: visibleState,
+        onTap: currentMarker.onTap,
+      );
+
+      setState(() {
+        markers[id] = updatedMarker;
+      });
     }
   }
 
@@ -71,15 +106,17 @@ class MapPageState extends State<MapPage> {
       LatLng? coordinates =
           await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey, client);
 
+      MarkerId markerId = MarkerId(listing['id'].toString());
+
       if (coordinates != null) {
-        setState(() {
           double hue =
               getMarkerColorHue(listing['primaryType'], listing['secondaryType']);
-          markers.add(
-            Marker(
-              markerId: MarkerId(listing['id'].toString()),
+
+            Marker newMarker = Marker(
+              markerId: markerId,
               position: coordinates,
               icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
+              visible: true,
               onTap: () {
                 // Show bottom sheet with listing information
                 showModalBottomSheet(
@@ -100,9 +137,11 @@ class MapPageState extends State<MapPage> {
                   },
                 );
               },
-            ),
-          );
-        });
+            );
+
+            setState(() {
+              markers[markerId] = newMarker;
+            });
       }
     }
   }
@@ -174,7 +213,8 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Vendor_Food"] = value!;
                         });
-                        fetchListings();
+                        final idList = foodMarkerIds;
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     CheckboxListTile(
@@ -185,7 +225,12 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Vendor_Retail"] = value!;
                         });
-                        fetchListings();
+                        final idList = shoppingMarkerIds;
+                        if (value == true) {
+                          updateMarkerVisibility(idList, true);
+                        } else {
+                          updateMarkerVisibility(idList, false);
+                        }
                       },
                     ),
                     CheckboxListTile(
@@ -196,7 +241,12 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Performer_*"] = value!;
                         });
-                        fetchListings();
+                        final idList = musicMarkerIds;
+                        if (value == true) {
+                          updateMarkerVisibility(idList, true);
+                        } else {
+                          updateMarkerVisibility(idList, false);
+                        }
                       },
                     ),
                     CheckboxListTile(
@@ -207,7 +257,12 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Event_*"] = value!;
                         });
-                        fetchListings();
+                        final idList = eventMarkerIds;
+                        if (value == true) {
+                          updateMarkerVisibility(idList, true);
+                        } else {
+                          updateMarkerVisibility(idList, false);
+                        }
                       },
                     ),
                     CheckboxListTile(
@@ -218,7 +273,12 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Service_*"] = value!;
                         });
-                        fetchListings();
+                        final idList = serviceMarkerIds;
+                        if (value == true) {
+                          updateMarkerVisibility(idList, true);
+                        } else {
+                          updateMarkerVisibility(idList, false);
+                        }
                       },
                     ),
                     Row(
@@ -384,7 +444,7 @@ class MapPageState extends State<MapPage> {
             target: LatLng(52.199212, 0.139342),
             zoom: 15,
           ),
-          markers: markers,
+          markers: markers.values.toSet(),
           polylines: _polylines,
         ),
         floatingActionButton: Padding(
