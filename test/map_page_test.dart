@@ -133,7 +133,7 @@ void main() async {
       };
 
       when(mockClient.get(Uri.parse(url))).thenAnswer(
-              (_) async => http.Response(jsonEncode(responseBody), 200));
+          (_) async => http.Response(jsonEncode(responseBody), 200));
 
       // Pump the widget tree
       await tester.pumpWidget(const MaterialApp(home: MapPage()));
@@ -158,6 +158,72 @@ void main() async {
       expect(find.text('Food • Restaurant'), findsOneWidget);
       expect(find.text('10:00 AM - 8:00 PM'), findsOneWidget);
       expect(find.text('123-456-7890'), findsOneWidget);
+    });
+
+    testWidgets('shows filter menu and interacts with filter options',
+        (WidgetTester tester) async {
+      // Build the MapPage widget
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: MapPage(),
+          ),
+        ),
+      );
+
+      // Open the filter menu
+      await tester.tap(find.byIcon(Icons.filter_alt));
+      await tester.pumpAndSettle();
+
+      // Verify the "Filter Map Pins" title text is shown
+      expect(find.text("Filter Map Pins"), findsOneWidget);
+
+      // Verify all checkboxes are present
+      expect(find.widgetWithText(CheckboxListTile, "Food"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Shopping"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Music"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Events"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
+
+      // Interact with checkboxes
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Food"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Events"));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
+      await tester.pumpAndSettle();
+
+      // TODO: Add tests to check that the correct pins disappear/appears when the checkboxes are toggled
+
+      // Verify "Show All" button works
+      final showAll = find.text("Show All");
+      await tester.dragUntilVisible(
+        showAll,
+        find.byType(SingleChildScrollView),
+        const Offset(0, 50),
+      );
+      await tester.tap(showAll);
+      await tester.pumpAndSettle();
+      expect(find.text("Filter Map Pins"), findsNothing);
+
+      // Re-open filter menu
+      await tester.tap(find.byIcon(Icons.filter_alt));
+      await tester.pumpAndSettle();
+
+      // Verify "Hide All" button works
+      final hideAll = find.text("Hide All");
+      await tester.dragUntilVisible(
+        showAll,
+        find.byType(SingleChildScrollView),
+        const Offset(0, 50),
+      );
+      await tester.tap(hideAll);
+      await tester.pumpAndSettle();
+      expect(find.text("Filter Map Pins"), findsNothing);
     });
 
     testWidgets('clearAllMarkers clears all markers', (tester) async {

@@ -151,6 +151,7 @@ class MapPageState extends State<MapPage> {
           builder: (BuildContext context, StateSetter setState) {
             return Padding(
                 padding: const EdgeInsets.all(16.0),
+                child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,6 +254,7 @@ class MapPageState extends State<MapPage> {
                     ),
                   ],
                 )
+            )
             );
           },
         );
