@@ -14,7 +14,6 @@ import 'package:mockito/mockito.dart';
 import 'map_page_test.mocks.dart';
 
 void main() async {
-
   TestWidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
@@ -29,8 +28,8 @@ void main() async {
       mockClient = MockClient();
     });
 
-    testWidgets('addMarker filters and adds marker based on filter settings', (tester) async {
-
+    testWidgets('addMarker filters and adds marker based on filter settings',
+        (tester) async {
       // Define a test listing
       final listing = {
         "displayName": "Glazed and Confused",
@@ -49,7 +48,8 @@ void main() async {
 
       const plusCode = '9F4254XQ+VG';
       final encodedPlusCode = Uri.encodeComponent(plusCode);
-      final url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
+      final url =
+          'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
       const lat = 52.199687;
       const lng = 0.138813;
       final responseBody = {
@@ -62,7 +62,8 @@ void main() async {
         ]
       };
 
-      when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
+      when(mockClient.get(Uri.parse(url))).thenAnswer(
+          (_) async => http.Response(jsonEncode(responseBody), 200));
 
       // Build the widget and trigger the state
       await tester.pumpWidget(
@@ -99,6 +100,65 @@ void main() async {
       expect(hueService, 276.0);
     });
 
+    testWidgets('Adds marker, opens modal bottom sheet, and checks content',
+        (WidgetTester tester) async {
+      // Set up initial data
+      final listing = {
+        'id': 1,
+        'displayName': 'Test Listing',
+        'plusCode': '9F4254XQ+VG',
+        'primaryType': 'Vendor',
+        'secondaryType': 'Food',
+        'tertiaryType': 'Restaurant',
+        'startTime': '10:00 AM',
+        'endTime': '8:00 PM',
+        'phone': '123-456-7890',
+        'website': 'https://example.com',
+      };
+
+      const plusCode = '9F4254XQ+VG';
+      final encodedPlusCode = Uri.encodeComponent(plusCode);
+      final url =
+          'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
+      const lat = 52.199687;
+      const lng = 0.138813;
+      final responseBody = {
+        "results": [
+          {
+            "geometry": {
+              "location": {"lat": lat, "lng": lng}
+            }
+          }
+        ]
+      };
+
+      when(mockClient.get(Uri.parse(url))).thenAnswer(
+              (_) async => http.Response(jsonEncode(responseBody), 200));
+
+      // Pump the widget tree
+      await tester.pumpWidget(const MaterialApp(home: MapPage()));
+
+      // Access the MapPageState to add a marker directly
+      final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
+
+      // Add a marker
+      await mapPageState.addMarker(listing, mockClient);
+      await tester.pumpAndSettle(); // Wait for the marker to be added
+
+      // Simulate a tap on the marker
+      final markerId = MarkerId(listing['id'].toString());
+      final marker = mapPageState.markers
+          .firstWhere((marker) => marker.markerId == markerId);
+      marker.onTap!(); // Trigger the marker tap programmatically
+
+      await tester.pumpAndSettle(); // Wait for the bottom sheet to open
+
+      // Check the text content in the bottom sheet
+      expect(find.text('Test Listing'), findsOneWidget);
+      expect(find.text('Food • Restaurant'), findsOneWidget);
+      expect(find.text('10:00 AM - 8:00 PM'), findsOneWidget);
+      expect(find.text('123-456-7890'), findsOneWidget);
+    });
 
     testWidgets('clearAllMarkers clears all markers', (tester) async {
       // Build the widget and trigger the state
