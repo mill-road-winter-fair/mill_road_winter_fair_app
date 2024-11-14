@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -26,6 +25,33 @@ void main() async {
     setUp(() {
       mapPageState = const MapPage().createState();
       mockClient = MockClient();
+    });
+
+    testWidgets('test map type button changes map type',
+            (WidgetTester tester) async {
+      // Build the MapPage widget
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: MapPage(),
+          ),
+        ),
+      );
+
+      final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
+
+      // Check the initial map type
+      expect(mapPageState.mapType, MapType.normal);
+
+      // Switch the map type
+      await tester.tap(find.byIcon(Icons.satellite_alt));
+      await tester.pumpAndSettle();
+      expect(mapPageState.mapType, MapType.satellite);
+
+      // Switch the map type back
+      await tester.tap(find.byIcon(Icons.map));
+      await tester.pumpAndSettle();
+      expect(mapPageState.mapType, MapType.normal);
     });
 
     testWidgets('addMarker filters and adds marker based on filter settings',

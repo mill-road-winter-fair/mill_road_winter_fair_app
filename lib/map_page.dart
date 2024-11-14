@@ -25,7 +25,7 @@ class MapPageState extends State<MapPage> {
   LatLng? _currentLocation; // To store the user's current location
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller; // Declare _controller here
-  MapType _mapType = MapType.normal;
+  MapType mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
   // Declare default filters
   final Map<String, bool> filterSettings = {
@@ -371,7 +371,7 @@ class MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: GoogleMap(
-          mapType: _mapType,
+          mapType: mapType,
           rotateGesturesEnabled: false,
           compassEnabled: false,
           myLocationEnabled: true,
@@ -410,11 +410,11 @@ class MapPageState extends State<MapPage> {
                     IconButton.filled(
                         onPressed: () {
                           setState(() {
-                            if (_mapType == MapType.normal) {
-                              _mapType = MapType.satellite;
+                            if (mapType == MapType.normal) {
+                              mapType = MapType.satellite;
                               _layersIcon = Icons.map;
                             } else {
-                              _mapType = MapType.normal;
+                              mapType = MapType.normal;
                               _layersIcon = Icons.satellite_alt;
                             }
                           });
