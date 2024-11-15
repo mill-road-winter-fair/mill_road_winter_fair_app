@@ -23,6 +23,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # Creating .env file for use by GitHub Actions pipeline
+      - name: 'Create env file'
+        run: | 
+          touch .env
+          echo GOOGLE_MAPS_API_KEY=fakeKey >> .env
+          echo MRWF_API=fakeAPI >> .env
+          cat .env
+
       # Uncomment this step to verify the use of 'dart format' on each commit.
       # - name: Verify formatting
       #   run: dart format --output=none --set-exit-if-changed .
