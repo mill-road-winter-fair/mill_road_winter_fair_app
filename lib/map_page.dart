@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:async'; // For StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
@@ -297,6 +298,13 @@ class MapPageState extends State<MapPage> {
       updateMarkerVisibility(idList, false); // Hide any existing markers
     });
 
+    // Get the user's current location
+    Position position = await getCurrentLocation();
+    LatLng origin = LatLng(position.latitude, position.longitude);
+    await updatePolyline(origin, destination);
+    // Set the camera position once, at the beginning of the navigation
+    _setMapFitToPolyline(_polylines);
+
     // Start location updates
     await startLocationUpdates(destination);
 
@@ -354,10 +362,6 @@ class MapPageState extends State<MapPage> {
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
         ));
       });
-
-      // Adjust the map camera to fit the polyline
-      // TODO: Might need to change this later as it will adjust the camera every time the device location updates
-      _setMapFitToPolyline(_polylines);
     }
   }
 
