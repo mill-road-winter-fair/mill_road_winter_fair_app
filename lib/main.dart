@@ -5,21 +5,25 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
-//Initialize Google Map API Key variable
-String googleApiKey = "";
+//Initialize API Key variables
+late String googleApiKey;
+late String mrwfApi;
+
 Future<void> main() async {
-  // Declare googleApiKey after dotenv is loaded
-  await dotenv.load();
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
   googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+  mrwfApi = dotenv.env['MRWF_API'] ?? '';
   runApp(const MyApp());
 }
 
 //Define a GlobalKey for MapPageState:
-final GlobalKey<MapPageState> _mapPageKey = GlobalKey<MapPageState>();
+final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
 //Set the default page number (0 is the map page)
-int currentIndex = 0;
+int globalIndex = 0;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -66,17 +70,19 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  int get currentIndex => globalIndex;
 
-  Future<void> navigateToMapAndGetDirections(int id, String plusCode) async {
+  Future<void> navigateToMapAndGetDirections(int id, String plusCode, http.Client client) async {
+
     setState(() {
-      currentIndex = 0;
+      globalIndex = 0;
     });
 
     LatLng? coordinates =
-        await getCoordinatesFromPlusCode(plusCode, googleApiKey);
+        await getCoordinatesFromPlusCode(plusCode, googleApiKey, client);
 
     if (coordinates != null) {
-      _mapPageKey.currentState?.getDirections(id, coordinates);
+      mapPageKey.currentState?.getDirections(id, coordinates);
     }
   }
 
@@ -95,26 +101,26 @@ class HomePageState extends State<HomePage> {
         ),
       ),
       body: IndexedStack(
-        index: currentIndex,
+        index: globalIndex,
         children: [
-          MapPage(key: _mapPageKey),
-          const FilteredListingsPage(
-              filterPrimaryType: "Vendor", filterSecondaryType: "Food"),
-          const FilteredListingsPage(
-              filterPrimaryType: "Vendor", filterSecondaryType: "Retail"),
-          const FilteredListingsPage(
-              filterPrimaryType: "Performer", filterSecondaryType: ""),
-          const FilteredListingsPage(
-              filterPrimaryType: "Event", filterSecondaryType: ""),
-          const FilteredListingsPage(
-              filterPrimaryType: "Service", filterSecondaryType: ""),
+          MapPage(key: mapPageKey),
+          FilteredListingsPage(
+              filterPrimaryType: "Vendor", filterSecondaryType: "Food", client: http.Client()),
+          FilteredListingsPage(
+              filterPrimaryType: "Vendor", filterSecondaryType: "Retail", client: http.Client()),
+          FilteredListingsPage(
+              filterPrimaryType: "Performer", filterSecondaryType: "", client: http.Client()),
+          FilteredListingsPage(
+              filterPrimaryType: "Event", filterSecondaryType: "", client: http.Client()),
+          FilteredListingsPage(
+              filterPrimaryType: "Service", filterSecondaryType: "", client: http.Client()),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
+        currentIndex: globalIndex,
         onTap: (index) {
           setState(() {
-            currentIndex = index;
+            globalIndex = index;
           });
         },
         items: const [

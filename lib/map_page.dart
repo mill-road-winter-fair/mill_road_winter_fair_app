@@ -3,12 +3,11 @@ import 'dart:async'; // For StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-
-import 'main.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -18,17 +17,23 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  final Set<Marker> _markers = {}; // For displaying the map markers
+  late http.Client client;
+  List<MarkerId> foodMarkerIds = [];
+  List<MarkerId> shoppingMarkerIds = [];
+  List<MarkerId> musicMarkerIds = [];
+  List<MarkerId> eventMarkerIds = [];
+  List<MarkerId> serviceMarkerIds = [];
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
   StreamSubscription<Position>? _positionStream;
   LatLng? _currentLocation; // To store the user's current location
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller; // Declare _controller here
-  MapType _mapType = MapType.normal;
+  MapType mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
   // Declare default filters
-  final Map<String, bool> _filterSettings = {
+  final Map<String, bool> filterSettings = {
     'Vendor_Food': true,
     'Vendor_Retail': true,
     'Performer_*': true,
@@ -43,64 +48,87 @@ class MapPageState extends State<MapPage> {
     fetchListings();
   }
 
-  fetchListings() async {
+  Future<void> fetchListings() async {
     setState(() {
-      _markers.clear();
+      markers.clear();
     });
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
+    final response = await http.get(Uri.parse('$mrwfApi/listings'));
     if (response.statusCode == 200) {
       final listings = json.decode(response.body);
       for (var listing in listings) {
-        addMarker(listing);
+        addMarker(listing, http.Client());
       }
     }
   }
 
-  addMarker(listing) async {
-    // Determine the primary and secondary types
-    String typeKey =
-        '${listing['primaryType']}_${listing['secondaryType'] ?? '*'}';
+  void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
+    for (var id in idList) {
+      final currentMarker = markers.values.toList().firstWhere((item) => item.markerId == id);
 
-    bool isVisible = _filterSettings[typeKey] ??
-        _filterSettings['${listing['primaryType']}_*'] == true;
+      Marker updatedMarker = Marker(
+        markerId: id,
+        position: currentMarker.position,
+        icon: currentMarker.icon,
+        visible: visibleState,
+        onTap: currentMarker.onTap,
+      );
 
-    if (isVisible) {
-      LatLng? coordinates =
-          await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey);
+      setState(() {
+        markers[id] = updatedMarker;
+      });
+    }
+  }
 
-      if (coordinates != null) {
-        setState(() {
-          double hue =
-              getMarkerColorHue(listing['primaryType'], listing['secondaryType']);
-          _markers.add(
-            Marker(
-              markerId: MarkerId(listing['id'].toString()),
-              position: coordinates,
-              icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
-              onTap: () {
-                // Show bottom sheet with listing information
-                showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return ListingInfoSheet(
-                      title: listing['displayName'],
-                      categories: listing['secondaryType'] +
-                          ' • ' +
-                          listing['tertiaryType'],
-                      openingTimes:
-                          listing['startTime'] + ' - ' + listing['endTime'],
-                      phoneNumber: listing['phone'],
-                      website: listing['website'],
-                      onGetDirections: () =>
-                          getDirections(listing['id'], coordinates),
-                    );
-                  },
-                );
-              },
-            ),
+  addMarker(listing, client) async {
+    // Option to use a mock function (for tests)
+    client ??= http.Client();
+
+    // Assign markerIds to maps for filtering
+    if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Food") {
+      foodMarkerIds.add(MarkerId(listing['id'].toString()));
+    } else if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Retail") {
+      shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
+    } else if (listing['primaryType'] == "Performer") {
+      musicMarkerIds.add(MarkerId(listing['id'].toString()));
+    } else if (listing['primaryType'] == "Event") {
+      eventMarkerIds.add(MarkerId(listing['id'].toString()));
+    } else if (listing['primaryType'] == "Service") {
+      serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+    }
+
+    LatLng? coordinates = await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey, client);
+
+    MarkerId markerId = MarkerId(listing['id'].toString());
+
+    if (coordinates != null) {
+      double hue = getMarkerColorHue(listing['primaryType'], listing['secondaryType']);
+
+      Marker newMarker = Marker(
+        markerId: markerId,
+        position: coordinates,
+        icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
+        visible: true,
+        onTap: () {
+          // Show bottom sheet with listing information
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return ListingInfoSheet(
+                title: listing['displayName'],
+                categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
+                openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
+                phoneNumber: listing['phone'],
+                website: listing['website'],
+                onGetDirections: () => getDirections(listing['id'], coordinates),
+              );
+            },
           );
-        });
-      }
+        },
+      );
+
+      setState(() {
+        markers[markerId] = newMarker;
+      });
     }
   }
 
@@ -136,7 +164,7 @@ class MapPageState extends State<MapPage> {
   //The Remove All filters button seems to prefer using this function rather than doing it's own setState
   void clearAllMarkers() {
     setState(() {
-      _markers.clear();
+      markers.clear();
     });
   }
 
@@ -148,73 +176,76 @@ class MapPageState extends State<MapPage> {
           builder: (BuildContext context, StateSetter setState) {
             return Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
+                child: SingleChildScrollView(
+                    child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Filter Map Pins",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.left,
-                          )
-                        ]),
+                    const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      Text(
+                        "Filter Map Pins",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.left,
+                      )
+                    ]),
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 110, 51, 1.0),
                       title: const Text("Food"),
-                      value: _filterSettings["Vendor_Food"],
+                      value: filterSettings["Vendor_Food"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Vendor_Food"] = value!;
+                          filterSettings["Vendor_Food"] = value!;
                         });
-                        fetchListings();
+                        final idList = foodMarkerIds;
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 51, 51, 1.0),
                       title: const Text("Shopping"),
-                      value: _filterSettings["Vendor_Retail"],
+                      value: filterSettings["Vendor_Retail"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Vendor_Retail"] = value!;
+                          filterSettings["Vendor_Retail"] = value!;
                         });
-                        fetchListings();
+                        final idList = shoppingMarkerIds;
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 51, 120, 1.0),
                       title: const Text("Music"),
-                      value: _filterSettings["Performer_*"],
+                      value: filterSettings["Performer_*"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Performer_*"] = value!;
+                          filterSettings["Performer_*"] = value!;
                         });
-                        fetchListings();
+                        final idList = musicMarkerIds;
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 161, 51, 1.0),
                       title: const Text("Events"),
-                      value: _filterSettings["Event_*"],
+                      value: filterSettings["Event_*"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Event_*"] = value!;
+                          filterSettings["Event_*"] = value!;
                         });
-                        fetchListings();
+                        final idList = eventMarkerIds;
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(153, 0, 255, 1.0),
                       title: const Text("Services"),
-                      value: _filterSettings["Service_*"],
+                      value: filterSettings["Service_*"],
                       onChanged: (value) {
                         setState(() {
-                          _filterSettings["Service_*"] = value!;
+                          filterSettings["Service_*"] = value!;
                         });
-                        fetchListings();
+                        final idList = serviceMarkerIds;
+                        updateMarkerVisibility(idList, value!);
                       },
                     ),
                     Row(
@@ -223,11 +254,12 @@ class MapPageState extends State<MapPage> {
                         ElevatedButton.icon(
                           onPressed: () {
                             setState(() {
-                              _filterSettings.forEach((key, _) {
-                                _filterSettings[key] = true;
+                              filterSettings.forEach((key, _) {
+                                filterSettings[key] = true;
                               });
                             });
-                            fetchListings();
+                            final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+                            updateMarkerVisibility(idList, true);
                             Navigator.pop(context);
                           },
                           icon: const Icon(Icons.filter_alt),
@@ -236,11 +268,12 @@ class MapPageState extends State<MapPage> {
                         ElevatedButton.icon(
                           onPressed: () {
                             setState(() {
-                              _filterSettings.forEach((key, _) {
-                                _filterSettings[key] = false;
+                              filterSettings.forEach((key, _) {
+                                filterSettings[key] = false;
                               });
                             });
-                            clearAllMarkers();
+                            final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+                            updateMarkerVisibility(idList, false);
                             Navigator.pop(context);
                           },
                           icon: const Icon(Icons.filter_alt_off),
@@ -249,8 +282,7 @@ class MapPageState extends State<MapPage> {
                       ],
                     ),
                   ],
-                )
-            );
+                )));
           },
         );
       },
@@ -261,23 +293,18 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines
     setState(() {
       _polylines.clear(); // Clear any existing polylines
-      _markers.clear(); // Clear any existing markers
+      final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+      updateMarkerVisibility(idList, false); // Hide any existing markers
     });
 
     // Start location updates
     await startLocationUpdates(destination);
 
     // Re-add destination marker
-    final response = await http.get(Uri.parse('http://10.0.2.2:8080/listings'));
-    if (response.statusCode == 200) {
-      final listings = json.decode(response.body);
-      //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
-      for (var listing in listings) {
-        if (listing['id'] == id) {
-          addMarker(listing);
-        }
-      }
-    }
+    MarkerId markerId = MarkerId(id.toString());
+    List<MarkerId> destinationMarkerIds = [];
+    destinationMarkerIds.add(markerId);
+    updateMarkerVisibility(destinationMarkerIds, true);
   }
 
   @override
@@ -321,9 +348,7 @@ class MapPageState extends State<MapPage> {
         _polylines.clear();
         _polylines.add(Polyline(
           polylineId: const PolylineId('route'),
-          points: result.points
-              .map((point) => LatLng(point.latitude, point.longitude))
-              .toList(),
+          points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
           color: const Color.fromRGBO(204, 51, 51, 1.0),
           width: 5,
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
@@ -366,7 +391,7 @@ class MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: GoogleMap(
-          mapType: _mapType,
+          mapType: mapType,
           rotateGesturesEnabled: false,
           compassEnabled: false,
           myLocationEnabled: true,
@@ -379,7 +404,7 @@ class MapPageState extends State<MapPage> {
             target: LatLng(52.199212, 0.139342),
             zoom: 15,
           ),
-          markers: _markers,
+          markers: markers.values.toSet(),
           polylines: _polylines,
         ),
         floatingActionButton: Padding(
@@ -405,11 +430,11 @@ class MapPageState extends State<MapPage> {
                     IconButton.filled(
                         onPressed: () {
                           setState(() {
-                            if (_mapType == MapType.normal) {
-                              _mapType = MapType.satellite;
+                            if (mapType == MapType.normal) {
+                              mapType = MapType.satellite;
                               _layersIcon = Icons.map;
                             } else {
-                              _mapType = MapType.normal;
+                              mapType = MapType.normal;
                               _layersIcon = Icons.satellite_alt;
                             }
                           });
@@ -428,8 +453,8 @@ class MapPageState extends State<MapPage> {
                             setState(() {
                               _positionStream?.cancel();
                               _polylines.clear();
-                              _markers.clear();
-                              fetchListings();
+                              final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+                              updateMarkerVisibility(idList, true);
                             });
                           },
                           icon: const Icon(
