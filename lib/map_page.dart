@@ -27,6 +27,7 @@ class MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
+  String? distanceToDestination;
   StreamSubscription<Position>? _positionStream;
   LatLng? _currentLocation; // To store the user's current location
   LatLng? _destination; // To store the destination
@@ -361,6 +362,13 @@ class MapPageState extends State<MapPage> {
           width: 5,
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
         ));
+        final distanceMetres = result.totalDistanceValue;
+        if (distanceMetres! <= 999) {
+          distanceToDestination = '$distanceMetres m';
+        } else {
+          final distanceKilometres = (distanceMetres / 1000);
+          distanceToDestination = '$distanceKilometres km';
+        }
       });
     }
   }
@@ -412,59 +420,96 @@ class MapPageState extends State<MapPage> {
           polylines: _polylines,
         ),
         floatingActionButton: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+            padding: const EdgeInsets.fromLTRB(20, 20, 45, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    IconButton.filled(
-                        onPressed: () {
-                          showFilterMenu();
-                        },
-                        icon: const Icon(
-                          Icons.filter_alt,
-                          color: Color.fromRGBO(255, 255, 255, 1.0),
-                        ))
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton.filled(
+                            onPressed: () {
+                              showFilterMenu();
+                            },
+                            icon: const Icon(
+                              Icons.filter_alt,
+                              color: Color.fromRGBO(255, 255, 255, 1.0),
+                            )
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton.filled(
+                            onPressed: () {
+                              setState(() {
+                                if (mapType == MapType.normal) {
+                                  mapType = MapType.satellite;
+                                  _layersIcon = Icons.map;
+                                } else {
+                                  mapType = MapType.normal;
+                                  _layersIcon = Icons.satellite_alt;
+                                }
+                              });
+                            },
+                            icon: Icon(
+                              _layersIcon,
+                              color: const Color.fromRGBO(255, 255, 255, 1.0),
+                            ))
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_polylines.isNotEmpty)
+                          IconButton.filled(
+                              onPressed: () {
+                                setState(() {
+                                  _positionStream?.cancel();
+                                  _polylines.clear();
+                                  final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+                                  updateMarkerVisibility(idList, true);
+                                });
+                              },
+                              icon: const Icon(
+                                Icons.wrong_location,
+                                color: Color.fromRGBO(255, 255, 255, 1.0),
+                              ))
+                      ],
+                    )
                   ],
                 ),
-                Row(
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    IconButton.filled(
-                        onPressed: () {
-                          setState(() {
-                            if (mapType == MapType.normal) {
-                              mapType = MapType.satellite;
-                              _layersIcon = Icons.map;
-                            } else {
-                              mapType = MapType.normal;
-                              _layersIcon = Icons.satellite_alt;
-                            }
-                          });
-                        },
-                        icon: Icon(
-                          _layersIcon,
-                          color: const Color.fromRGBO(255, 255, 255, 1.0),
-                        ))
-                  ],
-                ),
-                Row(
-                  children: [
-                    if (_polylines.isNotEmpty)
-                      IconButton.filled(
-                          onPressed: () {
-                            setState(() {
-                              _positionStream?.cancel();
-                              _polylines.clear();
-                              final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
-                              updateMarkerVisibility(idList, true);
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.wrong_location,
-                            color: Color.fromRGBO(255, 255, 255, 1.0),
-                          ))
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (distanceToDestination != null)
+                          ElevatedButton.icon(
+                              onPressed: () {
+                                _setMapFitToPolyline(_polylines);
+                              },
+                              style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(204, 51, 51, 1)),
+                              icon: const Icon(Icons.directions, color: Color.fromRGBO(255, 255, 255, 1.0)),
+                              label: Text(
+                                distanceToDestination!,
+                                style: const TextStyle(fontSize: 28, color: Colors.white),
+                              )
+                          )
+                      ],
+                    ),
                   ],
                 )
               ],
