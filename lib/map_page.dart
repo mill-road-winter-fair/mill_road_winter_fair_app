@@ -57,24 +57,12 @@ class MapPageState extends State<MapPage> {
       final listings = json.decode(response.body);
       for (var listing in listings) {
         addMarker(listing, http.Client());
-        if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Food") {
-          foodMarkerIds.add(MarkerId(listing['id'].toString()));
-        } else if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Retail") {
-          shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
-        } else if (listing['primaryType'] == "Performer") {
-          musicMarkerIds.add(MarkerId(listing['id'].toString()));
-        } else if (listing['primaryType'] == "Event") {
-          eventMarkerIds.add(MarkerId(listing['id'].toString()));
-        } else if (listing['primaryType'] == "Service") {
-          serviceMarkerIds.add(MarkerId(listing['id'].toString()));
-        }
       }
     }
   }
 
   void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
     for (var id in idList) {
-
       final currentMarker = markers.values.toList().firstWhere((item) => item.markerId == id);
 
       Marker updatedMarker = Marker(
@@ -95,54 +83,52 @@ class MapPageState extends State<MapPage> {
     // Option to use a mock function (for tests)
     client ??= http.Client();
 
-    // Determine the primary and secondary types
-    String typeKey =
-        '${listing['primaryType']}_${listing['secondaryType'] ?? '*'}';
+    // Assign markerIds to maps for filtering
+    if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Food") {
+      foodMarkerIds.add(MarkerId(listing['id'].toString()));
+    } else if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Retail") {
+      shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
+    } else if (listing['primaryType'] == "Performer") {
+      musicMarkerIds.add(MarkerId(listing['id'].toString()));
+    } else if (listing['primaryType'] == "Event") {
+      eventMarkerIds.add(MarkerId(listing['id'].toString()));
+    } else if (listing['primaryType'] == "Service") {
+      serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+    }
 
-    bool isVisible = filterSettings[typeKey] ??
-        filterSettings['${listing['primaryType']}_*'] == true;
+    LatLng? coordinates = await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey, client);
 
-    if (isVisible) {
-      LatLng? coordinates =
-          await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey, client);
+    MarkerId markerId = MarkerId(listing['id'].toString());
 
-      MarkerId markerId = MarkerId(listing['id'].toString());
+    if (coordinates != null) {
+      double hue = getMarkerColorHue(listing['primaryType'], listing['secondaryType']);
 
-      if (coordinates != null) {
-          double hue =
-              getMarkerColorHue(listing['primaryType'], listing['secondaryType']);
+      Marker newMarker = Marker(
+        markerId: markerId,
+        position: coordinates,
+        icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
+        visible: true,
+        onTap: () {
+          // Show bottom sheet with listing information
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return ListingInfoSheet(
+                title: listing['displayName'],
+                categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
+                openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
+                phoneNumber: listing['phone'],
+                website: listing['website'],
+                onGetDirections: () => getDirections(listing['id'], coordinates),
+              );
+            },
+          );
+        },
+      );
 
-            Marker newMarker = Marker(
-              markerId: markerId,
-              position: coordinates,
-              icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
-              visible: true,
-              onTap: () {
-                // Show bottom sheet with listing information
-                showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return ListingInfoSheet(
-                      title: listing['displayName'],
-                      categories: listing['secondaryType'] +
-                          ' • ' +
-                          listing['tertiaryType'],
-                      openingTimes:
-                          listing['startTime'] + ' - ' + listing['endTime'],
-                      phoneNumber: listing['phone'],
-                      website: listing['website'],
-                      onGetDirections: () =>
-                          getDirections(listing['id'], coordinates),
-                    );
-                  },
-                );
-              },
-            );
-
-            setState(() {
-              markers[markerId] = newMarker;
-            });
-      }
+      setState(() {
+        markers[markerId] = newMarker;
+      });
     }
   }
 
@@ -191,20 +177,17 @@ class MapPageState extends State<MapPage> {
             return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SingleChildScrollView(
-                child: Column(
+                    child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Filter Map Pins",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.left,
-                          )
-                        ]),
+                    const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      Text(
+                        "Filter Map Pins",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.left,
+                      )
+                    ]),
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 110, 51, 1.0),
                       title: const Text("Food"),
@@ -275,7 +258,7 @@ class MapPageState extends State<MapPage> {
                                 filterSettings[key] = true;
                               });
                             });
-                            final idList = foodMarkerIds+shoppingMarkerIds+musicMarkerIds+eventMarkerIds+serviceMarkerIds;
+                            final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
                             updateMarkerVisibility(idList, true);
                             Navigator.pop(context);
                           },
@@ -289,7 +272,7 @@ class MapPageState extends State<MapPage> {
                                 filterSettings[key] = false;
                               });
                             });
-                            final idList = foodMarkerIds+shoppingMarkerIds+musicMarkerIds+eventMarkerIds+serviceMarkerIds;
+                            final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
                             updateMarkerVisibility(idList, false);
                             Navigator.pop(context);
                           },
@@ -299,9 +282,7 @@ class MapPageState extends State<MapPage> {
                       ],
                     ),
                   ],
-                )
-            )
-            );
+                )));
           },
         );
       },
@@ -372,9 +353,7 @@ class MapPageState extends State<MapPage> {
         _polylines.clear();
         _polylines.add(Polyline(
           polylineId: const PolylineId('route'),
-          points: result.points
-              .map((point) => LatLng(point.latitude, point.longitude))
-              .toList(),
+          points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
           color: const Color.fromRGBO(204, 51, 51, 1.0),
           width: 5,
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],

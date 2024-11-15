@@ -109,7 +109,7 @@ void main() async {
     // Verify that the expected marker was added
     expect(mapPageState.markers.isNotEmpty, true);
     expect(mapPageState.markers.length, 1);
-    expect(mapPageState.markers.any((marker) => marker.markerId == const MarkerId('1')), true);
+    expect(mapPageState.markers.values.toSet().any((marker) => marker.markerId == const MarkerId('1')), true);
   });
 
   test('getMarkerColorHue returns correct hue for given types', () {
@@ -173,7 +173,7 @@ void main() async {
 
     // Simulate a tap on the map marker
     final markerId = MarkerId(listing['id'].toString());
-    final marker = mapPageState.markers.firstWhere((marker) => marker.markerId == markerId);
+    final marker = mapPageState.markers.values.toList().firstWhere((marker) => marker.markerId == markerId);
     marker.onTap!();
     await tester.pumpAndSettle();
 
@@ -195,6 +195,204 @@ void main() async {
       ),
     );
 
+    // Obtain the state after mounting
+    mapPageState = tester.state<MapPageState>(find.byType(MapPage));
+
+    // Define a test listing
+    var listing = {
+      "displayName": "Glazed and Confused",
+      "email": "admin@glazedandconfued.com",
+      "endTime": "16:30",
+      "id": 1,
+      "name": "glazedandconfused",
+      "phone": "01223 111111",
+      "plusCode": "9F4254XQ+VG",
+      "primaryType": "Vendor",
+      "secondaryType": "Food",
+      "startTime": "10:30",
+      "tertiaryType": "Doughnuts",
+      "website": "https://www.glazedandconfused.com"
+    };
+    // Define mock values
+    var plusCode = '9F4254XQ+VG';
+    var encodedPlusCode = Uri.encodeComponent(plusCode);
+    var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
+    var lat = 52.199687;
+    var lng = 0.138813;
+    var responseBody = {
+      "results": [
+        {
+          "geometry": {
+            "location": {"lat": lat, "lng": lng}
+          }
+        }
+      ]
+    };
+
+    // Specify when to mock
+    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
+
+    // Add a marker
+    await mapPageState.addMarker(listing, mockClient);
+    await tester.pumpAndSettle();
+
+    listing = {
+      "displayName": "The Crafty Canvas",
+      "email": "contact@craftycanvas.com",
+      "endTime": "16:30",
+      "id": 2,
+      "name": "thecraftycanvas",
+      "phone": "01223 222222",
+      "plusCode": "9F42642J+QQ9",
+      "primaryType": "Vendor",
+      "secondaryType": "Retail",
+      "startTime": "10:30",
+      "tertiaryType": "Crafts",
+      "website": "https://www.craftycanvas.com"
+    };
+    // Define mock values
+    plusCode = '9F42642J+QQ9';
+    encodedPlusCode = Uri.encodeComponent(plusCode);
+    url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
+    lat = 52.199687;
+    lng = 0.138813;
+    responseBody = {
+      "results": [
+        {
+          "geometry": {
+            "location": {"lat": lat, "lng": lng}
+          }
+        }
+      ]
+    };
+
+    // Specify when to mock
+    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
+
+    // Add a marker
+    await mapPageState.addMarker(listing, mockClient);
+    await tester.pumpAndSettle();
+
+    listing = {
+      "displayName": "The Jazz Junction",
+      "email": "contact@jazzjunction.com",
+      "endTime": "16:30",
+      "id": 3,
+      "name": "thejazzjunction",
+      "phone": "01223 333333",
+      "plusCode": "9F42642J+VG2",
+      "primaryType": "Performer",
+      "secondaryType": "Music",
+      "startTime": "10:30",
+      "tertiaryType": "Jazz",
+      "website": "https://www.jazzjunction.com"
+    };
+    // Define mock values
+    plusCode = '9F42642J+VG2';
+    encodedPlusCode = Uri.encodeComponent(plusCode);
+    url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
+    lat = 52.199687;
+    lng = 0.138813;
+    responseBody = {
+      "results": [
+        {
+          "geometry": {
+            "location": {"lat": lat, "lng": lng}
+          }
+        }
+      ]
+    };
+
+    // Specify when to mock
+    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
+
+    // Add a marker
+    await mapPageState.addMarker(listing, mockClient);
+    await tester.pumpAndSettle();
+
+    listing = {
+      "displayName": "Santa",
+      "email": "",
+      "endTime": "16:30",
+      "id": 4,
+      "name": "santa1",
+      "phone": "",
+      "plusCode": "9F42643J+CXW",
+      "primaryType": "Event",
+      "secondaryType": "Performance",
+      "startTime": "10:30",
+      "tertiaryType": "Kindly Elf",
+      "website": ""
+    };
+    // Define mock values
+    plusCode = '9F42643J+CXW';
+    encodedPlusCode = Uri.encodeComponent(plusCode);
+    url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
+    lat = 52.199687;
+    lng = 0.138813;
+    responseBody = {
+      "results": [
+        {
+          "geometry": {
+            "location": {"lat": lat, "lng": lng}
+          }
+        }
+      ]
+    };
+
+    // Specify when to mock
+    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
+
+    // Add a marker
+    await mapPageState.addMarker(listing, mockClient);
+    await tester.pumpAndSettle();
+
+    listing = {
+      "displayName": "Information Point",
+      "email": "info@millroadwinterfair.org",
+      "endTime": "16:30",
+      "id": 5,
+      "name": "informationpoint1",
+      "phone": "",
+      "plusCode": "9F42642P+3WV",
+      "primaryType": "Service",
+      "secondaryType": "Information",
+      "startTime": "10:30",
+      "tertiaryType": "Help Point",
+      "website": ""
+    };
+    // Define mock values
+    plusCode = '9F42642P+3WV';
+    encodedPlusCode = Uri.encodeComponent(plusCode);
+    url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
+    lat = 52.199687;
+    lng = 0.138813;
+    responseBody = {
+      "results": [
+        {
+          "geometry": {
+            "location": {"lat": lat, "lng": lng}
+          }
+        }
+      ]
+    };
+
+    // Specify when to mock
+    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
+
+    // Add a marker
+    await mapPageState.addMarker(listing, mockClient);
+    await tester.pumpAndSettle();
+
+    // Verify that the expected marker was added
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+
     // Open the filter menu
     await tester.tap(find.byIcon(Icons.filter_alt));
     await tester.pumpAndSettle();
@@ -209,19 +407,105 @@ void main() async {
     expect(find.widgetWithText(CheckboxListTile, "Events"), findsOneWidget);
     expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
 
-    // Interact with checkboxes
+    // Test Food checkbox
     await tester.tap(find.widgetWithText(CheckboxListTile, "Food"));
     await tester.pumpAndSettle();
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+    await tester.tap(find.widgetWithText(CheckboxListTile, "Food"));
+    await tester.pumpAndSettle();
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+
+    // Test Shopping checkbox
     await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
     await tester.pumpAndSettle();
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, false);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+    await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
+    await tester.pumpAndSettle();
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+
+    // Test Music checkbox
     await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
     await tester.pumpAndSettle();
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, false);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+    await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
+    await tester.pumpAndSettle();
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+
+    // Test Events checkbox
     await tester.tap(find.widgetWithText(CheckboxListTile, "Events"));
     await tester.pumpAndSettle();
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, false);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+    await tester.tap(find.widgetWithText(CheckboxListTile, "Events"));
+    await tester.pumpAndSettle();
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
+
+    // Test Services checkbox
     await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
     await tester.pumpAndSettle();
-
-    // TODO: Add tests to check that the correct pins disappear/appears when the checkboxes are toggled
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, false);
+    await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
+    await tester.pumpAndSettle();
+    expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 5);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
     // Verify "Show All" button works
     final showAll = find.text("Show All");
@@ -233,7 +517,11 @@ void main() async {
     await tester.tap(showAll);
     await tester.pumpAndSettle();
     expect(find.text("Filter Map Pins"), findsNothing);
-    // TODO: Add test to check that all pins are added when "Show All" is tapped
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
     // Re-open filter menu
     await tester.tap(find.byIcon(Icons.filter_alt));
@@ -249,11 +537,12 @@ void main() async {
     await tester.tap(hideAll);
     await tester.pumpAndSettle();
     expect(find.text("Filter Map Pins"), findsNothing);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
+    expect(mapPageState.markers[const MarkerId('2')]?.visible, false);
+    expect(mapPageState.markers[const MarkerId('3')]?.visible, false);
+    expect(mapPageState.markers[const MarkerId('4')]?.visible, false);
+    expect(mapPageState.markers[const MarkerId('5')]?.visible, false);
   });
-
-  // TODO: Add test for initial polyline plotting
-  // TODO: Add test for polyline updates
-  // TODO: Add test for camera movements
 
   testWidgets('clearAllMarkers clears all markers', (tester) async {
     // Build the widget and trigger the state
@@ -269,10 +558,18 @@ void main() async {
     // Obtain the state after mounting
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
-    mapPageState.markers.add(const Marker(markerId: MarkerId('1')));
+    MarkerId markerId = MarkerId('1'.toString());
+    Marker newMarker = Marker(markerId: markerId);
+    mapPageState.markers[markerId] = newMarker;
+
     expect(mapPageState.markers.isNotEmpty, true);
+    expect(mapPageState.markers.length, 1);
 
     mapPageState.clearAllMarkers();
     expect(mapPageState.markers.isEmpty, true);
   });
+
+  // TODO: Add test for initial polyline plotting
+  // TODO: Add test for polyline updates
+  // TODO: Add test for camera movements
 }
