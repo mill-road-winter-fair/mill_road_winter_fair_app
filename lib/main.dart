@@ -105,15 +105,15 @@ class HomePageState extends State<HomePage> {
         children: [
           MapPage(key: mapPageKey),
           FilteredListingsPage(
-              filterPrimaryType: "Vendor", filterSecondaryType: "Food", client: http.Client()),
+              filterPrimaryType: "Food", client: http.Client()),
           FilteredListingsPage(
-              filterPrimaryType: "Vendor", filterSecondaryType: "Retail", client: http.Client()),
+              filterPrimaryType: "Shopping", client: http.Client()),
           FilteredListingsPage(
-              filterPrimaryType: "Performer", filterSecondaryType: "", client: http.Client()),
+              filterPrimaryType: "Music", client: http.Client()),
           FilteredListingsPage(
-              filterPrimaryType: "Event", filterSecondaryType: "", client: http.Client()),
+              filterPrimaryType: "Event", client: http.Client()),
           FilteredListingsPage(
-              filterPrimaryType: "Service", filterSecondaryType: "", client: http.Client()),
+              filterPrimaryType: "Service", client: http.Client()),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

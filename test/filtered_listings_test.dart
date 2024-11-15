@@ -28,13 +28,11 @@ void main() async {
   Future<void> pumpFilteredListingsPage(
     WidgetTester tester,
     String primaryType,
-    String secondaryType,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: FilteredListingsPage(
           filterPrimaryType: primaryType,
-          filterSecondaryType: secondaryType,
           client: mockClient,
         ),
       ),
@@ -46,7 +44,7 @@ void main() async {
   testWidgets('displays error text when fetchFilteredListings fails', (WidgetTester tester) async {
     when(mockClient.get(Uri.parse('$mrwfApi/listings'))).thenAnswer((_) async => http.Response('', 500));
 
-    await pumpFilteredListingsPage(tester, 'Vendor', 'Food');
+    await pumpFilteredListingsPage(tester, 'Food');
 
     expect(find.text('Error fetching listings'), findsOneWidget);
   });
@@ -60,7 +58,7 @@ void main() async {
         'id': 1,
         'phone': '01223 111111',
         'plusCode': '9F4254XQ+VG',
-        'primaryType': 'Vendor',
+        'primaryType': 'Food',
         'secondaryType': 'Food',
         'startTime': '10:30',
         'tertiaryType': 'Doughnuts',
@@ -72,7 +70,7 @@ void main() async {
         'id': 1,
         'phone': '01223 222222',
         'plusCode': '9F42642Q+2P2',
-        'primaryType': 'Vendor',
+        'primaryType': 'Food',
         'secondaryType': 'Food',
         'startTime': '12:00',
         'tertiaryType': 'Sushi',
@@ -83,7 +81,7 @@ void main() async {
     // Specify when to mock
     when(mockClient.get(Uri.parse('$mrwfApi/listings'))).thenAnswer((_) async => http.Response(jsonEncode(listings), 200));
 
-    await pumpFilteredListingsPage(tester, 'Vendor', 'Food');
+    await pumpFilteredListingsPage(tester, 'Food');
 
     expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(find.text('Food • Doughnuts'), findsOneWidget);

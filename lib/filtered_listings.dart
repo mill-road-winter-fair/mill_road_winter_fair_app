@@ -6,12 +6,10 @@ import 'package:mill_road_winter_fair_app/main.dart';
 
 class FilteredListingsPage extends StatelessWidget {
   final String filterPrimaryType;
-  final String filterSecondaryType;
   final http.Client client;
 
   const FilteredListingsPage({
     required this.filterPrimaryType,
-    required this.filterSecondaryType,
     required this.client,
     super.key,
   });
@@ -19,7 +17,7 @@ class FilteredListingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchFilteredListings(filterPrimaryType, filterSecondaryType, client),
+      future: fetchFilteredListings(filterPrimaryType, client),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -58,7 +56,7 @@ class FilteredListingsPage extends StatelessWidget {
   }
 
   Future<List> fetchFilteredListings(
-      String primaryType, String secondaryType, http.Client client) async {
+      String primaryType, http.Client client) async {
     // Fetch all listings from the API
     final response = await client.get(Uri.parse('$mrwfApi/listings'));
 
@@ -70,12 +68,6 @@ class FilteredListingsPage extends StatelessWidget {
       final filteredListings = allListings
           .where((listing) => listing['primaryType'] == primaryType)
           .toList();
-
-      if (secondaryType.isNotEmpty) {
-        return filteredListings
-            .where((listing) => listing['secondaryType'] == secondaryType)
-            .toList();
-      }
 
       return filteredListings;
     } else {

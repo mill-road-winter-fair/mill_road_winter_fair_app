@@ -99,7 +99,7 @@ void main() async {
       "name": "glazedandconfused",
       "phone": "01223 111111",
       "plusCode": "9F4254XQ+VG",
-      "primaryType": "Vendor",
+      "primaryType": "Food",
       "secondaryType": "Food",
       "startTime": "10:30",
       "tertiaryType": "Doughnuts",

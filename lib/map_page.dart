@@ -85,11 +85,11 @@ class MapPageState extends State<MapPage> {
     client ??= http.Client();
 
     // Assign markerIds to maps for filtering
-    if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Food") {
+    if (listing['primaryType'] == "Food") {
       foodMarkerIds.add(MarkerId(listing['id'].toString()));
-    } else if (listing['primaryType'] == "Vendor" && listing['secondaryType'] == "Retail") {
+    } else if (listing['primaryType'] == "Shopping") {
       shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
-    } else if (listing['primaryType'] == "Performer") {
+    } else if (listing['primaryType'] == "Music") {
       musicMarkerIds.add(MarkerId(listing['id'].toString()));
     } else if (listing['primaryType'] == "Event") {
       eventMarkerIds.add(MarkerId(listing['id'].toString()));
@@ -102,7 +102,7 @@ class MapPageState extends State<MapPage> {
     MarkerId markerId = MarkerId(listing['id'].toString());
 
     if (coordinates != null) {
-      double hue = getMarkerColorHue(listing['primaryType'], listing['secondaryType']);
+      double hue = getMarkerColorHue(listing['primaryType']);
 
       Marker newMarker = Marker(
         markerId: markerId,
@@ -133,16 +133,16 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  double getMarkerColorHue(String primaryType, String secondaryType) {
-    if (primaryType == "Vendor" && secondaryType == "Food") {
+  double getMarkerColorHue(String primaryType) {
+    if (primaryType == "Food") {
       Color color = const Color.fromRGBO(204, 110, 51, 1.0);
       double hue = HSVColor.fromColor(color).hue;
       return hue;
-    } else if (primaryType == "Vendor" && secondaryType == "Retail") {
+    } else if (primaryType == "Shopping") {
       Color color = const Color.fromRGBO(204, 51, 51, 1);
       double hue = HSVColor.fromColor(color).hue;
       return hue;
-    } else if (primaryType == "Performer") {
+    } else if (primaryType == "Music") {
       Color color = const Color.fromRGBO(204, 51, 120, 1.0);
       double hue = HSVColor.fromColor(color).hue;
       return hue;

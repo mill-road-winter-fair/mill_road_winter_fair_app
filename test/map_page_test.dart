@@ -63,7 +63,7 @@ void main() async {
       "name": "glazedandconfused",
       "phone": "01223 111111",
       "plusCode": "9F4254XQ+VG",
-      "primaryType": "Vendor",
+      "primaryType": "Food",
       "secondaryType": "Food",
       "startTime": "10:30",
       "tertiaryType": "Doughnuts",
@@ -113,11 +113,11 @@ void main() async {
   });
 
   test('getMarkerColorHue returns correct hue for given types', () {
-    final hueFood = mapPageState.getMarkerColorHue("Vendor", "Food");
-    final hueRetail = mapPageState.getMarkerColorHue("Vendor", "Retail");
-    final hueMusic = mapPageState.getMarkerColorHue("Performer", "");
-    final hueEvent = mapPageState.getMarkerColorHue("Event", "");
-    final hueService = mapPageState.getMarkerColorHue("Service", "");
+    final hueFood = mapPageState.getMarkerColorHue("Food");
+    final hueRetail = mapPageState.getMarkerColorHue("Shopping");
+    final hueMusic = mapPageState.getMarkerColorHue("Music");
+    final hueEvent = mapPageState.getMarkerColorHue("Event");
+    final hueService = mapPageState.getMarkerColorHue("Service");
 
     expect(hueFood, 23.13725490196078);
     expect(hueRetail, 0.0);
@@ -136,7 +136,7 @@ void main() async {
       "name": "glazedandconfused",
       "phone": "01223 111111",
       "plusCode": "9F4254XQ+VG",
-      "primaryType": "Vendor",
+      "primaryType": "Food",
       "secondaryType": "Food",
       "startTime": "10:30",
       "tertiaryType": "Doughnuts",
@@ -207,7 +207,7 @@ void main() async {
       "name": "glazedandconfused",
       "phone": "01223 111111",
       "plusCode": "9F4254XQ+VG",
-      "primaryType": "Vendor",
+      "primaryType": "Food",
       "secondaryType": "Food",
       "startTime": "10:30",
       "tertiaryType": "Doughnuts",
@@ -244,7 +244,7 @@ void main() async {
       "name": "thecraftycanvas",
       "phone": "01223 222222",
       "plusCode": "9F42642J+QQ9",
-      "primaryType": "Vendor",
+      "primaryType": "Shopping",
       "secondaryType": "Retail",
       "startTime": "10:30",
       "tertiaryType": "Crafts",
@@ -281,7 +281,7 @@ void main() async {
       "name": "thejazzjunction",
       "phone": "01223 333333",
       "plusCode": "9F42642J+VG2",
-      "primaryType": "Performer",
+      "primaryType": "Music",
       "secondaryType": "Music",
       "startTime": "10:30",
       "tertiaryType": "Jazz",
