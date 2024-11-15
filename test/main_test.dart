@@ -90,7 +90,23 @@ void main() async {
     expect(homePageState.currentIndex, 0);
   });
 
-  testWidgets('HomePage navigateToMapAndGetDirections function changes to MapPage and calls getDirections', (WidgetTester tester) async {
+  testWidgets('HomePage navigateToMapAndGetDirections function changes to MapPage', (WidgetTester tester) async {
+    // Define a test listing
+    final listing = {
+      "displayName": "Glazed and Confused",
+      "email": "admin@glazedandconfued.com",
+      "endTime": "16:30",
+      "id": 1,
+      "name": "glazedandconfused",
+      "phone": "01223 111111",
+      "plusCode": "9F4254XQ+VG",
+      "primaryType": "Vendor",
+      "secondaryType": "Food",
+      "startTime": "10:30",
+      "tertiaryType": "Doughnuts",
+      "website": "https://www.glazedandconfused.com"
+    };
+
     // Define mock values
     const plusCode = '9F4254XQ+VG';
     final encodedPlusCode = Uri.encodeComponent(plusCode);
@@ -115,6 +131,15 @@ void main() async {
 
     // Obtain the state after mounting
     final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
+    final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
+
+    // Configure the map marker filter and add the marker
+    mapPageState.filterSettings["Vendor_Food"] = true;
+    await mapPageState.addMarker(listing, mockClient);
+
+    await tester.tap(find.text('Food'));
+    await tester.pumpAndSettle();
+    expect(homePageState.currentIndex, 1);
 
     // Trigger the navigation to map and fetch directions
     await homePageState.navigateToMapAndGetDirections(1, plusCode, mockClient);

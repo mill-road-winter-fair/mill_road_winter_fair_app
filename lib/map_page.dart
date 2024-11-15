@@ -293,23 +293,18 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines
     setState(() {
       _polylines.clear(); // Clear any existing polylines
-      markers.clear(); // Clear any existing markers
+      final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+      updateMarkerVisibility(idList, false); // Hide any existing markers
     });
 
     // Start location updates
     await startLocationUpdates(destination);
 
     // Re-add destination marker
-    final response = await http.get(Uri.parse('$mrwfApi/listings'));
-    if (response.statusCode == 200) {
-      final listings = json.decode(response.body);
-      //TODO: This is needlessly iterating through all listings, once we've added params to the backend we can get just the necessary listing
-      for (var listing in listings) {
-        if (listing['id'] == id) {
-          addMarker(listing, http.Client());
-        }
-      }
-    }
+    MarkerId markerId = MarkerId(id.toString());
+    List<MarkerId> destinationMarkerIds = [];
+    destinationMarkerIds.add(markerId);
+    updateMarkerVisibility(destinationMarkerIds, true);
   }
 
   @override
@@ -458,8 +453,8 @@ class MapPageState extends State<MapPage> {
                             setState(() {
                               _positionStream?.cancel();
                               _polylines.clear();
-                              markers.clear();
-                              fetchListings();
+                              final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+                              updateMarkerVisibility(idList, true);
                             });
                           },
                           icon: const Icon(
