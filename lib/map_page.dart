@@ -27,6 +27,7 @@ class MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
+  String? distanceToDestination;
   StreamSubscription<Position>? _positionStream;
   LatLng? _currentLocation; // To store the user's current location
   LatLng? _destination; // To store the destination
@@ -361,6 +362,13 @@ class MapPageState extends State<MapPage> {
           width: 5,
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
         ));
+        final distanceMetres = result.totalDistanceValue;
+        if (distanceMetres! <= 999) {
+          distanceToDestination = '$distanceMetres m';
+        } else {
+          final distanceKilometres = (distanceMetres / 1000);
+          distanceToDestination = '$distanceKilometres km';
+        }
       });
     }
   }
@@ -418,6 +426,7 @@ class MapPageState extends State<MapPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     IconButton.filled(
                         onPressed: () {
@@ -426,7 +435,18 @@ class MapPageState extends State<MapPage> {
                         icon: const Icon(
                           Icons.filter_alt,
                           color: Color.fromRGBO(255, 255, 255, 1.0),
-                        ))
+                        )),
+                    if (distanceToDestination != null)
+                      ElevatedButton.icon(
+                          onPressed: () {
+                            _setMapFitToPolyline(_polylines);
+                          },
+                          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(204, 51, 51, 1)),
+                          icon: const Icon(Icons.directions, color: Color.fromRGBO(255, 255, 255, 1.0)),
+                          label: Text(
+                            distanceToDestination!,
+                            style: const TextStyle(fontSize: 28, color: Colors.white),
+                          ))
                   ],
                 ),
                 Row(
