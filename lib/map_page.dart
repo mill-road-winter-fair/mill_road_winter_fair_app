@@ -401,8 +401,8 @@ class MapPageState extends State<MapPage> {
             _controller = controller; // Assign the controller here
           },
           initialCameraPosition: const CameraPosition(
-            target: LatLng(52.199212, 0.139342),
-            zoom: 15,
+            target: LatLng(52.199174, 0.140929),
+            zoom: 14.3,
           ),
           markers: markers.values.toSet(),
           polylines: _polylines,
