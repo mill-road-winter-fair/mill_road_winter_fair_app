@@ -36,11 +36,11 @@ class MapPageState extends State<MapPage> {
   IconData _layersIcon = Icons.satellite_alt;
   // Declare default filters
   final Map<String, bool> filterSettings = {
-    'Vendor_Food': true,
-    'Vendor_Retail': true,
-    'Performer_*': true,
-    'Event_*': true,
-    'Service_*': true,
+    'Food': true,
+    'Shopping': true,
+    'Music': true,
+    'Events': true,
+    'Services': true,
   };
 
   @override
@@ -193,10 +193,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 110, 51, 1.0),
                       title: const Text("Food"),
-                      value: filterSettings["Vendor_Food"],
+                      value: filterSettings["Food"],
                       onChanged: (value) {
                         setState(() {
-                          filterSettings["Vendor_Food"] = value!;
+                          filterSettings["Food"] = value!;
                         });
                         final idList = foodMarkerIds;
                         updateMarkerVisibility(idList, value!);
@@ -205,10 +205,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 51, 51, 1.0),
                       title: const Text("Shopping"),
-                      value: filterSettings["Vendor_Retail"],
+                      value: filterSettings["Shopping"],
                       onChanged: (value) {
                         setState(() {
-                          filterSettings["Vendor_Retail"] = value!;
+                          filterSettings["Shopping"] = value!;
                         });
                         final idList = shoppingMarkerIds;
                         updateMarkerVisibility(idList, value!);
@@ -217,10 +217,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 51, 120, 1.0),
                       title: const Text("Music"),
-                      value: filterSettings["Performer_*"],
+                      value: filterSettings["Music"],
                       onChanged: (value) {
                         setState(() {
-                          filterSettings["Performer_*"] = value!;
+                          filterSettings["Music"] = value!;
                         });
                         final idList = musicMarkerIds;
                         updateMarkerVisibility(idList, value!);
@@ -229,10 +229,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(204, 161, 51, 1.0),
                       title: const Text("Events"),
-                      value: filterSettings["Event_*"],
+                      value: filterSettings["Events"],
                       onChanged: (value) {
                         setState(() {
-                          filterSettings["Event_*"] = value!;
+                          filterSettings["Events"] = value!;
                         });
                         final idList = eventMarkerIds;
                         updateMarkerVisibility(idList, value!);
@@ -241,10 +241,10 @@ class MapPageState extends State<MapPage> {
                     CheckboxListTile(
                       activeColor: const Color.fromRGBO(153, 0, 255, 1.0),
                       title: const Text("Services"),
-                      value: filterSettings["Service_*"],
+                      value: filterSettings["Services"],
                       onChanged: (value) {
                         setState(() {
-                          filterSettings["Service_*"] = value!;
+                          filterSettings["Services"] = value!;
                         });
                         final idList = serviceMarkerIds;
                         updateMarkerVisibility(idList, value!);
@@ -366,7 +366,7 @@ class MapPageState extends State<MapPage> {
         if (distanceMetres! <= 999) {
           distanceToDestination = '$distanceMetres m';
         } else {
-          final distanceKilometres = (distanceMetres / 1000);
+          final distanceKilometres = (distanceMetres / 1000).toStringAsFixed(2);
           distanceToDestination = '$distanceKilometres km';
         }
       });
@@ -402,117 +402,121 @@ class MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: GoogleMap(
-          mapType: mapType,
-          rotateGesturesEnabled: false,
-          compassEnabled: false,
-          myLocationEnabled: true,
-          myLocationButtonEnabled: true,
-          mapToolbarEnabled: false,
-          onMapCreated: (GoogleMapController controller) {
-            _controller = controller; // Assign the controller here
-          },
-          initialCameraPosition: const CameraPosition(
-            target: LatLng(52.199174, 0.140929),
-            zoom: 14.3,
-          ),
-          markers: markers.values.toSet(),
-          polylines: _polylines,
+      body: GoogleMap(
+        mapType: mapType,
+        rotateGesturesEnabled: false,
+        compassEnabled: false,
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
+        mapToolbarEnabled: false,
+        onMapCreated: (GoogleMapController controller) {
+          _controller = controller; // Assign the controller here
+        },
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(52.199174, 0.140929),
+          zoom: 14.3,
         ),
-        floatingActionButton: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 45, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton.filled(
-                            onPressed: () {
-                              showFilterMenu();
-                            },
-                            icon: const Icon(
-                              Icons.filter_alt,
-                              color: Color.fromRGBO(255, 255, 255, 1.0),
-                            )
+        markers: markers.values.toSet(),
+        polylines: _polylines,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
+      floatingActionButton: Container(
+        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 3),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      IconButton.filled(
+                        onPressed: () {
+                          showFilterMenu();
+                        },
+                        icon: const Icon(
+                          Icons.filter_alt,
+                          color: Color.fromRGBO(255, 255, 255, 1.0),
                         ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      IconButton.filled(
+                        onPressed: () {
+                          setState(() {
+                            if (mapType == MapType.normal) {
+                              mapType = MapType.satellite;
+                              _layersIcon = Icons.map;
+                            } else {
+                              mapType = MapType.normal;
+                              _layersIcon = Icons.satellite_alt;
+                            }
+                          });
+                        },
+                        icon: Icon(
+                          _layersIcon,
+                          color: const Color.fromRGBO(255, 255, 255, 1.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      if (_polylines.isNotEmpty)
                         IconButton.filled(
                             onPressed: () {
                               setState(() {
-                                if (mapType == MapType.normal) {
-                                  mapType = MapType.satellite;
-                                  _layersIcon = Icons.map;
-                                } else {
-                                  mapType = MapType.normal;
-                                  _layersIcon = Icons.satellite_alt;
-                                }
+                                _positionStream?.cancel();
+                                _polylines.clear();
+                                distanceToDestination = null;
+                                final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+                                updateMarkerVisibility(idList, true);
                               });
                             },
-                            icon: Icon(
-                              _layersIcon,
-                              color: const Color.fromRGBO(255, 255, 255, 1.0),
+                            icon: const Icon(
+                              Icons.wrong_location,
+                              color: Color.fromRGBO(255, 255, 255, 1.0),
                             ))
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_polylines.isNotEmpty)
-                          IconButton.filled(
-                              onPressed: () {
-                                setState(() {
-                                  _positionStream?.cancel();
-                                  _polylines.clear();
-                                  final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
-                                  updateMarkerVisibility(idList, true);
-                                });
-                              },
-                              icon: const Icon(
-                                Icons.wrong_location,
-                                color: Color.fromRGBO(255, 255, 255, 1.0),
-                              ))
-                      ],
-                    )
-                  ],
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (distanceToDestination != null)
-                          ElevatedButton.icon(
-                              onPressed: () {
-                                _setMapFitToPolyline(_polylines);
-                              },
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(204, 51, 51, 1)),
-                              icon: const Icon(Icons.directions, color: Color.fromRGBO(255, 255, 255, 1.0)),
-                              label: Text(
-                                distanceToDestination!,
-                                style: const TextStyle(fontSize: 28, color: Colors.white),
-                              )
-                          )
-                      ],
-                    ),
-                  ],
-                )
-              ],
-            )));
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 6,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (distanceToDestination != null)
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            _setMapFitToPolyline(_polylines);
+                          },
+                          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(204, 51, 51, 1)),
+                          icon: const Icon(Icons.directions, color: Color.fromRGBO(255, 255, 255, 1.0)),
+                          label: Text(
+                            distanceToDestination!,
+                            style: const TextStyle(fontSize: 28, color: Colors.white),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const Expanded(
+              flex: 2,
+              child: Column(), // Dummy column to help flex with centring distance button
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
