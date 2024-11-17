@@ -131,40 +131,44 @@ class HomePageState extends State<HomePage> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(color: Color.fromRGBO(204, 51, 51, 1)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Mill Road Winter Fair',
-                    style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
-                    },
-                    icon: const Icon(Icons.public),
-                    label: const Text('Visit our website'),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      final Uri mailUri = Uri(scheme: 'mailto', path: 'info@millroadwinterfair.org');
-                      if (await canLaunchUrl(mailUri)) {
-                      await launchUrl(mailUri);
-                      } else {
-                      throw Exception('Could not launch email client');
-                      }
-                    },
-                    icon: const Icon(Icons.email_outlined),
-                    label: const Text('Email us'),
-                  ),
-                ],
+            SizedBox(
+              height: 195,
+              child: DrawerHeader(
+                decoration: const BoxDecoration(color: Color.fromRGBO(204, 51, 51, 1)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Mill Road Winter Fair',
+                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                      },
+                      icon: const Icon(Icons.public),
+                      label: const Text('Visit our website'),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final Uri mailUri = Uri(scheme: 'mailto', path: 'info@millroadwinterfair.org');
+                        if (await canLaunchUrl(mailUri)) {
+                          await launchUrl(mailUri);
+                        } else {
+                          throw Exception('Could not launch email client');
+                        }
+                      },
+                      icon: const Icon(Icons.email_outlined),
+                      label: const Text('Email us'),
+                    ),
+                  ],
+                ),
               ),
             ),
             ListTile(
               tileColor: Colors.white,
-              title: const Text('About the Fair'),
+              title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mockito/annotations.dart';
-import 'package:mill_road_winter_fair_app/about_us.dart';
+import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mockito/mockito.dart';
@@ -41,16 +41,16 @@ void main() async {
     expect(find.text('Services'), findsOneWidget);
   });
 
-  testWidgets('HomePage navigates to AboutUsPage when About Us in drawer is tapped', (WidgetTester tester) async {
+  testWidgets('HomePage navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('About Us'));
+    await tester.tap(find.text('About the Fair'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(AboutUsPage), findsOneWidget);
+    expect(find.byType(AboutTheFairPage), findsOneWidget);
   });
 
   testWidgets('HomePage BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
