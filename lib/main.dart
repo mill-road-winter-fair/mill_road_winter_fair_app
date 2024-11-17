@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mill_road_winter_fair_app/about_us.dart';
+import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
@@ -164,10 +164,10 @@ class HomePageState extends State<HomePage> {
             ),
             ListTile(
               tileColor: Colors.white,
-              title: const Text('About Us'),
+              title: const Text('About the Fair'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutUsPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
               },
             ),
           ],

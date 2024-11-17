@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class AboutUsPage extends StatelessWidget {
-  const AboutUsPage({super.key});
+class AboutTheFairPage extends StatelessWidget {
+  const AboutTheFairPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("About Us")),
+      appBar: AppBar(title: const Text("About Mill Road Winter Fair")),
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: Column(
