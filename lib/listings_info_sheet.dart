@@ -6,6 +6,7 @@ class ListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;
   final String openingTimes;
+  final String approxDistance;
   final String phoneNumber;
   final String website;
   final Function onGetDirections;
@@ -14,6 +15,7 @@ class ListingInfoSheet extends StatelessWidget {
     required this.title,
     required this.categories,
     required this.openingTimes,
+    required this.approxDistance,
     required this.phoneNumber,
     required this.website,
     required this.onGetDirections,
@@ -33,8 +35,7 @@ class ListingInfoSheet extends StatelessWidget {
             children: [
               Text(
                 title,
-                style:
-                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Text(
                 openingTimes,
@@ -43,7 +44,24 @@ class ListingInfoSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(categories),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  flex: 5,
+                  child: Text(categories)
+              ),
+              if (approxDistance.isNotEmpty)
+                Expanded(
+                  flex: 5,
+                  child: Text(
+                    approxDistance,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 8),
           if (phoneNumber.isNotEmpty)
             GestureDetector(

@@ -5,6 +5,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
@@ -29,7 +30,6 @@ class MapPageState extends State<MapPage> {
   late PolylinePoints polylinePoints; // For decoding points
   String? distanceToDestination;
   StreamSubscription<Position>? _positionStream;
-  LatLng? _currentLocation; // To store the user's current location
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller; // Declare _controller here
   MapType mapType = MapType.normal;
@@ -47,6 +47,7 @@ class MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
     polylinePoints = PolylinePoints();
+    establishLocation();
     fetchListings();
   }
 
@@ -98,7 +99,7 @@ class MapPageState extends State<MapPage> {
       serviceMarkerIds.add(MarkerId(listing['id'].toString()));
     }
 
-    LatLng destinationCoordinates = stringToLatLng(listing['latLng']);
+    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
 
     MarkerId markerId = MarkerId(listing['id'].toString());
 
@@ -106,10 +107,12 @@ class MapPageState extends State<MapPage> {
 
     Marker newMarker = Marker(
       markerId: markerId,
-      position: destinationCoordinates,
+      position: destinationLatLng,
       icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
       visible: true,
       onTap: () {
+        // Update user's location
+        establishLocation();
         // Show bottom sheet with listing information
         showModalBottomSheet(
           context: context,
@@ -118,9 +121,10 @@ class MapPageState extends State<MapPage> {
               title: listing['displayName'],
               categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
               openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
+              approxDistance: asTheCrowFlies(currentLatLng!, destinationLatLng),
               phoneNumber: listing['phone'],
               website: listing['website'],
-              onGetDirections: () => getDirections(listing['id'], destinationCoordinates),
+              onGetDirections: () => getDirections(listing['id'], destinationLatLng),
             );
           },
         );
@@ -298,9 +302,9 @@ class MapPageState extends State<MapPage> {
     });
 
     // Get the user's current location
-    Position position = await getCurrentLocation();
-    LatLng origin = LatLng(position.latitude, position.longitude);
-    await updatePolyline(origin, destination);
+    Position position = await getCurrentPosition();
+    LatLng currentLatLng = LatLng(position.latitude, position.longitude);
+    await updatePolyline(currentLatLng, destination);
     // Set the camera position once, at the beginning of the navigation
     _setMapFitToPolyline(_polylines);
 
@@ -330,11 +334,11 @@ class MapPageState extends State<MapPage> {
       locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
     ).listen((Position position) async {
       // Update the user's current location
-      _currentLocation = LatLng(position.latitude, position.longitude);
+      currentLatLng = LatLng(position.latitude, position.longitude);
 
       // If a destination is set, get new directions and update the polyline
       if (_destination != null) {
-        await updatePolyline(_currentLocation!, _destination!);
+        await updatePolyline(currentLatLng!, _destination!);
       }
     });
   }

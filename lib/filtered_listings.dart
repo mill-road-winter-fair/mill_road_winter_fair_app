@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
+import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
@@ -53,19 +55,20 @@ class FilteredListingsPage extends StatelessWidget {
             itemCount: listings.length,
             itemBuilder: (context, index) {
               final listing = listings[index];
-              LatLng destinationCoordinates = stringToLatLng(listing['latLng']);
+              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
               return ListingInfoSheet(
                 title: listing['displayName'],
                 categories:
                 listing['secondaryType'] + ' • ' + listing['tertiaryType'],
                 openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
+                approxDistance: asTheCrowFlies(currentLatLng!, destinationLatLng),
                 phoneNumber: listing['phone'],
                 website: listing['website'],
                 onGetDirections: () => {
                   if (homePageState != null)
                     {
                       homePageState
-                          .navigateToMapAndGetDirections(listing['id'], destinationCoordinates, http.Client()),
+                          .navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
                     }
                 },
               );
