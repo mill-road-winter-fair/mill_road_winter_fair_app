@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
+import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 
@@ -106,6 +107,9 @@ void main() async {
   });
 
   testWidgets('Adds marker, opens modal bottom sheet, and checks content', (WidgetTester tester) async {
+    // Override user location global
+    currentLatLng = const LatLng(52.199174, 0.140929);
+
     // Define a test listing
     final listing = {
       "displayName": "Glazed and Confused",
@@ -141,6 +145,7 @@ void main() async {
     expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(find.text('Food • Doughnuts'), findsOneWidget);
     expect(find.text('10:30 - 16:30'), findsOneWidget);
+    expect(find.text('approx. 206 m'), findsOneWidget);
     expect(find.byIcon(Icons.directions), findsOneWidget);
     expect(find.byIcon(Icons.public), findsOneWidget);
   });
