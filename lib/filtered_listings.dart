@@ -37,6 +37,18 @@ class FilteredListingsPage extends StatelessWidget {
     }
   }
 
+  // Helper method to extract numeric distance from a string
+  double _extractNumericDistance(String distance) {
+    // Remove 'approx.' and unit (m or km) from the string and parse the number
+    if (distance.contains(' km')) {
+      // Regex for kilometres (floating point)
+      return double.parse(distance.replaceAll(RegExp(r'(approx\.\s)|([^\d.])'), '')) * 1000;
+    } else {
+      // Regex for metres (integer)
+      return double.parse(distance.replaceAll(RegExp(r'[^0-9]'), ''));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -44,24 +56,42 @@ class FilteredListingsPage extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+
         } else if (snapshot.hasError) {
           return const Center(child: Text("Error fetching listings"));
+
         } else {
           final listings = snapshot.data as List;
+
           final homePageState = context.findAncestorStateOfType<HomePageState>();
+
+          // Sort listings by approximate distance
+          final sortedListings = listings.map((listing) {
+            LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+            final distance = asTheCrowFlies(currentLatLng!, destinationLatLng);
+            return {...listing, 'approximateDistance': distance};
+          }).toList();
+
+          sortedListings.sort((a, b) {
+            // Extract the numeric value from the "approximateDistance" strings
+            double distanceA = _extractNumericDistance(a['approximateDistance']);
+            double distanceB = _extractNumericDistance(b['approximateDistance']);
+            return distanceA.compareTo(distanceB);
+          });
+
           return ListView.separated(
             padding: const EdgeInsets.all(8),
             separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-            itemCount: listings.length,
+            itemCount: sortedListings.length,
             itemBuilder: (context, index) {
-              final listing = listings[index];
+              final listing = sortedListings[index];
               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
               return ListingInfoSheet(
                 title: listing['displayName'],
                 categories:
                 listing['secondaryType'] + ' • ' + listing['tertiaryType'],
                 openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-                approxDistance: asTheCrowFlies(currentLatLng!, destinationLatLng),
+                approxDistance: listing['approximateDistance'],
                 phoneNumber: listing['phone'],
                 website: listing['website'],
                 onGetDirections: () => {
