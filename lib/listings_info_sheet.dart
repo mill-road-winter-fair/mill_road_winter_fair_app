@@ -24,7 +24,7 @@ class ListingInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -33,13 +33,20 @@ class ListingInfoSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Expanded(
+                flex: 7,
+                child: Text(
+                  title,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-              Text(
-                openingTimes,
-                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  openingTimes,
+                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  textAlign: TextAlign.end,
+                ),
               ),
             ],
           ),
