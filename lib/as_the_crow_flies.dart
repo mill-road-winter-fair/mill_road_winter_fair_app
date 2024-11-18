@@ -1,7 +1,13 @@
 import 'dart:math' as math;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-String asTheCrowFlies(LatLng origin, LatLng destination) {
+String asTheCrowFlies(LatLng? origin, LatLng destination) {
+
+  // If the user has location tracking disabled we need to return nothing here.
+  if (origin == null) {
+    return "";
+  }
+
   // Constant value for converting degrees to radians (π/180)
   const p = 0.017453292519943295;
   // Alias for the cosine function for easier usage in the formula

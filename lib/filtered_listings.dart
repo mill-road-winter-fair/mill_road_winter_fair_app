@@ -27,9 +27,7 @@ class FilteredListingsPage extends StatelessWidget {
       final allListings = json.decode(response.body) as List;
 
       // Filter the listings based on the primaryType
-      final filteredListings = allListings
-          .where((listing) => listing['primaryType'] == primaryType)
-          .toList();
+      final filteredListings = allListings.where((listing) => listing['primaryType'] == primaryType).toList();
 
       return filteredListings;
     } else {
@@ -56,10 +54,8 @@ class FilteredListingsPage extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-
         } else if (snapshot.hasError) {
           return const Center(child: Text("Error fetching listings"));
-
         } else {
           final listings = snapshot.data as List;
 
@@ -68,16 +64,18 @@ class FilteredListingsPage extends StatelessWidget {
           // Sort listings by approximate distance
           final sortedListings = listings.map((listing) {
             LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-            final distance = asTheCrowFlies(currentLatLng!, destinationLatLng);
+            final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
             return {...listing, 'approximateDistance': distance};
           }).toList();
 
-          sortedListings.sort((a, b) {
-            // Extract the numeric value from the "approximateDistance" strings
-            double distanceA = _extractNumericDistance(a['approximateDistance']);
-            double distanceB = _extractNumericDistance(b['approximateDistance']);
-            return distanceA.compareTo(distanceB);
-          });
+          if (currentLatLng != null) {
+            sortedListings.sort((a, b) {
+              // Extract the numeric value from the "approximateDistance" strings
+              double distanceA = _extractNumericDistance(a['approximateDistance']);
+              double distanceB = _extractNumericDistance(b['approximateDistance']);
+              return distanceA.compareTo(distanceB);
+            });
+          }
 
           return ListView.separated(
             padding: const EdgeInsets.all(8),
@@ -88,8 +86,7 @@ class FilteredListingsPage extends StatelessWidget {
               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
               return ListingInfoSheet(
                 title: listing['displayName'],
-                categories:
-                listing['secondaryType'] + ' • ' + listing['tertiaryType'],
+                categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
                 openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
                 approxDistance: listing['approximateDistance'],
                 phoneNumber: listing['phone'],
@@ -97,8 +94,7 @@ class FilteredListingsPage extends StatelessWidget {
                 onGetDirections: () => {
                   if (homePageState != null)
                     {
-                      homePageState
-                          .navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
+                      homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
                     }
                 },
               );

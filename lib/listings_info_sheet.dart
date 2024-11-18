@@ -51,7 +51,7 @@ class ListingInfoSheet extends StatelessWidget {
                   flex: 5,
                   child: Text(categories)
               ),
-              if (approxDistance.isNotEmpty)
+              if (approxDistance != "")
                 Expanded(
                   flex: 5,
                   child: Text(
