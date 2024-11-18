@@ -1,13 +1,11 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 
 @GenerateMocks([http.Client])
 import 'map_page_test.mocks.dart';
@@ -62,32 +60,13 @@ void main() async {
       "id": 1,
       "name": "glazedandconfused",
       "phone": "01223 111111",
-      "plusCode": "9F4254XQ+VG",
+      "latLng": "52.199687,0.138813",
       "primaryType": "Food",
       "secondaryType": "Food",
       "startTime": "10:30",
       "tertiaryType": "Doughnuts",
       "website": "https://www.glazedandconfused.com"
     };
-
-    // Define mock values
-    const plusCode = '9F4254XQ+VG';
-    final encodedPlusCode = Uri.encodeComponent(plusCode);
-    final url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
-    const lat = 52.199687;
-    const lng = 0.138813;
-    final responseBody = {
-      "results": [
-        {
-          "geometry": {
-            "location": {"lat": lat, "lng": lng}
-          }
-        }
-      ]
-    };
-
-    // Specify when to mock
-    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     // Build the widget and trigger the state
     await tester.pumpWidget(
@@ -103,7 +82,7 @@ void main() async {
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
     // Configure the map marker filter and add the marker
-    mapPageState.filterSettings["Vendor_Food"] = true;
+    mapPageState.filterSettings["Food"] = true;
     await mapPageState.addMarker(listing, mockClient);
 
     // Verify that the expected marker was added
@@ -135,32 +114,13 @@ void main() async {
       "id": 1,
       "name": "glazedandconfused",
       "phone": "01223 111111",
-      "plusCode": "9F4254XQ+VG",
+      "latLng": "52.199687,0.138813",
       "primaryType": "Food",
       "secondaryType": "Food",
       "startTime": "10:30",
       "tertiaryType": "Doughnuts",
       "website": "https://www.glazedandconfused.com"
     };
-
-    // Define mock values
-    const plusCode = '9F4254XQ+VG';
-    final encodedPlusCode = Uri.encodeComponent(plusCode);
-    final url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
-    const lat = 52.199687;
-    const lng = 0.138813;
-    final responseBody = {
-      "results": [
-        {
-          "geometry": {
-            "location": {"lat": lat, "lng": lng}
-          }
-        }
-      ]
-    };
-
-    // Specify when to mock
-    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     await tester.pumpWidget(const MaterialApp(home: MapPage()));
 
@@ -206,31 +166,13 @@ void main() async {
       "id": 1,
       "name": "glazedandconfused",
       "phone": "01223 111111",
-      "plusCode": "9F4254XQ+VG",
+      "latLng": "52.199687,0.138813",
       "primaryType": "Food",
       "secondaryType": "Food",
       "startTime": "10:30",
       "tertiaryType": "Doughnuts",
       "website": "https://www.glazedandconfused.com"
     };
-    // Define mock values
-    var plusCode = '9F4254XQ+VG';
-    var encodedPlusCode = Uri.encodeComponent(plusCode);
-    var url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
-    var lat = 52.199687;
-    var lng = 0.138813;
-    var responseBody = {
-      "results": [
-        {
-          "geometry": {
-            "location": {"lat": lat, "lng": lng}
-          }
-        }
-      ]
-    };
-
-    // Specify when to mock
-    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     // Add a marker
     await mapPageState.addMarker(listing, mockClient);
@@ -243,31 +185,13 @@ void main() async {
       "id": 2,
       "name": "thecraftycanvas",
       "phone": "01223 222222",
-      "plusCode": "9F42642J+QQ9",
+      "latLng": "52.201913,0.131984",
       "primaryType": "Shopping",
       "secondaryType": "Retail",
       "startTime": "10:30",
       "tertiaryType": "Crafts",
       "website": "https://www.craftycanvas.com"
     };
-    // Define mock values
-    plusCode = '9F42642J+QQ9';
-    encodedPlusCode = Uri.encodeComponent(plusCode);
-    url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
-    lat = 52.199687;
-    lng = 0.138813;
-    responseBody = {
-      "results": [
-        {
-          "geometry": {
-            "location": {"lat": lat, "lng": lng}
-          }
-        }
-      ]
-    };
-
-    // Specify when to mock
-    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     // Add a marker
     await mapPageState.addMarker(listing, mockClient);
@@ -280,31 +204,13 @@ void main() async {
       "id": 3,
       "name": "thejazzjunction",
       "phone": "01223 333333",
-      "plusCode": "9F42642J+VG2",
+      "latLng": "52.202188,0.131312",
       "primaryType": "Music",
       "secondaryType": "Music",
       "startTime": "10:30",
       "tertiaryType": "Jazz",
       "website": "https://www.jazzjunction.com"
     };
-    // Define mock values
-    plusCode = '9F42642J+VG2';
-    encodedPlusCode = Uri.encodeComponent(plusCode);
-    url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
-    lat = 52.199687;
-    lng = 0.138813;
-    responseBody = {
-      "results": [
-        {
-          "geometry": {
-            "location": {"lat": lat, "lng": lng}
-          }
-        }
-      ]
-    };
-
-    // Specify when to mock
-    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     // Add a marker
     await mapPageState.addMarker(listing, mockClient);
@@ -317,31 +223,13 @@ void main() async {
       "id": 4,
       "name": "santa1",
       "phone": "",
-      "plusCode": "9F42643J+CXW",
+      "latLng": "52.203563,0.132437",
       "primaryType": "Event",
       "secondaryType": "Performance",
       "startTime": "10:30",
       "tertiaryType": "Kindly Elf",
       "website": ""
     };
-    // Define mock values
-    plusCode = '9F42643J+CXW';
-    encodedPlusCode = Uri.encodeComponent(plusCode);
-    url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
-    lat = 52.199687;
-    lng = 0.138813;
-    responseBody = {
-      "results": [
-        {
-          "geometry": {
-            "location": {"lat": lat, "lng": lng}
-          }
-        }
-      ]
-    };
-
-    // Specify when to mock
-    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     // Add a marker
     await mapPageState.addMarker(listing, mockClient);
@@ -354,31 +242,13 @@ void main() async {
       "id": 5,
       "name": "informationpoint1",
       "phone": "",
-      "plusCode": "9F42642P+3WV",
+      "latLng": "52.200187,0.137313",
       "primaryType": "Service",
       "secondaryType": "Information",
       "startTime": "10:30",
       "tertiaryType": "Help Point",
       "website": ""
     };
-    // Define mock values
-    plusCode = '9F42642P+3WV';
-    encodedPlusCode = Uri.encodeComponent(plusCode);
-    url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
-    lat = 52.199687;
-    lng = 0.138813;
-    responseBody = {
-      "results": [
-        {
-          "geometry": {
-            "location": {"lat": lat, "lng": lng}
-          }
-        }
-      ]
-    };
-
-    // Specify when to mock
-    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     // Add a marker
     await mapPageState.addMarker(listing, mockClient);
