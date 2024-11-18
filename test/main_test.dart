@@ -1,13 +1,13 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 
 @GenerateMocks([http.Client])
 import 'main_test.mocks.dart';
@@ -98,32 +98,13 @@ void main() async {
       "id": 1,
       "name": "glazedandconfused",
       "phone": "01223 111111",
-      "plusCode": "9F4254XQ+VG",
+      "latLng": "52.199687,0.138813",
       "primaryType": "Food",
       "secondaryType": "Food",
       "startTime": "10:30",
       "tertiaryType": "Doughnuts",
       "website": "https://www.glazedandconfused.com"
     };
-
-    // Define mock values
-    const plusCode = '9F4254XQ+VG';
-    final encodedPlusCode = Uri.encodeComponent(plusCode);
-    final url = 'https://maps.googleapis.com/maps/api/geocode/json?address=$encodedPlusCode&key=$googleApiKey';
-    const lat = 52.199687;
-    const lng = 0.138813;
-    final responseBody = {
-      "results": [
-        {
-          "geometry": {
-            "location": {"lat": lat, "lng": lng}
-          }
-        }
-      ]
-    };
-
-    // Specify when to mock
-    when(mockClient.get(Uri.parse(url))).thenAnswer((_) async => http.Response(jsonEncode(responseBody), 200));
 
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
@@ -133,15 +114,18 @@ void main() async {
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
     // Configure the map marker filter and add the marker
-    mapPageState.filterSettings["Vendor_Food"] = true;
+    mapPageState.filterSettings["Food"] = true;
     await mapPageState.addMarker(listing, mockClient);
 
     await tester.tap(find.text('Food'));
     await tester.pumpAndSettle();
     expect(homePageState.currentIndex, 1);
 
+    // Convert String to LatLng
+    LatLng destinationCoordinates = stringToLatLng("52.199687,0.138813");
+
     // Trigger the navigation to map and fetch directions
-    await homePageState.navigateToMapAndGetDirections(1, plusCode, mockClient);
+    await homePageState.navigateToMapAndGetDirections(1, destinationCoordinates, mockClient);
 
     expect(homePageState.currentIndex, 0);
   });

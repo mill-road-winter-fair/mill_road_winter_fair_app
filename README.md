@@ -40,9 +40,8 @@ GOOGLE_MAPS_API_KEY=\\Google Maps Platform API key
 10. You should now have everything you need to run the app locally.
 
 ## Google Cloud Platform
-The app currently uses the the Google Maps Platform within GCP in order to access two APIs:
-1. Geocoding API (To converts Google Maps Plus Codes into Lat/Long coordinates.)
-2. Maps SDK for Android (To render the interactive map on the app's homepage.)
+The app currently uses the the Google Maps Platform within GCP in order to access the following API(s):
+1. Maps SDK for Android (To render the interactive map on the app's homepage.)
 
 ## Other Links
 - [Mill Road Winter Fair App DB & API](https://github.com/MarauderOne/mill_road_winter_fair_app_db_api) (the app's "backend")

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
-import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
 
 //Initialize API Key variables
 late String googleApiKey;
@@ -73,16 +72,12 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int get currentIndex => globalIndex;
 
-  Future<void> navigateToMapAndGetDirections(int id, String plusCode, http.Client client) async {
+  Future<void> navigateToMapAndGetDirections(int id, LatLng destinationCoordinates, http.Client client) async {
     setState(() {
       globalIndex = 0;
     });
 
-    LatLng? coordinates = await getCoordinatesFromPlusCode(plusCode, googleApiKey, client);
-
-    if (coordinates != null) {
-      mapPageKey.currentState?.getDirections(id, coordinates);
-    }
+    mapPageKey.currentState?.getDirections(id, destinationCoordinates);
   }
 
   @override

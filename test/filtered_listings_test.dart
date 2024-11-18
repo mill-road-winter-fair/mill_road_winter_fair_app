@@ -1,12 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 @GenerateMocks([http.Client])
 import 'filtered_listings_test.mocks.dart';
@@ -57,7 +57,7 @@ void main() async {
         'endTime': '16:30',
         'id': 1,
         'phone': '01223 111111',
-        'plusCode': '9F4254XQ+VG',
+        'latLng': '52.199687,0.138813',
         'primaryType': 'Food',
         'secondaryType': 'Food',
         'startTime': '10:30',
@@ -69,7 +69,7 @@ void main() async {
         'endTime': '16:30',
         'id': 1,
         'phone': '01223 222222',
-        'plusCode': '9F42642Q+2P2',
+        'latLng': '52.200063,0.139313',
         'primaryType': 'Food',
         'secondaryType': 'Food',
         'startTime': '12:00',

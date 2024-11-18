@@ -1,14 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:async'; // For StreamSubscription
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/plus_code_handlers.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -98,40 +98,38 @@ class MapPageState extends State<MapPage> {
       serviceMarkerIds.add(MarkerId(listing['id'].toString()));
     }
 
-    LatLng? coordinates = await getCoordinatesFromPlusCode(listing['plusCode'], googleApiKey, client);
+    LatLng destinationCoordinates = stringToLatLng(listing['latLng']);
 
     MarkerId markerId = MarkerId(listing['id'].toString());
 
-    if (coordinates != null) {
-      double hue = getMarkerColorHue(listing['primaryType']);
+    double hue = getMarkerColorHue(listing['primaryType']);
 
-      Marker newMarker = Marker(
-        markerId: markerId,
-        position: coordinates,
-        icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
-        visible: true,
-        onTap: () {
-          // Show bottom sheet with listing information
-          showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) {
-              return ListingInfoSheet(
-                title: listing['displayName'],
-                categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
-                openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-                phoneNumber: listing['phone'],
-                website: listing['website'],
-                onGetDirections: () => getDirections(listing['id'], coordinates),
-              );
-            },
-          );
-        },
-      );
+    Marker newMarker = Marker(
+      markerId: markerId,
+      position: destinationCoordinates,
+      icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
+      visible: true,
+      onTap: () {
+        // Show bottom sheet with listing information
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return ListingInfoSheet(
+              title: listing['displayName'],
+              categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
+              openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
+              phoneNumber: listing['phone'],
+              website: listing['website'],
+              onGetDirections: () => getDirections(listing['id'], destinationCoordinates),
+            );
+          },
+        );
+      },
+    );
 
-      setState(() {
-        markers[markerId] = newMarker;
-      });
-    }
+    setState(() {
+      markers[markerId] = newMarker;
+    });
   }
 
   double getMarkerColorHue(String primaryType) {
