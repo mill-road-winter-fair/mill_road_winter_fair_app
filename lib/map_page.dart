@@ -28,6 +28,7 @@ class MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
+  bool navigationInProgress = false;
   String? distanceToDestination;
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
@@ -301,21 +302,27 @@ class MapPageState extends State<MapPage> {
       updateMarkerVisibility(idList, false); // Hide any existing markers
     });
 
-    // Get the user's current location
-    Position position = await getCurrentPosition();
-    LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-    await updatePolyline(currentLatLng, destination);
-    // Set the camera position once, at the beginning of the navigation
-    _setMapFitToPolyline(_polylines);
+    // If user has location tracking enabled
+    if (currentLatLng != null) {
+      // Get the user's current location
+      Position position = await getCurrentPosition();
+      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
+      await updatePolyline(currentLatLng, destination);
+      // Set the camera position once, at the beginning of the navigation
+      _setMapFitToPolyline(_polylines);
 
-    // Start location updates
-    await startLocationUpdates(destination);
+      // Start location updates
+      await startLocationUpdates(destination);
+    }
 
     // Re-add destination marker
     MarkerId markerId = MarkerId(id.toString());
     List<MarkerId> destinationMarkerIds = [];
     destinationMarkerIds.add(markerId);
     updateMarkerVisibility(destinationMarkerIds, true);
+
+    // Set navigation as in progress
+    navigationInProgress = true;
   }
 
   @override
@@ -467,7 +474,7 @@ class MapPageState extends State<MapPage> {
                   ),
                   Row(
                     children: [
-                      if (_polylines.isNotEmpty)
+                      if (navigationInProgress == true)
                         IconButton.filled(
                             onPressed: () {
                               setState(() {
@@ -476,6 +483,7 @@ class MapPageState extends State<MapPage> {
                                 distanceToDestination = null;
                                 final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
                                 updateMarkerVisibility(idList, true);
+                                navigationInProgress = false;
                               });
                             },
                             icon: const Icon(
