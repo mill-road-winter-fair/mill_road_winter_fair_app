@@ -1,7 +1,16 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Initialise the user's current location at the global level as it needs to be used by the filtered listings page as well as the map page
+LatLng? currentLatLng;
+
+Future<void> establishLocation() async {
+  Position position = await getCurrentPosition();
+  currentLatLng = LatLng(position.latitude, position.longitude);
+}
 
 // Helper function to get the current location
-Future<Position> getCurrentLocation() async {
+Future<Position> getCurrentPosition() async {
   bool serviceEnabled;
   LocationPermission permission;
 

@@ -6,6 +6,7 @@ class ListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;
   final String openingTimes;
+  final String approxDistance;
   final String phoneNumber;
   final String website;
   final Function onGetDirections;
@@ -14,6 +15,7 @@ class ListingInfoSheet extends StatelessWidget {
     required this.title,
     required this.categories,
     required this.openingTimes,
+    required this.approxDistance,
     required this.phoneNumber,
     required this.website,
     required this.onGetDirections,
@@ -22,7 +24,7 @@ class ListingInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -31,19 +33,42 @@ class ListingInfoSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style:
-                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Expanded(
+                flex: 7,
+                child: Text(
+                  title,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-              Text(
-                openingTimes,
-                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  openingTimes,
+                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  textAlign: TextAlign.end,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(categories),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                  flex: 5,
+                  child: Text(categories)
+              ),
+              if (approxDistance != "")
+                Expanded(
+                  flex: 5,
+                  child: Text(
+                    approxDistance,
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 8),
           if (phoneNumber.isNotEmpty)
             GestureDetector(

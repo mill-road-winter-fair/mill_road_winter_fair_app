@@ -7,6 +7,8 @@ import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 
+import 'get_current_location.dart';
+
 //Initialize API Key variables
 late String googleApiKey;
 late String mrwfApi;
@@ -108,6 +110,8 @@ class HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: globalIndex,
         onTap: (index) {
+          // Update the user's location
+          establishLocation();
           setState(() {
             globalIndex = index;
           });
