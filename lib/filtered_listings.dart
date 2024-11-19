@@ -76,7 +76,7 @@ class FilteredListingsPage extends StatelessWidget {
                 title: listing['displayName'],
                 categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
                 openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-                approxDistance: convertDistanceUnits(listing['approximateDistanceMetres'], "metric"),
+                approxDistance: 'approx. ${convertDistanceUnits(listing['approximateDistanceMetres'], "metric")}',
                 phoneNumber: listing['phone'],
                 website: listing['website'],
                 onGetDirections: () => {

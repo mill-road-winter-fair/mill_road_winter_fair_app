@@ -124,7 +124,7 @@ class MapPageState extends State<MapPage> {
               title: listing['displayName'],
               categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
               openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-              approxDistance: convertDistanceUnits(approximateDistanceMetres, "metric"),
+              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, "metric")}',
               phoneNumber: listing['phone'],
               website: listing['website'],
               onGetDirections: () => getDirections(listing['id'], destinationLatLng),
