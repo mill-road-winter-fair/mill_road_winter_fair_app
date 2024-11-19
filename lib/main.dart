@@ -2,30 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
-
-import 'get_current_location.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 //Initialize API Key variables
 late String googleApiKey;
 late String mrwfApi;
-
-Future<void> main() async {
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
-  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
-  mrwfApi = dotenv.env['MRWF_API'] ?? '';
-  runApp(const MyApp());
-}
 
 //Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
 //Set the default page number (0 is the map page)
 int globalIndex = 0;
+
+Future<void> main() async {
+  // Ensure all bindings are initialized before async calls
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+  mrwfApi = dotenv.env['MRWF_API'] ?? '';
+
+  // Load user preferences
+  await _loadSettings();
+
+  // Run the app
+  runApp(const MyApp());
+}
+
+// Load settings from SharedPreferences
+Future<void> _loadSettings() async {
+  final prefs = await SharedPreferences.getInstance();
+  int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
+  preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -171,6 +187,14 @@ class HomePageState extends State<HomePage> {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+              },
+            ),
+            ListTile(
+              tileColor: Colors.white,
+              title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
               },
             ),
           ],

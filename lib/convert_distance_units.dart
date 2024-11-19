@@ -1,7 +1,9 @@
-String convertDistanceUnits(int distanceMetres, String preferredDistanceUnits) {
+import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceUnits) {
   String distanceToDestination = "Distance conversion error";
 
-  if (preferredDistanceUnits == "metric") {
+  if (preferredDistanceUnits == DistanceUnits.metric) {
 
     if (distanceMetres <= 999) {
       distanceToDestination = '$distanceMetres m';
@@ -10,7 +12,7 @@ String convertDistanceUnits(int distanceMetres, String preferredDistanceUnits) {
       distanceToDestination = '$distanceKilometresRounded km';
     }
 
-  } else if (preferredDistanceUnits == "imperial") {
+  } else if (preferredDistanceUnits == DistanceUnits.imperial) {
 
     if (distanceMetres <= 161) {
       final distanceFeetRounded = (distanceMetres * 3.28084).toStringAsFixed(0);

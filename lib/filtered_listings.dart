@@ -7,6 +7,7 @@ import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 
 class FilteredListingsPage extends StatelessWidget {
@@ -76,7 +77,7 @@ class FilteredListingsPage extends StatelessWidget {
                 title: listing['displayName'],
                 categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
                 openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-                approxDistance: 'approx. ${convertDistanceUnits(listing['approximateDistanceMetres'], "metric")}',
+                approxDistance: 'approx. ${convertDistanceUnits(listing['approximateDistanceMetres'], preferredDistanceUnits)}',
                 phoneNumber: listing['phone'],
                 website: listing['website'],
                 onGetDirections: () => {
