@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
@@ -13,6 +14,10 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 //Initialize API Key variables
 late String googleApiKey;
 late String mrwfApi;
+
+late String selectedThemeKey; // Currently selected theme key
+late ThemeData selectedTheme; // Currently selected theme
+late ValueNotifier<String> themeNotifier;
 
 //Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
@@ -29,24 +34,34 @@ Future<void> main() async {
   googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   mrwfApi = dotenv.env['MRWF_API'] ?? '';
 
-  // Load user preferences
-  await loadSettings();
+  // Load settings from SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+
+  int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
+  preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
+
+  selectedThemeKey = prefs.getString('selectedTheme') ?? 'light'; // Default to 'light'
+  selectedTheme = appThemes[selectedThemeKey]!;
+
+  // Create a ValueNotifier to hold the current theme
+  themeNotifier = ValueNotifier(selectedThemeKey);
 
   // Run the app
-  runApp(const MyApp());
+  runApp(MyApp(themeNotifier: themeNotifier));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ValueNotifier<String> themeNotifier;
+  const MyApp({super.key, required this.themeNotifier});
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
-      builder: (context, themeKey, _) {
+      builder: (context, selectedTheme, _) {
         return MaterialApp(
           title: 'Mill Road Winter Fair',
-          theme: appThemes[themeKey],
+          theme: appThemes[selectedTheme],
           home: const HomePage(),
         );
       },

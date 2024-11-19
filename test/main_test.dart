@@ -26,7 +26,7 @@ void main() async {
   });
 
   testWidgets('HomePage displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(themeNotifier: ValueNotifier('light')));
 
     expect(find.text('Mill Road Winter Fair'), findsOneWidget);
 
@@ -42,7 +42,7 @@ void main() async {
   });
 
   testWidgets('HomePage navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(themeNotifier: ValueNotifier('light')));
 
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
@@ -54,7 +54,7 @@ void main() async {
   });
 
   testWidgets('HomePage BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(themeNotifier: ValueNotifier('light')));
 
     await tester.tap(find.text('Food'));
     await tester.pumpAndSettle();
@@ -106,7 +106,7 @@ void main() async {
       "website": "https://www.glazedandconfused.com"
     };
 
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp(themeNotifier: ValueNotifier('light')));
     await tester.pumpAndSettle();
 
     // Obtain the state after mounting

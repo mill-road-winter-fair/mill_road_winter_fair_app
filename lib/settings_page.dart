@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mill_road_winter_fair_app/themes.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Define available distance units
@@ -7,17 +7,6 @@ enum DistanceUnits { metric, imperial }
 
 // Set default distance units
 DistanceUnits preferredDistanceUnits = DistanceUnits.metric;
-
-// Load settings from SharedPreferences
-Future<void> loadSettings() async {
-  final prefs = await SharedPreferences.getInstance();
-
-  int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
-  preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
-
-  selectedThemeKey = prefs.getString('selectedTheme') ?? 'light'; // Default to 'light'
-  selectedTheme = appThemes[selectedThemeKey]!;
-}
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -30,7 +19,6 @@ class SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    loadSettings();
   }
 
   // Save settings to shared preferences
