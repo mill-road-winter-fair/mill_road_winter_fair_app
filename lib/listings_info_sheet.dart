@@ -44,7 +44,7 @@ class ListingInfoSheet extends StatelessWidget {
                 flex: 3,
                 child: Text(
                   openingTimes,
-                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   textAlign: TextAlign.end,
                 ),
               ),
@@ -63,7 +63,7 @@ class ListingInfoSheet extends StatelessWidget {
                   flex: 5,
                   child: Text(
                     approxDistance,
-                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.end,
                   ),
                 ),

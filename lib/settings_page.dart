@@ -60,10 +60,11 @@ class SettingsPageState extends State<SettingsPage> {
               children: [
                 const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 RadioListTile(
+                  activeColor: Theme.of(context).colorScheme.tertiary,
                   title: const Text('Metric'),
                   subtitle: Text(
                     'Metres & Kilometres',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                   visualDensity: VisualDensity.compact,
                   value: DistanceUnits.metric,
@@ -76,10 +77,11 @@ class SettingsPageState extends State<SettingsPage> {
                   },
                 ),
                 RadioListTile(
+                  activeColor: Theme.of(context).colorScheme.tertiary,
                   title: const Text('Imperial'),
                   subtitle: Text(
                     'Feet & Miles',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                   visualDensity: VisualDensity.compact,
                   value: DistanceUnits.imperial,
@@ -98,6 +100,7 @@ class SettingsPageState extends State<SettingsPage> {
               children: [
                 const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 RadioListTile(
+                  activeColor: Theme.of(context).colorScheme.tertiary,
                   title: const Text('Light'),
                   visualDensity: VisualDensity.compact,
                   value: 'light',
@@ -111,9 +114,52 @@ class SettingsPageState extends State<SettingsPage> {
                   },
                 ),
                 RadioListTile(
+                  activeColor: Theme.of(context).colorScheme.tertiary,
                   title: const Text('Dark'),
                   visualDensity: VisualDensity.compact,
                   value: 'dark',
+                  groupValue: themeNotifier.value,
+                  onChanged: (value) {
+                    selectedThemeKey = value!;
+                    setState(() {
+                      _changeTheme(value);
+                    });
+                    _saveSettings();
+                  },
+                ),
+                RadioListTile(
+                  activeColor: Theme.of(context).colorScheme.tertiary,
+                  title: const Text('2024 Colour Scheme'),
+                  visualDensity: VisualDensity.compact,
+                  value: '2024',
+                  groupValue: themeNotifier.value,
+                  onChanged: (value) {
+                    setState(() {
+                      _changeTheme(value!);
+                    });
+                    selectedThemeKey = value!;
+                    _saveSettings();
+                  },
+                ),
+                RadioListTile(
+                  activeColor: Theme.of(context).colorScheme.tertiary,
+                  title: const Text('High Contrast'),
+                  visualDensity: VisualDensity.compact,
+                  value: 'highContrast',
+                  groupValue: themeNotifier.value,
+                  onChanged: (value) {
+                    setState(() {
+                      _changeTheme(value!);
+                    });
+                    selectedThemeKey = value!;
+                    _saveSettings();
+                  },
+                ),
+                RadioListTile(
+                  activeColor: Theme.of(context).colorScheme.tertiary,
+                  title: const Text('Colour Blind Friendly'),
+                  visualDensity: VisualDensity.compact,
+                  value: 'colourBlindFriendly',
                   groupValue: themeNotifier.value,
                   onChanged: (value) {
                     selectedThemeKey = value!;

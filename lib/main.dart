@@ -116,21 +116,20 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       drawer: Drawer(
-        backgroundColor: Colors.white,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             SizedBox(
               height: 195,
               child: DrawerHeader(
-                decoration: const BoxDecoration(color: Color.fromRGBO(204, 51, 51, 1)),
+                decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Mill Road Winter Fair',
-                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     ElevatedButton.icon(
                       onPressed: () {
@@ -156,7 +155,6 @@ class HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
-              tileColor: Colors.white,
               title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
@@ -164,7 +162,6 @@ class HomePageState extends State<HomePage> {
               },
             ),
             ListTile(
-              tileColor: Colors.white,
               title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
