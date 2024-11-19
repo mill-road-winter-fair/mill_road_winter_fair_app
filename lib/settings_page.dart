@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Define available distance units
@@ -6,6 +7,17 @@ enum DistanceUnits { metric, imperial }
 
 // Set default distance units
 DistanceUnits preferredDistanceUnits = DistanceUnits.metric;
+
+// Load settings from SharedPreferences
+Future<void> loadSettings() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
+  preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
+
+  selectedThemeKey = prefs.getString('selectedTheme') ?? 'light'; // Default to 'light'
+  selectedTheme = appThemes[selectedThemeKey]!;
+}
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -18,23 +30,18 @@ class SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    _loadSettings();
-  }
-
-  // Load settings from shared preferences
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      // Retrieve the saved enum index and convert it back to DistanceUnits
-      int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
-      preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
-    });
+    loadSettings();
   }
 
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
+    await prefs.setString('selectedTheme', themeNotifier.value);
+  }
+
+  Future<void> _changeTheme(String themeKey) async {
+    themeNotifier.value = themeKey;
   }
 
   @override
@@ -43,19 +50,21 @@ class SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: ListView.separated(
-        separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-        itemCount: 1,
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+      body: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 RadioListTile(
                   title: const Text('Metric'),
-                  subtitle: Text('Metres & Kilometres', style: TextStyle(fontSize: 14, color: Colors.grey[700]),),
+                  subtitle: Text(
+                    'Metres & Kilometres',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
                   visualDensity: VisualDensity.compact,
                   value: DistanceUnits.metric,
                   groupValue: preferredDistanceUnits,
@@ -68,7 +77,10 @@ class SettingsPageState extends State<SettingsPage> {
                 ),
                 RadioListTile(
                   title: const Text('Imperial'),
-                  subtitle: Text('Feet & Miles', style: TextStyle(fontSize: 14, color: Colors.grey[700]),),
+                  subtitle: Text(
+                    'Feet & Miles',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
                   visualDensity: VisualDensity.compact,
                   value: DistanceUnits.imperial,
                   groupValue: preferredDistanceUnits,
@@ -81,8 +93,40 @@ class SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
-          );
-        },
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                RadioListTile(
+                  title: const Text('Light'),
+                  visualDensity: VisualDensity.compact,
+                  value: 'light',
+                  groupValue: themeNotifier.value,
+                  onChanged: (value) {
+                    selectedThemeKey = value!;
+                    setState(() {
+                      _changeTheme(value);
+                    });
+                    _saveSettings();
+                  },
+                ),
+                RadioListTile(
+                  title: const Text('Dark'),
+                  visualDensity: VisualDensity.compact,
+                  value: 'dark',
+                  groupValue: themeNotifier.value,
+                  onChanged: (value) {
+                    selectedThemeKey = value!;
+                    setState(() {
+                      _changeTheme(value);
+                    });
+                    _saveSettings();
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

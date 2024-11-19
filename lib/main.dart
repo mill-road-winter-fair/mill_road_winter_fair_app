@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
@@ -30,17 +30,10 @@ Future<void> main() async {
   mrwfApi = dotenv.env['MRWF_API'] ?? '';
 
   // Load user preferences
-  await _loadSettings();
+  await loadSettings();
 
   // Run the app
   runApp(const MyApp());
-}
-
-// Load settings from SharedPreferences
-Future<void> _loadSettings() async {
-  final prefs = await SharedPreferences.getInstance();
-  int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
-  preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 }
 
 class MyApp extends StatelessWidget {
@@ -48,34 +41,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mill Road Winter Fair',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: const ColorScheme(
-          brightness: Brightness.light,
-          primary: Color.fromRGBO(204, 51, 51, 1),
-          onPrimary: Colors.black,
-          secondary: Colors.yellow,
-          onSecondary: Colors.black,
-          error: Colors.red,
-          onError: Colors.white,
-          surface: Colors.white,
-          onSurface: Colors.black,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color.fromRGBO(204, 51, 51, 1),
-          foregroundColor: Colors.white,
-        ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          selectedItemColor: Color.fromRGBO(204, 51, 51, 1),
-          unselectedItemColor: Colors.grey,
-        ),
-        drawerTheme: const DrawerThemeData(
-          backgroundColor: Color.fromRGBO(204, 51, 51, 1),
-        ),
-      ),
-      home: const HomePage(),
+    return ValueListenableBuilder<String>(
+      valueListenable: themeNotifier,
+      builder: (context, themeKey, _) {
+        return MaterialApp(
+          title: 'Mill Road Winter Fair',
+          theme: appThemes[themeKey],
+          home: const HomePage(),
+        );
+      },
     );
   }
 }
