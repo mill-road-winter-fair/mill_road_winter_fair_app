@@ -12,6 +12,10 @@ import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
+
+//Define a GlobalKey for MapPageState:
+final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -106,7 +110,8 @@ class MapPageState extends State<MapPage> {
 
     MarkerId markerId = MarkerId(listing['id'].toString());
 
-    double hue = getMarkerColorHue(listing['primaryType']);
+    Color color = getMarkerColor(selectedThemeKey, listing['primaryType']);
+    double hue = HSVColor.fromColor(color).hue;
 
     Marker newMarker = Marker(
       markerId: markerId,
@@ -140,35 +145,6 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  double getMarkerColorHue(String primaryType) {
-    if (primaryType == "Food") {
-      Color color = const Color.fromRGBO(204, 110, 51, 1.0);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    } else if (primaryType == "Shopping") {
-      Color color = const Color.fromRGBO(204, 51, 51, 1);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    } else if (primaryType == "Music") {
-      Color color = const Color.fromRGBO(204, 51, 120, 1.0);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    } else if (primaryType == "Event") {
-      Color color = const Color.fromRGBO(204, 161, 51, 1.0);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    } else if (primaryType == "Service") {
-      Color color = const Color.fromRGBO(153, 0, 255, 1.0);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    }
-
-    //Default colour
-    Color color = const Color.fromRGBO(255, 255, 255, 1.0);
-    double hue = HSVColor.fromColor(color).hue;
-    return hue;
-  }
-
   //The Remove All filters button seems to prefer using this function rather than doing it's own setState
   void clearAllMarkers() {
     setState(() {
@@ -197,7 +173,7 @@ class MapPageState extends State<MapPage> {
                       )
                     ]),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(204, 110, 51, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Food'),
                       title: const Text("Food"),
                       value: filterSettings["Food"],
                       onChanged: (value) {
@@ -209,7 +185,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(204, 51, 51, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Shopping'),
                       title: const Text("Shopping"),
                       value: filterSettings["Shopping"],
                       onChanged: (value) {
@@ -221,7 +197,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(204, 51, 120, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Music'),
                       title: const Text("Music"),
                       value: filterSettings["Music"],
                       onChanged: (value) {
@@ -233,7 +209,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(204, 161, 51, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Event'),
                       title: const Text("Events"),
                       value: filterSettings["Events"],
                       onChanged: (value) {
@@ -245,7 +221,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(153, 0, 255, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Service'),
                       title: const Text("Services"),
                       value: filterSettings["Services"],
                       onChanged: (value) {

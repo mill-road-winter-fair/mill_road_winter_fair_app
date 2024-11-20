@@ -139,3 +139,116 @@ final Map<String, ThemeData> appThemes = {
     ),
   ),
 };
+
+Color getMarkerColor(String selectedThemeKey, String primaryType) {
+  if (selectedThemeKey == "light") {
+    if (primaryType == "Food") {
+      Color color = const Color.fromRGBO(204, 110, 51, 1.0);
+      return color;
+    } else if (primaryType == "Shopping") {
+      Color color = const Color.fromRGBO(204, 51, 51, 1);
+      return color;
+    } else if (primaryType == "Music") {
+      Color color = const Color.fromRGBO(204, 51, 120, 1.0);
+      return color;
+    } else if (primaryType == "Event") {
+      Color color = const Color.fromRGBO(204, 161, 51, 1.0);
+      return color;
+    } else if (primaryType == "Service") {
+      Color color = const Color.fromRGBO(153, 0, 255, 1.0);
+      return color;
+    }
+
+    // Default colour for markers with no category
+    Color color = const Color.fromRGBO(0, 0, 0, 1.0);
+    return color;
+  } else if (selectedThemeKey == "dark") {
+    if (primaryType == "Food") {
+      Color color = const Color.fromRGBO(204, 110, 51, 1.0);
+      return color;
+    } else if (primaryType == "Shopping") {
+      Color color = const Color.fromRGBO(204, 51, 51, 1);
+      return color;
+    } else if (primaryType == "Music") {
+      Color color = const Color.fromRGBO(204, 51, 120, 1.0);
+      return color;
+    } else if (primaryType == "Event") {
+      Color color = const Color.fromRGBO(204, 161, 51, 1.0);
+      return color;
+    } else if (primaryType == "Service") {
+      Color color = const Color.fromRGBO(153, 0, 255, 1.0);
+      return color;
+    }
+
+    // Default colour for markers with no category
+    Color color = const Color.fromRGBO(0, 0, 0, 1.0);
+    return color;
+  } else if (selectedThemeKey == "2024") {
+    if (primaryType == "Food") {
+      Color color = const Color.fromRGBO(204, 110, 51, 1.0);
+      return color;
+    } else if (primaryType == "Shopping") {
+      Color color = const Color.fromRGBO(204, 51, 51, 1);
+      return color;
+    } else if (primaryType == "Music") {
+      Color color = const Color.fromRGBO(163, 163, 163, 1.0);
+      return color;
+    } else if (primaryType == "Event") {
+      Color color = const Color.fromRGBO(204, 161, 51, 1.0);
+      return color;
+    } else if (primaryType == "Service") {
+      Color color = const Color.fromRGBO(37, 63, 128, 1.0);
+      return color;
+    }
+
+    // Default colour for markers with no category
+    Color color = const Color.fromRGBO(0, 0, 0, 1.0);
+    return color;
+  } else if (selectedThemeKey == "highContrast") {
+    if (primaryType == "Food") {
+      Color color = const Color.fromRGBO(255, 0, 0, 1.0);
+      return color;
+    } else if (primaryType == "Shopping") {
+      Color color = const Color.fromRGBO(8, 255, 0, 1.0);
+      return color;
+    } else if (primaryType == "Music") {
+      Color color = const Color.fromRGBO(230, 0, 255, 1.0);
+      return color;
+    } else if (primaryType == "Event") {
+      Color color = const Color.fromRGBO(255, 243, 0, 1.0);
+      return color;
+    } else if (primaryType == "Service") {
+      Color color = const Color.fromRGBO(0, 255, 244, 1.0);
+      return color;
+    }
+
+    // Default colour for markers with no category
+    Color color = const Color.fromRGBO(0, 0, 0, 1.0);
+    return color;
+  } else if (selectedThemeKey == "colourBlindFriendly") {
+    if (primaryType == "Food") {
+      Color color = const Color.fromRGBO(255, 100, 0, 1.0);
+      return color;
+    } else if (primaryType == "Shopping") {
+      Color color = const Color.fromRGBO(255, 0, 0, 1.0);
+      return color;
+    } else if (primaryType == "Music") {
+      Color color = const Color.fromRGBO(51, 204, 176, 1.0);
+      return color;
+    } else if (primaryType == "Event") {
+      Color color = const Color.fromRGBO(255, 196, 0, 1.0);
+      return color;
+    } else if (primaryType == "Service") {
+      Color color = const Color.fromRGBO(153, 0, 255, 1.0);
+      return color;
+    }
+
+    // Default colour for markers with no category
+    Color color = const Color.fromRGBO(255, 0, 0, 1.0);
+    return color;
+  } else {
+    // Default colour for markers with no theme and no category
+    Color color = const Color.fromRGBO(255, 0, 0, 1.0);
+    return color;
+  }
+}

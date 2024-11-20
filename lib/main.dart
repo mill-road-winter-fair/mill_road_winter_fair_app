@@ -15,9 +15,6 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 late String googleApiKey;
 late String mrwfApi;
 
-//Define a GlobalKey for MapPageState:
-final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
-
 //Set the default page number (0 is the map page)
 int globalIndex = 0;
 

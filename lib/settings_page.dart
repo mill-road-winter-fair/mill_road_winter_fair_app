@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 
 // Define available distance units
 enum DistanceUnits { metric, imperial }
@@ -103,6 +104,7 @@ class SettingsPageState extends State<SettingsPage> {
                       _changeTheme(value);
                     });
                     _saveSettings();
+                    mapPageKey.currentState?.fetchListings();
                   },
                 ),
                 RadioListTile(
@@ -117,6 +119,7 @@ class SettingsPageState extends State<SettingsPage> {
                       _changeTheme(value);
                     });
                     _saveSettings();
+                    mapPageKey.currentState?.fetchListings();
                   },
                 ),
                 RadioListTile(
@@ -131,6 +134,7 @@ class SettingsPageState extends State<SettingsPage> {
                     });
                     selectedThemeKey = value!;
                     _saveSettings();
+                    mapPageKey.currentState?.fetchListings();
                   },
                 ),
                 RadioListTile(
@@ -145,6 +149,7 @@ class SettingsPageState extends State<SettingsPage> {
                     });
                     selectedThemeKey = value!;
                     _saveSettings();
+                    mapPageKey.currentState?.fetchListings();
                   },
                 ),
                 RadioListTile(
@@ -159,6 +164,7 @@ class SettingsPageState extends State<SettingsPage> {
                       _changeTheme(value);
                     });
                     _saveSettings();
+                    mapPageKey.currentState?.fetchListings();
                   },
                 ),
               ],
