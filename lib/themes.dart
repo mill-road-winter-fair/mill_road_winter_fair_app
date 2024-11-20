@@ -135,7 +135,7 @@ final Map<String, ThemeData> appThemes = {
       unselectedItemColor: Colors.grey,
     ),
     drawerTheme: const DrawerThemeData(
-      backgroundColor: Color.fromRGBO(102, 55, 133, 1.0),
+      backgroundColor: Colors.white,
     ),
   ),
 };
