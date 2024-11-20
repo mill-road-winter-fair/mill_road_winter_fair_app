@@ -8,6 +8,11 @@ enum DistanceUnits { metric, imperial }
 // Set default distance units
 DistanceUnits preferredDistanceUnits = DistanceUnits.metric;
 
+// Initialise theme variables
+late String selectedThemeKey; // Currently selected theme key
+late ThemeData selectedTheme; // Currently selected theme
+late ValueNotifier<String> themeNotifier;
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 

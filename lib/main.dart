@@ -11,13 +11,9 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
-//Initialize API Key variables
+// Initialise API Key variables
 late String googleApiKey;
 late String mrwfApi;
-
-late String selectedThemeKey; // Currently selected theme key
-late ThemeData selectedTheme; // Currently selected theme
-late ValueNotifier<String> themeNotifier;
 
 //Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
