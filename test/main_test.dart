@@ -113,8 +113,11 @@ void main() async {
     final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
-    // Configure the map marker filter and add the marker
+    // Configure the map marker filter and theme
     mapPageState.filterSettings["Food"] = true;
+    mapPageState.selectedThemeKey = 'light';
+
+    // Add the marker
     await mapPageState.addMarker(listing, mockClient);
 
     await tester.tap(find.text('Food'));

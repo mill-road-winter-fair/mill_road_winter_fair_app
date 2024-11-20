@@ -26,6 +26,7 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late http.Client client;
+  late String selectedThemeKey;
   List<MarkerId> foodMarkerIds = [];
   List<MarkerId> shoppingMarkerIds = [];
   List<MarkerId> musicMarkerIds = [];
