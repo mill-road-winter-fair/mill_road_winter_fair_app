@@ -9,6 +9,7 @@ import 'package:mockito/mockito.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 @GenerateMocks([http.Client])
 import 'filtered_listings_test.mocks.dart';
@@ -85,6 +86,7 @@ void main() async {
     // Specify when to mock
     when(mockClient.get(Uri.parse('$mrwfApi/listings'))).thenAnswer((_) async => http.Response(jsonEncode(listings), 200));
 
+    await loadSettings(true);
     await pumpFilteredListingsPage(tester, 'Food');
 
     expect(find.text('Glazed and Confused'), findsOneWidget);

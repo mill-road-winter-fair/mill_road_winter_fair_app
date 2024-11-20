@@ -7,6 +7,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 @GenerateMocks([http.Client])
@@ -71,6 +72,7 @@ void main() async {
     };
 
     // Build the widget and trigger the state
+    await loadSettings(true);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -83,9 +85,8 @@ void main() async {
     // Obtain the state after mounting
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
-    // Configure the map marker filter and theme
+    // Configure the map marker filter
     mapPageState.filterSettings["Food"] = true;
-    mapPageState.selectedThemeKey = 'light';
 
     // Add the marker
     await mapPageState.addMarker(listing, mockClient);
@@ -135,13 +136,11 @@ void main() async {
       "website": "https://www.glazedandconfused.com"
     };
 
+    await loadSettings(true);
     await tester.pumpWidget(const MaterialApp(home: MapPage()));
 
     // Obtain the state after mounting
     final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
-
-    // Configure the theme
-    mapPageState.selectedThemeKey = 'light';
 
     // Add a marker
     await mapPageState.addMarker(listing, mockClient);
@@ -164,6 +163,7 @@ void main() async {
 
   testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
     // Build the MapPage widget
+    await loadSettings(true);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -174,9 +174,6 @@ void main() async {
 
     // Obtain the state after mounting
     mapPageState = tester.state<MapPageState>(find.byType(MapPage));
-
-    // Configure the theme
-    mapPageState.selectedThemeKey = 'light';
 
     // Define a test listing
     var listing = {

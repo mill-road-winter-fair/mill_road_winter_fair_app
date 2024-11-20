@@ -6,12 +6,32 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 enum DistanceUnits { metric, imperial }
 
 // Set default distance units
-DistanceUnits preferredDistanceUnits = DistanceUnits.metric;
+late DistanceUnits preferredDistanceUnits;
 
 // Initialise theme variables
-late String selectedThemeKey; // Currently selected theme key
-late ThemeData selectedTheme; // Currently selected theme
+late String selectedThemeKey;
 late ValueNotifier<String> themeNotifier;
+
+Future<void> loadSettings(bool onTest) async {
+  if (onTest == false) {
+    // Load settings from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+
+    int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
+    preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
+
+    selectedThemeKey = prefs.getString('selectedTheme') ?? 'light'; // Default to 'light'
+    // Create a ValueNotifier to hold the current theme
+    themeNotifier = ValueNotifier(selectedThemeKey);
+  } else if (onTest == true) {
+    int savedUnitIndex = 0;
+    preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
+
+    selectedThemeKey = 'light';
+    // Create a ValueNotifier to hold the current theme
+    themeNotifier = ValueNotifier(selectedThemeKey);
+  }
+}
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});

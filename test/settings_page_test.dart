@@ -5,12 +5,8 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUp(() async {
-    selectedThemeKey = 'light'; // Default to 'light'
-    themeNotifier = ValueNotifier(selectedThemeKey);
-  });
-
   testWidgets('SettingsPage displays correct initial state', (WidgetTester tester) async {
+    await loadSettings(true);
     await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
 
     // Verify the Distance Units section
@@ -34,6 +30,7 @@ void main() {
   });
 
   testWidgets('SettingsPage changes distance units to Imperial', (WidgetTester tester) async {
+    await loadSettings(true);
     await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
 
     // Tap on Imperial radio button
@@ -45,6 +42,7 @@ void main() {
   });
 
   testWidgets('SettingsPage changes theme to Dark', (WidgetTester tester) async {
+    await loadSettings(true);
     await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
 
     // Tap on the Dark theme radio button
@@ -56,6 +54,7 @@ void main() {
   });
 
   testWidgets('SettingsPage changes theme to Colour Blind Friendly', (WidgetTester tester) async {
+    await loadSettings(true);
     await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
 
     // Tap on the Colour Blind Friendly theme radio button
@@ -67,6 +66,7 @@ void main() {
   });
 
   testWidgets('SettingsPage persists settings after selection', (WidgetTester tester) async {
+    await loadSettings(true);
     await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
 
     // Change distance units to Imperial

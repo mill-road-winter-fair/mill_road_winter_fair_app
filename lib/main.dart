@@ -27,34 +27,23 @@ Future<void> main() async {
   googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   mrwfApi = dotenv.env['MRWF_API'] ?? '';
 
-  // Load settings from SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
-
-  int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
-  preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
-
-  selectedThemeKey = prefs.getString('selectedTheme') ?? 'light'; // Default to 'light'
-  selectedTheme = appThemes[selectedThemeKey]!;
-
-  // Create a ValueNotifier to hold the current theme
-  themeNotifier = ValueNotifier(selectedThemeKey);
+  await loadSettings(false);
 
   // Run the app
-  runApp(MyApp(themeNotifier: themeNotifier));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final ValueNotifier<String> themeNotifier;
-  const MyApp({super.key, required this.themeNotifier});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
-      builder: (context, selectedTheme, _) {
+      builder: (context, selectedThemeKey, _) {
         return MaterialApp(
           title: 'Mill Road Winter Fair',
-          theme: appThemes[selectedTheme],
+          theme: appThemes[selectedThemeKey],
           home: const HomePage(),
         );
       },
