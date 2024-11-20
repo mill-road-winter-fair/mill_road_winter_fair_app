@@ -346,6 +346,7 @@ class MapPageState extends State<MapPage> {
         _polylines.add(Polyline(
           polylineId: const PolylineId('route'),
           points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+          // TODO: Update the route line colour if we start using custom maps
           color: const Color.fromRGBO(204, 51, 51, 1.0),
           width: 5,
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
@@ -423,9 +424,9 @@ class MapPageState extends State<MapPage> {
                         onPressed: () {
                           showFilterMenu();
                         },
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.filter_alt,
-                          color: Color.fromRGBO(255, 255, 255, 1.0),
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
                     ],
@@ -446,7 +447,7 @@ class MapPageState extends State<MapPage> {
                         },
                         icon: Icon(
                           _layersIcon,
-                          color: const Color.fromRGBO(255, 255, 255, 1.0),
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
                     ],
@@ -465,9 +466,9 @@ class MapPageState extends State<MapPage> {
                                 navigationInProgress = false;
                               });
                             },
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.wrong_location,
-                              color: Color.fromRGBO(255, 255, 255, 1.0),
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ))
                     ],
                   ),
@@ -487,11 +488,11 @@ class MapPageState extends State<MapPage> {
                           onPressed: () {
                             _setMapFitToPolyline(_polylines);
                           },
-                          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(204, 51, 51, 1)),
-                          icon: const Icon(Icons.directions, color: Color.fromRGBO(255, 255, 255, 1.0)),
+                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
+                          icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
                           label: Text(
                             distanceToDestination!,
-                            style: const TextStyle(fontSize: 28, color: Colors.white),
+                            style: TextStyle(fontSize: 28, color: Theme.of(context).colorScheme.onPrimary),
                           ),
                         ),
                     ],
