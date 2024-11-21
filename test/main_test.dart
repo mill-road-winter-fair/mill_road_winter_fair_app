@@ -56,6 +56,19 @@ void main() async {
     expect(find.byType(AboutTheFairPage), findsOneWidget);
   });
 
+  testWidgets('HomePage navigates to SettingsPage when Settings in drawer is tapped', (WidgetTester tester) async {
+    await loadSettings(true);
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SettingsPage), findsOneWidget);
+  });
+
   testWidgets('HomePage BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
     await loadSettings(true);
     await tester.pumpWidget(const MyApp());
