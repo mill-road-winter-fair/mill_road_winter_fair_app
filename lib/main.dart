@@ -73,7 +73,14 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mill Road Winter Fair'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text('Mill Road Winter Fair'),
+            Image.asset('assets/iconTransparent.png', height: 30, width: 30, color: Theme.of(context).colorScheme.onPrimary),
+          ],
+        ),
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
