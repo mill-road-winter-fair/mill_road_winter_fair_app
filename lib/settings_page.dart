@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Define available distance units
 enum DistanceUnits { metric, imperial }
@@ -11,6 +12,9 @@ late DistanceUnits preferredDistanceUnits;
 // Initialise theme variables
 late String selectedThemeKey;
 late ValueNotifier<String> themeNotifier;
+
+// Initialise map style variable
+late String mapStyle;
 
 Future<void> loadSettings(bool onTest) async {
   if (onTest == false) {
@@ -23,6 +27,8 @@ Future<void> loadSettings(bool onTest) async {
     selectedThemeKey = prefs.getString('selectedTheme') ?? 'light'; // Default to 'light'
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
+
+    mapStyle = prefs.getString('selectedMapStyle') ?? 'standardMap';
   } else if (onTest == true) {
     int savedUnitIndex = 0;
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
@@ -30,6 +36,8 @@ Future<void> loadSettings(bool onTest) async {
     selectedThemeKey = 'light';
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
+
+    mapStyle = 'standardMap';
   }
 }
 
@@ -51,6 +59,7 @@ class SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
     await prefs.setString('selectedTheme', themeNotifier.value);
+    await prefs.setString('selectedMapStyle', mapStyle);
   }
 
   Future<void> _changeTheme(String themeKey) async {
@@ -122,6 +131,7 @@ class SettingsPageState extends State<SettingsPage> {
                     selectedThemeKey = value!;
                     setState(() {
                       _changeTheme(value);
+                      mapStyle = standardMap;
                     });
                     _saveSettings();
                     mapPageKey.currentState?.fetchListings();
@@ -137,6 +147,7 @@ class SettingsPageState extends State<SettingsPage> {
                     selectedThemeKey = value!;
                     setState(() {
                       _changeTheme(value);
+                      mapStyle = darkMap;
                     });
                     _saveSettings();
                     mapPageKey.currentState?.fetchListings();
@@ -151,6 +162,7 @@ class SettingsPageState extends State<SettingsPage> {
                   onChanged: (value) {
                     setState(() {
                       _changeTheme(value!);
+                      mapStyle = retroMap;
                     });
                     selectedThemeKey = value!;
                     _saveSettings();
@@ -166,6 +178,7 @@ class SettingsPageState extends State<SettingsPage> {
                   onChanged: (value) {
                     setState(() {
                       _changeTheme(value!);
+                      mapStyle = nightMap;
                     });
                     selectedThemeKey = value!;
                     _saveSettings();
@@ -182,6 +195,7 @@ class SettingsPageState extends State<SettingsPage> {
                     selectedThemeKey = value!;
                     setState(() {
                       _changeTheme(value);
+                      mapStyle = aubergineMap;
                     });
                     _saveSettings();
                     mapPageKey.currentState?.fetchListings();

@@ -392,6 +392,7 @@ class MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: GoogleMap(
+        style: mapStyle,
         mapType: mapType,
         rotateGesturesEnabled: false,
         compassEnabled: false,
