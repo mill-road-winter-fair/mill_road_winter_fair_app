@@ -30,6 +30,7 @@ void main() async {
 
   testWidgets('test map type button changes map type', (WidgetTester tester) async {
     // Build the MapPage widget
+    await loadSettings(true);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
