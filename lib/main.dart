@@ -179,25 +179,29 @@ class HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                          onPressed: () {
-                            launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
-                          },
-                          icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 50, color: Theme.of(context).colorScheme.primary)),
+                        onPressed: () {
+                          launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                        },
+                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 50, color: Theme.of(context).colorScheme.tertiary),
+                      ),
                       IconButton(
-                          onPressed: () {
-                            launchUrl(Uri.parse('https://x.com/millroadfair'));
-                          },
-                          icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 50, color: Theme.of(context).colorScheme.primary)),
+                        onPressed: () {
+                          launchUrl(Uri.parse('https://x.com/millroadfair'));
+                        },
+                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 50, color: Theme.of(context).colorScheme.tertiary),
+                      ),
                       IconButton(
-                          onPressed: () {
-                            launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
-                          },
-                          icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 50, color: Theme.of(context).colorScheme.primary)),
+                        onPressed: () {
+                          launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
+                        },
+                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 50, color: Theme.of(context).colorScheme.tertiary),
+                      ),
                       IconButton(
-                          onPressed: () {
-                            launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
-                          },
-                          icon: FaIcon(FontAwesomeIcons.flickr, size: 50, color: Theme.of(context).colorScheme.primary)),
+                        onPressed: () {
+                          launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
+                        },
+                        icon: FaIcon(FontAwesomeIcons.flickr, size: 50, color: Theme.of(context).colorScheme.tertiary),
+                      ),
                     ],
                   ),
                 ],
