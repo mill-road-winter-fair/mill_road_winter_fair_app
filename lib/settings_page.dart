@@ -178,7 +178,7 @@ class SettingsPageState extends State<SettingsPage> {
                   onChanged: (value) {
                     setState(() {
                       _changeTheme(value!);
-                      mapStyle = nightMap;
+                      mapStyle = highContrastMap;
                     });
                     selectedThemeKey = value!;
                     _saveSettings();
@@ -195,7 +195,7 @@ class SettingsPageState extends State<SettingsPage> {
                     selectedThemeKey = value!;
                     setState(() {
                       _changeTheme(value);
-                      mapStyle = aubergineMap;
+                      mapStyle = colourBlindMap;
                     });
                     _saveSettings();
                     mapPageKey.currentState?.fetchListings();
