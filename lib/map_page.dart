@@ -392,6 +392,7 @@ class MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: GoogleMap(
+        // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
         style: mapStyle,
         mapType: mapType,
         rotateGesturesEnabled: false,
