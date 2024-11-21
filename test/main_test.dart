@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
@@ -26,6 +27,7 @@ void main() async {
   });
 
   testWidgets('HomePage displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
+    await loadSettings(true);
     await tester.pumpWidget(const MyApp());
 
     expect(find.text('Mill Road Winter Fair'), findsOneWidget);
@@ -42,6 +44,7 @@ void main() async {
   });
 
   testWidgets('HomePage navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
+    await loadSettings(true);
     await tester.pumpWidget(const MyApp());
 
     await tester.tap(find.byIcon(Icons.menu));
@@ -54,6 +57,7 @@ void main() async {
   });
 
   testWidgets('HomePage BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
+    await loadSettings(true);
     await tester.pumpWidget(const MyApp());
 
     await tester.tap(find.text('Food'));
@@ -106,6 +110,7 @@ void main() async {
       "website": "https://www.glazedandconfused.com"
     };
 
+    await loadSettings(true);
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
@@ -113,8 +118,10 @@ void main() async {
     final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
-    // Configure the map marker filter and add the marker
+    // Configure the map marker filter and theme
     mapPageState.filterSettings["Food"] = true;
+
+    // Add the marker
     await mapPageState.addMarker(listing, mockClient);
 
     await tester.tap(find.text('Food'));

@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-String asTheCrowFlies(LatLng? origin, LatLng destination) {
+int asTheCrowFlies(LatLng? origin, LatLng destination) {
 
   // If the user has location tracking disabled we need to return nothing here.
   if (origin == null) {
-    return "";
+    return 0;
   }
 
   // Constant value for converting degrees to radians (π/180)
@@ -31,14 +31,5 @@ String asTheCrowFlies(LatLng? origin, LatLng destination) {
   // Round the figure to 0 decimal places
   var distanceMetres = (((12742 * math.asin(math.sqrt(a))) * 1000) * fudgeFactor).round();
 
-  // Return either metres or kilometres, depending on overall length
-  String distanceToDestination;
-  if (distanceMetres <= 999) {
-    distanceToDestination = 'approx. $distanceMetres m';
-  } else {
-    final distanceKilometresRounded = (distanceMetres / 1000).toStringAsFixed(2);
-    distanceToDestination = 'approx. $distanceKilometresRounded km';
-  }
-
-  return distanceToDestination;
+  return distanceMetres;
 }

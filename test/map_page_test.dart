@@ -7,6 +7,8 @@ import 'package:mockito/annotations.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
 
 @GenerateMocks([http.Client])
 import 'map_page_test.mocks.dart';
@@ -28,6 +30,7 @@ void main() async {
 
   testWidgets('test map type button changes map type', (WidgetTester tester) async {
     // Build the MapPage widget
+    await loadSettings(true);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -70,6 +73,7 @@ void main() async {
     };
 
     // Build the widget and trigger the state
+    await loadSettings(true);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -82,8 +86,10 @@ void main() async {
     // Obtain the state after mounting
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
-    // Configure the map marker filter and add the marker
+    // Configure the map marker filter
     mapPageState.filterSettings["Food"] = true;
+
+    // Add the marker
     await mapPageState.addMarker(listing, mockClient);
 
     // Verify that the expected marker was added
@@ -93,17 +99,22 @@ void main() async {
   });
 
   test('getMarkerColorHue returns correct hue for given types', () {
-    final hueFood = mapPageState.getMarkerColorHue("Food");
-    final hueRetail = mapPageState.getMarkerColorHue("Shopping");
-    final hueMusic = mapPageState.getMarkerColorHue("Music");
-    final hueEvent = mapPageState.getMarkerColorHue("Event");
-    final hueService = mapPageState.getMarkerColorHue("Service");
+    final foodColor = getMarkerColor("light", "Food");
+    final foodHue = HSVColor.fromColor(foodColor).hue;
+    final shoppingColor = getMarkerColor("light", "Shopping");
+    final shoppingHue = HSVColor.fromColor(shoppingColor).hue;
+    final musicColor = getMarkerColor("light", "Music");
+    final musicHue = HSVColor.fromColor(musicColor).hue;
+    final eventColor = getMarkerColor("light", "Event");
+    final eventHue = HSVColor.fromColor(eventColor).hue;
+    final serviceColor = getMarkerColor("light", "Service");
+    final serviceHue = HSVColor.fromColor(serviceColor).hue;
 
-    expect(hueFood, 23.13725490196078);
-    expect(hueRetail, 0.0);
-    expect(hueMusic, 332.94117647058823);
-    expect(hueEvent, 43.13725490196078);
-    expect(hueService, 276.0);
+    expect(foodHue, 23.13725490196078);
+    expect(shoppingHue, 0.0);
+    expect(musicHue, 332.94117647058823);
+    expect(eventHue, 43.13725490196078);
+    expect(serviceHue, 276.0);
   });
 
   testWidgets('Adds marker, opens modal bottom sheet, and checks content', (WidgetTester tester) async {
@@ -126,6 +137,7 @@ void main() async {
       "website": "https://www.glazedandconfused.com"
     };
 
+    await loadSettings(true);
     await tester.pumpWidget(const MaterialApp(home: MapPage()));
 
     // Obtain the state after mounting
@@ -152,6 +164,7 @@ void main() async {
 
   testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
     // Build the MapPage widget
+    await loadSettings(true);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

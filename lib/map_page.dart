@@ -6,10 +6,16 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
+import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
+
+//Define a GlobalKey for MapPageState:
+final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -104,7 +110,8 @@ class MapPageState extends State<MapPage> {
 
     MarkerId markerId = MarkerId(listing['id'].toString());
 
-    double hue = getMarkerColorHue(listing['primaryType']);
+    Color color = getMarkerColor(selectedThemeKey, listing['primaryType']);
+    double hue = HSVColor.fromColor(color).hue;
 
     Marker newMarker = Marker(
       markerId: markerId,
@@ -114,6 +121,7 @@ class MapPageState extends State<MapPage> {
       onTap: () {
         // Update user's location
         establishLocation();
+        int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
         // Show bottom sheet with listing information
         showModalBottomSheet(
           context: context,
@@ -122,7 +130,7 @@ class MapPageState extends State<MapPage> {
               title: listing['displayName'],
               categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
               openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-              approxDistance: asTheCrowFlies(currentLatLng, destinationLatLng),
+              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
               phoneNumber: listing['phone'],
               website: listing['website'],
               onGetDirections: () => getDirections(listing['id'], destinationLatLng),
@@ -135,35 +143,6 @@ class MapPageState extends State<MapPage> {
     setState(() {
       markers[markerId] = newMarker;
     });
-  }
-
-  double getMarkerColorHue(String primaryType) {
-    if (primaryType == "Food") {
-      Color color = const Color.fromRGBO(204, 110, 51, 1.0);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    } else if (primaryType == "Shopping") {
-      Color color = const Color.fromRGBO(204, 51, 51, 1);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    } else if (primaryType == "Music") {
-      Color color = const Color.fromRGBO(204, 51, 120, 1.0);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    } else if (primaryType == "Event") {
-      Color color = const Color.fromRGBO(204, 161, 51, 1.0);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    } else if (primaryType == "Service") {
-      Color color = const Color.fromRGBO(153, 0, 255, 1.0);
-      double hue = HSVColor.fromColor(color).hue;
-      return hue;
-    }
-
-    //Default colour
-    Color color = const Color.fromRGBO(255, 255, 255, 1.0);
-    double hue = HSVColor.fromColor(color).hue;
-    return hue;
   }
 
   //The Remove All filters button seems to prefer using this function rather than doing it's own setState
@@ -194,7 +173,7 @@ class MapPageState extends State<MapPage> {
                       )
                     ]),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(204, 110, 51, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Food'),
                       title: const Text("Food"),
                       value: filterSettings["Food"],
                       onChanged: (value) {
@@ -206,7 +185,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(204, 51, 51, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Shopping'),
                       title: const Text("Shopping"),
                       value: filterSettings["Shopping"],
                       onChanged: (value) {
@@ -218,7 +197,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(204, 51, 120, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Music'),
                       title: const Text("Music"),
                       value: filterSettings["Music"],
                       onChanged: (value) {
@@ -230,7 +209,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(204, 161, 51, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Event'),
                       title: const Text("Events"),
                       value: filterSettings["Events"],
                       onChanged: (value) {
@@ -242,7 +221,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: const Color.fromRGBO(153, 0, 255, 1.0),
+                      activeColor: getMarkerColor(selectedThemeKey, 'Service'),
                       title: const Text("Services"),
                       value: filterSettings["Services"],
                       onChanged: (value) {
@@ -367,6 +346,7 @@ class MapPageState extends State<MapPage> {
         _polylines.add(Polyline(
           polylineId: const PolylineId('route'),
           points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+          // TODO: Update the route line colour if we start using custom maps
           color: const Color.fromRGBO(204, 51, 51, 1.0),
           width: 5,
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
@@ -412,6 +392,8 @@ class MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: GoogleMap(
+        // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
+        style: mapStyle,
         mapType: mapType,
         rotateGesturesEnabled: false,
         compassEnabled: false,
@@ -444,9 +426,9 @@ class MapPageState extends State<MapPage> {
                         onPressed: () {
                           showFilterMenu();
                         },
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.filter_alt,
-                          color: Color.fromRGBO(255, 255, 255, 1.0),
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
                     ],
@@ -467,7 +449,7 @@ class MapPageState extends State<MapPage> {
                         },
                         icon: Icon(
                           _layersIcon,
-                          color: const Color.fromRGBO(255, 255, 255, 1.0),
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
                     ],
@@ -486,9 +468,9 @@ class MapPageState extends State<MapPage> {
                                 navigationInProgress = false;
                               });
                             },
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.wrong_location,
-                              color: Color.fromRGBO(255, 255, 255, 1.0),
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ))
                     ],
                   ),
@@ -508,11 +490,11 @@ class MapPageState extends State<MapPage> {
                           onPressed: () {
                             _setMapFitToPolyline(_polylines);
                           },
-                          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(204, 51, 51, 1)),
-                          icon: const Icon(Icons.directions, color: Color.fromRGBO(255, 255, 255, 1.0)),
+                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
+                          icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
                           label: Text(
                             distanceToDestination!,
-                            style: const TextStyle(fontSize: 28, color: Colors.white),
+                            style: TextStyle(fontSize: 28, color: Theme.of(context).colorScheme.onPrimary),
                           ),
                         ),
                     ],

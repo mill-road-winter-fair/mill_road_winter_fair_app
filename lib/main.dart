@@ -5,61 +5,47 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 
-import 'get_current_location.dart';
-
-//Initialize API Key variables
+// Initialise API Key variables
 late String googleApiKey;
 late String mrwfApi;
 
+//Set the default page number (0 is the map page)
+int globalIndex = 0;
+
 Future<void> main() async {
+  // Ensure all bindings are initialized before async calls
+  WidgetsFlutterBinding.ensureInitialized();
+
   // Load environment variables
   await dotenv.load(fileName: ".env");
   googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
   mrwfApi = dotenv.env['MRWF_API'] ?? '';
+
+  await loadSettings(false);
+
+  // Run the app
   runApp(const MyApp());
 }
-
-//Define a GlobalKey for MapPageState:
-final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
-
-//Set the default page number (0 is the map page)
-int globalIndex = 0;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mill Road Winter Fair',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: const ColorScheme(
-          brightness: Brightness.light,
-          primary: Color.fromRGBO(204, 51, 51, 1),
-          onPrimary: Colors.black,
-          secondary: Colors.yellow,
-          onSecondary: Colors.black,
-          error: Colors.red,
-          onError: Colors.white,
-          surface: Colors.white,
-          onSurface: Colors.black,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color.fromRGBO(204, 51, 51, 1),
-          foregroundColor: Colors.white,
-        ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          selectedItemColor: Color.fromRGBO(204, 51, 51, 1),
-          unselectedItemColor: Colors.grey,
-        ),
-        drawerTheme: const DrawerThemeData(
-          backgroundColor: Color.fromRGBO(204, 51, 51, 1),
-        ),
-      ),
-      home: const HomePage(),
+    return ValueListenableBuilder<String>(
+      valueListenable: themeNotifier,
+      builder: (context, selectedThemeKey, _) {
+        return MaterialApp(
+          title: 'Mill Road Winter Fair',
+          theme: appThemes[selectedThemeKey],
+          home: const HomePage(),
+        );
+      },
     );
   }
 }
@@ -126,21 +112,20 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       drawer: Drawer(
-        backgroundColor: Colors.white,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             SizedBox(
               height: 195,
               child: DrawerHeader(
-                decoration: const BoxDecoration(color: Color.fromRGBO(204, 51, 51, 1)),
+                decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Mill Road Winter Fair',
-                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     ElevatedButton.icon(
                       onPressed: () {
@@ -166,11 +151,17 @@ class HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
-              tileColor: Colors.white,
               title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+              },
+            ),
+            ListTile(
+              title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
               },
             ),
           ],

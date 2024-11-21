@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
+import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 void main() {
   LatLng currentLatLng = const LatLng(52.199174, 0.140929);
-  LatLng destinationCoordinates = const LatLng(52.199687,0.138813);
+  LatLng destinationLatLng = const LatLng(52.199687,0.138813);
+  int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
 
   // Build widget tree
   Widget createWidgetUnderTest({
@@ -38,7 +41,7 @@ void main() {
       title: 'Glazed and Confused',
       categories: 'Food • Doughnuts',
       openingTimes: '10:30 - 16:30',
-      approxDistance: asTheCrowFlies(currentLatLng, destinationCoordinates),
+      approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
       phoneNumber: '01223 111111',
       website: 'https://www.glazedandconfused.com',
       onGetDirections: () {},
@@ -56,7 +59,7 @@ void main() {
       title: 'Glazed and Confused',
       categories: 'Food • Doughnuts',
       openingTimes: '10:30 - 16:30',
-      approxDistance: asTheCrowFlies(currentLatLng, destinationCoordinates),
+      approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
       phoneNumber: '01223 111111',
       website: '',
       onGetDirections: () {},
@@ -79,7 +82,7 @@ void main() {
       title: 'Glazed and Confused',
       categories: 'Food • Doughnuts',
       openingTimes: '10:30 - 16:30',
-      approxDistance: asTheCrowFlies(currentLatLng, destinationCoordinates),
+      approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
       phoneNumber: '01223 111111',
       website: 'https://www.glazedandconfused.com',
       onGetDirections: () {

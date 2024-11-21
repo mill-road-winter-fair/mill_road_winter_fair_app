@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
+import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 
 class FilteredListingsPage extends StatelessWidget {
@@ -35,18 +37,6 @@ class FilteredListingsPage extends StatelessWidget {
     }
   }
 
-  // Helper method to extract numeric distance from a string
-  double _extractNumericDistance(String distance) {
-    // Remove 'approx.' and unit (m or km) from the string and parse the number
-    if (distance.contains(' km')) {
-      // Regex for kilometres (floating point)
-      return double.parse(distance.replaceAll(RegExp(r'(approx\.\s)|([^\d.])'), '')) * 1000;
-    } else {
-      // Regex for metres (integer)
-      return double.parse(distance.replaceAll(RegExp(r'[^0-9]'), ''));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -65,14 +55,13 @@ class FilteredListingsPage extends StatelessWidget {
           final sortedListings = listings.map((listing) {
             LatLng destinationLatLng = stringToLatLng(listing['latLng']);
             final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
-            return {...listing, 'approximateDistance': distance};
+            return {...listing, 'approximateDistanceMetres': distance};
           }).toList();
 
           if (currentLatLng != null) {
             sortedListings.sort((a, b) {
-              // Extract the numeric value from the "approximateDistance" strings
-              double distanceA = _extractNumericDistance(a['approximateDistance']);
-              double distanceB = _extractNumericDistance(b['approximateDistance']);
+              int distanceA = a['approximateDistanceMetres'];
+              int distanceB = b['approximateDistanceMetres'];
               return distanceA.compareTo(distanceB);
             });
           }
@@ -88,7 +77,7 @@ class FilteredListingsPage extends StatelessWidget {
                 title: listing['displayName'],
                 categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
                 openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-                approxDistance: listing['approximateDistance'],
+                approxDistance: 'approx. ${convertDistanceUnits(listing['approximateDistanceMetres'], preferredDistanceUnits)}',
                 phoneNumber: listing['phone'],
                 website: listing['website'],
                 onGetDirections: () => {
