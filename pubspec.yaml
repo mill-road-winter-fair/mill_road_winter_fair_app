@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   mockito: ^5.4.4
+  flutter_launcher_icons: ^0.14.1
   flutter_native_splash: ^2.4.3
   flutter_dotenv: ^5.0.2
   font_awesome_flutter: ^10.8.0
