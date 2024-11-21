@@ -6,11 +6,11 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.light,
-      primary: const Color.fromRGBO(204, 51, 51, 1),
+      primary: const Color.fromRGBO(200, 0, 10, 1),
       onPrimary: Colors.white,
       secondary: Colors.white,
       onSecondary: Colors.black,
-      tertiary: const Color.fromRGBO(204, 51, 51, 1),
+      tertiary: const Color.fromRGBO(200, 0, 10, 1),
       error: Colors.red,
       onError: Colors.white,
       surface: Colors.white,
@@ -18,11 +18,11 @@ final Map<String, ThemeData> appThemes = {
       onSurfaceVariant: Colors.grey[700]!,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(204, 51, 51, 1),
+      backgroundColor: Color.fromRGBO(200, 0, 10, 1),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(204, 51, 51, 1),
+      selectedItemColor: Color.fromRGBO(200, 0, 10, 1),
       unselectedItemColor: Colors.grey,
     ),
     drawerTheme: const DrawerThemeData(
@@ -160,7 +160,7 @@ Color getMarkerColor(String selectedThemeKey, String primaryType) {
       Color color = const Color.fromRGBO(204, 110, 51, 1.0);
       return color;
     } else if (primaryType == "Shopping") {
-      Color color = const Color.fromRGBO(204, 51, 51, 1);
+      Color color = const Color.fromRGBO(200, 0, 10, 1);
       return color;
     } else if (primaryType == "Music") {
       Color color = const Color.fromRGBO(204, 51, 120, 1.0);
@@ -181,7 +181,7 @@ Color getMarkerColor(String selectedThemeKey, String primaryType) {
       Color color = const Color.fromRGBO(204, 110, 51, 1.0);
       return color;
     } else if (primaryType == "Shopping") {
-      Color color = const Color.fromRGBO(204, 51, 51, 1);
+      Color color = const Color.fromRGBO(200, 0, 10, 1);
       return color;
     } else if (primaryType == "Music") {
       Color color = const Color.fromRGBO(204, 51, 120, 1.0);
@@ -202,7 +202,7 @@ Color getMarkerColor(String selectedThemeKey, String primaryType) {
       Color color = const Color.fromRGBO(204, 110, 51, 1.0);
       return color;
     } else if (primaryType == "Shopping") {
-      Color color = const Color.fromRGBO(204, 51, 51, 1);
+      Color color = const Color.fromRGBO(200, 0, 10, 1);
       return color;
     } else if (primaryType == "Music") {
       Color color = const Color.fromRGBO(163, 163, 163, 1.0);

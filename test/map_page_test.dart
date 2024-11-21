@@ -111,7 +111,7 @@ void main() async {
     final serviceHue = HSVColor.fromColor(serviceColor).hue;
 
     expect(foodHue, 23.13725490196078);
-    expect(shoppingHue, 0.0);
+    expect(shoppingHue, 357.0);
     expect(musicHue, 332.94117647058823);
     expect(eventHue, 43.13725490196078);
     expect(serviceHue, 276.0);
