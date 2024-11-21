@@ -119,42 +119,22 @@ class HomePageState extends State<HomePage> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: <Widget>[
-                  SizedBox(
-                    height: 195,
-                    child: DrawerHeader(
-                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Mill Road Winter Fair',
-                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 22, fontWeight: FontWeight.bold),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
-                            },
-                            icon: const Icon(Icons.public),
-                            label: const Text('Visit our website'),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () async {
-                              final Uri mailUri = Uri(scheme: 'mailto', path: 'info@millroadwinterfair.org');
-                              if (await canLaunchUrl(mailUri)) {
-                                await launchUrl(mailUri);
-                              } else {
-                                throw Exception('Could not launch email client');
-                              }
-                            },
-                            icon: const Icon(Icons.email_outlined),
-                            label: const Text('Email us'),
-                          ),
-                        ],
-                      ),
+                  DrawerHeader(
+                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Mill Road Winter Fair',
+                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 28),
+                      ],
                     ),
                   ),
                   ListTile(
+                    leading: const Icon(Icons.info),
                     title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
                       Navigator.pop(context);
@@ -162,10 +142,22 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                   ListTile(
-                    title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                    leading: const Icon(Icons.public),
+                    title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
+                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.email),
+                    title: const Text('Email us', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onTap: () async {
+                      final Uri mailUri = Uri(scheme: 'mailto', path: 'info@millroadwinterfair.org');
+                      if (await canLaunchUrl(mailUri)) {
+                        await launchUrl(mailUri);
+                      } else {
+                        throw Exception('Could not launch email client');
+                      }
                     },
                   ),
                 ],
@@ -176,33 +168,49 @@ class HomePageState extends State<HomePage> {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       IconButton(
                         onPressed: () {
                           launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 50, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 60, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
                           launchUrl(Uri.parse('https://x.com/millroadfair'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 50, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 60, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
                           launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 50, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 60, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
                           launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.flickr, size: 50, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.flickr, size: 60, color: Theme.of(context).colorScheme.tertiary),
                       ),
                     ],
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.feedback),
+                    title: const Text('Give feedback about the app', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+                    },
                   ),
                 ],
               ),
