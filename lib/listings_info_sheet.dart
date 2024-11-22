@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ListingInfoSheet extends StatelessWidget {
