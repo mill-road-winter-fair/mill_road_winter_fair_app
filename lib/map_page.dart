@@ -126,7 +126,7 @@ class MapPageState extends State<MapPage> {
               approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
               phoneNumber: listing['phone'],
               website: listing['website'],
-              onGetDirections: () => getDirections(listing['id'], destinationLatLng),
+              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
             );
           },
         );
@@ -266,7 +266,12 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  Future<void> getDirections(String id, LatLng destination) async {
+  Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    // Pop the navigator if told to
+    if (navigatorPop == true) {
+      Navigator.pop(context);
+    }
+
     // Clear any existing polylines
     setState(() {
       _polylines.clear(); // Clear any existing polylines

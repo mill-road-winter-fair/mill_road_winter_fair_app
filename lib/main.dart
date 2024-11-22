@@ -24,14 +24,12 @@ late List<Map<String, dynamic>> listings;
 int globalIndex = 0;
 
 // Fetch listings from Google Sheets
-Future<void> fetchListings(bool onTest) async {
-  if (onTest == true) {
-    listings = [];
-  } else if (onTest == false) {
+Future<void> fetchListings(http.Client client) async {
+
     final uri = Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey');
 
     try {
-      final response = await http.get(uri);
+      final response = await client.get(uri);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -51,7 +49,6 @@ Future<void> fetchListings(bool onTest) async {
     } catch (e) {
       throw 'Error fetching Google Sheets data: $e';
     }
-  }
 }
 
 Future<void> main() async {
@@ -66,7 +63,7 @@ Future<void> main() async {
 
   await loadSettings(false);
 
-  await fetchListings(false);
+  await fetchListings(http.Client());
 
   // Run the app
   runApp(const MyApp());
@@ -98,14 +95,14 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  int get currentIndex => globalIndex;
+  int index = 0;
 
   Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
     setState(() {
-      globalIndex = 0;
+      index = 0;
     });
 
-    mapPageKey.currentState?.getDirections(id, destinationCoordinates);
+    mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
   }
 
   @override
@@ -130,7 +127,7 @@ class HomePageState extends State<HomePage> {
         ),
       ),
       body: IndexedStack(
-        index: globalIndex,
+        index: index,
         children: [
           MapPage(key: mapPageKey),
           FilteredListingsPage(filterPrimaryType: "Food", listings: listings),
@@ -141,12 +138,12 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: globalIndex,
-        onTap: (index) {
+        currentIndex: index,
+        onTap: (selectedIndex) {
           // Update the user's location
           establishLocation();
           setState(() {
-            globalIndex = index;
+            index = selectedIndex;
           });
         },
         items: const [
