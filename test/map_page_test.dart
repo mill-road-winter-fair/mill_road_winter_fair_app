@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
@@ -18,8 +20,9 @@ void main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   googleMapsAndSheetsApiKey = dotenv.env['GOOGLE_MAPS_AND_SHEETS_API_KEY'] ?? '';
+  googleSheetId = dotenv.env['GOOGLE_SHEET_ID'] ?? '';
+  googleSheetRange = dotenv.env['GOOGLE_SHEET_RANGE'] ?? '';
 
-  await fetchListings(true);
   await loadSettings(true);
 
   // Set up mocks
@@ -31,6 +34,43 @@ void main() async {
   });
 
   testWidgets('test map type button changes map type', (WidgetTester tester) async {
+    final mockGoogleSheetsResponse = {
+      "range": "Sheet1!A1:L200",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "id",
+          "name",
+          "displayName",
+          "primaryType",
+          "secondaryType",
+          "tertiaryType",
+          "email",
+          "website",
+          "phone",
+          "latLng",
+          "startTime",
+          "endTime"
+        ],
+        [
+          "1",
+          "glazedandconfused",
+          "Glazed and Confused",
+          "Food",
+          "Food",
+          "Doughnuts",
+          "admin@glazedandconfued.com",
+          "https://www.glazedandconfused.com",
+          "01223 111111",
+          "52.199687,0.138813",
+          "10:30",
+          "16:30"
+        ]
+      ]
+    };
+    when(mockClient.get(Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey'))).thenAnswer((_) async => http.Response(jsonEncode(mockGoogleSheetsResponse), 200));
+    await fetchListings(mockClient);
+
     // Build the MapPage widget
     await tester.pumpWidget(
       const MaterialApp(
@@ -57,6 +97,43 @@ void main() async {
   });
 
   testWidgets('addMarker filters and adds marker based on filter settings', (tester) async {
+    final mockGoogleSheetsResponse = {
+      "range": "Sheet1!A1:L200",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "id",
+          "name",
+          "displayName",
+          "primaryType",
+          "secondaryType",
+          "tertiaryType",
+          "email",
+          "website",
+          "phone",
+          "latLng",
+          "startTime",
+          "endTime"
+        ],
+        [
+          "1",
+          "glazedandconfused",
+          "Glazed and Confused",
+          "Food",
+          "Food",
+          "Doughnuts",
+          "admin@glazedandconfued.com",
+          "https://www.glazedandconfused.com",
+          "01223 111111",
+          "52.199687,0.138813",
+          "10:30",
+          "16:30"
+        ]
+      ]
+    };
+    when(mockClient.get(Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey'))).thenAnswer((_) async => http.Response(jsonEncode(mockGoogleSheetsResponse), 200));
+    await fetchListings(mockClient);
+
     // Define a test listing
     final listing = {
       "displayName": "Glazed and Confused",
@@ -118,6 +195,43 @@ void main() async {
   });
 
   testWidgets('Adds marker, opens modal bottom sheet, and checks content', (WidgetTester tester) async {
+    final mockGoogleSheetsResponse = {
+      "range": "Sheet1!A1:L200",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "id",
+          "name",
+          "displayName",
+          "primaryType",
+          "secondaryType",
+          "tertiaryType",
+          "email",
+          "website",
+          "phone",
+          "latLng",
+          "startTime",
+          "endTime"
+        ],
+        [
+          "1",
+          "glazedandconfused",
+          "Glazed and Confused",
+          "Food",
+          "Food",
+          "Doughnuts",
+          "admin@glazedandconfued.com",
+          "https://www.glazedandconfused.com",
+          "01223 111111",
+          "52.199687,0.138813",
+          "10:30",
+          "16:30"
+        ]
+      ]
+    };
+    when(mockClient.get(Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey'))).thenAnswer((_) async => http.Response(jsonEncode(mockGoogleSheetsResponse), 200));
+    await fetchListings(mockClient);
+
     // Override user location global
     currentLatLng = const LatLng(52.199174, 0.140929);
 
@@ -162,6 +276,43 @@ void main() async {
   });
 
   testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
+    final mockGoogleSheetsResponse = {
+      "range": "Sheet1!A1:L200",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "id",
+          "name",
+          "displayName",
+          "primaryType",
+          "secondaryType",
+          "tertiaryType",
+          "email",
+          "website",
+          "phone",
+          "latLng",
+          "startTime",
+          "endTime"
+        ],
+        [
+          "1",
+          "glazedandconfused",
+          "Glazed and Confused",
+          "Food",
+          "Food",
+          "Doughnuts",
+          "admin@glazedandconfued.com",
+          "https://www.glazedandconfused.com",
+          "01223 111111",
+          "52.199687,0.138813",
+          "10:30",
+          "16:30"
+        ]
+      ]
+    };
+    when(mockClient.get(Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey'))).thenAnswer((_) async => http.Response(jsonEncode(mockGoogleSheetsResponse), 200));
+    await fetchListings(mockClient);
+
     // Build the MapPage widget
     await tester.pumpWidget(
       const MaterialApp(
@@ -431,6 +582,43 @@ void main() async {
   });
 
   testWidgets('clearAllMarkers clears all markers', (tester) async {
+    final mockGoogleSheetsResponse = {
+      "range": "Sheet1!A1:L200",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "id",
+          "name",
+          "displayName",
+          "primaryType",
+          "secondaryType",
+          "tertiaryType",
+          "email",
+          "website",
+          "phone",
+          "latLng",
+          "startTime",
+          "endTime"
+        ],
+        [
+          "1",
+          "glazedandconfused",
+          "Glazed and Confused",
+          "Food",
+          "Food",
+          "Doughnuts",
+          "admin@glazedandconfued.com",
+          "https://www.glazedandconfused.com",
+          "01223 111111",
+          "52.199687,0.138813",
+          "10:30",
+          "16:30"
+        ]
+      ]
+    };
+    when(mockClient.get(Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey'))).thenAnswer((_) async => http.Response(jsonEncode(mockGoogleSheetsResponse), 200));
+    await fetchListings(mockClient);
+
     // Build the widget and trigger the state
     await tester.pumpWidget(
       const MaterialApp(

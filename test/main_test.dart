@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
@@ -21,7 +24,7 @@ void main() async {
   googleSheetId = dotenv.env['GOOGLE_SHEET_ID'] ?? '';
   googleSheetRange = dotenv.env['GOOGLE_SHEET_RANGE'] ?? '';
 
-  await fetchListings(true);
+  // Mock user settings
   await loadSettings(true);
 
   // Set up mocks
@@ -31,6 +34,43 @@ void main() async {
   });
 
   testWidgets('HomePage displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
+    final mockGoogleSheetsResponse = {
+        "range": "Sheet1!A1:L200",
+        "majorDimension": "ROWS",
+        "values": [
+          [
+            "id",
+            "name",
+            "displayName",
+            "primaryType",
+            "secondaryType",
+            "tertiaryType",
+            "email",
+            "website",
+            "phone",
+            "latLng",
+            "startTime",
+            "endTime"
+          ],
+          [
+            "1",
+            "glazedandconfused",
+            "Glazed and Confused",
+            "Food",
+            "Food",
+            "Doughnuts",
+            "admin@glazedandconfued.com",
+            "https://www.glazedandconfused.com",
+            "01223 111111",
+            "52.199687,0.138813",
+            "10:30",
+            "16:30"
+          ]
+        ]
+      };
+    when(mockClient.get(Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey'))).thenAnswer((_) async => http.Response(jsonEncode(mockGoogleSheetsResponse), 200));
+    await fetchListings(mockClient);
+
     await tester.pumpWidget(const MyApp());
 
     expect(find.text('Mill Road Winter Fair'), findsOneWidget);
@@ -47,6 +87,43 @@ void main() async {
   });
 
   testWidgets('HomePage navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
+    final mockGoogleSheetsResponse = {
+      "range": "Sheet1!A1:L200",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "id",
+          "name",
+          "displayName",
+          "primaryType",
+          "secondaryType",
+          "tertiaryType",
+          "email",
+          "website",
+          "phone",
+          "latLng",
+          "startTime",
+          "endTime"
+        ],
+        [
+          "1",
+          "glazedandconfused",
+          "Glazed and Confused",
+          "Food",
+          "Food",
+          "Doughnuts",
+          "admin@glazedandconfued.com",
+          "https://www.glazedandconfused.com",
+          "01223 111111",
+          "52.199687,0.138813",
+          "10:30",
+          "16:30"
+        ]
+      ]
+    };
+    when(mockClient.get(Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey'))).thenAnswer((_) async => http.Response(jsonEncode(mockGoogleSheetsResponse), 200));
+    await fetchListings(mockClient);
+
     await tester.pumpWidget(const MyApp());
 
     await tester.tap(find.byIcon(Icons.menu));
@@ -71,6 +148,43 @@ void main() async {
   });
 
   testWidgets('HomePage BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
+    final mockGoogleSheetsResponse = {
+      "range": "Sheet1!A1:L200",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "id",
+          "name",
+          "displayName",
+          "primaryType",
+          "secondaryType",
+          "tertiaryType",
+          "email",
+          "website",
+          "phone",
+          "latLng",
+          "startTime",
+          "endTime"
+        ],
+        [
+          "1",
+          "glazedandconfused",
+          "Glazed and Confused",
+          "Food",
+          "Food",
+          "Doughnuts",
+          "admin@glazedandconfued.com",
+          "https://www.glazedandconfused.com",
+          "01223 111111",
+          "52.199687,0.138813",
+          "10:30",
+          "16:30"
+        ]
+      ]
+    };
+    when(mockClient.get(Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey'))).thenAnswer((_) async => http.Response(jsonEncode(mockGoogleSheetsResponse), 200));
+    await fetchListings(mockClient);
+
     await tester.pumpWidget(const MyApp());
 
     await tester.tap(find.text('Food'));
@@ -78,37 +192,74 @@ void main() async {
 
     // Obtain the state after mounting
     final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
-    expect(homePageState.currentIndex, 1);
+    expect(homePageState.index, 1);
 
     await tester.tap(find.text('Shopping'));
     await tester.pumpAndSettle();
 
-    expect(homePageState.currentIndex, 2);
+    expect(homePageState.index, 2);
 
     await tester.tap(find.text('Music'));
     await tester.pumpAndSettle();
 
-    expect(homePageState.currentIndex, 3);
+    expect(homePageState.index, 3);
 
     await tester.tap(find.text('Events'));
     await tester.pumpAndSettle();
 
-    expect(homePageState.currentIndex, 4);
+    expect(homePageState.index, 4);
 
     await tester.tap(find.text('Services'));
     await tester.pumpAndSettle();
 
-    expect(homePageState.currentIndex, 5);
+    expect(homePageState.index, 5);
 
     await tester.tap(find.text('Map'));
     await tester.pumpAndSettle();
 
-    expect(homePageState.currentIndex, 0);
+    expect(homePageState.index, 0);
   });
 
   testWidgets('HomePage navigateToMapAndGetDirections function changes to MapPage', (WidgetTester tester) async {
+    final mockGoogleSheetsResponse = {
+      "range": "Sheet1!A1:L200",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "id",
+          "name",
+          "displayName",
+          "primaryType",
+          "secondaryType",
+          "tertiaryType",
+          "email",
+          "website",
+          "phone",
+          "latLng",
+          "startTime",
+          "endTime"
+        ],
+        [
+          "1",
+          "glazedandconfused",
+          "Glazed and Confused",
+          "Food",
+          "Food",
+          "Doughnuts",
+          "admin@glazedandconfued.com",
+          "https://www.glazedandconfused.com",
+          "01223 111111",
+          "52.199687,0.138813",
+          "10:30",
+          "16:30"
+        ]
+      ]
+    };
+    when(mockClient.get(Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey'))).thenAnswer((_) async => http.Response(jsonEncode(mockGoogleSheetsResponse), 200));
+    await fetchListings(mockClient);
+
     // Define a test listing
-    final listing = {
+    final mockListing = {
       "displayName": "Glazed and Confused",
       "email": "admin@glazedandconfued.com",
       "endTime": "16:30",
@@ -134,11 +285,11 @@ void main() async {
     mapPageState.filterSettings["Food"] = true;
 
     // Add the marker
-    await mapPageState.addMarker(listing, mockClient);
+    await mapPageState.addMarker(mockListing, mockClient);
 
     await tester.tap(find.text('Food'));
     await tester.pumpAndSettle();
-    expect(homePageState.currentIndex, 1);
+    expect(homePageState.index, 1);
 
     // Convert String to LatLng
     LatLng destinationCoordinates = stringToLatLng("52.199687,0.138813");
@@ -146,6 +297,6 @@ void main() async {
     // Trigger the navigation to map and fetch directions
     await homePageState.navigateToMapAndGetDirections("1", destinationCoordinates, mockClient);
 
-    expect(homePageState.currentIndex, 0);
+    expect(homePageState.index, 0);
   });
 }
