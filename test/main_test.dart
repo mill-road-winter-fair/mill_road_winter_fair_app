@@ -17,8 +17,12 @@ void main() async {
   // Load environment variables
   TestWidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
-  mrwfApi = dotenv.env['MRWF_API'] ?? '';
+  googleMapsAndSheetsApiKey = dotenv.env['GOOGLE_MAPS_AND_SHEETS_API_KEY'] ?? '';
+  googleSheetId = dotenv.env['GOOGLE_SHEET_ID'] ?? '';
+  googleSheetRange = dotenv.env['GOOGLE_SHEET_RANGE'] ?? '';
+
+  await fetchListings(true);
+  await loadSettings(true);
 
   // Set up mocks
   late MockClient mockClient;
@@ -27,7 +31,6 @@ void main() async {
   });
 
   testWidgets('HomePage displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
-    await loadSettings(true);
     await tester.pumpWidget(const MyApp());
 
     expect(find.text('Mill Road Winter Fair'), findsOneWidget);
@@ -44,7 +47,6 @@ void main() async {
   });
 
   testWidgets('HomePage navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
-    await loadSettings(true);
     await tester.pumpWidget(const MyApp());
 
     await tester.tap(find.byIcon(Icons.menu));
@@ -57,7 +59,6 @@ void main() async {
   });
 
   testWidgets('HomePage navigates to SettingsPage when Settings in drawer is tapped', (WidgetTester tester) async {
-    await loadSettings(true);
     await tester.pumpWidget(const MyApp());
 
     await tester.tap(find.byIcon(Icons.menu));
@@ -70,7 +71,6 @@ void main() async {
   });
 
   testWidgets('HomePage BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
-    await loadSettings(true);
     await tester.pumpWidget(const MyApp());
 
     await tester.tap(find.text('Food'));
@@ -112,7 +112,7 @@ void main() async {
       "displayName": "Glazed and Confused",
       "email": "admin@glazedandconfued.com",
       "endTime": "16:30",
-      "id": 1,
+      "id": "1",
       "name": "glazedandconfused",
       "phone": "01223 111111",
       "latLng": "52.199687,0.138813",
@@ -123,7 +123,6 @@ void main() async {
       "website": "https://www.glazedandconfused.com"
     };
 
-    await loadSettings(true);
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
@@ -145,7 +144,7 @@ void main() async {
     LatLng destinationCoordinates = stringToLatLng("52.199687,0.138813");
 
     // Trigger the navigation to map and fetch directions
-    await homePageState.navigateToMapAndGetDirections(1, destinationCoordinates, mockClient);
+    await homePageState.navigateToMapAndGetDirections("1", destinationCoordinates, mockClient);
 
     expect(homePageState.currentIndex, 0);
   });

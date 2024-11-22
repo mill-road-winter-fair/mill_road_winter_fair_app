@@ -1,42 +1,29 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
-@GenerateMocks([http.Client])
-import 'filtered_listings_test.mocks.dart';
-
 void main() async {
   // Load environment variables
   TestWidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
-  mrwfApi = dotenv.env['MRWF_API'] ?? '';
-
-  // Set up mocks
-  late MockClient mockClient;
-  setUp(() {
-    mockClient = MockClient();
-  });
+  googleMapsAndSheetsApiKey = dotenv.env['GOOGLE_MAPS_AND_SHEETS_API_KEY'] ?? '';
 
   // Build widget tree
   Future<void> pumpFilteredListingsPage(
     WidgetTester tester,
     String primaryType,
+    List<Map<String, dynamic>> listings,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: FilteredListingsPage(
           filterPrimaryType: primaryType,
-          client: mockClient,
+          listings: listings,
         ),
       ),
     );
@@ -45,22 +32,23 @@ void main() async {
   }
 
   testWidgets('displays error text when fetchFilteredListings fails', (WidgetTester tester) async {
-    when(mockClient.get(Uri.parse('$mrwfApi/listings'))).thenAnswer((_) async => http.Response('', 500));
+    // Define a test listing
+    List<Map<String, dynamic>> listing = [];
 
-    await pumpFilteredListingsPage(tester, 'Food');
+    await pumpFilteredListingsPage(tester, 'Food', listing);
 
-    expect(find.text('Error fetching listings'), findsOneWidget);
+    expect(find.text('Error fetching/sorting listings'), findsOneWidget);
   });
 
   testWidgets('displays filtered listings correctly', (WidgetTester tester) async {
     // Override user location global
     currentLatLng = const LatLng(52.199174, 0.140929);
     // Define mock values
-    final listings = [
+    List<Map<String, dynamic>> listings = [
       {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
-        'id': 1,
+        'id': '1',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',
         'primaryType': 'Food',
@@ -72,7 +60,7 @@ void main() async {
       {
         'displayName': 'Sushi Squad',
         'endTime': '16:30',
-        'id': 1,
+        'id': '2',
         'phone': '01223 222222',
         'latLng': '52.200063,0.139313',
         'primaryType': 'Food',
@@ -83,11 +71,8 @@ void main() async {
       },
     ];
 
-    // Specify when to mock
-    when(mockClient.get(Uri.parse('$mrwfApi/listings'))).thenAnswer((_) async => http.Response(jsonEncode(listings), 200));
-
     await loadSettings(true);
-    await pumpFilteredListingsPage(tester, 'Food');
+    await pumpFilteredListingsPage(tester, 'Food', listings);
 
     expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(find.text('Food • Doughnuts'), findsOneWidget);

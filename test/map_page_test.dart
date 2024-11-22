@@ -17,8 +17,10 @@ void main() async {
   // Load environment variables
   TestWidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
-  mrwfApi = dotenv.env['MRWF_API'] ?? '';
+  googleMapsAndSheetsApiKey = dotenv.env['GOOGLE_MAPS_AND_SHEETS_API_KEY'] ?? '';
+
+  await fetchListings(true);
+  await loadSettings(true);
 
   // Set up mocks
   late MapPageState mapPageState;
@@ -30,7 +32,6 @@ void main() async {
 
   testWidgets('test map type button changes map type', (WidgetTester tester) async {
     // Build the MapPage widget
-    await loadSettings(true);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -61,7 +62,7 @@ void main() async {
       "displayName": "Glazed and Confused",
       "email": "admin@glazedandconfued.com",
       "endTime": "16:30",
-      "id": 1,
+      "id": "1",
       "name": "glazedandconfused",
       "phone": "01223 111111",
       "latLng": "52.199687,0.138813",
@@ -73,7 +74,6 @@ void main() async {
     };
 
     // Build the widget and trigger the state
-    await loadSettings(true);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -126,7 +126,7 @@ void main() async {
       "displayName": "Glazed and Confused",
       "email": "admin@glazedandconfued.com",
       "endTime": "16:30",
-      "id": 1,
+      "id": "1",
       "name": "glazedandconfused",
       "phone": "01223 111111",
       "latLng": "52.199687,0.138813",
@@ -137,7 +137,6 @@ void main() async {
       "website": "https://www.glazedandconfused.com"
     };
 
-    await loadSettings(true);
     await tester.pumpWidget(const MaterialApp(home: MapPage()));
 
     // Obtain the state after mounting
@@ -164,7 +163,6 @@ void main() async {
 
   testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
     // Build the MapPage widget
-    await loadSettings(true);
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -181,7 +179,7 @@ void main() async {
       "displayName": "Glazed and Confused",
       "email": "admin@glazedandconfued.com",
       "endTime": "16:30",
-      "id": 1,
+      "id": "1",
       "name": "glazedandconfused",
       "phone": "01223 111111",
       "latLng": "52.199687,0.138813",
@@ -200,7 +198,7 @@ void main() async {
       "displayName": "The Crafty Canvas",
       "email": "contact@craftycanvas.com",
       "endTime": "16:30",
-      "id": 2,
+      "id": "2",
       "name": "thecraftycanvas",
       "phone": "01223 222222",
       "latLng": "52.201913,0.131984",
@@ -219,7 +217,7 @@ void main() async {
       "displayName": "The Jazz Junction",
       "email": "contact@jazzjunction.com",
       "endTime": "16:30",
-      "id": 3,
+      "id": "3",
       "name": "thejazzjunction",
       "phone": "01223 333333",
       "latLng": "52.202188,0.131312",
@@ -238,7 +236,7 @@ void main() async {
       "displayName": "Santa",
       "email": "",
       "endTime": "16:30",
-      "id": 4,
+      "id": "4",
       "name": "santa1",
       "phone": "",
       "latLng": "52.203563,0.132437",
@@ -257,7 +255,7 @@ void main() async {
       "displayName": "Information Point",
       "email": "info@millroadwinterfair.org",
       "endTime": "16:30",
-      "id": 5,
+      "id": "5",
       "name": "informationpoint1",
       "phone": "",
       "latLng": "52.200187,0.137313",
