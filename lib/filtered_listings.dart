@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -12,72 +11,69 @@ import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 
 class FilteredListingsPage extends StatelessWidget {
   final String filterPrimaryType;
-  final http.Client client;
+  final List<Map<String, dynamic>> listings;
 
   const FilteredListingsPage({
     required this.filterPrimaryType,
-    required this.client,
+    required this.listings,
     super.key,
   });
 
-  Future<List> fetchFilteredListings(String primaryType, http.Client client) async {
-    // Fetch all listings from the API
-    final response = await client.get(Uri.parse('$mrwfApi/listings'));
+  Future<List> sortListings() async {
+    if (listings.isEmpty) {
+      throw "No listings exist";
+    } else if (currentLatLng != null) {
+      // Sort listings by approximate distance
+      final sortedListings = listings.map((listing) {
+        LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+        final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
+        return {...listing, 'approximateDistanceMetres': distance};
+      }).toList();
 
-    if (response.statusCode == 200) {
-      // Decode the full list of listings
-      final allListings = json.decode(response.body) as List;
+      sortedListings.sort((a, b) {
+        int distanceA = a['approximateDistanceMetres'];
+        int distanceB = b['approximateDistanceMetres'];
+        return distanceA.compareTo(distanceB);
+      });
 
-      // Filter the listings based on the primaryType
-      final filteredListings = allListings.where((listing) => listing['primaryType'] == primaryType).toList();
-
-      return filteredListings;
-    } else {
-      throw Exception("Failed to load listings");
+      return sortedListings;
     }
+
+    return listings;
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchFilteredListings(filterPrimaryType, client),
+      future: sortListings(),
+      initialData: listings,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return const Center(child: Text("Error fetching listings"));
+          return const Center(child: Text("Error fetching/sorting listings"));
         } else {
-          final listings = snapshot.data as List;
+          final allListings = snapshot.data as List;
+
+          // Filter the listings based on the primaryType
+          final filteredListings = allListings.where((listing) => listing['primaryType'] == filterPrimaryType).toList();
 
           final homePageState = context.findAncestorStateOfType<HomePageState>();
-
-          // Sort listings by approximate distance
-          final sortedListings = listings.map((listing) {
-            LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-            final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
-            return {...listing, 'approximateDistanceMetres': distance};
-          }).toList();
-
-          if (currentLatLng != null) {
-            sortedListings.sort((a, b) {
-              int distanceA = a['approximateDistanceMetres'];
-              int distanceB = b['approximateDistanceMetres'];
-              return distanceA.compareTo(distanceB);
-            });
-          }
 
           return ListView.separated(
             padding: const EdgeInsets.all(8),
             separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-            itemCount: sortedListings.length,
+            itemCount: filteredListings.length,
             itemBuilder: (context, index) {
-              final listing = sortedListings[index];
+              final listing = filteredListings[index];
+              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+              final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
               return ListingInfoSheet(
                 title: listing['displayName'],
                 categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
                 openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-                approxDistance: 'approx. ${convertDistanceUnits(listing['approximateDistanceMetres'], preferredDistanceUnits)}',
+                approxDistance: approximateDistance,
                 phoneNumber: listing['phone'],
                 website: listing['website'],
                 onGetDirections: () => {

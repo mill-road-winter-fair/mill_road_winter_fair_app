@@ -134,7 +134,8 @@ class SettingsPageState extends State<SettingsPage> {
                       mapStyle = standardMap;
                     });
                     _saveSettings();
-                    mapPageKey.currentState?.fetchListings();
+                    mapPageKey.currentState?.clearAllMarkers();
+                    mapPageKey.currentState?.addAllMarkers();
                   },
                 ),
                 RadioListTile(
@@ -150,7 +151,8 @@ class SettingsPageState extends State<SettingsPage> {
                       mapStyle = darkMap;
                     });
                     _saveSettings();
-                    mapPageKey.currentState?.fetchListings();
+                    mapPageKey.currentState?.clearAllMarkers();
+                    mapPageKey.currentState?.addAllMarkers();
                   },
                 ),
                 RadioListTile(
@@ -166,7 +168,8 @@ class SettingsPageState extends State<SettingsPage> {
                     });
                     selectedThemeKey = value!;
                     _saveSettings();
-                    mapPageKey.currentState?.fetchListings();
+                    mapPageKey.currentState?.clearAllMarkers();
+                    mapPageKey.currentState?.addAllMarkers();
                   },
                 ),
                 RadioListTile(
@@ -182,7 +185,8 @@ class SettingsPageState extends State<SettingsPage> {
                     });
                     selectedThemeKey = value!;
                     _saveSettings();
-                    mapPageKey.currentState?.fetchListings();
+                    mapPageKey.currentState?.clearAllMarkers();
+                    mapPageKey.currentState?.addAllMarkers();
                   },
                 ),
                 RadioListTile(
@@ -198,7 +202,8 @@ class SettingsPageState extends State<SettingsPage> {
                       mapStyle = colourBlindMap;
                     });
                     _saveSettings();
-                    mapPageKey.currentState?.fetchListings();
+                    mapPageKey.currentState?.clearAllMarkers();
+                    mapPageKey.currentState?.addAllMarkers();
                   },
                 ),
               ],

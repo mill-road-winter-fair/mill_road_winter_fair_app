@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -55,19 +54,13 @@ class MapPageState extends State<MapPage> {
     super.initState();
     polylinePoints = PolylinePoints();
     establishLocation();
-    fetchListings();
+    addAllMarkers();
   }
 
-  Future<void> fetchListings() async {
-    setState(() {
-      markers.clear();
-    });
-    final response = await http.get(Uri.parse('$mrwfApi/listings'));
-    if (response.statusCode == 200) {
-      final listings = json.decode(response.body);
-      for (var listing in listings) {
-        addMarker(listing, http.Client());
-      }
+  void addAllMarkers() {
+    final allListings = listings as List;
+    for (var listing in allListings) {
+      addMarker(listing, http.Client());
     }
   }
 
@@ -273,7 +266,7 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  Future<void> getDirections(int id, LatLng destination) async {
+  Future<void> getDirections(String id, LatLng destination) async {
     // Clear any existing polylines
     setState(() {
       _polylines.clear(); // Clear any existing polylines
@@ -332,7 +325,7 @@ class MapPageState extends State<MapPage> {
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
     // Fetch new directions from the Google Directions API
     final result = await polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey: googleApiKey,
+      googleApiKey: googleMapsAndSheetsApiKey,
       request: PolylineRequest(
         origin: PointLatLng(origin.latitude, origin.longitude),
         destination: PointLatLng(destination.latitude, destination.longitude),

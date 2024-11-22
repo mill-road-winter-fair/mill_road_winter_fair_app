@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -11,12 +12,47 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
-// Initialise API Key variables
-late String googleApiKey;
-late String mrwfApi;
+// Initialise API variables
+late String googleMapsAndSheetsApiKey;
+late String googleSheetId;
+late String googleSheetRange;
+
+// Initialise global variable to hold listings (might want to switch this out for Firebase at some point)
+late List<Map<String, dynamic>> listings;
 
 //Set the default page number (0 is the map page)
 int globalIndex = 0;
+
+// Fetch listings from Google Sheets
+Future<void> fetchListings(bool onTest) async {
+  if (onTest == true) {
+    listings = [];
+  } else if (onTest == false) {
+    final uri = Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey');
+
+    try {
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        // Transform the Sheets API response into JSON that matches your app's format
+        final rows = data['values'] as List<dynamic>;
+        final headers = rows.first as List<dynamic>; // Assume the first row is headers
+        listings = rows.skip(1).map((row) {
+          return Map<String, dynamic>.fromIterables(
+            headers.cast<String>(),
+            row.cast<dynamic>(),
+          );
+        }).toList();
+      } else {
+        throw Exception('Failed to load Google Sheets data');
+      }
+    } catch (e) {
+      throw 'Error fetching Google Sheets data: $e';
+    }
+  }
+}
 
 Future<void> main() async {
   // Ensure all bindings are initialized before async calls
@@ -24,10 +60,13 @@ Future<void> main() async {
 
   // Load environment variables
   await dotenv.load(fileName: ".env");
-  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
-  mrwfApi = dotenv.env['MRWF_API'] ?? '';
+  googleMapsAndSheetsApiKey = dotenv.env['GOOGLE_MAPS_AND_SHEETS_API_KEY'] ?? '';
+  googleSheetId = dotenv.env['GOOGLE_SHEET_ID'] ?? '';
+  googleSheetRange = dotenv.env['GOOGLE_SHEET_RANGE'] ?? '';
 
   await loadSettings(false);
+
+  await fetchListings(false);
 
   // Run the app
   runApp(const MyApp());
@@ -61,7 +100,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   int get currentIndex => globalIndex;
 
-  Future<void> navigateToMapAndGetDirections(int id, LatLng destinationCoordinates, http.Client client) async {
+  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
     setState(() {
       globalIndex = 0;
     });
@@ -94,11 +133,11 @@ class HomePageState extends State<HomePage> {
         index: globalIndex,
         children: [
           MapPage(key: mapPageKey),
-          FilteredListingsPage(filterPrimaryType: "Food", client: http.Client()),
-          FilteredListingsPage(filterPrimaryType: "Shopping", client: http.Client()),
-          FilteredListingsPage(filterPrimaryType: "Music", client: http.Client()),
-          FilteredListingsPage(filterPrimaryType: "Event", client: http.Client()),
-          FilteredListingsPage(filterPrimaryType: "Service", client: http.Client()),
+          FilteredListingsPage(filterPrimaryType: "Food", listings: listings),
+          FilteredListingsPage(filterPrimaryType: "Shopping", listings: listings),
+          FilteredListingsPage(filterPrimaryType: "Music", listings: listings),
+          FilteredListingsPage(filterPrimaryType: "Event", listings: listings),
+          FilteredListingsPage(filterPrimaryType: "Service", listings: listings),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
