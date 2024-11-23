@@ -216,7 +216,6 @@ void main() async {
       ),
     );
     await tester.pumpAndSettle();
-    listings = [];
 
     // Obtain the state after mounting
     mapPageState = tester.state<MapPageState>(find.byType(MapPage));
@@ -381,6 +380,8 @@ void main() async {
   });
 
   testWidgets('clearAllMarkers clears all markers', (tester) async {
+    listings = [];
+
     // Build the MapPage widget
     await tester.pumpWidget(
       MaterialApp(
