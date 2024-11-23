@@ -38,3 +38,12 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     throw 'Error fetching Google Sheets data: $e';
   }
 }
+
+// Fetch listings from Google Sheets if we don't have any listings
+Future<List<Map<String, dynamic>>> fetchExistingListings(http.Client client) async {
+  if (listings != []) {
+    return listings;
+  } else {
+    return fetchListings(client);
+  }
+}

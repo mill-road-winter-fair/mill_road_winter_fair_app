@@ -83,7 +83,7 @@ class HomePageState extends State<HomePage> {
       body: IndexedStack(
         index: index,
         children: [
-          MapPage(key: mapPageKey),
+          MapPage(listings: listings, key: mapPageKey),
           FilteredListingsPage(filterPrimaryType: "Food", listings: listings),
           FilteredListingsPage(filterPrimaryType: "Shopping", listings: listings),
           FilteredListingsPage(filterPrimaryType: "Music", listings: listings),
