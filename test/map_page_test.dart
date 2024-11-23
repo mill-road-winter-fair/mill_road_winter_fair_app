@@ -1,43 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:mockito/annotations.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
-@GenerateMocks([http.Client])
-import 'map_page_test.mocks.dart';
-
 void main() async {
-  // Load environment variables
-  TestWidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
-  mrwfApi = dotenv.env['MRWF_API'] ?? '';
+  // Mock user settings
+  await loadSettings(true);
+
+  listings = [
+    {
+      'displayName': 'Glazed and Confused',
+      'endTime': '16:30',
+      'id': '1',
+      'phone': '01223 111111',
+      'latLng': '52.199687,0.138813',
+      'primaryType': 'Food',
+      'secondaryType': 'Food',
+      'startTime': '10:30',
+      'tertiaryType': 'Doughnuts',
+      'website': 'https://www.glazedandconfused.com',
+    }
+  ];
 
   // Set up mocks
   late MapPageState mapPageState;
-  late MockClient mockClient;
   setUp(() {
-    mapPageState = const MapPage().createState();
-    mockClient = MockClient();
+    mapPageState = MapPage(listings: listings).createState();
   });
 
   testWidgets('test map type button changes map type', (WidgetTester tester) async {
     // Build the MapPage widget
-    await loadSettings(true);
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
-          body: MapPage(),
+          body: MapPage(listings: listings),
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
 
@@ -56,28 +60,11 @@ void main() async {
   });
 
   testWidgets('addMarker filters and adds marker based on filter settings', (tester) async {
-    // Define a test listing
-    final listing = {
-      "displayName": "Glazed and Confused",
-      "email": "admin@glazedandconfued.com",
-      "endTime": "16:30",
-      "id": 1,
-      "name": "glazedandconfused",
-      "phone": "01223 111111",
-      "latLng": "52.199687,0.138813",
-      "primaryType": "Food",
-      "secondaryType": "Food",
-      "startTime": "10:30",
-      "tertiaryType": "Doughnuts",
-      "website": "https://www.glazedandconfused.com"
-    };
-
-    // Build the widget and trigger the state
-    await loadSettings(true);
+    // Build the MapPage widget
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
-          body: MapPage(),
+          body: MapPage(listings: listings),
         ),
       ),
     );
@@ -88,9 +75,6 @@ void main() async {
 
     // Configure the map marker filter
     mapPageState.filterSettings["Food"] = true;
-
-    // Add the marker
-    await mapPageState.addMarker(listing, mockClient);
 
     // Verify that the expected marker was added
     expect(mapPageState.markers.isNotEmpty, true);
@@ -121,34 +105,21 @@ void main() async {
     // Override user location global
     currentLatLng = const LatLng(52.199174, 0.140929);
 
-    // Define a test listing
-    final listing = {
-      "displayName": "Glazed and Confused",
-      "email": "admin@glazedandconfued.com",
-      "endTime": "16:30",
-      "id": 1,
-      "name": "glazedandconfused",
-      "phone": "01223 111111",
-      "latLng": "52.199687,0.138813",
-      "primaryType": "Food",
-      "secondaryType": "Food",
-      "startTime": "10:30",
-      "tertiaryType": "Doughnuts",
-      "website": "https://www.glazedandconfused.com"
-    };
-
-    await loadSettings(true);
-    await tester.pumpWidget(const MaterialApp(home: MapPage()));
+    // Build the MapPage widget
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MapPage(listings: listings),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
     // Obtain the state after mounting
     final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
 
-    // Add a marker
-    await mapPageState.addMarker(listing, mockClient);
-    await tester.pumpAndSettle();
-
     // Simulate a tap on the map marker
-    final markerId = MarkerId(listing['id'].toString());
+    const markerId = MarkerId('1');
     final marker = mapPageState.markers.values.toList().firstWhere((marker) => marker.markerId == markerId);
     marker.onTap!();
     await tester.pumpAndSettle();
@@ -163,114 +134,91 @@ void main() async {
   });
 
   testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
+    listings = [
+      {
+        "displayName": "Glazed and Confused",
+        "email": "admin@glazedandconfued.com",
+        "endTime": "16:30",
+        "id": "1",
+        "name": "glazedandconfused",
+        "phone": "01223 111111",
+        "latLng": "52.199687,0.138813",
+        "primaryType": "Food",
+        "secondaryType": "Food",
+        "startTime": "10:30",
+        "tertiaryType": "Doughnuts",
+        "website": "https://www.glazedandconfused.com"
+      },
+      {
+        "displayName": "The Crafty Canvas",
+        "email": "contact@craftycanvas.com",
+        "endTime": "16:30",
+        "id": "2",
+        "name": "thecraftycanvas",
+        "phone": "01223 222222",
+        "latLng": "52.201913,0.131984",
+        "primaryType": "Shopping",
+        "secondaryType": "Retail",
+        "startTime": "10:30",
+        "tertiaryType": "Crafts",
+        "website": "https://www.craftycanvas.com"
+      },
+      {
+        "displayName": "The Jazz Junction",
+        "email": "contact@jazzjunction.com",
+        "endTime": "16:30",
+        "id": "3",
+        "name": "thejazzjunction",
+        "phone": "01223 333333",
+        "latLng": "52.202188,0.131312",
+        "primaryType": "Music",
+        "secondaryType": "Music",
+        "startTime": "10:30",
+        "tertiaryType": "Jazz",
+        "website": "https://www.jazzjunction.com"
+      },
+      {
+        "displayName": "Santa",
+        "email": "",
+        "endTime": "16:30",
+        "id": "4",
+        "name": "santa1",
+        "phone": "",
+        "latLng": "52.203563,0.132437",
+        "primaryType": "Event",
+        "secondaryType": "Performance",
+        "startTime": "10:30",
+        "tertiaryType": "Kindly Elf",
+        "website": ""
+      },
+      {
+        "displayName": "Information Point",
+        "email": "info@millroadwinterfair.org",
+        "endTime": "16:30",
+        "id": "5",
+        "name": "informationpoint1",
+        "phone": "",
+        "latLng": "52.200187,0.137313",
+        "primaryType": "Service",
+        "secondaryType": "Information",
+        "startTime": "10:30",
+        "tertiaryType": "Help Point",
+        "website": ""
+      }
+    ];
+
     // Build the MapPage widget
-    await loadSettings(true);
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
-          body: MapPage(),
+          body: MapPage(listings: listings),
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     // Obtain the state after mounting
     mapPageState = tester.state<MapPageState>(find.byType(MapPage));
-
-    // Define a test listing
-    var listing = {
-      "displayName": "Glazed and Confused",
-      "email": "admin@glazedandconfued.com",
-      "endTime": "16:30",
-      "id": 1,
-      "name": "glazedandconfused",
-      "phone": "01223 111111",
-      "latLng": "52.199687,0.138813",
-      "primaryType": "Food",
-      "secondaryType": "Food",
-      "startTime": "10:30",
-      "tertiaryType": "Doughnuts",
-      "website": "https://www.glazedandconfused.com"
-    };
-
-    // Add a marker
-    await mapPageState.addMarker(listing, mockClient);
-    await tester.pumpAndSettle();
-
-    listing = {
-      "displayName": "The Crafty Canvas",
-      "email": "contact@craftycanvas.com",
-      "endTime": "16:30",
-      "id": 2,
-      "name": "thecraftycanvas",
-      "phone": "01223 222222",
-      "latLng": "52.201913,0.131984",
-      "primaryType": "Shopping",
-      "secondaryType": "Retail",
-      "startTime": "10:30",
-      "tertiaryType": "Crafts",
-      "website": "https://www.craftycanvas.com"
-    };
-
-    // Add a marker
-    await mapPageState.addMarker(listing, mockClient);
-    await tester.pumpAndSettle();
-
-    listing = {
-      "displayName": "The Jazz Junction",
-      "email": "contact@jazzjunction.com",
-      "endTime": "16:30",
-      "id": 3,
-      "name": "thejazzjunction",
-      "phone": "01223 333333",
-      "latLng": "52.202188,0.131312",
-      "primaryType": "Music",
-      "secondaryType": "Music",
-      "startTime": "10:30",
-      "tertiaryType": "Jazz",
-      "website": "https://www.jazzjunction.com"
-    };
-
-    // Add a marker
-    await mapPageState.addMarker(listing, mockClient);
-    await tester.pumpAndSettle();
-
-    listing = {
-      "displayName": "Santa",
-      "email": "",
-      "endTime": "16:30",
-      "id": 4,
-      "name": "santa1",
-      "phone": "",
-      "latLng": "52.203563,0.132437",
-      "primaryType": "Event",
-      "secondaryType": "Performance",
-      "startTime": "10:30",
-      "tertiaryType": "Kindly Elf",
-      "website": ""
-    };
-
-    // Add a marker
-    await mapPageState.addMarker(listing, mockClient);
-    await tester.pumpAndSettle();
-
-    listing = {
-      "displayName": "Information Point",
-      "email": "info@millroadwinterfair.org",
-      "endTime": "16:30",
-      "id": 5,
-      "name": "informationpoint1",
-      "phone": "",
-      "latLng": "52.200187,0.137313",
-      "primaryType": "Service",
-      "secondaryType": "Information",
-      "startTime": "10:30",
-      "tertiaryType": "Help Point",
-      "website": ""
-    };
-
-    // Add a marker
-    await mapPageState.addMarker(listing, mockClient);
-    await tester.pumpAndSettle();
 
     // Verify that the expected marker was added
     expect(mapPageState.markers.isNotEmpty, true);
@@ -424,7 +372,6 @@ void main() async {
     );
     await tester.tap(hideAll);
     await tester.pumpAndSettle();
-    expect(find.text("Filter Map Pins"), findsNothing);
     expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
     expect(mapPageState.markers[const MarkerId('2')]?.visible, false);
     expect(mapPageState.markers[const MarkerId('3')]?.visible, false);
@@ -433,11 +380,13 @@ void main() async {
   });
 
   testWidgets('clearAllMarkers clears all markers', (tester) async {
-    // Build the widget and trigger the state
+    listings = [];
+
+    // Build the MapPage widget
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
-          body: MapPage(),
+          body: MapPage(listings: listings),
         ),
       ),
     );

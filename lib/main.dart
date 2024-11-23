@@ -1,33 +1,23 @@
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-
-// Initialise API Key variables
-late String googleApiKey;
-late String mrwfApi;
-
-//Set the default page number (0 is the map page)
-int globalIndex = 0;
 
 Future<void> main() async {
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
-  googleApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
-  mrwfApi = dotenv.env['MRWF_API'] ?? '';
-
   await loadSettings(false);
+
+  listings = await fetchListings(http.Client());
 
   // Run the app
   runApp(const MyApp());
@@ -59,14 +49,14 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  int get currentIndex => globalIndex;
+  int index = 0;
 
-  Future<void> navigateToMapAndGetDirections(int id, LatLng destinationCoordinates, http.Client client) async {
+  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
     setState(() {
-      globalIndex = 0;
+      index = 0;
     });
 
-    mapPageKey.currentState?.getDirections(id, destinationCoordinates);
+    mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
   }
 
   @override
@@ -91,23 +81,23 @@ class HomePageState extends State<HomePage> {
         ),
       ),
       body: IndexedStack(
-        index: globalIndex,
+        index: index,
         children: [
-          MapPage(key: mapPageKey),
-          FilteredListingsPage(filterPrimaryType: "Food", client: http.Client()),
-          FilteredListingsPage(filterPrimaryType: "Shopping", client: http.Client()),
-          FilteredListingsPage(filterPrimaryType: "Music", client: http.Client()),
-          FilteredListingsPage(filterPrimaryType: "Event", client: http.Client()),
-          FilteredListingsPage(filterPrimaryType: "Service", client: http.Client()),
+          MapPage(listings: listings, key: mapPageKey),
+          FilteredListingsPage(filterPrimaryType: "Food", listings: listings),
+          FilteredListingsPage(filterPrimaryType: "Shopping", listings: listings),
+          FilteredListingsPage(filterPrimaryType: "Music", listings: listings),
+          FilteredListingsPage(filterPrimaryType: "Event", listings: listings),
+          FilteredListingsPage(filterPrimaryType: "Service", listings: listings),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: globalIndex,
-        onTap: (index) {
+        currentIndex: index,
+        onTap: (selectedIndex) {
           // Update the user's location
           establishLocation();
           setState(() {
-            globalIndex = index;
+            index = selectedIndex;
           });
         },
         items: const [
