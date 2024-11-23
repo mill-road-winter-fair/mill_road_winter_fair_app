@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 void main() async {
-  // Load environment variables
-  TestWidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-  googleMapsAndSheetsApiKey = dotenv.env['GOOGLE_MAPS_AND_SHEETS_API_KEY'] ?? '';
-
   // Build widget tree
   Future<void> pumpFilteredListingsPage(
     WidgetTester tester,
@@ -37,7 +30,7 @@ void main() async {
 
     await pumpFilteredListingsPage(tester, 'Food', listing);
 
-    expect(find.text('Error fetching/sorting listings'), findsOneWidget);
+    expect(find.text('Error sorting listings'), findsOneWidget);
   });
 
   testWidgets('displays filtered listings correctly', (WidgetTester tester) async {
