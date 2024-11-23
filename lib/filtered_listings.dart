@@ -51,7 +51,7 @@ class FilteredListingsPage extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return const Center(child: Text("Error fetching/sorting listings"));
+          return const Center(child: Text("Error sorting listings"));
         } else {
           final allListings = snapshot.data as List;
 
