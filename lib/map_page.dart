@@ -28,11 +28,11 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late http.Client client;
-  List<MarkerId> foodMarkerIds = [];
-  List<MarkerId> shoppingMarkerIds = [];
-  List<MarkerId> musicMarkerIds = [];
-  List<MarkerId> eventMarkerIds = [];
-  List<MarkerId> serviceMarkerIds = [];
+  late List<MarkerId> foodMarkerIds;
+  late List<MarkerId> shoppingMarkerIds;
+  late List<MarkerId> musicMarkerIds;
+  late List<MarkerId> eventMarkerIds;
+  late List<MarkerId> serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints polylinePoints; // For decoding points
@@ -57,12 +57,14 @@ class MapPageState extends State<MapPage> {
     super.initState();
     polylinePoints = PolylinePoints();
     establishLocation();
+    setMarkerLists();
+    addAllMarkers();
   }
 
   void addAllMarkers() {
     final allListings = listings as List;
     for (var listing in allListings) {
-      addMarker(listing, http.Client());
+      addMarker(listing);
     }
   }
 
@@ -84,23 +86,32 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  addMarker(listing, client) async {
-    // Option to use a mock function (for tests)
-    client ??= http.Client();
+  void setMarkerLists() {
+    // Reset marker lists
+    foodMarkerIds = [];
+    shoppingMarkerIds = [];
+    musicMarkerIds = [];
+    eventMarkerIds = [];
+    serviceMarkerIds = [];
 
-    // Assign markerIds to maps for filtering
-    if (listing['primaryType'] == "Food") {
-      foodMarkerIds.add(MarkerId(listing['id'].toString()));
-    } else if (listing['primaryType'] == "Shopping") {
-      shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
-    } else if (listing['primaryType'] == "Music") {
-      musicMarkerIds.add(MarkerId(listing['id'].toString()));
-    } else if (listing['primaryType'] == "Event") {
-      eventMarkerIds.add(MarkerId(listing['id'].toString()));
-    } else if (listing['primaryType'] == "Service") {
-      serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+    final allListings = listings as List;
+    for (var listing in allListings) {
+      // Assign markerIds to maps for filtering
+      if (listing['primaryType'] == "Food") {
+        foodMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Shopping") {
+        shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Music") {
+        musicMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Event") {
+        eventMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Service") {
+        serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
     }
+  }
 
+  addMarker(listing) async {
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
 
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -395,7 +406,10 @@ class MapPageState extends State<MapPage> {
           } else if (snapshot.hasError) {
             return const Center(child: Text("Error fetching listings"));
           } else {
-            addAllMarkers();
+            if (markers.isEmpty) {
+              addAllMarkers();
+              setMarkerLists();
+            }
             return Scaffold(
               body: GoogleMap(
                 // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
@@ -431,6 +445,7 @@ class MapPageState extends State<MapPage> {
                               IconButton.filled(
                                 onPressed: () {
                                   showFilterMenu();
+                                  setMarkerLists();
                                 },
                                 icon: Icon(
                                   Icons.filter_alt,
