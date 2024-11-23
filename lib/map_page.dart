@@ -355,12 +355,7 @@ class MapPageState extends State<MapPage> {
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
         ));
         final distanceMetres = result.totalDistanceValue;
-        if (distanceMetres! <= 999) {
-          distanceToDestination = '$distanceMetres m';
-        } else {
-          final distanceKilometres = (distanceMetres / 1000).toStringAsFixed(2);
-          distanceToDestination = '$distanceKilometres km';
-        }
+        distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
       });
     }
   }
