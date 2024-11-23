@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ListingInfoSheet extends StatelessWidget {
@@ -57,7 +58,7 @@ class ListingInfoSheet extends StatelessWidget {
                   flex: 5,
                   child: Text(categories)
               ),
-              if (approxDistance != "")
+              if (currentLatLng != null)
                 Expanded(
                   flex: 5,
                   child: Text(
