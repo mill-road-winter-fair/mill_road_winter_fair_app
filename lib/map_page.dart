@@ -54,11 +54,12 @@ class MapPageState extends State<MapPage> {
 
   @override
   void initState() {
-    super.initState();
     _polylinePoints = PolylinePoints();
-    establishLocation();
+    _fetchListings = fetchExistingListings(http.Client());
     setMarkerLists();
     addAllMarkers();
+    establishLocation();
+    super.initState();
   }
 
   void addAllMarkers() {
@@ -407,10 +408,6 @@ class MapPageState extends State<MapPage> {
           } else if (snapshot.hasError) {
             return const Center(child: Text("Error fetching listings"));
           } else {
-            if (markers.isEmpty) {
-              addAllMarkers();
-              setMarkerLists();
-            }
             return Scaffold(
               body: GoogleMap(
                 // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
