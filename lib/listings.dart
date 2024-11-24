@@ -24,8 +24,22 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     // It only seems to occur when the API has not been called in some time
     // I don't know why this is happening (possibly something to do with custom formulas) but this is attempting to account for it
     if (response.body.contains("#NAME?")) {
-      sleep(const Duration(seconds: 2));
-      response = await client.get(uri);
+      for (var i = 0; i < 10; i++) {
+        sleep(const Duration(seconds: 2));
+        var newResponse = await client.get(uri);
+        if (newResponse.body.contains("#NAME?")) {
+          continue;
+        } else {
+         response = newResponse;
+         break;
+        }
+      }
+
+      // If the response still contains "#NAME?" after 10 attempts, throw an error
+      if (response.body.contains("#NAME?")) {
+        throw "Error fetching listings";
+      }
+
     }
 
     if (response.statusCode == 200) {
