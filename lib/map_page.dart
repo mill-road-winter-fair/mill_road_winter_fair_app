@@ -440,17 +440,38 @@ class MapPageState extends State<MapPage> {
                         children: [
                           Row(
                             children: [
+                              if (_navigationInProgress == true)
+                                IconButton.filled(
+                                  onPressed: () {
+                                    setState(() {
+                                      _positionStream?.cancel();
+                                      _polylines.clear();
+                                      _distanceToDestination = null;
+                                      final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                                      updateMarkerVisibility(idList, true);
+                                      _navigationInProgress = false;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.wrong_location,
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                  ),
+                                )
+                            ],
+                          ),
+                          Row(
+                            children: [
                               if (_navigationInProgress == false)
-                              IconButton.filled(
-                                onPressed: () {
-                                  showFilterMenu();
-                                  setMarkerLists();
-                                },
-                                icon: Icon(
-                                  Icons.filter_alt,
-                                  color: Theme.of(context).colorScheme.onPrimary,
+                                IconButton.filled(
+                                  onPressed: () {
+                                    showFilterMenu();
+                                    setMarkerLists();
+                                  },
+                                  icon: Icon(
+                                    Icons.filter_alt,
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                           Row(
@@ -472,26 +493,6 @@ class MapPageState extends State<MapPage> {
                                   color: Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              if (_navigationInProgress == true)
-                                IconButton.filled(
-                                    onPressed: () {
-                                      setState(() {
-                                        _positionStream?.cancel();
-                                        _polylines.clear();
-                                        _distanceToDestination = null;
-                                        final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                                        updateMarkerVisibility(idList, true);
-                                        _navigationInProgress = false;
-                                      });
-                                    },
-                                    icon: Icon(
-                                      Icons.wrong_location,
-                                      color: Theme.of(context).colorScheme.onPrimary,
-                                    ))
                             ],
                           ),
                         ],
