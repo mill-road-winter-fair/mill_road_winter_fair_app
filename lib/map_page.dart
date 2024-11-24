@@ -27,17 +27,17 @@ class MapPage extends StatefulWidget {
 }
 
 class MapPageState extends State<MapPage> {
-  late http.Client client;
-  late List<MarkerId> foodMarkerIds;
-  late List<MarkerId> shoppingMarkerIds;
-  late List<MarkerId> musicMarkerIds;
-  late List<MarkerId> eventMarkerIds;
-  late List<MarkerId> serviceMarkerIds;
+  late Future<List<Map<String, dynamic>>> _fetchListings;
+  late List<MarkerId> _foodMarkerIds;
+  late List<MarkerId> _shoppingMarkerIds;
+  late List<MarkerId> _musicMarkerIds;
+  late List<MarkerId> _eventMarkerIds;
+  late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
-  late PolylinePoints polylinePoints; // For decoding points
-  bool navigationInProgress = false;
-  String? distanceToDestination;
+  late PolylinePoints _polylinePoints; // For decoding points
+  bool _navigationInProgress = false;
+  String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller; // Declare _controller here
@@ -55,15 +55,14 @@ class MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    polylinePoints = PolylinePoints();
+    _polylinePoints = PolylinePoints();
     establishLocation();
     setMarkerLists();
     addAllMarkers();
   }
 
   void addAllMarkers() {
-    final allListings = listings as List;
-    for (var listing in allListings) {
+    for (var listing in listings) {
       addMarker(listing);
     }
   }
@@ -88,25 +87,25 @@ class MapPageState extends State<MapPage> {
 
   void setMarkerLists() {
     // Reset marker lists
-    foodMarkerIds = [];
-    shoppingMarkerIds = [];
-    musicMarkerIds = [];
-    eventMarkerIds = [];
-    serviceMarkerIds = [];
+    _foodMarkerIds = [];
+    _shoppingMarkerIds = [];
+    _musicMarkerIds = [];
+    _eventMarkerIds = [];
+    _serviceMarkerIds = [];
 
     final allListings = listings as List;
     for (var listing in allListings) {
       // Assign markerIds to maps for filtering
       if (listing['primaryType'] == "Food") {
-        foodMarkerIds.add(MarkerId(listing['id'].toString()));
+        _foodMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Shopping") {
-        shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
+        _shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Music") {
-        musicMarkerIds.add(MarkerId(listing['id'].toString()));
+        _musicMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Event") {
-        eventMarkerIds.add(MarkerId(listing['id'].toString()));
+        _eventMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Service") {
-        serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+        _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
       }
     }
   }
@@ -146,7 +145,9 @@ class MapPageState extends State<MapPage> {
       },
     );
 
-    markers[markerId] = newMarker;
+    setState(() {
+      markers[markerId] = newMarker;
+    });
   }
 
   //The Remove All filters button seems to prefer using this function rather than doing it's own setState
@@ -184,7 +185,7 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Food"] = value!;
                         });
-                        final idList = foodMarkerIds;
+                        final idList = _foodMarkerIds;
                         updateMarkerVisibility(idList, value!);
                       },
                     ),
@@ -196,7 +197,7 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Shopping"] = value!;
                         });
-                        final idList = shoppingMarkerIds;
+                        final idList = _shoppingMarkerIds;
                         updateMarkerVisibility(idList, value!);
                       },
                     ),
@@ -208,7 +209,7 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Music"] = value!;
                         });
-                        final idList = musicMarkerIds;
+                        final idList = _musicMarkerIds;
                         updateMarkerVisibility(idList, value!);
                       },
                     ),
@@ -220,7 +221,7 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Events"] = value!;
                         });
-                        final idList = eventMarkerIds;
+                        final idList = _eventMarkerIds;
                         updateMarkerVisibility(idList, value!);
                       },
                     ),
@@ -232,7 +233,7 @@ class MapPageState extends State<MapPage> {
                         setState(() {
                           filterSettings["Services"] = value!;
                         });
-                        final idList = serviceMarkerIds;
+                        final idList = _serviceMarkerIds;
                         updateMarkerVisibility(idList, value!);
                       },
                     ),
@@ -246,7 +247,7 @@ class MapPageState extends State<MapPage> {
                                 filterSettings[key] = true;
                               });
                             });
-                            final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+                            final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                             updateMarkerVisibility(idList, true);
                             Navigator.pop(context);
                           },
@@ -260,7 +261,7 @@ class MapPageState extends State<MapPage> {
                                 filterSettings[key] = false;
                               });
                             });
-                            final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+                            final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                             updateMarkerVisibility(idList, false);
                             Navigator.pop(context);
                           },
@@ -286,7 +287,7 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines
     setState(() {
       _polylines.clear(); // Clear any existing polylines
-      final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+      final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
       updateMarkerVisibility(idList, false); // Hide any existing markers
     });
 
@@ -310,7 +311,7 @@ class MapPageState extends State<MapPage> {
     updateMarkerVisibility(destinationMarkerIds, true);
 
     // Set navigation as in progress
-    navigationInProgress = true;
+    _navigationInProgress = true;
   }
 
   @override
@@ -344,7 +345,7 @@ class MapPageState extends State<MapPage> {
     String googleMapsAndSheetsApiKey = dotenv.env['GOOGLE_MAPS_AND_SHEETS_API_KEY'] ?? '';
 
     // Fetch new directions from the Google Directions API
-    final result = await polylinePoints.getRouteBetweenCoordinates(
+    final result = await _polylinePoints.getRouteBetweenCoordinates(
       googleApiKey: googleMapsAndSheetsApiKey,
       request: PolylineRequest(
         origin: PointLatLng(origin.latitude, origin.longitude),
@@ -365,7 +366,7 @@ class MapPageState extends State<MapPage> {
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
         ));
         final distanceMetres = result.totalDistanceValue;
-        distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
+        _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
       });
     }
   }
@@ -399,7 +400,7 @@ class MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: fetchExistingListings(http.Client()),
+        future: _fetchListings,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -477,16 +478,16 @@ class MapPageState extends State<MapPage> {
                           ),
                           Row(
                             children: [
-                              if (navigationInProgress == true)
+                              if (_navigationInProgress == true)
                                 IconButton.filled(
                                     onPressed: () {
                                       setState(() {
                                         _positionStream?.cancel();
                                         _polylines.clear();
-                                        distanceToDestination = null;
-                                        final idList = foodMarkerIds + shoppingMarkerIds + musicMarkerIds + eventMarkerIds + serviceMarkerIds;
+                                        _distanceToDestination = null;
+                                        final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                                         updateMarkerVisibility(idList, true);
-                                        navigationInProgress = false;
+                                        _navigationInProgress = false;
                                       });
                                     },
                                     icon: Icon(
@@ -506,7 +507,7 @@ class MapPageState extends State<MapPage> {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              if (distanceToDestination != null)
+                              if (_distanceToDestination != null)
                                 ElevatedButton.icon(
                                   onPressed: () {
                                     _setMapFitToPolyline(_polylines);
@@ -514,7 +515,7 @@ class MapPageState extends State<MapPage> {
                                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                                   icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
                                   label: Text(
-                                    distanceToDestination!,
+                                    _distanceToDestination!,
                                     style: TextStyle(fontSize: 28, color: Theme.of(context).colorScheme.onPrimary),
                                   ),
                                 ),
