@@ -15,7 +15,7 @@ import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Define a GlobalKey for MapPageState:
-final mapPageKey = GlobalKey<_MapPageState>();
+final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
@@ -23,10 +23,10 @@ class MapPage extends StatefulWidget {
   const MapPage({required this.listings, super.key});
 
   @override
-  State<MapPage> createState() => _MapPageState();
+  MapPageState createState() => MapPageState();
 }
 
-class _MapPageState extends State<MapPage> {
+class MapPageState extends State<MapPage> {
   late Future<List<Map<String, dynamic>>> _fetchListings;
   late List<MarkerId> _foodMarkerIds;
   late List<MarkerId> _shoppingMarkerIds;
