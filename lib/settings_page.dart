@@ -45,10 +45,10 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  SettingsPageState createState() => SettingsPageState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();

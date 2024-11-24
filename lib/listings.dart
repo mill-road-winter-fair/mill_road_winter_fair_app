@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mill_road_winter_fair_app/map_page.dart';
 
 // Initialise global variable to hold listings (might want to switch this out for Firebase at some point)
 late List<Map<String, dynamic>> listings;
@@ -17,7 +17,29 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
   final uri = Uri.parse('https://sheets.googleapis.com/v4/spreadsheets/$googleSheetId/values/$googleSheetRange?key=$googleMapsAndSheetsApiKey');
 
   try {
-    final response = await client.get(uri);
+    var response = await client.get(uri);
+
+    // Sometimes column J in the Google Sheet is returning "#NAME?" instead of the latLng value
+    // It only seems to occur when the API has not been called in some time
+    // I don't know why this is happening (possibly something to do with custom formulas) but this is attempting to account for it
+    if (response.body.contains("#NAME?")) {
+      for (var i = 0; i < 10; i++) {
+        sleep(const Duration(seconds: 2));
+        var newResponse = await client.get(uri);
+        if (newResponse.body.contains("#NAME?")) {
+          continue;
+        } else {
+         response = newResponse;
+         break;
+        }
+      }
+
+      // If the response still contains "#NAME?" after 10 attempts, throw an error
+      if (response.body.contains("#NAME?")) {
+        throw "Error fetching listings";
+      }
+
+    }
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -45,9 +67,6 @@ Future<List<Map<String, dynamic>>> fetchExistingListings(http.Client client) asy
   if (listings != []) {
     return listings;
   } else {
-    List<Map<String, dynamic>> newListings = await fetchListings(client);
-    mapPageKey.currentState?.setMarkerLists();
-    mapPageKey.currentState?.addAllMarkers();
-    return newListings;
+    return fetchListings(client);
   }
 }
