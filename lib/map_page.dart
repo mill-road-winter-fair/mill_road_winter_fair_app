@@ -440,6 +440,7 @@ class MapPageState extends State<MapPage> {
                         children: [
                           Row(
                             children: [
+                              if (_navigationInProgress == false)
                               IconButton.filled(
                                 onPressed: () {
                                   showFilterMenu();
