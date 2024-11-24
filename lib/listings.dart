@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:mill_road_winter_fair_app/map_page.dart';
 
 // Initialise global variable to hold listings (might want to switch this out for Firebase at some point)
 late List<Map<String, dynamic>> listings;
