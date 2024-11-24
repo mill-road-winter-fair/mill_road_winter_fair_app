@@ -419,7 +419,7 @@ class MapPageState extends State<MapPage> {
                 myLocationButtonEnabled: true,
                 mapToolbarEnabled: false,
                 onMapCreated: (GoogleMapController controller) {
-                  _controller = controller; // Assign the controller here
+                  _controller = controller;
                 },
                 initialCameraPosition: const CameraPosition(
                   target: LatLng(52.199174, 0.140929),
