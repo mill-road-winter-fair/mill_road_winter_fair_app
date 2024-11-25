@@ -70,7 +70,3 @@ Future<List<Map<String, dynamic>>> fetchExistingListings(http.Client client) asy
     return fetchListings(client);
   }
 }
-
-Future<void> refreshListings() async {
-  listings = await fetchListings(http.Client());
-}

@@ -10,7 +10,7 @@ import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 
-class FilteredListingsPage extends StatelessWidget {
+class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
   final List<Map<String, dynamic>> listings;
 
@@ -20,10 +20,26 @@ class FilteredListingsPage extends StatelessWidget {
     super.key,
   });
 
+  @override
+  State<FilteredListingsPage> createState() => _FilteredListingsPageState();
+}
+
+class _FilteredListingsPageState extends State<FilteredListingsPage> {
+  // ignore: unused_field
+  late Future<List> _sortedListings;
+
+  @override
+  void initState() {
+    _sortedListings = sortListings();
+    super.initState();
+  }
+
   Future<List> sortListings() async {
-    if (listings.isEmpty) {
-      throw "No listings exist";
-    } else if (currentLatLng != null) {
+      if (listings.isEmpty) {
+        throw Exception("No listings exist");
+      }
+
+    if (currentLatLng != null) {
       // Sort listings by approximate distance
       final sortedListings = listings.map((listing) {
         LatLng destinationLatLng = stringToLatLng(listing['latLng']);
@@ -43,21 +59,28 @@ class FilteredListingsPage extends StatelessWidget {
     return listings;
   }
 
+  Future<void> refreshListings() async {
+    listings = await fetchListings(http.Client());
+    setState(() {
+      _sortedListings = sortListings();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: sortListings(),
+      future: _sortedListings = sortListings(),
       initialData: listings,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return const Center(child: Text("Error sorting listings"));
+          return Center(child: Text(snapshot.error.toString()));
         } else {
           final allListings = snapshot.data as List;
 
           // Filter the listings based on the primaryType
-          final filteredListings = allListings.where((listing) => listing['primaryType'] == filterPrimaryType).toList();
+          final filteredListings = allListings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
 
           final homePageState = context.findAncestorStateOfType<HomePageState>();
 
