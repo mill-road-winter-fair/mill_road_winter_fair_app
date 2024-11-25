@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -60,30 +61,35 @@ class FilteredListingsPage extends StatelessWidget {
 
           final homePageState = context.findAncestorStateOfType<HomePageState>();
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(8),
-            separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-            itemCount: filteredListings.length,
-            itemBuilder: (context, index) {
-              final listing = filteredListings[index];
-              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-              final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-              return ListingInfoSheet(
-                title: listing['displayName'],
-                categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
-                openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-                approxDistance: approximateDistance,
-                phoneNumber: listing['phone'],
-                website: listing['website'],
-                onGetDirections: () => {
-                  if (homePageState != null)
-                    {
-                      homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
-                    }
-                },
-              );
-            },
+          return RefreshIndicator(
+            onRefresh: refreshListings,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.onPrimary,
+            child: ListView.separated(
+              padding: const EdgeInsets.all(8),
+              separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+              itemCount: filteredListings.length,
+              itemBuilder: (context, index) {
+                final listing = filteredListings[index];
+                final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                return ListingInfoSheet(
+                  title: listing['displayName'],
+                  categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
+                  openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
+                  approxDistance: approximateDistance,
+                  phoneNumber: listing['phone'],
+                  website: listing['website'],
+                  onGetDirections: () => {
+                    if (homePageState != null)
+                      {
+                        homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
+                      }
+                  },
+                );
+              },
+            ),
           );
         }
       },
