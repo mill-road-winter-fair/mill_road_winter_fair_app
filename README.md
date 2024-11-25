@@ -7,7 +7,7 @@ The app itself is a Flutter project which connects to external database via an A
 Currently the aim is for the app to provides listings of the various stalls, musical performances, events and services. The app also provides directions to each of these. 
 
 ### Potential Future Development Ideas
-- TBD
+- Development goals are currently listed [here](https://github.com/MarauderOne/mill_road_winter_fair_app/issues).
 
 ## Setting Up Your Local Environment
 
@@ -29,7 +29,9 @@ Currently the aim is for the app to provides listings of the various stalls, mus
 
 8. Create a `.env` file containing the following:
 ```txt
-GOOGLE_MAPS_API_KEY=\\Google Maps Platform API key
+GOOGLE_MAPS_AND_SHEETS_API_KEY=\\Google Maps Platform API key
+GOOGLE_SHEET_ID=1-Dk_K8tvDJ4C9vSx0OJSEYhvhGrt6IEkabVRP83n0OM
+GOOGLE_SHEET_RANGE=A1:L200
 ```
 
 9. Ensure that your run target for `main.dart` is using the following arg(s):
