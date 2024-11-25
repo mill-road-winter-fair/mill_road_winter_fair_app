@@ -27,6 +27,7 @@ class FilteredListingsPage extends StatefulWidget {
 class _FilteredListingsPageState extends State<FilteredListingsPage> {
   // ignore: unused_field
   late Future<List> _sortedListings;
+  bool isRefreshing = false;
 
   @override
   void initState() {
@@ -60,10 +61,17 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   Future<void> refreshListings() async {
-    listings = await fetchListings(http.Client());
     setState(() {
-      _sortedListings = sortListings();
+      isRefreshing = true;
     });
+
+    try {
+      listings = await fetchListings(http.Client());
+    } finally {
+      setState(() {
+        _sortedListings = sortListings();
+      });
+    }
   }
 
   @override
@@ -75,7 +83,26 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error.toString()));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  snapshot.error.toString(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                isRefreshing
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton.icon(
+                  onPressed: refreshListings,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Refresh Listings'),
+                ),
+              ],
+            ),
+          );
         } else {
           final allListings = snapshot.data as List;
 
