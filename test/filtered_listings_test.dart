@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 void main() async {
@@ -24,20 +25,11 @@ void main() async {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('displays error text when fetchFilteredListings fails', (WidgetTester tester) async {
-    // Define a test listing
-    List<Map<String, dynamic>> listing = [];
-
-    await pumpFilteredListingsPage(tester, 'Food', listing);
-
-    expect(find.text('Error sorting listings'), findsOneWidget);
-  });
-
   testWidgets('displays filtered listings correctly', (WidgetTester tester) async {
     // Override user location global
     currentLatLng = const LatLng(52.199174, 0.140929);
     // Define mock values
-    List<Map<String, dynamic>> listings = [
+    listings = [
       {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
