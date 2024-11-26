@@ -7,6 +7,7 @@ import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 
@@ -36,28 +37,35 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   Future<List> sortListings() async {
+    try {
       if (listings.isEmpty) {
         throw Exception("No listings exist");
       }
 
-    if (currentLatLng != null) {
-      // Sort listings by approximate distance
-      final sortedListings = listings.map((listing) {
-        LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-        final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
-        return {...listing, 'approximateDistanceMetres': distance};
-      }).toList();
+      if (currentLatLng != null) {
+        // Sort listings by approximate distance
+        final sortedListings = listings.map((listing) {
+          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+          final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
+          return {...listing, 'approximateDistanceMetres': distance};
+        }).toList();
 
-      sortedListings.sort((a, b) {
-        int distanceA = a['approximateDistanceMetres'];
-        int distanceB = b['approximateDistanceMetres'];
-        return distanceA.compareTo(distanceB);
-      });
+        sortedListings.sort((a, b) {
+          int distanceA = a['approximateDistanceMetres'];
+          int distanceB = b['approximateDistanceMetres'];
+          return distanceA.compareTo(distanceB);
+        });
 
-      return sortedListings;
+        return sortedListings;
+      }
+
+      return listings;
+    } on Exception catch (e) {
+      debugPrint('Error sorting listings: $e');
+      return listings;
+    } catch (e) {
+      return Future.error('Error sorting listings: $e');
     }
-
-    return listings;
   }
 
   Future<void> refreshListings() async {
@@ -67,9 +75,13 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
 
     try {
       listings = await fetchListings(http.Client());
+      mapPageKey.currentState?.setMarkerLists();
+      mapPageKey.currentState?.addAllMarkers();
+      establishLocation();
     } finally {
       setState(() {
         _sortedListings = sortListings();
+        isRefreshing = false;
       });
     }
   }
@@ -82,66 +94,80 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+              child: Text(
+            "Error: ${snapshot.error}",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              color: Theme.of(context).colorScheme.onError,
+            ),
+          ));
+        }
+
+        if (listings.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  snapshot.error.toString(),
+                  "Unable to retrieve listings",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 16),
+                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 isRefreshing
                     ? const CircularProgressIndicator()
                     : ElevatedButton.icon(
-                  onPressed: refreshListings,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh Listings'),
-                ),
+                        onPressed: refreshListings,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Refresh Listings'),
+                      ),
               ],
             ),
           );
-        } else {
-          final allListings = snapshot.data as List;
-
-          // Filter the listings based on the primaryType
-          final filteredListings = allListings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
-
-          final homePageState = context.findAncestorStateOfType<HomePageState>();
-
-          return RefreshIndicator(
-            onRefresh: refreshListings,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            color: Theme.of(context).colorScheme.onPrimary,
-            child: ListView.separated(
-              padding: const EdgeInsets.all(8),
-              separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-              itemCount: filteredListings.length,
-              itemBuilder: (context, index) {
-                final listing = filteredListings[index];
-                final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                return ListingInfoSheet(
-                  title: listing['displayName'],
-                  categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
-                  openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
-                  approxDistance: approximateDistance,
-                  phoneNumber: listing['phone'],
-                  website: listing['website'],
-                  onGetDirections: () => {
-                    if (homePageState != null)
-                      {
-                        homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
-                      }
-                  },
-                );
-              },
-            ),
-          );
         }
+
+        final allListings = snapshot.data as List;
+
+        // Filter the listings based on the primaryType
+        final filteredListings = allListings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+
+        final homePageState = context.findAncestorStateOfType<HomePageState>();
+
+        return RefreshIndicator(
+          onRefresh: refreshListings,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.onPrimary,
+          child: ListView.separated(
+            padding: const EdgeInsets.all(8),
+            separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+            itemCount: filteredListings.length,
+            itemBuilder: (context, index) {
+              final listing = filteredListings[index];
+              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+              final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+              return ListingInfoSheet(
+                title: listing['displayName'],
+                categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
+                openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
+                approxDistance: approximateDistance,
+                phoneNumber: listing['phone'],
+                website: listing['website'],
+                onGetDirections: () => {
+                  if (homePageState != null)
+                    {
+                      homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
+                    }
+                },
+              );
+            },
+          ),
+        );
       },
     );
   }
