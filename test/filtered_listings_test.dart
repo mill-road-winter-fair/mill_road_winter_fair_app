@@ -25,6 +25,15 @@ void main() async {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('displays error text when fetchFilteredListings fails', (WidgetTester tester) async {
+    // Define a test listing
+    List<Map<String, dynamic>> listing = [];
+
+    await pumpFilteredListingsPage(tester, 'Food', listing);
+
+    expect(find.text('Unable to retrieve listings'), findsOneWidget);
+  });
+
   testWidgets('displays filtered listings correctly', (WidgetTester tester) async {
     // Override user location global
     currentLatLng = const LatLng(52.199174, 0.140929);

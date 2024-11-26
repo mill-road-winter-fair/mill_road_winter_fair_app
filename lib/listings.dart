@@ -31,7 +31,7 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
       // It only seems to occur when the API has not been called in some time
       // I don't know why this is happening (possibly something to do with custom formulas) but this is attempting to account for it
       if (response.body.contains("#NAME?")) {
-        for (var i = 0; i < 10; i++) {
+        for (var i = 1; i < 10; i++) {
           sleep(const Duration(seconds: 2));
           var newResponse = await client.get(uri);
 
