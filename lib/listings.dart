@@ -25,12 +25,10 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     }
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-
       // Sometimes column J in the Google Sheet is returning "#NAME?" instead of the latLng value
       // It only seems to occur when the API has not been called in some time
       // I don't know why this is happening (possibly something to do with custom formulas) but this is attempting to account for it
-      if (response.body.contains("#NAME?")) {
+      if (response.body.contains('#NAME?')) {
         for (var i = 1; i < 10; i++) {
           sleep(const Duration(seconds: 2));
           var newResponse = await client.get(uri);
@@ -42,6 +40,7 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
           if (newResponse.body.contains("#NAME?")) {
             continue;
           }
+
           response = newResponse;
           break;
         }
@@ -52,9 +51,10 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
         }
       }
 
-      // Transform the Sheets API response into JSON that matches your app's format
+      // Transform the Sheets API response into JSON that matches the app's listings format
+      final data = json.decode(response.body);
       final rows = data['values'] as List<dynamic>;
-      final headers = rows.first as List<dynamic>; // Assume the first row is headers
+      final headers = rows.first as List<dynamic>; // The first row is headers
       List<Map<String, dynamic>> listings = rows.skip(1).map((row) {
         return Map<String, dynamic>.fromIterables(
           headers.cast<String>(),
@@ -76,11 +76,15 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
 
 // Fetch listings from Google Sheets if we don't have any listings
 Future<List<Map<String, dynamic>>> fetchExistingListings(http.Client client) async {
-  if (listings.isEmpty) {
+  if (listings.isEmpty || listings[0].containsValue('#NAME?')) {
     try {
       return fetchListings(client);
+    } on Exception catch (e) {
+      debugPrint('Error fetching Google Sheets listing data: $e');
+      return [];
     } catch (e) {
-      throw '$e';
+      listings = [];
+      return Future.error('Error fetching Google Sheets listing data: $e');
     }
   }
 
