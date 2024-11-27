@@ -50,6 +50,37 @@ void main() async {
     expect(find.text('Services'), findsOneWidget);
   });
 
+  testWidgets('HomePage drawer displays expected widgets', (WidgetTester tester) async {
+    listings = [
+      {
+        'displayName': 'Glazed and Confused',
+        'endTime': '16:30',
+        'id': '1',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '10:30',
+        'tertiaryType': 'Doughnuts',
+        'website': 'https://www.glazedandconfused.com',
+      }
+    ];
+
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DrawerHeader), findsOneWidget);
+    expect(find.text('Mill Road Winter Fair'), findsExactly(2));
+    expect(find.text('About the Fair'), findsOneWidget);
+    expect(find.text('Visit our website'), findsOneWidget);
+    expect(find.text('Email us'), findsOneWidget);
+    expect(find.byType(IconButton), findsExactly(7));
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Give feedback about the app'), findsOneWidget);
+  });
+
   testWidgets('HomePage navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
     listings = [
       {

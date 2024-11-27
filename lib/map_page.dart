@@ -40,9 +40,10 @@ class MapPageState extends State<MapPage> {
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
-  GoogleMapController? _controller; // Declare _controller here
+  GoogleMapController? _controller;
   MapType mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
+  bool isRefreshing = false;
   // Declare default filters
   final Map<String, bool> filterSettings = {
     'Food': true,
@@ -398,140 +399,191 @@ class MapPageState extends State<MapPage> {
     );
   }
 
+  Future<void> refreshListings() async {
+    setState(() {
+      isRefreshing = true;
+    });
+
+    try {
+      listings = await fetchListings(http.Client());
+      setMarkerLists();
+      addAllMarkers();
+      establishLocation();
+    } finally {
+      setState(() {
+        isRefreshing = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _fetchListings,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text("Error fetching listings"));
-          } else {
-            return Scaffold(
-              body: GoogleMap(
-                // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
-                style: mapStyle,
-                mapType: mapType,
-                rotateGesturesEnabled: false,
-                compassEnabled: false,
-                myLocationEnabled: true,
-                myLocationButtonEnabled: true,
-                mapToolbarEnabled: false,
-                onMapCreated: (GoogleMapController controller) {
-                  _controller = controller;
-                },
-                initialCameraPosition: const CameraPosition(
-                  target: LatLng(52.199174, 0.140929),
-                  zoom: 14.3,
+      future: _fetchListings,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+              child: Text(
+            "Error: ${snapshot.error}",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              color: Theme.of(context).colorScheme.onError,
+            ),
+          ));
+        }
+
+        if (listings.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Unable to retrieve listings",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                markers: markers.values.toSet(),
-                polylines: _polylines,
-              ),
-              floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
-              floatingActionButton: Container(
-                padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 3),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 20),
+                isRefreshing
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton.icon(
+                        onPressed: refreshListings,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Refresh Listings'),
+                      ),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          body: GoogleMap(
+            // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
+            style: mapStyle,
+            mapType: mapType,
+            rotateGesturesEnabled: false,
+            compassEnabled: false,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            mapToolbarEnabled: false,
+            onMapCreated: (GoogleMapController controller) {
+              _controller = controller;
+            },
+            initialCameraPosition: const CameraPosition(
+              target: LatLng(52.199174, 0.140929),
+              zoom: 14.3,
+            ),
+            markers: markers.values.toSet(),
+            polylines: _polylines,
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
+          floatingActionButton: Container(
+            padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 3),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              if (_navigationInProgress == true)
-                                IconButton.filled(
-                                  onPressed: () {
-                                    setState(() {
-                                      _positionStream?.cancel();
-                                      _polylines.clear();
-                                      _distanceToDestination = null;
-                                      final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                                      updateMarkerVisibility(idList, true);
-                                      _navigationInProgress = false;
-                                    });
-                                  },
-                                  icon: Icon(
-                                    Icons.wrong_location,
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                )
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              if (_navigationInProgress == false)
-                                IconButton.filled(
-                                  onPressed: () {
-                                    showFilterMenu();
-                                    setMarkerLists();
-                                  },
-                                  icon: Icon(
-                                    Icons.filter_alt,
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              IconButton.filled(
-                                onPressed: () {
-                                  setState(() {
-                                    if (mapType == MapType.normal) {
-                                      mapType = MapType.satellite;
-                                      _layersIcon = Icons.map;
-                                    } else {
-                                      mapType = MapType.normal;
-                                      _layersIcon = Icons.satellite_alt;
-                                    }
-                                  });
-                                },
-                                icon: Icon(
-                                  _layersIcon,
-                                  color: Theme.of(context).colorScheme.onPrimary,
-                                ),
+                          if (_navigationInProgress == true)
+                            IconButton.filled(
+                              onPressed: () {
+                                setState(() {
+                                  _positionStream?.cancel();
+                                  _polylines.clear();
+                                  _distanceToDestination = null;
+                                  final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                                  updateMarkerVisibility(idList, true);
+                                  _navigationInProgress = false;
+                                });
+                              },
+                              icon: Icon(
+                                Icons.wrong_location,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               ),
-                            ],
-                          ),
+                            )
                         ],
                       ),
-                    ),
-                    Expanded(
-                      flex: 6,
-                      child: Column(
+                      Row(
                         children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (_distanceToDestination != null)
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    _setMapFitToPolyline(_polylines);
-                                  },
-                                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                                  icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
-                                  label: Text(
-                                    _distanceToDestination!,
-                                    style: TextStyle(fontSize: 28, color: Theme.of(context).colorScheme.onPrimary),
-                                  ),
-                                ),
-                            ],
+                          if (_navigationInProgress == false)
+                            IconButton.filled(
+                              onPressed: () {
+                                showFilterMenu();
+                                setMarkerLists();
+                              },
+                              icon: Icon(
+                                Icons.filter_alt,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          IconButton.filled(
+                            onPressed: () {
+                              setState(() {
+                                if (mapType == MapType.normal) {
+                                  mapType = MapType.satellite;
+                                  _layersIcon = Icons.map;
+                                } else {
+                                  mapType = MapType.normal;
+                                  _layersIcon = Icons.satellite_alt;
+                                }
+                              });
+                            },
+                            icon: Icon(
+                              _layersIcon,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    const Expanded(
-                      flex: 2,
-                      child: Column(), // Dummy column to help flex with centring distance button
-                    )
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }
-        });
+                Expanded(
+                  flex: 6,
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_distanceToDestination != null)
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                _setMapFitToPolyline(_polylines);
+                              },
+                              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
+                              icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
+                              label: Text(
+                                _distanceToDestination!,
+                                style: TextStyle(fontSize: 28, color: Theme.of(context).colorScheme.onPrimary),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const Expanded(
+                  flex: 2,
+                  child: Column(), // Dummy column to help flex with centring distance button
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
