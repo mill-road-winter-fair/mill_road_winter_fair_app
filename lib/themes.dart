@@ -187,49 +187,56 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
     assetPath = "assets/servicesMarker.png";
   }
 
-  int markerPixelSize = 288;
+  try {
+    int markerPixelSize = 288;
 
-  // Load the backdrop image (frame)
-  final ByteData backdropData = await rootBundle.load("assets/markerIconFrame.png");
-  final ui.Codec backdropCodec = await ui.instantiateImageCodec(
-    backdropData.buffer.asUint8List(),
-    targetWidth: markerPixelSize,
-    targetHeight: markerPixelSize,
-  );
-  final ui.FrameInfo backdropFrame = await backdropCodec.getNextFrame();
-  final ui.Image backdropImage = backdropFrame.image;
+    // Load the backdrop image (frame)
+    final ByteData backdropData = await rootBundle.load("assets/markerIconFrame.png");
+    final ui.Codec backdropCodec = await ui.instantiateImageCodec(
+      backdropData.buffer.asUint8List(),
+      targetWidth: markerPixelSize,
+      targetHeight: markerPixelSize,
+    );
+    // The below line does not seem to work at all in the unit tests, it crashes the function without error
+    final ui.FrameInfo backdropFrame = await backdropCodec.getNextFrame();
+    final ui.Image backdropImage = backdropFrame.image;
 
-  // Load the base image (to be colorized)
-  final ByteData markerData = await rootBundle.load(assetPath);
-  final ui.Codec markerCodec = await ui.instantiateImageCodec(
-    markerData.buffer.asUint8List(),
-    targetWidth: markerPixelSize,
-    targetHeight: markerPixelSize,
-  );
-  final ui.FrameInfo markerFrame = await markerCodec.getNextFrame();
-  final ui.Image markerImage = markerFrame.image;
+    // Load the base image (to be colorized)
+    final ByteData markerData = await rootBundle.load(assetPath);
+    final ui.Codec markerCodec = await ui.instantiateImageCodec(
+      markerData.buffer.asUint8List(),
+      targetWidth: markerPixelSize,
+      targetHeight: markerPixelSize,
+    );
+    // The below line does not seem to work at all in the unit tests, it crashes the function without error
+    final ui.FrameInfo markerFrame = await markerCodec.getNextFrame();
+    final ui.Image markerImage = markerFrame.image;
 
-  // Create a canvas to draw both images
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
+    // Create a canvas to draw both images
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
 
-  // Draw the backdrop image without any color filter
-  final Paint backdropPaint = Paint(); // No color filter
-  canvas.drawImage(backdropImage, Offset.zero, backdropPaint);
+    // Draw the backdrop image without any color filter
+    final Paint backdropPaint = Paint(); // No color filter
+    canvas.drawImage(backdropImage, Offset.zero, backdropPaint);
 
-  // Draw the marker image on top with the color overlay
-  final Paint markerPaint = Paint()..colorFilter = ColorFilter.mode(color, BlendMode.srcIn); // Apply color to the marker image
-  canvas.drawImage(markerImage, Offset.zero, markerPaint);
+    // Draw the marker image on top with the color overlay
+    final Paint markerPaint = Paint()..colorFilter = ColorFilter.mode(color, BlendMode.srcIn); // Apply color to the marker image
+    canvas.drawImage(markerImage, Offset.zero, markerPaint);
 
-  // Convert the final image to a BitmapDescriptor
-  final ui.Image finalImage = await recorder.endRecording().toImage(
-        markerImage.width,
-        markerImage.height,
-      );
-  final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
-  final Uint8List pngBytes = byteData!.buffer.asUint8List();
+    // Convert the final image to a BitmapDescriptor
+    final ui.Image finalImage = await recorder.endRecording().toImage(
+          markerImage.width,
+          markerImage.height,
+        );
+    final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-  return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: 48.0, width: 48.0);
+    return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: 48.0, width: 48.0);
+  } catch (e) {
+    debugPrint("Custom marker rendering failed: $e");
+    return BitmapDescriptor.defaultMarker;
+  }
 }
 
 Color getCategoryColor(String selectedThemeKey, String primaryType) {
