@@ -58,14 +58,14 @@ class MapPageState extends State<MapPage> {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
     setMarkerLists();
-    addAllMarkers();
+    addAllMarkers(false);
     establishLocation();
     super.initState();
   }
 
-  void addAllMarkers() {
+  void addAllMarkers(bool onTest) {
     for (var listing in listings) {
-      addMarker(listing);
+      addMarker(listing, onTest);
     }
   }
 
@@ -112,11 +112,17 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  addMarker(listing) async {
+  void addMarker(listing, bool onTest) async {
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
-    BitmapDescriptor customMarker = await getColoredMarker(listing['primaryType'], color);
+    late BitmapDescriptor customMarker;
+    if (onTest == false) {
+      customMarker = await getColoredMarker(listing['primaryType'], color);
+    } else {
+      double hue = HSVColor.fromColor(color).hue;
+      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
+    }
 
     Marker newMarker = Marker(
       markerId: markerId,
@@ -405,7 +411,7 @@ class MapPageState extends State<MapPage> {
     try {
       listings = await fetchListings(http.Client());
       setMarkerLists();
-      addAllMarkers();
+      addAllMarkers(false);
       establishLocation();
     } finally {
       setState(() {

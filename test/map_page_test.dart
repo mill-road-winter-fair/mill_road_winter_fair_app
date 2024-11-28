@@ -72,6 +72,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
+    mapPageState.addAllMarkers(true);
 
     // Configure the map marker filter
     mapPageState.filterSettings["Food"] = true;
@@ -112,6 +113,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
+    mapPageState.addAllMarkers(true);
 
     // Simulate a tap on the map marker
     const markerId = MarkerId('1');
@@ -214,6 +216,7 @@ void main() async {
 
     // Obtain the state after mounting
     mapPageState = tester.state<MapPageState>(find.byType(MapPage));
+    mapPageState.addAllMarkers(true);
 
     // Verify that the expected marker was added
     expect(mapPageState.markers.isNotEmpty, true);

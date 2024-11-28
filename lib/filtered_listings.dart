@@ -76,7 +76,7 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
     try {
       listings = await fetchListings(http.Client());
       mapPageKey.currentState?.setMarkerLists();
-      mapPageKey.currentState?.addAllMarkers();
+      mapPageKey.currentState?.addAllMarkers(true);
       establishLocation();
     } finally {
       setState(() {
