@@ -77,7 +77,7 @@ void main() async {
     expect(find.text('About the Fair'), findsOneWidget);
     expect(find.text('Visit our website'), findsOneWidget);
     expect(find.text('Email us'), findsOneWidget);
-    expect(find.byType(IconButton), findsExactly(7));
+    expect(find.byType(IconButton), findsExactly(8));
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Give feedback about the app'), findsOneWidget);
   });

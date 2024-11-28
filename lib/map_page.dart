@@ -304,7 +304,7 @@ class MapPageState extends State<MapPage> {
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
       await updatePolyline(currentLatLng, destination);
       // Set the camera position once, at the beginning of the navigation
-      _setMapFitToPolyline(_polylines);
+      _setMapCameraToFitPolyline(_polylines);
 
       // Start location updates
       await startLocationUpdates(destination);
@@ -377,7 +377,11 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  void _setMapFitToPolyline(Set<Polyline> polylines) {
+  void _resetMapCamera() {
+    _controller?.moveCamera(CameraUpdate.newLatLngZoom(const LatLng(52.199174, 0.140929), 14.3));
+  }
+
+  void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
     double minLat = polylines.first.points.first.latitude;
     double minLong = polylines.first.points.first.longitude;
     double maxLat = polylines.first.points.first.latitude;
@@ -520,6 +524,31 @@ class MapPageState extends State<MapPage> {
                           if (_navigationInProgress == false)
                             IconButton.filled(
                               onPressed: () {
+                                _resetMapCamera();
+                                if (filterSettings['Food'] == false && filterSettings['Shopping'] == false && filterSettings['Music'] == false && filterSettings['Events'] == false && filterSettings['Services'] == false) {
+                                  final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                                  setState(() {
+                                    filterSettings['Food'] = true;
+                                    filterSettings['Shopping'] = true;
+                                    filterSettings['Music'] = true;
+                                    filterSettings['Events'] = true;
+                                    filterSettings['Services'] = true;
+                                    updateMarkerVisibility(idList, true);
+                                  });
+                                }
+                              },
+                              icon: Icon(
+                                Icons.home,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          if (_navigationInProgress == false)
+                            IconButton.filled(
+                              onPressed: () {
                                 showFilterMenu();
                                 setMarkerLists();
                               },
@@ -565,7 +594,7 @@ class MapPageState extends State<MapPage> {
                           if (_distanceToDestination != null)
                             ElevatedButton.icon(
                               onPressed: () {
-                                _setMapFitToPolyline(_polylines);
+                                _setMapCameraToFitPolyline(_polylines);
                               },
                               style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                               icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
