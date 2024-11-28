@@ -114,16 +114,14 @@ class MapPageState extends State<MapPage> {
 
   addMarker(listing) async {
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-
     MarkerId markerId = MarkerId(listing['id'].toString());
-
-    Color color = getMarkerColor(selectedThemeKey, listing['primaryType']);
-    double hue = HSVColor.fromColor(color).hue;
+    Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
+    BitmapDescriptor customMarker = await getColoredMarker(listing['primaryType'], color);
 
     Marker newMarker = Marker(
       markerId: markerId,
       position: destinationLatLng,
-      icon: BitmapDescriptor.defaultMarkerWithHue(hue), // Set marker color
+      icon: customMarker,
       visible: true,
       onTap: () {
         // Update user's location
@@ -180,7 +178,7 @@ class MapPageState extends State<MapPage> {
                       )
                     ]),
                     CheckboxListTile(
-                      activeColor: getMarkerColor(selectedThemeKey, 'Food'),
+                      activeColor: getCategoryColor(selectedThemeKey, 'Food'),
                       title: const Text("Food"),
                       value: filterSettings["Food"],
                       onChanged: (value) {
@@ -192,7 +190,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: getMarkerColor(selectedThemeKey, 'Shopping'),
+                      activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
                       title: const Text("Shopping"),
                       value: filterSettings["Shopping"],
                       onChanged: (value) {
@@ -204,7 +202,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: getMarkerColor(selectedThemeKey, 'Music'),
+                      activeColor: getCategoryColor(selectedThemeKey, 'Music'),
                       title: const Text("Music"),
                       value: filterSettings["Music"],
                       onChanged: (value) {
@@ -216,7 +214,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: getMarkerColor(selectedThemeKey, 'Event'),
+                      activeColor: getCategoryColor(selectedThemeKey, 'Event'),
                       title: const Text("Events"),
                       value: filterSettings["Events"],
                       onChanged: (value) {
@@ -228,7 +226,7 @@ class MapPageState extends State<MapPage> {
                       },
                     ),
                     CheckboxListTile(
-                      activeColor: getMarkerColor(selectedThemeKey, 'Service'),
+                      activeColor: getCategoryColor(selectedThemeKey, 'Service'),
                       title: const Text("Services"),
                       value: filterSettings["Services"],
                       onChanged: (value) {
