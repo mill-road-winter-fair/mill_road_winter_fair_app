@@ -378,7 +378,20 @@ void main() async {
   });
 
   testWidgets('clearAllMarkers clears all markers', (tester) async {
-    listings = [];
+    listings = [
+      {
+        'displayName': 'Glazed and Confused',
+        'endTime': '16:30',
+        'id': '1',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '10:30',
+        'tertiaryType': 'Doughnuts',
+        'website': 'https://www.glazedandconfused.com',
+      }
+    ];
 
     // Build the MapPage widget
     await tester.pumpWidget(
@@ -392,10 +405,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
-
-    MarkerId markerId = MarkerId('1'.toString());
-    Marker newMarker = Marker(markerId: markerId);
-    mapPageState.markers[markerId] = newMarker;
+    mapPageState.addAllMarkers(true);
 
     expect(mapPageState.markers.isNotEmpty, true);
     expect(mapPageState.markers.length, 1);
