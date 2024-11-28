@@ -72,6 +72,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
+    mapPageState.addAllMarkers(true);
 
     // Configure the map marker filter
     mapPageState.filterSettings["Food"] = true;
@@ -82,23 +83,18 @@ void main() async {
     expect(mapPageState.markers.values.toSet().any((marker) => marker.markerId == const MarkerId('1')), true);
   });
 
-  test('getMarkerColorHue returns correct hue for given types', () {
-    final foodColor = getMarkerColor("light", "Food");
-    final foodHue = HSVColor.fromColor(foodColor).hue;
-    final shoppingColor = getMarkerColor("light", "Shopping");
-    final shoppingHue = HSVColor.fromColor(shoppingColor).hue;
-    final musicColor = getMarkerColor("light", "Music");
-    final musicHue = HSVColor.fromColor(musicColor).hue;
-    final eventColor = getMarkerColor("light", "Event");
-    final eventHue = HSVColor.fromColor(eventColor).hue;
-    final serviceColor = getMarkerColor("light", "Service");
-    final serviceHue = HSVColor.fromColor(serviceColor).hue;
+  test('getCategoryColor returns correct color for given types', () {
+    final foodColor = getCategoryColor("light", "Food");
+    final shoppingColor = getCategoryColor("light", "Shopping");
+    final musicColor = getCategoryColor("light", "Music");
+    final eventColor = getCategoryColor("light", "Event");
+    final serviceColor = getCategoryColor("light", "Service");
 
-    expect(foodHue, 23.13725490196078);
-    expect(shoppingHue, 357.0);
-    expect(musicHue, 332.94117647058823);
-    expect(eventHue, 43.13725490196078);
-    expect(serviceHue, 276.0);
+    expect(foodColor, const Color.fromRGBO(242, 153, 0, 1.0));
+    expect(shoppingColor, const Color.fromRGBO(209, 81, 85, 1.0));
+    expect(musicColor, const Color.fromRGBO(190, 110, 230, 1.0));
+    expect(eventColor, const Color.fromRGBO(243, 190, 66, 1.0));
+    expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
   });
 
   testWidgets('Adds marker, opens modal bottom sheet, and checks content', (WidgetTester tester) async {
@@ -117,6 +113,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
+    mapPageState.addAllMarkers(true);
 
     // Simulate a tap on the map marker
     const markerId = MarkerId('1');
@@ -219,6 +216,7 @@ void main() async {
 
     // Obtain the state after mounting
     mapPageState = tester.state<MapPageState>(find.byType(MapPage));
+    mapPageState.addAllMarkers(true);
 
     // Verify that the expected marker was added
     expect(mapPageState.markers.isNotEmpty, true);
@@ -380,7 +378,20 @@ void main() async {
   });
 
   testWidgets('clearAllMarkers clears all markers', (tester) async {
-    listings = [];
+    listings = [
+      {
+        'displayName': 'Glazed and Confused',
+        'endTime': '16:30',
+        'id': '1',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '10:30',
+        'tertiaryType': 'Doughnuts',
+        'website': 'https://www.glazedandconfused.com',
+      }
+    ];
 
     // Build the MapPage widget
     await tester.pumpWidget(
@@ -394,10 +405,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
-
-    MarkerId markerId = MarkerId('1'.toString());
-    Marker newMarker = Marker(markerId: markerId);
-    mapPageState.markers[markerId] = newMarker;
+    mapPageState.addAllMarkers(true);
 
     expect(mapPageState.markers.isNotEmpty, true);
     expect(mapPageState.markers.length, 1);

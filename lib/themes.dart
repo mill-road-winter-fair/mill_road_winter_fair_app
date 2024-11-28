@@ -1,5 +1,8 @@
 // Define available themes
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 final Map<String, ThemeData> appThemes = {
   'light': ThemeData(
@@ -141,7 +144,8 @@ final Map<String, ThemeData> appThemes = {
 };
 
 // Standard Google Maps themes (designed with https://mapstyle.withgoogle.com/)
-String standardMap = '[]';
+String standardMap =
+    '[{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"labels.text","stylers":[{"visibility":"off"}]}]';
 String silverMap =
     '[{"elementType":"geometry","stylers":[{"color":"#f5f5f5"}]},{"elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#616161"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#f5f5f5"}]},{"featureType":"administrative.land_parcel","elementType":"labels.text.fill","stylers":[{"color":"#bdbdbd"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#eeeeee"}]},{"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#757575"}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#e5e5e5"}]},{"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#9e9e9e"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#ffffff"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#757575"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#dadada"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#616161"}]},{"featureType":"road.local","elementType":"labels.text.fill","stylers":[{"color":"#9e9e9e"}]},{"featureType":"transit.line","elementType":"geometry","stylers":[{"color":"#e5e5e5"}]},{"featureType":"transit.station","elementType":"geometry","stylers":[{"color":"#eeeeee"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#c9c9c9"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#9e9e9e"}]}]';
 String retroMap =
@@ -161,22 +165,96 @@ String highContrastMap =
 String colourBlindMap =
     '[{"featureType":"all","elementType":"all","stylers":[{"saturation":"-100"}]},{"featureType":"landscape.man_made","elementType":"all","stylers":[{"color":"#f5f5f5"}]},{"featureType":"landscape.natural","elementType":"all","stylers":[{"color":"#f5f5f5"}]},{"featureType":"poi","elementType":"all","stylers":[{"color":"#e8e8e8"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"},{"color":"#fe934c"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#666666"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#9a96c5"}]}]';
 
-Color getMarkerColor(String selectedThemeKey, String primaryType) {
+Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async {
+  late String assetPath;
+  if (primaryType == "Food") {
+    assetPath = "assets/foodMarker.png";
+  }
+
+  if (primaryType == "Shopping") {
+    assetPath = "assets/shoppingMarker.png";
+  }
+
+  if (primaryType == "Music") {
+    assetPath = "assets/musicMarker.png";
+  }
+
+  if (primaryType == "Event") {
+    assetPath = "assets/eventsMarker.png";
+  }
+
+  if (primaryType == "Service") {
+    assetPath = "assets/servicesMarker.png";
+  }
+
+  try {
+    int markerPixelSize = 288;
+
+    // Load the backdrop image (frame)
+    final ByteData backdropData = await rootBundle.load("assets/markerIconFrame.png");
+    final ui.Codec backdropCodec = await ui.instantiateImageCodec(
+      backdropData.buffer.asUint8List(),
+      targetWidth: markerPixelSize,
+      targetHeight: markerPixelSize,
+    );
+    // The below line does not seem to work at all in the unit tests, it crashes the function without error
+    final ui.FrameInfo backdropFrame = await backdropCodec.getNextFrame();
+    final ui.Image backdropImage = backdropFrame.image;
+
+    // Load the base image (to be colorized)
+    final ByteData markerData = await rootBundle.load(assetPath);
+    final ui.Codec markerCodec = await ui.instantiateImageCodec(
+      markerData.buffer.asUint8List(),
+      targetWidth: markerPixelSize,
+      targetHeight: markerPixelSize,
+    );
+    // The below line does not seem to work at all in the unit tests, it crashes the function without error
+    final ui.FrameInfo markerFrame = await markerCodec.getNextFrame();
+    final ui.Image markerImage = markerFrame.image;
+
+    // Create a canvas to draw both images
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    // Draw the backdrop image without any color filter
+    final Paint backdropPaint = Paint(); // No color filter
+    canvas.drawImage(backdropImage, Offset.zero, backdropPaint);
+
+    // Draw the marker image on top with the color overlay
+    final Paint markerPaint = Paint()..colorFilter = ColorFilter.mode(color, BlendMode.srcIn); // Apply color to the marker image
+    canvas.drawImage(markerImage, Offset.zero, markerPaint);
+
+    // Convert the final image to a BitmapDescriptor
+    final ui.Image finalImage = await recorder.endRecording().toImage(
+          markerImage.width,
+          markerImage.height,
+        );
+    final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+    return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: 48.0, width: 48.0);
+  } catch (e) {
+    debugPrint("Custom marker rendering failed: $e");
+    return BitmapDescriptor.defaultMarker;
+  }
+}
+
+Color getCategoryColor(String selectedThemeKey, String primaryType) {
   if (selectedThemeKey == "light") {
     if (primaryType == "Food") {
-      Color color = const Color.fromRGBO(204, 110, 51, 1.0);
+      Color color = const Color.fromRGBO(242, 153, 0, 1.0);
       return color;
     } else if (primaryType == "Shopping") {
-      Color color = const Color.fromRGBO(200, 0, 10, 1);
+      Color color = const Color.fromRGBO(209, 81, 85, 1.0);
       return color;
     } else if (primaryType == "Music") {
-      Color color = const Color.fromRGBO(204, 51, 120, 1.0);
+      Color color = const Color.fromRGBO(190, 110, 230, 1.0);
       return color;
     } else if (primaryType == "Event") {
-      Color color = const Color.fromRGBO(204, 161, 51, 1.0);
+      Color color = const Color.fromRGBO(243, 190, 66, 1.0);
       return color;
     } else if (primaryType == "Service") {
-      Color color = const Color.fromRGBO(153, 0, 255, 1.0);
+      Color color = const Color.fromRGBO(84, 145, 245, 1.0);
       return color;
     }
 
@@ -185,19 +263,19 @@ Color getMarkerColor(String selectedThemeKey, String primaryType) {
     return color;
   } else if (selectedThemeKey == "dark") {
     if (primaryType == "Food") {
-      Color color = const Color.fromRGBO(204, 110, 51, 1.0);
+      Color color = const Color.fromRGBO(189, 70, 0, 1.0);
       return color;
     } else if (primaryType == "Shopping") {
-      Color color = const Color.fromRGBO(200, 0, 10, 1);
+      Color color = const Color.fromRGBO(204, 22, 22, 1.0);
       return color;
     } else if (primaryType == "Music") {
-      Color color = const Color.fromRGBO(204, 51, 120, 1.0);
+      Color color = const Color.fromRGBO(183, 13, 204, 1.0);
       return color;
     } else if (primaryType == "Event") {
-      Color color = const Color.fromRGBO(204, 161, 51, 1.0);
+      Color color = const Color.fromRGBO(255, 196, 0, 1.0);
       return color;
     } else if (primaryType == "Service") {
-      Color color = const Color.fromRGBO(153, 0, 255, 1.0);
+      Color color = const Color.fromRGBO(29, 112, 198, 1.0);
       return color;
     }
 
@@ -212,7 +290,7 @@ Color getMarkerColor(String selectedThemeKey, String primaryType) {
       Color color = const Color.fromRGBO(200, 0, 10, 1);
       return color;
     } else if (primaryType == "Music") {
-      Color color = const Color.fromRGBO(163, 163, 163, 1.0);
+      Color color = const Color.fromRGBO(175, 98, 214, 1.0);
       return color;
     } else if (primaryType == "Event") {
       Color color = const Color.fromRGBO(204, 161, 51, 1.0);
@@ -227,19 +305,19 @@ Color getMarkerColor(String selectedThemeKey, String primaryType) {
     return color;
   } else if (selectedThemeKey == "highContrast") {
     if (primaryType == "Food") {
-      Color color = const Color.fromRGBO(255, 0, 0, 1.0);
+      Color color = const Color.fromRGBO(131, 0, 0, 1.0);
       return color;
     } else if (primaryType == "Shopping") {
-      Color color = const Color.fromRGBO(8, 255, 0, 1.0);
+      Color color = const Color.fromRGBO(5, 117, 0, 1.0);
       return color;
     } else if (primaryType == "Music") {
-      Color color = const Color.fromRGBO(230, 0, 255, 1.0);
+      Color color = const Color.fromRGBO(125, 0, 140, 1.0);
       return color;
     } else if (primaryType == "Event") {
-      Color color = const Color.fromRGBO(255, 243, 0, 1.0);
+      Color color = const Color.fromRGBO(151, 143, 0, 1.0);
       return color;
     } else if (primaryType == "Service") {
-      Color color = const Color.fromRGBO(0, 255, 244, 1.0);
+      Color color = const Color.fromRGBO(0, 120, 114, 1.0);
       return color;
     }
 

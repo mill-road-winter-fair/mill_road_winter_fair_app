@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/listings.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
@@ -207,6 +208,8 @@ void main() async {
 
     // Obtain the state after mounting
     final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
+    final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
+    mapPageState.addAllMarkers(true);
 
     await tester.tap(find.text('Food'));
     await tester.pumpAndSettle();
