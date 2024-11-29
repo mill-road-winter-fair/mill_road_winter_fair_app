@@ -333,7 +333,10 @@ class MapPageState extends State<MapPage> {
 
     // Start listening for location updates
     _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 3,
+      ),
     ).listen((Position position) async {
       // Update the user's current location
       currentLatLng = LatLng(position.latitude, position.longitude);
@@ -524,7 +527,11 @@ class MapPageState extends State<MapPage> {
                             IconButton.filled(
                               onPressed: () {
                                 _resetMapCamera();
-                                if (filterSettings['Food'] == false && filterSettings['Shopping'] == false && filterSettings['Music'] == false && filterSettings['Events'] == false && filterSettings['Services'] == false) {
+                                if (filterSettings['Food'] == false &&
+                                    filterSettings['Shopping'] == false &&
+                                    filterSettings['Music'] == false &&
+                                    filterSettings['Events'] == false &&
+                                    filterSettings['Services'] == false) {
                                   final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                                   setState(() {
                                     filterSettings['Food'] = true;
