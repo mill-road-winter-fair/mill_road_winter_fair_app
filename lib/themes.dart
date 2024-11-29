@@ -106,6 +106,9 @@ final Map<String, ThemeData> appThemes = {
         backgroundColor: Colors.black,
         foregroundColor: Color.fromRGBO(255, 243, 0, 1.0),
       ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0)),
+      ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0),
         unselectedItemColor: Colors.grey,
@@ -114,7 +117,7 @@ final Map<String, ThemeData> appThemes = {
         backgroundColor: Colors.black,
       ),
       elevatedButtonTheme:
-          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(8, 255, 0, 1.0), foregroundColor: Colors.black)),
+          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white)),
       listTileTheme: const ListTileThemeData(tileColor: Colors.black)),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
