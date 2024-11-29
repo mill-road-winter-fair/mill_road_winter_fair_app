@@ -366,8 +366,7 @@ class MapPageState extends State<MapPage> {
         _polylines.add(Polyline(
           polylineId: const PolylineId('route'),
           points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
-          // TODO: Update the route line colour if we start using custom maps
-          color: const Color.fromRGBO(204, 51, 51, 1.0),
+          color: Theme.of(context).colorScheme.tertiary,
           width: 5,
           patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
         ));
