@@ -118,18 +118,21 @@ class HomePageState extends State<HomePage> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: <Widget>[
-                  DrawerHeader(
-                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'Mill Road Winter Fair',
-                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 28),
-                      ],
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 480),
+                    child: DrawerHeader(
+                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'Mill Road Winter Fair',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 28),
+                        ],
+                      ),
                     ),
                   ),
                   ListTile(
