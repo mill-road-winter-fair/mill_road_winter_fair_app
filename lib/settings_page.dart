@@ -75,6 +75,7 @@ class _SettingsPageState extends State<SettingsPage> {
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Column(
@@ -208,7 +209,44 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                const Text('App Information', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text('About'),
+                  onTap: () {
+                    showAboutDialog(
+                        context: context,
+                        applicationName: 'Mill Road\nWinter Fair',
+                        applicationVersion: 'v 0.9.0',
+                        applicationIcon: const MyAppIcon());
+                  },
+                ),
+              ],
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class MyAppIcon extends StatelessWidget {
+  const MyAppIcon({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8.0),
+        child: Image.asset(
+          'assets/icon.png',
+          fit: BoxFit.contain,
         ),
       ),
     );
