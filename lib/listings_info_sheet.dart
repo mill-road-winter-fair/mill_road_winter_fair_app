@@ -55,12 +55,12 @@ class ListingInfoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                  flex: 5,
+                  flex: 7,
                   child: Text(categories)
               ),
               if (currentLatLng != null)
                 Expanded(
-                  flex: 5,
+                  flex: 3,
                   child: Text(
                     approxDistance,
                     style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
