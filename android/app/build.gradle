@@ -49,11 +49,24 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE_FILE"))
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            ndk {
+                // Enable debug symbols for native code
+                debugSymbolLevel 'SYMBOL_TABLE'
+            }
+            signingConfig signingConfigs.release
+            minifyEnabled true // Enable for optimization
+            shrinkResources true // Remove unused resources
         }
     }
 }
