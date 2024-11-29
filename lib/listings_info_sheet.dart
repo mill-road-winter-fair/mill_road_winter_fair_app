@@ -92,20 +92,27 @@ class ListingInfoSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  onGetDirections();
-                },
-                icon: const Icon(Icons.directions),
-                label: const Text('Get Directions'),
-              ),
-              if (website.isNotEmpty)
-                ElevatedButton.icon(
+              Flexible(
+                flex: 8,
+                child: ElevatedButton.icon(
                   onPressed: () {
-                    launchUrl(Uri.parse(website));
+                    onGetDirections();
                   },
-                  icon: const Icon(Icons.public),
-                  label: const Text('Open website'),
+                  icon: const Icon(Icons.directions),
+                  label: const Text('Get Directions'),
+                ),
+              ),
+              Flexible(flex: 1, child: Container()),
+              if (website.isNotEmpty)
+                Flexible(
+                  flex: 8,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      launchUrl(Uri.parse(website));
+                    },
+                    icon: const Icon(Icons.public),
+                    label: const Text('Open website'),
+                  ),
                 ),
             ],
           ),
