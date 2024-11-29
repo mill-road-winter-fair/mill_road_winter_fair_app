@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -19,8 +20,9 @@ Future<void> main() async {
 
   listings = await fetchListings(http.Client());
 
-  // Run the app
-  runApp(const MyApp());
+  // Lock app in portrait rotation and run
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((value) => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -116,18 +118,25 @@ class HomePageState extends State<HomePage> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: <Widget>[
-                  DrawerHeader(
-                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'Mill Road Winter Fair',
-                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 28),
-                      ],
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 480),
+                    child: DrawerHeader(
+                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Expanded(flex: 4, child: Container()),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              'Mill Road Winter Fair',
+                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 22, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Expanded(flex: 1, child: Container())
+                        ],
+                      ),
                     ),
                   ),
                   ListTile(

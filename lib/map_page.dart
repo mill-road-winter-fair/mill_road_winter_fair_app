@@ -378,7 +378,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void _resetMapCamera() {
-    _controller?.moveCamera(CameraUpdate.newLatLngZoom(const LatLng(52.199174, 0.140929), 14.3));
+    _controller?.moveCamera(CameraUpdate.newLatLngZoom(const LatLng(52.199174, 0.140929), 14.1));
   }
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
@@ -483,7 +483,7 @@ class MapPageState extends State<MapPage> {
             },
             initialCameraPosition: const CameraPosition(
               target: LatLng(52.199174, 0.140929),
-              zoom: 14.3,
+              zoom: 14.1,
             ),
             markers: markers.values.toSet(),
             polylines: _polylines,
