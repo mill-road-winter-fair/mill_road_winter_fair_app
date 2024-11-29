@@ -183,7 +183,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     onChanged: (value) {
                       setState(() {
                         _changeTheme(value!);
-                        mapStyle = highContrastMap;
+                        mapStyle = darkMap;
                       });
                       selectedThemeKey = value!;
                       _saveSettings();
