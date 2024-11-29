@@ -222,7 +222,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       showAboutDialog(
                           context: context,
                           applicationName: 'Mill Road\nWinter Fair',
-                          applicationVersion: 'v 0.9.0',
+                          applicationVersion: 'v 0.9.1',
                           applicationIcon: const MyAppIcon());
                     },
                   ),
