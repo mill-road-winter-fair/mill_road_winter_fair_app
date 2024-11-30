@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -24,7 +25,11 @@ Future<void> loadSettings(bool onTest) async {
     int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 
-    selectedThemeKey = prefs.getString('selectedTheme') ?? 'light'; // Default to 'light'
+    // Detect system brightness
+    Brightness systemBrightness = PlatformDispatcher.instance.platformBrightness;
+    String defaultTheme = systemBrightness == Brightness.light ? 'light' : 'dark';
+
+    selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme; // Default to system theme
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
 
