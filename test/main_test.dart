@@ -45,7 +45,7 @@ void main() async {
 
     expect(find.text('Map'), findsOneWidget);
     expect(find.text('Food'), findsOneWidget);
-    expect(find.text('Shopping'), findsOneWidget);
+    expect(find.text('Stalls'), findsOneWidget);
     expect(find.text('Music'), findsOneWidget);
     expect(find.text('Events'), findsOneWidget);
     expect(find.text('Services'), findsOneWidget);
@@ -161,7 +161,7 @@ void main() async {
     final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
     expect(homePageState.index, 1);
 
-    await tester.tap(find.text('Shopping'));
+    await tester.tap(find.text('Stalls'));
     await tester.pumpAndSettle();
 
     expect(homePageState.index, 2);
