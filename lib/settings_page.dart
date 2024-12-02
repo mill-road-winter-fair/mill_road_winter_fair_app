@@ -27,13 +27,15 @@ Future<void> loadSettings(bool onTest) async {
 
     // Detect system brightness
     Brightness systemBrightness = PlatformDispatcher.instance.platformBrightness;
-    String defaultTheme = systemBrightness == Brightness.light ? 'light' : 'dark';
 
-    selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme; // Default to system theme
+    // Set initial theme and map style according to system brightness
+    String defaultTheme = systemBrightness == Brightness.light ? 'light' : 'dark';
+    String defaultMapStyle = systemBrightness == Brightness.dark ? darkMap : standardMap;
+    selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme;
+    mapStyle = prefs.getString('selectedMapStyle') ?? defaultMapStyle;
+
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
-
-    mapStyle = prefs.getString('selectedMapStyle') ?? 'standardMap';
   } else if (onTest == true) {
     int savedUnitIndex = 0;
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
@@ -225,10 +227,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: const Text('About'),
                     onTap: () {
                       showAboutDialog(
-                          context: context,
-                          applicationName: 'Mill Road\nWinter Fair',
-                          applicationVersion: 'v 0.9.1',
-                          applicationIcon: const MyAppIcon());
+                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.1', applicationIcon: const MyAppIcon());
                     },
                   ),
                 ],
