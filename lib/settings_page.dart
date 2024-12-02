@@ -5,7 +5,7 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Define available distance units
-enum DistanceUnits { metric, imperial }
+enum DistanceUnits { metric, imperial, cambridge }
 
 // Set default distance units
 late DistanceUnits preferredDistanceUnits;
@@ -116,6 +116,23 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     visualDensity: VisualDensity.compact,
                     value: DistanceUnits.imperial,
+                    groupValue: preferredDistanceUnits,
+                    onChanged: (DistanceUnits? value) {
+                      setState(() {
+                        preferredDistanceUnits = value!;
+                      });
+                      _saveSettings();
+                    },
+                  ),
+                  RadioListTile(
+                    activeColor: Theme.of(context).colorScheme.tertiary,
+                    title: const Text('Cambridge'),
+                    subtitle: Text(
+                      'Punt lengths',
+                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    value: DistanceUnits.cambridge,
                     groupValue: preferredDistanceUnits,
                     onChanged: (DistanceUnits? value) {
                       setState(() {

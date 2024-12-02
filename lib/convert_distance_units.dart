@@ -21,6 +21,12 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
       final distanceMilesRounded = (distanceMetres / 1609.34).toStringAsFixed(2);
       distanceToDestination = '$distanceMilesRounded miles';
     }
+
+  } else if (preferredDistanceUnits == DistanceUnits.cambridge) {
+
+    final puntLengths = (distanceMetres / 4).toStringAsFixed(0);
+    distanceToDestination = '$puntLengths punts';
+
   }
 
   return distanceToDestination;
