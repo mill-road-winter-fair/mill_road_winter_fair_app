@@ -49,8 +49,6 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
       );
     }).toList();
     return listings;
-
-    return [];
   } on Exception catch (e) {
     debugPrint('Error fetching Heroku listing data: $e');
     return [];
