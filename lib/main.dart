@@ -105,7 +105,7 @@ class HomePageState extends State<HomePage> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
           BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: "Shopping"),
+          BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
           BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
           BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
           BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),

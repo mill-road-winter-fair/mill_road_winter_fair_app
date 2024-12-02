@@ -26,4 +26,10 @@ void main() async {
 
     expect(testDistance, "1.89 miles");
   });
+
+  test('convertDistanceUnits returns punts', () {
+    final testDistance = convertDistanceUnits(444, DistanceUnits.cambridge);
+
+    expect(testDistance, "111 punts");
+  });
 }

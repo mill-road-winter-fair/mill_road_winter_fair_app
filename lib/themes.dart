@@ -175,7 +175,7 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
   }
 
   if (primaryType == "Shopping") {
-    assetPath = "assets/shoppingMarker.png";
+    assetPath = "assets/stallsMarker.png";
   }
 
   if (primaryType == "Music") {

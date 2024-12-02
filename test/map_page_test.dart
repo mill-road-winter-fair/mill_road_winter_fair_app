@@ -236,7 +236,7 @@ void main() async {
 
     // Verify all checkboxes are present
     expect(find.widgetWithText(CheckboxListTile, "Food"), findsOneWidget);
-    expect(find.widgetWithText(CheckboxListTile, "Shopping"), findsOneWidget);
+    expect(find.widgetWithText(CheckboxListTile, "Stalls"), findsOneWidget);
     expect(find.widgetWithText(CheckboxListTile, "Music"), findsOneWidget);
     expect(find.widgetWithText(CheckboxListTile, "Events"), findsOneWidget);
     expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
@@ -262,7 +262,7 @@ void main() async {
     expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
     // Test Shopping checkbox
-    await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
+    await tester.tap(find.widgetWithText(CheckboxListTile, "Stalls"));
     await tester.pumpAndSettle();
     expect(mapPageState.markers.isNotEmpty, true);
     expect(mapPageState.markers.length, 5);
@@ -271,7 +271,7 @@ void main() async {
     expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
     expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
     expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-    await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
+    await tester.tap(find.widgetWithText(CheckboxListTile, "Stalls"));
     await tester.pumpAndSettle();
     expect(mapPageState.markers.isNotEmpty, true);
     expect(mapPageState.markers.length, 5);

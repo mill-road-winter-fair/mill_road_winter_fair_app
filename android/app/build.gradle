@@ -42,10 +42,15 @@ android {
         versionName = flutter.versionName
 
         // Check for dartDefines in case the key is not set
-        if (dartDefines.containsKey('GOOGLE_MAPS_AND_SHEETS_API_KEY')) {
-            resValue "string", "GOOGLE_MAPS_AND_SHEETS_API_KEY", dartDefines['GOOGLE_MAPS_AND_SHEETS_API_KEY']
+        if (dartDefines.containsKey('GOOGLE_MAPS_API_KEY')) {
+            resValue "string", "GOOGLE_MAPS_API_KEY", dartDefines['GOOGLE_MAPS_API_KEY']
         } else {
-            throw new GradleException("GOOGLE_MAPS_AND_SHEETS_API_KEY is missing from dart-defines.")
+            throw new GradleException("GOOGLE_MAPS_API_KEY is missing from dart-defines.")
+        }
+        if (dartDefines.containsKey('HEROKU_API')) {
+            resValue "string", "HEROKU_API", dartDefines['HEROKU_API']
+        } else {
+            throw new GradleException("HEROKU_API is missing from dart-defines.")
         }
     }
 

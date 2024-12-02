@@ -15,9 +15,8 @@ void main() {
   setUp(() async {
     mockClient = MockClient();
     dotenv.testLoad(fileInput: '''
-    GOOGLE_MAPS_AND_SHEETS_API_KEY=MOCK_KEY
-    GOOGLE_SHEET_ID=MOCK_ID
-    GOOGLE_SHEET_RANGE=MOCK_RANGE
+    HEROKU_API=MOCK_API
+    GOOGLE_MAPS_API_KEY=MOCK_KEY
     ''');
   });
 
@@ -63,29 +62,11 @@ void main() {
       expect(result, []);
     });
 
-    test('retries up to 10 times if response contains "#NAME?", then returns empty listings', () async {
-      final invalidResponse = {
-        "values": [
-          ["displayName", "email", "endTime", "id", "latLng", "name", "phone", "primaryType", "secondaryType", "startTime", "tertiaryType", "website"],
-          [
-            "Glazed and Confused",
-            "admin@glazedandconfued.com",
-            "16:30",
-            "1",
-            "#NAME?",
-            "glazedandconfused",
-            "01223 111111",
-            "Food",
-            "Food",
-            "10:30",
-            "Doughnuts",
-            "https://www.glazedandconfused.com"
-          ]
-        ]
-      };
+    test('retries up to 10 times if response code is not 200, then returns empty listings', () async {
+      final invalidResponse = {};
 
       when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response(jsonEncode(invalidResponse), 200),
+        (_) async => http.Response(jsonEncode(invalidResponse), 500),
       );
 
       final result = await fetchExistingListings(mockClient);
