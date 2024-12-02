@@ -351,11 +351,11 @@ class MapPageState extends State<MapPage> {
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
     // Load environment variables
     await dotenv.load(fileName: ".env");
-    String googleMapsAndSheetsApiKey = dotenv.env['GOOGLE_MAPS_AND_SHEETS_API_KEY'] ?? '';
+    String googleMapsApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
     // Fetch new directions from the Google Directions API
     final result = await _polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey: googleMapsAndSheetsApiKey,
+      googleApiKey: googleMapsApiKey,
       request: PolylineRequest(
         origin: PointLatLng(origin.latitude, origin.longitude),
         destination: PointLatLng(destination.latitude, destination.longitude),
