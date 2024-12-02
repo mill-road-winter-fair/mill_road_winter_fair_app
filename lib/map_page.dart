@@ -29,7 +29,7 @@ class MapPage extends StatefulWidget {
 class MapPageState extends State<MapPage> {
   late Future<List<Map<String, dynamic>>> _fetchListings;
   late List<MarkerId> _foodMarkerIds;
-  late List<MarkerId> _shoppingMarkerIds;
+  late List<MarkerId> _stallsMarkerIds;
   late List<MarkerId> _musicMarkerIds;
   late List<MarkerId> _eventMarkerIds;
   late List<MarkerId> _serviceMarkerIds;
@@ -47,7 +47,7 @@ class MapPageState extends State<MapPage> {
   // Declare default filters
   final Map<String, bool> filterSettings = {
     'Food': true,
-    'Shopping': true,
+    'Stalls': true,
     'Music': true,
     'Events': true,
     'Services': true,
@@ -90,7 +90,7 @@ class MapPageState extends State<MapPage> {
   void setMarkerLists() {
     // Reset marker lists
     _foodMarkerIds = [];
-    _shoppingMarkerIds = [];
+    _stallsMarkerIds = [];
     _musicMarkerIds = [];
     _eventMarkerIds = [];
     _serviceMarkerIds = [];
@@ -101,7 +101,7 @@ class MapPageState extends State<MapPage> {
       if (listing['primaryType'] == "Food") {
         _foodMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Shopping") {
-        _shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
+        _stallsMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Music") {
         _musicMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Event") {
@@ -197,13 +197,13 @@ class MapPageState extends State<MapPage> {
                     ),
                     CheckboxListTile(
                       activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
-                      title: const Text("Shopping"),
-                      value: filterSettings["Shopping"],
+                      title: const Text("Stalls"),
+                      value: filterSettings["Stalls"],
                       onChanged: (value) {
                         setState(() {
-                          filterSettings["Shopping"] = value!;
+                          filterSettings["Stalls"] = value!;
                         });
-                        final idList = _shoppingMarkerIds;
+                        final idList = _stallsMarkerIds;
                         updateMarkerVisibility(idList, value!);
                       },
                     ),
@@ -253,7 +253,7 @@ class MapPageState extends State<MapPage> {
                                 filterSettings[key] = true;
                               });
                             });
-                            final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                             updateMarkerVisibility(idList, true);
                             Navigator.pop(context);
                           },
@@ -267,7 +267,7 @@ class MapPageState extends State<MapPage> {
                                 filterSettings[key] = false;
                               });
                             });
-                            final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                             updateMarkerVisibility(idList, false);
                             Navigator.pop(context);
                           },
@@ -293,7 +293,7 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines
     setState(() {
       _polylines.clear(); // Clear any existing polylines
-      final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+      final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
       updateMarkerVisibility(idList, false); // Hide any existing markers
     });
 
@@ -509,7 +509,7 @@ class MapPageState extends State<MapPage> {
                                   _positionStream?.cancel();
                                   _polylines.clear();
                                   _distanceToDestination = null;
-                                  final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                                  final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                                   updateMarkerVisibility(idList, true);
                                   _navigationInProgress = false;
                                 });
@@ -528,14 +528,14 @@ class MapPageState extends State<MapPage> {
                               onPressed: () {
                                 _resetMapCamera();
                                 if (filterSettings['Food'] == false &&
-                                    filterSettings['Shopping'] == false &&
+                                    filterSettings['Stalls'] == false &&
                                     filterSettings['Music'] == false &&
                                     filterSettings['Events'] == false &&
                                     filterSettings['Services'] == false) {
-                                  final idList = _foodMarkerIds + _shoppingMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                                  final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                                   setState(() {
                                     filterSettings['Food'] = true;
-                                    filterSettings['Shopping'] = true;
+                                    filterSettings['Stalls'] = true;
                                     filterSettings['Music'] = true;
                                     filterSettings['Events'] = true;
                                     filterSettings['Services'] = true;
