@@ -571,7 +571,7 @@ class MapPageState extends State<MapPage> {
                             onPressed: () {
                               setState(() {
                                 if (mapType == MapType.normal) {
-                                  mapType = MapType.satellite;
+                                  mapType = MapType.hybrid;
                                   _layersIcon = Icons.map;
                                 } else {
                                   mapType = MapType.normal;
