@@ -58,6 +58,19 @@ The app currently uses the the Google Maps Platform within GCP in order to acces
 1. Maps SDK for Android (To render the interactive map on the app's homepage.)
 2. Google Maps Directions API
 
+## Release Steps
+
+1. Increment the version number and build number in `pubspec.yaml`.
+
+2. Run the following command in the terminal:
+```shell
+flutter build appbundle --release --dart-define-from-file=.env
+```
+
+3. Upload the following file to the Google Plat Console as a new release: `/build/app/outputs/bundle/release/app-release.aab`
+
+4. If required, add the following folder to a `.zip` file and upload it to the Release as a Debug Symbols artifact: `build/app/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib/x86_64`
+
 ## Other Links
 - [Mill Road Winter Fair Caching API](https://github.com/MarauderOne/mill_road_winter_fair_app_db_api)
 - [Test Data Spreadsheet](https://docs.google.com/spreadsheets/d/1-Dk_K8tvDJ4C9vSx0OJSEYhvhGrt6IEkabVRP83n0OM/edit?usp=sharing)
