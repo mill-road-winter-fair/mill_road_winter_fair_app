@@ -75,6 +75,7 @@ void main() async {
     expect(find.byType(DrawerHeader), findsOneWidget);
     expect(find.text('Mill Road Winter Fair'), findsExactly(2));
     expect(find.text('About the Fair'), findsOneWidget);
+    expect(find.text('Important Info'), findsOneWidget);
     expect(find.text('Visit our website'), findsOneWidget);
     expect(find.text('Email us'), findsOneWidget);
     expect(find.byType(IconButton), findsExactly(8));
