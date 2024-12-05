@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -75,6 +76,7 @@ void main() async {
     expect(find.byType(DrawerHeader), findsOneWidget);
     expect(find.text('Mill Road Winter Fair'), findsExactly(2));
     expect(find.text('About the Fair'), findsOneWidget);
+    expect(find.text('Important Info'), findsOneWidget);
     expect(find.text('Visit our website'), findsOneWidget);
     expect(find.text('Email us'), findsOneWidget);
     expect(find.byType(IconButton), findsExactly(8));
@@ -107,6 +109,33 @@ void main() async {
     await tester.pumpAndSettle();
 
     expect(find.byType(AboutTheFairPage), findsOneWidget);
+  });
+
+  testWidgets('HomePage navigates to ImportantInfoPage when Important Info in drawer is tapped', (WidgetTester tester) async {
+    listings = [
+      {
+        'displayName': 'Glazed and Confused',
+        'endTime': '16:30',
+        'id': '1',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '10:30',
+        'tertiaryType': 'Doughnuts',
+        'website': 'https://www.glazedandconfused.com',
+      }
+    ];
+
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.byIcon(Icons.menu));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Important Info'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ImportantInfoPage), findsOneWidget);
   });
 
   testWidgets('HomePage navigates to SettingsPage when Settings in drawer is tapped', (WidgetTester tester) async {

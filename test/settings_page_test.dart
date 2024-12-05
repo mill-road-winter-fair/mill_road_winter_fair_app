@@ -15,6 +15,8 @@ void main() {
     expect(find.text('Metres & Kilometres'), findsOneWidget);
     expect(find.text('Imperial'), findsOneWidget);
     expect(find.text('Feet & Miles'), findsOneWidget);
+    expect(find.text('Cambridge'), findsOneWidget);
+    expect(find.text('Punt lengths'), findsOneWidget);
 
     // Verify the Theme section
     expect(find.text('Theme'), findsOneWidget);
@@ -23,6 +25,10 @@ void main() {
     expect(find.text('2024 Colour Scheme'), findsOneWidget);
     expect(find.text('High Contrast'), findsOneWidget);
     expect(find.text('Colour Blind Friendly'), findsOneWidget);
+
+    // Verify the Theme section
+    expect(find.text('App Information'), findsOneWidget);
+    expect(find.text('About'), findsOneWidget);
 
     // Verify default settings
     expect(preferredDistanceUnits, DistanceUnits.metric);

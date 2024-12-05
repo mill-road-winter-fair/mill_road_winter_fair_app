@@ -51,7 +51,7 @@ void main() async {
     // Switch the map type
     await tester.tap(find.byIcon(Icons.satellite_alt));
     await tester.pumpAndSettle();
-    expect(mapPageState.mapType, MapType.satellite);
+    expect(mapPageState.mapType, MapType.hybrid);
 
     // Switch the map type back
     await tester.tap(find.byIcon(Icons.map));
