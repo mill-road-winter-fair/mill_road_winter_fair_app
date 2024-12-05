@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -145,6 +146,14 @@ class HomePageState extends State<HomePage> {
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.warning),
+                    title: const Text('Important Info', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
                     },
                   ),
                   ListTile(
