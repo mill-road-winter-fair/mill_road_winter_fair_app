@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -308,6 +309,15 @@ class MapPageState extends State<MapPage> {
 
       // Start location updates
       await startLocationUpdates(destination);
+    } else {
+      Fluttertoast.showToast(
+        msg: 'Location permissions are required to determine directions',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+      );
     }
 
     // Re-add destination marker
