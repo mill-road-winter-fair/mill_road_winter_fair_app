@@ -12,6 +12,8 @@ class AboutTheFairPage extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              const Text('Please note that the 2024 Mill Road Winter Fair is now CANCELLED due to Storm Darragh.', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
               const Text(
                   "Mill Road Winter Fair is a celebration of community along one of the most diverse and vibrant roads in Cambridge. Usually held on the first Saturday of December, the Fair brings together local businesses and organisations, shops and stallholders, musicians, artists and dancers in one day of festival joy."),
               const SizedBox(height: 20),
@@ -31,7 +33,7 @@ class AboutTheFairPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text('The 2024 Fair will be on Saturday 7th December, 10.30am to 4.30pm.', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('The 2024 Fair will be on Saturday 7th December, 10.30am to 4.30pm.', style: TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.lineThrough)),
               const SizedBox(height: 20),
               const Text('Be sure to come early so that you don’t miss out! We have so much to see! The fire engine pull, opening ceremony, dance show and parade are all in the morning, as well as lots of amazing stalls, performance and events.'),
               const SizedBox(height: 8),

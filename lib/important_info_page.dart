@@ -15,6 +15,8 @@ class ImportantInfoPage extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              const Text('Please note that the 2024 Mill Road Winter Fair is now CANCELLED due to Storm Darragh.', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 240),
                 child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/hiVis.jpg', fit: BoxFit.fitWidth)),
