@@ -22,8 +22,7 @@ Future<void> main() async {
   listings = await fetchListings(http.Client());
 
   // Lock app in portrait rotation and run
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((value) => runApp(const MyApp()));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -70,7 +69,20 @@ class HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text('Mill Road Winter Fair'),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Mill Road Winter Fair 2024'),
+                Text(
+                  'Now CANCELLED due to Storm Darragh',
+                  style: TextStyle(
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      color: Theme.of(context).colorScheme.onError,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
             Image.asset('assets/iconTransparent.png', height: 30, width: 30, color: Theme.of(context).colorScheme.onPrimary),
           ],
         ),
@@ -131,8 +143,19 @@ class HomePageState extends State<HomePage> {
                           Expanded(
                             flex: 3,
                             child: Text(
-                              'Mill Road Winter Fair',
-                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 22, fontWeight: FontWeight.bold),
+                              'Mill Road Winter Fair 2024',
+                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              'Now CANCELLED due to Storm Darragh',
+                              style: TextStyle(
+                                  backgroundColor: Theme.of(context).colorScheme.error,
+                                  color: Theme.of(context).colorScheme.onError,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                           Expanded(flex: 1, child: Container())
