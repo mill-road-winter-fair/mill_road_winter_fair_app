@@ -142,22 +142,20 @@ class HomePageState extends State<HomePage> {
                           Expanded(flex: 4, child: Container()),
                           Expanded(
                             flex: 3,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Mill Road Winter Fair 2024',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 21, fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  'Now CANCELLED due to Storm Darragh',
-                                  style: TextStyle(
-                                      backgroundColor: Theme.of(context).colorScheme.error,
-                                      color: Theme.of(context).colorScheme.onError,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
+                            child: Text(
+                              'Mill Road Winter Fair 2024',
+                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              'Now CANCELLED due to Storm Darragh',
+                              style: TextStyle(
+                                  backgroundColor: Theme.of(context).colorScheme.error,
+                                  color: Theme.of(context).colorScheme.onError,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                           Expanded(flex: 1, child: Container())
