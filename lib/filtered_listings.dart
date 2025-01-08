@@ -153,8 +153,8 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
               return ListingInfoSheet(
                 title: listing['displayName'],
-                categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
-                openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
+                categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+                openingTimes: "${listing['startTime']} - ${listing['endTime']}",
                 approxDistance: approximateDistance,
                 phoneNumber: listing['phone'],
                 website: listing['website'],
