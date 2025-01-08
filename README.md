@@ -62,14 +62,22 @@ The app currently uses the the Google Maps Platform within GCP in order to acces
 
 1. Increment the version number and build number in `pubspec.yaml`.
 
-2. Run the following command in the terminal:
+2. Set environment variables for the signing key store.
+```shell
+$env:KEYSTORE_FILE='C:\Users\alexb\Development\mill_road_winter_fair_app_keystore\upload-keystore.jks'
+$env:KEYSTORE_PASSWORD=REDACTED
+$env:KEY_ALIAS='upload'
+$env:KEY_PASSWORD=REDACTED
+```
+
+3. Run the following command in the terminal:
 ```shell
 flutter build appbundle --release --dart-define-from-file=.env
 ```
 
-3. Upload the following file to the Google Plat Console as a new release: `/build/app/outputs/bundle/release/app-release.aab`
+4. Upload the following file to the Google Plat Console as a new release: `/build/app/outputs/bundle/release/app-release.aab`
 
-4. If required, add the following folder to a `.zip` file and upload it to the Release as a Debug Symbols artifact: `build/app/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib/x86_64`
+5. If required, add the following folder to a `.zip` file and upload it to the Release as a Debug Symbols artifact: `build/app/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib/x86_64`
 
 ## Other Links
 - [Mill Road Winter Fair Caching API](https://github.com/MarauderOne/mill_road_winter_fair_app_db_api)

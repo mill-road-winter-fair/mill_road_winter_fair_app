@@ -140,8 +140,8 @@ class MapPageState extends State<MapPage> {
           builder: (BuildContext context) {
             return ListingInfoSheet(
               title: listing['displayName'],
-              categories: listing['secondaryType'] + ' • ' + listing['tertiaryType'],
-              openingTimes: listing['startTime'] + ' - ' + listing['endTime'],
+              categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+              openingTimes: "${listing['startTime']} - ${listing['endTime']}",
               approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
               phoneNumber: listing['phone'],
               website: listing['website'],
