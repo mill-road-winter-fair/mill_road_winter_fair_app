@@ -94,6 +94,7 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
+        showUnselectedLabels: true,
         currentIndex: index,
         onTap: (selectedIndex) {
           // Update the user's location
