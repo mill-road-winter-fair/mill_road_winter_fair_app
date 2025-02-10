@@ -69,7 +69,7 @@ class HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text('Mill Road Winter Fair 2024'),
+            const Text('Mill Road Winter Fair 2025'),
             Image.asset('assets/iconTransparent.png', height: 30, width: 30, color: Theme.of(context).colorScheme.onPrimary),
           ],
         ),
@@ -130,7 +130,7 @@ class HomePageState extends State<HomePage> {
                           Expanded(
                             flex: 3,
                             child: Text(
-                              'Mill Road Winter Fair 2024',
+                              'Mill Road Winter Fair 2025',
                               style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ),
