@@ -10,6 +10,7 @@ import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
@@ -43,20 +44,30 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
       }
 
       if (currentLatLng != null) {
-        // Sort listings by approximate distance
-        final sortedListings = listings.map((listing) {
+        // Add approximate distance to each listing
+        listings = listings.map((listing) {
           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
           final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
           return {...listing, 'approximateDistanceMetres': distance};
         }).toList();
+      }
 
-        sortedListings.sort((a, b) {
+      if (preferredSortingMethod == SortingMethod.values[0]) {
+        // Sort listings by approximate distance
+        listings.sort((a, b) {
           int distanceA = a['approximateDistanceMetres'];
           int distanceB = b['approximateDistanceMetres'];
           return distanceA.compareTo(distanceB);
         });
-
-        return sortedListings;
+        return listings;
+      } else {
+        // Sort listings by name
+        listings.sort((a, b) {
+          String nameA = a['name'];
+          String nameB = b['name'];
+          return nameA.compareTo(nameB);
+        });
+        return listings;
       }
 
       return listings;
@@ -84,6 +95,12 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
         isRefreshing = false;
       });
     }
+  }
+
+  // Save settings to shared preferences
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
   }
 
   @override
@@ -142,30 +159,100 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
           onRefresh: refreshListings,
           backgroundColor: Theme.of(context).colorScheme.primary,
           color: Theme.of(context).colorScheme.onPrimary,
-          child: ListView.separated(
-            padding: const EdgeInsets.all(8),
-            separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-            itemCount: filteredListings.length,
-            itemBuilder: (context, index) {
-              final listing = filteredListings[index];
-              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-              final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-              return ListingInfoSheet(
-                title: listing['displayName'],
-                categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                openingTimes: "${listing['startTime']} - ${listing['endTime']}",
-                approxDistance: approximateDistance,
-                phoneNumber: listing['phone'],
-                website: listing['website'],
-                onGetDirections: () => {
-                  if (homePageState != null)
-                    {
-                      homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
-                    }
-                },
-              );
-            },
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondary,
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey[350]!, width: 2),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const Text("Sort by: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          Flexible(
+                            flex: 8,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: preferredSortingMethod == SortingMethod.values[0]
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.secondary,
+                                    foregroundColor: preferredSortingMethod == SortingMethod.values[0]
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSecondary),
+                                child: const Text('Nearest'),
+                                onPressed: () {
+                                  setState(() {
+                                    preferredSortingMethod = SortingMethod.values[0];
+                                  });
+                                  _saveSettings();
+                                },
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 8,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: preferredSortingMethod == SortingMethod.values[1]
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.secondary,
+                                    foregroundColor: preferredSortingMethod == SortingMethod.values[1]
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSecondary),
+                                child: const Text('A-Z'),
+                                onPressed: () {
+                                  setState(() {
+                                    preferredSortingMethod = SortingMethod.values[1];
+                                  });
+                                  _saveSettings();
+                                },
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  )),
+              Expanded(
+                flex: 24,
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(8),
+                  separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+                  itemCount: filteredListings.length,
+                  itemBuilder: (context, index) {
+                    final listing = filteredListings[index];
+                    final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                    final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                    return ListingInfoSheet(
+                      title: listing['displayName'],
+                      categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+                      openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                      approxDistance: approximateDistance,
+                      phoneNumber: listing['phone'],
+                      website: listing['website'],
+                      onGetDirections: () => {
+                        if (homePageState != null)
+                          {
+                            homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
+                          }
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         );
       },

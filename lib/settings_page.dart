@@ -4,6 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
+// Define available sorting methods
+enum SortingMethod { nearest, alphabetical }
+
+// Set default sorting method
+late SortingMethod preferredSortingMethod;
+
 // Define available distance units
 enum DistanceUnits { metric, imperial, cambridge }
 
@@ -22,7 +28,14 @@ Future<void> loadSettings(bool onTest) async {
     // Load settings from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
 
-    int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0; // Default to 0 (metric)
+    // Set default sorting method as nearest (0 in the index)
+    int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 0;
+    //Load preferred sorting method from shared preferences
+    preferredSortingMethod = SortingMethod.values[savedSortingIndex];
+
+    // Set default distance unit as metric (0 in the index)
+    int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0;
+    //Load preferred distance unit from shared preferences
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 
     // Detect system brightness
