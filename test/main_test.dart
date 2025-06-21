@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -15,6 +17,10 @@ import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'main_test.mocks.dart';
 
 void main() async {
+  // Mock location services and permissions
+  locationServicesEnabled = true;
+  locationPermission = LocationPermission.always;
+
   // Mock user settings
   await loadSettings(true);
 
@@ -30,6 +36,7 @@ void main() async {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
         'id': '1',
+        'name': 'glazedandconfused',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',
         'primaryType': 'Food',
@@ -42,7 +49,7 @@ void main() async {
 
     await tester.pumpWidget(const MyApp());
 
-    expect(find.text('Mill Road Winter Fair 2024'), findsOneWidget);
+    expect(find.text('Mill Road Winter Fair 2025'), findsOneWidget);
 
     expect(find.text('Map'), findsOneWidget);
     expect(find.text('Food'), findsOneWidget);
@@ -58,6 +65,7 @@ void main() async {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
         'id': '1',
+        'name': 'glazedandconfused',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',
         'primaryType': 'Food',
@@ -74,7 +82,7 @@ void main() async {
     await tester.pumpAndSettle();
 
     expect(find.byType(DrawerHeader), findsOneWidget);
-    expect(find.text('Mill Road Winter Fair 2024'), findsExactly(2));
+    expect(find.text('Mill Road Winter Fair 2025'), findsExactly(2));
     expect(find.text('About the Fair'), findsOneWidget);
     expect(find.text('Important Info'), findsOneWidget);
     expect(find.text('Visit our website'), findsOneWidget);
@@ -90,6 +98,7 @@ void main() async {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
         'id': '1',
+        'name': 'glazedandconfused',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',
         'primaryType': 'Food',
@@ -117,6 +126,7 @@ void main() async {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
         'id': '1',
+        'name': 'glazedandconfused',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',
         'primaryType': 'Food',
@@ -144,6 +154,7 @@ void main() async {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
         'id': '1',
+        'name': 'glazedandconfused',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',
         'primaryType': 'Food',
@@ -171,6 +182,7 @@ void main() async {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
         'id': '1',
+        'name': 'glazedandconfused',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',
         'primaryType': 'Food',
@@ -222,6 +234,7 @@ void main() async {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
         'id': '1',
+        'name': 'glazedandconfused',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',
         'primaryType': 'Food',

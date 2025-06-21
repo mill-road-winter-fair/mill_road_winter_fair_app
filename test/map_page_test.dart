@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
@@ -8,11 +9,16 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 void main() async {
+  // Mock location services and permissions
+  locationServicesEnabled = true;
+  locationPermission = LocationPermission.always;
+
   // Mock user settings
   await loadSettings(true);
 
   listings = [
     {
+      'name': 'glazedandconfused',
       'displayName': 'Glazed and Confused',
       'endTime': '16:30',
       'id': '1',
@@ -383,6 +389,7 @@ void main() async {
         'displayName': 'Glazed and Confused',
         'endTime': '16:30',
         'id': '1',
+        'name': 'glazedandconfused',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',
         'primaryType': 'Food',

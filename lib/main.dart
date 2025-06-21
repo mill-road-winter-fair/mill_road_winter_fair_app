@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -20,6 +21,10 @@ Future<void> main() async {
   await loadSettings(false);
 
   listings = await fetchListings(http.Client());
+
+  // Check whether location services are enabled and permissions are granted to the app
+  locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
+  locationPermission = await Geolocator.checkPermission();
 
   // Lock app in portrait rotation and run
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const MyApp()));
@@ -69,20 +74,7 @@ class HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Mill Road Winter Fair 2024'),
-                Text(
-                  'Now CANCELLED due to Storm Darragh',
-                  style: TextStyle(
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                      color: Theme.of(context).colorScheme.onError,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+            const Text('Mill Road Winter Fair 2025'),
             Image.asset('assets/iconTransparent.png', height: 30, width: 30, color: Theme.of(context).colorScheme.onPrimary),
           ],
         ),
@@ -107,6 +99,7 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
+        showUnselectedLabels: true,
         currentIndex: index,
         onTap: (selectedIndex) {
           // Update the user's location
@@ -143,19 +136,8 @@ class HomePageState extends State<HomePage> {
                           Expanded(
                             flex: 3,
                             child: Text(
-                              'Mill Road Winter Fair 2024',
+                              'Mill Road Winter Fair 2025',
                               style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              'Now CANCELLED due to Storm Darragh',
-                              style: TextStyle(
-                                  backgroundColor: Theme.of(context).colorScheme.error,
-                                  color: Theme.of(context).colorScheme.onError,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                           Expanded(flex: 1, child: Container())

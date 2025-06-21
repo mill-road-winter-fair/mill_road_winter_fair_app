@@ -311,7 +311,7 @@ class MapPageState extends State<MapPage> {
       await startLocationUpdates(destination);
     } else {
       Fluttertoast.showToast(
-        msg: 'Location permissions are required to determine directions',
+        msg: 'Location services and permissions are required to determine directions',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
         textColor: Theme.of(context).colorScheme.onPrimary,

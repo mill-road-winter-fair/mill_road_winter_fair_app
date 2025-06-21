@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
@@ -10,6 +12,7 @@ import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
@@ -29,6 +32,7 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
   // ignore: unused_field
   late Future<List> _sortedListings;
   bool isRefreshing = false;
+  bool useFallbackSorting = false;
 
   @override
   void initState() {
@@ -38,25 +42,34 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
 
   Future<List> sortListings() async {
     try {
-      if (listings.isEmpty) {
-        throw Exception("No listings exist");
+      if (listings.isEmpty) throw Exception("No listings exist");
+
+      if (locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
+        // User has disabled location permissions, change their preferred sorting method
+        preferredSortingMethod = SortingMethod.values[1];
       }
 
-      if (currentLatLng != null) {
-        // Sort listings by approximate distance
-        final sortedListings = listings.map((listing) {
+      if (locationServicesEnabled == false || currentLatLng == null) {
+        // Location services are disabled or we cannot get the user's location, use fallback sorting but don't change their saved preferences
+        useFallbackSorting = true;
+      } else {
+        useFallbackSorting = false;
+      }
+
+      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) && locationServicesEnabled == true && useFallbackSorting == false) {
+        // Add distance to each listing
+        listings = listings.map((listing) {
           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
           final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
           return {...listing, 'approximateDistanceMetres': distance};
         }).toList();
+      }
 
-        sortedListings.sort((a, b) {
-          int distanceA = a['approximateDistanceMetres'];
-          int distanceB = b['approximateDistanceMetres'];
-          return distanceA.compareTo(distanceB);
-        });
-
-        return sortedListings;
+      // Sort based on preference
+      if (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true) {
+        listings.sort((a, b) => a['name'].compareTo(b['name']));
+      } else {
+        listings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
       }
 
       return listings;
@@ -84,6 +97,12 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
         isRefreshing = false;
       });
     }
+  }
+
+  // Save settings to shared preferences
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
   }
 
   @override
@@ -142,30 +161,111 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
           onRefresh: refreshListings,
           backgroundColor: Theme.of(context).colorScheme.primary,
           color: Theme.of(context).colorScheme.onPrimary,
-          child: ListView.separated(
-            padding: const EdgeInsets.all(8),
-            separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-            itemCount: filteredListings.length,
-            itemBuilder: (context, index) {
-              final listing = filteredListings[index];
-              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-              final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-              return ListingInfoSheet(
-                title: listing['displayName'],
-                categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                openingTimes: "${listing['startTime']} - ${listing['endTime']}",
-                approxDistance: approximateDistance,
-                phoneNumber: listing['phone'],
-                website: listing['website'],
-                onGetDirections: () => {
-                  if (homePageState != null)
-                    {
-                      homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
-                    }
-                },
-              );
-            },
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondary,
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey[350]!, width: 2),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const Text("Sort by: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          Flexible(
+                            flex: 8,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[0] && useFallbackSorting == false)
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.secondary,
+                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[0] && useFallbackSorting == false)
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSecondary),
+                                child: const Text('Nearest'),
+                                onPressed: () {
+                                  if (currentLatLng != null) {
+                                    setState(() {
+                                      preferredSortingMethod = SortingMethod.values[0];
+                                    });
+                                    _saveSettings();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Location services and permissions are required to determine distances',
+                                      gravity: ToastGravity.CENTER,
+                                      backgroundColor: Theme.of(context).colorScheme.primary,
+                                      textColor: Theme.of(context).colorScheme.onPrimary,
+                                      fontSize: 16,
+                                      toastLength: Toast.LENGTH_LONG,
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 8,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true)
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.secondary,
+                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true)
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSecondary),
+                                child: const Text('A-Z'),
+                                onPressed: () {
+                                  setState(() {
+                                    preferredSortingMethod = SortingMethod.values[1];
+                                  });
+                                  _saveSettings();
+                                },
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  )),
+              Expanded(
+                flex: 24,
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(8),
+                  separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+                  itemCount: filteredListings.length,
+                  itemBuilder: (context, index) {
+                    final listing = filteredListings[index];
+                    final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                    final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                    return ListingInfoSheet(
+                      title: listing['displayName'],
+                      categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+                      openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                      approxDistance: approximateDistance,
+                      phoneNumber: listing['phone'],
+                      website: listing['website'],
+                      onGetDirections: () => {
+                        if (homePageState != null)
+                          {
+                            homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
+                          }
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         );
       },
