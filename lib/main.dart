@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -20,6 +21,10 @@ Future<void> main() async {
   await loadSettings(false);
 
   listings = await fetchListings(http.Client());
+
+  // Check whether location services are enabled and permissions are granted to the app
+  locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
+  locationPermission = await Geolocator.checkPermission();
 
   // Lock app in portrait rotation and run
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const MyApp()));

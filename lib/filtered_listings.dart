@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
@@ -43,25 +45,36 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
         throw Exception("No listings exist");
       }
 
-      if (currentLatLng != null) {
-        // Add approximate distance to each listing
-        listings = listings.map((listing) {
-          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-          final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
-          return {...listing, 'approximateDistanceMetres': distance};
-        }).toList();
-      }
+      if ((locationServicesEnabled = true) && (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)) {
+        if (currentLatLng != null) {
+          // Add approximate distance to each listing
+          listings = listings.map((listing) {
+            LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+            final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
+            return {...listing, 'approximateDistanceMetres': distance};
+          }).toList();
+        }
 
-      if (preferredSortingMethod == SortingMethod.values[0]) {
-        // Sort listings by approximate distance
-        listings.sort((a, b) {
-          int distanceA = a['approximateDistanceMetres'];
-          int distanceB = b['approximateDistanceMetres'];
-          return distanceA.compareTo(distanceB);
-        });
-        return listings;
+        if (preferredSortingMethod == SortingMethod.values[0]) {
+          // Sort listings by approximate distance
+          listings.sort((a, b) {
+            int distanceA = a['approximateDistanceMetres'];
+            int distanceB = b['approximateDistanceMetres'];
+            return distanceA.compareTo(distanceB);
+          });
+          return listings;
+        } else {
+          // Sort listings by name
+          listings.sort((a, b) {
+            String nameA = a['name'];
+            String nameB = b['name'];
+            return nameA.compareTo(nameB);
+          });
+          return listings;
+        }
       } else {
-        // Sort listings by name
+        // Either Location Services are disabled or permissions have not been granted, so sort by name
+        preferredSortingMethod = SortingMethod.values[1];
         listings.sort((a, b) {
           String nameA = a['name'];
           String nameB = b['name'];
@@ -69,8 +82,6 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
         });
         return listings;
       }
-
-      return listings;
     } on Exception catch (e) {
       debugPrint('Error sorting listings: $e');
       return listings;
@@ -190,10 +201,21 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
                                         : Theme.of(context).colorScheme.onSecondary),
                                 child: const Text('Nearest'),
                                 onPressed: () {
-                                  setState(() {
-                                    preferredSortingMethod = SortingMethod.values[0];
-                                  });
-                                  _saveSettings();
+                                  if (currentLatLng != null) {
+                                    setState(() {
+                                      preferredSortingMethod = SortingMethod.values[0];
+                                    });
+                                    _saveSettings();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Location services and permissions are required to determine distances',
+                                      gravity: ToastGravity.CENTER,
+                                      backgroundColor: Theme.of(context).colorScheme.primary,
+                                      textColor: Theme.of(context).colorScheme.onPrimary,
+                                      fontSize: 16,
+                                      toastLength: Toast.LENGTH_LONG,
+                                    );
+                                  }
                                 },
                               ),
                             ),
