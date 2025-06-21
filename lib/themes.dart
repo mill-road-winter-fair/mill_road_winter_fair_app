@@ -59,7 +59,7 @@ final Map<String, ThemeData> appThemes = {
         backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
       ),
       elevatedButtonTheme:
-          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white)),
+          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
       listTileTheme: const ListTileThemeData(tileColor: Color.fromRGBO(44, 44, 44, 1.0))),
   '2024': ThemeData(
     useMaterial3: true,
@@ -117,7 +117,7 @@ final Map<String, ThemeData> appThemes = {
         backgroundColor: Colors.black,
       ),
       elevatedButtonTheme:
-          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white)),
+          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
       listTileTheme: const ListTileThemeData(tileColor: Colors.black)),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
