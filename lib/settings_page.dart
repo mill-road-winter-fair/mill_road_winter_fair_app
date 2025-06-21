@@ -1,13 +1,17 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
+// Define variable for first execution status
+late bool firstExecution;
+
 // Define available sorting methods
 enum SortingMethod { nearest, alphabetical }
 
-// Set default sorting method
+// Define variable for sorting method
 late SortingMethod preferredSortingMethod;
 
 // Define available distance units
@@ -28,14 +32,17 @@ Future<void> loadSettings(bool onTest) async {
     // Load settings from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
 
+    // Get first execution status, default to true
+    firstExecution = prefs.getBool('firstExecution') ?? true;
+
     // Set default sorting method as nearest (0 in the index)
     int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 0;
-    //Load preferred sorting method from shared preferences
+    // Load preferred sorting method from shared preferences
     preferredSortingMethod = SortingMethod.values[savedSortingIndex];
 
     // Set default distance unit as metric (0 in the index)
     int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0;
-    //Load preferred distance unit from shared preferences
+    // Load preferred distance unit from shared preferences
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 
     // Detect system brightness
@@ -86,6 +93,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _changeTheme(String themeKey) async {
     themeNotifier.value = themeKey;
+  }
+
+  // Function to replay the initial welcome screen
+  void _replayWelcomeScreen(context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+    );
   }
 
   @override
@@ -246,6 +260,18 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.clearAllMarkers();
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  const Text('Onboarding', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  ListTile(
+                    leading: const Icon(Icons.first_page),
+                    title: const Text('Replay Welcome Screen'),
+                    onTap: () => _replayWelcomeScreen(context),
                   ),
                 ],
               ),
