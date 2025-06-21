@@ -32,6 +32,7 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
   // ignore: unused_field
   late Future<List> _sortedListings;
   bool isRefreshing = false;
+  bool useFallbackSorting = false;
 
   @override
   void initState() {
@@ -41,47 +42,37 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
 
   Future<List> sortListings() async {
     try {
-      if (listings.isEmpty) {
-        throw Exception("No listings exist");
-      }
+      if (listings.isEmpty) throw Exception("No listings exist");
 
-      if ((locationServicesEnabled = true) && (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)) {
-        if (currentLatLng != null) {
-          // Add approximate distance to each listing
-          listings = listings.map((listing) {
-            LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-            final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
-            return {...listing, 'approximateDistanceMetres': distance};
-          }).toList();
-        }
-
-        if (preferredSortingMethod == SortingMethod.values[0]) {
-          // Sort listings by approximate distance
-          listings.sort((a, b) {
-            int distanceA = a['approximateDistanceMetres'];
-            int distanceB = b['approximateDistanceMetres'];
-            return distanceA.compareTo(distanceB);
-          });
-          return listings;
-        } else {
-          // Sort listings by name
-          listings.sort((a, b) {
-            String nameA = a['name'];
-            String nameB = b['name'];
-            return nameA.compareTo(nameB);
-          });
-          return listings;
-        }
-      } else {
-        // Either Location Services are disabled or permissions have not been granted, so sort by name
+      if (locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
+        // User has disabled location permissions, change their preferred sorting method
         preferredSortingMethod = SortingMethod.values[1];
-        listings.sort((a, b) {
-          String nameA = a['name'];
-          String nameB = b['name'];
-          return nameA.compareTo(nameB);
-        });
-        return listings;
       }
+
+      if (locationServicesEnabled == false || currentLatLng == null) {
+        // Location services are disabled or we cannot get the user's location, use fallback sorting but don't change their saved preferences
+        useFallbackSorting = true;
+      } else {
+        useFallbackSorting = false;
+      }
+
+      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) && locationServicesEnabled == true && useFallbackSorting == false) {
+        // Add distance to each listing
+        listings = listings.map((listing) {
+          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+          final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
+          return {...listing, 'approximateDistanceMetres': distance};
+        }).toList();
+      }
+
+      // Sort based on preference
+      if (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true) {
+        listings.sort((a, b) => a['name'].compareTo(b['name']));
+      } else {
+        listings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
+      }
+
+      return listings;
     } on Exception catch (e) {
       debugPrint('Error sorting listings: $e');
       return listings;
@@ -193,10 +184,10 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
                               padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: preferredSortingMethod == SortingMethod.values[0]
+                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[0] && useFallbackSorting == false)
                                         ? Theme.of(context).colorScheme.primary
                                         : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: preferredSortingMethod == SortingMethod.values[0]
+                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[0] && useFallbackSorting == false)
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSecondary),
                                 child: const Text('Nearest'),
@@ -226,10 +217,10 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
                               padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: preferredSortingMethod == SortingMethod.values[1]
+                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true)
                                         ? Theme.of(context).colorScheme.primary
                                         : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: preferredSortingMethod == SortingMethod.values[1]
+                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true)
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSecondary),
                                 child: const Text('A-Z'),
