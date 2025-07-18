@@ -362,11 +362,13 @@ class MapPageState extends State<MapPage> {
     // Load environment variables
     await dotenv.load(fileName: ".env");
     String googleMapsApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
+    String androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
 
     // Fetch new directions from the Google Directions API
     final result = await _polylinePoints.getRouteBetweenCoordinates(
       googleApiKey: googleMapsApiKey,
       request: PolylineRequest(
+        headers: {"X-Android-Package": "com.theberridge.mill_road_winter_fair_app", "X-Android-Cert": androidSigningKey},
         origin: PointLatLng(origin.latitude, origin.longitude),
         destination: PointLatLng(destination.latitude, destination.longitude),
         mode: TravelMode.walking,
