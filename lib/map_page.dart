@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -363,12 +364,28 @@ class MapPageState extends State<MapPage> {
     await dotenv.load(fileName: ".env");
     String googleMapsApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
     String androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
+    String iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
+
+    // Define headers based on platform
+    Map<String, String> headers;
+    if (Platform.isAndroid) {
+      headers = {
+        "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
+        "X-Android-Cert": androidSigningKey,
+      };
+    } else if (Platform.isIOS) {
+      headers = {
+        "X-Ios-Bundle-Identifier": iosBundleId,
+      };
+    } else {
+      headers = {};
+    }
 
     // Fetch new directions from the Google Directions API
     final result = await _polylinePoints.getRouteBetweenCoordinates(
       googleApiKey: googleMapsApiKey,
       request: PolylineRequest(
-        headers: {"X-Android-Package": "com.theberridge.mill_road_winter_fair_app", "X-Android-Cert": androidSigningKey},
+        headers: headers,
         origin: PointLatLng(origin.latitude, origin.longitude),
         destination: PointLatLng(destination.latitude, destination.longitude),
         mode: TravelMode.walking,
