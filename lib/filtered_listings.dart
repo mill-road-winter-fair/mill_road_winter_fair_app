@@ -164,7 +164,7 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
           child: Column(
             children: <Widget>[
               Expanded(
-                  flex: 1,
+                  flex: 8,
                   child: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.secondary,
@@ -238,7 +238,7 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
                     ),
                   )),
               Expanded(
-                flex: 24,
+                flex: 92,
                 child: ListView.separated(
                   padding: const EdgeInsets.all(8),
                   separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
