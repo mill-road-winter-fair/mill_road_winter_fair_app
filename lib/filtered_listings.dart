@@ -66,10 +66,12 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
       }
 
       // Sort based on preference
-      if (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true) {
+      if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
         listings.sort((a, b) => a['name'].compareTo(b['name']));
-      } else {
+      } else if (preferredSortingMethod == SortingMethod.values[1]) {
         listings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
+      } else {
+        listings.sort((a, b) => a['startTime'].compareTo(b['startTime']));
       }
 
       return listings;
@@ -227,6 +229,28 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
                                 onPressed: () {
                                   setState(() {
                                     preferredSortingMethod = SortingMethod.values[1];
+                                  });
+                                  _saveSettings();
+                                },
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 8,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[2] || useFallbackSorting == true)
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.secondary,
+                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[2] || useFallbackSorting == true)
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSecondary),
+                                child: const Text('Time'),
+                                onPressed: () {
+                                  setState(() {
+                                    preferredSortingMethod = SortingMethod.values[2];
                                   });
                                   _saveSettings();
                                 },

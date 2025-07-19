@@ -9,7 +9,7 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 late bool firstExecution;
 
 // Define available sorting methods
-enum SortingMethod { nearest, alphabetical }
+enum SortingMethod { nearest, alphabetical, startTime }
 
 // Define variable for sorting method
 late SortingMethod preferredSortingMethod;
