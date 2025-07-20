@@ -59,7 +59,7 @@ Future<void> loadSettings(bool onTest) async {
   } else if (onTest == true) {
     int savedUnitIndex = 0;
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
-    int savedSortingIndex = 0;
+    int savedSortingIndex = 1;
     preferredSortingMethod = SortingMethod.values[savedSortingIndex];
 
     selectedThemeKey = 'light';
