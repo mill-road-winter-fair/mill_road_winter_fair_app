@@ -546,7 +546,7 @@ class MapPageState extends State<MapPage> {
                                 });
                               },
                               icon: Icon(
-                                Icons.wrong_location,
+                                Icons.cancel,
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             )
