@@ -132,7 +132,7 @@ void main() async {
     expect(find.text('Food • Doughnuts'), findsOneWidget);
     expect(find.text('10:30 - 16:30'), findsOneWidget);
     expect(find.text('approx. 206 m'), findsOneWidget);
-    expect(find.byIcon(Icons.directions), findsOneWidget);
+    expect(find.byIcon(Icons.directions_walk), findsOneWidget);
     expect(find.byIcon(Icons.public), findsOneWidget);
   });
 

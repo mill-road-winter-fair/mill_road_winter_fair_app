@@ -50,7 +50,7 @@ void main() {
     expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(find.text('Food • Doughnuts'), findsOneWidget);
     expect(find.text('10:30 - 16:30'), findsOneWidget);
-    expect(find.byIcon(Icons.directions), findsOneWidget);
+    expect(find.byIcon(Icons.directions_walk), findsOneWidget);
     expect(find.byIcon(Icons.public), findsOneWidget);
   });
 
@@ -68,7 +68,7 @@ void main() {
     expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(find.text('Food • Doughnuts'), findsOneWidget);
     expect(find.text('10:30 - 16:30'), findsOneWidget);
-    expect(find.byIcon(Icons.directions), findsOneWidget);
+    expect(find.byIcon(Icons.directions_walk), findsOneWidget);
     expect(find.byIcon(Icons.public), findsNothing);
   });
 
