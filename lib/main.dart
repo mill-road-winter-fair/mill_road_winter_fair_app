@@ -77,7 +77,7 @@ class HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text('Mill Road Winter Fair 2025', style: TextStyle(fontSize: 20)),
-            Image.asset('assets/iconTransparent.png', height: 30, width: 30, color: Theme.of(context).colorScheme.onPrimary),
+            Image.asset('assets/icons/iconTransparent.png', height: 30, width: 30, color: Theme.of(context).colorScheme.onPrimary),
           ],
         ),
         leading: Builder(

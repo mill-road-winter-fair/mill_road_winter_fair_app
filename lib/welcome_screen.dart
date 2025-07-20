@@ -48,7 +48,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
   }
 
   Widget _buildImage(String assetName, [double width = 350]) {
-    return Image.asset('assets/$assetName', width: width);
+    return Image.asset('assets/welcomeScreen/$assetName', width: width);
   }
 
   @override
@@ -109,7 +109,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       pages: [
         PageViewModel(
           title: "The purpose of the app...",
-          backgroundImage: 'assets/carousel01.jpg',
+          backgroundImage: 'assets/aboutPage/carousel01.jpg',
           bodyWidget: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -129,7 +129,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           title: "Map Pins",
           body: "What are the map pins and what do they mean?",
-          backgroundImage: 'assets/carousel02.jpg',
+          backgroundImage: 'assets/aboutPage/carousel02.jpg',
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 2,
@@ -140,7 +140,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           title: "Filtering",
           body: "How can I filter the stalls/events?",
-          backgroundImage: 'assets/carousel03.jpg',
+          backgroundImage: 'assets/aboutPage/carousel03.jpg',
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 2,
@@ -151,7 +151,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           title: "Listings",
           body: "What are the listings pages for?",
-          backgroundImage: 'assets/carousel04.jpg',
+          backgroundImage: 'assets/aboutPage/carousel04.jpg',
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 2,
@@ -162,7 +162,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           title: "That's all",
           body: "We hope you enjoy...",
-          backgroundImage: 'assets/carousel01.jpg',
+          backgroundImage: 'assets/aboutPage/carousel01.jpg',
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 2,

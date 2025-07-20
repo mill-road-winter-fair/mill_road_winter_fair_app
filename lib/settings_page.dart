@@ -309,7 +309,7 @@ class MyAppIcon extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
         child: Image.asset(
-          'assets/icon.png',
+          'assets/icons/icon.png',
           fit: BoxFit.contain,
         ),
       ),
