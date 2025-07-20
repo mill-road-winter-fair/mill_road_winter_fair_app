@@ -54,10 +54,7 @@ class ListingInfoSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                  flex: 7,
-                  child: Text(categories)
-              ),
+              Expanded(flex: 7, child: Text(categories)),
               if (currentLatLng != null)
                 Expanded(
                   flex: 3,

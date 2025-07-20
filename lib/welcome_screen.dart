@@ -77,15 +77,15 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: Container(
-                  color: Theme.of(context).colorScheme.secondary,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(40, 8, 8, 8),
-                    child: Text(
-                      'Welcome to the official\nMill Road Winter Fair app!',
-                      textAlign: TextAlign.right,
-                      style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
-                    ),
+                color: Theme.of(context).colorScheme.secondary,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(40, 8, 8, 8),
+                  child: Text(
+                    'Welcome to the official\nMill Road Winter Fair app!',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
                   ),
+                ),
               ),
             ),
           ),
@@ -161,8 +161,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           title: "That's all",
-          body:
-              "We hope you enjoy...",
+          body: "We hope you enjoy...",
           backgroundImage: 'assets/carousel01.jpg',
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),

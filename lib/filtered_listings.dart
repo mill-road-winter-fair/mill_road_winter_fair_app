@@ -44,7 +44,8 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
     try {
       if (listings.isEmpty) throw Exception("No listings exist");
 
-      if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) && preferredSortingMethod == SortingMethod.values[1]) {
+      if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
+          preferredSortingMethod == SortingMethod.values[1]) {
         // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
         preferredSortingMethod = SortingMethod.values[0];
       }
@@ -56,7 +57,9 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
         useFallbackSorting = false;
       }
 
-      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) && locationServicesEnabled == true && useFallbackSorting == false) {
+      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) &&
+          locationServicesEnabled == true &&
+          useFallbackSorting == false) {
         // Add distance to each listing
         listings = listings.map((listing) {
           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
