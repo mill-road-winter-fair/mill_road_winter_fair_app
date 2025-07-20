@@ -9,7 +9,7 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 late bool firstExecution;
 
 // Define available sorting methods
-enum SortingMethod { nearest, alphabetical, startTime }
+enum SortingMethod { alphabetical, nearest, startTime }
 
 // Define variable for sorting method
 late SortingMethod preferredSortingMethod;
@@ -35,8 +35,8 @@ Future<void> loadSettings(bool onTest) async {
     // Get first execution status, default to true
     firstExecution = prefs.getBool('firstExecution') ?? true;
 
-    // Set default sorting method as nearest (0 in the index)
-    int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 0;
+    // Set default sorting method as nearest (1 in the index)
+    int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 1;
     // Load preferred sorting method from shared preferences
     preferredSortingMethod = SortingMethod.values[savedSortingIndex];
 
