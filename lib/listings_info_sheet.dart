@@ -111,7 +111,7 @@ class ListingInfoSheet extends StatelessWidget {
                       launchUrl(Uri.parse(website));
                     },
                     icon: const Icon(Icons.public),
-                    label: const Text('Open website'),
+                    label: const Text('Open Website'),
                   ),
                 ),
             ],
