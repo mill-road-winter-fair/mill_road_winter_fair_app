@@ -25,10 +25,10 @@ class FilteredListingsPage extends StatefulWidget {
   });
 
   @override
-  State<FilteredListingsPage> createState() => _FilteredListingsPageState();
+  State<FilteredListingsPage> createState() => FilteredListingsPageState();
 }
 
-class _FilteredListingsPageState extends State<FilteredListingsPage> {
+class FilteredListingsPageState extends State<FilteredListingsPage> {
   // ignore: unused_field
   late Future<List> _sortedListings;
   bool isRefreshing = false;

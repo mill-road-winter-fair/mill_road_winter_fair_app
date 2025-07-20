@@ -35,9 +35,9 @@ void main() async {
 
   testWidgets('displays error text when fetchFilteredListings fails', (WidgetTester tester) async {
     // Define a test listing
-    List<Map<String, dynamic>> listing = [];
+    List<Map<String, dynamic>> listings = [];
 
-    await pumpFilteredListingsPage(tester, 'Food', listing);
+    await pumpFilteredListingsPage(tester, 'Food', listings);
 
     expect(find.text('Unable to retrieve listings'), findsOneWidget);
   });
@@ -93,5 +93,216 @@ void main() async {
 
     final dividerFinder = find.byWidgetPredicate((widget) => widget is Divider && widget.color == Colors.grey[350]);
     expect(dividerFinder, findsWidgets);
+  });
+
+  testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
+    await loadSettings(true);
+    // Override user location global
+    currentLatLng = const LatLng(52.199174, 0.140929);
+
+    listings = [
+      {
+        'displayName': 'Glazed and Confused',
+        'endTime': '16:30',
+        'id': '1',
+        'name': 'glazedandconfused',
+        'phone': '01223 111111',
+        'latLng': '52.200662,0.135547',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '10:30',
+        'tertiaryType': 'Doughnuts',
+        'website': 'https://www.glazedandconfused.com',
+      },
+      {
+        'displayName': 'Sushi Squad',
+        'endTime': '16:30',
+        'id': '2',
+        'name': 'sushisquad',
+        'phone': '01223 222222',
+        'latLng': '52.199188,0.139437',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '12:00',
+        'tertiaryType': 'Sushi',
+        'website': 'https://www.sushisquad.com',
+      },
+      {
+        'displayName': 'Bite Club',
+        'endTime': '16:30',
+        'id': '3',
+        'name': 'biteclub',
+        'phone': '01223 333333',
+        'latLng': '52.202313,0.131562',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '14:00',
+        'tertiaryType': 'Burgers',
+        'website': 'https://www.biteclub.com',
+      },
+    ];
+
+    // Mock sorting preference is distance
+    preferredSortingMethod = SortingMethod.values[1];
+
+
+    await pumpFilteredListingsPage(tester, 'Food', listings);
+
+    expect(listings[0]['name'], 'sushisquad');
+    expect(listings[1]['name'], 'glazedandconfused');
+    expect(listings[2]['name'], 'biteclub');
+
+    // Mock sorting preference is alphabetical
+    preferredSortingMethod = SortingMethod.values[0];
+
+    await pumpFilteredListingsPage(tester, 'Food', listings);
+
+    expect(listings[0]['name'], 'biteclub');
+    expect(listings[1]['name'], 'glazedandconfused');
+    expect(listings[2]['name'], 'sushisquad');
+
+    // Mock sorting preference is time
+    preferredSortingMethod = SortingMethod.values[2];
+
+    await pumpFilteredListingsPage(tester, 'Food', listings);
+
+    expect(listings[0]['name'], 'glazedandconfused');
+    expect(listings[1]['name'], 'sushisquad');
+    expect(listings[2]['name'], 'biteclub');
+  });
+
+  testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {
+    // Override user location global
+    currentLatLng = const LatLng(52.199174, 0.140929);
+    // Define mock values
+    listings = [
+      {
+        'displayName': 'Glazed and Confused',
+        'endTime': '16:30',
+        'id': '1',
+        'name': 'glazedandconfused',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '10:30',
+        'tertiaryType': 'Doughnuts',
+        'website': 'https://www.glazedandconfused.com',
+      },
+    ];
+
+    await loadSettings(true);
+    await pumpFilteredListingsPage(tester, 'Food', listings);
+
+    await tester.tap(find.text('A-Z'));
+    await tester.pumpAndSettle();
+
+    expect(preferredSortingMethod, SortingMethod.values[0]);
+
+    await tester.tap(find.text('Nearest'));
+    await tester.pumpAndSettle();
+
+    expect(preferredSortingMethod, SortingMethod.values[1]);
+
+    await tester.tap(find.text('Time'));
+    await tester.pumpAndSettle();
+
+    expect(preferredSortingMethod, SortingMethod.values[2]);
+  });
+
+  testWidgets('change the preferred sorting method when location permission is denied', (WidgetTester tester) async {
+    // Mock sorting preference is distance
+    preferredSortingMethod = SortingMethod.values[1];
+
+    // Location permission is denied
+    locationPermission = LocationPermission.deniedForever;
+
+    // Define mock values
+    listings = [
+      {
+        'displayName': 'Glazed and Confused',
+        'endTime': '16:30',
+        'id': '1',
+        'name': 'glazedandconfused',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '10:30',
+        'tertiaryType': 'Doughnuts',
+        'website': 'https://www.glazedandconfused.com',
+      },
+    ];
+
+    await loadSettings(true);
+    await pumpFilteredListingsPage(tester, 'Food', listings);
+
+    // Preferred sorting method should have been reset to 0 (alphabetical)
+    expect(preferredSortingMethod, SortingMethod.values[0]);
+  });
+
+  testWidgets('use fallback sorting when location is unavailable, do not use it when location returns', (WidgetTester tester) async {
+    await loadSettings(true);
+
+    // Mock sorting preference is distance
+    preferredSortingMethod = SortingMethod.values[1];
+
+    // Location permission is granted
+    locationPermission = LocationPermission.always;
+
+    // Define mock values
+    listings = [
+      {
+        'displayName': 'Glazed and Confused',
+        'endTime': '16:30',
+        'id': '1',
+        'name': 'glazedandconfused',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '10:30',
+        'tertiaryType': 'Doughnuts',
+        'website': 'https://www.glazedandconfused.com',
+      },
+    ];
+
+    // Mock location services are disabled
+    locationServicesEnabled = false;
+
+    await pumpFilteredListingsPage(tester, 'Food', listings);
+
+    // Obtain the state after mounting
+    final filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
+
+    // Fallback sorting should be enabled
+    expect(filteredListingsPageState.useFallbackSorting, true);
+
+    // Preferred sorting method should be unchanged
+    expect(preferredSortingMethod, SortingMethod.values[1]);
+
+    // Mock location services are re-enabled
+    locationServicesEnabled = true;
+    // Mock location is available
+    currentLatLng = const LatLng(52.199174, 0.140929);
+
+    await pumpFilteredListingsPage(tester, 'Food', listings);
+
+    // Fallback sorting should be disabled
+    expect(filteredListingsPageState.useFallbackSorting, false);
+
+    // Preferred sorting method should be unchanged
+    expect(preferredSortingMethod, SortingMethod.values[1]);
+
+    // Mock location is now unavailable
+    currentLatLng = null;
+
+    await pumpFilteredListingsPage(tester, 'Food', listings);
+
+    // Fallback sorting should be enabled
+    expect(filteredListingsPageState.useFallbackSorting, true);
+
+    // Preferred sorting method should be unchanged
+    expect(preferredSortingMethod, SortingMethod.values[1]);
   });
 }
