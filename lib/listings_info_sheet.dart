@@ -98,7 +98,7 @@ class ListingInfoSheet extends StatelessWidget {
                   onPressed: () {
                     onGetDirections();
                   },
-                  icon: const Icon(Icons.directions),
+                  icon: const Icon(Icons.directions_walk),
                   label: const Text('Get Directions'),
                 ),
               ),
