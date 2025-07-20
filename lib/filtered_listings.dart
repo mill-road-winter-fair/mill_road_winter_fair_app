@@ -67,11 +67,17 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
 
       // Sort based on preference
       if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
+        // Sort by name
         listings.sort((a, b) => a['name'].compareTo(b['name']));
       } else if (preferredSortingMethod == SortingMethod.values[1]) {
+        // Sort by distance to user (nearest first)
         listings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
       } else {
-        listings.sort((a, b) => a['startTime'].compareTo(b['startTime']));
+        // Sort by start time, if the star time is the same sort by name
+        listings.sort((a, b) {
+          final timeCompare = a['startTime'].compareTo(b['startTime']);
+          return timeCompare != 0 ? timeCompare : a['name'].compareTo(b['name']);
+        });
       }
 
       return listings;
