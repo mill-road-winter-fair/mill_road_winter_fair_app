@@ -16,7 +16,12 @@ void main() {
     mockClient = MockClient();
     dotenv.testLoad(fileInput: '''
     HEROKU_API=MOCK_API
-    GOOGLE_MAPS_API_KEY=MOCK_KEY
+    ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
+    ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
+    IOS_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
+    IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
+    SIGNING_KEY=MOCK_CERT
+    IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
     ''');
   });
 

@@ -15,7 +15,7 @@
 		<key>CFBundleName</key>
 		<string>Mill Road Winter Fair</string>
 		<key>GMSApiKey</key>
-		<string>$(GOOGLE_MAPS_API_KEY)</string>
+		<string>$(IOS_GOOGLE_MAPS_SDK_API_KEY)</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
