@@ -28,7 +28,12 @@ Currently the aim is for the app to provides listings of the various stalls, mus
 7. Create a `.env` file containing the following:
 ```txt
 HEROKU_API=https://mrwf.theberridge.com/listings
-GOOGLE_MAPS_API_KEY=\\Google Maps Platform API key
+ANDROID_GOOGLE_MAPS_SDK_API_KEY=\\API Key for Google Maps SDK for Android
+ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=\\API Key for Google Maps Directions API for Android
+IOS_GOOGLE_MAPS_SDK_API_KEY=\\API Key for Google Maps SDK for iOS
+IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=\\API Key for Google Maps Directions API for iOS
+SIGNING_KEY=\\Signing key for the app
+IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
 ```
 
 8. Ensure that your run target for `main.dart` is using the following arg(s):
