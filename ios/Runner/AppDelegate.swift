@@ -10,7 +10,6 @@ import GoogleMaps
   ) -> Bool {
       if let apiKey = Bundle.main.object(forInfoDictionaryKey: "GMSApiKey") as? String {
           GMSServices.provideAPIKey(apiKey as String)
-          print("Got API key: "+apiKey)
       } else {
           print("Couldn't get IOS_GOOGLE_MAPS_SDK_API_KEY via GMSApiKey")
       }

@@ -1,0 +1,30 @@
+{
+  "" : {
+    "const-values" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/url_launcher_ios-master.swiftconstvalues",
+    "dependencies" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/url_launcher_ios-master.d",
+    "diagnostics" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/url_launcher_ios-master.dia",
+    "emit-module-dependencies" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/url_launcher_ios-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/url_launcher_ios-master-emit-module.dia",
+    "swift-dependencies" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/url_launcher_ios-master.swiftdeps"
+  },
+  "/Users/mattwhiting/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.3/ios/url_launcher_ios/Sources/url_launcher_ios/Launcher.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/Launcher.o",
+    "llvm-bc" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/Launcher.bc",
+    "object" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/Launcher.o"
+  },
+  "/Users/mattwhiting/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.3/ios/url_launcher_ios/Sources/url_launcher_ios/URLLaunchSession.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/URLLaunchSession.o",
+    "llvm-bc" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/URLLaunchSession.bc",
+    "object" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/URLLaunchSession.o"
+  },
+  "/Users/mattwhiting/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.3/ios/url_launcher_ios/Sources/url_launcher_ios/URLLauncherPlugin.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/URLLauncherPlugin.o",
+    "llvm-bc" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/URLLauncherPlugin.bc",
+    "object" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/URLLauncherPlugin.o"
+  },
+  "/Users/mattwhiting/.pub-cache/hosted/pub.dev/url_launcher_ios-6.3.3/ios/url_launcher_ios/Sources/url_launcher_ios/messages.g.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/messages.g.o",
+    "llvm-bc" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/messages.g.bc",
+    "object" : "/Users/mattwhiting/Development/mill_road_winter_fair_app/ios/build/Pods.build/Release-iphoneos/url_launcher_ios.build/Objects-normal/arm64/messages.g.o"
+  }
+}

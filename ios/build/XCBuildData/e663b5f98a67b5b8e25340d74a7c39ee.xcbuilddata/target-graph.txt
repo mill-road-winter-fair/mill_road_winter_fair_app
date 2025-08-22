@@ -1,0 +1,45 @@
+Target dependency graph (18 targets)
+Target 'Pods-RunnerTests' in project 'Pods'
+➜ Explicit dependency on target 'Pods-Runner' in project 'Pods'
+Target 'Pods-Runner' in project 'Pods'
+➜ Explicit dependency on target 'Flutter' in project 'Pods'
+➜ Explicit dependency on target 'Google-Maps-iOS-Utils' in project 'Pods'
+➜ Explicit dependency on target 'GoogleMaps' in project 'Pods'
+➜ Explicit dependency on target 'flutter_native_splash' in project 'Pods'
+➜ Explicit dependency on target 'fluttertoast' in project 'Pods'
+➜ Explicit dependency on target 'geolocator_apple' in project 'Pods'
+➜ Explicit dependency on target 'google_maps_flutter_ios' in project 'Pods'
+➜ Explicit dependency on target 'shared_preferences_foundation' in project 'Pods'
+➜ Explicit dependency on target 'url_launcher_ios' in project 'Pods'
+Target 'url_launcher_ios' in project 'Pods'
+➜ Explicit dependency on target 'Flutter' in project 'Pods'
+➜ Explicit dependency on target 'url_launcher_ios-url_launcher_ios_privacy' in project 'Pods'
+Target 'url_launcher_ios-url_launcher_ios_privacy' in project 'Pods' (no dependencies)
+Target 'shared_preferences_foundation' in project 'Pods'
+➜ Explicit dependency on target 'Flutter' in project 'Pods'
+➜ Explicit dependency on target 'shared_preferences_foundation-shared_preferences_foundation_privacy' in project 'Pods'
+Target 'shared_preferences_foundation-shared_preferences_foundation_privacy' in project 'Pods' (no dependencies)
+Target 'google_maps_flutter_ios' in project 'Pods'
+➜ Explicit dependency on target 'Flutter' in project 'Pods'
+➜ Explicit dependency on target 'Google-Maps-iOS-Utils' in project 'Pods'
+➜ Explicit dependency on target 'GoogleMaps' in project 'Pods'
+➜ Explicit dependency on target 'google_maps_flutter_ios-google_maps_flutter_ios_privacy' in project 'Pods'
+Target 'google_maps_flutter_ios-google_maps_flutter_ios_privacy' in project 'Pods' (no dependencies)
+Target 'geolocator_apple' in project 'Pods'
+➜ Explicit dependency on target 'Flutter' in project 'Pods'
+➜ Explicit dependency on target 'geolocator_apple-geolocator_apple_privacy' in project 'Pods'
+Target 'geolocator_apple-geolocator_apple_privacy' in project 'Pods' (no dependencies)
+Target 'fluttertoast' in project 'Pods'
+➜ Explicit dependency on target 'Flutter' in project 'Pods'
+➜ Explicit dependency on target 'fluttertoast-fluttertoast_privacy' in project 'Pods'
+Target 'fluttertoast-fluttertoast_privacy' in project 'Pods' (no dependencies)
+Target 'flutter_native_splash' in project 'Pods'
+➜ Explicit dependency on target 'Flutter' in project 'Pods'
+➜ Explicit dependency on target 'flutter_native_splash-flutter_native_splash_privacy' in project 'Pods'
+Target 'flutter_native_splash-flutter_native_splash_privacy' in project 'Pods' (no dependencies)
+Target 'Google-Maps-iOS-Utils' in project 'Pods'
+➜ Explicit dependency on target 'GoogleMaps' in project 'Pods'
+Target 'GoogleMaps' in project 'Pods'
+➜ Explicit dependency on target 'GoogleMaps-GoogleMapsResources' in project 'Pods'
+Target 'GoogleMaps-GoogleMapsResources' in project 'Pods' (no dependencies)
+Target 'Flutter' in project 'Pods' (no dependencies)

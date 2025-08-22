@@ -33,7 +33,7 @@ ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=\\API Key for Google Maps Directions API 
 IOS_GOOGLE_MAPS_SDK_API_KEY=\\API Key for Google Maps SDK for iOS
 IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=\\API Key for Google Maps Directions API for iOS
 SIGNING_KEY=\\Signing key for the app
-IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
+IOS_BUNDLE_ID=com.theberridge.millRoadWinterFairApp
 ```
 
 8. Ensure that your run target for `main.dart` is using the following arg(s):
