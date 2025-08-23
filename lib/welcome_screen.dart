@@ -69,28 +69,6 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       globalBackgroundColor: Colors.white,
       allowImplicitScrolling: true,
       infiniteAutoScroll: true,
-      globalHeader: Align(
-        alignment: Alignment.topRight,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 16, right: 16),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Container(
-                color: Theme.of(context).colorScheme.secondary,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(40, 8, 8, 8),
-                  child: Text(
-                    'Welcome to the official\nMill Road Winter Fair app!',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
       globalFooter: Padding(
         padding: const EdgeInsets.fromLTRB(6, 0, 6, 28),
         child: SizedBox(
@@ -108,23 +86,50 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       ),
       pages: [
         PageViewModel(
-          title: "The purpose of the app...",
+          title: "Welcome to the official\nMill Road Winter Fair app!",
           backgroundImage: 'assets/aboutPage/carousel01.jpg',
-          bodyWidget: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          bodyWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Click on ", style: bodyStyle),
-              Icon(Icons.edit),
-              Text(" to edit a post", style: bodyStyle),
+              Text("What can I do with the app?", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("Use our interactive map to help navigate the fair's attractions", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.storefront, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("See listings of the fair's various stalls, events and facilities", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.language, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("Find the websites and social links for the fair and its stalls", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.info, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("Find out important information about the fair", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
             ],
           ),
           decoration: pageDecoration.copyWith(
-            bodyFlex: 2,
-            imageFlex: 4,
-            bodyAlignment: Alignment.bottomCenter,
-            imageAlignment: Alignment.topCenter,
+            contentMargin: const EdgeInsets.symmetric(horizontal: 16),
+            bodyFlex: 10,
+            imageFlex: 3,
+            safeArea: 100,
+            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
-          reverse: true,
         ),
         PageViewModel(
           title: "Map Pins",
@@ -132,7 +137,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           backgroundImage: 'assets/aboutPage/carousel02.jpg',
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 2,
+            bodyFlex: 6,
             imageFlex: 3,
             safeArea: 100,
           ),
@@ -143,7 +148,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           backgroundImage: 'assets/aboutPage/carousel03.jpg',
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 2,
+            bodyFlex: 6,
             imageFlex: 3,
             safeArea: 100,
           ),
@@ -154,7 +159,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           backgroundImage: 'assets/aboutPage/carousel04.jpg',
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 2,
+            bodyFlex: 6,
             imageFlex: 3,
             safeArea: 100,
           ),
@@ -165,7 +170,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           backgroundImage: 'assets/aboutPage/carousel01.jpg',
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 2,
+            bodyFlex: 6,
             imageFlex: 3,
             safeArea: 100,
           ),
@@ -177,11 +182,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       skipOrBackFlex: 0,
       nextFlex: 0,
       showBackButton: false,
-      //rtl: true, // Display as right-to-left
-      back: const Icon(Icons.arrow_back),
-      skip: const Text('Skip', style: TextStyle(fontWeight: FontWeight.w600)),
-      next: const Icon(Icons.arrow_forward),
-      done: const Text('Done', style: TextStyle(fontWeight: FontWeight.w600)),
+      back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
+      skip: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
+      next: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.tertiary),
+      done: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
       curve: Curves.fastLinearToSlowEaseIn,
       controlsMargin: const EdgeInsets.all(16),
       controlsPadding: kIsWeb ? const EdgeInsets.all(12.0) : const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
