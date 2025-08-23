@@ -219,11 +219,32 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           title: "Listings",
-          body: "What are the listings pages for?",
           backgroundImage: 'assets/aboutPage/carousel04.jpg',
+          bodyWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("How can I see a list of what's on?",
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("At the bottom of the app you'll see sections for each different category. Tap on these to see every listing for that category", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("You can then sort these listings by distance, start time or alphabetical order", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 6,
+            bodyFlex: 8,
             imageFlex: 3,
             safeArea: 100,
           ),
