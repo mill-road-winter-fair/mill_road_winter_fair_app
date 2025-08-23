@@ -87,8 +87,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           bodyWidget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("What can I do with the app?",
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              FittedBox(
+                child: Text("What can I do with the app?",
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              ),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -124,7 +126,9 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 10,
             imageFlex: 3,
-            safeArea: 100,
+            safeArea: 160,
+            pageColor: Theme.of(context).colorScheme.secondary,
+            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
             bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         ),
@@ -134,8 +138,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           bodyWidget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("What do the map pins mean?",
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              FittedBox(
+                child: Text("What do the map pins mean?",
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              ),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -178,7 +184,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 16,
             imageFlex: 3,
-            safeArea: 100,
+            safeArea: 160,
+            pageColor: Theme.of(context).colorScheme.secondary,
+            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
+            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         ),
         PageViewModel(
@@ -187,8 +196,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           bodyWidget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("How can I filter all those pins?",
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              FittedBox(
+                child: Text("How can I filter all those pins?",
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              ),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -210,7 +221,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 7,
             imageFlex: 3,
-            safeArea: 100,
+            safeArea: 160,
+            pageColor: Theme.of(context).colorScheme.secondary,
+            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
+            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         ),
         PageViewModel(
@@ -219,13 +233,19 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           bodyWidget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("How can I see a list of what's on?",
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              FittedBox(
+                child: Text("How can I see a list of what's on?",
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("At the bottom of the app you'll see sections for each different category. Tap on these to see every listing for that category", style: bodyStyle)),
+                  const Expanded(
+                      flex: 8,
+                      child: Text(
+                          "At the bottom of the app you'll see sections for each different category. Tap on these to see every listing for that category",
+                          style: bodyStyle)),
                 ],
               ),
               const SizedBox(height: 20),
@@ -242,7 +262,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 8,
             imageFlex: 3,
-            safeArea: 100,
+            safeArea: 160,
+            pageColor: Theme.of(context).colorScheme.secondary,
+            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
+            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         ),
         PageViewModel(
@@ -251,8 +274,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           bodyWidget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("A few final things...",
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              FittedBox(
+                child: Text("A few final things...",
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              ),
               const SizedBox(height: 20),
               Row(
                 children: [
@@ -264,14 +289,21 @@ class OnBoardingPageState extends State<OnBoardingPage> {
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("Did you know the fair is organised entirely by volunteers? If you'd like to get involved visit our website.", style: bodyStyle)),
+                  const Expanded(
+                      flex: 8,
+                      child: Text("Did you know the fair is organised entirely by volunteers? If you'd like to get involved visit our website.",
+                          style: bodyStyle)),
                 ],
               ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("If you have feedback about the app we'd love to hear from you! You can find a link to our feedback form at the bottom of the app's main menu.", style: bodyStyle)),
+                  const Expanded(
+                      flex: 8,
+                      child: Text(
+                          "If you have feedback about the app we'd love to hear from you! You can find a link to our feedback form at the bottom of the app's main menu.",
+                          style: bodyStyle)),
                 ],
               ),
               const SizedBox(height: 20),
@@ -281,7 +313,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 12,
             imageFlex: 3,
-            safeArea: 100,
+            safeArea: 160,
+            pageColor: Theme.of(context).colorScheme.secondary,
+            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
+            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
           ),
         ),
       ],
