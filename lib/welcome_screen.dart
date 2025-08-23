@@ -139,7 +139,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("What do the map pins mean?",
-                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: getCategoryColor(selectedThemeKey, "food"))),
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
               const SizedBox(height: 20),
               Row(
                 children: [
