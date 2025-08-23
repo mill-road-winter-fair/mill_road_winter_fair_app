@@ -187,11 +187,32 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           title: "Filtering",
-          body: "How can I filter the stalls/events?",
           backgroundImage: 'assets/aboutPage/carousel03.jpg',
+          bodyWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("How can I filter the pins to find what I want?",
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.filter_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("First tap the filter icon on the map page", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.check_box_outlined, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("Then simply select the categories you want to see", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 6,
+            bodyFlex: 7,
             imageFlex: 3,
             safeArea: 100,
           ),
