@@ -395,6 +395,15 @@ class MapPageState extends State<MapPage> {
     );
 
     if (result.points.isNotEmpty) {
+
+      // iOS can't handle the dotted polylines at this point, so we need to differentiate here
+      late List<PatternItem> polylinePattern;
+      if (Platform.isAndroid) {
+        polylinePattern = <PatternItem>[PatternItem.dot, PatternItem.gap(10)];
+      } else {
+        polylinePattern = <PatternItem>[];
+      }
+
       setState(() {
         _polylines.clear();
         _polylines.add(Polyline(
@@ -402,7 +411,7 @@ class MapPageState extends State<MapPage> {
           points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
           color: Theme.of(context).colorScheme.tertiary,
           width: 5,
-          patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
+          patterns: polylinePattern,
         ));
         final distanceMetres = result.totalDistanceValue;
         _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
