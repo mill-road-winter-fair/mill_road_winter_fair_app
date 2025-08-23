@@ -97,8 +97,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // Function to replay the initial welcome screen
   void _replayWelcomeScreen(context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+    Navigator.pop(context);
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()),
     );
   }
 

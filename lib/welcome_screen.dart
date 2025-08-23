@@ -91,7 +91,8 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           bodyWidget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("What can I do with the app?", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              Text("What can I do with the app?",
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
               const SizedBox(height: 20),
               Row(
                 children: [

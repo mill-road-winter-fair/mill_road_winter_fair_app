@@ -28,6 +28,7 @@ Future<void> main() async {
   locationPermission = await Geolocator.checkPermission();
 
   // Lock app in portrait rotation and run main app
+  // If this is the first execution run the welcome screen, otherwise just run the app normally
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
 }
 
