@@ -96,7 +96,7 @@ class ListingInfoSheet extends StatelessWidget {
                     onGetDirections();
                   },
                   icon: const Icon(Icons.directions_walk),
-                  label: const Text('Get Directions'),
+                  label: const FittedBox(child: Text('Get Directions')),
                 ),
               ),
               Flexible(flex: 1, child: Container()),
@@ -108,7 +108,7 @@ class ListingInfoSheet extends StatelessWidget {
                       launchUrl(Uri.parse(website));
                     },
                     icon: const Icon(Icons.public),
-                    label: const Text('Open Website'),
+                    label: const FittedBox(child: Text('Open Website')),
                   ),
                 ),
             ],
