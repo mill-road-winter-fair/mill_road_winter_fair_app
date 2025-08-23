@@ -201,7 +201,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     foregroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSecondary),
-                                child: const Text('Nearest'),
+                                child: const FittedBox(child: Text('Nearest', style: TextStyle(fontSize: 16))),
                                 onPressed: () {
                                   if (currentLatLng != null) {
                                     setState(() {
@@ -223,7 +223,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             ),
                           ),
                           Flexible(
-                            flex: 8,
+                            flex: 6,
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
                               child: ElevatedButton(
@@ -234,7 +234,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     foregroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSecondary),
-                                child: const Text('A-Z'),
+                                child: const FittedBox(child: Text('A-Z', style: TextStyle(fontSize: 16))),
                                 onPressed: () {
                                   setState(() {
                                     preferredSortingMethod = SortingMethod.values[0];
@@ -245,7 +245,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             ),
                           ),
                           Flexible(
-                            flex: 8,
+                            flex: 6,
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
                               child: ElevatedButton(
@@ -256,7 +256,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     foregroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSecondary),
-                                child: const Text('Time'),
+                                child: const FittedBox(child: Text('Time', style: TextStyle(fontSize: 16))),
                                 onPressed: () {
                                   setState(() {
                                     preferredSortingMethod = SortingMethod.values[2];
