@@ -134,11 +134,53 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           title: "Map Pins",
-          body: "What are the map pins and what do they mean?",
           backgroundImage: 'assets/aboutPage/carousel02.jpg',
+          bodyWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("What do the map pins mean?",
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: getCategoryColor(selectedThemeKey, "food"))),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.fastfood, size: 40, color: getCategoryColor(selectedThemeKey, "Food"))),
+                  const Expanded(flex: 8, child: Text("Our delicious ready-to-eat food stalls and food trucks", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.storefront, size: 40, color: getCategoryColor(selectedThemeKey, "Shopping"))),
+                  const Expanded(flex: 8, child: Text("The stalls of all the various shops, charities and other organisations", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.music_note, size: 40, color: getCategoryColor(selectedThemeKey, "Music"))),
+                  const Expanded(flex: 8, child: Text("The fair's amazing and talented musicians, buskers and bands", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.event, size: 40, color: getCategoryColor(selectedThemeKey, "Event"))),
+                  const Expanded(flex: 8, child: Text("Other exciting events, such as Santa's Grotto and the parade", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.wheelchair_pickup, size: 40, color: getCategoryColor(selectedThemeKey, "Service"))),
+                  const Expanded(flex: 8, child: Text("All of our important services, such as toilets and first aid points", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 6,
+            bodyFlex: 16,
             imageFlex: 3,
             safeArea: 100,
           ),
