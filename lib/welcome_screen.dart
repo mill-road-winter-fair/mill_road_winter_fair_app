@@ -250,12 +250,40 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           ),
         ),
         PageViewModel(
-          title: "That's all",
-          body: "We hope you enjoy...",
+          title: "Almost there!",
           backgroundImage: 'assets/aboutPage/carousel01.jpg',
+          bodyWidget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("A few final things...",
+                  style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.favorite, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("Thank you so much for visiting Mill Road Winter Fair and using our new app.", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("Did you know the fair is organised entirely by volunteers? If you'd like to get involved visit our website.", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(flex: 2, child: Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
+                  const Expanded(flex: 8, child: Text("If you have feedback about the app we'd love to hear from you! You can find a link to our feedback form at the bottom of the app's main menu.", style: bodyStyle)),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 6,
+            bodyFlex: 12,
             imageFlex: 3,
             safeArea: 100,
           ),
