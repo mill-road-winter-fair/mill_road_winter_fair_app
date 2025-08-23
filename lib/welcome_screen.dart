@@ -191,7 +191,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           bodyWidget: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("How can I filter the pins to find what I want?",
+              Text("How can I filter all those pins?",
                   style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
               const SizedBox(height: 20),
               Row(
