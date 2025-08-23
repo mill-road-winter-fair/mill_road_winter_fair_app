@@ -47,10 +47,6 @@ class OnBoardingPageState extends State<OnBoardingPage> {
     );
   }
 
-  Widget _buildImage(String assetName, [double width = 350]) {
-    return Image.asset('assets/welcomeScreen/$assetName', width: width);
-  }
-
   @override
   Widget build(BuildContext context) {
     const bodyStyle = TextStyle(fontSize: 19.0);
