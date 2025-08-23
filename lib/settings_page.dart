@@ -285,7 +285,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: const Text('About'),
                     onTap: () {
                       showAboutDialog(
-                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.6', applicationIcon: const MyAppIcon());
+                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.7', applicationIcon: const MyAppIcon());
                     },
                   ),
                 ],
