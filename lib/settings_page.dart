@@ -119,6 +119,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Metric'),
@@ -136,6 +137,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       _saveSettings();
                     },
                   ),
+                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Imperial'),
@@ -153,6 +155,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       _saveSettings();
                     },
                   ),
+                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Cambridge'),
@@ -176,6 +179,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Light'),
@@ -193,6 +197,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
                   ),
+                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Dark'),
@@ -210,6 +215,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
                   ),
+                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('2024 Colour Scheme'),
@@ -227,6 +233,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
                   ),
+                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('High Contrast'),
@@ -244,6 +251,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
                   ),
+                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Colour Blind Friendly'),
