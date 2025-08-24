@@ -98,7 +98,9 @@ class _SettingsPageState extends State<SettingsPage> {
   // Function to replay the initial welcome screen
   void _replayWelcomeScreen(context) {
     Navigator.pop(context);
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
     );
   }
 
@@ -119,16 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Metric'),
-                    subtitle: Text(
-                      'Metres & Kilometres',
-                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    value: DistanceUnits.metric,
-                    // ignore: deprecated_member_use
+                  RadioGroup<DistanceUnits>(
                     groupValue: preferredDistanceUnits,
                     onChanged: (DistanceUnits? value) {
                       setState(() {
@@ -136,139 +129,119 @@ class _SettingsPageState extends State<SettingsPage> {
                       });
                       _saveSettings();
                     },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Imperial'),
-                    subtitle: Text(
-                      'Feet & Miles',
-                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    child: Column(
+                      children: [
+                        RadioListTile<DistanceUnits>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Metric'),
+                          subtitle: Text(
+                            'Metres & Kilometres',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          value: DistanceUnits.metric,
+                        ),
+                        RadioListTile<DistanceUnits>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Imperial'),
+                          subtitle: Text(
+                            'Feet & Miles',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          value: DistanceUnits.imperial,
+                        ),
+                        RadioListTile<DistanceUnits>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Cambridge'),
+                          subtitle: Text(
+                            'Punt lengths',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          value: DistanceUnits.cambridge,
+                        ),
+                      ],
                     ),
-                    visualDensity: VisualDensity.compact,
-                    value: DistanceUnits.imperial,
-                    // ignore: deprecated_member_use
-                    groupValue: preferredDistanceUnits,
-                    onChanged: (DistanceUnits? value) {
-                      setState(() {
-                        preferredDistanceUnits = value!;
-                      });
-                      _saveSettings();
-                    },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Cambridge'),
-                    subtitle: Text(
-                      'Punt lengths',
-                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    value: DistanceUnits.cambridge,
-                    // ignore: deprecated_member_use
-                    groupValue: preferredDistanceUnits,
-                    onChanged: (DistanceUnits? value) {
-                      setState(() {
-                        preferredDistanceUnits = value!;
-                      });
-                      _saveSettings();
-                    },
-                  ),
+                  )
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Light'),
-                    visualDensity: VisualDensity.compact,
-                    value: 'light',
-                    // ignore: deprecated_member_use
+                  RadioGroup<String>(
                     groupValue: themeNotifier.value,
                     onChanged: (value) {
                       selectedThemeKey = value!;
                       setState(() {
                         _changeTheme(value);
-                        mapStyle = standardMap;
+                        switch (value) {
+                          case 'light':
+                            mapStyle = standardMap;
+                            break;
+                          case 'dark':
+                            mapStyle = darkMap;
+                            break;
+                          case '2024':
+                            mapStyle = retroMap;
+                            break;
+                          case 'highContrast':
+                            mapStyle = darkMap;
+                            break;
+                          case 'colourBlindFriendly':
+                            mapStyle = colourBlindMap;
+                            break;
+                        }
                       });
                       _saveSettings();
                       mapPageKey.currentState?.clearAllMarkers();
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Dark'),
-                    visualDensity: VisualDensity.compact,
-                    value: 'dark',
-                    // ignore: deprecated_member_use
-                    groupValue: themeNotifier.value,
-                    onChanged: (value) {
-                      selectedThemeKey = value!;
-                      setState(() {
-                        _changeTheme(value);
-                        mapStyle = darkMap;
-                      });
-                      _saveSettings();
-                      mapPageKey.currentState?.clearAllMarkers();
-                      mapPageKey.currentState?.addAllMarkers(false);
-                    },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('2024 Colour Scheme'),
-                    visualDensity: VisualDensity.compact,
-                    value: '2024',
-                    // ignore: deprecated_member_use
-                    groupValue: themeNotifier.value,
-                    onChanged: (value) {
-                      setState(() {
-                        _changeTheme(value!);
-                        mapStyle = retroMap;
-                      });
-                      selectedThemeKey = value!;
-                      _saveSettings();
-                      mapPageKey.currentState?.clearAllMarkers();
-                      mapPageKey.currentState?.addAllMarkers(false);
-                    },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('High Contrast'),
-                    visualDensity: VisualDensity.compact,
-                    value: 'highContrast',
-                    // ignore: deprecated_member_use
-                    groupValue: themeNotifier.value,
-                    onChanged: (value) {
-                      setState(() {
-                        _changeTheme(value!);
-                        mapStyle = darkMap;
-                      });
-                      selectedThemeKey = value!;
-                      _saveSettings();
-                      mapPageKey.currentState?.clearAllMarkers();
-                      mapPageKey.currentState?.addAllMarkers(false);
-                    },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Colour Blind Friendly'),
-                    visualDensity: VisualDensity.compact,
-                    value: 'colourBlindFriendly',
-                    // ignore: deprecated_member_use
-                    groupValue: themeNotifier.value,
-                    onChanged: (value) {
-                      selectedThemeKey = value!;
-                      setState(() {
-                        _changeTheme(value);
-                        mapStyle = colourBlindMap;
-                      });
-                      _saveSettings();
-                      mapPageKey.currentState?.clearAllMarkers();
-                      mapPageKey.currentState?.addAllMarkers(false);
-                    },
-                  ),
+                    child: Column(
+                      children: [
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Light'),
+                          visualDensity: VisualDensity.compact,
+                          value: 'light',
+                        ),
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Dark'),
+                          visualDensity: VisualDensity.compact,
+                          value: 'dark',
+                        ),
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('2024 Colour Scheme'),
+                          visualDensity: VisualDensity.compact,
+                          value: '2024',
+                        ),
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('High Contrast'),
+                          visualDensity: VisualDensity.compact,
+                          value: 'highContrast',
+                        ),
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Colour Blind Friendly'),
+                          visualDensity: VisualDensity.compact,
+                          value: 'colourBlindFriendly',
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
               Column(
