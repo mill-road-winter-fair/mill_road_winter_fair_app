@@ -119,7 +119,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Metric'),
@@ -129,6 +128,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     visualDensity: VisualDensity.compact,
                     value: DistanceUnits.metric,
+                    // ignore: deprecated_member_use
                     groupValue: preferredDistanceUnits,
                     onChanged: (DistanceUnits? value) {
                       setState(() {
@@ -137,7 +137,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       _saveSettings();
                     },
                   ),
-                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Imperial'),
@@ -147,6 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     visualDensity: VisualDensity.compact,
                     value: DistanceUnits.imperial,
+                    // ignore: deprecated_member_use
                     groupValue: preferredDistanceUnits,
                     onChanged: (DistanceUnits? value) {
                       setState(() {
@@ -155,7 +155,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       _saveSettings();
                     },
                   ),
-                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Cambridge'),
@@ -165,6 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     visualDensity: VisualDensity.compact,
                     value: DistanceUnits.cambridge,
+                    // ignore: deprecated_member_use
                     groupValue: preferredDistanceUnits,
                     onChanged: (DistanceUnits? value) {
                       setState(() {
@@ -179,12 +179,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Light'),
                     visualDensity: VisualDensity.compact,
                     value: 'light',
+                    // ignore: deprecated_member_use
                     groupValue: themeNotifier.value,
                     onChanged: (value) {
                       selectedThemeKey = value!;
@@ -197,12 +197,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
                   ),
-                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Dark'),
                     visualDensity: VisualDensity.compact,
                     value: 'dark',
+                    // ignore: deprecated_member_use
                     groupValue: themeNotifier.value,
                     onChanged: (value) {
                       selectedThemeKey = value!;
@@ -215,12 +215,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
                   ),
-                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('2024 Colour Scheme'),
                     visualDensity: VisualDensity.compact,
                     value: '2024',
+                    // ignore: deprecated_member_use
                     groupValue: themeNotifier.value,
                     onChanged: (value) {
                       setState(() {
@@ -233,12 +233,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
                   ),
-                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('High Contrast'),
                     visualDensity: VisualDensity.compact,
                     value: 'highContrast',
+                    // ignore: deprecated_member_use
                     groupValue: themeNotifier.value,
                     onChanged: (value) {
                       setState(() {
@@ -251,12 +251,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
                   ),
-                  // ignore: deprecated_member_use
                   RadioListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const Text('Colour Blind Friendly'),
                     visualDensity: VisualDensity.compact,
                     value: 'colourBlindFriendly',
+                    // ignore: deprecated_member_use
                     groupValue: themeNotifier.value,
                     onChanged: (value) {
                       selectedThemeKey = value!;
