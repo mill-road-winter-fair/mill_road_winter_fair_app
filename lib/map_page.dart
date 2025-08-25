@@ -257,7 +257,6 @@ class MapPageState extends State<MapPage> {
                           });
                           final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                           updateMarkerVisibility(idList, true);
-                          Navigator.pop(context);
                         },
                         icon: const Icon(Icons.filter_alt),
                         label: const Text('Show All'),
@@ -271,7 +270,6 @@ class MapPageState extends State<MapPage> {
                           });
                           final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                           updateMarkerVisibility(idList, false);
-                          Navigator.pop(context);
                         },
                         icon: const Icon(Icons.filter_alt_off),
                         label: const Text('Hide All'),
