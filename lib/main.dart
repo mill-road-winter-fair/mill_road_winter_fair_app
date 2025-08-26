@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
@@ -26,8 +27,9 @@ Future<void> main() async {
   locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
   locationPermission = await Geolocator.checkPermission();
 
-  // Lock app in portrait rotation and run
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const MyApp()));
+  // Lock app in portrait rotation and run main app
+  // If this is the first execution run the welcome screen, otherwise just run the app normally
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -74,8 +76,8 @@ class HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text('Mill Road Winter Fair 2025'),
-            Image.asset('assets/iconTransparent.png', height: 30, width: 30, color: Theme.of(context).colorScheme.onPrimary),
+            const Text('Mill Road Winter Fair 2025', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Image.asset('assets/icons/iconTransparent.png', height: 30, width: 30, color: Theme.of(context).colorScheme.onPrimary),
           ],
         ),
         leading: Builder(

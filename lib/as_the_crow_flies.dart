@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 int asTheCrowFlies(LatLng? origin, LatLng destination) {
-
   // If the user has location tracking disabled we need to return nothing here.
   if (origin == null) {
     return 0;

@@ -26,7 +26,11 @@ void main() {
     expect(find.text('High Contrast'), findsOneWidget);
     expect(find.text('Colour Blind Friendly'), findsOneWidget);
 
-    // Verify the Theme section
+    // Verify the Onboarding section
+    expect(find.text('Onboarding'), findsOneWidget);
+    expect(find.text('Replay Welcome Screen'), findsOneWidget);
+
+    // Verify the App Information section
     expect(find.text('App Information'), findsOneWidget);
     expect(find.text('About'), findsOneWidget);
 

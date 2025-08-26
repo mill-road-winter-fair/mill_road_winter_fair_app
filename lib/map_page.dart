@@ -167,119 +167,118 @@ class MapPageState extends State<MapPage> {
 
   void showFilterMenu() {
     showModalBottomSheet(
+      scrollControlDisabledMaxHeightRatio: 0.8,
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SingleChildScrollView(
-                    child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                      Text(
-                        "Filter Map Pins",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.left,
-                      )
-                    ]),
-                    CheckboxListTile(
-                      activeColor: getCategoryColor(selectedThemeKey, 'Food'),
-                      title: const Text("Food"),
-                      value: filterSettings["Food"],
-                      onChanged: (value) {
-                        setState(() {
-                          filterSettings["Food"] = value!;
-                        });
-                        final idList = _foodMarkerIds;
-                        updateMarkerVisibility(idList, value!);
-                      },
-                    ),
-                    CheckboxListTile(
-                      activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
-                      title: const Text("Stalls"),
-                      value: filterSettings["Stalls"],
-                      onChanged: (value) {
-                        setState(() {
-                          filterSettings["Stalls"] = value!;
-                        });
-                        final idList = _stallsMarkerIds;
-                        updateMarkerVisibility(idList, value!);
-                      },
-                    ),
-                    CheckboxListTile(
-                      activeColor: getCategoryColor(selectedThemeKey, 'Music'),
-                      title: const Text("Music"),
-                      value: filterSettings["Music"],
-                      onChanged: (value) {
-                        setState(() {
-                          filterSettings["Music"] = value!;
-                        });
-                        final idList = _musicMarkerIds;
-                        updateMarkerVisibility(idList, value!);
-                      },
-                    ),
-                    CheckboxListTile(
-                      activeColor: getCategoryColor(selectedThemeKey, 'Event'),
-                      title: const Text("Events"),
-                      value: filterSettings["Events"],
-                      onChanged: (value) {
-                        setState(() {
-                          filterSettings["Events"] = value!;
-                        });
-                        final idList = _eventMarkerIds;
-                        updateMarkerVisibility(idList, value!);
-                      },
-                    ),
-                    CheckboxListTile(
-                      activeColor: getCategoryColor(selectedThemeKey, 'Service'),
-                      title: const Text("Services"),
-                      value: filterSettings["Services"],
-                      onChanged: (value) {
-                        setState(() {
-                          filterSettings["Services"] = value!;
-                        });
-                        final idList = _serviceMarkerIds;
-                        updateMarkerVisibility(idList, value!);
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              filterSettings.forEach((key, _) {
-                                filterSettings[key] = true;
-                              });
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text(
+                      "Filter Map Pins",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.left,
+                    )
+                  ]),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Food'),
+                    title: const Text("Food"),
+                    value: filterSettings["Food"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Food"] = value!;
+                      });
+                      final idList = _foodMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
+                    title: const Text("Stalls"),
+                    value: filterSettings["Stalls"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Stalls"] = value!;
+                      });
+                      final idList = _stallsMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Music'),
+                    title: const Text("Music"),
+                    value: filterSettings["Music"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Music"] = value!;
+                      });
+                      final idList = _musicMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Event'),
+                    title: const Text("Events"),
+                    value: filterSettings["Events"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Events"] = value!;
+                      });
+                      final idList = _eventMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Service'),
+                    title: const Text("Services"),
+                    value: filterSettings["Services"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Services"] = value!;
+                      });
+                      final idList = _serviceMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            filterSettings.forEach((key, _) {
+                              filterSettings[key] = true;
                             });
-                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                            updateMarkerVisibility(idList, true);
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(Icons.filter_alt),
-                          label: const Text('Show All'),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              filterSettings.forEach((key, _) {
-                                filterSettings[key] = false;
-                              });
+                          });
+                          final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                          updateMarkerVisibility(idList, true);
+                        },
+                        icon: const Icon(Icons.filter_alt),
+                        label: const Text('Show All'),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            filterSettings.forEach((key, _) {
+                              filterSettings[key] = false;
                             });
-                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                            updateMarkerVisibility(idList, false);
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(Icons.filter_alt_off),
-                          label: const Text('Hide All'),
-                        ),
-                      ],
-                    ),
-                  ],
-                )));
+                          });
+                          final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                          updateMarkerVisibility(idList, false);
+                        },
+                        icon: const Icon(Icons.filter_alt_off),
+                        label: const Text('Hide All'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
           },
         );
       },
@@ -402,7 +401,7 @@ class MapPageState extends State<MapPage> {
           points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
           color: Theme.of(context).colorScheme.tertiary,
           width: 5,
-          patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
+          patterns: <PatternItem>[PatternItem.dash(10), PatternItem.gap(10)],
         ));
         final distanceMetres = result.totalDistanceValue;
         _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
@@ -546,7 +545,7 @@ class MapPageState extends State<MapPage> {
                                 });
                               },
                               icon: Icon(
-                                Icons.wrong_location,
+                                Icons.cancel,
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             )

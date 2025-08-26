@@ -17,7 +17,7 @@ class ImportantInfoPage extends StatelessWidget {
             children: [
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 240),
-                child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/hiVis.jpg', fit: BoxFit.fitWidth)),
+                child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/hiVis.jpg', fit: BoxFit.fitWidth)),
               ),
               const SizedBox(height: 20),
               const Text('Stewards', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
@@ -29,7 +29,7 @@ class ImportantInfoPage extends StatelessWidget {
               const SizedBox(height: 40),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 250),
-                child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/cautionVehicles.jpg', fit: BoxFit.fitWidth)),
+                child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/cautionVehicles.jpg', fit: BoxFit.fitWidth)),
               ),
               const SizedBox(height: 20),
               const Text('Caution – Vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),

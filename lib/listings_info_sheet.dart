@@ -54,10 +54,7 @@ class ListingInfoSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                  flex: 7,
-                  child: Text(categories)
-              ),
+              Expanded(flex: 7, child: Text(categories)),
               if (currentLatLng != null)
                 Expanded(
                   flex: 3,
@@ -98,8 +95,8 @@ class ListingInfoSheet extends StatelessWidget {
                   onPressed: () {
                     onGetDirections();
                   },
-                  icon: const Icon(Icons.directions),
-                  label: const Text('Get Directions'),
+                  icon: const Icon(Icons.directions_walk),
+                  label: const FittedBox(child: Text('Get Directions')),
                 ),
               ),
               Flexible(flex: 1, child: Container()),
@@ -111,7 +108,7 @@ class ListingInfoSheet extends StatelessWidget {
                       launchUrl(Uri.parse(website));
                     },
                     icon: const Icon(Icons.public),
-                    label: const Text('Open website'),
+                    label: const FittedBox(child: Text('Open Website')),
                   ),
                 ),
             ],

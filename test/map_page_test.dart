@@ -132,7 +132,7 @@ void main() async {
     expect(find.text('Food • Doughnuts'), findsOneWidget);
     expect(find.text('10:30 - 16:30'), findsOneWidget);
     expect(find.text('approx. 206 m'), findsOneWidget);
-    expect(find.byIcon(Icons.directions), findsOneWidget);
+    expect(find.byIcon(Icons.directions_walk), findsOneWidget);
     expect(find.byIcon(Icons.public), findsOneWidget);
   });
 
@@ -356,16 +356,12 @@ void main() async {
     );
     await tester.tap(showAll);
     await tester.pumpAndSettle();
-    expect(find.text("Filter Map Pins"), findsNothing);
+    expect(find.text("Filter Map Pins"), findsOne);
     expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
     expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
     expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
     expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
     expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-
-    // Re-open filter menu
-    await tester.tap(find.byIcon(Icons.filter_alt));
-    await tester.pumpAndSettle();
 
     // Verify "Hide All" button works
     final hideAll = find.text("Hide All");
@@ -376,6 +372,7 @@ void main() async {
     );
     await tester.tap(hideAll);
     await tester.pumpAndSettle();
+    expect(find.text("Filter Map Pins"), findsOne);
     expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
     expect(mapPageState.markers[const MarkerId('2')]?.visible, false);
     expect(mapPageState.markers[const MarkerId('3')]?.visible, false);

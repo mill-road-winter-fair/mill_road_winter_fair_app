@@ -25,10 +25,10 @@ class FilteredListingsPage extends StatefulWidget {
   });
 
   @override
-  State<FilteredListingsPage> createState() => _FilteredListingsPageState();
+  State<FilteredListingsPage> createState() => FilteredListingsPageState();
 }
 
-class _FilteredListingsPageState extends State<FilteredListingsPage> {
+class FilteredListingsPageState extends State<FilteredListingsPage> {
   // ignore: unused_field
   late Future<List> _sortedListings;
   bool isRefreshing = false;
@@ -44,19 +44,22 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
     try {
       if (listings.isEmpty) throw Exception("No listings exist");
 
-      if (locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
-        // User has disabled location permissions, change their preferred sorting method
-        preferredSortingMethod = SortingMethod.values[1];
+      if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
+          preferredSortingMethod == SortingMethod.values[1]) {
+        // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
+        preferredSortingMethod = SortingMethod.values[0];
       }
 
-      if (locationServicesEnabled == false || currentLatLng == null) {
-        // Location services are disabled or we cannot get the user's location, use fallback sorting but don't change their saved preferences
+      if ((locationServicesEnabled == false || currentLatLng == null) && preferredSortingMethod == SortingMethod.values[1]) {
+        // User prefers distance sorting but their location services are disabled or we cannot get the user's location, use fallback (a-z) sorting but don't change their saved preferences
         useFallbackSorting = true;
       } else {
         useFallbackSorting = false;
       }
 
-      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) && locationServicesEnabled == true && useFallbackSorting == false) {
+      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) &&
+          locationServicesEnabled == true &&
+          useFallbackSorting == false) {
         // Add distance to each listing
         listings = listings.map((listing) {
           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
@@ -66,10 +69,18 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
       }
 
       // Sort based on preference
-      if (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true) {
+      if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
+        // Sort by name
         listings.sort((a, b) => a['name'].compareTo(b['name']));
-      } else {
+      } else if (preferredSortingMethod == SortingMethod.values[1]) {
+        // Sort by distance to user (nearest first)
         listings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
+      } else {
+        // Sort by start time, if the star time is the same sort by name
+        listings.sort((a, b) {
+          final timeCompare = a['startTime'].compareTo(b['startTime']);
+          return timeCompare != 0 ? timeCompare : a['name'].compareTo(b['name']);
+        });
       }
 
       return listings;
@@ -164,7 +175,7 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
           child: Column(
             children: <Widget>[
               Expanded(
-                  flex: 1,
+                  flex: 8,
                   child: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.secondary,
@@ -184,17 +195,17 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
                               padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[0] && useFallbackSorting == false)
+                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
                                         ? Theme.of(context).colorScheme.primary
                                         : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[0] && useFallbackSorting == false)
+                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSecondary),
-                                child: const Text('Nearest'),
+                                child: const FittedBox(child: Text('Nearest', style: TextStyle(fontSize: 16))),
                                 onPressed: () {
                                   if (currentLatLng != null) {
                                     setState(() {
-                                      preferredSortingMethod = SortingMethod.values[0];
+                                      preferredSortingMethod = SortingMethod.values[1];
                                     });
                                     _saveSettings();
                                   } else {
@@ -212,21 +223,43 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
                             ),
                           ),
                           Flexible(
-                            flex: 8,
+                            flex: 6,
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true)
+                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
                                         ? Theme.of(context).colorScheme.primary
                                         : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[1] || useFallbackSorting == true)
+                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSecondary),
-                                child: const Text('A-Z'),
+                                child: const FittedBox(child: Text('A-Z', style: TextStyle(fontSize: 16))),
                                 onPressed: () {
                                   setState(() {
-                                    preferredSortingMethod = SortingMethod.values[1];
+                                    preferredSortingMethod = SortingMethod.values[0];
+                                  });
+                                  _saveSettings();
+                                },
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 6,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.secondary,
+                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSecondary),
+                                child: const FittedBox(child: Text('Time', style: TextStyle(fontSize: 16))),
+                                onPressed: () {
+                                  setState(() {
+                                    preferredSortingMethod = SortingMethod.values[2];
                                   });
                                   _saveSettings();
                                 },
@@ -238,7 +271,7 @@ class _FilteredListingsPageState extends State<FilteredListingsPage> {
                     ),
                   )),
               Expanded(
-                flex: 24,
+                flex: 92,
                 child: ListView.separated(
                   padding: const EdgeInsets.all(8),
                   separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),

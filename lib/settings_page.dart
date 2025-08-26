@@ -1,13 +1,17 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
-// Define available sorting methods
-enum SortingMethod { nearest, alphabetical }
+// Define variable for first execution status
+late bool firstExecution;
 
-// Set default sorting method
+// Define available sorting methods
+enum SortingMethod { alphabetical, nearest, startTime }
+
+// Define variable for sorting method
 late SortingMethod preferredSortingMethod;
 
 // Define available distance units
@@ -28,14 +32,17 @@ Future<void> loadSettings(bool onTest) async {
     // Load settings from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
 
-    // Set default sorting method as nearest (0 in the index)
-    int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 0;
-    //Load preferred sorting method from shared preferences
+    // Get first execution status, default to true
+    firstExecution = prefs.getBool('firstExecution') ?? true;
+
+    // Set default sorting method as nearest (1 in the index)
+    int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 1;
+    // Load preferred sorting method from shared preferences
     preferredSortingMethod = SortingMethod.values[savedSortingIndex];
 
     // Set default distance unit as metric (0 in the index)
     int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0;
-    //Load preferred distance unit from shared preferences
+    // Load preferred distance unit from shared preferences
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 
     // Detect system brightness
@@ -52,7 +59,7 @@ Future<void> loadSettings(bool onTest) async {
   } else if (onTest == true) {
     int savedUnitIndex = 0;
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
-    int savedSortingIndex = 0;
+    int savedSortingIndex = 1;
     preferredSortingMethod = SortingMethod.values[savedSortingIndex];
 
     selectedThemeKey = 'light';
@@ -88,6 +95,15 @@ class _SettingsPageState extends State<SettingsPage> {
     themeNotifier.value = themeKey;
   }
 
+  // Function to replay the initial welcome screen
+  void _replayWelcomeScreen(context) {
+    Navigator.pop(context);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,15 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Metric'),
-                    subtitle: Text(
-                      'Metres & Kilometres',
-                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    value: DistanceUnits.metric,
+                  RadioGroup<DistanceUnits>(
                     groupValue: preferredDistanceUnits,
                     onChanged: (DistanceUnits? value) {
                       setState(() {
@@ -121,131 +129,130 @@ class _SettingsPageState extends State<SettingsPage> {
                       });
                       _saveSettings();
                     },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Imperial'),
-                    subtitle: Text(
-                      'Feet & Miles',
-                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    child: Column(
+                      children: [
+                        RadioListTile<DistanceUnits>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Metric'),
+                          subtitle: Text(
+                            'Metres & Kilometres',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          value: DistanceUnits.metric,
+                        ),
+                        RadioListTile<DistanceUnits>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Imperial'),
+                          subtitle: Text(
+                            'Feet & Miles',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          value: DistanceUnits.imperial,
+                        ),
+                        RadioListTile<DistanceUnits>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Cambridge'),
+                          subtitle: Text(
+                            'Punt lengths',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          visualDensity: VisualDensity.compact,
+                          value: DistanceUnits.cambridge,
+                        ),
+                      ],
                     ),
-                    visualDensity: VisualDensity.compact,
-                    value: DistanceUnits.imperial,
-                    groupValue: preferredDistanceUnits,
-                    onChanged: (DistanceUnits? value) {
-                      setState(() {
-                        preferredDistanceUnits = value!;
-                      });
-                      _saveSettings();
-                    },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Cambridge'),
-                    subtitle: Text(
-                      'Punt lengths',
-                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    ),
-                    visualDensity: VisualDensity.compact,
-                    value: DistanceUnits.cambridge,
-                    groupValue: preferredDistanceUnits,
-                    onChanged: (DistanceUnits? value) {
-                      setState(() {
-                        preferredDistanceUnits = value!;
-                      });
-                      _saveSettings();
-                    },
-                  ),
+                  )
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Light'),
-                    visualDensity: VisualDensity.compact,
-                    value: 'light',
+                  RadioGroup<String>(
                     groupValue: themeNotifier.value,
                     onChanged: (value) {
                       selectedThemeKey = value!;
                       setState(() {
                         _changeTheme(value);
-                        mapStyle = standardMap;
+                        switch (value) {
+                          case 'light':
+                            mapStyle = standardMap;
+                            break;
+                          case 'dark':
+                            mapStyle = darkMap;
+                            break;
+                          case '2024':
+                            mapStyle = retroMap;
+                            break;
+                          case 'highContrast':
+                            mapStyle = darkMap;
+                            break;
+                          case 'colourBlindFriendly':
+                            mapStyle = colourBlindMap;
+                            break;
+                        }
                       });
                       _saveSettings();
                       mapPageKey.currentState?.clearAllMarkers();
                       mapPageKey.currentState?.addAllMarkers(false);
                     },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Dark'),
-                    visualDensity: VisualDensity.compact,
-                    value: 'dark',
-                    groupValue: themeNotifier.value,
-                    onChanged: (value) {
-                      selectedThemeKey = value!;
-                      setState(() {
-                        _changeTheme(value);
-                        mapStyle = darkMap;
-                      });
-                      _saveSettings();
-                      mapPageKey.currentState?.clearAllMarkers();
-                      mapPageKey.currentState?.addAllMarkers(false);
-                    },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('2024 Colour Scheme'),
-                    visualDensity: VisualDensity.compact,
-                    value: '2024',
-                    groupValue: themeNotifier.value,
-                    onChanged: (value) {
-                      setState(() {
-                        _changeTheme(value!);
-                        mapStyle = retroMap;
-                      });
-                      selectedThemeKey = value!;
-                      _saveSettings();
-                      mapPageKey.currentState?.clearAllMarkers();
-                      mapPageKey.currentState?.addAllMarkers(false);
-                    },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('High Contrast'),
-                    visualDensity: VisualDensity.compact,
-                    value: 'highContrast',
-                    groupValue: themeNotifier.value,
-                    onChanged: (value) {
-                      setState(() {
-                        _changeTheme(value!);
-                        mapStyle = darkMap;
-                      });
-                      selectedThemeKey = value!;
-                      _saveSettings();
-                      mapPageKey.currentState?.clearAllMarkers();
-                      mapPageKey.currentState?.addAllMarkers(false);
-                    },
-                  ),
-                  RadioListTile(
-                    activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text('Colour Blind Friendly'),
-                    visualDensity: VisualDensity.compact,
-                    value: 'colourBlindFriendly',
-                    groupValue: themeNotifier.value,
-                    onChanged: (value) {
-                      selectedThemeKey = value!;
-                      setState(() {
-                        _changeTheme(value);
-                        mapStyle = colourBlindMap;
-                      });
-                      _saveSettings();
-                      mapPageKey.currentState?.clearAllMarkers();
-                      mapPageKey.currentState?.addAllMarkers(false);
-                    },
+                    child: Column(
+                      children: [
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Light'),
+                          visualDensity: VisualDensity.compact,
+                          value: 'light',
+                        ),
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Dark'),
+                          visualDensity: VisualDensity.compact,
+                          value: 'dark',
+                        ),
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('2024 Colour Scheme'),
+                          visualDensity: VisualDensity.compact,
+                          value: '2024',
+                        ),
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('High Contrast'),
+                          visualDensity: VisualDensity.compact,
+                          value: 'highContrast',
+                        ),
+                        RadioListTile<String>(
+                          activeColor: Theme.of(context).colorScheme.tertiary,
+                          title: const Text('Colour Blind Friendly'),
+                          visualDensity: VisualDensity.compact,
+                          value: 'colourBlindFriendly',
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  const Text('Onboarding', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  ListTile(
+                    leading: const Icon(Icons.first_page),
+                    title: const Text('Replay Welcome Screen'),
+                    onTap: () => _replayWelcomeScreen(context),
                   ),
                 ],
               ),
@@ -259,7 +266,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: const Text('About'),
                     onTap: () {
                       showAboutDialog(
-                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.6', applicationIcon: const MyAppIcon());
+                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.7', applicationIcon: const MyAppIcon());
                     },
                   ),
                 ],
@@ -283,7 +290,7 @@ class MyAppIcon extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
         child: Image.asset(
-          'assets/icon.png',
+          'assets/icons/icon.png',
           fit: BoxFit.contain,
         ),
       ),

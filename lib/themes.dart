@@ -58,8 +58,8 @@ final Map<String, ThemeData> appThemes = {
       drawerTheme: const DrawerThemeData(
         backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
       ),
-      elevatedButtonTheme:
-          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
       listTileTheme: const ListTileThemeData(tileColor: Color.fromRGBO(44, 44, 44, 1.0))),
   '2024': ThemeData(
     useMaterial3: true,
@@ -116,8 +116,8 @@ final Map<String, ThemeData> appThemes = {
       drawerTheme: const DrawerThemeData(
         backgroundColor: Colors.black,
       ),
-      elevatedButtonTheme:
-          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
       listTileTheme: const ListTileThemeData(tileColor: Colors.black)),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
@@ -171,30 +171,30 @@ String colourBlindMap =
 Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async {
   late String assetPath;
   if (primaryType == "Food") {
-    assetPath = "assets/foodMarker.png";
+    assetPath = "assets/mapMarkers/foodMarker.png";
   }
 
   if (primaryType == "Shopping") {
-    assetPath = "assets/stallsMarker.png";
+    assetPath = "assets/mapMarkers/stallsMarker.png";
   }
 
   if (primaryType == "Music") {
-    assetPath = "assets/musicMarker.png";
+    assetPath = "assets/mapMarkers/musicMarker.png";
   }
 
   if (primaryType == "Event") {
-    assetPath = "assets/eventsMarker.png";
+    assetPath = "assets/mapMarkers/eventsMarker.png";
   }
 
   if (primaryType == "Service") {
-    assetPath = "assets/servicesMarker.png";
+    assetPath = "assets/mapMarkers/servicesMarker.png";
   }
 
   try {
     int markerPixelSize = 288;
 
     // Load the backdrop image (frame)
-    final ByteData backdropData = await rootBundle.load("assets/markerIconFrame.png");
+    final ByteData backdropData = await rootBundle.load("assets/mapMarkers/markerIconFrame.png");
     final ui.Codec backdropCodec = await ui.instantiateImageCodec(
       backdropData.buffer.asUint8List(),
       targetWidth: markerPixelSize,
