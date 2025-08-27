@@ -57,25 +57,10 @@ android {
         } else {
             throw new GradleException("ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY is missing from dart-defines.")
         }
-        if (dartDefines.containsKey('IOS_GOOGLE_MAPS_SDK_API_KEY')) {
-            resValue "string", "IOS_GOOGLE_MAPS_SDK_API_KEY", dartDefines['IOS_GOOGLE_MAPS_SDK_API_KEY']
-        } else {
-            throw new GradleException("IOS_GOOGLE_MAPS_SDK_API_KEY is missing from dart-defines.")
-        }
-        if (dartDefines.containsKey('IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY')) {
-            resValue "string", "IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY", dartDefines['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY']
-        } else {
-            throw new GradleException("IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY is missing from dart-defines.")
-        }
         if (dartDefines.containsKey('SIGNING_KEY')) {
             resValue "string", "SIGNING_KEY", dartDefines['SIGNING_KEY']
         } else {
             throw new GradleException("SIGNING_KEY is missing from dart-defines.")
-        }
-        if (dartDefines.containsKey('IOS_BUNDLE_ID')) {
-            resValue "string", "IOS_BUNDLE_ID", dartDefines['IOS_BUNDLE_ID']
-        } else {
-            throw new GradleException("IOS_BUNDLE_ID is missing from dart-defines.")
         }
     }
 
