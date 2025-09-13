@@ -6,6 +6,10 @@ The app itself is a Flutter project which connects to a Google Sheet via an API.
 
 Currently the aim is for the app to provides listings of the various stalls, musical performances, events and services. The app also provides directions to each of these. 
 
+### Developers
+* Alexander Berridge (Android)
+* Matt Whiting (iOS)
+
 ### Potential Future Development Ideas
 - Development goals are currently listed [here](https://github.com/MarauderOne/mill_road_winter_fair_app/issues).
 
