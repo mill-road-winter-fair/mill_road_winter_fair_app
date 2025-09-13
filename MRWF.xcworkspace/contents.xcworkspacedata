@@ -1,0 +1,2753 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:analysis_options.yaml">
+   </FileRef>
+   <Group
+      location = "group:android"
+      name = "android">
+      <Group
+         location = "group:app"
+         name = "app">
+         <FileRef
+            location = "group:build.gradle">
+         </FileRef>
+         <Group
+            location = "group:src"
+            name = "src">
+            <Group
+               location = "group:profile"
+               name = "profile">
+               <FileRef
+                  location = "group:AndroidManifest.xml">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:main"
+               name = "main">
+               <Group
+                  location = "group:res"
+                  name = "res">
+                  <Group
+                     location = "group:mipmap-mdpi"
+                     name = "mipmap-mdpi">
+                     <FileRef
+                        location = "group:ic_launcher.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:launcher_icon.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-night-xxhdpi"
+                     name = "drawable-night-xxhdpi">
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:mipmap-hdpi"
+                     name = "mipmap-hdpi">
+                     <FileRef
+                        location = "group:ic_launcher.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:launcher_icon.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:values-night-v31"
+                     name = "values-night-v31">
+                     <FileRef
+                        location = "group:styles.xml">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-night"
+                     name = "drawable-night">
+                     <FileRef
+                        location = "group:background.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:launch_background.xml">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable"
+                     name = "drawable">
+                     <FileRef
+                        location = "group:background.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:launch_background.xml">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:mipmap-xxxhdpi"
+                     name = "mipmap-xxxhdpi">
+                     <FileRef
+                        location = "group:ic_launcher.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:launcher_icon.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:mipmap-xxhdpi"
+                     name = "mipmap-xxhdpi">
+                     <FileRef
+                        location = "group:ic_launcher.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:launcher_icon.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-night-mdpi"
+                     name = "drawable-night-mdpi">
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:values-night"
+                     name = "values-night">
+                     <FileRef
+                        location = "group:styles.xml">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-night-v21"
+                     name = "drawable-night-v21">
+                     <FileRef
+                        location = "group:background.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:launch_background.xml">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:values"
+                     name = "values">
+                     <FileRef
+                        location = "group:colors.xml">
+                     </FileRef>
+                     <FileRef
+                        location = "group:styles.xml">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-night-hdpi"
+                     name = "drawable-night-hdpi">
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-xhdpi"
+                     name = "drawable-xhdpi">
+                     <FileRef
+                        location = "group:ic_launcher_foreground.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-night-xhdpi"
+                     name = "drawable-night-xhdpi">
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-xxhdpi"
+                     name = "drawable-xxhdpi">
+                     <FileRef
+                        location = "group:ic_launcher_foreground.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-hdpi"
+                     name = "drawable-hdpi">
+                     <FileRef
+                        location = "group:ic_launcher_foreground.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-v21"
+                     name = "drawable-v21">
+                     <FileRef
+                        location = "group:background.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:launch_background.xml">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-mdpi"
+                     name = "drawable-mdpi">
+                     <FileRef
+                        location = "group:ic_launcher_foreground.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-night-xxxhdpi"
+                     name = "drawable-night-xxxhdpi">
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:mipmap-xhdpi"
+                     name = "mipmap-xhdpi">
+                     <FileRef
+                        location = "group:ic_launcher.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:launcher_icon.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:drawable-xxxhdpi"
+                     name = "drawable-xxxhdpi">
+                     <FileRef
+                        location = "group:ic_launcher_foreground.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:android12splash.png">
+                     </FileRef>
+                     <FileRef
+                        location = "group:splash.png">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:values-v31"
+                     name = "values-v31">
+                     <FileRef
+                        location = "group:styles.xml">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:mipmap-anydpi-v26"
+                     name = "mipmap-anydpi-v26">
+                     <FileRef
+                        location = "group:ic_launcher.xml">
+                     </FileRef>
+                  </Group>
+               </Group>
+               <FileRef
+                  location = "group:AndroidManifest.xml">
+               </FileRef>
+               <Group
+                  location = "group:java"
+                  name = "java">
+                  <Group
+                     location = "group:io"
+                     name = "io">
+                     <Group
+                        location = "group:flutter"
+                        name = "flutter">
+                        <Group
+                           location = "group:plugins"
+                           name = "plugins">
+                           <FileRef
+                              location = "group:GeneratedPluginRegistrant.java">
+                           </FileRef>
+                        </Group>
+                     </Group>
+                  </Group>
+               </Group>
+               <Group
+                  location = "group:kotlin"
+                  name = "kotlin">
+                  <Group
+                     location = "group:com"
+                     name = "com">
+                     <Group
+                        location = "group:theberridge"
+                        name = "theberridge">
+                        <Group
+                           location = "group:mill_road_winter_fair_app"
+                           name = "mill_road_winter_fair_app">
+                           <FileRef
+                              location = "group:MainActivity.kt">
+                           </FileRef>
+                        </Group>
+                     </Group>
+                  </Group>
+               </Group>
+            </Group>
+            <Group
+               location = "group:debug"
+               name = "debug">
+               <FileRef
+                  location = "group:AndroidManifest.xml">
+               </FileRef>
+            </Group>
+         </Group>
+      </Group>
+      <FileRef
+         location = "group:local.properties">
+      </FileRef>
+      <Group
+         location = "group:gradle"
+         name = "gradle">
+         <Group
+            location = "group:wrapper"
+            name = "wrapper">
+            <FileRef
+               location = "group:gradle-wrapper.properties">
+            </FileRef>
+         </Group>
+      </Group>
+      <FileRef
+         location = "group:build.gradle">
+      </FileRef>
+      <FileRef
+         location = "group:gradle.properties">
+      </FileRef>
+      <FileRef
+         location = "group:settings.gradle">
+      </FileRef>
+   </Group>
+   <Group
+      location = "group:assets"
+      name = "assets">
+      <Group
+         location = "group:mapMarkers"
+         name = "mapMarkers">
+         <FileRef
+            location = "group:foodMarker.png">
+         </FileRef>
+         <FileRef
+            location = "group:markerIconFrame.png">
+         </FileRef>
+         <FileRef
+            location = "group:musicMarker.png">
+         </FileRef>
+         <FileRef
+            location = "group:eventsMarker.png">
+         </FileRef>
+         <FileRef
+            location = "group:servicesMarker.png">
+         </FileRef>
+         <FileRef
+            location = "group:stallsMarker.png">
+         </FileRef>
+      </Group>
+      <Group
+         location = "group:aboutPage"
+         name = "aboutPage">
+         <FileRef
+            location = "group:carousel04.jpg">
+         </FileRef>
+         <FileRef
+            location = "group:carousel01.jpg">
+         </FileRef>
+         <FileRef
+            location = "group:carousel03.jpg">
+         </FileRef>
+         <FileRef
+            location = "group:carousel02.jpg">
+         </FileRef>
+      </Group>
+      <Group
+         location = "group:icons"
+         name = "icons">
+         <FileRef
+            location = "group:icon.png">
+         </FileRef>
+         <FileRef
+            location = "group:iconClean.png">
+         </FileRef>
+         <FileRef
+            location = "group:iconWithBorder.png">
+         </FileRef>
+         <FileRef
+            location = "group:iconTransparent.png">
+         </FileRef>
+         <FileRef
+            location = "group:splashScreenIcon.png">
+         </FileRef>
+      </Group>
+      <Group
+         location = "group:importantInfoPage"
+         name = "importantInfoPage">
+         <FileRef
+            location = "group:cautionVehicles.jpg">
+         </FileRef>
+         <FileRef
+            location = "group:hiVis.jpg">
+         </FileRef>
+      </Group>
+   </Group>
+   <Group
+      location = "group:build"
+      name = "build">
+      <Group
+         location = "group:5596e5507e6321464fd2ba85b0b46c84"
+         name = "5596e5507e6321464fd2ba85b0b46c84">
+         <FileRef
+            location = "group:gen_localizations.stamp">
+         </FileRef>
+         <FileRef
+            location = "group:gen_dart_plugin_registrant.stamp">
+         </FileRef>
+         <FileRef
+            location = "group:_composite.stamp">
+         </FileRef>
+      </Group>
+      <FileRef
+         location = "group:d2976540244dba7be000c4f9690bfe66.cache.dill.track.dill">
+      </FileRef>
+      <Group
+         location = "group:ios"
+         name = "ios">
+         <Group
+            location = "group:XCBuildData"
+            name = "XCBuildData">
+            <Group
+               location = "group:PIFCache"
+               name = "PIFCache">
+               <Group
+                  location = "group:target"
+                  name = "target">
+                  <FileRef
+                     location = "group:TARGET@v11_hash=5e89071e7e0e48ff04ef786b7dc37149-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=e8da13e426e4a7747205381c751d6b4d-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=85edfeef6f3256b6ffecb1044cc8b38b-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=edb94cce41d590ff5cfa3142a3b56d4f-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=9f6e4520722f901dfcd4cff1cf6e7cbc-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=f3acc343c745eef2c1a1b9a09f3400f1-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=66490d55c62e5d02a848d56c1b85451f-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=b292e82a5d641420da01d5f1d5568f58-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=77df79e203e716b36c16915e231b7cfb-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=c084453e416e913eb25dc0ab4f044157-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=e08ed3ace7a67e49dea7a0231aedb297-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=c9d8f9ea8ecd05589b9febe8d14e07e1-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=f7581c7e09bfcafc66c66d1a9eea2f43-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=33d81325bcce16515fdf18242a6ddc05-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=28e081e34ab0a67f21b5d8f6d070d3bb-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=becd4729184a25dcf2947397bce164b2-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=5c40f1d5af720d5be8e99bf2d3cba67e-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=ac04a0b28f4d0c74a25b37265a87a622-json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:TARGET@v11_hash=aed0193cff2ab02d6ed11ff471b295e0-json">
+                  </FileRef>
+               </Group>
+               <Group
+                  location = "group:workspace"
+                  name = "workspace">
+                  <FileRef
+                     location = "group:WORKSPACE@v11_hash=(null)_subobjects=eccff4a0e9f69ff09c3640eab99fe3c8-json">
+                  </FileRef>
+               </Group>
+               <Group
+                  location = "group:project"
+                  name = "project">
+                  <FileRef
+                     location = "group:PROJECT@v11_mod=67f59ea8647adb87d49122d8c37871f8_hash=bfdfe7dc352907fc980b868725387e98plugins=1OJSG6M1FOV3XYQCBH7Z29RZ0FPR9XDE1-json">
+                  </FileRef>
+               </Group>
+            </Group>
+         </Group>
+         <Group
+            location = "group:Debug-iphonesimulator"
+            name = "Debug-iphonesimulator">
+            <Group
+               location = "group:google_maps_flutter_ios"
+               name = "google_maps_flutter_ios">
+               <Group
+                  location = "group:google_maps_flutter_ios.framework"
+                  name = "google_maps_flutter_ios.framework">
+                  <Group
+                     location = "group:_CodeSignature"
+                     name = "_CodeSignature">
+                     <FileRef
+                        location = "group:CodeResources">
+                     </FileRef>
+                     <FileRef
+                        location = "group:CodeDirectory">
+                     </FileRef>
+                     <FileRef
+                        location = "group:CodeRequirements-1">
+                     </FileRef>
+                     <FileRef
+                        location = "group:CodeSignature">
+                     </FileRef>
+                     <FileRef
+                        location = "group:CodeRequirements">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:google_maps_flutter_ios">
+                  </FileRef>
+                  <Group
+                     location = "group:Headers"
+                     name = "Headers">
+                     <FileRef
+                        location = "group:messages.g.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FLTGoogleMapJSONConversions.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapMarkerController.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapController.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FLTGoogleMapsPlugin.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:google_maps_flutter_ios-umbrella.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapMarkerController_Test.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FGMClusterManagersController.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FGMImageUtils.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapPolygonController.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FGMGroundOverlayController_Test.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FGMCATransactionWrapper.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FGMMarkerUserData.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapPolylineController.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapController_Test.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FLTGoogleMapTileOverlayController.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapPolylineController_Test.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FGMGroundOverlayController.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapCircleController.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FLTGoogleMapHeatmapController.h">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:Modules"
+                     name = "Modules">
+                     <FileRef
+                        location = "group:module.modulemap">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:Info.plist">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:google_maps_flutter_ios_privacy.bundle">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:XCFrameworkIntermediates"
+               name = "XCFrameworkIntermediates">
+               <Group
+                  location = "group:GoogleMaps"
+                  name = "GoogleMaps">
+                  <Group
+                     location = "group:Maps"
+                     name = "Maps">
+                     <FileRef
+                        location = "group:GoogleMaps.a.x86_64.both_weak_and_weak_private_symbols">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMaps.a.x86_64.unprelinked_weak_private_symbols">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMaps.a.arm64.both_weak_and_weak_private_symbols">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMaps.a.arm64.unprelinked_weak_private_symbols">
+                     </FileRef>
+                     <Group
+                        location = "group:GoogleMaps.framework"
+                        name = "GoogleMaps.framework">
+                        <FileRef
+                           location = "group:GoogleMaps">
+                        </FileRef>
+                        <Group
+                           location = "group:Headers"
+                           name = "Headers">
+                           <FileRef
+                              location = "group:GMSPanoramaView.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSAccessibilityLabels.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSIndoorBuilding.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSMapID.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSMarker.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSMapView.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSServices.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:module.modulemap.bak">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSIndoorDisplay.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSMarkerLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSOverlayLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSDatasetFeature.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSCameraUpdate.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSMapLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPolyline.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSDeprecationMacros.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSMapView+Animation.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSOrientation.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSMarkerAnimation.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPanoramaService.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSMapStyle.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSMutablePath.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPanorama.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSDatasetFeatureLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSIndoorLevel.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSCircle.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSCoordinateBounds+GoogleMaps.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPinImageGlyph.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSStampStyle.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPanoramaSource.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSStyleSpan.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPinImage.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSTileLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPanoramaCameraUpdate.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPanoramaCamera.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSAdvancedMarker.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSCameraPosition.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSAddress.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GoogleMaps.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSOverlay.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSSyncTileLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSGeometryUtils.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPinImageOptions.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPath.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSURLTileLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSFeature.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSFeatureLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSGeocoder.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPanoramaLink.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPlaceFeature.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSGroundOverlay.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSCALayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSStrokeStyle.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPanoramaLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPolygon.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSCompatabilityMacros.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSCollisionBehavior.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSProjection.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSCoordinateBounds.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSPolygonLayer.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSFeatureStyle.h">
+                           </FileRef>
+                           <FileRef
+                              location = "group:GMSUISettings.h">
+                           </FileRef>
+                        </Group>
+                        <Group
+                           location = "group:Modules"
+                           name = "Modules">
+                           <FileRef
+                              location = "group:module.modulemap">
+                           </FileRef>
+                        </Group>
+                     </Group>
+                  </Group>
+               </Group>
+            </Group>
+            <Group
+               location = "group:url_launcher_ios"
+               name = "url_launcher_ios">
+               <Group
+                  location = "group:url_launcher_ios.framework"
+                  name = "url_launcher_ios.framework">
+                  <Group
+                     location = "group:_CodeSignature"
+                     name = "_CodeSignature">
+                     <FileRef
+                        location = "group:CodeResources">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:url_launcher_ios">
+                  </FileRef>
+                  <Group
+                     location = "group:Headers"
+                     name = "Headers">
+                     <FileRef
+                        location = "group:url_launcher_ios-Swift.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:url_launcher_ios-umbrella.h">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:url_launcher_ios_privacy.bundle">
+                  </FileRef>
+                  <Group
+                     location = "group:Modules"
+                     name = "Modules">
+                     <Group
+                        location = "group:url_launcher_ios.swiftmodule"
+                        name = "url_launcher_ios.swiftmodule">
+                        <FileRef
+                           location = "group:arm64-apple-ios-simulator.abi.json">
+                        </FileRef>
+                        <FileRef
+                           location = "group:x86_64-apple-ios-simulator.swiftdoc">
+                        </FileRef>
+                        <FileRef
+                           location = "group:x86_64-apple-ios-simulator.swiftmodule">
+                        </FileRef>
+                        <FileRef
+                           location = "group:arm64-apple-ios-simulator.swiftmodule">
+                        </FileRef>
+                        <Group
+                           location = "group:Project"
+                           name = "Project">
+                           <FileRef
+                              location = "group:arm64-apple-ios-simulator.swiftsourceinfo">
+                           </FileRef>
+                           <FileRef
+                              location = "group:x86_64-apple-ios-simulator.swiftsourceinfo">
+                           </FileRef>
+                        </Group>
+                        <FileRef
+                           location = "group:arm64-apple-ios-simulator.swiftdoc">
+                        </FileRef>
+                        <FileRef
+                           location = "group:x86_64-apple-ios-simulator.abi.json">
+                        </FileRef>
+                     </Group>
+                     <FileRef
+                        location = "group:module.modulemap">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:Info.plist">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:url_launcher_ios_privacy.bundle">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Flutter.framework"
+               name = "Flutter.framework">
+               <Group
+                  location = "group:_CodeSignature"
+                  name = "_CodeSignature">
+                  <FileRef
+                     location = "group:CodeResources">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:icudtl.dat">
+               </FileRef>
+               <FileRef
+                  location = "group:Flutter">
+               </FileRef>
+               <Group
+                  location = "group:Headers"
+                  name = "Headers">
+                  <FileRef
+                     location = "group:FlutterSceneDelegate.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterEngine.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterChannels.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterPlugin.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterAppDelegate.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterTexture.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterEngineGroup.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterPlatformViews.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterHeadlessDartRunner.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterCodecs.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Flutter.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterViewController.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterMacros.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterDartProject.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterHourFormat.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterPluginAppLifeCycleDelegate.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterBinaryMessenger.h">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FlutterCallbackCache.h">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:PrivacyInfo.xcprivacy">
+               </FileRef>
+               <Group
+                  location = "group:Modules"
+                  name = "Modules">
+                  <FileRef
+                     location = "group:module.modulemap">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:Info.plist">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Google-Maps-iOS-Utils"
+               name = "Google-Maps-iOS-Utils">
+               <Group
+                  location = "group:GoogleMapsUtils.framework"
+                  name = "GoogleMapsUtils.framework">
+                  <Group
+                     location = "group:_CodeSignature"
+                     name = "_CodeSignature">
+                     <FileRef
+                        location = "group:CodeResources">
+                     </FileRef>
+                     <FileRef
+                        location = "group:CodeDirectory">
+                     </FileRef>
+                     <FileRef
+                        location = "group:CodeRequirements-1">
+                     </FileRef>
+                     <FileRef
+                        location = "group:CodeSignature">
+                     </FileRef>
+                     <FileRef
+                        location = "group:CodeRequirements">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:GoogleMapsUtils">
+                  </FileRef>
+                  <Group
+                     location = "group:Headers"
+                     name = "Headers">
+                     <FileRef
+                        location = "group:GMUClusterIconGenerator.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPoint.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPointQuadTreeItem.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUStyle.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterAlgorithm.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGradient.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUStaticCluster.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterRenderer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUNonHierarchicalDistanceBasedAlgorithm.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapsUtils-Swift.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPair.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryContainer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterRenderer+Testing.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMSMarker+GMUClusteritem.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUMarkerClustering.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:Google-Maps-iOS-Utils-umbrella.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterIconGenerator.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUHeatmapTileLayer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUHeatmapTileLayer+Testing.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMULineString.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeoJSONParser.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapsUtils-Bridging-Header.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterManager.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometry.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPoint.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryCollection.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPointQuadTree.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGridBasedClusterAlgorithm.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUWeightedLatLng.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPolygon.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterManager+Testing.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPlacemark.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUCluster.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUKMLParser.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterItem.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUSimpleClusterAlgorithm.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUStyleMap.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPointQuadTreeChild.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryRenderer+Testing.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUWrappingDictionaryKey.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterRenderer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGroundOverlay.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTBounds.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUFeature.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryRenderer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterIconGenerator+Testing.h">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:Modules"
+                     name = "Modules">
+                     <Group
+                        location = "group:GoogleMapsUtils.swiftmodule"
+                        name = "GoogleMapsUtils.swiftmodule">
+                        <FileRef
+                           location = "group:arm64-apple-ios-simulator.abi.json">
+                        </FileRef>
+                        <FileRef
+                           location = "group:x86_64-apple-ios-simulator.swiftdoc">
+                        </FileRef>
+                        <FileRef
+                           location = "group:x86_64-apple-ios-simulator.swiftmodule">
+                        </FileRef>
+                        <FileRef
+                           location = "group:arm64-apple-ios-simulator.swiftmodule">
+                        </FileRef>
+                        <Group
+                           location = "group:Project"
+                           name = "Project">
+                           <FileRef
+                              location = "group:arm64-apple-ios-simulator.swiftsourceinfo">
+                           </FileRef>
+                           <FileRef
+                              location = "group:x86_64-apple-ios-simulator.swiftsourceinfo">
+                           </FileRef>
+                        </Group>
+                        <FileRef
+                           location = "group:arm64-apple-ios-simulator.swiftdoc">
+                        </FileRef>
+                        <FileRef
+                           location = "group:x86_64-apple-ios-simulator.abi.json">
+                        </FileRef>
+                     </Group>
+                     <FileRef
+                        location = "group:module.modulemap">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:Info.plist">
+                  </FileRef>
+               </Group>
+            </Group>
+            <Group
+               location = "group:App.framework"
+               name = "App.framework">
+               <Group
+                  location = "group:_CodeSignature"
+                  name = "_CodeSignature">
+                  <FileRef
+                     location = "group:CodeResources">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:App">
+               </FileRef>
+               <Group
+                  location = "group:flutter_assets"
+                  name = "flutter_assets">
+                  <FileRef
+                     location = "group:NOTICES.Z">
+                  </FileRef>
+                  <FileRef
+                     location = "group:NativeAssetsManifest.json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:vm_snapshot_data">
+                  </FileRef>
+                  <FileRef
+                     location = "group:isolate_snapshot_data">
+                  </FileRef>
+                  <FileRef
+                     location = "group:AssetManifest.json">
+                  </FileRef>
+                  <FileRef
+                     location = "group:kernel_blob.bin">
+                  </FileRef>
+                  <FileRef
+                     location = "group:FontManifest.json">
+                  </FileRef>
+                  <Group
+                     location = "group:packages"
+                     name = "packages">
+                     <Group
+                        location = "group:cupertino_icons"
+                        name = "cupertino_icons">
+                        <Group
+                           location = "group:assets"
+                           name = "assets">
+                           <FileRef
+                              location = "group:CupertinoIcons.ttf">
+                           </FileRef>
+                        </Group>
+                     </Group>
+                     <Group
+                        location = "group:font_awesome_flutter"
+                        name = "font_awesome_flutter">
+                        <Group
+                           location = "group:lib"
+                           name = "lib">
+                           <Group
+                              location = "group:fonts"
+                              name = "fonts">
+                              <FileRef
+                                 location = "group:fa-solid-900.ttf">
+                              </FileRef>
+                              <FileRef
+                                 location = "group:fa-regular-400.ttf">
+                              </FileRef>
+                              <FileRef
+                                 location = "group:fa-brands-400.ttf">
+                              </FileRef>
+                           </Group>
+                        </Group>
+                     </Group>
+                     <Group
+                        location = "group:fluttertoast"
+                        name = "fluttertoast">
+                        <Group
+                           location = "group:assets"
+                           name = "assets">
+                           <FileRef
+                              location = "group:toastify.js">
+                           </FileRef>
+                           <FileRef
+                              location = "group:toastify.css">
+                           </FileRef>
+                        </Group>
+                     </Group>
+                  </Group>
+                  <Group
+                     location = "group:shaders"
+                     name = "shaders">
+                     <FileRef
+                        location = "group:ink_sparkle.frag">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:AssetManifest.bin">
+                  </FileRef>
+                  <Group
+                     location = "group:fonts"
+                     name = "fonts">
+                     <FileRef
+                        location = "group:MaterialIcons-Regular.otf">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:assets"
+                     name = "assets">
+                     <Group
+                        location = "group:mapMarkers"
+                        name = "mapMarkers">
+                        <FileRef
+                           location = "group:foodMarker.png">
+                        </FileRef>
+                        <FileRef
+                           location = "group:markerIconFrame.png">
+                        </FileRef>
+                        <FileRef
+                           location = "group:musicMarker.png">
+                        </FileRef>
+                        <FileRef
+                           location = "group:eventsMarker.png">
+                        </FileRef>
+                        <FileRef
+                           location = "group:servicesMarker.png">
+                        </FileRef>
+                        <FileRef
+                           location = "group:stallsMarker.png">
+                        </FileRef>
+                     </Group>
+                     <Group
+                        location = "group:aboutPage"
+                        name = "aboutPage">
+                        <FileRef
+                           location = "group:carousel04.jpg">
+                        </FileRef>
+                        <FileRef
+                           location = "group:carousel01.jpg">
+                        </FileRef>
+                        <FileRef
+                           location = "group:carousel03.jpg">
+                        </FileRef>
+                        <FileRef
+                           location = "group:carousel02.jpg">
+                        </FileRef>
+                     </Group>
+                     <Group
+                        location = "group:icons"
+                        name = "icons">
+                        <FileRef
+                           location = "group:icon.png">
+                        </FileRef>
+                        <FileRef
+                           location = "group:iconClean.png">
+                        </FileRef>
+                        <FileRef
+                           location = "group:iconWithBorder.png">
+                        </FileRef>
+                        <FileRef
+                           location = "group:iconTransparent.png">
+                        </FileRef>
+                        <FileRef
+                           location = "group:splashScreenIcon.png">
+                        </FileRef>
+                     </Group>
+                     <Group
+                        location = "group:importantInfoPage"
+                        name = "importantInfoPage">
+                        <FileRef
+                           location = "group:cautionVehicles.jpg">
+                        </FileRef>
+                        <FileRef
+                           location = "group:hiVis.jpg">
+                        </FileRef>
+                     </Group>
+                  </Group>
+               </Group>
+               <FileRef
+                  location = "group:Info.plist">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:GoogleMaps"
+               name = "GoogleMaps">
+               <FileRef
+                  location = "group:GoogleMapsResources.bundle">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Runner.swiftmodule"
+               name = "Runner.swiftmodule">
+               <FileRef
+                  location = "group:arm64-apple-ios-simulator.abi.json">
+               </FileRef>
+               <FileRef
+                  location = "group:arm64-apple-ios-simulator.swiftmodule">
+               </FileRef>
+               <Group
+                  location = "group:Project"
+                  name = "Project">
+                  <FileRef
+                     location = "group:arm64-apple-ios-simulator.swiftsourceinfo">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:arm64-apple-ios-simulator.swiftdoc">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Pods_Runner.framework"
+               name = "Pods_Runner.framework">
+               <Group
+                  location = "group:_CodeSignature"
+                  name = "_CodeSignature">
+                  <FileRef
+                     location = "group:CodeResources">
+                  </FileRef>
+                  <FileRef
+                     location = "group:CodeDirectory">
+                  </FileRef>
+                  <FileRef
+                     location = "group:CodeRequirements-1">
+                  </FileRef>
+                  <FileRef
+                     location = "group:CodeSignature">
+                  </FileRef>
+                  <FileRef
+                     location = "group:CodeRequirements">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:Pods_Runner">
+               </FileRef>
+               <Group
+                  location = "group:Headers"
+                  name = "Headers">
+                  <FileRef
+                     location = "group:Pods-Runner-umbrella.h">
+                  </FileRef>
+               </Group>
+               <Group
+                  location = "group:Modules"
+                  name = "Modules">
+                  <FileRef
+                     location = "group:module.modulemap">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:Info.plist">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Flutter"
+               name = "Flutter">
+            </Group>
+            <Group
+               location = "group:fluttertoast"
+               name = "fluttertoast">
+               <FileRef
+                  location = "group:fluttertoast_privacy.bundle">
+               </FileRef>
+               <Group
+                  location = "group:fluttertoast.framework"
+                  name = "fluttertoast.framework">
+                  <Group
+                     location = "group:_CodeSignature"
+                     name = "_CodeSignature">
+                     <FileRef
+                        location = "group:CodeResources">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:fluttertoast_privacy.bundle">
+                  </FileRef>
+                  <FileRef
+                     location = "group:fluttertoast">
+                  </FileRef>
+                  <Group
+                     location = "group:Headers"
+                     name = "Headers">
+                     <FileRef
+                        location = "group:fluttertoast-umbrella.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FluttertoastPlugin.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:UIView+Toast.h">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:Modules"
+                     name = "Modules">
+                     <FileRef
+                        location = "group:module.modulemap">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:Info.plist">
+                  </FileRef>
+               </Group>
+            </Group>
+            <Group
+               location = "group:flutter_native_splash"
+               name = "flutter_native_splash">
+               <FileRef
+                  location = "group:flutter_native_splash_privacy.bundle">
+               </FileRef>
+               <Group
+                  location = "group:flutter_native_splash.framework"
+                  name = "flutter_native_splash.framework">
+                  <Group
+                     location = "group:_CodeSignature"
+                     name = "_CodeSignature">
+                     <FileRef
+                        location = "group:CodeResources">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:flutter_native_splash">
+                  </FileRef>
+                  <Group
+                     location = "group:Headers"
+                     name = "Headers">
+                     <FileRef
+                        location = "group:flutter_native_splash-umbrella.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:FlutterNativeSplashPlugin.h">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:flutter_native_splash_privacy.bundle">
+                  </FileRef>
+                  <Group
+                     location = "group:Modules"
+                     name = "Modules">
+                     <FileRef
+                        location = "group:module.modulemap">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:Info.plist">
+                  </FileRef>
+               </Group>
+            </Group>
+            <Group
+               location = "group:flutter_keyboard_visibility"
+               name = "flutter_keyboard_visibility">
+               <Group
+                  location = "group:flutter_keyboard_visibility.framework"
+                  name = "flutter_keyboard_visibility.framework">
+                  <Group
+                     location = "group:_CodeSignature"
+                     name = "_CodeSignature">
+                     <FileRef
+                        location = "group:CodeResources">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:flutter_keyboard_visibility">
+                  </FileRef>
+                  <Group
+                     location = "group:Headers"
+                     name = "Headers">
+                     <FileRef
+                        location = "group:FlutterKeyboardVisibilityPlugin.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:flutter_keyboard_visibility-umbrella.h">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:Modules"
+                     name = "Modules">
+                     <FileRef
+                        location = "group:module.modulemap">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:Info.plist">
+                  </FileRef>
+               </Group>
+            </Group>
+            <FileRef
+               location = "group:Runner.app">
+            </FileRef>
+            <Group
+               location = "group:shared_preferences_foundation"
+               name = "shared_preferences_foundation">
+               <FileRef
+                  location = "group:shared_preferences_foundation_privacy.bundle">
+               </FileRef>
+               <Group
+                  location = "group:shared_preferences_foundation.framework"
+                  name = "shared_preferences_foundation.framework">
+                  <Group
+                     location = "group:_CodeSignature"
+                     name = "_CodeSignature">
+                     <FileRef
+                        location = "group:CodeResources">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:shared_preferences_foundation_privacy.bundle">
+                  </FileRef>
+                  <Group
+                     location = "group:Headers"
+                     name = "Headers">
+                     <FileRef
+                        location = "group:shared_preferences_foundation-umbrella.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:shared_preferences_foundation-Swift.h">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:shared_preferences_foundation">
+                  </FileRef>
+                  <Group
+                     location = "group:Modules"
+                     name = "Modules">
+                     <Group
+                        location = "group:shared_preferences_foundation.swiftmodule"
+                        name = "shared_preferences_foundation.swiftmodule">
+                        <FileRef
+                           location = "group:arm64-apple-ios-simulator.abi.json">
+                        </FileRef>
+                        <FileRef
+                           location = "group:x86_64-apple-ios-simulator.swiftdoc">
+                        </FileRef>
+                        <FileRef
+                           location = "group:x86_64-apple-ios-simulator.swiftmodule">
+                        </FileRef>
+                        <FileRef
+                           location = "group:arm64-apple-ios-simulator.swiftmodule">
+                        </FileRef>
+                        <Group
+                           location = "group:Project"
+                           name = "Project">
+                           <FileRef
+                              location = "group:arm64-apple-ios-simulator.swiftsourceinfo">
+                           </FileRef>
+                           <FileRef
+                              location = "group:x86_64-apple-ios-simulator.swiftsourceinfo">
+                           </FileRef>
+                        </Group>
+                        <FileRef
+                           location = "group:arm64-apple-ios-simulator.swiftdoc">
+                        </FileRef>
+                        <FileRef
+                           location = "group:x86_64-apple-ios-simulator.abi.json">
+                        </FileRef>
+                     </Group>
+                     <FileRef
+                        location = "group:module.modulemap">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:Info.plist">
+                  </FileRef>
+               </Group>
+            </Group>
+            <Group
+               location = "group:geolocator_apple"
+               name = "geolocator_apple">
+               <Group
+                  location = "group:geolocator_apple.framework"
+                  name = "geolocator_apple.framework">
+                  <Group
+                     location = "group:_CodeSignature"
+                     name = "_CodeSignature">
+                     <FileRef
+                        location = "group:CodeResources">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:Headers"
+                     name = "Headers">
+                     <FileRef
+                        location = "group:LocationServiceStreamHandler.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GeolocationHandler.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:PermissionUtils.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:geolocator-umbrella.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:AuthorizationStatusMapper.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:ActivityTypeMapper.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:LocationDistanceMapper.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GeolocatorPlugin.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:LocationMapper.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:ErrorCodes.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GeolocationHandler_Test.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:ServiceStatus.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:PositionStreamHandler.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:LocationAccuracyMapper.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GeolocatorPlugin_Test.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:LocationAccuracyHandler.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:PermissionHandler.h">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:Modules"
+                     name = "Modules">
+                     <FileRef
+                        location = "group:module.modulemap">
+                     </FileRef>
+                  </Group>
+                  <FileRef
+                     location = "group:geolocator_apple">
+                  </FileRef>
+                  <FileRef
+                     location = "group:Info.plist">
+                  </FileRef>
+                  <FileRef
+                     location = "group:geolocator_apple_privacy.bundle">
+                  </FileRef>
+               </Group>
+               <FileRef
+                  location = "group:geolocator_apple_privacy.bundle">
+               </FileRef>
+            </Group>
+         </Group>
+         <FileRef
+            location = "group:pod_inputs.fingerprint">
+         </FileRef>
+         <Group
+            location = "group:iphonesimulator"
+            name = "iphonesimulator">
+            <FileRef
+               location = "group:Runner.app">
+            </FileRef>
+         </Group>
+      </Group>
+      <Group
+         location = "group:native_assets"
+         name = "native_assets">
+         <Group
+            location = "group:ios"
+            name = "ios">
+         </Group>
+      </Group>
+   </Group>
+   <Group
+      location = "group:coverage"
+      name = "coverage">
+      <FileRef
+         location = "group:lcov.info">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:devtools_options.yaml">
+   </FileRef>
+   <FileRef
+      location = "group:flutter_launcher_icons.yaml">
+   </FileRef>
+   <Group
+      location = "group:ios"
+      name = "ios">
+      <FileRef
+         location = "group:Runner.xcworkspace">
+      </FileRef>
+      <Group
+         location = "group:RunnerTests"
+         name = "RunnerTests">
+         <FileRef
+            location = "group:RunnerTests.swift">
+         </FileRef>
+      </Group>
+      <Group
+         location = "group:Runner"
+         name = "Runner">
+         <FileRef
+            location = "group:Runner-Bridging-Header.h">
+         </FileRef>
+         <FileRef
+            location = "group:Assets.xcassets">
+         </FileRef>
+         <FileRef
+            location = "group:GeneratedPluginRegistrant.h">
+         </FileRef>
+         <Group
+            location = "group:Base.lproj"
+            name = "Base.lproj">
+            <FileRef
+               location = "group:LaunchScreen.storyboard">
+            </FileRef>
+            <FileRef
+               location = "group:Main.storyboard">
+            </FileRef>
+         </Group>
+         <FileRef
+            location = "group:AppDelegate.swift">
+         </FileRef>
+         <FileRef
+            location = "group:GeneratedPluginRegistrant.m">
+         </FileRef>
+         <FileRef
+            location = "group:Info.plist">
+         </FileRef>
+      </Group>
+      <FileRef
+         location = "group:Runner.xcodeproj">
+      </FileRef>
+      <Group
+         location = "group:Flutter"
+         name = "Flutter">
+         <FileRef
+            location = "group:flutter_export_environment.sh">
+         </FileRef>
+         <FileRef
+            location = "group:Debug.xcconfig">
+         </FileRef>
+         <FileRef
+            location = "group:Release.xcconfig">
+         </FileRef>
+         <FileRef
+            location = "group:AppFrameworkInfo.plist">
+         </FileRef>
+         <FileRef
+            location = "group:Flutter.podspec">
+         </FileRef>
+         <FileRef
+            location = "group:Generated.xcconfig">
+         </FileRef>
+         <FileRef
+            location = "group:APIkeys.xcconfig">
+         </FileRef>
+         <Group
+            location = "group:ephemeral"
+            name = "ephemeral">
+            <FileRef
+               location = "group:flutter_lldbinit">
+            </FileRef>
+            <FileRef
+               location = "group:flutter_lldb_helper.py">
+            </FileRef>
+         </Group>
+      </Group>
+      <Group
+         location = "group:Pods"
+         name = "Pods">
+         <FileRef
+            location = "group:Pods.xcodeproj">
+         </FileRef>
+         <Group
+            location = "group:Target Support Files"
+            name = "Target Support Files">
+            <Group
+               location = "group:google_maps_flutter_ios"
+               name = "google_maps_flutter_ios">
+               <FileRef
+                  location = "group:google_maps_flutter_ios-dummy.m">
+               </FileRef>
+               <FileRef
+                  location = "group:google_maps_flutter_ios.modulemap">
+               </FileRef>
+               <FileRef
+                  location = "group:google_maps_flutter_ios.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:google_maps_flutter_ios-prefix.pch">
+               </FileRef>
+               <FileRef
+                  location = "group:ResourceBundle-google_maps_flutter_ios_privacy-google_maps_flutter_ios-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:google_maps_flutter_ios.debug.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:google_maps_flutter_ios-Info.plist">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:url_launcher_ios"
+               name = "url_launcher_ios">
+               <FileRef
+                  location = "group:ResourceBundle-url_launcher_ios_privacy-url_launcher_ios-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:url_launcher_ios-umbrella.h">
+               </FileRef>
+               <FileRef
+                  location = "group:url_launcher_ios.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:url_launcher_ios-prefix.pch">
+               </FileRef>
+               <FileRef
+                  location = "group:url_launcher_ios.modulemap">
+               </FileRef>
+               <FileRef
+                  location = "group:url_launcher_ios-dummy.m">
+               </FileRef>
+               <FileRef
+                  location = "group:url_launcher_ios.debug.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:url_launcher_ios-Info.plist">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Google-Maps-iOS-Utils"
+               name = "Google-Maps-iOS-Utils">
+               <FileRef
+                  location = "group:Google-Maps-iOS-Utils.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:Google-Maps-iOS-Utils-prefix.pch">
+               </FileRef>
+               <FileRef
+                  location = "group:Google-Maps-iOS-Utils.debug.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:Google-Maps-iOS-Utils-umbrella.h">
+               </FileRef>
+               <FileRef
+                  location = "group:Google-Maps-iOS-Utils-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:Google-Maps-iOS-Utils.modulemap">
+               </FileRef>
+               <FileRef
+                  location = "group:Google-Maps-iOS-Utils-dummy.m">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:GoogleMaps"
+               name = "GoogleMaps">
+               <FileRef
+                  location = "group:GoogleMaps.debug.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:GoogleMaps.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:GoogleMaps-xcframeworks-input-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:ResourceBundle-GoogleMapsResources-GoogleMaps-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:GoogleMaps-xcframeworks-output-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:GoogleMaps-xcframeworks.sh">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Flutter"
+               name = "Flutter">
+               <FileRef
+                  location = "group:Flutter.debug.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:Flutter.release.xcconfig">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:fluttertoast"
+               name = "fluttertoast">
+               <FileRef
+                  location = "group:fluttertoast.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:fluttertoast-prefix.pch">
+               </FileRef>
+               <FileRef
+                  location = "group:fluttertoast.debug.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:fluttertoast-umbrella.h">
+               </FileRef>
+               <FileRef
+                  location = "group:fluttertoast-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:ResourceBundle-fluttertoast_privacy-fluttertoast-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:fluttertoast-dummy.m">
+               </FileRef>
+               <FileRef
+                  location = "group:fluttertoast.modulemap">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:flutter_native_splash"
+               name = "flutter_native_splash">
+               <FileRef
+                  location = "group:flutter_native_splash.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:ResourceBundle-flutter_native_splash_privacy-flutter_native_splash-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_native_splash-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_native_splash-umbrella.h">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_native_splash-dummy.m">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_native_splash.modulemap">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_native_splash-prefix.pch">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_native_splash.debug.xcconfig">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:flutter_keyboard_visibility"
+               name = "flutter_keyboard_visibility">
+               <FileRef
+                  location = "group:flutter_keyboard_visibility.modulemap">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_keyboard_visibility-umbrella.h">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_keyboard_visibility-prefix.pch">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_keyboard_visibility-dummy.m">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_keyboard_visibility.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_keyboard_visibility-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:flutter_keyboard_visibility.debug.xcconfig">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Pods-Runner"
+               name = "Pods-Runner">
+               <FileRef
+                  location = "group:Pods-Runner-frameworks-Release-input-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-resources-Release-input-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-resources-Debug-output-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-acknowledgements.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-frameworks-Profile-input-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-resources-Profile-input-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-resources.sh">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-frameworks-Profile-output-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-resources-Debug-input-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-acknowledgements.markdown">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-resources-Release-output-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-frameworks-Debug-input-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-umbrella.h">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-resources-Profile-output-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-frameworks-Release-output-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner.modulemap">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-frameworks-Debug-output-files.xcfilelist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-frameworks.sh">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner.profile.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner-dummy.m">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-Runner.debug.xcconfig">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:shared_preferences_foundation"
+               name = "shared_preferences_foundation">
+               <FileRef
+                  location = "group:shared_preferences_foundation-prefix.pch">
+               </FileRef>
+               <FileRef
+                  location = "group:shared_preferences_foundation.debug.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:shared_preferences_foundation-dummy.m">
+               </FileRef>
+               <FileRef
+                  location = "group:shared_preferences_foundation-umbrella.h">
+               </FileRef>
+               <FileRef
+                  location = "group:shared_preferences_foundation.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:shared_preferences_foundation-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:shared_preferences_foundation.modulemap">
+               </FileRef>
+               <FileRef
+                  location = "group:ResourceBundle-shared_preferences_foundation_privacy-shared_preferences_foundation-Info.plist">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:Pods-RunnerTests"
+               name = "Pods-RunnerTests">
+               <FileRef
+                  location = "group:Pods-RunnerTests-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-RunnerTests.debug.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-RunnerTests.release.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-RunnerTests-dummy.m">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-RunnerTests.profile.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-RunnerTests-acknowledgements.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-RunnerTests.modulemap">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-RunnerTests-acknowledgements.markdown">
+               </FileRef>
+               <FileRef
+                  location = "group:Pods-RunnerTests-umbrella.h">
+               </FileRef>
+            </Group>
+            <Group
+               location = "group:geolocator_apple"
+               name = "geolocator_apple">
+               <FileRef
+                  location = "group:geolocator_apple-dummy.m">
+               </FileRef>
+               <FileRef
+                  location = "group:ResourceBundle-geolocator_apple_privacy-geolocator_apple-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:geolocator_apple-Info.plist">
+               </FileRef>
+               <FileRef
+                  location = "group:geolocator_apple.debug.xcconfig">
+               </FileRef>
+               <FileRef
+                  location = "group:geolocator_apple.modulemap">
+               </FileRef>
+               <FileRef
+                  location = "group:geolocator_apple-prefix.pch">
+               </FileRef>
+               <FileRef
+                  location = "group:geolocator_apple.release.xcconfig">
+               </FileRef>
+            </Group>
+         </Group>
+         <FileRef
+            location = "group:Manifest.lock">
+         </FileRef>
+         <Group
+            location = "group:Local Podspecs"
+            name = "Local Podspecs">
+            <FileRef
+               location = "group:url_launcher_ios.podspec.json">
+            </FileRef>
+            <FileRef
+               location = "group:fluttertoast.podspec.json">
+            </FileRef>
+            <FileRef
+               location = "group:google_maps_flutter_ios.podspec.json">
+            </FileRef>
+            <FileRef
+               location = "group:flutter_native_splash.podspec.json">
+            </FileRef>
+            <FileRef
+               location = "group:shared_preferences_foundation.podspec.json">
+            </FileRef>
+            <FileRef
+               location = "group:Flutter.podspec.json">
+            </FileRef>
+            <FileRef
+               location = "group:geolocator_apple.podspec.json">
+            </FileRef>
+            <FileRef
+               location = "group:flutter_keyboard_visibility.podspec.json">
+            </FileRef>
+         </Group>
+         <Group
+            location = "group:Google-Maps-iOS-Utils"
+            name = "Google-Maps-iOS-Utils">
+            <FileRef
+               location = "group:LICENSE">
+            </FileRef>
+            <FileRef
+               location = "group:README.md">
+            </FileRef>
+            <Group
+               location = "group:Sources"
+               name = "Sources">
+               <Group
+                  location = "group:GoogleMapsUtils"
+                  name = "GoogleMapsUtils">
+                  <Group
+                     location = "group:GeometryUtils"
+                     name = "GeometryUtils">
+                     <FileRef
+                        location = "group:Math.swift">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMSPath+GeometryUtils.swift">
+                     </FileRef>
+                     <FileRef
+                        location = "group:MapPoint.swift">
+                     </FileRef>
+                     <Group
+                        location = "group:Internal"
+                        name = "Internal">
+                        <FileRef
+                           location = "group:LatLngRadians.swift">
+                        </FileRef>
+                        <FileRef
+                           location = "group:CartesianPoint.swift">
+                        </FileRef>
+                     </Group>
+                     <FileRef
+                        location = "group:CLLocationCoordinate2D+GeometryUtils.swift">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMSPolyline+GeometryUtils.swift">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMSPolygon+GeometryUtils.swift">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:Heatmap"
+                     name = "Heatmap">
+                     <FileRef
+                        location = "group:HeatmapInterpolationPoints.swift">
+                     </FileRef>
+                  </Group>
+                  <Group
+                     location = "group:Helper"
+                     name = "Helper">
+                     <FileRef
+                        location = "group:MockMapView.swift">
+                     </FileRef>
+                  </Group>
+               </Group>
+               <Group
+                  location = "group:GoogleMapsUtilsObjC"
+                  name = "GoogleMapsUtilsObjC">
+                  <Group
+                     location = "group:include"
+                     name = "include">
+                     <FileRef
+                        location = "group:GMUGridBasedClusterAlgorithm.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterIconGenerator.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryCollection.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPointQuadTree.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPoint.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterManager.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPointQuadTreeItem.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUStyle.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterAlgorithm.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUKMLParser.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPlacemark.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGradient.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUStaticCluster.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterRenderer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUNonHierarchicalDistanceBasedAlgorithm.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPolygon.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPair.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUWeightedLatLng.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryContainer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterRenderer+Testing.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterRenderer.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUWrappingDictionaryKey.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMSMarker+GMUClusteritem.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUMarkerClustering.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPointQuadTreeChild.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUStyleMap.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterIconGenerator.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUSimpleClusterAlgorithm.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUHeatmapTileLayer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUHeatmapTileLayer+Testing.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryRenderer.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUFeature.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMULineString.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeoJSONParser.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGroundOverlay.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUStyle.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPoint.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GoogleMapsUtils-Bridging-Header.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterManager.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometry.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPoint.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryCollection.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPointQuadTree.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGridBasedClusterAlgorithm.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPair.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUWeightedLatLng.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPolygon.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUNonHierarchicalDistanceBasedAlgorithm.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterManager+Testing.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUStaticCluster.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGradient.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUPlacemark.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUCluster.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUKMLParser.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUClusterItem.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUHeatmapTileLayer.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUSimpleClusterAlgorithm.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUStyleMap.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterIconGenerator.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTPointQuadTreeChild.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMSMarker+GMUClusteritem.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryRenderer+Testing.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUWrappingDictionaryKey.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterRenderer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGroundOverlay.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeoJSONParser.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMULineString.m">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GQTBounds.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUFeature.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUGeometryRenderer.h">
+                     </FileRef>
+                     <FileRef
+                        location = "group:GMUDefaultClusterIconGenerator+Testing.h">
+                     </FileRef>
+                  </Group>
+               </Group>
+            </Group>
+         </Group>
+         <Group
+            location = "group:GoogleMaps"
+            name = "GoogleMaps">
+            <Group
+               location = "group:Maps"
+               name = "Maps">
+               <Group
+                  location = "group:Resources"
+                  name = "Resources">
+                  <Group
+                     location = "group:GoogleMapsResources"
+                     name = "GoogleMapsResources">
+                     <FileRef
+                        location = "group:GoogleMaps.bundle">
+                     </FileRef>
+                  </Group>
+               </Group>
+               <FileRef
+                  location = "group:GMSEmpty.m">
+               </FileRef>
+               <Group
+                  location = "group:Sources"
+                  name = "Sources">
+                  <FileRef
+                     location = "group:GMSEmpty.h">
+                  </FileRef>
+               </Group>
+               <Group
+                  location = "group:Frameworks"
+                  name = "Frameworks">
+                  <FileRef
+                     location = "group:GoogleMaps.xcframework">
+                  </FileRef>
+               </Group>
+            </Group>
+            <FileRef
+               location = "group:CHANGELOG.md">
+            </FileRef>
+            <FileRef
+               location = "group:README.md">
+            </FileRef>
+         </Group>
+         <Group
+            location = "group:Headers"
+            name = "Headers">
+            <Group
+               location = "group:Public"
+               name = "Public">
+               <Group
+                  location = "group:GoogleMaps"
+                  name = "GoogleMaps">
+                  <FileRef
+                     location = "group:GMSEmpty.h">
+                  </FileRef>
+               </Group>
+            </Group>
+            <Group
+               location = "group:Private"
+               name = "Private">
+               <Group
+                  location = "group:GoogleMaps"
+                  name = "GoogleMaps">
+                  <FileRef
+                     location = "group:GMSEmpty.h">
+                  </FileRef>
+               </Group>
+            </Group>
+         </Group>
+      </Group>
+      <FileRef
+         location = "group:Podfile">
+      </FileRef>
+      <FileRef
+         location = "group:Podfile.lock">
+      </FileRef>
+   </Group>
+   <Group
+      location = "group:lib"
+      name = "lib">
+      <FileRef
+         location = "group:string_to_latlng.dart">
+      </FileRef>
+      <FileRef
+         location = "group:themes.dart">
+      </FileRef>
+      <FileRef
+         location = "group:listings.dart">
+      </FileRef>
+      <FileRef
+         location = "group:filtered_listings.dart">
+      </FileRef>
+      <FileRef
+         location = "group:convert_distance_units.dart">
+      </FileRef>
+      <FileRef
+         location = "group:about_the_fair.dart">
+      </FileRef>
+      <FileRef
+         location = "group:as_the_crow_flies.dart">
+      </FileRef>
+      <FileRef
+         location = "group:main.dart">
+      </FileRef>
+      <FileRef
+         location = "group:get_current_location.dart">
+      </FileRef>
+      <FileRef
+         location = "group:listings_info_sheet.dart">
+      </FileRef>
+      <FileRef
+         location = "group:map_page.dart">
+      </FileRef>
+      <FileRef
+         location = "group:important_info_page.dart">
+      </FileRef>
+      <FileRef
+         location = "group:welcome_screen.dart">
+      </FileRef>
+      <FileRef
+         location = "group:settings_page.dart">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:MRWF.xcworkspace">
+   </FileRef>
+   <FileRef
+      location = "group:pubspec.lock">
+   </FileRef>
+   <FileRef
+      location = "group:pubspec.yaml">
+   </FileRef>
+   <FileRef
+      location = "group:README.md">
+   </FileRef>
+   <Group
+      location = "group:test"
+      name = "test">
+      <FileRef
+         location = "group:map_page_test.dart">
+      </FileRef>
+      <FileRef
+         location = "group:filtered_listings_test.dart">
+      </FileRef>
+      <FileRef
+         location = "group:important_info_page_test.dart">
+      </FileRef>
+      <FileRef
+         location = "group:main_test.dart">
+      </FileRef>
+      <FileRef
+         location = "group:settings_page_test.dart">
+      </FileRef>
+      <FileRef
+         location = "group:listings_test.mocks.dart">
+      </FileRef>
+      <FileRef
+         location = "group:convert_distance_units_test.dart">
+      </FileRef>
+      <FileRef
+         location = "group:listings_info_sheet_test.dart">
+      </FileRef>
+      <FileRef
+         location = "group:listings_test.dart">
+      </FileRef>
+      <FileRef
+         location = "group:main_test.mocks.dart">
+      </FileRef>
+   </Group>
+</Workspace>
