@@ -287,7 +287,8 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("At the bottom of the app you'll see\nsections for each different category.\nTap on these to see every listing\nfor that category",
+                          Text(
+                              "At the bottom of the app you'll see\nsections for each different category.\nTap on these to see every listing\nfor that category",
                               style: bodyStyle),
                         ],
                       ),
@@ -313,57 +314,60 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           ),
         ),
         PageViewModel(
-          title: "Almost there!",
+          useScrollView: false,
           backgroundImage: 'assets/aboutPage/carousel01.jpg',
-          bodyWidget: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                child: Text("A few final things...",
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.favorite, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("Thank you so much for visiting Mill Road Winter Fair and using our new app.")),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(
-                    flex: 8,
-                    child: Text(
-                      "Did you know the fair is organised entirely by volunteers? If you'd like to get involved visit our website.",
-                    ),
+          title: "Almost there!",
+          bodyWidget: LayoutBuilder(
+            builder: (context, constraints) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: constraints.maxHeight, // respect available space
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown, // shrink contents if needed
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("A few final things...",
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Icon(Icons.favorite, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Thank you so much for visiting\nMill Road Winter Fair and using\nour new app.", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Did you know the fair is organised\nentirely by volunteers?\nIf you'd like to get involved, just\nvisit our website.", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text(
+                              "If you have feedback about the app\nwe'd love to hear from you!\nYou can find a link to our feedback\nform at the bottom of the app's\nmain menu.",
+                              style: bodyStyle),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(
-                    flex: 8,
-                    child: Text(
-                      "If you have feedback about the app we'd love to hear from you! You can find a link to our feedback form at the bottom of the app's main menu.",
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ],
+                ),
+              );
+            },
           ),
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 12,
-            imageFlex: 3,
-            safeArea: 160,
-            pageColor: Theme.of(context).colorScheme.secondary,
-            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
-            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+            bodyFlex: 0,
+            safeArea: 160, // padding at bottom to avoid nav bar
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
       ],
