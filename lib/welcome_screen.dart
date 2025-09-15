@@ -141,7 +141,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5),
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
         PageViewModel(
@@ -217,40 +217,53 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           ),
         ),
         PageViewModel(
-          title: "Filtering",
+          useScrollView: false,
           backgroundImage: 'assets/aboutPage/carousel03.jpg',
-          bodyWidget: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                child: Text("How can I filter all those pins?",
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.filter_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("First tap the filter icon on the map page")),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.check_box_outlined, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("Then simply select the categories you want to see")),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ],
+          title: "Filtering",
+          bodyWidget: LayoutBuilder(
+            builder: (context, constraints) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: constraints.maxHeight, // respect available space
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown, // shrink contents if needed
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        child: Text("How can I filter all those pins?",
+                            style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Icon(Icons.filter_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("First tap the filter icon on\nthe map page", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.check_box_outlined, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Then simply select the\ncategories you want to see", style: bodyStyle),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 7,
-            imageFlex: 3,
-            safeArea: 160,
-            pageColor: Theme.of(context).colorScheme.secondary,
-            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
-            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+            bodyFlex: 0,
+            safeArea: 160, // padding at bottom to avoid nav bar
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
         PageViewModel(
