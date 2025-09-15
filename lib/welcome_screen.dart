@@ -233,10 +233,8 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FittedBox(
-                        child: Text("How can I filter all those pins?",
-                            style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
-                      ),
+                      Text("How can I filter all those pins?",
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
                       const SizedBox(height: 18),
                       Row(
                         children: [
@@ -267,45 +265,51 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           ),
         ),
         PageViewModel(
-          title: "Listings",
+          useScrollView: false,
           backgroundImage: 'assets/aboutPage/carousel04.jpg',
-          bodyWidget: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                child: Text("How can I see a list of what's on?",
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(
-                    flex: 8,
-                    child: Text(
-                      "At the bottom of the app you'll see sections for each different category. Tap on these to see every listing for that category",
-                    ),
+          title: "Listings",
+          bodyWidget: LayoutBuilder(
+            builder: (context, constraints) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: constraints.maxHeight, // respect available space
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown, // shrink contents if needed
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("How can I see a list of what's on?",
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("At the bottom of the app you'll see\nsections for each different category.\nTap on these to see every listing\nfor that category",
+                              style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("You can then sort these listings\nby distance, start time or\nalphabetical order", style: bodyStyle),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("You can then sort these listings by distance, start time or alphabetical order")),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ],
+                ),
+              );
+            },
           ),
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 8,
-            imageFlex: 3,
-            safeArea: 160,
-            pageColor: Theme.of(context).colorScheme.secondary,
-            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
-            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+            bodyFlex: 0,
+            safeArea: 160, // padding at bottom to avoid nav bar
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
         PageViewModel(
