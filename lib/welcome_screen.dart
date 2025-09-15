@@ -49,14 +49,13 @@ class OnBoardingPageState extends State<OnBoardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    const bodyStyle = TextStyle(fontSize: 19.0);
+    var bodyStyle = TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary);
 
     var pageDecoration = PageDecoration(
-      titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSecondary),
-      bodyTextStyle: bodyStyle,
+      titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
+      bodyTextStyle: TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary),
       bodyPadding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
       pageColor: Theme.of(context).colorScheme.secondary,
-      imagePadding: EdgeInsets.zero,
     );
 
     return IntroductionScreen(
@@ -82,54 +81,66 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       ),
       pages: [
         PageViewModel(
-          title: "Welcome to the official\nMill Road Winter Fair app!",
+          useScrollView: false,
           backgroundImage: 'assets/aboutPage/carousel01.jpg',
-          bodyWidget: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                child: Text("What can I do with the app?",
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("Use our interactive map to help navigate the fair's attractions", style: bodyStyle)),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.storefront, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("See listings of the fair's various stalls, events and facilities", style: bodyStyle)),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.language, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("Find the websites and social links for the fair and its stalls", style: bodyStyle)),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.info, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("Find out important information about the fair", style: bodyStyle)),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ],
+          title: "Welcome to the official\nMill Road Winter Fair app!",
+          bodyWidget: LayoutBuilder(
+            builder: (context, constraints) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: constraints.maxHeight, // respect available space
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown, // shrink contents if needed
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("What can I do with the app?", style: bodyStyle),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Use our interactive map to help\nnavigate the fair's attractions", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.storefront, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("See listings of the fair's various\nstalls, events and facilities", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.language, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Find the websites and social\nlinks for the fair and its stalls", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.info, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Find out important information\nabout the fair", style: bodyStyle),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 10,
-            imageFlex: 3,
-            safeArea: 160,
-            pageColor: Theme.of(context).colorScheme.secondary,
-            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
-            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+            bodyFlex: 0,
+            safeArea: 160, // padding at bottom to avoid nav bar
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5),
           ),
         ),
         PageViewModel(
@@ -146,35 +157,35 @@ class OnBoardingPageState extends State<OnBoardingPage> {
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.fastfood, size: 40, color: getCategoryColor(selectedThemeKey, "Food"))),
-                  const Expanded(flex: 8, child: Text("Our delicious ready-to-eat food stalls and food trucks", style: bodyStyle)),
+                  const Expanded(flex: 8, child: Text("Our delicious ready-to-eat food stalls and food trucks")),
                 ],
               ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.storefront, size: 40, color: getCategoryColor(selectedThemeKey, "Shopping"))),
-                  const Expanded(flex: 8, child: Text("The stalls of all the various shops, charities and other organisations", style: bodyStyle)),
+                  const Expanded(flex: 8, child: Text("The stalls of all the various shops, charities and other organisations")),
                 ],
               ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.music_note, size: 40, color: getCategoryColor(selectedThemeKey, "Music"))),
-                  const Expanded(flex: 8, child: Text("The fair's amazing and talented musicians, buskers and bands", style: bodyStyle)),
+                  const Expanded(flex: 8, child: Text("The fair's amazing and talented musicians, buskers and bands")),
                 ],
               ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.event, size: 40, color: getCategoryColor(selectedThemeKey, "Event"))),
-                  const Expanded(flex: 8, child: Text("Other exciting events, such as Santa's Grotto and the parade", style: bodyStyle)),
+                  const Expanded(flex: 8, child: Text("Other exciting events, such as Santa's Grotto and the parade")),
                 ],
               ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.wheelchair_pickup, size: 40, color: getCategoryColor(selectedThemeKey, "Service"))),
-                  const Expanded(flex: 8, child: Text("All of our important services, such as toilets and first aid points", style: bodyStyle)),
+                  const Expanded(flex: 8, child: Text("All of our important services, such as toilets and first aid points")),
                 ],
               ),
               const SizedBox(height: 20),
@@ -204,14 +215,14 @@ class OnBoardingPageState extends State<OnBoardingPage> {
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.filter_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("First tap the filter icon on the map page", style: bodyStyle)),
+                  const Expanded(flex: 8, child: Text("First tap the filter icon on the map page")),
                 ],
               ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.check_box_outlined, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("Then simply select the categories you want to see", style: bodyStyle)),
+                  const Expanded(flex: 8, child: Text("Then simply select the categories you want to see")),
                 ],
               ),
               const SizedBox(height: 20),
@@ -242,17 +253,18 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
                   const Expanded(
-                      flex: 8,
-                      child: Text(
-                          "At the bottom of the app you'll see sections for each different category. Tap on these to see every listing for that category",
-                          style: bodyStyle)),
+                    flex: 8,
+                    child: Text(
+                      "At the bottom of the app you'll see sections for each different category. Tap on these to see every listing for that category",
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("You can then sort these listings by distance, start time or alphabetical order", style: bodyStyle)),
+                  const Expanded(flex: 8, child: Text("You can then sort these listings by distance, start time or alphabetical order")),
                 ],
               ),
               const SizedBox(height: 20),
@@ -282,7 +294,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
               Row(
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.favorite, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
-                  const Expanded(flex: 8, child: Text("Thank you so much for visiting Mill Road Winter Fair and using our new app.", style: bodyStyle)),
+                  const Expanded(flex: 8, child: Text("Thank you so much for visiting Mill Road Winter Fair and using our new app.")),
                 ],
               ),
               const SizedBox(height: 20),
@@ -290,9 +302,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
                   const Expanded(
-                      flex: 8,
-                      child: Text("Did you know the fair is organised entirely by volunteers? If you'd like to get involved visit our website.",
-                          style: bodyStyle)),
+                    flex: 8,
+                    child: Text(
+                      "Did you know the fair is organised entirely by volunteers? If you'd like to get involved visit our website.",
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -300,10 +314,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                 children: [
                   Expanded(flex: 2, child: Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary)),
                   const Expanded(
-                      flex: 8,
-                      child: Text(
-                          "If you have feedback about the app we'd love to hear from you! You can find a link to our feedback form at the bottom of the app's main menu.",
-                          style: bodyStyle)),
+                    flex: 8,
+                    child: Text(
+                      "If you have feedback about the app we'd love to hear from you! You can find a link to our feedback form at the bottom of the app's main menu.",
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
