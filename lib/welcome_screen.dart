@@ -49,7 +49,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    var bodyStyle = TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary);
+    var bodyStyle = TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary);
 
     var pageDecoration = PageDecoration(
       titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
@@ -97,7 +97,8 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("What can I do with the app?", style: bodyStyle),
+                      Text("What can I do with the app?",
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
                       const SizedBox(height: 18),
                       Row(
                         children: [
@@ -144,61 +145,75 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           ),
         ),
         PageViewModel(
-          title: "Map Pins",
+          useScrollView: false,
           backgroundImage: 'assets/aboutPage/carousel02.jpg',
-          bodyWidget: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                child: Text("What do the map pins mean?",
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.fastfood, size: 40, color: getCategoryColor(selectedThemeKey, "Food"))),
-                  const Expanded(flex: 8, child: Text("Our delicious ready-to-eat food stalls and food trucks")),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.storefront, size: 40, color: getCategoryColor(selectedThemeKey, "Shopping"))),
-                  const Expanded(flex: 8, child: Text("The stalls of all the various shops, charities and other organisations")),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.music_note, size: 40, color: getCategoryColor(selectedThemeKey, "Music"))),
-                  const Expanded(flex: 8, child: Text("The fair's amazing and talented musicians, buskers and bands")),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.event, size: 40, color: getCategoryColor(selectedThemeKey, "Event"))),
-                  const Expanded(flex: 8, child: Text("Other exciting events, such as Santa's Grotto and the parade")),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(flex: 2, child: Icon(Icons.wheelchair_pickup, size: 40, color: getCategoryColor(selectedThemeKey, "Service"))),
-                  const Expanded(flex: 8, child: Text("All of our important services, such as toilets and first aid points")),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ],
+          title: "Map Pins",
+          bodyWidget: LayoutBuilder(
+            builder: (context, constraints) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: constraints.maxHeight, // respect available space
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown, // shrink contents if needed
+                  alignment: Alignment.topCenter,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("What do the map pins mean?",
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Icon(Icons.fastfood, size: 40, color: getCategoryColor(selectedThemeKey, "Food")),
+                          const SizedBox(width: 8),
+                          Text("Our delicious ready-to-eat food\nstalls and food trucks", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.storefront, size: 40, color: getCategoryColor(selectedThemeKey, "Shopping")),
+                          const SizedBox(width: 8),
+                          Text("The stalls of all the various shops,\ncharities and other organisations", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.music_note, size: 40, color: getCategoryColor(selectedThemeKey, "Music")),
+                          const SizedBox(width: 8),
+                          Text("The fair's amazing and talented\nmusicians, buskers and bands", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.event, size: 40, color: getCategoryColor(selectedThemeKey, "Event")),
+                          const SizedBox(width: 8),
+                          Text("Other exciting events, such as\nSanta's Grotto and the parade", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.wheelchair_pickup, size: 40, color: getCategoryColor(selectedThemeKey, "Service")),
+                          const SizedBox(width: 8),
+                          Text("All of our important services, such\nas toilets and first aid points", style: bodyStyle),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
           decoration: pageDecoration.copyWith(
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 16,
-            imageFlex: 3,
-            safeArea: 160,
-            pageColor: Theme.of(context).colorScheme.secondary,
-            titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
-            bodyTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+            bodyFlex: 0,
+            safeArea: 160, // padding at bottom to avoid nav bar
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
         PageViewModel(
