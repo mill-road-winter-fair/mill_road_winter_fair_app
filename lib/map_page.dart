@@ -414,18 +414,22 @@ class MapPageState extends State<MapPage> {
   }
 
   void _setMapCameraToFitMapMarkers() {
-    // Set default LatLngs
-    double minLat = 52.199174;
-    double minLong = 0.140929;
-    double maxLat = 52.199174;
-    double maxLong = 0.140929;
+    // Set default LatLngs bounds
+    // southwest
+    double minLat = 52.198062;
+    double minLong = 0.134937;
+    // northeast
+    double maxLat = 52.200688;
+    double maxLong = 0.144813;
 
-    for (var listing in listings) {
-      LatLng markerLatLng = stringToLatLng(listing['latLng']);
-      if (markerLatLng.latitude < minLat) minLat = markerLatLng.latitude;
-      if (markerLatLng.latitude > maxLat) maxLat = markerLatLng.latitude;
-      if (markerLatLng.longitude < minLong) minLong = markerLatLng.longitude;
-      if (markerLatLng.longitude > maxLong) maxLong = markerLatLng.longitude;
+    if (listings.isNotEmpty) {
+      for (var listing in listings) {
+        LatLng markerLatLng = stringToLatLng(listing['latLng']);
+        if (markerLatLng.latitude < minLat) minLat = markerLatLng.latitude;
+        if (markerLatLng.latitude > maxLat) maxLat = markerLatLng.latitude;
+        if (markerLatLng.longitude < minLong) minLong = markerLatLng.longitude;
+        if (markerLatLng.longitude > maxLong) maxLong = markerLatLng.longitude;
+      }
     }
 
     _moveCameraToBounds(LatLng(minLat, minLong), LatLng(maxLat, maxLong), 25);
@@ -522,8 +526,10 @@ class MapPageState extends State<MapPage> {
           );
         }
 
-        // We should have listings by this point so set the camera to their bounds
-        _setMapCameraToFitMapMarkers();
+        if (listings.isNotEmpty) {
+          // We should have listings by this point so set the camera to their bounds
+          _setMapCameraToFitMapMarkers();
+        }
 
         return Scaffold(
           body: GoogleMap(
