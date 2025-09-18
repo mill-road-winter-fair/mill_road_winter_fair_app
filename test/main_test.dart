@@ -84,12 +84,12 @@ void main() async {
     expect(find.byType(DrawerHeader), findsOneWidget);
     expect(find.text('Mill Road Winter Fair 2025'), findsExactly(2));
     expect(find.text('About the Fair'), findsOneWidget);
-    expect(find.text('Important Info'), findsOneWidget);
-    expect(find.text('Visit our website'), findsOneWidget);
+    expect(find.text('Important information'), findsOneWidget);
+    expect(find.text('Visit our Website'), findsOneWidget);
     expect(find.text('Email us'), findsOneWidget);
     expect(find.byType(IconButton), findsExactly(8));
     expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Give feedback about the app'), findsOneWidget);
+    expect(find.text('Give feedback on the app'), findsOneWidget);
   });
 
   testWidgets('HomePage navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
@@ -120,7 +120,7 @@ void main() async {
     expect(find.byType(AboutTheFairPage), findsOneWidget);
   });
 
-  testWidgets('HomePage navigates to ImportantInfoPage when Important Info in drawer is tapped', (WidgetTester tester) async {
+  testWidgets('HomePage navigates to ImportantInfoPage when Important information in drawer is tapped', (WidgetTester tester) async {
     listings = [
       {
         'displayName': 'Glazed and Confused',
@@ -142,7 +142,7 @@ void main() async {
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Important Info'));
+    await tester.tap(find.text('Important information'));
     await tester.pumpAndSettle();
 
     expect(find.byType(ImportantInfoPage), findsOneWidget);
