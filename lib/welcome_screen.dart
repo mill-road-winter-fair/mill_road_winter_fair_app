@@ -52,8 +52,8 @@ class OnBoardingPageState extends State<OnBoardingPage> {
     var bodyStyle = TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary);
 
     var pageDecoration = PageDecoration(
-      titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary, height: 0.6),
-      bodyTextStyle: TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary, height: 0.9),
+      titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
+      bodyTextStyle: TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary),
       bodyPadding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
       pageColor: Theme.of(context).colorScheme.secondary,
     );
@@ -83,7 +83,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/aboutPage/carousel01.jpg',
-          title: "Welcome to the official\n\nMill Road Winter Fair app!",
+          title: "Welcome to the official\nMill Road Winter Fair app!",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -98,37 +98,37 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("What can I do with the app?",
-                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary, height: 0.8)),
-                      const SizedBox(height: 12),
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      const SizedBox(height: 18),
                       Row(
                         children: [
                           Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Use our interactive map to help\nnavigate the Fair’s attractions", style: bodyStyle),
+                          Text("Use our interactive map to help\nnavigate the fair's attractions", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.storefront, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("See listings of the Fair’s various\nstalls, events and facilities", style: bodyStyle),
+                          Text("See listings of the fair's various\nstalls, events and facilities", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.language, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Find the websites and social\nlinks for the Fair and its stalls", style: bodyStyle),
+                          Text("Find the websites and social\nlinks for the fair and its stalls", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.info, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Read important information\nabout the Fair", style: bodyStyle),
+                          Text("Find out important information\nabout the fair", style: bodyStyle),
                         ],
                       ),
                     ],
@@ -162,40 +162,40 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("What do the map pins mean?",
-                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary, height: 0.8)),
-                      const SizedBox(height: 12),
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      const SizedBox(height: 18),
                       Row(
                         children: [
                           Icon(Icons.fastfood, size: 40, color: getCategoryColor(selectedThemeKey, "Food")),
                           const SizedBox(width: 8),
-                          Text("Our delicious ready-to-eat food\nand drink stalls and trucks", style: bodyStyle),
+                          Text("Our delicious ready-to-eat food\nstalls and food trucks", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.storefront, size: 40, color: getCategoryColor(selectedThemeKey, "Shopping")),
                           const SizedBox(width: 8),
-                          Text("The stalls of the various shops,\ncharities and other organisations", style: bodyStyle),
+                          Text("The stalls of all the various shops,\ncharities and other organisations", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.music_note, size: 40, color: getCategoryColor(selectedThemeKey, "Music")),
                           const SizedBox(width: 8),
-                          Text("The Fair’s amazing and talented\nmusicians, buskers and bands", style: bodyStyle),
+                          Text("The fair's amazing and talented\nmusicians, buskers and bands", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.event, size: 40, color: getCategoryColor(selectedThemeKey, "Event")),
                           const SizedBox(width: 8),
-                          Text("Other exciting events, such as\nSanta’s Grotto and the Parade", style: bodyStyle),
+                          Text("Other exciting events, such as\nSanta's Grotto and the parade", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.wheelchair_pickup, size: 40, color: getCategoryColor(selectedThemeKey, "Service")),
@@ -234,8 +234,8 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("How can I filter all those pins?",
-                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary, height: 0.8)),
-                      const SizedBox(height: 12),
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      const SizedBox(height: 18),
                       Row(
                         children: [
                           Icon(Icons.filter_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -243,7 +243,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("First tap the filter icon on\nthe map page", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.check_box_outlined, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -280,24 +280,24 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("How can I see a list of what’s on?",
-                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary, height: 0.8)),
-                      const SizedBox(height: 12),
+                      Text("How can I see a list of what's on?",
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      const SizedBox(height: 18),
                       Row(
                         children: [
                           Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           Text(
-                              "At the bottom of the app you’ll\nsee sections for each category.\nTap on one to see every listing\nfor that category",
+                              "At the bottom of the app you'll see\nsections for each different category.\nTap on these to see every listing\nfor that category",
                               style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("You can then sort these listings\nby distance, start time or\nalphabetically", style: bodyStyle),
+                          Text("You can then sort these listings\nby distance, start time or\nalphabetical order", style: bodyStyle),
                         ],
                       ),
                     ],
@@ -329,9 +329,9 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("A few final things…",
-                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary, height: 0.8)),
-                      const SizedBox(height: 12),
+                      Text("A few final things...",
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      const SizedBox(height: 18),
                       Row(
                         children: [
                           Icon(Icons.favorite, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -339,21 +339,22 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Thank you so much for visiting\nMill Road Winter Fair and using\nour new app.", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Did you know the Fair is\norganised entirely by\nvolunteers? If you’d like to\nget involved, just visit our\nWebsite.", style: bodyStyle),
+                          Text("Did you know the fair is organised\nentirely by volunteers?\nIf you'd like to get involved, just\nvisit our website.",
+                              style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           Text(
-                              "We’d love to hear your comments\nabout the app! You’ll find a link\nto a feedback form at the bottom\nof the main menu.",
+                              "If you have feedback about the app\nwe'd love to hear from you!\nYou can find a link to our feedback\nform at the bottom of the app's\nmain menu.",
                               style: bodyStyle),
                         ],
                       ),
