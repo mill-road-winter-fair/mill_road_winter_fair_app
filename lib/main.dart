@@ -41,7 +41,6 @@ class MyApp extends StatelessWidget {
       valueListenable: themeNotifier,
       builder: (context, selectedThemeKey, _) {
         return MaterialApp(
-          debugShowCheckedModeBanner: false,
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
           home: const HomePage(),
