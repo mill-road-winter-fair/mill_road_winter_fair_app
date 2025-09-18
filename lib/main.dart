@@ -139,7 +139,7 @@ class HomePageState extends State<HomePage> {
                             flex: 3,
                             child: Text(
                               'Mill Road Winter Fair 2025',
-                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 20, fontWeight: FontWeight.bold),
+                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19, fontWeight: FontWeight.bold),
                             ),
                           ),
                           Expanded(flex: 1, child: Container())
@@ -157,7 +157,7 @@ class HomePageState extends State<HomePage> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.warning),
-                    title: const Text('Important Info', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
@@ -165,7 +165,7 @@ class HomePageState extends State<HomePage> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.public),
-                    title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: const Text('Visit our Website', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
                       launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
                     },
@@ -229,11 +229,12 @@ class HomePageState extends State<HomePage> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.feedback),
-                    title: const Text('Give feedback about the app', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: const Text('Give feedback on the app', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
                       launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
                     },
                   ),
+                  const SizedBox(height: 30),
                 ],
               ),
             )

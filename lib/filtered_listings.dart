@@ -75,12 +75,27 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       } else if (preferredSortingMethod == SortingMethod.values[1]) {
         // Sort by distance to user (nearest first)
         listings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
-      } else {
-        // Sort by start time, if the star time is the same sort by name
+      } else if (preferredSortingMethod == SortingMethod.values[2]) {
+        // Sort by start time, if the start time is the same sort by name
         listings.sort((a, b) {
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           return timeCompare != 0 ? timeCompare : a['name'].compareTo(b['name']);
         });
+      } else {
+        // The only other option is location sorting
+        listings.sort((a, b) {
+          // 1. Compare by location (secondaryType)
+          final locationCompare = a['secondaryType'].compareTo(b['secondaryType']);
+          if (locationCompare != 0) return locationCompare;
+
+          // 2. If location is the same, compare by startTime
+          final timeCompare = a['startTime'].compareTo(b['startTime']);
+          if (timeCompare != 0) return timeCompare;
+
+          // 3. If startTime is also the same, compare by name
+          return a['name'].compareTo(b['name']);
+        });
+
       }
 
       return listings;
@@ -218,6 +233,28 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       toastLength: Toast.LENGTH_LONG,
                                     );
                                   }
+                                },
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 8,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context).colorScheme.secondary,
+                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSecondary),
+                                child: const FittedBox(child: Text('Location', style: TextStyle(fontSize: 16))),
+                                onPressed: () {
+                                  setState(() {
+                                    preferredSortingMethod = SortingMethod.values[3];
+                                  });
+                                  _saveSettings();
                                 },
                               ),
                             ),
