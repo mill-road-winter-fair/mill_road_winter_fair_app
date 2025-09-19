@@ -59,12 +59,87 @@ class MapPageState extends State<MapPage> {
   void addAllGroupMarkers(bool onTest) {
     for (var listing in listings) {
       if (listing['primaryType'] == 'Group') {
-        addMarker(listing, onTest);
+        addGroupMarker(listing, onTest);
       }
     }
   }
 
-  void addMarker(listing, bool onTest) async {
+  void addGroupMarker(listing, bool onTest) async {
+    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+    MarkerId markerId = MarkerId(listing['id'].toString());
+    Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
+    late BitmapDescriptor customMarker;
+
+    if (onTest == false) {
+      customMarker = await getColoredMarker(listing['primaryType'], color);
+    } else {
+      double hue = HSVColor.fromColor(color).hue;
+      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
+    }
+
+    Marker newMarker = Marker(
+      markerId: markerId,
+      position: destinationLatLng,
+      icon: customMarker,
+      visible: true,
+      onTap: () {
+        establishLocation();
+
+        // Filter listings with the same secondaryType
+        List<Map<String, dynamic>> relatedListings = listings
+            .where((l) => l['secondaryType'] == listing['secondaryType'])
+            .toList();
+
+        // Sort listings: Group first → startTime → displayName
+        relatedListings.sort((a, b) {
+          if (a['primaryType'] == "Group" && b['primaryType'] != "Group") {
+            return -1;
+          } else if (b['primaryType'] == "Group" && a['primaryType'] != "Group") {
+            return 1;
+          }
+
+          // If neither or both are Group, sort by startTime
+          final timeCompare = a['startTime'].compareTo(b['startTime']);
+          if (timeCompare != 0) return timeCompare;
+
+          // If startTime same, sort alphabetically by displayName
+          return a['name'].compareTo(b['name']);
+        });
+
+        showModalBottomSheet(
+          context: context,
+          showDragHandle: true,
+          builder: (BuildContext context) {
+            return ListView.builder(
+              itemCount: relatedListings.length,
+              itemBuilder: (context, index) {
+                final rel = relatedListings[index];
+                int approximateDistanceMetres =
+                asTheCrowFlies(currentLatLng, stringToLatLng(rel['latLng']));
+
+                return ListingInfoSheet(
+                  title: rel['displayName'],
+                  categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
+                  openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                  approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                  phoneNumber: rel['phone'],
+                  website: rel['website'],
+                  onGetDirections: () =>
+                      getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+
+    setState(() {
+      markers[markerId] = newMarker;
+    });
+  }
+
+  void addSpecificMarker(listing, bool onTest) async {
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
@@ -150,7 +225,7 @@ class MapPageState extends State<MapPage> {
 
     // Add destination map marker
     Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
-    addMarker(destinationListing, false);
+    addSpecificMarker(destinationListing, false);
 
     // Set navigation as in progress
     _navigationInProgress = true;
