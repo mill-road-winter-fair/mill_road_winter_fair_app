@@ -64,24 +64,6 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
-    for (var id in idList) {
-      final currentMarker = markers.values.toList().firstWhere((item) => item.markerId == id);
-
-      Marker updatedMarker = Marker(
-        markerId: id,
-        position: currentMarker.position,
-        icon: currentMarker.icon,
-        visible: visibleState,
-        onTap: currentMarker.onTap,
-      );
-
-      setState(() {
-        markers[id] = updatedMarker;
-      });
-    }
-  }
-
   void addMarker(listing, bool onTest) async {
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
