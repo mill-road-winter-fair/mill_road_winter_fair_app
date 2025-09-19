@@ -58,7 +58,9 @@ class MapPageState extends State<MapPage> {
 
   void addAllMarkers(bool onTest) {
     for (var listing in listings) {
-      addMarker(listing, onTest);
+      if (listing['primaryType'] == 'Group') {
+        addMarker(listing, onTest);
+      }
     }
   }
 
