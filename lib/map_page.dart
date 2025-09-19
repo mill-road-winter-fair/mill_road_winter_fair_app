@@ -141,8 +141,7 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines
     setState(() {
       _polylines.clear(); // Clear any existing polylines
-      final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-      updateMarkerVisibility(idList, false); // Hide any existing markers
+      clearAllMarkers(); // Clear any existing map markers
     });
 
     // If user has location tracking enabled
@@ -167,11 +166,9 @@ class MapPageState extends State<MapPage> {
       );
     }
 
-    // Re-add destination marker
-    MarkerId markerId = MarkerId(id.toString());
-    List<MarkerId> destinationMarkerIds = [];
-    destinationMarkerIds.add(markerId);
-    updateMarkerVisibility(destinationMarkerIds, true);
+    // Add destination map marker
+    Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
+    addMarker(destinationListing, false);
 
     // Set navigation as in progress
     _navigationInProgress = true;
@@ -416,8 +413,8 @@ class MapPageState extends State<MapPage> {
                                   _positionStream?.cancel();
                                   _polylines.clear();
                                   _distanceToDestination = null;
-                                  final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                                  updateMarkerVisibility(idList, true);
+                                  clearAllMarkers();
+                                  addAllMarkers(false);
                                   _navigationInProgress = false;
                                 });
                               },
