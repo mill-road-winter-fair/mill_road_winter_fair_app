@@ -416,41 +416,41 @@ class MapPageState extends State<MapPage> {
   void _setMapCameraToFitMapMarkers() {
     // Set default LatLngs bounds
     // southwest
-    double minLat = 52.198062;
-    double minLong = 0.134937;
+    double markerMinLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : 52.199174;
+    double markerMinLong = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).longitude : 0.140929;
     // northeast
-    double maxLat = 52.200688;
-    double maxLong = 0.144813;
+    double markerMaxLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : 52.199174;
+    double markerMaxLong = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).longitude : 0.140929;
 
     if (listings.isNotEmpty) {
       for (var listing in listings) {
         LatLng markerLatLng = stringToLatLng(listing['latLng']);
-        if (markerLatLng.latitude < minLat) minLat = markerLatLng.latitude;
-        if (markerLatLng.latitude > maxLat) maxLat = markerLatLng.latitude;
-        if (markerLatLng.longitude < minLong) minLong = markerLatLng.longitude;
-        if (markerLatLng.longitude > maxLong) maxLong = markerLatLng.longitude;
+        if (markerLatLng.latitude < markerMinLat) markerMinLat = markerLatLng.latitude;
+        if (markerLatLng.latitude > markerMaxLat) markerMaxLat = markerLatLng.latitude;
+        if (markerLatLng.longitude < markerMinLong) markerMinLong = markerLatLng.longitude;
+        if (markerLatLng.longitude > markerMaxLong) markerMaxLong = markerLatLng.longitude;
       }
     }
 
-    _moveCameraToBounds(LatLng(minLat, minLong), LatLng(maxLat, maxLong), 25);
+    _moveCameraToBounds(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25);
   }
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
-    double minLat = polylines.first.points.first.latitude;
-    double minLong = polylines.first.points.first.longitude;
-    double maxLat = polylines.first.points.first.latitude;
-    double maxLong = polylines.first.points.first.longitude;
+    double polylineMinLat = polylines.first.points.first.latitude;
+    double polylineMinLong = polylines.first.points.first.longitude;
+    double polylineMaxLat = polylines.first.points.first.latitude;
+    double polylineMaxLong = polylines.first.points.first.longitude;
 
     for (var polyline in polylines) {
       for (var point in polyline.points) {
-        if (point.latitude < minLat) minLat = point.latitude;
-        if (point.latitude > maxLat) maxLat = point.latitude;
-        if (point.longitude < minLong) minLong = point.longitude;
-        if (point.longitude > maxLong) maxLong = point.longitude;
+        if (point.latitude < polylineMinLat) polylineMinLat = point.latitude;
+        if (point.latitude > polylineMaxLat) polylineMaxLat = point.latitude;
+        if (point.longitude < polylineMinLong) polylineMinLong = point.longitude;
+        if (point.longitude > polylineMaxLong) polylineMaxLong = point.longitude;
       }
     }
 
-    _moveCameraToBounds(LatLng(minLat, minLong), LatLng(maxLat, maxLong), 75);
+    _moveCameraToBounds(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), 75);
   }
 
   _moveCameraToBounds(LatLng southwestMin, LatLng northeastMax, double padding) {
@@ -526,11 +526,6 @@ class MapPageState extends State<MapPage> {
           );
         }
 
-        if (listings.isNotEmpty) {
-          // We should have listings by this point so set the camera to their bounds
-          _setMapCameraToFitMapMarkers();
-        }
-
         return Scaffold(
           body: GoogleMap(
             // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
@@ -543,6 +538,10 @@ class MapPageState extends State<MapPage> {
             mapToolbarEnabled: false,
             onMapCreated: (GoogleMapController controller) {
               _controller = controller;
+              if (listings.isNotEmpty) {
+                // We should have listings by this point so set the camera to their bounds
+                _setMapCameraToFitMapMarkers();
+              }
             },
             initialCameraPosition: const CameraPosition(
               target: LatLng(52.199174, 0.140929),
