@@ -38,6 +38,7 @@ class MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
+  Map<ClusterManagerId, ClusterManager> clusterManagers = <ClusterManagerId, ClusterManager>{}; // For managing clusters
   bool _navigationInProgress = false;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
@@ -126,32 +127,46 @@ class MapPageState extends State<MapPage> {
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
+    var theClusterManagerId;
+    var theClusterManager = clusterManagers[ClusterManagerId(listing['secondaryType']+' '+listing['primaryType'])];
+    if (theClusterManager == null) {
+      debugPrint('Creating new ClusterManager for ${listing['secondaryType']} ${listing['primaryType']}');
+      ClusterManager newClusterManager = ClusterManager(
+          clusterManagerId: ClusterManagerId(listing['secondaryType']+' '+listing['primaryType']),
+      );
+      clusterManagers[ClusterManagerId(listing['secondaryType']+' '+listing['primaryType'])] = newClusterManager;
+      theClusterManagerId = newClusterManager.clusterManagerId;
+    } else {
+      debugPrint('Re-using existing ClusterManager for ${listing['secondaryType']} ${listing['primaryType']}');
+      theClusterManagerId = theClusterManager.clusterManagerId;
+    }
     Marker newMarker = Marker(
-      markerId: markerId,
-      position: destinationLatLng,
-      icon: customMarker,
-      visible: true,
-      onTap: () {
-        // Update user's location
-        establishLocation();
-        int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
-        // Show bottom sheet with listing information
-        showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return ListingInfoSheet(
-              title: listing['displayName'],
-              categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-              openingTimes: "${listing['startTime']} - ${listing['endTime']}",
-              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-              phoneNumber: listing['phone'],
-              website: listing['website'],
-              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
-            );
-          },
-        );
-      },
-    );
+        markerId: markerId,
+        position: destinationLatLng,
+        icon: customMarker,
+        visible: true,
+        clusterManagerId: theClusterManagerId,
+        onTap: () {
+          // Update user's location
+          establishLocation();
+          int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
+          // Show bottom sheet with listing information
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return ListingInfoSheet(
+                title: listing['displayName'],
+                categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+                openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                phoneNumber: listing['phone'],
+                website: listing['website'],
+                onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+              );
+            },
+          );
+        },
+      );
 
     setState(() {
       markers[markerId] = newMarker;
@@ -410,6 +425,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void _resetMapCamera() {
+    debugPrint('Resetting map camera to fit all markers');
     _setMapCameraToFitMapMarkers();
   }
 
@@ -431,7 +447,7 @@ class MapPageState extends State<MapPage> {
         if (markerLatLng.longitude > maxLong) maxLong = markerLatLng.longitude;
       }
     }
-
+debugPrint('Map markers bounds: minLat=$minLat, minLong=$minLong, maxLat=$maxLat, maxLong=$maxLong');
     _moveCameraToBounds(LatLng(minLat, minLong), LatLng(maxLat, maxLong), 25);
   }
 
@@ -449,12 +465,15 @@ class MapPageState extends State<MapPage> {
         if (point.longitude > maxLong) maxLong = point.longitude;
       }
     }
-
+    
     _moveCameraToBounds(LatLng(minLat, minLong), LatLng(maxLat, maxLong), 75);
   }
 
   _moveCameraToBounds(LatLng southwestMin, LatLng northeastMax, double padding) {
-    _controller?.moveCamera(
+    
+    debugPrint('Moving camera to bounds: SW($southwestMin) NE($northeastMax) with padding $padding');
+
+    _controller?.animateCamera(
       CameraUpdate.newLatLngBounds(
         LatLngBounds(
           southwest: southwestMin,
@@ -463,6 +482,17 @@ class MapPageState extends State<MapPage> {
         padding, // Padding around the bounds
       ),
     );
+
+    _controller?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(52.199174, 0.140929),
+          zoom: 15,
+          bearing: 290,
+        ),
+      ),
+    );
+
   }
 
   Future<void> refreshListings() async {
@@ -528,6 +558,7 @@ class MapPageState extends State<MapPage> {
 
         if (listings.isNotEmpty) {
           // We should have listings by this point so set the camera to their bounds
+          debugPrint('Listings available, setting map camera to fit markers');
           _setMapCameraToFitMapMarkers();
         }
 
@@ -536,8 +567,8 @@ class MapPageState extends State<MapPage> {
             // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
             style: mapStyle,
             mapType: mapType,
-            rotateGesturesEnabled: false,
-            compassEnabled: false,
+            rotateGesturesEnabled: true,
+            compassEnabled: true,
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
             mapToolbarEnabled: false,
@@ -546,10 +577,11 @@ class MapPageState extends State<MapPage> {
             },
             initialCameraPosition: const CameraPosition(
               target: LatLng(52.199174, 0.140929),
-              zoom: 14.1,
+              zoom: 15,
             ),
             markers: markers.values.toSet(),
             polylines: _polylines,
+            clusterManagers: Set<ClusterManager>.of(clusterManagers.values),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
           floatingActionButton: Container(
