@@ -35,7 +35,8 @@ class MapPageState extends State<MapPage> {
   late List<MarkerId> _musicMarkerIds;
   late List<MarkerId> _eventMarkerIds;
   late List<MarkerId> _serviceMarkerIds;
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // Current display of visible map markers
+  Map<MarkerId, Marker> allMarkers = <MarkerId, Marker>{}; // Cache of all markers, visible or not
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
   Map<ClusterManagerId, ClusterManager> clusterManagers = <ClusterManagerId, ClusterManager>{}; // For managing clusters
@@ -79,6 +80,7 @@ class MapPageState extends State<MapPage> {
     for (var listing in listings) {
       addMarker(listing, onTest);
     }
+    allMarkers = Map.from(markers);
   }
 
   Future<bool> createAllMarkerBitmaps(bool onTest) async {
@@ -95,15 +97,28 @@ class MapPageState extends State<MapPage> {
   }
 
   void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
+    // now removes and re-adds markers to work around iOS not keeping pace with many show/hides
+    final updated = Map<MarkerId, Marker>.from(markers);
     for (var id in idList) {
-      final currentMarker = markers.values.toList().firstWhere((item) => item.markerId == id);
-      setState(() {
-        markers[id] = currentMarker.copyWith(visibleParam: visibleState);
-      });
+      if (visibleState) {
+        // Show again → re-add original marker (from a cache of all markers)
+        final original = allMarkers[id];
+        if (original != null) {
+          updated[id] = original;
+        }
+      } else {
+        // Hide → remove completely
+        updated.remove(id);
+      }
     }
+    // batch update state
+    setState(() {
+      markers = updated;
+    });
+//    debugPrint('Set visibility of ${idList.length} markers to $visibleState and there are now ${markers.length} total markers');
   }
 
-  void setMarkerLists() {
+    void setMarkerLists() {
     // Reset marker lists
     _foodMarkerIds = [];
     _stallsMarkerIds = [];
