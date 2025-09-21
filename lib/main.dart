@@ -104,6 +104,8 @@ class HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         showUnselectedLabels: true,
         currentIndex: index,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
         onTap: (selectedIndex) {
           // Update the user's location
           establishLocation();
