@@ -90,9 +90,9 @@ class MapPageState extends State<MapPage> {
 
         // Sort listings: Group first → startTime → displayName
         relatedListings.sort((a, b) {
-          if (a['primaryType'] == "Group" && b['primaryType'] != "Group") {
+          if (a['primaryType'].startsWith("Group") && !b['primaryType'].startsWith("Group")) {
             return -1;
-          } else if (b['primaryType'] == "Group" && a['primaryType'] != "Group") {
+          } else if (b['primaryType'].startsWith("Group") && !a['primaryType'].startsWith("Group")) {
             return 1;
           }
 
