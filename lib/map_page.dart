@@ -35,11 +35,9 @@ class MapPageState extends State<MapPage> {
   late List<MarkerId> _musicMarkerIds;
   late List<MarkerId> _eventMarkerIds;
   late List<MarkerId> _serviceMarkerIds;
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // Current display of visible map markers
-  Map<MarkerId, Marker> allMarkers = <MarkerId, Marker>{}; // Cache of all markers, visible or not
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
-  Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{};  // Cache of custom BitmapDescriptors
   bool _navigationInProgress = false;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
@@ -56,13 +54,6 @@ class MapPageState extends State<MapPage> {
     'Events': true,
     'Services': true,
   };
- final Map<String, bool> listingTypes = {
-    'Food': true,
-    'Shopping': true,
-    'Music': true,
-    'Event': true,
-    'Service': true,
-  };
 
   @override
   void initState() {
@@ -74,48 +65,28 @@ class MapPageState extends State<MapPage> {
     super.initState();
   }
 
- void addAllMarkers(bool onTest) async {
-    if (bitmapDescriptors.length == 0) {
-      bool gotBitmaps = await createAllMarkerBitmaps(false);
-    }
+  void addAllMarkers(bool onTest) {
     for (var listing in listings) {
       addMarker(listing, onTest);
-    }
-    allMarkers = Map.from(markers);
-  }
-
-  Future<bool> createAllMarkerBitmaps(bool onTest) async {
-    for (var listingType in listingTypes.keys) {
-      BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
-      bitmapDescriptors[listingType] = newBitmapDescriptor;
-    }
-    if (bitmapDescriptors.length == 0) {
-      debugPrint('Error: created zero bitmap descriptors');
-      return false;
-    } else {
-      return true;
     }
   }
 
   void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
-    // now removes and re-adds markers to work around iOS not keeping pace with many show/hides, causing memory errors
-    final updated = Map<MarkerId, Marker>.from(markers);
     for (var id in idList) {
-      if (visibleState) {
-        // Show again → re-add original marker (from a cache of all markers)
-        final original = allMarkers[id];
-        if (original != null) {
-          updated[id] = original;
-        }
-      } else {
-        // Hide → remove completely
-        updated.remove(id);
-      }
+      final currentMarker = markers.values.toList().firstWhere((item) => item.markerId == id);
+
+      Marker updatedMarker = Marker(
+        markerId: id,
+        position: currentMarker.position,
+        icon: currentMarker.icon,
+        visible: visibleState,
+        onTap: currentMarker.onTap,
+      );
+
+      setState(() {
+        markers[id] = updatedMarker;
+      });
     }
-    // batch update state
-    setState(() {
-      markers = updated;
-    });
   }
 
   void setMarkerLists() {
@@ -149,8 +120,7 @@ class MapPageState extends State<MapPage> {
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
     late BitmapDescriptor customMarker;
     if (onTest == false) {
-      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarker;
-      // debugPrint('Got bitmap descriptor for ${listing['primaryType']} from cache of size '+bitmapDescriptors.length.toString()+': $customMarker');
+      customMarker = await getColoredMarker(listing['primaryType'], color);
     } else {
       double hue = HSVColor.fromColor(color).hue;
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
@@ -484,16 +454,7 @@ class MapPageState extends State<MapPage> {
   }
 
   _moveCameraToBounds(LatLng southwestMin, LatLng northeastMax, double padding) {
-    _controller?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(52.199174, 0.140929),
-          zoom: 15,
-          bearing: 290,
-        ),
-      ),
-    );
-    _controller?.animateCamera(
+    _controller?.moveCamera(
       CameraUpdate.newLatLngBounds(
         LatLngBounds(
           southwest: southwestMin,
@@ -502,7 +463,7 @@ class MapPageState extends State<MapPage> {
         padding, // Padding around the bounds
       ),
     );
-}
+  }
 
   Future<void> refreshListings() async {
     setState(() {
@@ -570,8 +531,8 @@ class MapPageState extends State<MapPage> {
             // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
             style: mapStyle,
             mapType: mapType,
-            rotateGesturesEnabled: true,
-            compassEnabled: true,
+            rotateGesturesEnabled: false,
+            compassEnabled: false,
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
             mapToolbarEnabled: false,
@@ -584,7 +545,7 @@ class MapPageState extends State<MapPage> {
             },
             initialCameraPosition: const CameraPosition(
               target: LatLng(52.199174, 0.140929),
-              zoom: 15,
+              zoom: 14.1,
             ),
             markers: markers.values.toSet(),
             polylines: _polylines,
