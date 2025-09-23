@@ -115,29 +115,32 @@ class MapPageState extends State<MapPage> {
           context: context,
           showDragHandle: true,
           builder: (BuildContext context) {
-            return Scrollbar(
-              thumbVisibility: true, // always show scrollbar
-              thickness: 4, // thin scrollbar
-              radius: const Radius.circular(8), // rounded edges
-              child: ListView.builder(
-                itemCount: relatedListings.length,
-                itemBuilder: (context, index) {
-                  final rel = relatedListings[index];
-                  int approximateDistanceMetres = asTheCrowFlies(
-                    currentLatLng,
-                    stringToLatLng(rel['latLng']),
-                  );
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Scrollbar(
+                thumbVisibility: true, // always show scrollbar
+                thickness: 4, // thin scrollbar
+                radius: const Radius.circular(8), // rounded edges
+                child: ListView.builder(
+                  itemCount: relatedListings.length,
+                  itemBuilder: (context, index) {
+                    final rel = relatedListings[index];
+                    int approximateDistanceMetres = asTheCrowFlies(
+                      currentLatLng,
+                      stringToLatLng(rel['latLng']),
+                    );
 
-                  return ListingInfoSheet(
-                    title: rel['displayName'],
-                    categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
-                    openingTimes: "${rel['startTime']} - ${rel['endTime']}",
-                    approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-                    phoneNumber: rel['phone'],
-                    website: rel['website'],
-                    onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                  );
-                },
+                    return ListingInfoSheet(
+                      title: rel['displayName'],
+                      categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
+                      openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                      approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                      phoneNumber: rel['phone'],
+                      website: rel['website'],
+                      onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                    );
+                  },
+                ),
               ),
             );
           },
