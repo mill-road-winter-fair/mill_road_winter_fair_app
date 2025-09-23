@@ -58,8 +58,15 @@ class MapPageState extends State<MapPage> {
 
   void addAllGroupMarkers(bool onTest) {
     for (var listing in listings) {
-      if (listing['primaryType'].startsWith('Group-')) {
-        addGroupMarker(listing, onTest);
+      if (listing['visibleOnMap'] == 'TRUE') {
+        // Add Group markers
+        if (listing['primaryType'].startsWith('Group-')) {
+          addGroupMarker(listing, onTest);
+        }
+        // Add Specific markers
+        if (!listing['primaryType'].startsWith('Group-')) {
+          addSpecificMarker(listing, onTest);
+        }
       }
     }
   }
