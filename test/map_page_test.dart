@@ -33,12 +33,6 @@ void main() async {
     }
   ];
 
-  // Set up mocks
-  late MapPageState mapPageState;
-  setUp(() {
-    mapPageState = MapPage(listings: listings).createState();
-  });
-
   testWidgets('test map type button changes map type', (WidgetTester tester) async {
     // Build the MapPage widget
     await tester.pumpWidget(
