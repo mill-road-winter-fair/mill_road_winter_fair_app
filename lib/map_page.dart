@@ -30,11 +30,6 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late Future<List<Map<String, dynamic>>> _fetchListings;
-  late List<MarkerId> _foodMarkerIds;
-  late List<MarkerId> _stallsMarkerIds;
-  late List<MarkerId> _musicMarkerIds;
-  late List<MarkerId> _eventMarkerIds;
-  late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
