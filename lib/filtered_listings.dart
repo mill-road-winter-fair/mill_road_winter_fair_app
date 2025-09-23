@@ -33,11 +33,18 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   late Future<List> _sortedListings;
   bool isRefreshing = false;
   bool useFallbackSorting = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     _sortedListings = sortListings();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose(); // Clean up
+    super.dispose();
   }
 
   Future<List> sortListings() async {
@@ -95,7 +102,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           // 3. If startTime is also the same, compare by name
           return a['name'].compareTo(b['name']);
         });
-
       }
 
       return listings;
@@ -308,32 +314,46 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   )),
               Expanded(
                 flex: 92,
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(8),
-                  separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-                  itemCount: filteredListings.length,
-                  itemBuilder: (context, index) {
-                    final listing = filteredListings[index];
-                    final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                    final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                    return ListingInfoSheet(
-                      title: listing['displayName'],
-                      categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                      openingTimes: "${listing['startTime']} - ${listing['endTime']}",
-                      approxDistance: approximateDistance,
-                      phoneNumber: listing['phone'],
-                      website: listing['website'],
-                      onGetDirections: () => {
-                        if (homePageState != null)
-                          {
-                            homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
-                          }
-                      },
-                    );
-                  },
+                child: PrimaryScrollController.none(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Scrollbar(
+                      controller: _scrollController,
+                      thumbVisibility: true,
+                      thickness: 4,
+                      radius: const Radius.circular(8),
+                      child: ListView.separated(
+                        controller: _scrollController,
+                        separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+                        itemCount: filteredListings.length,
+                        itemBuilder: (context, index) {
+                          final listing = filteredListings[index];
+                          final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                          final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                          return ListingInfoSheet(
+                            title: listing['displayName'],
+                            categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+                            openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                            approxDistance: approximateDistance,
+                            phoneNumber: listing['phone'],
+                            website: listing['website'],
+                            onGetDirections: () {
+                              if (homePageState != null) {
+                                homePageState.navigateToMapAndGetDirections(
+                                  listing['id'],
+                                  destinationLatLng,
+                                  http.Client(),
+                                );
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              )
             ],
           ),
         );
