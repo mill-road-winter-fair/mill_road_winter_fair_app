@@ -51,12 +51,12 @@ class MapPageState extends State<MapPage> {
   void initState() {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
-    addAllGroupMarkers(false);
+    addAllVisibleMarkers(false);
     establishLocation();
     super.initState();
   }
 
-  void addAllGroupMarkers(bool onTest) {
+  void addAllVisibleMarkers(bool onTest) {
     for (var listing in listings) {
       if (listing['visibleOnMap'] == 'TRUE') {
         // Add Group markers
@@ -388,7 +388,7 @@ class MapPageState extends State<MapPage> {
 
     try {
       listings = await fetchListings(http.Client());
-      addAllGroupMarkers(false);
+      addAllVisibleMarkers(false);
       establishLocation();
     } finally {
       setState(() {
@@ -485,7 +485,7 @@ class MapPageState extends State<MapPage> {
                                   _polylines.clear();
                                   _distanceToDestination = null;
                                   clearAllMarkers();
-                                  addAllGroupMarkers(false);
+                                  addAllVisibleMarkers(false);
                                   _navigationInProgress = false;
                                 });
                               },
