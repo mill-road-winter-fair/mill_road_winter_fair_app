@@ -121,7 +121,8 @@ class MapPageState extends State<MapPage> {
                 thumbVisibility: true, // always show scrollbar
                 thickness: 4, // thin scrollbar
                 radius: const Radius.circular(8), // rounded edges
-                child: ListView.builder(
+                child: ListView.separated(
+                  separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
                   itemCount: relatedListings.length,
                   itemBuilder: (context, index) {
                     final rel = relatedListings[index];
