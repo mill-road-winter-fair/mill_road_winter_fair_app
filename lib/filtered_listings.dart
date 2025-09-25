@@ -148,14 +148,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
         if (snapshot.hasError) {
           return Center(
-              child: Text(
-            "Error: ${snapshot.error}",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              color: Theme.of(context).colorScheme.onError,
+            child: Text(
+              "Error: ${snapshot.error}",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                color: Theme.of(context).colorScheme.onError,
+              ),
             ),
-          ));
+          );
         }
 
         if (listings.isEmpty) {
@@ -195,123 +196,124 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           child: Column(
             children: <Widget>[
               Expanded(
-                  flex: 8,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary,
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey[350]!, width: 2),
-                      ),
+                flex: 8,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey[350]!, width: 2),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const Text("Sort by: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                          Flexible(
-                            flex: 8,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onSecondary),
-                                child: const FittedBox(child: Text('Nearest', style: TextStyle(fontSize: 16))),
-                                onPressed: () {
-                                  if (currentLatLng != null) {
-                                    setState(() {
-                                      preferredSortingMethod = SortingMethod.values[1];
-                                    });
-                                    _saveSettings();
-                                  } else {
-                                    Fluttertoast.showToast(
-                                      msg: 'Location services and permissions are required to determine distances',
-                                      gravity: ToastGravity.CENTER,
-                                      backgroundColor: Theme.of(context).colorScheme.primary,
-                                      textColor: Theme.of(context).colorScheme.onPrimary,
-                                      fontSize: 16,
-                                      toastLength: Toast.LENGTH_LONG,
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            flex: 8,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onSecondary),
-                                child: const FittedBox(child: Text('Location', style: TextStyle(fontSize: 16))),
-                                onPressed: () {
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Text("Sort by: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Flexible(
+                          flex: 8,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSecondary),
+                              child: const FittedBox(child: Text('Nearest', style: TextStyle(fontSize: 16))),
+                              onPressed: () {
+                                if (currentLatLng != null) {
                                   setState(() {
-                                    preferredSortingMethod = SortingMethod.values[3];
+                                    preferredSortingMethod = SortingMethod.values[1];
                                   });
                                   _saveSettings();
-                                },
-                              ),
+                                } else {
+                                  Fluttertoast.showToast(
+                                    msg: 'Location services and permissions are required to determine distances',
+                                    gravity: ToastGravity.CENTER,
+                                    backgroundColor: Theme.of(context).colorScheme.primary,
+                                    textColor: Theme.of(context).colorScheme.onPrimary,
+                                    fontSize: 16,
+                                    toastLength: Toast.LENGTH_LONG,
+                                  );
+                                }
+                              },
                             ),
                           ),
-                          Flexible(
-                            flex: 6,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onSecondary),
-                                child: const FittedBox(child: Text('A-Z', style: TextStyle(fontSize: 16))),
-                                onPressed: () {
-                                  setState(() {
-                                    preferredSortingMethod = SortingMethod.values[0];
-                                  });
-                                  _saveSettings();
-                                },
-                              ),
+                        ),
+                        Flexible(
+                          flex: 8,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSecondary),
+                              child: const FittedBox(child: Text('Location', style: TextStyle(fontSize: 16))),
+                              onPressed: () {
+                                setState(() {
+                                  preferredSortingMethod = SortingMethod.values[3];
+                                });
+                                _saveSettings();
+                              },
                             ),
                           ),
-                          Flexible(
-                            flex: 6,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onSecondary),
-                                child: const FittedBox(child: Text('Time', style: TextStyle(fontSize: 16))),
-                                onPressed: () {
-                                  setState(() {
-                                    preferredSortingMethod = SortingMethod.values[2];
-                                  });
-                                  _saveSettings();
-                                },
-                              ),
+                        ),
+                        Flexible(
+                          flex: 6,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSecondary),
+                              child: const FittedBox(child: Text('A-Z', style: TextStyle(fontSize: 16))),
+                              onPressed: () {
+                                setState(() {
+                                  preferredSortingMethod = SortingMethod.values[0];
+                                });
+                                _saveSettings();
+                              },
                             ),
-                          )
-                        ],
-                      ),
+                          ),
+                        ),
+                        Flexible(
+                          flex: 6,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSecondary),
+                              child: const FittedBox(child: Text('Time', style: TextStyle(fontSize: 16))),
+                              onPressed: () {
+                                setState(() {
+                                  preferredSortingMethod = SortingMethod.values[2];
+                                });
+                                _saveSettings();
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  )),
+                  ),
+                ),
+              ),
               Expanded(
                 flex: 92,
                 child: PrimaryScrollController.none(
@@ -353,7 +355,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         );

@@ -33,7 +33,7 @@ class MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
-  Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{};  // Cache of custom BitmapDescriptors to use as map markers
+  Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   bool _navigationInProgress = false;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
@@ -322,13 +322,15 @@ class MapPageState extends State<MapPage> {
     if (result.points.isNotEmpty) {
       setState(() {
         _polylines.clear();
-        _polylines.add(Polyline(
-          polylineId: const PolylineId('route'),
-          points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
-          color: Theme.of(context).colorScheme.tertiary,
-          width: 5,
-          patterns: <PatternItem>[PatternItem.dash(10), PatternItem.gap(10)],
-        ));
+        _polylines.add(
+          Polyline(
+            polylineId: const PolylineId('route'),
+            points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+            color: Theme.of(context).colorScheme.tertiary,
+            width: 5,
+            patterns: <PatternItem>[PatternItem.dash(10), PatternItem.gap(10)],
+          ),
+        );
         final distanceMetres = result.totalDistanceValue;
         _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
       });
@@ -418,14 +420,15 @@ class MapPageState extends State<MapPage> {
 
         if (snapshot.hasError) {
           return Center(
-              child: Text(
-            "Error: ${snapshot.error}",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              color: Theme.of(context).colorScheme.onError,
+            child: Text(
+              "Error: ${snapshot.error}",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                color: Theme.of(context).colorScheme.onError,
+              ),
             ),
-          ));
+          );
         }
 
         if (listings.isEmpty) {
@@ -503,7 +506,7 @@ class MapPageState extends State<MapPage> {
                                 Icons.cancel,
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
-                            )
+                            ),
                         ],
                       ),
                       Row(
@@ -572,7 +575,7 @@ class MapPageState extends State<MapPage> {
                 const Expanded(
                   flex: 2,
                   child: Column(), // Dummy column to help flex with centring distance button
-                )
+                ),
               ],
             ),
           ),
