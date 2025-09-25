@@ -33,6 +33,7 @@ class MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
+  Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{};  // Cache of custom BitmapDescriptors to use as map markers
   bool _navigationInProgress = false;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
@@ -46,6 +47,7 @@ class MapPageState extends State<MapPage> {
   void initState() {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
+    createAllMarkerBitmaps();
     addAllVisibleMarkers(false);
     establishLocation();
     super.initState();
@@ -66,6 +68,19 @@ class MapPageState extends State<MapPage> {
     }
   }
 
+  Future<bool> createAllMarkerBitmaps() async {
+    for (var listingType in 'Food, Shopping, Music, Event, Service, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'.split(', ')) {
+      BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
+      bitmapDescriptors[listingType] = newBitmapDescriptor;
+    }
+    if (bitmapDescriptors.isEmpty) {
+      debugPrint('Error: created zero bitmap descriptors');
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   void addGroupMarker(listing, bool onTest) async {
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -76,7 +91,7 @@ class MapPageState extends State<MapPage> {
       customMarker = await getColoredMarker(listing['primaryType'], color);
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
+      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarker;
     }
 
     Marker newMarker = Marker(
@@ -158,7 +173,7 @@ class MapPageState extends State<MapPage> {
       customMarker = await getColoredMarker(listing['primaryType'], color);
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
+      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarker;
     }
 
     Marker newMarker = Marker(
