@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -218,6 +219,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         : Theme.of(context).colorScheme.onSecondary),
                                 child: const FittedBox(child: Text('Nearest', style: TextStyle(fontSize: 16))),
                                 onPressed: () {
+                                  HapticFeedback.selectionClick();
                                   if (currentLatLng != null) {
                                     setState(() {
                                       preferredSortingMethod = SortingMethod.values[1];
@@ -251,6 +253,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         : Theme.of(context).colorScheme.onSecondary),
                                 child: const FittedBox(child: Text('Location', style: TextStyle(fontSize: 16))),
                                 onPressed: () {
+                                  HapticFeedback.selectionClick();
                                   setState(() {
                                     preferredSortingMethod = SortingMethod.values[3];
                                   });
@@ -273,6 +276,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         : Theme.of(context).colorScheme.onSecondary),
                                 child: const FittedBox(child: Text('A-Z', style: TextStyle(fontSize: 16))),
                                 onPressed: () {
+                                  HapticFeedback.selectionClick();
                                   setState(() {
                                     preferredSortingMethod = SortingMethod.values[0];
                                   });
@@ -295,6 +299,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         : Theme.of(context).colorScheme.onSecondary),
                                 child: const FittedBox(child: Text('Time', style: TextStyle(fontSize: 16))),
                                 onPressed: () {
+                                  HapticFeedback.selectionClick();
                                   setState(() {
                                     preferredSortingMethod = SortingMethod.values[2];
                                   });

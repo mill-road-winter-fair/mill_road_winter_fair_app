@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -125,6 +126,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     groupValue: preferredDistanceUnits,
                     onChanged: (DistanceUnits? value) {
                       setState(() {
+                        HapticFeedback.selectionClick();
                         preferredDistanceUnits = value!;
                       });
                       _saveSettings();
@@ -182,6 +184,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   RadioGroup<String>(
                     groupValue: themeNotifier.value,
                     onChanged: (value) {
+                      HapticFeedback.selectionClick();
                       selectedThemeKey = value!;
                       setState(() {
                         _changeTheme(value);
@@ -252,7 +255,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: const Icon(Icons.first_page),
                     title: const Text('Replay Welcome Screen'),
-                    onTap: () => _replayWelcomeScreen(context),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      _replayWelcomeScreen(context);
+                    },
                   ),
                 ],
               ),
@@ -265,6 +271,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: const Icon(Icons.info),
                     title: const Text('About'),
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       showAboutDialog(
                           context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.7', applicationIcon: const MyAppIcon());
                     },
