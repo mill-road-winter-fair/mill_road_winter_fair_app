@@ -6,7 +6,6 @@ import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:mill_road_winter_fair_app/themes.dart';
 
 void main() async {
   // Mock location services and permissions
@@ -18,18 +17,46 @@ void main() async {
 
   listings = [
     {
-      'name': 'glazedandconfused',
-      'displayName': 'Glazed and Confused',
+      'name': 'foodgroup',
+      'displayName': 'Food Group',
       'endTime': '16:30',
       'id': '1',
-      'phone': '01223 111111',
-      'latLng': '52.199687,0.138813',
-      'primaryType': 'Food',
-      'secondaryType': 'Food',
+      'latLng': '52.199838,0.139016',
+      'phone': '',
+      'primaryType': 'Group-Food',
+      'secondaryType': 'Fake Street',
       'startTime': '10:30',
-      'tertiaryType': 'Doughnuts',
+      'tertiaryType': 'Food',
       'visibleOnMap': 'TRUE',
+      'website': '',
+    },
+    {
+      'name': 'glazedandconfused',
+      'displayName': 'Glazed and Confused',
+      'endTime': '15:00',
+      'id': '2',
+      'latLng': '52.199687,0.138813',
+      'phone': '01223 111111',
+      'primaryType': 'Food',
+      'secondaryType': 'Fake Street',
+      'startTime': '11:00',
+      'tertiaryType': 'Doughnuts',
+      'visibleOnMap': 'FALSE',
       'website': 'https://www.glazedandconfused.com',
+    },
+    {
+      'displayName': 'Sushi Squad',
+      'endTime': '16:30',
+      'id': '3',
+      'name': 'sushisquad',
+      'latLng': '52.199188,0.139437',
+      'phone': '01223 222222',
+      'primaryType': 'Food',
+      'secondaryType': 'Implausible Avenue',
+      'startTime': '12:00',
+      'tertiaryType': 'Sushi',
+      'visibleOnMap': 'TRUE',
+      'website': 'https://www.sushisquad.com',
     }
   ];
 
@@ -60,21 +87,7 @@ void main() async {
     expect(mapPageState.mapType, MapType.normal);
   });
 
-  test('getCategoryColor returns correct color for given types', () {
-    final foodColor = getCategoryColor("light", "Food");
-    final shoppingColor = getCategoryColor("light", "Shopping");
-    final musicColor = getCategoryColor("light", "Music");
-    final eventColor = getCategoryColor("light", "Event");
-    final serviceColor = getCategoryColor("light", "Service");
-
-    expect(foodColor, const Color.fromRGBO(242, 153, 0, 1.0));
-    expect(shoppingColor, const Color.fromRGBO(209, 81, 85, 1.0));
-    expect(musicColor, const Color.fromRGBO(190, 110, 230, 1.0));
-    expect(eventColor, const Color.fromRGBO(243, 190, 66, 1.0));
-    expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
-  });
-
-  testWidgets('Adds marker, opens modal bottom sheet, and checks content', (WidgetTester tester) async {
+  testWidgets('Adds markers, opens modal bottom sheet for specific marker, and checks content', (WidgetTester tester) async {
     // Override user location global
     currentLatLng = const LatLng(52.199174, 0.140929);
 
@@ -99,10 +112,48 @@ void main() async {
     await tester.pumpAndSettle();
 
     // Check the text content in the bottom sheet
-    expect(find.text('Glazed and Confused'), findsOneWidget);
-    expect(find.text('Food • Doughnuts'), findsOneWidget);
+    expect(find.text('Food Group'), findsOneWidget);
     expect(find.text('10:30 - 16:30'), findsOneWidget);
+    expect(find.text('Fake Street • Food'), findsOneWidget);
+    expect(find.text('approx. 199 m'), findsOneWidget);
+    expect(find.byIcon(Icons.directions_walk), findsNWidgets(2));
+    expect(find.text('Glazed and Confused'), findsOneWidget);
+    expect(find.text('11:00 - 15:00'), findsOneWidget);
+    expect(find.text('Fake Street • Doughnuts'), findsOneWidget);
     expect(find.text('approx. 206 m'), findsOneWidget);
+    expect(find.byIcon(Icons.public), findsOneWidget);
+  });
+
+  testWidgets('Adds markers, opens modal bottom sheet for group marker, and checks content', (WidgetTester tester) async {
+    // Override user location global
+    currentLatLng = const LatLng(52.199174, 0.140929);
+
+    // Build the MapPage widget
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MapPage(listings: listings),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Obtain the state after mounting
+    final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
+    mapPageState.addAllVisibleMarkers(true);
+
+    // Simulate a tap on the map marker
+    const markerId = MarkerId('3');
+    final marker = mapPageState.markers.values.toList().firstWhere((marker) => marker.markerId == markerId);
+    marker.onTap!();
+    await tester.pumpAndSettle();
+
+    // Check the text content in the bottom sheet
+    expect(find.text('Sushi Squad'), findsOneWidget);
+    expect(find.text('12:00 - 16:30'), findsOneWidget);
+    expect(find.text('Implausible Avenue • Sushi'), findsOneWidget);
+    expect(find.text('approx. 135 m'), findsOneWidget);
+    expect(find.text('01223 222222'), findsOneWidget);
     expect(find.byIcon(Icons.directions_walk), findsOneWidget);
     expect(find.byIcon(Icons.public), findsOneWidget);
   });
