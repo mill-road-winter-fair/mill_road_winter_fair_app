@@ -91,7 +91,7 @@ class MapPageState extends State<MapPage> {
       customMarker = await getColoredMarker(listing['primaryType'], color);
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarker;
+      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
@@ -173,7 +173,7 @@ class MapPageState extends State<MapPage> {
       customMarker = await getColoredMarker(listing['primaryType'], color);
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarker;
+      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
