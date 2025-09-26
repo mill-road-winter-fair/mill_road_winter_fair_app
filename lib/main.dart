@@ -103,6 +103,8 @@ class HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         showUnselectedLabels: true,
         currentIndex: index,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
         onTap: (selectedIndex) {
           HapticFeedback.selectionClick();
           // Update the user's location
@@ -248,7 +250,7 @@ class HomePageState extends State<HomePage> {
                   const SizedBox(height: 30),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

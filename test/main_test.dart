@@ -87,7 +87,7 @@ void main() async {
     expect(find.text('Important information'), findsOneWidget);
     expect(find.text('Visit our Website'), findsOneWidget);
     expect(find.text('Email us'), findsOneWidget);
-    expect(find.byType(IconButton), findsExactly(8));
+    expect(find.byType(IconButton), findsExactly(7));
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Give feedback on the app'), findsOneWidget);
   });
@@ -251,7 +251,7 @@ void main() async {
     // Obtain the state after mounting
     final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
-    mapPageState.addAllMarkers(true);
+    mapPageState.addAllVisibleMarkers(true);
 
     await tester.tap(find.text('Food'));
     await tester.pumpAndSettle();

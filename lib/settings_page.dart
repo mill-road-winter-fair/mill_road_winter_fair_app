@@ -208,7 +208,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       });
                       _saveSettings();
                       mapPageKey.currentState?.clearAllMarkers();
-                      mapPageKey.currentState?.addAllMarkers(false);
+                      mapPageKey.currentState?.addAllVisibleMarkers(false);
                     },
                     child: Column(
                       children: [
@@ -244,7 +244,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
               Column(

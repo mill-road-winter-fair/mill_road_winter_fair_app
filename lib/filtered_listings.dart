@@ -34,11 +34,18 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   late Future<List> _sortedListings;
   bool isRefreshing = false;
   bool useFallbackSorting = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     _sortedListings = sortListings();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose(); // Clean up
+    super.dispose();
   }
 
   Future<List> sortListings() async {
@@ -96,7 +103,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           // 3. If startTime is also the same, compare by name
           return a['name'].compareTo(b['name']);
         });
-
       }
 
       return listings;
@@ -115,8 +121,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     try {
       listings = await fetchListings(http.Client());
-      mapPageKey.currentState?.setMarkerLists();
-      mapPageKey.currentState?.addAllMarkers(false);
+      mapPageKey.currentState?.addAllVisibleMarkers(false);
       establishLocation();
     } finally {
       setState(() {
@@ -144,14 +149,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
         if (snapshot.hasError) {
           return Center(
-              child: Text(
-            "Error: ${snapshot.error}",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              color: Theme.of(context).colorScheme.onError,
+            child: Text(
+              "Error: ${snapshot.error}",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                color: Theme.of(context).colorScheme.onError,
+              ),
             ),
-          ));
+          );
         }
 
         if (listings.isEmpty) {
@@ -191,13 +197,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           child: Column(
             children: <Widget>[
               Expanded(
-                  flex: 8,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary,
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey[350]!, width: 2),
-                      ),
+                flex: 8,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey[350]!, width: 2),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(4.0),
@@ -255,11 +260,20 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 onPressed: () {
                                   HapticFeedback.selectionClick();
                                   setState(() {
-                                    preferredSortingMethod = SortingMethod.values[3];
+                                    preferredSortingMethod = SortingMethod.values[1];
                                   });
                                   _saveSettings();
-                                },
-                              ),
+                                } else {
+                                  Fluttertoast.showToast(
+                                    msg: 'Location services and permissions are required to determine distances',
+                                    gravity: ToastGravity.CENTER,
+                                    backgroundColor: Theme.of(context).colorScheme.primary,
+                                    textColor: Theme.of(context).colorScheme.onPrimary,
+                                    fontSize: 16,
+                                    toastLength: Toast.LENGTH_LONG,
+                                  );
+                                }
+                              },
                             ),
                           ),
                           Flexible(
@@ -304,40 +318,55 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     preferredSortingMethod = SortingMethod.values[2];
                                   });
                                   _saveSettings();
-                                },
-                              ),
+                              },
                             ),
-                          )
-                        ],
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
-                  )),
+                  ),
+                ),
+              ),
               Expanded(
                 flex: 92,
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(8),
-                  separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-                  itemCount: filteredListings.length,
-                  itemBuilder: (context, index) {
-                    final listing = filteredListings[index];
-                    final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                    final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                    return ListingInfoSheet(
-                      title: listing['displayName'],
-                      categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                      openingTimes: "${listing['startTime']} - ${listing['endTime']}",
-                      approxDistance: approximateDistance,
-                      phoneNumber: listing['phone'],
-                      website: listing['website'],
-                      onGetDirections: () => {
-                        if (homePageState != null)
-                          {
-                            homePageState.navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client()),
-                          }
-                      },
-                    );
-                  },
+                child: PrimaryScrollController.none(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Scrollbar(
+                      controller: _scrollController,
+                      thumbVisibility: true,
+                      thickness: 4,
+                      radius: const Radius.circular(8),
+                      child: ListView.separated(
+                        controller: _scrollController,
+                        separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+                        itemCount: filteredListings.length,
+                        itemBuilder: (context, index) {
+                          final listing = filteredListings[index];
+                          final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                          final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                          return ListingInfoSheet(
+                            title: listing['displayName'],
+                            categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+                            openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                            approxDistance: approximateDistance,
+                            phoneNumber: listing['phone'],
+                            website: listing['website'],
+                            onGetDirections: () {
+                              if (homePageState != null) {
+                                homePageState.navigateToMapAndGetDirections(
+                                  listing['id'],
+                                  destinationLatLng,
+                                  http.Client(),
+                                );
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
