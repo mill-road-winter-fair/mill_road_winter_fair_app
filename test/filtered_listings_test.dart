@@ -145,7 +145,6 @@ void main() async {
     // Mock sorting preference is distance
     preferredSortingMethod = SortingMethod.values[1];
 
-
     await pumpFilteredListingsPage(tester, 'Food', listings);
 
     expect(listings[0]['name'], 'sushisquad');

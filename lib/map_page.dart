@@ -30,14 +30,10 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late Future<List<Map<String, dynamic>>> _fetchListings;
-  late List<MarkerId> _foodMarkerIds;
-  late List<MarkerId> _stallsMarkerIds;
-  late List<MarkerId> _musicMarkerIds;
-  late List<MarkerId> _eventMarkerIds;
-  late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
+  Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   bool _navigationInProgress = false;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
@@ -46,75 +42,129 @@ class MapPageState extends State<MapPage> {
   MapType mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
-  // Declare default filters
-  final Map<String, bool> filterSettings = {
-    'Food': true,
-    'Stalls': true,
-    'Music': true,
-    'Events': true,
-    'Services': true,
-  };
 
   @override
   void initState() {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
-    setMarkerLists();
-    addAllMarkers(false);
+    createAllMarkerBitmaps();
+    addAllVisibleMarkers(false);
     establishLocation();
     super.initState();
   }
 
-  void addAllMarkers(bool onTest) {
+  void addAllVisibleMarkers(bool onTest) {
     for (var listing in listings) {
-      addMarker(listing, onTest);
-    }
-  }
-
-  void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
-    for (var id in idList) {
-      final currentMarker = markers.values.toList().firstWhere((item) => item.markerId == id);
-
-      Marker updatedMarker = Marker(
-        markerId: id,
-        position: currentMarker.position,
-        icon: currentMarker.icon,
-        visible: visibleState,
-        onTap: currentMarker.onTap,
-      );
-
-      setState(() {
-        markers[id] = updatedMarker;
-      });
-    }
-  }
-
-  void setMarkerLists() {
-    // Reset marker lists
-    _foodMarkerIds = [];
-    _stallsMarkerIds = [];
-    _musicMarkerIds = [];
-    _eventMarkerIds = [];
-    _serviceMarkerIds = [];
-
-    final allListings = listings as List;
-    for (var listing in allListings) {
-      // Assign markerIds to maps for filtering
-      if (listing['primaryType'] == "Food") {
-        _foodMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Shopping") {
-        _stallsMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Music") {
-        _musicMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Event") {
-        _eventMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Service") {
-        _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+      if (listing['visibleOnMap'] == 'TRUE') {
+        // Add Group markers
+        if (listing['primaryType'].startsWith('Group-')) {
+          addGroupMarker(listing, onTest);
+        }
+        // Add Specific markers
+        if (!listing['primaryType'].startsWith('Group-')) {
+          addSpecificMarker(listing, onTest);
+        }
       }
     }
   }
 
-  void addMarker(listing, bool onTest) async {
+  Future<bool> createAllMarkerBitmaps() async {
+    for (var listingType in 'Food, Shopping, Music, Event, Service, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'.split(', ')) {
+      BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
+      bitmapDescriptors[listingType] = newBitmapDescriptor;
+    }
+    if (bitmapDescriptors.isEmpty) {
+      debugPrint('Error: created zero bitmap descriptors');
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  void addGroupMarker(listing, bool onTest) async {
+    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+    MarkerId markerId = MarkerId(listing['id'].toString());
+    Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
+    late BitmapDescriptor customMarker;
+
+    if (onTest == false) {
+      customMarker = await getColoredMarker(listing['primaryType'], color);
+    } else {
+      double hue = HSVColor.fromColor(color).hue;
+      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
+    }
+
+    Marker newMarker = Marker(
+      markerId: markerId,
+      position: destinationLatLng,
+      icon: customMarker,
+      visible: true,
+      onTap: () {
+        establishLocation();
+
+        // Filter listings with the same secondaryType
+        List<Map<String, dynamic>> relatedListings = listings.where((l) => l['secondaryType'] == listing['secondaryType']).toList();
+
+        // Sort listings: Group first → startTime → displayName
+        relatedListings.sort((a, b) {
+          if (a['primaryType'].startsWith("Group") && !b['primaryType'].startsWith("Group")) {
+            return -1;
+          } else if (b['primaryType'].startsWith("Group") && !a['primaryType'].startsWith("Group")) {
+            return 1;
+          }
+
+          // If neither or both are Group, sort by startTime
+          final timeCompare = a['startTime'].compareTo(b['startTime']);
+          if (timeCompare != 0) return timeCompare;
+
+          // If startTime same, sort alphabetically by displayName
+          return a['name'].compareTo(b['name']);
+        });
+
+        showModalBottomSheet(
+          context: context,
+          showDragHandle: true,
+          builder: (BuildContext context) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Scrollbar(
+                thumbVisibility: true, // always show scrollbar
+                thickness: 4, // thin scrollbar
+                radius: const Radius.circular(8), // rounded edges
+                child: ListView.separated(
+                  separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+                  itemCount: relatedListings.length,
+                  itemBuilder: (context, index) {
+                    final rel = relatedListings[index];
+                    int approximateDistanceMetres = asTheCrowFlies(
+                      currentLatLng,
+                      stringToLatLng(rel['latLng']),
+                    );
+
+                    return ListingInfoSheet(
+                      title: rel['displayName'],
+                      categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
+                      openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                      approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                      phoneNumber: rel['phone'],
+                      website: rel['website'],
+                      onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    setState(() {
+      markers[markerId] = newMarker;
+    });
+  }
+
+  void addSpecificMarker(listing, bool onTest) async {
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
@@ -123,7 +173,7 @@ class MapPageState extends State<MapPage> {
       customMarker = await getColoredMarker(listing['primaryType'], color);
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
+      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
@@ -158,131 +208,10 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  //The Remove All filters button seems to prefer using this function rather than doing it's own setState
   void clearAllMarkers() {
     setState(() {
       markers.clear();
     });
-  }
-
-  void showFilterMenu() {
-    showModalBottomSheet(
-      scrollControlDisabledMaxHeightRatio: 0.8,
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text(
-                      "Filter Map Pins",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.left,
-                    )
-                  ]),
-                  CheckboxListTile(
-                    activeColor: getCategoryColor(selectedThemeKey, 'Food'),
-                    title: const Text("Food"),
-                    value: filterSettings["Food"],
-                    onChanged: (value) {
-                      setState(() {
-                        filterSettings["Food"] = value!;
-                      });
-                      final idList = _foodMarkerIds;
-                      updateMarkerVisibility(idList, value!);
-                    },
-                  ),
-                  CheckboxListTile(
-                    activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
-                    title: const Text("Stalls"),
-                    value: filterSettings["Stalls"],
-                    onChanged: (value) {
-                      setState(() {
-                        filterSettings["Stalls"] = value!;
-                      });
-                      final idList = _stallsMarkerIds;
-                      updateMarkerVisibility(idList, value!);
-                    },
-                  ),
-                  CheckboxListTile(
-                    activeColor: getCategoryColor(selectedThemeKey, 'Music'),
-                    title: const Text("Music"),
-                    value: filterSettings["Music"],
-                    onChanged: (value) {
-                      setState(() {
-                        filterSettings["Music"] = value!;
-                      });
-                      final idList = _musicMarkerIds;
-                      updateMarkerVisibility(idList, value!);
-                    },
-                  ),
-                  CheckboxListTile(
-                    activeColor: getCategoryColor(selectedThemeKey, 'Event'),
-                    title: const Text("Events"),
-                    value: filterSettings["Events"],
-                    onChanged: (value) {
-                      setState(() {
-                        filterSettings["Events"] = value!;
-                      });
-                      final idList = _eventMarkerIds;
-                      updateMarkerVisibility(idList, value!);
-                    },
-                  ),
-                  CheckboxListTile(
-                    activeColor: getCategoryColor(selectedThemeKey, 'Service'),
-                    title: const Text("Services"),
-                    value: filterSettings["Services"],
-                    onChanged: (value) {
-                      setState(() {
-                        filterSettings["Services"] = value!;
-                      });
-                      final idList = _serviceMarkerIds;
-                      updateMarkerVisibility(idList, value!);
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            filterSettings.forEach((key, _) {
-                              filterSettings[key] = true;
-                            });
-                          });
-                          final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                          updateMarkerVisibility(idList, true);
-                        },
-                        icon: const Icon(Icons.filter_alt),
-                        label: const Text('Show All'),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            filterSettings.forEach((key, _) {
-                              filterSettings[key] = false;
-                            });
-                          });
-                          final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                          updateMarkerVisibility(idList, false);
-                        },
-                        icon: const Icon(Icons.filter_alt_off),
-                        label: const Text('Hide All'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
@@ -294,8 +223,7 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines
     setState(() {
       _polylines.clear(); // Clear any existing polylines
-      final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-      updateMarkerVisibility(idList, false); // Hide any existing markers
+      clearAllMarkers(); // Clear any existing map markers
     });
 
     // If user has location tracking enabled
@@ -320,11 +248,9 @@ class MapPageState extends State<MapPage> {
       );
     }
 
-    // Re-add destination marker
-    MarkerId markerId = MarkerId(id.toString());
-    List<MarkerId> destinationMarkerIds = [];
-    destinationMarkerIds.add(markerId);
-    updateMarkerVisibility(destinationMarkerIds, true);
+    // Add destination map marker
+    Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
+    addSpecificMarker(destinationListing, false);
 
     // Set navigation as in progress
     _navigationInProgress = true;
@@ -396,13 +322,15 @@ class MapPageState extends State<MapPage> {
     if (result.points.isNotEmpty) {
       setState(() {
         _polylines.clear();
-        _polylines.add(Polyline(
-          polylineId: const PolylineId('route'),
-          points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
-          color: Theme.of(context).colorScheme.tertiary,
-          width: 5,
-          patterns: <PatternItem>[PatternItem.dash(10), PatternItem.gap(10)],
-        ));
+        _polylines.add(
+          Polyline(
+            polylineId: const PolylineId('route'),
+            points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+            color: Theme.of(context).colorScheme.tertiary,
+            width: 5,
+            patterns: <PatternItem>[PatternItem.dash(10), PatternItem.gap(10)],
+          ),
+        );
         final distanceMetres = result.totalDistanceValue;
         _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
       });
@@ -472,8 +400,7 @@ class MapPageState extends State<MapPage> {
 
     try {
       listings = await fetchListings(http.Client());
-      setMarkerLists();
-      addAllMarkers(false);
+      addAllVisibleMarkers(false);
       establishLocation();
     } finally {
       setState(() {
@@ -493,14 +420,15 @@ class MapPageState extends State<MapPage> {
 
         if (snapshot.hasError) {
           return Center(
-              child: Text(
-            "Error: ${snapshot.error}",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              color: Theme.of(context).colorScheme.onError,
+            child: Text(
+              "Error: ${snapshot.error}",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                color: Theme.of(context).colorScheme.onError,
+              ),
             ),
-          ));
+          );
         }
 
         if (listings.isEmpty) {
@@ -569,42 +497,13 @@ class MapPageState extends State<MapPage> {
                                   _positionStream?.cancel();
                                   _polylines.clear();
                                   _distanceToDestination = null;
-                                  final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                                  updateMarkerVisibility(idList, true);
+                                  clearAllMarkers();
+                                  addAllVisibleMarkers(false);
                                   _navigationInProgress = false;
                                 });
                               },
                               icon: Icon(
                                 Icons.cancel,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            )
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          if (_navigationInProgress == false)
-                            IconButton.filled(
-                              onPressed: () {
-                                _resetMapCamera();
-                                if (filterSettings['Food'] == false &&
-                                    filterSettings['Stalls'] == false &&
-                                    filterSettings['Music'] == false &&
-                                    filterSettings['Events'] == false &&
-                                    filterSettings['Services'] == false) {
-                                  final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                                  setState(() {
-                                    filterSettings['Food'] = true;
-                                    filterSettings['Stalls'] = true;
-                                    filterSettings['Music'] = true;
-                                    filterSettings['Events'] = true;
-                                    filterSettings['Services'] = true;
-                                    updateMarkerVisibility(idList, true);
-                                  });
-                                }
-                              },
-                              icon: Icon(
-                                Icons.home,
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             ),
@@ -615,11 +514,10 @@ class MapPageState extends State<MapPage> {
                           if (_navigationInProgress == false)
                             IconButton.filled(
                               onPressed: () {
-                                showFilterMenu();
-                                setMarkerLists();
+                                _resetMapCamera();
                               },
                               icon: Icon(
-                                Icons.filter_alt,
+                                Icons.home,
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             ),
@@ -677,7 +575,7 @@ class MapPageState extends State<MapPage> {
                 const Expanded(
                   flex: 2,
                   child: Column(), // Dummy column to help flex with centring distance button
-                )
+                ),
               ],
             ),
           ),
