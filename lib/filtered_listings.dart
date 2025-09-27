@@ -204,61 +204,29 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     border: Border(
                       bottom: BorderSide(color: Colors.grey[350]!, width: 2),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const Text("Sort by: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                          Flexible(
-                            flex: 8,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onSecondary),
-                                child: const FittedBox(child: Text('Nearest', style: TextStyle(fontSize: 16))),
-                                onPressed: () {
-                                  HapticFeedback.selectionClick();
-                                  if (currentLatLng != null) {
-                                    setState(() {
-                                      preferredSortingMethod = SortingMethod.values[1];
-                                    });
-                                    _saveSettings();
-                                  } else {
-                                    Fluttertoast.showToast(
-                                      msg: 'Location services and permissions are required to determine distances',
-                                      gravity: ToastGravity.CENTER,
-                                      backgroundColor: Theme.of(context).colorScheme.primary,
-                                      textColor: Theme.of(context).colorScheme.onPrimary,
-                                      fontSize: 16,
-                                      toastLength: Toast.LENGTH_LONG,
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                          Flexible(
-                            flex: 8,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onSecondary),
-                                child: const FittedBox(child: Text('Location', style: TextStyle(fontSize: 16))),
-                                onPressed: () {
-                                  HapticFeedback.selectionClick();
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Text("Sort by: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Flexible(
+                          flex: 8,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSecondary),
+                              child: const FittedBox(child: Text('Nearest', style: TextStyle(fontSize: 16))),
+                              onPressed: () {
+                                HapticFeedback.selectionClick();
+                                if (currentLatLng != null) {
                                   setState(() {
                                     preferredSortingMethod = SortingMethod.values[1];
                                   });
@@ -276,48 +244,72 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               },
                             ),
                           ),
-                          Flexible(
-                            flex: 6,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onSecondary),
-                                child: const FittedBox(child: Text('A-Z', style: TextStyle(fontSize: 16))),
-                                onPressed: () {
-                                  HapticFeedback.selectionClick();
-                                  setState(() {
-                                    preferredSortingMethod = SortingMethod.values[0];
-                                  });
-                                  _saveSettings();
-                                },
-                              ),
+                        ),
+                        Flexible(
+                          flex: 8,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSecondary),
+                              child: const FittedBox(child: Text('Location', style: TextStyle(fontSize: 16))),
+                              onPressed: () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  preferredSortingMethod = SortingMethod.values[3];
+                                });
+                                _saveSettings();
+                              },
                             ),
                           ),
-                          Flexible(
-                            flex: 6,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.secondary,
-                                    foregroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
-                                        ? Theme.of(context).colorScheme.onPrimary
-                                        : Theme.of(context).colorScheme.onSecondary),
-                                child: const FittedBox(child: Text('Time', style: TextStyle(fontSize: 16))),
-                                onPressed: () {
-                                  HapticFeedback.selectionClick();
-                                  setState(() {
-                                    preferredSortingMethod = SortingMethod.values[2];
-                                  });
-                                  _saveSettings();
+                        ),
+                        Flexible(
+                          flex: 6,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSecondary),
+                              child: const FittedBox(child: Text('A-Z', style: TextStyle(fontSize: 16))),
+                              onPressed: () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  preferredSortingMethod = SortingMethod.values[0];
+                                });
+                                _saveSettings();
+                              },
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          flex: 6,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onSecondary),
+                              child: const FittedBox(child: Text('Time', style: TextStyle(fontSize: 16))),
+                              onPressed: () {
+                                HapticFeedback.selectionClick();
+                                setState(() {
+                                  preferredSortingMethod = SortingMethod.values[2];
+                                });
+                                _saveSettings();
                               },
                             ),
                           ),
