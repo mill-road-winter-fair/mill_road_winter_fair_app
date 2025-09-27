@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -131,6 +132,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   void sortingDropdownCallback(SortingMethod? selectedValue) {
+    HapticFeedback.selectionClick();
     if (selectedValue is SortingMethod) {
       if (selectedValue == SortingMethod.values[1] && currentLatLng == null) {
         Fluttertoast.showToast(
