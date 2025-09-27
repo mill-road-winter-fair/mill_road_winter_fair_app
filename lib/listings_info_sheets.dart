@@ -2,6 +2,82 @@ import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+class GroupListingInfoSheet extends StatelessWidget {
+  final String title;
+  final String categories;
+  final String openingTimes;
+  final String approxDistance;
+
+  const GroupListingInfoSheet({
+    required this.title,
+    required this.categories,
+    required this.openingTimes,
+    required this.approxDistance,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        border: BoxBorder.all(width: 1, color: Colors.grey[700]!),
+      ),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                flex: 7,
+                child: FittedBox(
+                  child: Text(
+                    title,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  openingTimes,
+                  style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary),
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                flex: 7,
+                child: Text(
+                  categories,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                ),
+              ),
+              if (currentLatLng != null)
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    approxDistance,
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class SpecificListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;

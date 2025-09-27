@@ -113,11 +113,9 @@ class MapPageState extends State<MapPage> {
             return 1;
           }
 
-          // If neither or both are Group, sort by startTime
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           if (timeCompare != 0) return timeCompare;
 
-          // If startTime same, sort alphabetically by displayName
           return a['name'].compareTo(b['name']);
         });
 
@@ -128,9 +126,9 @@ class MapPageState extends State<MapPage> {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Scrollbar(
-                thumbVisibility: true, // always show scrollbar
-                thickness: 4, // thin scrollbar
-                radius: const Radius.circular(8), // rounded edges
+                thumbVisibility: true,
+                thickness: 4,
+                radius: const Radius.circular(8),
                 child: ListView.separated(
                   separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
                   itemCount: relatedListings.length,
@@ -141,15 +139,30 @@ class MapPageState extends State<MapPage> {
                       stringToLatLng(rel['latLng']),
                     );
 
-                    return SpecificListingInfoSheet(
-                      title: rel['displayName'],
-                      categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
-                      openingTimes: "${rel['startTime']} - ${rel['endTime']}",
-                      approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-                      phoneNumber: rel['phone'],
-                      website: rel['website'],
-                      onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                    );
+                    if (rel['primaryType'].startsWith("Group")) {
+                      // Build the Group entry with GroupListingInfoSheet
+                      return GroupListingInfoSheet(
+                        title: rel['displayName'],
+                        categories: "${rel['tertiaryType']}",
+                        openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                        approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                      );
+                    } else {
+                      // Build all others with SpecificListingInfoSheet
+                      return SpecificListingInfoSheet(
+                        title: rel['displayName'],
+                        categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
+                        openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                        approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                        phoneNumber: rel['phone'],
+                        website: rel['website'],
+                        onGetDirections: () => getDirections(
+                          rel['id'],
+                          stringToLatLng(rel['latLng']),
+                          true,
+                        ),
+                      );
+                    }
                   },
                 ),
               ),
