@@ -33,34 +33,38 @@ final Map<String, ThemeData> appThemes = {
     ),
   ),
   'dark': ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme(
-        brightness: Brightness.dark,
-        primary: const Color.fromRGBO(30, 30, 30, 1.0),
-        onPrimary: Colors.white,
-        secondary: const Color.fromRGBO(44, 44, 44, 1.0),
-        onSecondary: Colors.white,
-        tertiary: const Color.fromRGBO(255, 196, 0, 1.0),
-        error: Colors.orange,
-        onError: Colors.black,
-        surface: const Color.fromRGBO(44, 44, 44, 1.0),
-        onSurface: Colors.white,
-        onSurfaceVariant: Colors.grey[300]!,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
-        foregroundColor: Colors.white,
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
-        unselectedItemColor: Colors.grey,
-      ),
-      drawerTheme: const DrawerThemeData(
-        backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
-      listTileTheme: const ListTileThemeData(tileColor: Color.fromRGBO(44, 44, 44, 1.0))),
+    useMaterial3: true,
+    colorScheme: ColorScheme(
+      brightness: Brightness.dark,
+      primary: const Color.fromRGBO(30, 30, 30, 1.0),
+      onPrimary: Colors.white,
+      secondary: const Color.fromRGBO(44, 44, 44, 1.0),
+      onSecondary: Colors.white,
+      tertiary: const Color.fromRGBO(255, 196, 0, 1.0),
+      error: Colors.orange,
+      onError: Colors.black,
+      surface: const Color.fromRGBO(44, 44, 44, 1.0),
+      onSurface: Colors.white,
+      onSurfaceVariant: Colors.grey[300]!,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
+      unselectedItemColor: Colors.grey,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
+    ),
+    listTileTheme: const ListTileThemeData(
+      tileColor: Color.fromRGBO(44, 44, 44, 1.0),
+    ),
+  ),
   '2024': ThemeData(
     useMaterial3: true,
     colorScheme: const ColorScheme(
@@ -88,37 +92,41 @@ final Map<String, ThemeData> appThemes = {
     ),
   ),
   'highContrast': ThemeData(
-      useMaterial3: true,
-      colorScheme: const ColorScheme.highContrastDark(
-        brightness: Brightness.dark,
-        primary: Colors.black,
-        onPrimary: Color.fromRGBO(255, 243, 0, 1.0),
-        secondary: Colors.black,
-        onSecondary: Color.fromRGBO(255, 243, 0, 1.0),
-        tertiary: Color.fromRGBO(8, 255, 0, 1.0),
-        error: Colors.orange,
-        onError: Colors.black,
-        surface: Colors.black,
-        onSurface: Color.fromRGBO(255, 243, 0, 1.0),
-        onSurfaceVariant: Color.fromRGBO(0, 255, 244, 1.0),
+    useMaterial3: true,
+    colorScheme: const ColorScheme.highContrastDark(
+      brightness: Brightness.dark,
+      primary: Colors.black,
+      onPrimary: Color.fromRGBO(255, 243, 0, 1.0),
+      secondary: Colors.black,
+      onSecondary: Color.fromRGBO(255, 243, 0, 1.0),
+      tertiary: Color.fromRGBO(8, 255, 0, 1.0),
+      error: Colors.orange,
+      onError: Colors.black,
+      surface: Colors.black,
+      onSurface: Color.fromRGBO(255, 243, 0, 1.0),
+      onSurfaceVariant: Color.fromRGBO(0, 255, 244, 1.0),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.black,
+      foregroundColor: Color.fromRGBO(255, 243, 0, 1.0),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0),
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.black,
-        foregroundColor: Color.fromRGBO(255, 243, 0, 1.0),
-      ),
-      iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0)),
-      ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0),
-        unselectedItemColor: Colors.grey,
-      ),
-      drawerTheme: const DrawerThemeData(
-        backgroundColor: Colors.black,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
-      listTileTheme: const ListTileThemeData(tileColor: Colors.black)),
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0),
+      unselectedItemColor: Colors.grey,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Colors.black,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
+    ),
+    listTileTheme: const ListTileThemeData(tileColor: Colors.black),
+  ),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
     colorScheme: const ColorScheme(
