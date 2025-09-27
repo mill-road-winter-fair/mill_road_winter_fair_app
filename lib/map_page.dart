@@ -141,7 +141,7 @@ class MapPageState extends State<MapPage> {
                       stringToLatLng(rel['latLng']),
                     );
 
-                    return ListingInfoSheet(
+                    return SpecificListingInfoSheet(
                       title: rel['displayName'],
                       categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
                       openingTimes: "${rel['startTime']} - ${rel['endTime']}",
@@ -189,7 +189,7 @@ class MapPageState extends State<MapPage> {
         showModalBottomSheet(
           context: context,
           builder: (BuildContext context) {
-            return ListingInfoSheet(
+            return SpecificListingInfoSheet(
               title: listing['displayName'],
               categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
               openingTimes: "${listing['startTime']} - ${listing['endTime']}",

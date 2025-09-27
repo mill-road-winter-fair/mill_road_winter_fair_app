@@ -23,7 +23,7 @@ void main() {
   }) {
     return MaterialApp(
       home: Scaffold(
-        body: ListingInfoSheet(
+        body: SpecificListingInfoSheet(
           title: title,
           categories: categories,
           openingTimes: openingTimes,

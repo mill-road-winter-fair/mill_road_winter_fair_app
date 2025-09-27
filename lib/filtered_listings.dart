@@ -333,7 +333,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                           final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
                           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                          return ListingInfoSheet(
+                          return SpecificListingInfoSheet(
                             title: listing['displayName'],
                             categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
                             openingTimes: "${listing['startTime']} - ${listing['endTime']}",

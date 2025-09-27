@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ListingInfoSheet extends StatelessWidget {
+class SpecificListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;
   final String openingTimes;
@@ -11,7 +11,7 @@ class ListingInfoSheet extends StatelessWidget {
   final String website;
   final Function onGetDirections;
 
-  const ListingInfoSheet({
+  const SpecificListingInfoSheet({
     required this.title,
     required this.categories,
     required this.openingTimes,
