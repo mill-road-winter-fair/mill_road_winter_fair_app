@@ -130,6 +130,26 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
   }
 
+  void sortingDropdownCallback(SortingMethod? selectedValue) {
+    if (selectedValue is SortingMethod) {
+      if (selectedValue == SortingMethod.values[1] && currentLatLng == null) {
+        Fluttertoast.showToast(
+          msg: 'Location services and permissions are required to determine distances',
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          textColor: Theme.of(context).colorScheme.onPrimary,
+          fontSize: 16,
+          toastLength: Toast.LENGTH_LONG,
+        );
+      } else {
+        setState(() {
+          preferredSortingMethod = selectedValue;
+        });
+        _saveSettings();
+      }
+    }
+  }
+
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
@@ -195,127 +215,45 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           color: Theme.of(context).colorScheme.onPrimary,
           child: Column(
             children: <Widget>[
-              Expanded(
-                flex: 8,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey[350]!, width: 2),
-                    ),
+              Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey[350]!, width: 2),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const Text("Sort by: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                        Flexible(
-                          flex: 8,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.secondary,
-                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSecondary),
-                              child: const FittedBox(child: Text('Nearest', style: TextStyle(fontSize: 16))),
-                              onPressed: () {
-                                if (currentLatLng != null) {
-                                  setState(() {
-                                    preferredSortingMethod = SortingMethod.values[1];
-                                  });
-                                  _saveSettings();
-                                } else {
-                                  Fluttertoast.showToast(
-                                    msg: 'Location services and permissions are required to determine distances',
-                                    gravity: ToastGravity.CENTER,
-                                    backgroundColor: Theme.of(context).colorScheme.primary,
-                                    textColor: Theme.of(context).colorScheme.onPrimary,
-                                    fontSize: 16,
-                                    toastLength: Toast.LENGTH_LONG,
-                                  );
-                                }
-                              },
-                            ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 54),
+                        child: DropdownMenu(
+                          initialSelection: preferredSortingMethod,
+                          width: MediaQuery.of(context).size.width,
+                          label: const Text(
+                            "Sort by",
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        Flexible(
-                          flex: 8,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.secondary,
-                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSecondary),
-                              child: const FittedBox(child: Text('Location', style: TextStyle(fontSize: 16))),
-                              onPressed: () {
-                                setState(() {
-                                  preferredSortingMethod = SortingMethod.values[3];
-                                });
-                                _saveSettings();
-                              },
-                            ),
+                          leadingIcon: const Icon(Icons.sort),
+                          inputDecorationTheme: const InputDecorationTheme(
+                            isDense: true,
                           ),
+                          dropdownMenuEntries: [
+                            DropdownMenuEntry(value: SortingMethod.values[1], label: "Nearest"),
+                            DropdownMenuEntry(value: SortingMethod.values[3], label: "Location (a-z)"),
+                            DropdownMenuEntry(value: SortingMethod.values[0], label: "Name (a-z)"),
+                            DropdownMenuEntry(value: SortingMethod.values[2], label: "Time"),
+                          ],
+                          onSelected: sortingDropdownCallback,
                         ),
-                        Flexible(
-                          flex: 6,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.secondary,
-                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSecondary),
-                              child: const FittedBox(child: Text('A-Z', style: TextStyle(fontSize: 16))),
-                              onPressed: () {
-                                setState(() {
-                                  preferredSortingMethod = SortingMethod.values[0];
-                                });
-                                _saveSettings();
-                              },
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          flex: 6,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.secondary,
-                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSecondary),
-                              child: const FittedBox(child: Text('Time', style: TextStyle(fontSize: 16))),
-                              onPressed: () {
-                                setState(() {
-                                  preferredSortingMethod = SortingMethod.values[2];
-                                });
-                                _saveSettings();
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               Expanded(
-                flex: 92,
                 child: PrimaryScrollController.none(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
