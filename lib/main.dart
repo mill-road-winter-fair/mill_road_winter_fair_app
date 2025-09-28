@@ -106,6 +106,7 @@ class HomePageState extends State<HomePage> {
         selectedFontSize: 12,
         unselectedFontSize: 12,
         onTap: (selectedIndex) {
+          HapticFeedback.selectionClick();
           // Update the user's location
           establishLocation();
           setState(() {
@@ -153,6 +154,7 @@ class HomePageState extends State<HomePage> {
                     leading: const Icon(Icons.info),
                     title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
                     },
@@ -161,6 +163,7 @@ class HomePageState extends State<HomePage> {
                     leading: const Icon(Icons.warning),
                     title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
                     },
@@ -169,6 +172,7 @@ class HomePageState extends State<HomePage> {
                     leading: const Icon(Icons.public),
                     title: const Text('Visit our Website', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
                     },
                   ),
@@ -176,6 +180,7 @@ class HomePageState extends State<HomePage> {
                     leading: const Icon(Icons.email),
                     title: const Text('Email us', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () async {
+                      HapticFeedback.lightImpact();
                       final Uri mailUri = Uri(scheme: 'mailto', path: 'info@millroadwinterfair.org');
                       if (await canLaunchUrl(mailUri)) {
                         await launchUrl(mailUri);
@@ -196,24 +201,28 @@ class HomePageState extends State<HomePage> {
                     children: [
                       IconButton(
                         onPressed: () {
+                          HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                         },
                         icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 60, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
+                          HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://x.com/millroadfair'));
                         },
                         icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 60, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
+                          HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                         },
                         icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 60, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
+                          HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                         },
                         icon: FaIcon(FontAwesomeIcons.flickr, size: 60, color: Theme.of(context).colorScheme.tertiary),
@@ -225,6 +234,7 @@ class HomePageState extends State<HomePage> {
                     leading: const Icon(Icons.settings),
                     title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
                     },
@@ -233,6 +243,7 @@ class HomePageState extends State<HomePage> {
                     leading: const Icon(Icons.feedback),
                     title: const Text('Give feedback on the app', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
                     },
                   ),
