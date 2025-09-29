@@ -90,7 +90,7 @@ void main() async {
     expect(find.text('12:00 - 16:30'), findsOneWidget);
     expect(find.text('approx. 197 m'), findsOneWidget);
     expect(find.text('01223 222222'), findsOneWidget);
-    expect(find.byIcon(Icons.directions_walk), findsExactly(2));
+    expect(find.byIcon(Icons.directions_walk), findsExactly(3));
     expect(find.byIcon(Icons.public), findsExactly(2));
 
     final dividerFinder = find.byWidgetPredicate((widget) => widget is Divider && widget.color == Colors.grey[350]);
