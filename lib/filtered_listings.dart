@@ -218,35 +218,51 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           child: Column(
             children: <Widget>[
               Container(
-                height: 56,
+                height: 66,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey[350]!, width: 2),
-                  ),
+                  color: Theme.of(context).colorScheme.surfaceDim,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 54),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 66),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: DropdownMenu(
                           initialSelection: preferredSortingMethod,
-                          width: MediaQuery.of(context).size.width,
+                          width: MediaQuery.of(context).size.width * 0.66,
                           label: const Text(
                             "Sort by",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           leadingIcon: const Icon(Icons.sort),
-                          inputDecorationTheme: const InputDecorationTheme(
-                            isDense: true,
+                          inputDecorationTheme: InputDecorationTheme(
+                            filled: true,
+                            fillColor: Theme.of(context).colorScheme.secondary,
                           ),
                           dropdownMenuEntries: [
-                            DropdownMenuEntry(value: SortingMethod.values[1], label: "Nearest"),
-                            DropdownMenuEntry(value: SortingMethod.values[3], label: "Location (a-z)"),
-                            DropdownMenuEntry(value: SortingMethod.values[0], label: "Name (a-z)"),
-                            DropdownMenuEntry(value: SortingMethod.values[2], label: "Time"),
+                            DropdownMenuEntry(
+                              value: SortingMethod.values[1],
+                              label: "Nearest",
+                              leadingIcon: const Icon(Icons.directions_walk),
+                            ),
+                            DropdownMenuEntry(
+                              value: SortingMethod.values[3],
+                              label: "Location (a-z)",
+                              leadingIcon: const Icon(Icons.signpost),
+                            ),
+                            DropdownMenuEntry(
+                              value: SortingMethod.values[0],
+                              label: "Name (a-z)",
+                              leadingIcon: const Icon(Icons.sort_by_alpha),
+                            ),
+                            DropdownMenuEntry(
+                              value: SortingMethod.values[2],
+                              label: "Time",
+                              leadingIcon: const Icon(Icons.alarm),
+                            ),
                           ],
                           onSelected: sortingDropdownCallback,
                         ),
