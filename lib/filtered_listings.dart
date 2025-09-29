@@ -215,81 +215,84 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           onRefresh: refreshListings,
           backgroundColor: Theme.of(context).colorScheme.primary,
           color: Theme.of(context).colorScheme.onPrimary,
-          child: Column(
-            children: <Widget>[
-              Container(
-                height: 66,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceDim,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 66),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: DropdownMenu(
-                          initialSelection: preferredSortingMethod,
-                          width: MediaQuery.of(context).size.width * 0.66,
-                          label: const Text(
-                            "Sort by",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          leadingIcon: const Icon(Icons.sort),
-                          inputDecorationTheme: InputDecorationTheme(
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.secondary,
-                          ),
-                          dropdownMenuEntries: [
-                            DropdownMenuEntry(
-                              value: SortingMethod.values[1],
-                              label: "Nearest",
-                              leadingIcon: const Icon(Icons.directions_walk),
-                            ),
-                            DropdownMenuEntry(
-                              value: SortingMethod.values[3],
-                              label: "Location (a-z)",
-                              leadingIcon: const Icon(Icons.signpost),
-                            ),
-                            DropdownMenuEntry(
-                              value: SortingMethod.values[0],
-                              label: "Name (a-z)",
-                              leadingIcon: const Icon(Icons.sort_by_alpha),
-                            ),
-                            DropdownMenuEntry(
-                              value: SortingMethod.values[2],
-                              label: "Time",
-                              leadingIcon: const Icon(Icons.alarm),
-                            ),
-                          ],
-                          onSelected: sortingDropdownCallback,
-                        ),
-                      ),
+          child: Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: true, // or false if you prefer "show on scroll"
+            thickness: 4,
+            radius: const Radius.circular(8),
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                // Dropdown header that scrolls away
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 66,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceDim,
                     ),
-                  ],
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 66),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: DropdownMenu(
+                              initialSelection: preferredSortingMethod,
+                              width: MediaQuery.of(context).size.width * 0.6,
+                              label: const Text(
+                                "Sort by",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              leadingIcon: const Icon(Icons.sort),
+                              inputDecorationTheme: InputDecorationTheme(
+                                filled: true,
+                                fillColor: Theme.of(context).colorScheme.secondary,
+                              ),
+                              dropdownMenuEntries: [
+                                DropdownMenuEntry(
+                                  value: SortingMethod.values[1],
+                                  label: "Nearest",
+                                  leadingIcon: const Icon(Icons.directions_walk),
+                                ),
+                                DropdownMenuEntry(
+                                  value: SortingMethod.values[3],
+                                  label: "Location (a-z)",
+                                  leadingIcon: const Icon(Icons.signpost),
+                                ),
+                                DropdownMenuEntry(
+                                  value: SortingMethod.values[0],
+                                  label: "Name (a-z)",
+                                  leadingIcon: const Icon(Icons.sort_by_alpha),
+                                ),
+                                DropdownMenuEntry(
+                                  value: SortingMethod.values[2],
+                                  label: "Time",
+                                  leadingIcon: const Icon(Icons.alarm),
+                                ),
+                              ],
+                              onSelected: sortingDropdownCallback,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: PrimaryScrollController.none(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: Scrollbar(
-                      controller: _scrollController,
-                      thumbVisibility: true,
-                      thickness: 4,
-                      radius: const Radius.circular(8),
-                      child: ListView.separated(
-                        controller: _scrollController,
-                        separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-                        itemCount: filteredListings.length,
-                        itemBuilder: (context, index) {
-                          final listing = filteredListings[index];
-                          final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                          final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                          return ListingInfoSheet(
+
+                // Listings list
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final listing = filteredListings[index];
+                      final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                      final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                      LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+
+                      return Column(
+                        children: [
+                          ListingInfoSheet(
                             title: listing['displayName'],
                             categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
                             openingTimes: "${listing['startTime']} - ${listing['endTime']}",
@@ -305,14 +308,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 );
                               }
                             },
-                          );
-                        },
-                      ),
-                    ),
+                          ),
+                          // separator except after last item
+                          if (index != filteredListings.length - 1) Divider(color: Colors.grey[350]),
+                        ],
+                      );
+                    },
+                    childCount: filteredListings.length,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
