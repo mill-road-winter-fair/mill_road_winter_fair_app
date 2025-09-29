@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -146,6 +147,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
           if (phoneNumber.isNotEmpty)
             GestureDetector(
               onTap: () async {
+                HapticFeedback.lightImpact();
                 final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
                 if (await canLaunchUrl(phoneUri)) {
                   await launchUrl(phoneUri);
@@ -169,6 +171,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 flex: 8,
                 child: ElevatedButton.icon(
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     onGetDirections();
                   },
                   icon: const Icon(Icons.directions_walk),
@@ -181,6 +184,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   flex: 8,
                   child: ElevatedButton.icon(
                     onPressed: () {
+                      HapticFeedback.lightImpact();
                       launchUrl(Uri.parse(website));
                     },
                     icon: const Icon(Icons.public),

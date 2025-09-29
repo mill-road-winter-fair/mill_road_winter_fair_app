@@ -75,7 +75,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
               'Take me straight to the app!',
               style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
             ),
-            onPressed: () => _onIntroEnd(context),
+            onPressed: () {
+              HapticFeedback.heavyImpact();
+              _onIntroEnd(context);
+            },
           ),
         ),
       ),
@@ -372,8 +375,14 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           ),
         ),
       ],
-      onDone: () => _onIntroEnd(context),
-      onSkip: () => _onIntroEnd(context), // You can override onSkip callback
+      onDone: () {
+        HapticFeedback.lightImpact();
+        _onIntroEnd(context);
+      },
+      onSkip: () {
+        HapticFeedback.lightImpact();
+        _onIntroEnd(context);
+      },
       showSkipButton: true,
       skipOrBackFlex: 0,
       nextFlex: 0,

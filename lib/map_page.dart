@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -195,6 +196,7 @@ class MapPageState extends State<MapPage> {
       icon: customMarker,
       visible: true,
       onTap: () {
+        HapticFeedback.lightImpact();
         // Update user's location
         establishLocation();
         int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
@@ -506,6 +508,7 @@ class MapPageState extends State<MapPage> {
                           if (_navigationInProgress == true)
                             IconButton.filled(
                               onPressed: () {
+                                HapticFeedback.lightImpact();
                                 setState(() {
                                   _positionStream?.cancel();
                                   _polylines.clear();
@@ -527,6 +530,7 @@ class MapPageState extends State<MapPage> {
                           if (_navigationInProgress == false)
                             IconButton.filled(
                               onPressed: () {
+                                HapticFeedback.lightImpact();
                                 _resetMapCamera();
                               },
                               icon: Icon(
@@ -540,6 +544,7 @@ class MapPageState extends State<MapPage> {
                         children: [
                           IconButton.filled(
                             onPressed: () {
+                              HapticFeedback.lightImpact();
                               setState(() {
                                 if (mapType == MapType.normal) {
                                   mapType = MapType.hybrid;
@@ -571,6 +576,7 @@ class MapPageState extends State<MapPage> {
                           if (_distanceToDestination != null)
                             ElevatedButton.icon(
                               onPressed: () {
+                                HapticFeedback.lightImpact();
                                 _setMapCameraToFitPolyline(_polylines);
                               },
                               style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
