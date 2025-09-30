@@ -323,6 +323,9 @@ class MapPageState extends State<MapPage> {
 
     if (result.points.isNotEmpty) {
       setState(() {
+        final distanceMetres = result.totalDistanceValue;
+        // Calculate dash and space sizes to appear the same on screen, no matter the distance
+        final dashSpace = (distanceMetres ?? 500) / 50;
         _polylines.clear();
         _polylines.add(
           Polyline(
@@ -330,10 +333,9 @@ class MapPageState extends State<MapPage> {
             points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: <PatternItem>[PatternItem.dash(10), PatternItem.gap(10)],
+            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)],
           ),
         );
-        final distanceMetres = result.totalDistanceValue;
         _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
       });
     }
