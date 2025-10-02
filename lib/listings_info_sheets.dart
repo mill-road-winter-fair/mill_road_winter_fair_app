@@ -34,10 +34,14 @@ class GroupListingInfoSheet extends StatelessWidget {
             children: [
               Expanded(
                 flex: 7,
-                child: FittedBox(
-                  child: Text(
-                    title,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 42), // cap text height
+                  child: FittedBox(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      title,
+                      style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                    ),
                   ),
                 ),
               ),
