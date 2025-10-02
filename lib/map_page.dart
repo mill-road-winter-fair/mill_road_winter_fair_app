@@ -150,11 +150,10 @@ class MapPageState extends State<MapPage> {
                       );
                     } else {
                       // Build all others with SpecificListingInfoSheet
-                      return SpecificListingInfoSheet(
+                      return SimplifiedListingInfoSheet(
                         title: rel['displayName'],
                         categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
                         openingTimes: "${rel['startTime']} - ${rel['endTime']}",
-                        approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
                         phoneNumber: rel['phone'],
                         website: rel['website'],
                         onGetDirections: () => getDirections(
