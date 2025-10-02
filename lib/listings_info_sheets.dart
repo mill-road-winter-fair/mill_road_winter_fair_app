@@ -22,6 +22,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(28),
         border: BoxBorder.all(width: 1, color: Colors.grey[700]!),
       ),
       padding: const EdgeInsets.all(16.0),

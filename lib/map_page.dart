@@ -122,50 +122,61 @@ class MapPageState extends State<MapPage> {
 
         showModalBottomSheet(
           context: context,
-          showDragHandle: true,
+          showDragHandle: false,
+          enableDrag: false,
+          isScrollControlled: true,
+          useSafeArea: true,
           builder: (BuildContext context) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Scrollbar(
-                thumbVisibility: true,
-                thickness: 4,
-                radius: const Radius.circular(8),
-                child: ListView.separated(
-                  separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-                  itemCount: relatedListings.length,
-                  itemBuilder: (context, index) {
-                    final rel = relatedListings[index];
-                    int approximateDistanceMetres = asTheCrowFlies(
-                      currentLatLng,
-                      stringToLatLng(rel['latLng']),
-                    );
-
-                    if (rel['primaryType'].startsWith("Group")) {
-                      // Build the Group entry with GroupListingInfoSheet
-                      return GroupListingInfoSheet(
-                        title: rel['displayName'],
-                        categories: "${rel['tertiaryType']}",
-                        openingTimes: "${rel['startTime']} - ${rel['endTime']}",
-                        approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-                      );
-                    } else {
-                      // Build all others with SpecificListingInfoSheet
-                      return SimplifiedListingInfoSheet(
-                        title: rel['displayName'],
-                        categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
-                        openingTimes: "${rel['startTime']} - ${rel['endTime']}",
-                        phoneNumber: rel['phone'],
-                        website: rel['website'],
-                        onGetDirections: () => getDirections(
-                          rel['id'],
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.66,
+              minChildSize: 0.3,
+              maxChildSize: 1.0,
+              builder: (context, scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                  child: Scrollbar(
+                    controller: scrollController,
+                    thumbVisibility: false,
+                    thickness: 4,
+                    radius: const Radius.circular(8),
+                    child: ListView.separated(
+                      controller: scrollController,
+                      separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+                      itemCount: relatedListings.length,
+                      itemBuilder: (context, index) {
+                        final rel = relatedListings[index];
+                        int approximateDistanceMetres = asTheCrowFlies(
+                          currentLatLng,
                           stringToLatLng(rel['latLng']),
-                          true,
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
+                        );
+
+                        if (rel['primaryType'].startsWith("Group")) {
+                          return GroupListingInfoSheet(
+                            title: rel['displayName'],
+                            categories: "${rel['tertiaryType']}",
+                            openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                            approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                          );
+                        } else {
+                          return SimplifiedListingInfoSheet(
+                            title: rel['displayName'],
+                            categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
+                            openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                            phoneNumber: rel['phone'],
+                            website: rel['website'],
+                            onGetDirections: () => getDirections(
+                              rel['id'],
+                              stringToLatLng(rel['latLng']),
+                              true,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
