@@ -224,7 +224,7 @@ class SimplifiedListingInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,36 +249,40 @@ class SimplifiedListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
+                flex: 6,
                 child: Text(categories),
               ),
+              if (phoneNumber.isNotEmpty)
+                Expanded(
+                  flex: 4,
+                  child: GestureDetector(
+                    onTap: () async {
+                      HapticFeedback.lightImpact();
+                      final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+                      if (await canLaunchUrl(phoneUri)) {
+                        await launchUrl(phoneUri);
+                      } else {
+                        throw Exception('Could not launch $phoneNumber');
+                      }
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Icon(Icons.phone, color: Colors.blue),
+                        const SizedBox(width: 2),
+                        Text(phoneNumber),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
-          const SizedBox(height: 8),
-          if (phoneNumber.isNotEmpty)
-            GestureDetector(
-              onTap: () async {
-                HapticFeedback.lightImpact();
-                final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-                if (await canLaunchUrl(phoneUri)) {
-                  await launchUrl(phoneUri);
-                } else {
-                  throw Exception('Could not launch $phoneNumber');
-                }
-              },
-              child: Row(
-                children: [
-                  const Icon(Icons.phone, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  Text(phoneNumber),
-                ],
-              ),
-            ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
