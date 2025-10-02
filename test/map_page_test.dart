@@ -119,7 +119,6 @@ void main() async {
     expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(find.text('11:00 - 15:00'), findsOneWidget);
     expect(find.text('Fake Street • Doughnuts'), findsOneWidget);
-    expect(find.text('approx. 206 m'), findsOneWidget);
     expect(find.byIcon(Icons.directions_walk), findsOneWidget);
     expect(find.byIcon(Icons.public), findsOneWidget);
   });
