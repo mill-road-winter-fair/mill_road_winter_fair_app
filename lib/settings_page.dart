@@ -52,8 +52,8 @@ Future<void> loadSettings(bool onTest) async {
     // Load preferred distance unit from shared preferences
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 
-    // Set default bearing display as always North (1 in the index)
-    int savedMapOrientationIndex = prefs.getInt('preferredMapOrientation') ?? 1;
+    // Set default bearing display as Adaptive (0 in the index)
+    int savedMapOrientationIndex = prefs.getInt('preferredMapOrientation') ?? 0;
     // Load preferred bearing display from shared preferences
     preferredMapOrientation = MapOrientation.values[savedMapOrientationIndex];
 

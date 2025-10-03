@@ -31,10 +31,12 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late Future<List<Map<String, dynamic>>> _fetchListings;
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
+  Map<MarkerId, Marker> markers =
+      <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
-  Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
+  Map<String, BitmapDescriptor> bitmapDescriptors = <String,
+      BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   bool _navigationInProgress = false;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
@@ -70,8 +72,11 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<bool> createAllMarkerBitmaps() async {
-    for (var listingType in 'Food, Shopping, Music, Event, Service, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'.split(', ')) {
-      BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
+    for (var listingType
+        in 'Food, Shopping, Music, Event, Service, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'
+            .split(', ')) {
+      BitmapDescriptor newBitmapDescriptor = await getColoredMarker(
+          listingType, getCategoryColor(selectedThemeKey, listingType));
       bitmapDescriptors[listingType] = newBitmapDescriptor;
     }
     if (bitmapDescriptors.isEmpty) {
@@ -92,7 +97,8 @@ class MapPageState extends State<MapPage> {
       customMarker = await getColoredMarker(listing['primaryType'], color);
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
+      customMarker = bitmapDescriptors[listing['primaryType']] ??
+          BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
@@ -104,13 +110,17 @@ class MapPageState extends State<MapPage> {
         establishLocation();
 
         // Filter listings with the same secondaryType
-        List<Map<String, dynamic>> relatedListings = listings.where((l) => l['secondaryType'] == listing['secondaryType']).toList();
+        List<Map<String, dynamic>> relatedListings = listings
+            .where((l) => l['secondaryType'] == listing['secondaryType'])
+            .toList();
 
         // Sort listings: Group first → startTime → displayName
         relatedListings.sort((a, b) {
-          if (a['primaryType'].startsWith("Group") && !b['primaryType'].startsWith("Group")) {
+          if (a['primaryType'].startsWith("Group") &&
+              !b['primaryType'].startsWith("Group")) {
             return -1;
-          } else if (b['primaryType'].startsWith("Group") && !a['primaryType'].startsWith("Group")) {
+          } else if (b['primaryType'].startsWith("Group") &&
+              !a['primaryType'].startsWith("Group")) {
             return 1;
           }
 
@@ -133,7 +143,8 @@ class MapPageState extends State<MapPage> {
                 thickness: 4, // thin scrollbar
                 radius: const Radius.circular(8), // rounded edges
                 child: ListView.separated(
-                  separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+                  separatorBuilder: (BuildContext context, int index) =>
+                      Divider(color: Colors.grey[350]),
                   itemCount: relatedListings.length,
                   itemBuilder: (context, index) {
                     final rel = relatedListings[index];
@@ -144,12 +155,15 @@ class MapPageState extends State<MapPage> {
 
                     return ListingInfoSheet(
                       title: rel['displayName'],
-                      categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
+                      categories:
+                          "${rel['secondaryType']} • ${rel['tertiaryType']}",
                       openingTimes: "${rel['startTime']} - ${rel['endTime']}",
-                      approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                      approxDistance:
+                          'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
                       phoneNumber: rel['phone'],
                       website: rel['website'],
-                      onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                      onGetDirections: () => getDirections(
+                          rel['id'], stringToLatLng(rel['latLng']), true),
                     );
                   },
                 ),
@@ -174,7 +188,8 @@ class MapPageState extends State<MapPage> {
       customMarker = await getColoredMarker(listing['primaryType'], color);
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
+      customMarker = bitmapDescriptors[listing['primaryType']] ??
+          BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
@@ -186,19 +201,23 @@ class MapPageState extends State<MapPage> {
         HapticFeedback.lightImpact();
         // Update user's location
         establishLocation();
-        int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
+        int approximateDistanceMetres =
+            asTheCrowFlies(currentLatLng, destinationLatLng);
         // Show bottom sheet with listing information
         showModalBottomSheet(
           context: context,
           builder: (BuildContext context) {
             return ListingInfoSheet(
               title: listing['displayName'],
-              categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+              categories:
+                  "${listing['secondaryType']} • ${listing['tertiaryType']}",
               openingTimes: "${listing['startTime']} - ${listing['endTime']}",
-              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+              approxDistance:
+                  'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
               phoneNumber: listing['phone'],
               website: listing['website'],
-              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+              onGetDirections: () =>
+                  getDirections(listing['id'], destinationLatLng, true),
             );
           },
         );
@@ -216,7 +235,8 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+  Future<void> getDirections(
+      String id, LatLng destination, bool navigatorPop) async {
     // Pop the navigator if told to
     if (navigatorPop == true) {
       Navigator.pop(context);
@@ -241,7 +261,8 @@ class MapPageState extends State<MapPage> {
       await startLocationUpdates(destination);
     } else {
       Fluttertoast.showToast(
-        msg: 'Location services and permissions are required to determine directions',
+        msg:
+            'Location services and permissions are required to determine directions',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
         textColor: Theme.of(context).colorScheme.onPrimary,
@@ -251,7 +272,8 @@ class MapPageState extends State<MapPage> {
     }
 
     // Add destination map marker
-    Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
+    Map<String, dynamic> destinationListing =
+        listings.firstWhere((element) => element['id'] == id);
     addSpecificMarker(destinationListing, false);
 
     // Set navigation as in progress
@@ -296,13 +318,15 @@ class MapPageState extends State<MapPage> {
     // Define headers based on platform
     Map<String, String> headers;
     if (Platform.isAndroid) {
-      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+      googleMapsDirectionsApiKey =
+          dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
       headers = {
         "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
         "X-Android-Cert": androidSigningKey,
       };
     } else if (Platform.isIOS) {
-      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+      googleMapsDirectionsApiKey =
+          dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
       headers = {
         "X-Ios-Bundle-Identifier": iosBundleId,
       };
@@ -330,13 +354,16 @@ class MapPageState extends State<MapPage> {
         _polylines.add(
           Polyline(
             polylineId: const PolylineId('route'),
-            points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+            points: result.points
+                .map((point) => LatLng(point.latitude, point.longitude))
+                .toList(),
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
             patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)],
           ),
         );
-        _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
+        _distanceToDestination =
+            convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
       });
     }
   }
@@ -348,23 +375,44 @@ class MapPageState extends State<MapPage> {
   void _setMapCameraToFitMapMarkers() {
     // Set default LatLngs bounds
     // southwest
-    double markerMinLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : 52.199174;
-    double markerMinLong = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).longitude : 0.140929;
+    double markerMinLat = listings.first.containsKey('latLng')
+        ? stringToLatLng(listings.first['latLng']).latitude
+        : 52.199174;
+    double markerMinLong = listings.first.containsKey('latLng')
+        ? stringToLatLng(listings.first['latLng']).longitude
+        : 0.140929;
     // northeast
-    double markerMaxLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : 52.199174;
-    double markerMaxLong = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).longitude : 0.140929;
+    double markerMaxLat = listings.first.containsKey('latLng')
+        ? stringToLatLng(listings.first['latLng']).latitude
+        : 52.199174;
+    double markerMaxLong = listings.first.containsKey('latLng')
+        ? stringToLatLng(listings.first['latLng']).longitude
+        : 0.140929;
 
     if (listings.isNotEmpty) {
       for (var listing in listings) {
         LatLng markerLatLng = stringToLatLng(listing['latLng']);
-        if (markerLatLng.latitude < markerMinLat) markerMinLat = markerLatLng.latitude;
-        if (markerLatLng.latitude > markerMaxLat) markerMaxLat = markerLatLng.latitude;
-        if (markerLatLng.longitude < markerMinLong) markerMinLong = markerLatLng.longitude;
-        if (markerLatLng.longitude > markerMaxLong) markerMaxLong = markerLatLng.longitude;
+        if (markerLatLng.latitude < markerMinLat)
+          markerMinLat = markerLatLng.latitude;
+        if (markerLatLng.latitude > markerMaxLat)
+          markerMaxLat = markerLatLng.latitude;
+        if (markerLatLng.longitude < markerMinLong)
+          markerMinLong = markerLatLng.longitude;
+        if (markerLatLng.longitude > markerMaxLong)
+          markerMaxLong = markerLatLng.longitude;
       }
     }
 
-    _moveCameraToBounds(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25);
+    if (preferredMapOrientation == MapOrientation.adaptive) {
+      _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong),
+          LatLng(markerMaxLat, markerMaxLong), 25, 290);
+    } else if (preferredMapOrientation == MapOrientation.alwaysNorth) {
+      _moveCameraToBounds(LatLng(markerMinLat, markerMinLong),
+          LatLng(markerMaxLat, markerMaxLong), 25);
+    } else {
+      debugPrint(
+          'Got invalid preferredMapOrientation: $preferredMapOrientation');
+    }
   }
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
@@ -377,15 +425,19 @@ class MapPageState extends State<MapPage> {
       for (var point in polyline.points) {
         if (point.latitude < polylineMinLat) polylineMinLat = point.latitude;
         if (point.latitude > polylineMaxLat) polylineMaxLat = point.latitude;
-        if (point.longitude < polylineMinLong) polylineMinLong = point.longitude;
-        if (point.longitude > polylineMaxLong) polylineMaxLong = point.longitude;
+        if (point.longitude < polylineMinLong)
+          polylineMinLong = point.longitude;
+        if (point.longitude > polylineMaxLong)
+          polylineMaxLong = point.longitude;
       }
     }
 
-    _moveCameraToBounds(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), 75);
+    _moveCameraToBounds(LatLng(polylineMinLat, polylineMinLong),
+        LatLng(polylineMaxLat, polylineMaxLong), 75);
   }
 
-  _moveCameraToBounds(LatLng southwestMin, LatLng northeastMax, double padding) {
+  _moveCameraToBounds(
+      LatLng southwestMin, LatLng northeastMax, double padding) {
     _controller?.moveCamera(
       CameraUpdate.newLatLngBounds(
         LatLngBounds(
@@ -393,6 +445,29 @@ class MapPageState extends State<MapPage> {
           northeast: northeastMax,
         ),
         padding, // Padding around the bounds
+      ),
+    );
+  }
+
+  _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax,
+      double padding, double rotation) {
+    _controller?.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: southwestMin,
+          northeast: northeastMax,
+        ),
+        padding, // Padding around the bounds
+      ),
+    );
+    _controller?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng((southwestMin.latitude + northeastMax.latitude) / 2,
+              (southwestMin.longitude + northeastMax.longitude) / 2),
+          zoom: 15,
+          bearing: rotation,
+        ),
       ),
     );
   }
@@ -443,7 +518,10 @@ class MapPageState extends State<MapPage> {
                 Text(
                   "Unable to retrieve listings",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.tertiary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 isRefreshing
@@ -464,7 +542,8 @@ class MapPageState extends State<MapPage> {
             style: mapStyle,
             mapType: mapType,
             rotateGesturesEnabled: false,
-            compassEnabled: false,
+            compassEnabled:
+                (preferredMapOrientation == MapOrientation.adaptive),
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
             mapToolbarEnabled: false,
@@ -492,6 +571,13 @@ class MapPageState extends State<MapPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // apparently android puts the compass in the top-left
+                      if ((preferredMapOrientation ==
+                              MapOrientation.adaptive) &&
+                          (Platform.isAndroid))
+                        Row(children: [
+                          Spacer(flex: 3),
+                        ]),
                       Row(
                         children: [
                           if (_navigationInProgress == true)
@@ -568,11 +654,19 @@ class MapPageState extends State<MapPage> {
                                 HapticFeedback.lightImpact();
                                 _setMapCameraToFitPolyline(_polylines);
                               },
-                              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                              icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.primary),
+                              icon: Icon(Icons.directions,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary),
                               label: Text(
                                 _distanceToDestination!,
-                                style: TextStyle(fontSize: 28, color: Theme.of(context).colorScheme.onPrimary),
+                                style: TextStyle(
+                                    fontSize: 28,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary),
                               ),
                             ),
                         ],
@@ -582,7 +676,8 @@ class MapPageState extends State<MapPage> {
                 ),
                 const Expanded(
                   flex: 2,
-                  child: Column(), // Dummy column to help flex with centring distance button
+                  child:
+                      Column(), // Dummy column to help flex with centring distance button
                 ),
               ],
             ),
