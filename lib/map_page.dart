@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +36,9 @@ class MapPageState extends State<MapPage> {
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
+  late double _mapBearing;
+  double? mapWidth;
+  double? mapHeight;
   bool _navigationInProgress = false;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
@@ -364,7 +368,14 @@ class MapPageState extends State<MapPage> {
       }
     }
 
-    _moveCameraToBounds(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25);
+    switch (preferredMapOrientation) {
+      case MapOrientation.adaptive:
+        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25, 290);
+        break;
+      case MapOrientation.alwaysNorth:
+        _moveCameraToBounds(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25);
+        break;
+    }
   }
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
@@ -395,6 +406,75 @@ class MapPageState extends State<MapPage> {
         padding, // Padding around the bounds
       ),
     );
+  }
+
+  _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
+    double theZoom;
+
+    if (mapWidth != null && mapHeight != null) {
+      theZoom = zoomForBounds(southwestMin, northeastMax, Size(mapWidth!, mapHeight!), padding: padding);
+    } else {
+      theZoom = 15;
+      debugPrint('No map areas size found so using default zoom of $theZoom');
+    }
+
+    _controller?.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: southwestMin,
+          northeast: northeastMax,
+        ),
+        padding, // Padding around the bounds
+      ),
+    );
+    _controller?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng((southwestMin.latitude + northeastMax.latitude) / 2, (southwestMin.longitude + northeastMax.longitude) / 2),
+          zoom: theZoom,
+          bearing: rotation,
+        ),
+      ),
+    );
+  }
+
+  double _latRad(double lat) {
+    final sinVal = sin(lat * pi / 180);
+    final radX2 = log((1 + sinVal) / (1 - sinVal)) / 2;
+    return max(min(radX2, pi), -pi) / 2;
+  }
+
+  double zoomForBounds(
+    LatLng southwestMin,
+    LatLng northeastMax,
+    Size mapSize, {
+    double padding = 0,
+  }) {
+    const WORLD_DIM = 256.0;
+    const ZOOM_MAX = 21.0;
+
+    // Effective size after padding
+    // The '4 / MediaQuery.of(context).devicePixelRatio)' adjusts the padding according to the device
+    final usableWidth = mapSize.width - (2 * padding * 4 / MediaQuery.of(context).devicePixelRatio);
+    final usableHeight = mapSize.height - (2 * padding * 4 / MediaQuery.of(context).devicePixelRatio);
+
+    if (usableWidth <= 0 || usableHeight <= 0) return 0;
+
+    final latFraction = (_latRad(northeastMax.latitude) - _latRad(southwestMin.latitude)) / pi;
+
+    final centerLat = (northeastMax.latitude + southwestMin.latitude) / 2;
+    final lngDiff = northeastMax.longitude - southwestMin.longitude;
+    final lngFraction = (lngDiff < 0 ? lngDiff + 360 : lngDiff) / 360;
+
+    // scale by cos(latitude) to account for Mercator
+    final adjustedLngFraction = lngFraction * cos(centerLat * pi / 180);
+
+    final lngZoom = log(usableWidth / WORLD_DIM / adjustedLngFraction) / ln2;
+
+    final latZoom = log(usableHeight / WORLD_DIM / latFraction) / ln2;
+
+    final zoom = min(latZoom, lngZoom);
+    return min(zoom, ZOOM_MAX);
   }
 
   Future<void> refreshListings() async {
@@ -458,134 +538,132 @@ class MapPageState extends State<MapPage> {
           );
         }
 
+        // Backup map bearing
+        switch (preferredMapOrientation) {
+          case MapOrientation.adaptive:
+            _mapBearing = 290;
+            break;
+          case MapOrientation.alwaysNorth:
+            _mapBearing = 0;
+            break;
+        }
+
         return Scaffold(
-          body: GoogleMap(
-            // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
-            style: mapStyle,
-            mapType: mapType,
-            rotateGesturesEnabled: false,
-            compassEnabled: false,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            mapToolbarEnabled: false,
-            onMapCreated: (GoogleMapController controller) {
-              _controller = controller;
-              if (listings.isNotEmpty) {
-                // We should have listings by this point so set the camera to their bounds
-                _setMapCameraToFitMapMarkers();
-              }
-            },
-            initialCameraPosition: const CameraPosition(
-              target: LatLng(52.199174, 0.140929),
-              zoom: 14.1,
-            ),
-            markers: markers.values.toSet(),
-            polylines: _polylines,
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerTop,
-          floatingActionButton: Container(
-            padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 3),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          if (_navigationInProgress == true)
-                            IconButton.filled(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                setState(() {
-                                  _positionStream?.cancel();
-                                  _polylines.clear();
-                                  _distanceToDestination = null;
-                                  clearAllMarkers();
-                                  addAllVisibleMarkers(false);
-                                  _navigationInProgress = false;
-                                });
-                              },
-                              icon: Icon(
-                                Icons.cancel,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                        ],
+          body: Stack(
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  mapWidth = constraints.maxWidth;
+                  mapHeight = constraints.maxHeight;
+                  return GoogleMap(
+                    // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
+                    style: mapStyle,
+                    mapType: mapType,
+                    rotateGesturesEnabled: false,
+                    compassEnabled: (preferredMapOrientation == MapOrientation.adaptive),
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
+                    mapToolbarEnabled: false,
+                    onMapCreated: (GoogleMapController controller) {
+                      _controller = controller;
+                      if (listings.isNotEmpty) {
+                        // We should have listings by this point so set the camera to their bounds
+                        _setMapCameraToFitMapMarkers();
+                      }
+                    },
+                    initialCameraPosition: const CameraPosition(
+                      target: LatLng(52.199174, 0.140929),
+                      zoom: 14.1,
+                    ),
+                    markers: markers.values.toSet(),
+                    polylines: _polylines,
+                  );
+                },
+              ),
+              Positioned(
+                top: 4,
+                left: 4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_navigationInProgress == true)
+                      FloatingActionButton(
+                        shape: const CircleBorder(),
+                        mini: true,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          setState(() {
+                            _positionStream?.cancel();
+                            _polylines.clear();
+                            _distanceToDestination = null;
+                            clearAllMarkers();
+                            addAllVisibleMarkers(false);
+                            _navigationInProgress = false;
+                          });
+                        },
+                        child: Icon(
+                          Icons.cancel,
+                          size: 24,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
-                      Row(
-                        children: [
-                          if (_navigationInProgress == false)
-                            IconButton.filled(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                _resetMapCamera();
-                              },
-                              icon: Icon(
-                                Icons.home,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                            ),
-                        ],
+                    if (_navigationInProgress == false)
+                      FloatingActionButton(
+                        shape: const CircleBorder(),
+                        mini: true,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          _resetMapCamera();
+                        },
+                        child: Icon(
+                          Icons.home,
+                          size: 24,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
-                      Row(
-                        children: [
-                          IconButton.filled(
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              setState(() {
-                                if (mapType == MapType.normal) {
-                                  mapType = MapType.hybrid;
-                                  _layersIcon = Icons.map;
-                                } else {
-                                  mapType = MapType.normal;
-                                  _layersIcon = Icons.satellite_alt;
-                                }
-                              });
-                            },
-                            icon: Icon(
-                              _layersIcon,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                        ],
+                    FloatingActionButton(
+                      shape: const CircleBorder(),
+                      mini: true,
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        setState(() {
+                          if (mapType == MapType.normal) {
+                            mapType = MapType.hybrid;
+                            _layersIcon = Icons.map;
+                          } else {
+                            mapType = MapType.normal;
+                            _layersIcon = Icons.satellite_alt;
+                          }
+                        });
+                      },
+                      child: Icon(
+                        _layersIcon,
+                        size: 24,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+              if (_distanceToDestination != null)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: FloatingActionButton.extended(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        _setMapCameraToFitPolyline(_polylines);
+                      },
+                      icon: Icon(Icons.directions),
+                      label: Text(
+                        _distanceToDestination!,
+                        style: TextStyle(fontSize: 24, color: Theme.of(context).colorScheme.onPrimary),
+                      ),
+                    ),
                   ),
                 ),
-                Expanded(
-                  flex: 6,
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (_distanceToDestination != null)
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                _setMapCameraToFitPolyline(_polylines);
-                              },
-                              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                              icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
-                              label: Text(
-                                _distanceToDestination!,
-                                style: TextStyle(fontSize: 28, color: Theme.of(context).colorScheme.onPrimary),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const Expanded(
-                  flex: 2,
-                  child: Column(), // Dummy column to help flex with centring distance button
-                ),
-              ],
-            ),
+            ],
           ),
         );
       },

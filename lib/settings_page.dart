@@ -9,6 +9,12 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 // Define variable for first execution status
 late bool firstExecution;
 
+// Define available bearing of map display
+enum MapOrientation { adaptive, alwaysNorth }
+
+// Set default bearing of map display
+late MapOrientation preferredMapOrientation;
+
 // Define available sorting methods
 enum SortingMethod { alphabetical, nearest, startTime, location }
 
@@ -35,6 +41,11 @@ Future<void> loadSettings(bool onTest) async {
 
     // Get first execution status, default to true
     firstExecution = prefs.getBool('firstExecution') ?? true;
+
+    // Set default bearing display as Adaptive (0 in the index)
+    int savedMapOrientationIndex = prefs.getInt('preferredMapOrientation') ?? 0;
+    // Load preferred bearing display from shared preferences
+    preferredMapOrientation = MapOrientation.values[savedMapOrientationIndex];
 
     // Set default sorting method as nearest (1 in the index)
     int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 1;
