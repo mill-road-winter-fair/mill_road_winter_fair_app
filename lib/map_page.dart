@@ -381,7 +381,7 @@ class MapPageState extends State<MapPage> {
         _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25, 290);
         break;
       case MapOrientation.alwaysNorth:
-        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25, 0);
+        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 75, 0);
         break;
     }
   }
