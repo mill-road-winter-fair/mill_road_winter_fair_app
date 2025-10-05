@@ -600,6 +600,7 @@ class MapPageState extends State<MapPage> {
                   children: [
                     if (_navigationInProgress == true)
                       FloatingActionButton(
+                        heroTag: 'cancelBtn',
                         shape: const CircleBorder(),
                         mini: true,
                         onPressed: () {
@@ -621,6 +622,7 @@ class MapPageState extends State<MapPage> {
                       ),
                     if (_navigationInProgress == false)
                       FloatingActionButton(
+                        heroTag: 'homeBtn',
                         shape: const CircleBorder(),
                         mini: true,
                         onPressed: () {
@@ -634,6 +636,7 @@ class MapPageState extends State<MapPage> {
                         ),
                       ),
                     FloatingActionButton(
+                      heroTag: 'mapTypeBtn',
                       shape: const CircleBorder(),
                       mini: true,
                       onPressed: () {
@@ -660,6 +663,7 @@ class MapPageState extends State<MapPage> {
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeOut,
                       child: FloatingActionButton(
+                        heroTag: 'mapBearingBtn',
                         shape: const CircleBorder(),
                         mini: true,
                         onPressed: () {
@@ -683,6 +687,7 @@ class MapPageState extends State<MapPage> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: FloatingActionButton.extended(
+                      heroTag: 'navigationBtn',
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(_polylines);

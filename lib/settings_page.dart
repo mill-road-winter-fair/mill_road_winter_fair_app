@@ -73,6 +73,8 @@ Future<void> loadSettings(bool onTest) async {
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
     int savedSortingIndex = 1;
     preferredSortingMethod = SortingMethod.values[savedSortingIndex];
+    int savedMapOrientationIndex = 0;
+    preferredMapOrientation = MapOrientation.values[savedMapOrientationIndex];
 
     selectedThemeKey = 'light';
     // Create a ValueNotifier to hold the current theme
