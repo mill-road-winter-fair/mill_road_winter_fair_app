@@ -69,9 +69,9 @@ The app currently uses the the Google Maps Platform within GCP in order to acces
 
 ## Release Steps
 
-1. Increment the version number and build number in `pubspec.yaml` and `lib/settings_page.dart`.
+1. Increment the version number and build number in `pubspec.yaml`.
 
-2. Increment the version number in `settings_page.dart` 
+2. Increment the version number in `lib/settings_page.dart`.
 
 3. Set environment variables for the signing key store.
 ```shell
