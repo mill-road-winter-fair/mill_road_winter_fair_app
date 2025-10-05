@@ -17,6 +17,7 @@ import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
@@ -346,6 +347,12 @@ class MapPageState extends State<MapPage> {
     }
   }
 
+  // Save settings to shared preferences
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
+  }
+
   void _resetMapCamera() {
     _setMapCameraToFitMapMarkers();
   }
@@ -658,6 +665,7 @@ class MapPageState extends State<MapPage> {
                           setState(() {
                             preferredMapOrientation =
                                 (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                            _saveSettings();
                           });
                           _setMapCameraToFitMapMarkers();
                         },
