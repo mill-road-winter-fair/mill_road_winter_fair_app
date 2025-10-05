@@ -353,10 +353,6 @@ class MapPageState extends State<MapPage> {
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
   }
 
-  void _resetMapCamera() {
-    _setMapCameraToFitMapMarkers();
-  }
-
   void _setMapCameraToFitMapMarkers() {
     // Set default LatLngs bounds
     // southwest
@@ -623,7 +619,7 @@ class MapPageState extends State<MapPage> {
                         mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          _resetMapCamera();
+                          _setMapCameraToFitMapMarkers();
                         },
                         child: Icon(
                           Icons.home,
