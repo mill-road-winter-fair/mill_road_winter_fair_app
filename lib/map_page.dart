@@ -645,6 +645,7 @@ class MapPageState extends State<MapPage> {
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
+                    if (_navigationInProgress == false)
                     AnimatedRotation(
                       turns: _compassBearing / 360.0,
                       duration: const Duration(milliseconds: 200),
