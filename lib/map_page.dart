@@ -37,6 +37,7 @@ class MapPageState extends State<MapPage> {
   late PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   late double _mapBearing;
+  late double _compassBearing;
   double? mapWidth;
   double? mapHeight;
   bool _navigationInProgress = false;
@@ -538,13 +539,14 @@ class MapPageState extends State<MapPage> {
           );
         }
 
-        // Backup map bearing
         switch (preferredMapOrientation) {
           case MapOrientation.adaptive:
             _mapBearing = 290;
+            _compassBearing = 90;
             break;
           case MapOrientation.alwaysNorth:
             _mapBearing = 0;
+            _compassBearing = 0;
             break;
         }
 
@@ -560,7 +562,7 @@ class MapPageState extends State<MapPage> {
                     style: mapStyle,
                     mapType: mapType,
                     rotateGesturesEnabled: false,
-                    compassEnabled: (preferredMapOrientation == MapOrientation.adaptive),
+                    compassEnabled: false,
                     myLocationEnabled: true,
                     myLocationButtonEnabled: true,
                     mapToolbarEnabled: false,
@@ -571,10 +573,23 @@ class MapPageState extends State<MapPage> {
                         _setMapCameraToFitMapMarkers();
                       }
                     },
-                    initialCameraPosition: const CameraPosition(
-                      target: LatLng(52.199174, 0.140929),
+                    initialCameraPosition: CameraPosition(
+                      target: const LatLng(52.199174, 0.140929),
                       zoom: 14.1,
+                      bearing: _mapBearing,
                     ),
+                    onCameraMove: (CameraPosition position) {
+                      setState(() {
+                        switch (preferredMapOrientation) {
+                          case MapOrientation.adaptive:
+                            _compassBearing = 90;
+                            break;
+                          case MapOrientation.alwaysNorth:
+                            _compassBearing = 0;
+                            break;
+                        }
+                      });
+                    },
                     markers: markers.values.toSet(),
                     polylines: _polylines,
                   );
@@ -642,6 +657,24 @@ class MapPageState extends State<MapPage> {
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
+                    AnimatedRotation(
+                      turns: _compassBearing / 360.0,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                      child: FloatingActionButton(
+                        shape: const CircleBorder(),
+                        mini: true,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          setState(() {
+                            preferredMapOrientation =
+                                (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                          });
+                          _setMapCameraToFitMapMarkers();
+                        },
+                        child: const Icon(Icons.assistant_navigation),
+                      ),
+                    )
                   ],
                 ),
               ),
