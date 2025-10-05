@@ -58,14 +58,11 @@ Future<void> loadSettings(bool onTest) async {
     preferredMapOrientation = MapOrientation.values[savedMapOrientationIndex];
 
     // Detect system brightness
-    Brightness systemBrightness =
-        PlatformDispatcher.instance.platformBrightness;
+    Brightness systemBrightness = PlatformDispatcher.instance.platformBrightness;
 
     // Set initial theme and map style according to system brightness
-    String defaultTheme =
-        systemBrightness == Brightness.light ? 'light' : 'dark';
-    String defaultMapStyle =
-        systemBrightness == Brightness.dark ? darkMap : standardMap;
+    String defaultTheme = systemBrightness == Brightness.light ? 'light' : 'dark';
+    String defaultMapStyle = systemBrightness == Brightness.dark ? darkMap : standardMap;
     selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme;
     mapStyle = prefs.getString('selectedMapStyle') ?? defaultMapStyle;
 
@@ -102,11 +99,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
-    //MW I notice this doesn't save preferredSortingMethod - is this deliberate?
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
-    await prefs.setInt(
-        'preferredMapOrientation', preferredMapOrientation.index);
+    await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
   }
@@ -131,23 +126,20 @@ class _SettingsPageState extends State<SettingsPage> {
         title: const Text('Settings'),
       ),
       body: Container(
-        padding: const EdgeInsets.fromLTRB(
-            16.0, 16.0, 10.0, 0.0), //MW was EdgeInsets.all(16.0)
-        margin: const EdgeInsets.fromLTRB(6.0, 2.0, 0.0, 0.0), //MW added
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 10.0, 0.0),
+        margin: const EdgeInsets.fromLTRB(6.0, 2.0, 0.0, 0.0),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(0.0), //MW added
+          padding: const EdgeInsets.all(0.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 0.0, //MW added
+            spacing: 0.0,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 0.0, //MW added
+                spacing: 0.0,
                 children: [
-                  const Text('Distance Units',
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   RadioGroup<DistanceUnits>(
                     groupValue: preferredDistanceUnits,
                     onChanged: (DistanceUnits? value) {
@@ -161,7 +153,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         RadioListTile<DistanceUnits>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Metric'),
                           subtitle: Text(
                             'Metres & Kilometres',
@@ -178,15 +170,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         RadioListTile<DistanceUnits>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Imperial'),
                           subtitle: Text(
                             'Feet & Miles',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                           visualDensity:
@@ -195,19 +185,16 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         RadioListTile<DistanceUnits>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Cambridge'),
                           subtitle: Text(
                             'Punt lengths',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
-                          visualDensity:
-                              VisualDensity(horizontal: 0.0, vertical: -4.0),
+                          visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: DistanceUnits.cambridge,
                         ),
                       ],
@@ -217,7 +204,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 0.0, //MW added
+                spacing: 0.0,
                 children: [
                   const Text('Map Orientation',
                       style:
@@ -235,36 +222,30 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         RadioListTile<MapOrientation>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Adaptive'),
                           subtitle: Text(
                             'Rotates the map to fit best on screen',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
-                          visualDensity:
-                              VisualDensity(horizontal: 0.0, vertical: -4.0),
+                          visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: MapOrientation.adaptive,
                         ),
                         RadioListTile<MapOrientation>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('North South'),
                           subtitle: Text(
                             'Always shows North at the top of the map',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
-                          visualDensity:
-                              VisualDensity(horizontal: 0.0, vertical: -4.0),
+                          visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: MapOrientation.alwaysNorth,
                         ),
                       ],
@@ -274,11 +255,9 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 0.0, //MW added
+                spacing: 0.0,
                 children: [
-                  const Text('Theme',
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   RadioGroup<String>(
                     groupValue: themeNotifier.value,
                     onChanged: (value) {
@@ -309,46 +288,41 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllVisibleMarkers(false);
                     },
                     child: Column(
-                      spacing: 0.0, //MW added
+                      spacing: 0.0,
                       children: [
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Light'),
-                          visualDensity:
-                              VisualDensity(horizontal: 0.0, vertical: -4.0),
+                          visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: 'light',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Dark'),
-                          visualDensity:
-                              VisualDensity(horizontal: 0.0, vertical: -4.0),
+                          visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: 'dark',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('2024 Colour Scheme'),
-                          visualDensity:
-                              VisualDensity(horizontal: 0.0, vertical: -4.0),
+                          visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: '2024',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('High Contrast'),
-                          visualDensity:
-                              VisualDensity(horizontal: 0.0, vertical: -4.0),
+                          visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: 'highContrast',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          contentPadding: const EdgeInsets.all(0.0), //MW added
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Colour Blind Friendly'),
-                          visualDensity:
-                              VisualDensity(horizontal: 0.0, vertical: -4.0),
+                          visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: 'colourBlindFriendly',
                         ),
                       ],
@@ -358,17 +332,14 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 0.0, //MW added
+                spacing: 0.0,
                 children: [
                   const SizedBox(height: 10),
-                  const Text('App Info and Onboarding',
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  const Text('App Info and Onboarding', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   ListTile(
                     leading: const Icon(Icons.first_page),
                     title: const Text('Replay Welcome Screen'),
-                    visualDensity:
-                        VisualDensity(horizontal: 0.0, vertical: -4.0),
+                    visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       _replayWelcomeScreen(context);
@@ -376,9 +347,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.info),
-                    title: const Text('About This App'),
-                    visualDensity:
-                        VisualDensity(horizontal: 0.0, vertical: -4.0),
+                    title: const Text('About This App'), visualDensity: VisualDensity(horizontal: 0.0, vertical: -4.0),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       showAboutDialog(
