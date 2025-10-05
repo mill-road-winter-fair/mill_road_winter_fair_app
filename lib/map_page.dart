@@ -374,7 +374,7 @@ class MapPageState extends State<MapPage> {
         _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25, 290);
         break;
       case MapOrientation.alwaysNorth:
-        _moveCameraToBounds(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25);
+        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25, 0);
         break;
     }
   }
@@ -394,19 +394,7 @@ class MapPageState extends State<MapPage> {
       }
     }
 
-    _moveCameraToBounds(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), 75);
-  }
-
-  _moveCameraToBounds(LatLng southwestMin, LatLng northeastMax, double padding) {
-    _controller?.moveCamera(
-      CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          southwest: southwestMin,
-          northeast: northeastMax,
-        ),
-        padding, // Padding around the bounds
-      ),
-    );
+    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), 75, 0);
   }
 
   _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
