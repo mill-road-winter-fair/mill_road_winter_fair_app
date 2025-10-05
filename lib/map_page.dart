@@ -448,8 +448,8 @@ class MapPageState extends State<MapPage> {
     Size mapSize, {
     double padding = 0,
   }) {
-    const WORLD_DIM = 256.0;
-    const ZOOM_MAX = 21.0;
+    const worldDIM = 256.0;
+    const zoomMax = 21.0;
 
     // Effective size after padding
     // The '4 / MediaQuery.of(context).devicePixelRatio)' adjusts the padding according to the device
@@ -467,12 +467,12 @@ class MapPageState extends State<MapPage> {
     // scale by cos(latitude) to account for Mercator
     final adjustedLngFraction = lngFraction * cos(centerLat * pi / 180);
 
-    final lngZoom = log(usableWidth / WORLD_DIM / adjustedLngFraction) / ln2;
+    final lngZoom = log(usableWidth / worldDIM / adjustedLngFraction) / ln2;
 
-    final latZoom = log(usableHeight / WORLD_DIM / latFraction) / ln2;
+    final latZoom = log(usableHeight / worldDIM / latFraction) / ln2;
 
     final zoom = min(latZoom, lngZoom);
-    return min(zoom, ZOOM_MAX);
+    return min(zoom, zoomMax);
   }
 
   Future<void> refreshListings() async {
@@ -692,7 +692,7 @@ class MapPageState extends State<MapPage> {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(_polylines);
                       },
-                      icon: Icon(Icons.directions),
+                      icon: const Icon(Icons.directions),
                       label: Text(
                         _distanceToDestination!,
                         style: TextStyle(fontSize: 24, color: Theme.of(context).colorScheme.onPrimary),
