@@ -260,12 +260,6 @@ class MapPageState extends State<MapPage> {
     Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
     addSpecificMarker(destinationListing, false);
 
-    // Set preferred orientation to be North-up
-    setState(() {
-      preferredMapOrientation = MapOrientation.alwaysNorth;
-      _saveSettings();
-    });
-
     // Set navigation as in progress
     _navigationInProgress = true;
   }
@@ -611,6 +605,7 @@ class MapPageState extends State<MapPage> {
                             _distanceToDestination = null;
                             clearAllMarkers();
                             addAllVisibleMarkers(false);
+                            _setMapCameraToFitMapMarkers();
                             _navigationInProgress = false;
                           });
                         },
