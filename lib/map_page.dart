@@ -12,7 +12,7 @@ import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
-import 'package:mill_road_winter_fair_app/listings_info_sheet.dart';
+import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -114,46 +114,69 @@ class MapPageState extends State<MapPage> {
             return 1;
           }
 
-          // If neither or both are Group, sort by startTime
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           if (timeCompare != 0) return timeCompare;
 
-          // If startTime same, sort alphabetically by displayName
           return a['name'].compareTo(b['name']);
         });
 
         showModalBottomSheet(
           context: context,
-          showDragHandle: true,
+          showDragHandle: false,
+          enableDrag: false,
+          isScrollControlled: true,
+          useSafeArea: true,
           builder: (BuildContext context) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: Scrollbar(
-                thumbVisibility: true, // always show scrollbar
-                thickness: 4, // thin scrollbar
-                radius: const Radius.circular(8), // rounded edges
-                child: ListView.separated(
-                  separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-                  itemCount: relatedListings.length,
-                  itemBuilder: (context, index) {
-                    final rel = relatedListings[index];
-                    int approximateDistanceMetres = asTheCrowFlies(
-                      currentLatLng,
-                      stringToLatLng(rel['latLng']),
-                    );
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.66,
+              minChildSize: 0.3,
+              maxChildSize: 1.0,
+              builder: (context, scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                  child: Scrollbar(
+                    controller: scrollController,
+                    thumbVisibility: false,
+                    thickness: 4,
+                    radius: const Radius.circular(8),
+                    child: ListView.separated(
+                      controller: scrollController,
+                      separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
+                      itemCount: relatedListings.length,
+                      itemBuilder: (context, index) {
+                        final rel = relatedListings[index];
+                        int approximateDistanceMetres = asTheCrowFlies(
+                          currentLatLng,
+                          stringToLatLng(rel['latLng']),
+                        );
 
-                    return ListingInfoSheet(
-                      title: rel['displayName'],
-                      categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
-                      openingTimes: "${rel['startTime']} - ${rel['endTime']}",
-                      approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-                      phoneNumber: rel['phone'],
-                      website: rel['website'],
-                      onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                    );
-                  },
-                ),
-              ),
+                        if (rel['primaryType'].startsWith("Group")) {
+                          return GroupListingInfoSheet(
+                            title: rel['displayName'],
+                            categories: "${rel['tertiaryType']}",
+                            openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                            approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                          );
+                        } else {
+                          return SimplifiedListingInfoSheet(
+                            title: rel['displayName'],
+                            categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
+                            openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                            phoneNumber: rel['phone'],
+                            website: rel['website'],
+                            onGetDirections: () => getDirections(
+                              rel['id'],
+                              stringToLatLng(rel['latLng']),
+                              true,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
@@ -191,7 +214,7 @@ class MapPageState extends State<MapPage> {
         showModalBottomSheet(
           context: context,
           builder: (BuildContext context) {
-            return ListingInfoSheet(
+            return SpecificListingInfoSheet(
               title: listing['displayName'],
               categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
               openingTimes: "${listing['startTime']} - ${listing['endTime']}",
