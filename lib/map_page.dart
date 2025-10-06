@@ -109,8 +109,20 @@ class MapPageState extends State<MapPage> {
       onTap: () {
         establishLocation();
 
-        // Filter listings with the same secondaryType
-        List<Map<String, dynamic>> relatedListings = listings.where((l) => l['secondaryType'] == listing['secondaryType']).toList();
+        // Helper to normalise primaryType by stripping "Group-" prefix if present
+        String normalisePrimaryType(String type) {
+          return type.startsWith("Group-") ? type.substring(6) : type;
+        }
+
+        // Filter listings where both normalised primaryType and secondaryType match
+        List<Map<String, dynamic>> relatedListings = listings.where((l) {
+          final listingPrimary = normalisePrimaryType(l['primaryType'] ?? '');
+          final targetPrimary = normalisePrimaryType(listing['primaryType'] ?? '');
+          final listingSecondary = l['secondaryType'] ?? '';
+          final targetSecondary = listing['secondaryType'] ?? '';
+
+          return listingPrimary == targetPrimary && listingSecondary == targetSecondary;
+        }).toList();
 
         // Sort listings: Group first → startTime → displayName
         relatedListings.sort((a, b) {
