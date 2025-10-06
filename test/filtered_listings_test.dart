@@ -23,9 +23,11 @@ void main() async {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: FilteredListingsPage(
-          filterPrimaryType: primaryType,
-          listings: listings,
+        home: Scaffold(
+          body: FilteredListingsPage(
+            filterPrimaryType: primaryType,
+            listings: listings,
+          ),
         ),
       ),
     );
@@ -88,7 +90,7 @@ void main() async {
     expect(find.text('12:00 - 16:30'), findsOneWidget);
     expect(find.text('approx. 197 m'), findsOneWidget);
     expect(find.text('01223 222222'), findsOneWidget);
-    expect(find.byIcon(Icons.directions_walk), findsExactly(2));
+    expect(find.byIcon(Icons.directions_walk), findsExactly(3));
     expect(find.byIcon(Icons.public), findsExactly(2));
 
     final dividerFinder = find.byWidgetPredicate((widget) => widget is Divider && widget.color == Colors.grey[350]);
@@ -193,20 +195,33 @@ void main() async {
     await loadSettings(true);
     await pumpFilteredListingsPage(tester, 'Food', listings);
 
-    await tester.tap(find.text('A-Z'));
+    await tester.tap(find.byType(DropdownMenu<SortingMethod>));
     await tester.pumpAndSettle();
-
-    expect(preferredSortingMethod, SortingMethod.values[0]);
-
-    await tester.tap(find.text('Nearest'));
+    await tester.tap(find.text('Nearest').last);
     await tester.pumpAndSettle();
 
     expect(preferredSortingMethod, SortingMethod.values[1]);
 
-    await tester.tap(find.text('Time'));
+    await tester.tap(find.byType(DropdownMenu<SortingMethod>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Time').last);
     await tester.pumpAndSettle();
 
     expect(preferredSortingMethod, SortingMethod.values[2]);
+
+    await tester.tap(find.byType(DropdownMenu<SortingMethod>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Location (a-z)').last);
+    await tester.pumpAndSettle();
+
+    expect(preferredSortingMethod, SortingMethod.values[3]);
+
+    await tester.tap(find.byType(DropdownMenu<SortingMethod>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Name (a-z)').last);
+    await tester.pumpAndSettle();
+
+    expect(preferredSortingMethod, SortingMethod.values[0]);
   });
 
   testWidgets('change the preferred sorting method when location permission is denied', (WidgetTester tester) async {

@@ -131,6 +131,27 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
   }
 
+  void sortingDropdownCallback(SortingMethod? selectedValue) {
+    HapticFeedback.selectionClick();
+    if (selectedValue is SortingMethod) {
+      if (selectedValue == SortingMethod.values[1] && currentLatLng == null) {
+        Fluttertoast.showToast(
+          msg: 'Location services and permissions are required to determine distances',
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          textColor: Theme.of(context).colorScheme.onPrimary,
+          fontSize: 16,
+          toastLength: Toast.LENGTH_LONG,
+        );
+      } else {
+        setState(() {
+          preferredSortingMethod = selectedValue;
+        });
+        _saveSettings();
+      }
+    }
+  }
+
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
@@ -194,123 +215,64 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           onRefresh: refreshListings,
           backgroundColor: Theme.of(context).colorScheme.primary,
           color: Theme.of(context).colorScheme.onPrimary,
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                flex: 8,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey[350]!, width: 2),
+          child: Scrollbar(
+            controller: _scrollController,
+            thumbVisibility: true, // or false if you prefer "show on scroll"
+            thickness: 4,
+            radius: const Radius.circular(8),
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                // Dropdown header that scrolls away
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 66,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceDim,
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Text("Sort by: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                        Flexible(
-                          flex: 8,
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 66),
                           child: Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.secondary,
-                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[1] && useFallbackSorting == false)
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSecondary),
-                              child: const FittedBox(child: Text('Nearest', style: TextStyle(fontSize: 16))),
-                              onPressed: () {
-                                HapticFeedback.selectionClick();
-                                if (currentLatLng != null) {
-                                  setState(() {
-                                    preferredSortingMethod = SortingMethod.values[1];
-                                  });
-                                  _saveSettings();
-                                } else {
-                                  Fluttertoast.showToast(
-                                    msg: 'Location services and permissions are required to determine distances',
-                                    gravity: ToastGravity.CENTER,
-                                    backgroundColor: Theme.of(context).colorScheme.primary,
-                                    textColor: Theme.of(context).colorScheme.onPrimary,
-                                    fontSize: 16,
-                                    toastLength: Toast.LENGTH_LONG,
-                                  );
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          flex: 8,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.secondary,
-                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[3] || useFallbackSorting == true)
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSecondary),
-                              child: const FittedBox(child: Text('Location', style: TextStyle(fontSize: 16))),
-                              onPressed: () {
-                                HapticFeedback.selectionClick();
-                                setState(() {
-                                  preferredSortingMethod = SortingMethod.values[3];
-                                });
-                                _saveSettings();
-                              },
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          flex: 6,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.secondary,
-                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true)
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSecondary),
-                              child: const FittedBox(child: Text('A-Z', style: TextStyle(fontSize: 16))),
-                              onPressed: () {
-                                HapticFeedback.selectionClick();
-                                setState(() {
-                                  preferredSortingMethod = SortingMethod.values[0];
-                                });
-                                _saveSettings();
-                              },
-                            ),
-                          ),
-                        ),
-                        Flexible(
-                          flex: 6,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(3, 1, 3, 1),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.secondary,
-                                  foregroundColor: (preferredSortingMethod == SortingMethod.values[2] && useFallbackSorting == false)
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSecondary),
-                              child: const FittedBox(child: Text('Time', style: TextStyle(fontSize: 16))),
-                              onPressed: () {
-                                HapticFeedback.selectionClick();
-                                setState(() {
-                                  preferredSortingMethod = SortingMethod.values[2];
-                                });
-                                _saveSettings();
-                              },
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: DropdownMenu(
+                              initialSelection: preferredSortingMethod,
+                              width: MediaQuery.of(context).size.width * 0.6,
+                              label: const Text(
+                                "Sort by",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              leadingIcon: const Icon(Icons.sort),
+                              inputDecorationTheme: InputDecorationTheme(
+                                filled: true,
+                                fillColor: Theme.of(context).colorScheme.secondary,
+                              ),
+                              dropdownMenuEntries: [
+                                DropdownMenuEntry(
+                                  value: SortingMethod.values[1],
+                                  label: "Nearest",
+                                  leadingIcon: const Icon(Icons.directions_walk),
+                                ),
+                                DropdownMenuEntry(
+                                  value: SortingMethod.values[3],
+                                  label: "Location (a-z)",
+                                  leadingIcon: const Icon(Icons.signpost),
+                                ),
+                                DropdownMenuEntry(
+                                  value: SortingMethod.values[0],
+                                  label: "Name (a-z)",
+                                  leadingIcon: const Icon(Icons.sort_by_alpha),
+                                ),
+                                DropdownMenuEntry(
+                                  value: SortingMethod.values[2],
+                                  label: "Time",
+                                  leadingIcon: const Icon(Icons.alarm),
+                                ),
+                              ],
+                              onSelected: sortingDropdownCallback,
                             ),
                           ),
                         ),
@@ -318,27 +280,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     ),
                   ),
                 ),
-              ),
-              Expanded(
-                flex: 92,
-                child: PrimaryScrollController.none(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: Scrollbar(
-                      controller: _scrollController,
-                      thumbVisibility: true,
-                      thickness: 4,
-                      radius: const Radius.circular(8),
-                      child: ListView.separated(
-                        controller: _scrollController,
-                        separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-                        itemCount: filteredListings.length,
-                        itemBuilder: (context, index) {
-                          final listing = filteredListings[index];
-                          final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                          final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                          return SpecificListingInfoSheet(
+
+                // Listings list
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final listing = filteredListings[index];
+                      final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                      final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                      LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+
+                      return Column(
+                        children: [
+                          SpecificListingInfoSheet(
                             title: listing['displayName'],
                             categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
                             openingTimes: "${listing['startTime']} - ${listing['endTime']}",
@@ -354,14 +308,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 );
                               }
                             },
-                          );
-                        },
-                      ),
-                    ),
+                          ),
+                          // separator except after last item
+                          if (index != filteredListings.length - 1) Divider(color: Colors.grey[350]),
+                        ],
+                      );
+                    },
+                    childCount: filteredListings.length,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
