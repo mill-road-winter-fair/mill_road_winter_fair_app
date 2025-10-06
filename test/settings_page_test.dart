@@ -26,13 +26,10 @@ void main() {
     expect(find.text('High Contrast'), findsOneWidget);
     expect(find.text('Colour Blind Friendly'), findsOneWidget);
 
-    // Verify the Onboarding section
-    expect(find.text('Onboarding'), findsOneWidget);
+    // Verify the App Info and Onboarding section
+    expect(find.text('App Info and Onboarding'), findsOneWidget);
     expect(find.text('Replay Welcome Screen'), findsOneWidget);
-
-    // Verify the App Information section
-    expect(find.text('App Information'), findsOneWidget);
-    expect(find.text('About'), findsOneWidget);
+    expect(find.text('About This App'), findsOneWidget);
 
     // Verify default settings
     expect(preferredDistanceUnits, DistanceUnits.metric);
