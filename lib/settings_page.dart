@@ -112,14 +112,18 @@ class _SettingsPageState extends State<SettingsPage> {
         title: const Text('Settings'),
       ),
       body: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 10.0, 0.0),
+        margin: const EdgeInsets.fromLTRB(6.0, 2.0, 0.0, 0.0),
         child: SingleChildScrollView(
+          padding: const EdgeInsets.all(0.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 0.0,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 0.0,
                 children: [
                   const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   RadioGroup<DistanceUnits>(
@@ -135,6 +139,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         RadioListTile<DistanceUnits>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Metric'),
                           subtitle: Text(
                             'Metres & Kilometres',
@@ -143,11 +148,12 @@ class _SettingsPageState extends State<SettingsPage> {
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: DistanceUnits.metric,
                         ),
                         RadioListTile<DistanceUnits>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Imperial'),
                           subtitle: Text(
                             'Feet & Miles',
@@ -156,11 +162,12 @@ class _SettingsPageState extends State<SettingsPage> {
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: DistanceUnits.imperial,
                         ),
                         RadioListTile<DistanceUnits>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Cambridge'),
                           subtitle: Text(
                             'Punt lengths',
@@ -169,7 +176,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: DistanceUnits.cambridge,
                         ),
                       ],
@@ -179,6 +186,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 0.0,
                 children: [
                   const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   RadioGroup<String>(
@@ -211,35 +219,41 @@ class _SettingsPageState extends State<SettingsPage> {
                       mapPageKey.currentState?.addAllVisibleMarkers(false);
                     },
                     child: Column(
+                      spacing: 0.0,
                       children: [
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Light'),
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: 'light',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('Dark'),
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: 'dark',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
+                          contentPadding: const EdgeInsets.all(0.0),
                           title: const Text('2024 Colour Scheme'),
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: '2024',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
+                          contentPadding: const EdgeInsets.all(0.0), //MW added
                           title: const Text('High Contrast'),
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: 'highContrast',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
+                          contentPadding: const EdgeInsets.all(0.0), //MW added
                           title: const Text('Colour Blind Friendly'),
-                          visualDensity: VisualDensity.compact,
+                          visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                           value: 'colourBlindFriendly',
                         ),
                       ],
@@ -249,31 +263,27 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 0.0,
                 children: [
                   const SizedBox(height: 10),
-                  const Text('Onboarding', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  const Text('App Info and Onboarding', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   ListTile(
                     leading: const Icon(Icons.first_page),
                     title: const Text('Replay Welcome Screen'),
+                    visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       _replayWelcomeScreen(context);
                     },
                   ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  const Text('App Information', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   ListTile(
                     leading: const Icon(Icons.info),
-                    title: const Text('About'),
+                    title: const Text('About This App'),
+                    visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4.0),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       showAboutDialog(
-                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.8', applicationIcon: const MyAppIcon());
+                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.7', applicationIcon: const MyAppIcon());
                     },
                   ),
                 ],
