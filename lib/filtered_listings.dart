@@ -292,7 +292,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
                       return Column(
                         children: [
-                          ListingInfoSheet(
+                          SpecificListingInfoSheet(
                             title: listing['displayName'],
                             categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
                             openingTimes: "${listing['startTime']} - ${listing['endTime']}",
