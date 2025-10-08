@@ -100,27 +100,33 @@ class HomePageState extends State<HomePage> {
           FilteredListingsPage(filterPrimaryType: "Service", listings: listings),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        showUnselectedLabels: true,
-        currentIndex: index,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        onTap: (selectedIndex) {
-          HapticFeedback.selectionClick();
-          // Update the user's location
-          establishLocation();
-          setState(() {
-            index = selectedIndex;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-          BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-          BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-          BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-          BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
-        ],
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.only(right: 10),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
+          elevation: 0,
+          currentIndex: index,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          iconSize: 30,
+          onTap: (selectedIndex) {
+            HapticFeedback.selectionClick();
+            // Update the user's location
+            establishLocation();
+            setState(() {
+              index = selectedIndex;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+            BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
+            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
+            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
+            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
+            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
+          ],
+        )
       ),
       drawer: Drawer(
         child: Column(
