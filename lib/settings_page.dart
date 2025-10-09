@@ -286,7 +286,12 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () {
                       HapticFeedback.lightImpact();
                       showAboutDialog(
-                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.8', applicationIcon: const MyAppIcon());
+                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.8', applicationIcon: const MyAppIcon(), 
+                          children: [ Text('Android app by Alex Berridge\n' 
+                          + '   http://theberridge.com\n\n'
+                          + 'iPhone port by Matt Whiting\n'
+                          + '   http://mattwhiting.com') ]
+                          );
                     },
                   ),
                 ],
