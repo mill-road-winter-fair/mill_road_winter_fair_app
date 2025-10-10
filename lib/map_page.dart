@@ -469,12 +469,6 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  double _latRad(double lat) {
-    final sinVal = sin(lat * pi / 180);
-    final radX2 = log((1 + sinVal) / (1 - sinVal)) / 2;
-    return max(min(radX2, pi), -pi) / 2;
-  }
-
   double zoomForBounds(
     LatLng southwestMin,
     LatLng northeastMax,
