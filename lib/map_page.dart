@@ -476,11 +476,11 @@ class MapPageState extends State<MapPage> {
   }
 
   double zoomForBounds(
-      LatLng southwestMin,
-      LatLng northeastMax,
-      Size mapSize, {
-        double padding = 0,
-      }) {
+    LatLng southwestMin,
+    LatLng northeastMax,
+    Size mapSize, {
+    double padding = 0,
+  }) {
     const worldDIM = 256.0;
     const zoomMax = 21.0;
 
