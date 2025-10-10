@@ -15,6 +15,12 @@ enum MapOrientation { adaptive, alwaysNorth }
 // Set default bearing of map display
 late MapOrientation preferredMapOrientation;
 
+// Define available map types
+enum MapStyleType { normal, hybrid }
+
+// Set default bearing of map display
+late MapStyleType preferredMapStyleType;
+
 // Define available sorting methods
 enum SortingMethod { alphabetical, nearest, startTime, location }
 
@@ -47,6 +53,11 @@ Future<void> loadSettings(bool onTest) async {
     // Load preferred bearing display from shared preferences
     preferredMapOrientation = MapOrientation.values[savedMapOrientationIndex];
 
+    // Set default bearing display as normal (0 in the index)
+    int savedMapStyleTypeIndex = prefs.getInt('preferredMapStyleType') ?? 0;
+    // Load preferred map type from shared preferences
+    preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
+
     // Set default sorting method as nearest (1 in the index)
     int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 1;
     // Load preferred sorting method from shared preferences
@@ -75,6 +86,8 @@ Future<void> loadSettings(bool onTest) async {
     preferredSortingMethod = SortingMethod.values[savedSortingIndex];
     int savedMapOrientationIndex = 0;
     preferredMapOrientation = MapOrientation.values[savedMapOrientationIndex];
+    int savedMapStyleTypeIndex = 0;
+    preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
 
     selectedThemeKey = 'light';
     // Create a ValueNotifier to hold the current theme
