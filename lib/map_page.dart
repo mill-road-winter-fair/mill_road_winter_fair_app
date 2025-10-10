@@ -258,6 +258,9 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    // Set navigation as in progress
+    _navigationInProgress = true;
+
     // Pop the navigator if told to
     if (navigatorPop == true) {
       Navigator.pop(context);
@@ -294,9 +297,6 @@ class MapPageState extends State<MapPage> {
     // Add destination map marker
     Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
     addSpecificMarker(destinationListing, false);
-
-    // Set navigation as in progress
-    _navigationInProgress = true;
   }
 
   @override
@@ -436,7 +436,9 @@ class MapPageState extends State<MapPage> {
       }
     }
 
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), 75, 0);
+    const double northUpBearing = 0;
+    double northUpPadding = mapWidth! * 0.07;
+    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), northUpPadding, northUpBearing);
   }
 
   _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -480,7 +482,7 @@ class MapPageState extends State<MapPage> {
 
     //Default bearing
     double bearing = 290;
-    if (preferredMapOrientation == MapOrientation.alwaysNorth) {
+    if (preferredMapOrientation == MapOrientation.alwaysNorth || _navigationInProgress == true) {
       bearing = 0;
     }
 
