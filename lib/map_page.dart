@@ -472,35 +472,66 @@ class MapPageState extends State<MapPage> {
   }
 
   double zoomForBounds(
-    LatLng southwestMin,
-    LatLng northeastMax,
-    Size mapSize, {
-    double padding = 0,
-  }) {
+      LatLng southwestMin,
+      LatLng northeastMax,
+      Size mapSize, {
+        double padding = 0,
+      }) {
     const worldDIM = 256.0;
     const zoomMax = 21.0;
 
-    // Effective size after padding
-    // The '4 / MediaQuery.of(context).devicePixelRatio)' adjusts the padding according to the device
-    final usableWidth = mapSize.width - (2 * padding * 4 / MediaQuery.of(context).devicePixelRatio);
-    final usableHeight = mapSize.height - (2 * padding * 4 / MediaQuery.of(context).devicePixelRatio);
+    //Default bearing
+    double bearing = 290;
+    if (preferredMapOrientation == MapOrientation.alwaysNorth) {
+      bearing = 0;
+    }
+
+    // Convert to radians for trig functions
+    final bearingRad = bearing * pi / 180.0;
+
+    // Convert LatLng to Mercator (x, y)
+    Offset latLngToPoint(LatLng latLng) {
+      final siny = sin(latLng.latitude * pi / 180).clamp(-0.9999, 0.9999);
+      final x = (latLng.longitude + 180) / 360;
+      final y = 0.5 - log((1 + siny) / (1 - siny)) / (4 * pi);
+      return Offset(x, y);
+    }
+
+    final sw = latLngToPoint(southwestMin);
+    final ne = latLngToPoint(northeastMax);
+
+    // Get center
+    final center = Offset((sw.dx + ne.dx) / 2, (sw.dy + ne.dy) / 2);
+
+    // Rotate both points around center by bearing
+    Offset rotatePoint(Offset point, Offset center, double angle) {
+      final translated = point - center;
+      final xNew = translated.dx * cos(angle) - translated.dy * sin(angle);
+      final yNew = translated.dx * sin(angle) + translated.dy * cos(angle);
+      return Offset(xNew, yNew) + center;
+    }
+
+    final swRot = rotatePoint(sw, center, bearingRad);
+    final neRot = rotatePoint(ne, center, bearingRad);
+
+    // Determine rotated bounds
+    final minX = min(swRot.dx, neRot.dx);
+    final maxX = max(swRot.dx, neRot.dx);
+    final minY = min(swRot.dy, neRot.dy);
+    final maxY = max(swRot.dy, neRot.dy);
+
+    final usableWidth = mapSize.width - 2 * padding;
+    final usableHeight = mapSize.height - 2 * padding;
 
     if (usableWidth <= 0 || usableHeight <= 0) return 0;
 
-    final latFraction = (_latRad(northeastMax.latitude) - _latRad(southwestMin.latitude)) / pi;
+    final worldWidth = maxX - minX;
+    final worldHeight = maxY - minY;
 
-    final centerLat = (northeastMax.latitude + southwestMin.latitude) / 2;
-    final lngDiff = northeastMax.longitude - southwestMin.longitude;
-    final lngFraction = (lngDiff < 0 ? lngDiff + 360 : lngDiff) / 360;
+    final zoomX = log(usableWidth / worldDIM / worldWidth) / ln2;
+    final zoomY = log(usableHeight / worldDIM / worldHeight) / ln2;
 
-    // scale by cos(latitude) to account for Mercator
-    final adjustedLngFraction = lngFraction * cos(centerLat * pi / 180);
-
-    final lngZoom = log(usableWidth / worldDIM / adjustedLngFraction) / ln2;
-
-    final latZoom = log(usableHeight / worldDIM / latFraction) / ln2;
-
-    final zoom = min(latZoom, lngZoom);
+    final zoom = min(zoomX, zoomY);
     return min(zoom, zoomMax);
   }
 
@@ -688,26 +719,26 @@ class MapPageState extends State<MapPage> {
                       ),
                     ),
                     if (_navigationInProgress == false)
-                    AnimatedRotation(
-                      turns: _compassBearing / 360.0,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                      child: FloatingActionButton(
-                        heroTag: 'mapBearingBtn',
-                        shape: const CircleBorder(),
-                        mini: true,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          setState(() {
-                            preferredMapOrientation =
-                                (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
-                            _saveSettings();
-                          });
-                          _setMapCameraToFitMapMarkers();
-                        },
-                        child: const Icon(Icons.assistant_navigation),
-                      ),
-                    )
+                      AnimatedRotation(
+                        turns: _compassBearing / 360.0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOut,
+                        child: FloatingActionButton(
+                          heroTag: 'mapBearingBtn',
+                          shape: const CircleBorder(),
+                          mini: true,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              preferredMapOrientation =
+                                  (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                              _saveSettings();
+                            });
+                            _setMapCameraToFitMapMarkers();
+                          },
+                          child: const Icon(Icons.assistant_navigation),
+                        ),
+                      )
                   ],
                 ),
               ),
