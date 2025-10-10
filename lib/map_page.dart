@@ -409,10 +409,14 @@ class MapPageState extends State<MapPage> {
 
     switch (preferredMapOrientation) {
       case MapOrientation.adaptive:
-        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25, 290);
+        const double westUpBearing = 290;
+        final double westUpPadding = mapHeight! * 0.05;
+        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), westUpPadding, westUpBearing);
         break;
       case MapOrientation.alwaysNorth:
-        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 75, 0);
+        const double northUpBearing = 0;
+        double northUpPadding = mapWidth! * 0.05;
+        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), northUpPadding, northUpBearing);
         break;
     }
   }
