@@ -68,6 +68,27 @@ class HomePageState extends State<HomePage> {
     mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
   }
 
+  Widget _buildEmailLink(String email) {
+    return InkWell(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        final Uri mailUri = Uri(scheme: 'mailto', path: email);
+        if (await canLaunchUrl(mailUri)) {
+          await launchUrl(mailUri);
+        } else {
+          throw Exception('Could not launch email client');
+        }
+      },
+      child: Text(
+        email,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.blue,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,15 +200,45 @@ class HomePageState extends State<HomePage> {
                   ListTile(
                     leading: const Icon(Icons.email),
                     title: const Text('Email us', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      final Uri mailUri = Uri(scheme: 'mailto', path: 'info@millroadwinterfair.org');
-                      if (await canLaunchUrl(mailUri)) {
-                        await launchUrl(mailUri);
-                      } else {
-                        throw Exception('Could not launch email client');
-                      }
-                    },
+                    onTap: () => showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) => Dialog(
+                        child: Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              const Text('General:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              _buildEmailLink('info@millroadwinterfair.org'),
+                              const SizedBox(height: 15),
+                              const Text('Volunteering:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              _buildEmailLink('volunteers@millroadwinterfair.org'),
+                              const SizedBox(height: 15),
+                              const Text('Events:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              _buildEmailLink('events@millroadwinterfair.org'),
+                              const SizedBox(height: 15),
+                              const Text('Stalls:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              _buildEmailLink('stalls@millroadwinterfair.org'),
+                              const SizedBox(height: 15),
+                              const Text('Website:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              _buildEmailLink('it@millroadwinterfair.org'),
+                              const SizedBox(height: 15),
+                              const Text('App:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              _buildEmailLink('app@millroadwinterfair.org'),
+                              const SizedBox(height: 45),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: Text(
+                                  'Close',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
