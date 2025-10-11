@@ -145,11 +145,21 @@ class MapPageState extends State<MapPage> {
           isScrollControlled: true,
           useSafeArea: true,
           builder: (BuildContext context) {
+            double screenHeight = MediaQuery.of(context).size.height;
+            // Estimate the height of a SimplifiedListingInfoSheet in pixels
+            double estimatedItemHeight = 145;
+            // Estimate the total height of the bottom sheet
+            double estimatedSheetHeight = relatedListings.length * estimatedItemHeight;
+            // Set the minimum size of the modalBottomSheet based on either the estimatedSheetHeight or 2/3 of the screen, whichever is lower
+            double minFraction = min((estimatedSheetHeight / screenHeight), 0.66);
+            // Set the maximum size of the modalBottomSheet based on either the estimatedSheetHeight or the whole screen, whichever is lower
+            double maxFraction = min((estimatedSheetHeight / screenHeight), 1);
+
             return DraggableScrollableSheet(
               expand: false,
-              initialChildSize: 0.66,
-              minChildSize: 0.3,
-              maxChildSize: 1.0,
+              initialChildSize: minFraction,
+              minChildSize: minFraction,
+              maxChildSize: maxFraction,
               builder: (context, scrollController) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
@@ -688,26 +698,26 @@ class MapPageState extends State<MapPage> {
                       ),
                     ),
                     if (_navigationInProgress == false)
-                    AnimatedRotation(
-                      turns: _compassBearing / 360.0,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                      child: FloatingActionButton(
-                        heroTag: 'mapBearingBtn',
-                        shape: const CircleBorder(),
-                        mini: true,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          setState(() {
-                            preferredMapOrientation =
-                                (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
-                            _saveSettings();
-                          });
-                          _setMapCameraToFitMapMarkers();
-                        },
-                        child: const Icon(Icons.assistant_navigation),
-                      ),
-                    )
+                      AnimatedRotation(
+                        turns: _compassBearing / 360.0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOut,
+                        child: FloatingActionButton(
+                          heroTag: 'mapBearingBtn',
+                          shape: const CircleBorder(),
+                          mini: true,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              preferredMapOrientation =
+                                  (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                              _saveSettings();
+                            });
+                            _setMapCameraToFitMapMarkers();
+                          },
+                          child: const Icon(Icons.assistant_navigation),
+                        ),
+                      )
                   ],
                 ),
               ),
