@@ -878,26 +878,26 @@ class MapPageState extends State<MapPage> {
                       ),
                     ),
                     if (_navigationInProgress == false)
-                    AnimatedRotation(
-                      turns: _compassBearing / 360.0,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                      child: FloatingActionButton(
-                        heroTag: 'mapBearingBtn',
-                        shape: const CircleBorder(),
-                        mini: true,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          setState(() {
-                            preferredMapOrientation =
-                                (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
-                            _saveSettings();
-                          });
-                          _setMapCameraToFitMapMarkers();
-                        },
-                        child: const Icon(Icons.assistant_navigation),
+                      AnimatedRotation(
+                        turns: _compassBearing / 360.0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOut,
+                        child: FloatingActionButton(
+                          heroTag: 'mapBearingBtn',
+                          shape: const CircleBorder(),
+                          mini: true,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              preferredMapOrientation =
+                                  (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                              _saveSettings();
+                            });
+                            _setMapCameraToFitMapMarkers();
+                          },
+                          child: const Icon(Icons.assistant_navigation),
+                        ),
                       ),
-                    ),
                     Row(
                       children: [
                         if (_navigationInProgress == false)
