@@ -33,6 +33,11 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late Future<List<Map<String, dynamic>>> _fetchListings;
+  late List<MarkerId> _foodMarkerIds;
+  late List<MarkerId> _stallsMarkerIds;
+  late List<MarkerId> _musicMarkerIds;
+  late List<MarkerId> _eventMarkerIds;
+  late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
@@ -49,15 +54,62 @@ class MapPageState extends State<MapPage> {
   MapType mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
+  // Declare default filters
+  final Map<String, bool> filterSettings = {
+    'Food': true,
+    'Stalls': true,
+    'Music': true,
+    'Events': true,
+    'Services': true,
+  };
 
   @override
   void initState() {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
+    setMarkerLists();
     createAllMarkerBitmaps();
     addAllVisibleMarkers(false);
     establishLocation();
     super.initState();
+  }
+
+  void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
+    setState(() {
+      for (var id in idList) {
+        final currentMarker = markers[id];
+        if (currentMarker == null) continue;
+
+        markers[id] = currentMarker.copyWith(
+          visibleParam: visibleState,
+        );
+      }
+    });
+  }
+
+  void setMarkerLists() {
+    // Reset marker lists
+    _foodMarkerIds = [];
+    _stallsMarkerIds = [];
+    _musicMarkerIds = [];
+    _eventMarkerIds = [];
+    _serviceMarkerIds = [];
+
+    final allListings = listings as List;
+    for (var listing in allListings) {
+      // Assign markerIds to maps for filtering
+      if (listing['primaryType'] == "Food" || listing['primaryType'] == "Group-Food") {
+        _foodMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Shopping" || listing['primaryType'] == "Group-Shopping") {
+        _stallsMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Music" || listing['primaryType'] == "Group-Music") {
+        _musicMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Event" || listing['primaryType'] == "Group-Event") {
+        _eventMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Service" || listing['primaryType'] == "Group-Service") {
+        _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
+    }
   }
 
   void addAllVisibleMarkers(bool onTest) {
@@ -251,10 +303,131 @@ class MapPageState extends State<MapPage> {
     });
   }
 
+  //The Remove All filters button seems to prefer using this function rather than doing it's own setState
   void clearAllMarkers() {
     setState(() {
       markers.clear();
     });
+  }
+
+  void showFilterMenu() {
+    showModalBottomSheet(
+      scrollControlDisabledMaxHeightRatio: 0.8,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text(
+                      "Filter Map Pins",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.left,
+                    )
+                  ]),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Food'),
+                    title: const Text("Food"),
+                    value: filterSettings["Food"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Food"] = value!;
+                      });
+                      final idList = _foodMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
+                    title: const Text("Stalls"),
+                    value: filterSettings["Stalls"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Stalls"] = value!;
+                      });
+                      final idList = _stallsMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Music'),
+                    title: const Text("Music"),
+                    value: filterSettings["Music"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Music"] = value!;
+                      });
+                      final idList = _musicMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Event'),
+                    title: const Text("Events"),
+                    value: filterSettings["Events"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Events"] = value!;
+                      });
+                      final idList = _eventMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Service'),
+                    title: const Text("Services"),
+                    value: filterSettings["Services"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Services"] = value!;
+                      });
+                      final idList = _serviceMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            filterSettings.forEach((key, _) {
+                              filterSettings[key] = true;
+                            });
+                          });
+                          final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                          updateMarkerVisibility(idList, true);
+                        },
+                        icon: const Icon(Icons.filter_alt),
+                        label: const Text('Show All'),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            filterSettings.forEach((key, _) {
+                              filterSettings[key] = false;
+                            });
+                          });
+                          final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                          updateMarkerVisibility(idList, false);
+                        },
+                        icon: const Icon(Icons.filter_alt_off),
+                        label: const Text('Hide All'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
@@ -511,6 +684,7 @@ class MapPageState extends State<MapPage> {
 
     try {
       listings = await fetchListings(http.Client());
+      setMarkerLists();
       addAllVisibleMarkers(false);
       establishLocation();
     } finally {
@@ -657,6 +831,22 @@ class MapPageState extends State<MapPage> {
                         mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
+                          // Home button resets the filters if they're all toggled off
+                          if (filterSettings['Food'] == false &&
+                              filterSettings['Stalls'] == false &&
+                              filterSettings['Music'] == false &&
+                              filterSettings['Events'] == false &&
+                              filterSettings['Services'] == false) {
+                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                            setState(() {
+                              filterSettings['Food'] = true;
+                              filterSettings['Stalls'] = true;
+                              filterSettings['Music'] = true;
+                              filterSettings['Events'] = true;
+                              filterSettings['Services'] = true;
+                              updateMarkerVisibility(idList, true);
+                            });
+                          }
                           _setMapCameraToFitMapMarkers();
                         },
                         child: Icon(
@@ -707,7 +897,22 @@ class MapPageState extends State<MapPage> {
                         },
                         child: const Icon(Icons.assistant_navigation),
                       ),
-                    )
+                    ),
+                    Row(
+                      children: [
+                        if (_navigationInProgress == false)
+                          IconButton.filled(
+                            onPressed: () {
+                              showFilterMenu();
+                              setMarkerLists();
+                            },
+                            icon: Icon(
+                              Icons.filter_alt,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
               ),
