@@ -14,7 +14,6 @@ import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
-import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -58,9 +57,6 @@ class MapPageState extends State<MapPage> {
     createAllMarkerBitmaps();
     addAllVisibleMarkers(false);
     establishLocation();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ListingUpdateNotifier.maybeShowNotice(context);
-    });
     super.initState();
   }
 
