@@ -328,45 +328,53 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
-    // Load environment variables
-    await dotenv.load(fileName: ".env");
-    String googleMapsDirectionsApiKey = "";
-    String androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
-    String iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
+    try {
+      // Load environment variables
+      await dotenv.load(fileName: ".env");
+      String googleMapsDirectionsApiKey = "";
+      String androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
+      String iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
 
-    // Define headers based on platform
-    Map<String, String> headers;
-    if (Platform.isAndroid) {
-      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-      headers = {
-        "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
-        "X-Android-Cert": androidSigningKey,
-      };
-    } else if (Platform.isIOS) {
-      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-      headers = {
-        "X-Ios-Bundle-Identifier": iosBundleId,
-      };
-    } else {
-      headers = {};
-    }
+      // Define headers based on platform
+      Map<String, String> headers;
+      if (Platform.isAndroid) {
+        googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+        headers = {
+          "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
+          "X-Android-Cert": androidSigningKey,
+        };
+      } else if (Platform.isIOS) {
+        googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+        headers = {
+          "X-Ios-Bundle-Identifier": iosBundleId,
+        };
+      } else {
+        headers = {};
+      }
 
-    // Fetch new directions from the Google Directions API
-    final result = await _polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey: googleMapsDirectionsApiKey,
-      request: PolylineRequest(
-        headers: headers,
-        origin: PointLatLng(origin.latitude, origin.longitude),
-        destination: PointLatLng(destination.latitude, destination.longitude),
-        mode: TravelMode.walking,
-      ),
-    );
+      if (googleMapsDirectionsApiKey.isEmpty) {
+        throw Exception("Google Maps Directions API key is missing.");
+      }
 
-    if (result.points.isNotEmpty) {
+      // Fetch new directions from the Google Directions API
+      final result = await _polylinePoints.getRouteBetweenCoordinates(
+        googleApiKey: googleMapsDirectionsApiKey,
+        request: PolylineRequest(
+          headers: headers,
+          origin: PointLatLng(origin.latitude, origin.longitude),
+          destination: PointLatLng(destination.latitude, destination.longitude),
+          mode: TravelMode.walking,
+        ),
+      );
+
+      if (result.points.isEmpty) {
+        throw Exception("No route points returned from Google Directions API.");
+      }
+
       setState(() {
-        final distanceMetres = result.totalDistanceValue;
-        // Calculate dash and space sizes to appear the same on screen, no matter the distance
-        final dashSpace = (distanceMetres ?? 500) / 50;
+        final distanceMetres = result.totalDistanceValue ?? 0;
+        final dashSpace = (distanceMetres > 0 ? distanceMetres : 500) / 50;
+
         _polylines.clear();
         _polylines.add(
           Polyline(
@@ -377,9 +385,44 @@ class MapPageState extends State<MapPage> {
             patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)],
           ),
         );
-        _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
+
+        _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
+    } on SocketException catch (e) {
+      debugPrint("Network error while fetching route: $e");
+      _handlePolylineError("Network connection issue. Please try again.");
+    } on HttpException catch (e) {
+      debugPrint("HTTP error while fetching route: $e");
+      _handlePolylineError("Server error retrieving route data.");
+    } on FormatException catch (e) {
+      debugPrint("Data format error: $e");
+      _handlePolylineError("Unexpected data format from directions API.");
+    } on Exception catch (e, stack) {
+      debugPrint("Unexpected error fetching directions: $e\n$stack");
+      _handlePolylineError("Failed to get route directions.");
     }
+  }
+
+  void _handlePolylineError(String message) {
+    setState(() {
+      _polylines.clear();
+      _distanceToDestination = null;
+      clearAllMarkers();
+      addAllVisibleMarkers(false);
+      _setMapCameraToFitMapMarkers();
+      _navigationInProgress = false;
+    });
+    debugPrint(message);
+    // Show a snackbar with the error
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        content: Text(
+          message,
+          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+        ),
+      ),
+    );
   }
 
   // Save settings to shared preferences
@@ -688,26 +731,26 @@ class MapPageState extends State<MapPage> {
                       ),
                     ),
                     if (_navigationInProgress == false)
-                    AnimatedRotation(
-                      turns: _compassBearing / 360.0,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                      child: FloatingActionButton(
-                        heroTag: 'mapBearingBtn',
-                        shape: const CircleBorder(),
-                        mini: true,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          setState(() {
-                            preferredMapOrientation =
-                                (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
-                            _saveSettings();
-                          });
-                          _setMapCameraToFitMapMarkers();
-                        },
-                        child: const Icon(Icons.assistant_navigation),
-                      ),
-                    )
+                      AnimatedRotation(
+                        turns: _compassBearing / 360.0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOut,
+                        child: FloatingActionButton(
+                          heroTag: 'mapBearingBtn',
+                          shape: const CircleBorder(),
+                          mini: true,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              preferredMapOrientation =
+                                  (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                              _saveSettings();
+                            });
+                            _setMapCameraToFitMapMarkers();
+                          },
+                          child: const Icon(Icons.assistant_navigation),
+                        ),
+                      )
                   ],
                 ),
               ),
