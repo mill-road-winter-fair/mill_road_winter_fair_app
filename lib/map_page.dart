@@ -162,7 +162,7 @@ class MapPageState extends State<MapPage> {
               maxChildSize: maxFraction,
               builder: (context, scrollController) {
                 return Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                  padding: const EdgeInsets.fromLTRB(4, 16, 4, 0),
                   child: Scrollbar(
                     controller: scrollController,
                     thumbVisibility: false,
