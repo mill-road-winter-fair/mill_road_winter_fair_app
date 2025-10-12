@@ -153,7 +153,7 @@ class MapPageState extends State<MapPage> {
             // Set the minimum size of the modalBottomSheet based on either the estimatedSheetHeight or 2/3 of the screen, whichever is lower
             double minFraction = min((estimatedSheetHeight / screenHeight), 0.66);
             // Set the maximum size of the modalBottomSheet based on either the estimatedSheetHeight or the whole screen, whichever is lower
-            double maxFraction = min((estimatedSheetHeight / screenHeight), 1);
+            double maxFraction = min((estimatedSheetHeight / screenHeight), 0.9);
 
             return DraggableScrollableSheet(
               expand: false,
