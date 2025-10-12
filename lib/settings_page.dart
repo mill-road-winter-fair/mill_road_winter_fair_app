@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -94,12 +95,31 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+
+  PackageInfo _packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+    installerStore: 'Unknown',
+  );
+
   @override
   void initState() {
     super.initState();
+    _initPackageInfo();
   }
 
-  // Save settings to shared preferences
+  // Fetch package information (from pubspec.yaml)
+  Future<void> _initPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageInfo = info;
+    });
+  }
+
+// Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
@@ -288,7 +308,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () {
                       HapticFeedback.lightImpact();
                       showAboutDialog(
-                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.8', applicationIcon: const MyAppIcon(),
+                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: _packageInfo.version, applicationIcon: const MyAppIcon(),
                           children: [
                             ListTile(
                               dense: true,
