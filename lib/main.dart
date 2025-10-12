@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
@@ -59,6 +60,29 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   int index = 0;
+
+  PackageInfo _packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+    installerStore: 'Unknown',
+  );
+
+@override
+  void initState() {
+    super.initState();
+    _initPackageInfo();
+  }
+
+  // Fetch package information (from pubspec.yaml)
+  Future<void> _initPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _packageInfo = info;
+    });
+  }
 
   Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
     setState(() {
@@ -193,7 +217,7 @@ class HomePageState extends State<HomePage> {
               ),
             ),
             Align(
-              alignment: FractionalOffset.bottomCenter,
+              alignment: FractionalOffset.topCenter,
               child: Column(
                 children: [
                   Row(
@@ -240,14 +264,69 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.feedback),
-                    title: const Text('Give feedback on the app', style: TextStyle(fontWeight: FontWeight.bold)),
+                    leading: const Icon(Icons.first_page),
+                    title: const Text('Replay welcome screen', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
                     },
                   ),
-                  const SizedBox(height: 30),
+                  ListTile(
+                    leading: const Icon(Icons.info),
+                    title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      showAboutDialog(
+                        context: context,
+                        applicationName: 'Mill Road\nWinter Fair',
+                        applicationVersion: _packageInfo.version,
+                        applicationIcon: const MyAppIcon(),
+                        children: [
+                          ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.face),
+                            title: const Text('Android app by Alex Berridge',
+                                style: TextStyle(), textAlign: TextAlign.left),
+                            subtitle: const Text('http://theberridge.com',
+                                style: TextStyle(), textAlign: TextAlign.left),
+                            onTap: () async {
+                              HapticFeedback.lightImpact();
+                              launchUrl(Uri.parse('http://theberridge.com'));
+                            },
+                          ),
+                          ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.face),
+                            title: const Text('iPhone port by Matt Whiting',
+                                style: TextStyle(), textAlign: TextAlign.left),
+                            subtitle: const Text('http://mattwhiting.com',
+                                style: TextStyle(), textAlign: TextAlign.left),
+                            onTap: () async {
+                              HapticFeedback.lightImpact();
+                              launchUrl(Uri.parse('http://mattwhiting.com'));
+                            },
+                          ),
+                          ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.feedback),
+                            title: const Text('Tell us if you like this app',
+                                style: TextStyle(), textAlign: TextAlign.left),
+                            subtitle: const Text('Opens a feedback form',
+                                style: TextStyle(), textAlign: TextAlign.left),
+                            onTap: () async {
+                              HapticFeedback.lightImpact();
+                              launchUrl(Uri.parse(
+                                  'https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),                  const SizedBox(height: 30),
                 ],
               ),
             ),

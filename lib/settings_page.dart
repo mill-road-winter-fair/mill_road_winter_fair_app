@@ -1,9 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -96,27 +93,9 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
 
-  PackageInfo _packageInfo = PackageInfo(
-    appName: 'Unknown',
-    packageName: 'Unknown',
-    version: 'Unknown',
-    buildNumber: 'Unknown',
-    buildSignature: 'Unknown',
-    installerStore: 'Unknown',
-  );
-
   @override
   void initState() {
     super.initState();
-    _initPackageInfo();
-  }
-
-  // Fetch package information (from pubspec.yaml)
-  Future<void> _initPackageInfo() async {
-    final info = await PackageInfo.fromPlatform();
-    setState(() {
-      _packageInfo = info;
-    });
   }
 
 // Save settings to shared preferences
@@ -129,15 +108,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _changeTheme(String themeKey) async {
     themeNotifier.value = themeKey;
-  }
-
-  // Function to replay the initial welcome screen
-  void _replayWelcomeScreen(context) {
-    Navigator.pop(context);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-    );
   }
 
   @override
@@ -279,73 +249,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  const Text('Onboarding', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  ListTile(
-                    leading: const Icon(Icons.first_page),
-                    title: const Text('Replay Welcome Screen'),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      _replayWelcomeScreen(context);
-                    },
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  const Text('App Information', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  ListTile(
-                    leading: const Icon(Icons.info),
-                    title: const Text('About'),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      showAboutDialog(
-                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: _packageInfo.version, applicationIcon: const MyAppIcon(),
-                          children: [
-                            ListTile(
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.face),
-                              title: const Text('Android app by Alex Berridge', style: TextStyle(), textAlign: TextAlign.left),
-                              subtitle: const Text('http://theberridge.com', style: TextStyle(), textAlign: TextAlign.left),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                launchUrl(Uri.parse('http://theberridge.com'));
-                              },
-                            ),
-                            ListTile(
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.face),
-                              title: const Text('iPhone port by Matt Whiting', style: TextStyle(), textAlign: TextAlign.left),
-                              subtitle: const Text('http://mattwhiting.com', style: TextStyle(), textAlign: TextAlign.left),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                launchUrl(Uri.parse('http://mattwhiting.com'));
-                              },
-                            ),
-                            ListTile(
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.feedback),
-                              title: const Text('Tell us if you like this app', style: TextStyle(), textAlign: TextAlign.left),
-                              subtitle: const Text('Opens a feedback form', style: TextStyle(), textAlign: TextAlign.left),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
-                              },
-                            ),
-                          ],
-                          );
-                    },
                   ),
                 ],
               ),
