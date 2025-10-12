@@ -38,6 +38,7 @@ class MapPageState extends State<MapPage> {
   late PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   late double _mapBearing;
+  late MapType mapType;
   late double _compassBearing;
   double? mapWidth;
   double? mapHeight;
@@ -46,7 +47,6 @@ class MapPageState extends State<MapPage> {
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller;
-  MapType mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
 
@@ -386,6 +386,7 @@ class MapPageState extends State<MapPage> {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
+    await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
   }
 
   void _setMapCameraToFitMapMarkers() {
@@ -576,6 +577,15 @@ class MapPageState extends State<MapPage> {
             break;
         }
 
+        switch (preferredMapStyleType) {
+          case MapStyleType.normal:
+            mapType = MapType.normal;
+            break;
+          case MapStyleType.hybrid:
+            mapType = MapType.hybrid;
+            break;
+        }
+
         return Scaffold(
           body: Stack(
             children: [
@@ -675,9 +685,13 @@ class MapPageState extends State<MapPage> {
                           if (mapType == MapType.normal) {
                             mapType = MapType.hybrid;
                             _layersIcon = Icons.map;
+                            preferredMapStyleType = MapStyleType.hybrid;
+                            _saveSettings();
                           } else {
                             mapType = MapType.normal;
                             _layersIcon = Icons.satellite_alt;
+                            preferredMapStyleType = MapStyleType.normal;
+                            _saveSettings();
                           }
                         });
                       },
