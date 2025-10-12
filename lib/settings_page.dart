@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -68,6 +69,7 @@ Future<void> loadSettings(bool onTest) async {
 
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
+
   } else if (onTest == true) {
     int savedUnitIndex = 0;
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
@@ -286,11 +288,42 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () {
                       HapticFeedback.lightImpact();
                       showAboutDialog(
-                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.8', applicationIcon: const MyAppIcon(), 
-                          children: [ Text('Android app by Alex Berridge\n' 
-                          + '   http://theberridge.com\n\n'
-                          + 'iPhone port by Matt Whiting\n'
-                          + '   http://mattwhiting.com') ]
+                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.8', applicationIcon: const MyAppIcon(),
+                          children: [
+                            ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.face),
+                              title: const Text('Android app by Alex Berridge', style: TextStyle(), textAlign: TextAlign.left),
+                              subtitle: const Text('http://theberridge.com', style: TextStyle(), textAlign: TextAlign.left),
+                              onTap: () async {
+                                HapticFeedback.lightImpact();
+                                launchUrl(Uri.parse('http://theberridge.com'));
+                              },
+                            ),
+                            ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.face),
+                              title: const Text('iPhone port by Matt Whiting', style: TextStyle(), textAlign: TextAlign.left),
+                              subtitle: const Text('http://mattwhiting.com', style: TextStyle(), textAlign: TextAlign.left),
+                              onTap: () async {
+                                HapticFeedback.lightImpact();
+                                launchUrl(Uri.parse('http://mattwhiting.com'));
+                              },
+                            ),
+                            ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.feedback),
+                              title: const Text('Tell us if you like this app', style: TextStyle(), textAlign: TextAlign.left),
+                              subtitle: const Text('Opens a feedback form', style: TextStyle(), textAlign: TextAlign.left),
+                              onTap: () async {
+                                HapticFeedback.lightImpact();
+                                launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+                              },
+                            ),
+                          ],
                           );
                     },
                   ),
