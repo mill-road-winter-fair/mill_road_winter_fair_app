@@ -898,21 +898,22 @@ class MapPageState extends State<MapPage> {
                           child: const Icon(Icons.assistant_navigation),
                         ),
                       ),
-                    Row(
-                      children: [
-                        if (_navigationInProgress == false)
-                          IconButton.filled(
-                            onPressed: () {
-                              showFilterMenu();
-                              setMarkerLists();
-                            },
-                            icon: Icon(
-                              Icons.filter_alt,
-                              color: Theme.of(context).colorScheme.onPrimary,
+                    if (_navigationInProgress == false)
+                      Row(
+                        children: [
+                          if (_navigationInProgress == false)
+                            IconButton.filled(
+                              onPressed: () {
+                                showFilterMenu();
+                                setMarkerLists();
+                              },
+                              icon: Icon(
+                                Icons.filter_alt,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                 ),
               ),
