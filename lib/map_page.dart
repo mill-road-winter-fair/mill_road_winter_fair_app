@@ -472,6 +472,34 @@ class MapPageState extends State<MapPage> {
     _navigationInProgress = true;
   }
 
+  void cancelNavigation() {
+    setState(() {
+      // Halt the location subscription
+      _positionStream?.cancel();
+
+      // Clear the polylines and markers
+      _polylines.clear();
+      _distanceToDestination = null;
+      clearAllMarkers();
+
+      // Reset the filters
+      filterSettings["Food"] = true;
+      filterSettings["Stalls"] = true;
+      filterSettings["Music"] = true;
+      filterSettings["Events"] = true;
+      filterSettings["Services"] = true;
+
+      // Re-add all visible markers
+      addAllVisibleMarkers(false);
+
+      // Reset the camera position
+      _setMapCameraToFitMapMarkers();
+      
+      // Set navigation as not in progress
+      _navigationInProgress = false;
+    });
+  }
+
   @override
   void dispose() {
     // Cancel the location subscription when the page is disposed
@@ -808,15 +836,7 @@ class MapPageState extends State<MapPage> {
                         mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          setState(() {
-                            _positionStream?.cancel();
-                            _polylines.clear();
-                            _distanceToDestination = null;
-                            clearAllMarkers();
-                            addAllVisibleMarkers(false);
-                            _setMapCameraToFitMapMarkers();
-                            _navigationInProgress = false;
-                          });
+                          cancelNavigation();
                         },
                         child: Icon(
                           Icons.cancel,
