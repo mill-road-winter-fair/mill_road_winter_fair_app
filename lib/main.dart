@@ -152,7 +152,13 @@ class HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text('Mill Road Winter Fair 2025', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            Image.asset('assets/icons/iconTransparent.png', height: 30, width: 30, color: Theme.of(context).colorScheme.onPrimary),
+            IconButton(
+              icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+              },
+            ),
           ],
         ),
         leading: Builder(
