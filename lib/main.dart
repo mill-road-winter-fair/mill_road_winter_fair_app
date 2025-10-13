@@ -63,9 +63,8 @@ class HomePageState extends State<HomePage> {
   Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
     setState(() {
       index = 0;
+      mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
     });
-
-    mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
   }
 
   Widget _buildEmailLink(String email) {
