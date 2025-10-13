@@ -445,6 +445,9 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    // Set navigation as in progress
+    _navigationInProgress = true;
+
     // Pop the navigator if told to
     if (navigatorPop == true) {
       Navigator.pop(context);
@@ -481,9 +484,6 @@ class MapPageState extends State<MapPage> {
     // Add destination map marker
     Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
     addSpecificMarker(destinationListing, false);
-
-    // Set navigation as in progress
-    _navigationInProgress = true;
   }
 
   void cancelNavigation() {
@@ -668,10 +668,14 @@ class MapPageState extends State<MapPage> {
 
     switch (preferredMapOrientation) {
       case MapOrientation.adaptive:
-        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25, 290);
+        const double westUpBearing = 290;
+        final double westUpPadding = mapHeight! * 0.05;
+        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), westUpPadding, westUpBearing);
         break;
       case MapOrientation.alwaysNorth:
-        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 75, 0);
+        const double northUpBearing = 0;
+        double northUpPadding = mapWidth! * 0.05;
+        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), northUpPadding, northUpBearing);
         break;
     }
   }
@@ -691,7 +695,9 @@ class MapPageState extends State<MapPage> {
       }
     }
 
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), 75, 0);
+    const double northUpBearing = 0;
+    double northUpPadding = mapWidth! * 0.07;
+    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), northUpPadding, northUpBearing);
   }
 
   _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -724,12 +730,6 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  double _latRad(double lat) {
-    final sinVal = sin(lat * pi / 180);
-    final radX2 = log((1 + sinVal) / (1 - sinVal)) / 2;
-    return max(min(radX2, pi), -pi) / 2;
-  }
-
   double zoomForBounds(
     LatLng southwestMin,
     LatLng northeastMax,
@@ -739,27 +739,58 @@ class MapPageState extends State<MapPage> {
     const worldDIM = 256.0;
     const zoomMax = 21.0;
 
-    // Effective size after padding
-    // The '4 / MediaQuery.of(context).devicePixelRatio)' adjusts the padding according to the device
-    final usableWidth = mapSize.width - (2 * padding * 4 / MediaQuery.of(context).devicePixelRatio);
-    final usableHeight = mapSize.height - (2 * padding * 4 / MediaQuery.of(context).devicePixelRatio);
+    //Default bearing
+    double bearing = 290;
+    if (preferredMapOrientation == MapOrientation.alwaysNorth || _navigationInProgress == true) {
+      bearing = 0;
+    }
+
+    // Convert to radians for trig functions
+    final bearingRad = bearing * pi / 180.0;
+
+    // Convert LatLng to Mercator (x, y)
+    Offset latLngToPoint(LatLng latLng) {
+      final siny = sin(latLng.latitude * pi / 180).clamp(-0.9999, 0.9999);
+      final x = (latLng.longitude + 180) / 360;
+      final y = 0.5 - log((1 + siny) / (1 - siny)) / (4 * pi);
+      return Offset(x, y);
+    }
+
+    final sw = latLngToPoint(southwestMin);
+    final ne = latLngToPoint(northeastMax);
+
+    // Get center
+    final center = Offset((sw.dx + ne.dx) / 2, (sw.dy + ne.dy) / 2);
+
+    // Rotate both points around center by bearing
+    Offset rotatePoint(Offset point, Offset center, double angle) {
+      final translated = point - center;
+      final xNew = translated.dx * cos(angle) - translated.dy * sin(angle);
+      final yNew = translated.dx * sin(angle) + translated.dy * cos(angle);
+      return Offset(xNew, yNew) + center;
+    }
+
+    final swRot = rotatePoint(sw, center, bearingRad);
+    final neRot = rotatePoint(ne, center, bearingRad);
+
+    // Determine rotated bounds
+    final minX = min(swRot.dx, neRot.dx);
+    final maxX = max(swRot.dx, neRot.dx);
+    final minY = min(swRot.dy, neRot.dy);
+    final maxY = max(swRot.dy, neRot.dy);
+
+    final usableWidth = mapSize.width - 2 * padding;
+    final usableHeight = mapSize.height - 2 * padding;
 
     if (usableWidth <= 0 || usableHeight <= 0) return 0;
 
-    final latFraction = (_latRad(northeastMax.latitude) - _latRad(southwestMin.latitude)) / pi;
+    final worldWidth = maxX - minX;
+    final worldHeight = maxY - minY;
 
-    final centerLat = (northeastMax.latitude + southwestMin.latitude) / 2;
-    final lngDiff = northeastMax.longitude - southwestMin.longitude;
-    final lngFraction = (lngDiff < 0 ? lngDiff + 360 : lngDiff) / 360;
+    final zoomX = log(usableWidth / worldDIM / worldWidth) / ln2;
+    final zoomY = log(usableHeight / worldDIM / worldHeight) / ln2;
 
-    // scale by cos(latitude) to account for Mercator
-    final adjustedLngFraction = lngFraction * cos(centerLat * pi / 180);
-
-    final lngZoom = log(usableWidth / worldDIM / adjustedLngFraction) / ln2;
-
-    final latZoom = log(usableHeight / worldDIM / latFraction) / ln2;
-
-    final zoom = min(latZoom, lngZoom);
+    final zoom = min(zoomX, zoomY);
     return min(zoom, zoomMax);
   }
 
