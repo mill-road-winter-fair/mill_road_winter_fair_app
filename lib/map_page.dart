@@ -14,6 +14,7 @@ import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -43,6 +44,7 @@ class MapPageState extends State<MapPage> {
   late PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   late double _mapBearing;
+  late MapType mapType;
   late double _compassBearing;
   double? mapWidth;
   double? mapHeight;
@@ -51,7 +53,6 @@ class MapPageState extends State<MapPage> {
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller;
-  MapType mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
   // Declare default filters
@@ -71,6 +72,9 @@ class MapPageState extends State<MapPage> {
     createAllMarkerBitmaps();
     addAllVisibleMarkers(false);
     establishLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ListingUpdateNotifier.maybeShowNotice(context);
+    });
     super.initState();
   }
 
@@ -197,11 +201,21 @@ class MapPageState extends State<MapPage> {
           isScrollControlled: true,
           useSafeArea: true,
           builder: (BuildContext context) {
+            double screenHeight = MediaQuery.of(context).size.height;
+            // Estimate the height of a SimplifiedListingInfoSheet in pixels
+            double estimatedItemHeight = 145;
+            // Estimate the total height of the bottom sheet
+            double estimatedSheetHeight = relatedListings.length * estimatedItemHeight;
+            // Set the minimum size of the modalBottomSheet based on either the estimatedSheetHeight or 2/3 of the screen, whichever is lower
+            double minFraction = min((estimatedSheetHeight / screenHeight), 0.66);
+            // Set the maximum size of the modalBottomSheet based on either the estimatedSheetHeight or the whole screen, whichever is lower
+            double maxFraction = min((estimatedSheetHeight / screenHeight), 0.9);
+
             return DraggableScrollableSheet(
               expand: false,
-              initialChildSize: 0.66,
-              minChildSize: 0.3,
-              maxChildSize: 1.0,
+              initialChildSize: minFraction,
+              minChildSize: minFraction,
+              maxChildSize: maxFraction,
               builder: (context, scrollController) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
@@ -494,7 +508,7 @@ class MapPageState extends State<MapPage> {
 
       // Reset the camera position
       _setMapCameraToFitMapMarkers();
-      
+
       // Set navigation as not in progress
       _navigationInProgress = false;
     });
@@ -529,45 +543,53 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
-    // Load environment variables
-    await dotenv.load(fileName: ".env");
-    String googleMapsDirectionsApiKey = "";
-    String androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
-    String iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
+    try {
+      // Load environment variables
+      await dotenv.load(fileName: ".env");
+      String googleMapsDirectionsApiKey = "";
+      String androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
+      String iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
 
-    // Define headers based on platform
-    Map<String, String> headers;
-    if (Platform.isAndroid) {
-      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-      headers = {
-        "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
-        "X-Android-Cert": androidSigningKey,
-      };
-    } else if (Platform.isIOS) {
-      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-      headers = {
-        "X-Ios-Bundle-Identifier": iosBundleId,
-      };
-    } else {
-      headers = {};
-    }
+      // Define headers based on platform
+      Map<String, String> headers;
+      if (Platform.isAndroid) {
+        googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+        headers = {
+          "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
+          "X-Android-Cert": androidSigningKey,
+        };
+      } else if (Platform.isIOS) {
+        googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+        headers = {
+          "X-Ios-Bundle-Identifier": iosBundleId,
+        };
+      } else {
+        headers = {};
+      }
 
-    // Fetch new directions from the Google Directions API
-    final result = await _polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey: googleMapsDirectionsApiKey,
-      request: PolylineRequest(
-        headers: headers,
-        origin: PointLatLng(origin.latitude, origin.longitude),
-        destination: PointLatLng(destination.latitude, destination.longitude),
-        mode: TravelMode.walking,
-      ),
-    );
+      if (googleMapsDirectionsApiKey.isEmpty) {
+        throw Exception("Google Maps Directions API key is missing.");
+      }
 
-    if (result.points.isNotEmpty) {
+      // Fetch new directions from the Google Directions API
+      final result = await _polylinePoints.getRouteBetweenCoordinates(
+        googleApiKey: googleMapsDirectionsApiKey,
+        request: PolylineRequest(
+          headers: headers,
+          origin: PointLatLng(origin.latitude, origin.longitude),
+          destination: PointLatLng(destination.latitude, destination.longitude),
+          mode: TravelMode.walking,
+        ),
+      );
+
+      if (result.points.isEmpty) {
+        throw Exception("No route points returned from Google Directions API.");
+      }
+
       setState(() {
-        final distanceMetres = result.totalDistanceValue;
-        // Calculate dash and space sizes to appear the same on screen, no matter the distance
-        final dashSpace = (distanceMetres ?? 500) / 50;
+        final distanceMetres = result.totalDistanceValue ?? 0;
+        final dashSpace = (distanceMetres > 0 ? distanceMetres : 500) / 50;
+
         _polylines.clear();
         _polylines.add(
           Polyline(
@@ -578,15 +600,51 @@ class MapPageState extends State<MapPage> {
             patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)],
           ),
         );
-        _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
+
+        _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
+    } on SocketException catch (e) {
+      debugPrint("Network error while fetching route: $e");
+      _handlePolylineError("Network connection issue. Please try again.");
+    } on HttpException catch (e) {
+      debugPrint("HTTP error while fetching route: $e");
+      _handlePolylineError("Server error retrieving route data.");
+    } on FormatException catch (e) {
+      debugPrint("Data format error: $e");
+      _handlePolylineError("Unexpected data format from directions API.");
+    } on Exception catch (e, stack) {
+      debugPrint("Unexpected error fetching directions: $e\n$stack");
+      _handlePolylineError("Failed to get route directions.");
     }
+  }
+
+  void _handlePolylineError(String message) {
+    setState(() {
+      _polylines.clear();
+      _distanceToDestination = null;
+      clearAllMarkers();
+      addAllVisibleMarkers(false);
+      _setMapCameraToFitMapMarkers();
+      _navigationInProgress = false;
+    });
+    debugPrint(message);
+    // Show a snackbar with the error
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        content: Text(
+          message,
+          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+        ),
+      ),
+    );
   }
 
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
+    await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
   }
 
   void _setMapCameraToFitMapMarkers() {
@@ -778,6 +836,15 @@ class MapPageState extends State<MapPage> {
             break;
         }
 
+        switch (preferredMapStyleType) {
+          case MapStyleType.normal:
+            mapType = MapType.normal;
+            break;
+          case MapStyleType.hybrid:
+            mapType = MapType.hybrid;
+            break;
+        }
+
         return Scaffold(
           body: Stack(
             children: [
@@ -885,9 +952,13 @@ class MapPageState extends State<MapPage> {
                           if (mapType == MapType.normal) {
                             mapType = MapType.hybrid;
                             _layersIcon = Icons.map;
+                            preferredMapStyleType = MapStyleType.hybrid;
+                            _saveSettings();
                           } else {
                             mapType = MapType.normal;
                             _layersIcon = Icons.satellite_alt;
+                            preferredMapStyleType = MapStyleType.normal;
+                            _saveSettings();
                           }
                         });
                       },

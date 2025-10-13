@@ -26,6 +26,19 @@ void main() {
   });
 
   group('fetchListings', () {
+    test('retries 10 times and returns empty listings when status code is not 200 and we have no listings cached', () async {
+      final invalidResponse = {};
+
+      when(mockClient.get(any)).thenAnswer(
+        (_) async => http.Response(jsonEncode(invalidResponse), 500),
+      );
+
+      final result = await fetchExistingListings(mockClient);
+
+      expect(result, []);
+      verify(mockClient.get(any)).called(equals(10));
+    });
+
     test('returns a list of listings when response is valid', () async {
       final mockResponse = {
         "values": [
@@ -54,30 +67,47 @@ void main() {
       final result = await fetchListings(mockClient);
 
       expect(result.length, 1);
-      expect(result.first["name"], "glazedandconfused");
+      expect(result, [
+        {
+          'displayName': 'Glazed and Confused',
+          'email': 'admin@glazedandconfued.com',
+          'endTime': '16:30',
+          'id': '1',
+          'latLng': '52.199687,0.138813',
+          'name': 'glazedandconfused',
+          'phone': '01223 111111',
+          'primaryType': 'Food',
+          'secondaryType': 'Food',
+          'startTime': '10:30',
+          'tertiaryType': 'Doughnuts',
+          'website': 'https://www.glazedandconfused.com'
+        }
+      ]);
     });
 
-    test('returns empty listings when status code is not 200', () async {
+    test('returns cached listings when status code is not 200', () async {
       when(mockClient.get(any)).thenAnswer(
         (_) async => http.Response('Error', 500),
       );
 
       final result = await fetchExistingListings(mockClient);
 
-      expect(result, []);
-    });
-
-    test('retries up to 10 times if response code is not 200, then returns empty listings', () async {
-      final invalidResponse = {};
-
-      when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response(jsonEncode(invalidResponse), 500),
-      );
-
-      final result = await fetchExistingListings(mockClient);
-
-      expect(result, []);
-      verify(mockClient.get(any)).called(equals(10));
+      expect(result, [
+        {
+          'displayName': 'Glazed and Confused',
+          'email': 'admin@glazedandconfued.com',
+          'endTime': '16:30',
+          'id': '1',
+          'latLng': '52.199687,0.138813',
+          'name': 'glazedandconfused',
+          'phone': '01223 111111',
+          'primaryType': 'Food',
+          'secondaryType': 'Food',
+          'startTime': '10:30',
+          'tertiaryType': 'Doughnuts',
+          'website': 'https://www.glazedandconfused.com'
+        }
+      ]);
     });
   });
 
