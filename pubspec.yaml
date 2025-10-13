@@ -43,7 +43,8 @@ dependencies:
   flutter_polyline_points: ^2.1.0
   shared_preferences: ^2.1.0
   fluttertoast: ^8.2.8
-  
+  package_info_plus: ^9.0.0
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -52,7 +53,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^2.4.13
-  package_info_plus: ^9.0.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
