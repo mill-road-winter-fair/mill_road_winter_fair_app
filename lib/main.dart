@@ -70,7 +70,7 @@ class HomePageState extends State<HomePage> {
     installerStore: 'Unknown',
   );
 
-@override
+  @override
   void initState() {
     super.initState();
     _initPackageInfo();
@@ -90,6 +90,57 @@ class HomePageState extends State<HomePage> {
     });
 
     mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
+  }
+
+  void aboutDialog() {
+    return showAboutDialog(
+      context: context,
+      applicationName: 'Mill Road\nWinter Fair',
+      applicationVersion: _packageInfo.version,
+      applicationIcon: const MyAppIcon(),
+      children: [
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.face),
+          title: const Text('Android app by Alex Berridge',
+              style: TextStyle(), textAlign: TextAlign.left),
+          subtitle: Text('http://theberridge.com',
+              style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary), textAlign: TextAlign.left),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('http://theberridge.com'));
+          },
+        ),
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.face),
+          title: const Text('iPhone version by Matt Whiting',
+              style: TextStyle(), textAlign: TextAlign.left),
+          subtitle: Text('http://mattwhiting.com',
+              style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary), textAlign: TextAlign.left),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('http://mattwhiting.com'));
+          },
+        ),
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.feedback),
+          title: const Text('Tell us if you like this app',
+              style: TextStyle(), textAlign: TextAlign.left),
+          subtitle: Text('Open a feedback form',
+              style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary), textAlign: TextAlign.left),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse(
+                'https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+          },
+        ),
+      ],
+    );
   }
 
   @override
@@ -189,7 +240,7 @@ class HomePageState extends State<HomePage> {
                     onTap: () {
                       HapticFeedback.lightImpact();
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                      Navigator.push(context,MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
                     },
                   ),
                   ListTile(
@@ -277,56 +328,11 @@ class HomePageState extends State<HomePage> {
                     title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      showAboutDialog(
-                        context: context,
-                        applicationName: 'Mill Road\nWinter Fair',
-                        applicationVersion: _packageInfo.version,
-                        applicationIcon: const MyAppIcon(),
-                        children: [
-                          ListTile(
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.face),
-                            title: const Text('Android app by Alex Berridge',
-                                style: TextStyle(), textAlign: TextAlign.left),
-                            subtitle: const Text('http://theberridge.com',
-                                style: TextStyle(), textAlign: TextAlign.left),
-                            onTap: () async {
-                              HapticFeedback.lightImpact();
-                              launchUrl(Uri.parse('http://theberridge.com'));
-                            },
-                          ),
-                          ListTile(
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.face),
-                            title: const Text('iPhone port by Matt Whiting',
-                                style: TextStyle(), textAlign: TextAlign.left),
-                            subtitle: const Text('http://mattwhiting.com',
-                                style: TextStyle(), textAlign: TextAlign.left),
-                            onTap: () async {
-                              HapticFeedback.lightImpact();
-                              launchUrl(Uri.parse('http://mattwhiting.com'));
-                            },
-                          ),
-                          ListTile(
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.feedback),
-                            title: const Text('Tell us if you like this app',
-                                style: TextStyle(), textAlign: TextAlign.left),
-                            subtitle: const Text('Opens a feedback form',
-                                style: TextStyle(), textAlign: TextAlign.left),
-                            onTap: () async {
-                              HapticFeedback.lightImpact();
-                              launchUrl(Uri.parse(
-                                  'https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
-                            },
-                          ),
-                        ],
-                      );
+                      Navigator.pop(context);
+                      aboutDialog();
                     },
-                  ),                  const SizedBox(height: 30),
+                  ),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
