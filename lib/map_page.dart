@@ -669,10 +669,10 @@ class MapPageState extends State<MapPage> {
                             _positionStream?.cancel();
                             _polylines.clear();
                             _distanceToDestination = null;
+                            _navigationInProgress = false;
                             clearAllMarkers();
                             addAllVisibleMarkers(false);
                             _setMapCameraToFitMapMarkers();
-                            _navigationInProgress = false;
                           });
                         },
                         child: Icon(
