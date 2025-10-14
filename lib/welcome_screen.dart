@@ -211,7 +211,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Image.asset('assets/mapMarkers/genericGroupMarker.png', height: 40, width: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Square pins show where there’s\nmore than one thing at a location", style: bodyStyle),
+                          Text("Wide pins show where there’s\nmore than one thing at a location", style: bodyStyle),
                         ],
                       ),
                     ],
