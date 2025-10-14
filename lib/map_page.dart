@@ -132,7 +132,6 @@ class MapPageState extends State<MapPage> {
         }
       }
     }
-    showFilteredMarkers();
   }
 
   Future<bool> createAllMarkerBitmaps() async {
@@ -318,6 +317,27 @@ class MapPageState extends State<MapPage> {
 
     setState(() {
       markers[markerId] = newMarker;
+    });
+  }
+
+  Future<void> updateMarkerIconsForTheme() async {
+    // Recreate marker bitmaps for the new theme colors
+    await createAllMarkerBitmaps();
+
+    // Update each marker’s icon to the correct color for its type
+    setState(() {
+      markers.updateAll((id, oldMarker) {
+        final listing = listings.firstWhere(
+              (l) => l['id'].toString() == id.value,
+          orElse: () => {},
+        );
+        if (listing.isEmpty) return oldMarker;
+
+        final type = listing['primaryType'];
+        final newIcon = bitmapDescriptors[type] ?? oldMarker.icon;
+
+        return oldMarker.copyWith(iconParam: newIcon);
+      });
     });
   }
 
