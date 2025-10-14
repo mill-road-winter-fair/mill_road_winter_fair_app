@@ -365,7 +365,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           RichText(
-                            text: new TextSpan(
+                            text: TextSpan(
                               children: [
                                 TextSpan(text: "Did you know the Fair is organised\nentirely by volunteers? To get\ninvolved, just visit our ",
                                     style: bodyStyle),
@@ -387,7 +387,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           RichText(
-                            text: new TextSpan(
+                            text: TextSpan(
                               children: [
                                 TextSpan(text: "If you have feedback about the app\nwe’d love to hear from you!\nJust fill in ",
                                     style: bodyStyle),
@@ -409,7 +409,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Icon(Icons.report, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           RichText(
-                            text: new TextSpan(
+                            text: TextSpan(
                               children: [
                                 TextSpan(text: "Please do make sure you’ve read the\n",
                                     style: bodyStyle),
