@@ -451,7 +451,7 @@ void main() async {
     expect(mapPageState.markers[const MarkerId('5')]?.visible, false);
   });
 
-  testWidgets('clearAllMarkers clears all markers', (tester) async {
+  testWidgets('hideAllMarkers clears all markers', (tester) async {
     listings = [
       {
         'displayName': 'Glazed and Confused',
@@ -484,10 +484,10 @@ void main() async {
     mapPageState.addAllVisibleMarkers(true);
 
     expect(mapPageState.markers.isNotEmpty, true);
-    expect(mapPageState.markers.length, 1);
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
 
-    mapPageState.clearAllMarkers();
-    expect(mapPageState.markers.isEmpty, true);
+    mapPageState.hideAllMarkers();
+    expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
   });
 
   // TODO: Add test for initial polyline plotting
