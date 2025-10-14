@@ -78,7 +78,6 @@ class ImportantInfoPage extends StatelessWidget {
               const Text('Updates and contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               bulletPoint('Please follow Mill Road Winter Fair on social media or check this app for the latest updates.'),
-
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2.0), // tighten spacing
                 child: Row(
@@ -116,7 +115,6 @@ class ImportantInfoPage extends StatelessWidget {
               const SizedBox(height: 10),
               const Text('The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
               const SizedBox(height: 10),
-              const SizedBox(height: 20),
             ],
           ),
         ),
