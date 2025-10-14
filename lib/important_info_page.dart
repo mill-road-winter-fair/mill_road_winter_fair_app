@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ImportantInfoPage extends StatelessWidget {
@@ -9,7 +8,7 @@ class ImportantInfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Important Info')),
+      appBar: AppBar(title: const Text('Important Information')),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(16.0),
@@ -17,51 +16,57 @@ class ImportantInfoPage extends StatelessWidget {
             children: [
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 240),
-                child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/hiVis.jpg', fit: BoxFit.fitWidth)),
+                child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/hiVis_cropped.jpg', fit: BoxFit.fitWidth)),
               ),
               const SizedBox(height: 20),
               const Text('Stewards', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               const Text(
-                  'On the day of the Fair, stewards wearing hi-vis jackets with Mill Road Winter Fair on the back will be available to assist you. To help ensure your safety, please comply promptly with any instructions from stewards. If you see anything suspicious or unsafe, please report it to a steward immediately. In an emergency, follow instructions from stewards or the emergency services.'),
-              const SizedBox(height: 20),
+                  'On the day of the Fair, stewards wearing high visibility jackets with Mill Road Winter Fair on the back will be available to assist you. To help ensure your safety, please comply promptly with any instructions from stewards. If you see anything suspicious or unsafe, please report it to a steward immediately. In an emergency, follow instructions from stewards or the emergency services.'),
+              const SizedBox(height: 10),
               const Text('Mill Road is a residential street. Please respect residents and do not trespass in private gardens.'),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 250),
                 child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/cautionVehicles.jpg', fit: BoxFit.fitWidth)),
+                    borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/cautionVehicles_cropped.jpg', fit: BoxFit.fitWidth)),
               ),
               const SizedBox(height: 20),
               const Text('Caution – Vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
               const Text.rich(
                 TextSpan(
                   children: [
                     TextSpan(
                         text:
-                            'While Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Gwydir Street, St Barnabas Road, Tenison Road, Cavendish Road, Catharine Street and Devonshire Road '),
+                            'Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Gwydir Street, St Barnabas Road, Tenison Road, Cavendish Road, Catharine Street and Devonshire Road '),
                     TextSpan(
                         text: 'will be closed to most traffic (including all cyclists) between 9am and 5.30pm ', style: TextStyle(fontWeight: FontWeight.bold)),
                     TextSpan(
                         text:
-                            'on the day, there will be some vehicle movement. Pedestrians should exercise particular care before the road is fully closed. Re-opening will occur gradually, so drivers and pedestrians should take extreme care.'),
+                            'However, on the day, there will be some vehicle movement. Pedestrians should exercise particular care before the road is fully closed. Re-opening will occur gradually, so drivers and pedestrians should take extreme care.'),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               const Text(
                   'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time. There is no access to the road closure without permission. Permitted vehicles must drive at walking pace, exercise extreme care for pedestrians, and follow any steward instructions.'),
-              const SizedBox(height: 40),
+              const SizedBox(height: 15),
               const Text('First Aid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               const Text('If you require first aid, please ask the nearest steward or go to Mill Road Baptist Church.'),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 250),
+                child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/carousel01_cropped.jpg', fit: BoxFit.fitWidth)),
+              ),
+              const SizedBox(height: 20),
               const Text('Missing Children', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               const Text(
                   'Please arrange your own family meeting point in case you become separated. Suggested meeting points are shown on the map. Report missing children to any steward.'),
-              const SizedBox(height: 40),
+              const SizedBox(height: 15),
               const Text('Toilets', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               const Column(
@@ -73,7 +78,7 @@ class ImportantInfoPage extends StatelessWidget {
                   Text('\u2022 King’s Church'),
                   Text('\u2022 St Barnabas Church'),
                   Text('\u2022 Mill Road Community Centre'),
-                  Text('\u2022 Mill Road Baptist Church (including accessible toilets)'),
+                  Text('\u2022 Mill Road Baptist Church (accessible toilets)'),
                   Text('\u2022 St Philip’s Church'),
                   Text('\u2022 Romsey Mill'),
                   Text('\u2022 Pubs on/near Mill Road.'),
@@ -82,11 +87,11 @@ class ImportantInfoPage extends StatelessWidget {
               const SizedBox(height: 20),
               const Text(
                   'Baby-changing facilities are available at Zion Baptist Church, King’s Church, St Barnabas Church, Mill Road Community Centre, Mill Road Baptist Church, St Philip’s Church and Romsey Mill.'),
-              const SizedBox(height: 40),
+              const SizedBox(height: 15),
               const Text('Updates', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               const Text('Please follow Mill Road Winter Fair on social media for the latest news and updates.'),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Text.rich(
                 TextSpan(
                   children: [
@@ -120,8 +125,13 @@ class ImportantInfoPage extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 15),
+              const Text('Disclaimer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              const SizedBox(height: 10),
+              const Text('The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
+              const SizedBox(height: 10),
               const SizedBox(height: 20),
-              Row(
+/*               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   IconButton(
@@ -150,7 +160,7 @@ class ImportantInfoPage extends StatelessWidget {
                   ),
                 ],
               ),
-            ],
+ */            ],
           ),
         ),
       ),
