@@ -387,7 +387,8 @@ class MapPageState extends State<MapPage> {
 
       setState(() {
         final distanceMetres = result.totalDistanceValue ?? 0;
-        final dashSpace = (distanceMetres > 0 ? distanceMetres : 500) / 50;
+        // empirical formula, since dashes don't space as if measured in pixels as per google's docs
+        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;  
 
         _polylines.clear();
         _polylines.add(
@@ -396,7 +397,7 @@ class MapPageState extends State<MapPage> {
             points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)],
+            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace*0.75)],
           ),
         );
 
