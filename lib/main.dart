@@ -326,7 +326,7 @@ class HomePageState extends State<HomePage> {
                     onTap: () {
                       HapticFeedback.lightImpact();
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
                     },
                   ),
                   ListTile(
