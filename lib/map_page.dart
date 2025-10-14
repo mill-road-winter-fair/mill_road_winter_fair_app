@@ -117,6 +117,9 @@ class MapPageState extends State<MapPage> {
   }
 
   void addAllVisibleMarkers(bool onTest) {
+    // Ensure the markers list is empty
+    markers.clear();
+
     for (var listing in listings) {
       if (listing['visibleOnMap'] == 'TRUE') {
         // Add Group markers
@@ -129,6 +132,7 @@ class MapPageState extends State<MapPage> {
         }
       }
     }
+    showFilteredMarkers();
   }
 
   Future<bool> createAllMarkerBitmaps() async {
@@ -317,11 +321,20 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  //The Remove All filters button seems to prefer using this function rather than doing it's own setState
-  void clearAllMarkers() {
-    setState(() {
-      markers.clear();
-    });
+  void hideAllMarkers() {
+    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, false);
+  }
+
+  void showAllMarkers() {
+    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, true);
+  }
+
+  void showFilteredMarkers() {
+    updateMarkerVisibility(_foodMarkerIds, filterSettings['Food']!);
+    updateMarkerVisibility(_stallsMarkerIds, filterSettings['Stalls']!);
+    updateMarkerVisibility(_musicMarkerIds, filterSettings['Music']!);
+    updateMarkerVisibility(_eventMarkerIds, filterSettings['Events']!);
+    updateMarkerVisibility(_serviceMarkerIds, filterSettings['Services']!);
   }
 
   void showFilterMenu() {
@@ -414,8 +427,7 @@ class MapPageState extends State<MapPage> {
                               filterSettings[key] = true;
                             });
                           });
-                          final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                          updateMarkerVisibility(idList, true);
+                          showAllMarkers();
                         },
                         icon: const Icon(Icons.filter_alt),
                         label: const Text('Show All'),
@@ -427,8 +439,7 @@ class MapPageState extends State<MapPage> {
                               filterSettings[key] = false;
                             });
                           });
-                          final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
-                          updateMarkerVisibility(idList, false);
+                          hideAllMarkers();
                         },
                         icon: const Icon(Icons.filter_alt_off),
                         label: const Text('Hide All'),
@@ -453,10 +464,10 @@ class MapPageState extends State<MapPage> {
       Navigator.pop(context);
     }
 
-    // Clear any existing polylines
+    // Clear any existing polylines and hide the markers
     setState(() {
-      _polylines.clear(); // Clear any existing polylines
-      clearAllMarkers(); // Clear any existing map markers
+      _polylines.clear();
+      hideAllMarkers();
     });
 
     // If user has location tracking enabled
@@ -487,31 +498,24 @@ class MapPageState extends State<MapPage> {
   }
 
   void cancelNavigation() {
-    setState(() {
-      // Halt the location subscription
-      _positionStream?.cancel();
+    // Halt the location subscription
+    _positionStream?.cancel();
 
-      // Clear the polylines and markers
-      _polylines.clear();
-      _distanceToDestination = null;
-      clearAllMarkers();
+    // Clear the polylines
+    _polylines.clear();
 
-      // Reset the filters
-      filterSettings["Food"] = true;
-      filterSettings["Stalls"] = true;
-      filterSettings["Music"] = true;
-      filterSettings["Events"] = true;
-      filterSettings["Services"] = true;
+    // Reset the distance to destination
+    _distanceToDestination = null;
 
-      // Re-add all visible markers
-      addAllVisibleMarkers(false);
+    // Show markers which have enabled filters
+    showFilteredMarkers();
 
-      // Reset the camera position
-      _setMapCameraToFitMapMarkers();
+    // Reset the camera position
+    _setMapCameraToFitMapMarkers();
 
-      // Set navigation as not in progress
-      _navigationInProgress = false;
-    });
+    // Set navigation as not in progress
+    _navigationInProgress = false;
+    setState(() {});
   }
 
   @override
@@ -622,7 +626,7 @@ class MapPageState extends State<MapPage> {
     setState(() {
       _polylines.clear();
       _distanceToDestination = null;
-      clearAllMarkers();
+      hideAllMarkers();
       addAllVisibleMarkers(false);
       _setMapCameraToFitMapMarkers();
       _navigationInProgress = false;

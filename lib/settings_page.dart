@@ -233,7 +233,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         }
                       });
                       _saveSettings();
-                      mapPageKey.currentState?.clearAllMarkers();
                       mapPageKey.currentState?.addAllVisibleMarkers(false);
                     },
                     child: Column(
