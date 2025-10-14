@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ImportantInfoPage extends StatelessWidget {
@@ -21,10 +22,11 @@ class ImportantInfoPage extends StatelessWidget {
               const SizedBox(height: 20),
               const Text('Stewards', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
-              const Text(
-                  'On the day of the Fair, stewards wearing high visibility jackets with Mill Road Winter Fair on the back will be available to assist you. To help ensure your safety, please comply promptly with any instructions from stewards. If you see anything suspicious or unsafe, please report it to a steward immediately. In an emergency, follow instructions from stewards or the emergency services.'),
-              const SizedBox(height: 10),
-              const Text('Mill Road is a residential street. Please respect residents and do not trespass in private gardens.'),
+              bulletPoint('Stewards wearing hi-vis jackets are available to assist you.'),
+              bulletPoint('To help ensure your safety, please comply promptly with any instructions from stewards.'),
+              bulletPoint('If you see anything unsafe or suspicious, please report it to a steward immediately.'),
+              bulletPoint('In an emergency, follow instructions from stewards or the emergency services.'),
+              bulletPoint('Please respect residents and do not trespass in private gardens.'),
               const SizedBox(height: 20),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 250),
@@ -32,29 +34,16 @@ class ImportantInfoPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/cautionVehicles_cropped.jpg', fit: BoxFit.fitWidth)),
               ),
               const SizedBox(height: 20),
-              const Text('Caution – Vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              const Text('Caution – vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 15),
-              const Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                        text:
-                            'Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Gwydir Street, St Barnabas Road, Tenison Road, Cavendish Road, Catharine Street and Devonshire Road '),
-                    TextSpan(
-                        text: 'will be closed to most traffic (including all cyclists) between 9am and 5.30pm ', style: TextStyle(fontWeight: FontWeight.bold)),
-                    TextSpan(
-                        text:
-                            'However, on the day, there will be some vehicle movement. Pedestrians should exercise particular care before the road is fully closed. Re-opening will occur gradually, so drivers and pedestrians should take extreme care.'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                  'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time. There is no access to the road closure without permission. Permitted vehicles must drive at walking pace, exercise extreme care for pedestrians, and follow any steward instructions.'),
+              bulletPoint('Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
+              bulletPoint('Pedestrians should exercise particular care before the road is fully closed.', isBold: true),
+              bulletPoint('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.', isBold: true),
+              bulletPoint('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
               const SizedBox(height: 15),
               const Text('First Aid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
-              const Text('If you require first aid, please ask the nearest steward or go to Mill Road Baptist Church.'),
+              const Text('If you require first aid, ask the nearest steward or go to Mill Road Baptist Church.'),
               const SizedBox(height: 20),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 250),
@@ -62,45 +51,63 @@ class ImportantInfoPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/carousel01_cropped.jpg', fit: BoxFit.fitWidth)),
               ),
               const SizedBox(height: 20),
-              const Text('Missing Children', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              const Text('Coming with children?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
-              const Text(
-                  'Please arrange your own family meeting point in case you become separated. Suggested meeting points are shown on the map. Report missing children to any steward.'),
+              bulletPoint('Please arrange your own family meeting point in case you become separated.'),
+              bulletPoint('Report missing children to any steward.'),
               const SizedBox(height: 15),
-              const Text('Updates', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-              const SizedBox(height: 10),
-              const Text('Please follow Mill Road Winter Fair on social media for the latest news and updates.'),
+              const Text('Road closure', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(text: 'If you have any questions about the road closure in advance, email '),
+                    const TextSpan(text: 'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                     TextSpan(
-                        text: 'info@millroadwinterfair.org',
+                        text: 'www.millroadwinterfair.org',
                         style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
                         recognizer: TapGestureRecognizer()
-                          ..onTap = () async {
-                            final Uri mailUri = Uri(scheme: 'mailto', path: 'info@millroadwinterfair.org');
-                            if (await canLaunchUrl(mailUri)) {
-                              await launchUrl(mailUri);
-                            } else {
-                              throw Exception('Could not launch email client');
-                            }
-                          }),
-                    const TextSpan(text: ' and on the day phone '),
-                    TextSpan(
-                        text: '07942 289773',
-                        style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () async {
-                            final Uri phoneUri = Uri(scheme: 'tel', path: '07942 289773');
-                            if (await canLaunchUrl(phoneUri)) {
-                              await launchUrl(phoneUri);
-                            } else {
-                              throw Exception('Could not launch 07942 28977');
-                            }
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
                           }),
                     const TextSpan(text: '.'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 15),
+              const Text('Updates and contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              const SizedBox(height: 10),
+              bulletPoint('Please follow Mill Road Winter Fair on social media or check this app for the latest updates.'),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2.0), // tighten spacing
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('• ', style: TextStyle(height: 1.2)),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            const TextSpan(text: 'On the day, you can also phone '),
+                            TextSpan(
+                              text: '07303 142689',
+                              style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                  if (await canLaunchUrl(phoneUri)) {
+                                    await launchUrl(phoneUri);
+                                  } else {
+                                    throw Exception('Could not dial 07303 142689');
+                                  }
+                                }
+                            ),
+                            const TextSpan(text: '.'),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -113,6 +120,24 @@ class ImportantInfoPage extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget bulletPoint(String theText, {isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.0), // tighten spacing
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(height: 1.2)),
+          Expanded(
+            child: Text(
+              theText,
+              style: TextStyle(height: 1.2, fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+            ),
+          ),
+        ],
       ),
     );
   }
