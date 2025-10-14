@@ -14,6 +14,7 @@ import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -33,11 +34,17 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late Future<List<Map<String, dynamic>>> _fetchListings;
+  late List<MarkerId> _foodMarkerIds;
+  late List<MarkerId> _stallsMarkerIds;
+  late List<MarkerId> _musicMarkerIds;
+  late List<MarkerId> _eventMarkerIds;
+  late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   late double _mapBearing;
+  late MapType mapType;
   late double _compassBearing;
   double? mapWidth;
   double? mapHeight;
@@ -46,21 +53,73 @@ class MapPageState extends State<MapPage> {
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller;
-  MapType mapType = MapType.normal;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
+  // Declare default filters
+  final Map<String, bool> filterSettings = {
+    'Food': true,
+    'Stalls': true,
+    'Music': true,
+    'Events': true,
+    'Services': true,
+  };
 
   @override
   void initState() {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
+    setMarkerLists();
     createAllMarkerBitmaps();
     addAllVisibleMarkers(false);
     establishLocation();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ListingUpdateNotifier.maybeShowNotice(context);
+    });
     super.initState();
   }
 
+  void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
+    setState(() {
+      for (var id in idList) {
+        final currentMarker = markers[id];
+        if (currentMarker == null) continue;
+
+        markers[id] = currentMarker.copyWith(
+          visibleParam: visibleState,
+        );
+      }
+    });
+  }
+
+  void setMarkerLists() {
+    // Reset marker lists
+    _foodMarkerIds = [];
+    _stallsMarkerIds = [];
+    _musicMarkerIds = [];
+    _eventMarkerIds = [];
+    _serviceMarkerIds = [];
+
+    final allListings = listings as List;
+    for (var listing in allListings) {
+      // Assign markerIds to maps for filtering
+      if (listing['primaryType'] == "Food" || listing['primaryType'] == "Group-Food") {
+        _foodMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Shopping" || listing['primaryType'] == "Group-Shopping") {
+        _stallsMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Music" || listing['primaryType'] == "Group-Music") {
+        _musicMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Event" || listing['primaryType'] == "Group-Event") {
+        _eventMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Service" || listing['primaryType'] == "Group-Service") {
+        _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
+    }
+  }
+
   void addAllVisibleMarkers(bool onTest) {
+    // Ensure the markers list is empty
+    markers.clear();
+
     for (var listing in listings) {
       if (listing['visibleOnMap'] == 'TRUE') {
         // Add Group markers
@@ -145,11 +204,21 @@ class MapPageState extends State<MapPage> {
           isScrollControlled: true,
           useSafeArea: true,
           builder: (BuildContext context) {
+            double screenHeight = MediaQuery.of(context).size.height;
+            // Estimate the height of a SimplifiedListingInfoSheet in pixels
+            double estimatedItemHeight = 145;
+            // Estimate the total height of the bottom sheet
+            double estimatedSheetHeight = relatedListings.length * estimatedItemHeight;
+            // Set the minimum size of the modalBottomSheet based on either the estimatedSheetHeight or 2/3 of the screen, whichever is lower
+            double minFraction = min((estimatedSheetHeight / screenHeight), 0.66);
+            // Set the maximum size of the modalBottomSheet based on either the estimatedSheetHeight or the whole screen, whichever is lower
+            double maxFraction = min((estimatedSheetHeight / screenHeight), 0.9);
+
             return DraggableScrollableSheet(
               expand: false,
-              initialChildSize: 0.66,
-              minChildSize: 0.3,
-              maxChildSize: 1.0,
+              initialChildSize: minFraction,
+              minChildSize: minFraction,
+              maxChildSize: maxFraction,
               builder: (context, scrollController) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
@@ -251,22 +320,174 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  void clearAllMarkers() {
+  Future<void> updateMarkerIconsForTheme() async {
+    // Recreate marker bitmaps for the new theme colors
+    await createAllMarkerBitmaps();
+
+    // Update each marker’s icon to the correct color for its type
     setState(() {
-      markers.clear();
+      markers.updateAll((id, oldMarker) {
+        final listing = listings.firstWhere(
+              (l) => l['id'].toString() == id.value,
+          orElse: () => {},
+        );
+        if (listing.isEmpty) return oldMarker;
+
+        final type = listing['primaryType'];
+        final newIcon = bitmapDescriptors[type] ?? oldMarker.icon;
+
+        return oldMarker.copyWith(iconParam: newIcon);
+      });
     });
   }
 
+  void hideAllMarkers() {
+    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, false);
+  }
+
+  void showAllMarkers() {
+    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, true);
+  }
+
+  void showFilteredMarkers() {
+    updateMarkerVisibility(_foodMarkerIds, filterSettings['Food']!);
+    updateMarkerVisibility(_stallsMarkerIds, filterSettings['Stalls']!);
+    updateMarkerVisibility(_musicMarkerIds, filterSettings['Music']!);
+    updateMarkerVisibility(_eventMarkerIds, filterSettings['Events']!);
+    updateMarkerVisibility(_serviceMarkerIds, filterSettings['Services']!);
+  }
+
+  void showFilterMenu() {
+    showModalBottomSheet(
+      scrollControlDisabledMaxHeightRatio: 0.8,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text(
+                      "Filter Map Pins",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.left,
+                    )
+                  ]),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Food'),
+                    title: const Text("Food"),
+                    value: filterSettings["Food"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Food"] = value!;
+                      });
+                      final idList = _foodMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
+                    title: const Text("Stalls"),
+                    value: filterSettings["Stalls"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Stalls"] = value!;
+                      });
+                      final idList = _stallsMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Music'),
+                    title: const Text("Music"),
+                    value: filterSettings["Music"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Music"] = value!;
+                      });
+                      final idList = _musicMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Event'),
+                    title: const Text("Events"),
+                    value: filterSettings["Events"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Events"] = value!;
+                      });
+                      final idList = _eventMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Service'),
+                    title: const Text("Services"),
+                    value: filterSettings["Services"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Services"] = value!;
+                      });
+                      final idList = _serviceMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            filterSettings.forEach((key, _) {
+                              filterSettings[key] = true;
+                            });
+                          });
+                          showAllMarkers();
+                        },
+                        icon: const Icon(Icons.filter_alt),
+                        label: const Text('Show All'),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            filterSettings.forEach((key, _) {
+                              filterSettings[key] = false;
+                            });
+                          });
+                          hideAllMarkers();
+                        },
+                        icon: const Icon(Icons.filter_alt_off),
+                        label: const Text('Hide All'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    // Set navigation as in progress
+    _navigationInProgress = true;
+
     // Pop the navigator if told to
     if (navigatorPop == true) {
       Navigator.pop(context);
     }
 
-    // Clear any existing polylines
+    // Clear any existing polylines and hide the markers
     setState(() {
-      _polylines.clear(); // Clear any existing polylines
-      clearAllMarkers(); // Clear any existing map markers
+      _polylines.clear();
+      hideAllMarkers();
     });
 
     // If user has location tracking enabled
@@ -294,9 +515,27 @@ class MapPageState extends State<MapPage> {
     // Add destination map marker
     Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
     addSpecificMarker(destinationListing, false);
+  }
 
-    // Set navigation as in progress
-    _navigationInProgress = true;
+  void cancelNavigation() {
+    // Halt the location subscription
+    _positionStream?.cancel();
+
+    // Clear the polylines
+    _polylines.clear();
+
+    // Reset the distance to destination
+    _distanceToDestination = null;
+
+    // Show markers which have enabled filters
+    showFilteredMarkers();
+
+    // Reset the camera position
+    _setMapCameraToFitMapMarkers();
+
+    // Set navigation as not in progress
+    _navigationInProgress = false;
+    setState(() {});
   }
 
   @override
@@ -328,45 +567,53 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
-    // Load environment variables
-    await dotenv.load(fileName: ".env");
-    String googleMapsDirectionsApiKey = "";
-    String androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
-    String iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
+    try {
+      // Load environment variables
+      await dotenv.load(fileName: ".env");
+      String googleMapsDirectionsApiKey = "";
+      String androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
+      String iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
 
-    // Define headers based on platform
-    Map<String, String> headers;
-    if (Platform.isAndroid) {
-      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-      headers = {
-        "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
-        "X-Android-Cert": androidSigningKey,
-      };
-    } else if (Platform.isIOS) {
-      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-      headers = {
-        "X-Ios-Bundle-Identifier": iosBundleId,
-      };
-    } else {
-      headers = {};
-    }
+      // Define headers based on platform
+      Map<String, String> headers;
+      if (Platform.isAndroid) {
+        googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+        headers = {
+          "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
+          "X-Android-Cert": androidSigningKey,
+        };
+      } else if (Platform.isIOS) {
+        googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+        headers = {
+          "X-Ios-Bundle-Identifier": iosBundleId,
+        };
+      } else {
+        headers = {};
+      }
 
-    // Fetch new directions from the Google Directions API
-    final result = await _polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey: googleMapsDirectionsApiKey,
-      request: PolylineRequest(
-        headers: headers,
-        origin: PointLatLng(origin.latitude, origin.longitude),
-        destination: PointLatLng(destination.latitude, destination.longitude),
-        mode: TravelMode.walking,
-      ),
-    );
+      if (googleMapsDirectionsApiKey.isEmpty) {
+        throw Exception("Google Maps Directions API key is missing.");
+      }
 
-    if (result.points.isNotEmpty) {
+      // Fetch new directions from the Google Directions API
+      final result = await _polylinePoints.getRouteBetweenCoordinates(
+        googleApiKey: googleMapsDirectionsApiKey,
+        request: PolylineRequest(
+          headers: headers,
+          origin: PointLatLng(origin.latitude, origin.longitude),
+          destination: PointLatLng(destination.latitude, destination.longitude),
+          mode: TravelMode.walking,
+        ),
+      );
+
+      if (result.points.isEmpty) {
+        throw Exception("No route points returned from Google Directions API.");
+      }
+
       setState(() {
-        final distanceMetres = result.totalDistanceValue;
-        // Calculate dash and space sizes to appear the same on screen, no matter the distance
-        final dashSpace = (distanceMetres ?? 500) / 50;
+        final distanceMetres = result.totalDistanceValue ?? 0;
+        final dashSpace = (distanceMetres > 0 ? distanceMetres : 500) / 50;
+
         _polylines.clear();
         _polylines.add(
           Polyline(
@@ -377,15 +624,51 @@ class MapPageState extends State<MapPage> {
             patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)],
           ),
         );
-        _distanceToDestination = convertDistanceUnits(distanceMetres!, preferredDistanceUnits);
+
+        _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
+    } on SocketException catch (e) {
+      debugPrint("Network error while fetching route: $e");
+      _handlePolylineError("Network connection issue. Please try again.");
+    } on HttpException catch (e) {
+      debugPrint("HTTP error while fetching route: $e");
+      _handlePolylineError("Server error retrieving route data.");
+    } on FormatException catch (e) {
+      debugPrint("Data format error: $e");
+      _handlePolylineError("Unexpected data format from directions API.");
+    } on Exception catch (e, stack) {
+      debugPrint("Unexpected error fetching directions: $e\n$stack");
+      _handlePolylineError("Failed to get route directions.");
     }
+  }
+
+  void _handlePolylineError(String message) {
+    setState(() {
+      _polylines.clear();
+      _distanceToDestination = null;
+      hideAllMarkers();
+      addAllVisibleMarkers(false);
+      _setMapCameraToFitMapMarkers();
+      _navigationInProgress = false;
+    });
+    debugPrint(message);
+    // Show a snackbar with the error
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        content: Text(
+          message,
+          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+        ),
+      ),
+    );
   }
 
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
+    await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
   }
 
   void _setMapCameraToFitMapMarkers() {
@@ -409,10 +692,14 @@ class MapPageState extends State<MapPage> {
 
     switch (preferredMapOrientation) {
       case MapOrientation.adaptive:
-        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 25, 290);
+        const double westUpBearing = 290;
+        final double westUpPadding = mapHeight! * 0.05;
+        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), westUpPadding, westUpBearing);
         break;
       case MapOrientation.alwaysNorth:
-        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), 75, 0);
+        const double northUpBearing = 0;
+        double northUpPadding = mapWidth! * 0.05;
+        _moveCameraToBoundsWithRotation(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong), northUpPadding, northUpBearing);
         break;
     }
   }
@@ -432,7 +719,9 @@ class MapPageState extends State<MapPage> {
       }
     }
 
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), 75, 0);
+    const double northUpBearing = 0;
+    double northUpPadding = mapWidth! * 0.07;
+    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), northUpPadding, northUpBearing);
   }
 
   _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -465,12 +754,6 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  double _latRad(double lat) {
-    final sinVal = sin(lat * pi / 180);
-    final radX2 = log((1 + sinVal) / (1 - sinVal)) / 2;
-    return max(min(radX2, pi), -pi) / 2;
-  }
-
   double zoomForBounds(
     LatLng southwestMin,
     LatLng northeastMax,
@@ -480,27 +763,58 @@ class MapPageState extends State<MapPage> {
     const worldDIM = 256.0;
     const zoomMax = 21.0;
 
-    // Effective size after padding
-    // The '4 / MediaQuery.of(context).devicePixelRatio)' adjusts the padding according to the device
-    final usableWidth = mapSize.width - (2 * padding * 4 / MediaQuery.of(context).devicePixelRatio);
-    final usableHeight = mapSize.height - (2 * padding * 4 / MediaQuery.of(context).devicePixelRatio);
+    //Default bearing
+    double bearing = 290;
+    if (preferredMapOrientation == MapOrientation.alwaysNorth || _navigationInProgress == true) {
+      bearing = 0;
+    }
+
+    // Convert to radians for trig functions
+    final bearingRad = bearing * pi / 180.0;
+
+    // Convert LatLng to Mercator (x, y)
+    Offset latLngToPoint(LatLng latLng) {
+      final siny = sin(latLng.latitude * pi / 180).clamp(-0.9999, 0.9999);
+      final x = (latLng.longitude + 180) / 360;
+      final y = 0.5 - log((1 + siny) / (1 - siny)) / (4 * pi);
+      return Offset(x, y);
+    }
+
+    final sw = latLngToPoint(southwestMin);
+    final ne = latLngToPoint(northeastMax);
+
+    // Get center
+    final center = Offset((sw.dx + ne.dx) / 2, (sw.dy + ne.dy) / 2);
+
+    // Rotate both points around center by bearing
+    Offset rotatePoint(Offset point, Offset center, double angle) {
+      final translated = point - center;
+      final xNew = translated.dx * cos(angle) - translated.dy * sin(angle);
+      final yNew = translated.dx * sin(angle) + translated.dy * cos(angle);
+      return Offset(xNew, yNew) + center;
+    }
+
+    final swRot = rotatePoint(sw, center, bearingRad);
+    final neRot = rotatePoint(ne, center, bearingRad);
+
+    // Determine rotated bounds
+    final minX = min(swRot.dx, neRot.dx);
+    final maxX = max(swRot.dx, neRot.dx);
+    final minY = min(swRot.dy, neRot.dy);
+    final maxY = max(swRot.dy, neRot.dy);
+
+    final usableWidth = mapSize.width - 2 * padding;
+    final usableHeight = mapSize.height - 2 * padding;
 
     if (usableWidth <= 0 || usableHeight <= 0) return 0;
 
-    final latFraction = (_latRad(northeastMax.latitude) - _latRad(southwestMin.latitude)) / pi;
+    final worldWidth = maxX - minX;
+    final worldHeight = maxY - minY;
 
-    final centerLat = (northeastMax.latitude + southwestMin.latitude) / 2;
-    final lngDiff = northeastMax.longitude - southwestMin.longitude;
-    final lngFraction = (lngDiff < 0 ? lngDiff + 360 : lngDiff) / 360;
+    final zoomX = log(usableWidth / worldDIM / worldWidth) / ln2;
+    final zoomY = log(usableHeight / worldDIM / worldHeight) / ln2;
 
-    // scale by cos(latitude) to account for Mercator
-    final adjustedLngFraction = lngFraction * cos(centerLat * pi / 180);
-
-    final lngZoom = log(usableWidth / worldDIM / adjustedLngFraction) / ln2;
-
-    final latZoom = log(usableHeight / worldDIM / latFraction) / ln2;
-
-    final zoom = min(latZoom, lngZoom);
+    final zoom = min(zoomX, zoomY);
     return min(zoom, zoomMax);
   }
 
@@ -511,6 +825,7 @@ class MapPageState extends State<MapPage> {
 
     try {
       listings = await fetchListings(http.Client());
+      setMarkerLists();
       addAllVisibleMarkers(false);
       establishLocation();
     } finally {
@@ -576,6 +891,15 @@ class MapPageState extends State<MapPage> {
             break;
         }
 
+        switch (preferredMapStyleType) {
+          case MapStyleType.normal:
+            mapType = MapType.normal;
+            break;
+          case MapStyleType.hybrid:
+            mapType = MapType.hybrid;
+            break;
+        }
+
         return Scaffold(
           body: Stack(
             children: [
@@ -634,15 +958,7 @@ class MapPageState extends State<MapPage> {
                         mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          setState(() {
-                            _positionStream?.cancel();
-                            _polylines.clear();
-                            _distanceToDestination = null;
-                            clearAllMarkers();
-                            addAllVisibleMarkers(false);
-                            _setMapCameraToFitMapMarkers();
-                            _navigationInProgress = false;
-                          });
+                          cancelNavigation();
                         },
                         child: Icon(
                           Icons.cancel,
@@ -657,6 +973,22 @@ class MapPageState extends State<MapPage> {
                         mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
+                          // Home button resets the filters if they're all toggled off
+                          if (filterSettings['Food'] == false &&
+                              filterSettings['Stalls'] == false &&
+                              filterSettings['Music'] == false &&
+                              filterSettings['Events'] == false &&
+                              filterSettings['Services'] == false) {
+                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                            setState(() {
+                              filterSettings['Food'] = true;
+                              filterSettings['Stalls'] = true;
+                              filterSettings['Music'] = true;
+                              filterSettings['Events'] = true;
+                              filterSettings['Services'] = true;
+                              updateMarkerVisibility(idList, true);
+                            });
+                          }
                           _setMapCameraToFitMapMarkers();
                         },
                         child: Icon(
@@ -675,9 +1007,13 @@ class MapPageState extends State<MapPage> {
                           if (mapType == MapType.normal) {
                             mapType = MapType.hybrid;
                             _layersIcon = Icons.map;
+                            preferredMapStyleType = MapStyleType.hybrid;
+                            _saveSettings();
                           } else {
                             mapType = MapType.normal;
                             _layersIcon = Icons.satellite_alt;
+                            preferredMapStyleType = MapStyleType.normal;
+                            _saveSettings();
                           }
                         });
                       },
@@ -688,26 +1024,42 @@ class MapPageState extends State<MapPage> {
                       ),
                     ),
                     if (_navigationInProgress == false)
-                    AnimatedRotation(
-                      turns: _compassBearing / 360.0,
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOut,
-                      child: FloatingActionButton(
-                        heroTag: 'mapBearingBtn',
-                        shape: const CircleBorder(),
-                        mini: true,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          setState(() {
-                            preferredMapOrientation =
-                                (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
-                            _saveSettings();
-                          });
-                          _setMapCameraToFitMapMarkers();
-                        },
-                        child: const Icon(Icons.assistant_navigation),
+                      AnimatedRotation(
+                        turns: _compassBearing / 360.0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOut,
+                        child: FloatingActionButton(
+                          heroTag: 'mapBearingBtn',
+                          shape: const CircleBorder(),
+                          mini: true,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              preferredMapOrientation =
+                                  (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                              _saveSettings();
+                            });
+                            _setMapCameraToFitMapMarkers();
+                          },
+                          child: const Icon(Icons.assistant_navigation),
+                        ),
                       ),
-                    )
+                    if (_navigationInProgress == false)
+                      Row(
+                        children: [
+                          if (_navigationInProgress == false)
+                            IconButton.filled(
+                              onPressed: () {
+                                showFilterMenu();
+                                setMarkerLists();
+                              },
+                              icon: Icon(
+                                Icons.filter_alt,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                        ],
+                      ),
                   ],
                 ),
               ),

@@ -4,71 +4,79 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
-// Initialise global variable to hold listings (might want to switch this out for Firebase at some point)
+// Initialise global variable to hold listings
 List<Map<String, dynamic>> listings = [];
 
-// Fetch listings from Google Sheets
+// Fetch listings from Heroku caching layer
 Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
   try {
     // Load environment variables
     await dotenv.load(fileName: ".env");
     String herokuApi = dotenv.env['HEROKU_API'] ?? '';
-
     final uri = Uri.parse(herokuApi);
 
-    var response = await client.get(uri);
+    final response = await client.get(uri);
 
+    // Retry up to 10 times for transient failures
     if (response.statusCode != 200) {
-      for (var i = 1; i < 10; i++) {
-        sleep(const Duration(seconds: 2));
-        var newResponse = await client.get(uri);
-
-        // If response status code is still not 200, go to the next loop iteration
-        if (newResponse.statusCode != 200) {
-          continue;
+      for (var i = 0; i < 9; i++) {
+        await Future.delayed(const Duration(seconds: 2));
+        final retryResponse = await client.get(uri);
+        if (retryResponse.statusCode == 200) {
+          return _parseListings(retryResponse.body);
         }
-
-        response = newResponse;
-        break;
       }
-
-      // If response status code is still not 200 after 10 attempts
-      if (response.statusCode != 200) {
-        throw Exception('Heroku listings call failed to complete');
-      }
+      throw HttpException('Heroku API returned ${response.statusCode}');
     }
 
-    // Transform the Sheets API response into JSON that matches the app's listings format
-    final data = json.decode(response.body);
-    final rows = data['values'] as List<dynamic>;
-    final headers = rows.first as List<dynamic>; // The first row is headers
-    List<Map<String, dynamic>> listings = rows.skip(1).map((row) {
-      return Map<String, dynamic>.fromIterables(
-        headers.cast<String>(),
-        row.cast<dynamic>(),
-      );
-    }).toList();
+    // Success
+    final newListings = _parseListings(response.body);
+    listings = newListings;
     return listings;
-  } on Exception catch (e) {
-    debugPrint('Error fetching Heroku listing data: $e');
-    return [];
-  } catch (e) {
-    listings = [];
-    return Future.error('Error fetching Heroku listing data: $e');
+  } on SocketException catch (_) {
+    debugPrint('⚠️ Network error: unable to reach server, using stale listings.');
+    return listings.isNotEmpty ? listings : [];
+  } on HttpException catch (e) {
+    debugPrint('⚠️ Server responded with an error: $e');
+    return listings.isNotEmpty ? listings : [];
+  } on FormatException catch (e) {
+    debugPrint('⚠️ Bad response format: $e');
+    return listings.isNotEmpty ? listings : [];
+  } catch (e, stack) {
+    debugPrint('⚠️ Unexpected error fetching listings: $e');
+    debugPrint(stack.toString());
+    return listings.isNotEmpty ? listings : [];
   }
 }
 
-// Fetch listings from Google Sheets if we don't have any listings
+// Helper to parse JSON into the app’s listing structure
+List<Map<String, dynamic>> _parseListings(String body) {
+  final data = json.decode(body);
+  final rows = data['values'] as List<dynamic>;
+  final headers = rows.first as List<dynamic>;
+  return rows.skip(1).map((row) {
+    return Map<String, dynamic>.fromIterables(
+      headers.cast<String>(),
+      row.cast<dynamic>(),
+    );
+  }).toList();
+}
+
+// Fetch listings only if we don't already have them
 Future<List<Map<String, dynamic>>> fetchExistingListings(http.Client client) async {
   if (listings.isEmpty) {
     try {
-      return fetchListings(client);
-    } on Exception catch (e) {
-      debugPrint('Error fetching Heroku listing data: $e');
-      return [];
+      return await fetchListings(client);
     } catch (e) {
-      listings = [];
-      return Future.error('Error fetching Heroku listing data: $e');
+      debugPrint('Error in fetchExistingListings: $e');
+
+      // If we already have cached listings, use them
+      if (listings.isNotEmpty) {
+        debugPrint('Using stale listings cache.');
+        return listings;
+      }
+
+      return [];
     }
   }
 
