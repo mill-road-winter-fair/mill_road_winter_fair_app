@@ -67,27 +67,6 @@ class ImportantInfoPage extends StatelessWidget {
               const Text(
                   'Please arrange your own family meeting point in case you become separated. Suggested meeting points are shown on the map. Report missing children to any steward.'),
               const SizedBox(height: 15),
-              const Text('Toilets', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-              const SizedBox(height: 10),
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('\u2022 Zion Baptist Church', textAlign: TextAlign.left),
-                  Text('\u2022 Ditchburn Place (for a small donation)'),
-                  Text('\u2022 The Bath House'),
-                  Text('\u2022 King’s Church'),
-                  Text('\u2022 St Barnabas Church'),
-                  Text('\u2022 Mill Road Community Centre'),
-                  Text('\u2022 Mill Road Baptist Church (accessible toilets)'),
-                  Text('\u2022 St Philip’s Church'),
-                  Text('\u2022 Romsey Mill'),
-                  Text('\u2022 Pubs on/near Mill Road.'),
-                ],
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                  'Baby-changing facilities are available at Zion Baptist Church, King’s Church, St Barnabas Church, Mill Road Community Centre, Mill Road Baptist Church, St Philip’s Church and Romsey Mill.'),
-              const SizedBox(height: 15),
               const Text('Updates', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               const Text('Please follow Mill Road Winter Fair on social media for the latest news and updates.'),
@@ -131,36 +110,7 @@ class ImportantInfoPage extends StatelessWidget {
               const Text('The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
               const SizedBox(height: 10),
               const SizedBox(height: 20),
-/*               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
-                    },
-                    icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 60, color: Theme.of(context).colorScheme.tertiary),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      launchUrl(Uri.parse('https://x.com/millroadfair'));
-                    },
-                    icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 60, color: Theme.of(context).colorScheme.tertiary),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
-                    },
-                    icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 60, color: Theme.of(context).colorScheme.tertiary),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
-                    },
-                    icon: FaIcon(FontAwesomeIcons.flickr, size: 60, color: Theme.of(context).colorScheme.tertiary),
-                  ),
-                ],
-              ),
- */            ],
+            ],
           ),
         ),
       ),
