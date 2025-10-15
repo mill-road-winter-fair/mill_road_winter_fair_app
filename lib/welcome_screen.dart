@@ -88,7 +88,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       pages: [
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/carousel00.jpg',
+          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork00.jpg',
           title: "Welcome to the official\nMill Road Winter Fair app!",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -152,7 +152,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/carousel02.jpg',
+          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork01.jpg',
           title: "What do the pins mean?",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -211,7 +211,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Image.asset('assets/mapMarkers/genericGroupMarker.png', height: 40, width: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Square pins show where there’s\nmore than one thing at a location", style: bodyStyle),
+                          Text("Wide pins show where there’s\nmore than one thing at a location", style: bodyStyle),
                         ],
                       ),
                     ],
@@ -229,7 +229,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/carousel03.jpg',
+          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork02.jpg',
           title: "Choosing what’s shown",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -282,7 +282,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/carousel04.jpg',
+          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork03.jpg',
           title: "What’s on and when",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -337,7 +337,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/carousel01.jpg',
+          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork04.jpg',
           title: "A few final things…",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -357,6 +357,30 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Icon(Icons.favorite, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           Text("Thank you for visiting Mill Road\nWinter Fair and using our new app", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.report, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(text: "Please do make sure you’ve read the\n",
+                                    style: bodyStyle),
+                                TextSpan(text:  "important information",
+                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline), 
+                                  recognizer: TapGestureRecognizer()..onTap = () {
+                                    HapticFeedback.lightImpact();
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                                  },
+                                ),
+                                TextSpan(text: " about the Fair",
+                                    style: bodyStyle),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -398,30 +422,6 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                                     launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link')); 
                                   },
                                 ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(Icons.report, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(text: "Please do make sure you’ve read the\n",
-                                    style: bodyStyle),
-                                TextSpan(text:  "important information",
-                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline), 
-                                  recognizer: TapGestureRecognizer()..onTap = () {
-                                    HapticFeedback.lightImpact();
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
-                                  },
-                                ),
-                                TextSpan(text: " about the Fair",
-                                    style: bodyStyle),
                               ],
                             ),
                           ),
