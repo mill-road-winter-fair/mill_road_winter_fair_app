@@ -454,15 +454,10 @@ class MapPageState extends State<MapPage> {
                       ),
                       ElevatedButton.icon(
                         onPressed: () {
-                          setState(() {
-                            filterSettings.forEach((key, _) {
-                              filterSettings[key] = false;
-                            });
-                          });
-                          hideAllMarkers();
+                          Navigator.pop(context);
                         },
-                        icon: const Icon(Icons.filter_alt_off),
-                        label: const Text('Hide All'),
+                        icon: const Icon(Icons.check_circle),
+                        label: const Text('Done'),
                       ),
                     ],
                   ),
