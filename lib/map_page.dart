@@ -224,7 +224,7 @@ class MapPageState extends State<MapPage> {
         points: roadClosurePolygonPoints,
         strokeWidth: 6,
         strokeColor: Theme.of(context).colorScheme.tertiary,
-        fillColor: Colors.transparent);
+        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
   }
 
   void updateRoadClosurePolygonVisibility(bool visibleState) {
