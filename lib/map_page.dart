@@ -1260,6 +1260,48 @@ class MapPageState extends State<MapPage> {
                     ),
                   ),
                 ),
+              if (filterSettings['Road Closures'] == true)
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0, bottom: 40.0),
+                  child: Material(
+                    elevation: 3,
+                    borderRadius: BorderRadius.circular(8),
+                    color: Theme.of(context).colorScheme.surface,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.tertiary,
+                                width: 3,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Road closures',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.tertiary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
         );
