@@ -86,10 +86,10 @@ void main() async {
     expect(find.text('About the Fair'), findsOneWidget);
     expect(find.text('Important information'), findsOneWidget);
     expect(find.text('Visit our Website'), findsOneWidget);
-    expect(find.text('Email us'), findsOneWidget);
-    expect(find.byType(IconButton), findsExactly(5));
+    expect(find.byType(IconButton), findsExactly(7));
     expect(find.text('Settings'), findsOneWidget);
-    expect(find.text('Give feedback on the app'), findsOneWidget);
+    expect(find.text('Replay welcome screen'), findsOneWidget);
+    expect(find.text('About the app'), findsOneWidget);
   });
 
   testWidgets('HomePage navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {

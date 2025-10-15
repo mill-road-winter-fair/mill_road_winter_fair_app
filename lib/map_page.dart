@@ -34,6 +34,11 @@ class MapPage extends StatefulWidget {
 
 class MapPageState extends State<MapPage> {
   late Future<List<Map<String, dynamic>>> _fetchListings;
+  late List<MarkerId> _foodMarkerIds;
+  late List<MarkerId> _stallsMarkerIds;
+  late List<MarkerId> _musicMarkerIds;
+  late List<MarkerId> _eventMarkerIds;
+  late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
@@ -50,11 +55,20 @@ class MapPageState extends State<MapPage> {
   GoogleMapController? _controller;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
+  // Declare default filters
+  final Map<String, bool> filterSettings = {
+    'Food': true,
+    'Stalls': true,
+    'Music': true,
+    'Events': true,
+    'Services': true,
+  };
 
   @override
   void initState() {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
+    setMarkerLists();
     createAllMarkerBitmaps();
     addAllVisibleMarkers(false);
     establishLocation();
@@ -64,7 +78,48 @@ class MapPageState extends State<MapPage> {
     super.initState();
   }
 
+  void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
+    setState(() {
+      for (var id in idList) {
+        final currentMarker = markers[id];
+        if (currentMarker == null) continue;
+
+        markers[id] = currentMarker.copyWith(
+          visibleParam: visibleState,
+        );
+      }
+    });
+  }
+
+  void setMarkerLists() {
+    // Reset marker lists
+    _foodMarkerIds = [];
+    _stallsMarkerIds = [];
+    _musicMarkerIds = [];
+    _eventMarkerIds = [];
+    _serviceMarkerIds = [];
+
+    final allListings = listings as List;
+    for (var listing in allListings) {
+      // Assign markerIds to maps for filtering
+      if (listing['primaryType'] == "Food" || listing['primaryType'] == "Group-Food") {
+        _foodMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Shopping" || listing['primaryType'] == "Group-Shopping") {
+        _stallsMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Music" || listing['primaryType'] == "Group-Music") {
+        _musicMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Event" || listing['primaryType'] == "Group-Event") {
+        _eventMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Service" || listing['primaryType'] == "Group-Service") {
+        _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
+    }
+  }
+
   void addAllVisibleMarkers(bool onTest) {
+    // Ensure the markers list is empty
+    markers.clear();
+
     for (var listing in listings) {
       if (listing['visibleOnMap'] == 'TRUE') {
         // Add Group markers
@@ -265,10 +320,159 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  void clearAllMarkers() {
+  Future<void> updateMarkerIconsForTheme() async {
+    // Recreate marker bitmaps for the new theme colors
+    await createAllMarkerBitmaps();
+
+    // Update each marker’s icon to the correct color for its type
     setState(() {
-      markers.clear();
+      markers.updateAll((id, oldMarker) {
+        final listing = listings.firstWhere(
+              (l) => l['id'].toString() == id.value,
+          orElse: () => {},
+        );
+        if (listing.isEmpty) return oldMarker;
+
+        final type = listing['primaryType'];
+        final newIcon = bitmapDescriptors[type] ?? oldMarker.icon;
+
+        return oldMarker.copyWith(iconParam: newIcon);
+      });
     });
+  }
+
+  void hideAllMarkers() {
+    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, false);
+  }
+
+  void showAllMarkers() {
+    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, true);
+  }
+
+  void showFilteredMarkers() {
+    updateMarkerVisibility(_foodMarkerIds, filterSettings['Food']!);
+    updateMarkerVisibility(_stallsMarkerIds, filterSettings['Stalls']!);
+    updateMarkerVisibility(_musicMarkerIds, filterSettings['Music']!);
+    updateMarkerVisibility(_eventMarkerIds, filterSettings['Events']!);
+    updateMarkerVisibility(_serviceMarkerIds, filterSettings['Services']!);
+  }
+
+  void showFilterMenu() {
+    showModalBottomSheet(
+      scrollControlDisabledMaxHeightRatio: 0.8,
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text(
+                      "Filter Map Pins",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.left,
+                    )
+                  ]),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Food'),
+                    title: const Text("Food"),
+                    value: filterSettings["Food"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Food"] = value!;
+                      });
+                      final idList = _foodMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
+                    title: const Text("Stalls"),
+                    value: filterSettings["Stalls"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Stalls"] = value!;
+                      });
+                      final idList = _stallsMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Music'),
+                    title: const Text("Music"),
+                    value: filterSettings["Music"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Music"] = value!;
+                      });
+                      final idList = _musicMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Event'),
+                    title: const Text("Events"),
+                    value: filterSettings["Events"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Events"] = value!;
+                      });
+                      final idList = _eventMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    activeColor: getCategoryColor(selectedThemeKey, 'Service'),
+                    title: const Text("Services"),
+                    value: filterSettings["Services"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Services"] = value!;
+                      });
+                      final idList = _serviceMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            filterSettings.forEach((key, _) {
+                              filterSettings[key] = true;
+                            });
+                          });
+                          showAllMarkers();
+                        },
+                        icon: const Icon(Icons.filter_alt),
+                        label: const Text('Show All'),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            filterSettings.forEach((key, _) {
+                              filterSettings[key] = false;
+                            });
+                          });
+                          hideAllMarkers();
+                        },
+                        icon: const Icon(Icons.filter_alt_off),
+                        label: const Text('Hide All'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
@@ -280,10 +484,10 @@ class MapPageState extends State<MapPage> {
       Navigator.pop(context);
     }
 
-    // Clear any existing polylines
+    // Clear any existing polylines and hide the markers
     setState(() {
-      _polylines.clear(); // Clear any existing polylines
-      clearAllMarkers(); // Clear any existing map markers
+      _polylines.clear();
+      hideAllMarkers();
     });
 
     // If user has location tracking enabled
@@ -311,6 +515,27 @@ class MapPageState extends State<MapPage> {
     // Add destination map marker
     Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
     addSpecificMarker(destinationListing, false);
+  }
+
+  void cancelNavigation() {
+    // Halt the location subscription
+    _positionStream?.cancel();
+
+    // Clear the polylines
+    _polylines.clear();
+
+    // Reset the distance to destination
+    _distanceToDestination = null;
+
+    // Show markers which have enabled filters
+    showFilteredMarkers();
+
+    // Reset the camera position
+    _setMapCameraToFitMapMarkers();
+
+    // Set navigation as not in progress
+    _navigationInProgress = false;
+    setState(() {});
   }
 
   @override
@@ -387,7 +612,8 @@ class MapPageState extends State<MapPage> {
 
       setState(() {
         final distanceMetres = result.totalDistanceValue ?? 0;
-        final dashSpace = (distanceMetres > 0 ? distanceMetres : 500) / 50;
+        // empirical formula, since dashes don't space as if measured in pixels as per google's docs
+        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;  
 
         _polylines.clear();
         _polylines.add(
@@ -396,7 +622,7 @@ class MapPageState extends State<MapPage> {
             points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)],
+            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace*0.75)],
           ),
         );
 
@@ -421,7 +647,7 @@ class MapPageState extends State<MapPage> {
     setState(() {
       _polylines.clear();
       _distanceToDestination = null;
-      clearAllMarkers();
+      hideAllMarkers();
       addAllVisibleMarkers(false);
       _setMapCameraToFitMapMarkers();
       _navigationInProgress = false;
@@ -600,6 +826,7 @@ class MapPageState extends State<MapPage> {
 
     try {
       listings = await fetchListings(http.Client());
+      setMarkerLists();
       addAllVisibleMarkers(false);
       establishLocation();
     } finally {
@@ -732,15 +959,7 @@ class MapPageState extends State<MapPage> {
                         mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          setState(() {
-                            _positionStream?.cancel();
-                            _polylines.clear();
-                            _distanceToDestination = null;
-                            _navigationInProgress = false;
-                            clearAllMarkers();
-                            addAllVisibleMarkers(false);
-                            _setMapCameraToFitMapMarkers();
-                          });
+                          cancelNavigation();
                         },
                         child: Icon(
                           Icons.cancel,
@@ -755,6 +974,22 @@ class MapPageState extends State<MapPage> {
                         mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
+                          // Home button resets the filters if they're all toggled off
+                          if (filterSettings['Food'] == false &&
+                              filterSettings['Stalls'] == false &&
+                              filterSettings['Music'] == false &&
+                              filterSettings['Events'] == false &&
+                              filterSettings['Services'] == false) {
+                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                            setState(() {
+                              filterSettings['Food'] = true;
+                              filterSettings['Stalls'] = true;
+                              filterSettings['Music'] = true;
+                              filterSettings['Events'] = true;
+                              filterSettings['Services'] = true;
+                              updateMarkerVisibility(idList, true);
+                            });
+                          }
                           _setMapCameraToFitMapMarkers();
                         },
                         child: Icon(
@@ -809,7 +1044,23 @@ class MapPageState extends State<MapPage> {
                           },
                           child: const Icon(Icons.assistant_navigation),
                         ),
-                      )
+                      ),
+                    if (_navigationInProgress == false)
+                      Row(
+                        children: [
+                          if (_navigationInProgress == false)
+                            IconButton.filled(
+                              onPressed: () {
+                                showFilterMenu();
+                                setMarkerLists();
+                              },
+                              icon: Icon(
+                                Icons.filter_alt,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                        ],
+                      ),
                   ],
                 ),
               ),
