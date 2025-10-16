@@ -88,7 +88,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       pages: [
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork00.jpg',
+          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork00.jpg',
           title: "Welcome to the official\nMill Road Winter Fair app!",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -152,7 +152,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork01.jpg',
+          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork01.jpg',
           title: "What do the pins mean?",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -229,7 +229,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork02.jpg',
+          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork02.jpg',
           title: "Choosing what’s shown",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -282,7 +282,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork03.jpg',
+          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork03.jpg',
           title: "What’s on and when",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -337,7 +337,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         ),
         PageViewModel(
           useScrollView: false,
-          backgroundImage: 'assets/aboutPage/clareMcEwan_artwork04.jpg',
+          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork04.jpg',
           title: "A few final things…",
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
