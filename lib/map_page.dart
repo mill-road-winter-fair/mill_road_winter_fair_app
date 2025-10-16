@@ -328,7 +328,7 @@ class MapPageState extends State<MapPage> {
     setState(() {
       markers.updateAll((id, oldMarker) {
         final listing = listings.firstWhere(
-              (l) => l['id'].toString() == id.value,
+          (l) => l['id'].toString() == id.value,
           orElse: () => {},
         );
         if (listing.isEmpty) return oldMarker;
@@ -630,7 +630,7 @@ class MapPageState extends State<MapPage> {
       setState(() {
         final distanceMetres = result.totalDistanceValue ?? 0;
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
-        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;  
+        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
         _polylines.clear();
         _polylines.add(
@@ -639,7 +639,7 @@ class MapPageState extends State<MapPage> {
             points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace*0.75)],
+            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
           ),
         );
 
