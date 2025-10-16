@@ -625,6 +625,7 @@ class MapPageState extends State<MapPage> {
                             });
                           });
                           showAllMarkers();
+                          updateRoadClosurePolygonVisibility(true);
                         },
                         icon: const Icon(Icons.filter_alt),
                         label: const Text('Show All'),
@@ -637,6 +638,7 @@ class MapPageState extends State<MapPage> {
                             });
                           });
                           hideAllMarkers();
+                          updateRoadClosurePolygonVisibility(false);
                         },
                         icon: const Icon(Icons.filter_alt_off),
                         label: const Text('Hide All'),
