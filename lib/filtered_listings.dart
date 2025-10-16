@@ -267,11 +267,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   label: "Name (a-z)",
                                   leadingIcon: const Icon(Icons.sort_by_alpha),
                                 ),
-                                DropdownMenuEntry(
-                                  value: SortingMethod.values[2],
-                                  label: "Time",
-                                  leadingIcon: const Icon(Icons.alarm),
-                                ),
+                                if (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event')
+                                  DropdownMenuEntry(
+                                    value: SortingMethod.values[2],
+                                    label: "Time",
+                                    leadingIcon: const Icon(Icons.alarm),
+                                  ),
                               ],
                               onSelected: sortingDropdownCallback,
                             ),
