@@ -438,26 +438,48 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            filterSettings.forEach((key, _) {
-                              filterSettings[key] = true;
-                            });
-                          });
-                          showAllMarkers();
-                        },
-                        icon: const Icon(Icons.filter_alt),
-                        label: const Text('Show All'),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.check_circle),
-                        label: const Text('Done'),
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Row(
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    filterSettings.forEach((key, _) {
+                                      filterSettings[key] = true;
+                                    });
+                                  });
+                                  showAllMarkers();
+                                },
+                                icon: const Icon(Icons.filter_alt),
+                                label: const Text('Show All'),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    filterSettings.forEach((key, _) {
+                                      filterSettings[key] = false;
+                                    });
+                                  });
+                                  hideAllMarkers();
+                                },
+                                icon: const Icon(Icons.filter_alt_off),
+                                label: const Text('Hide All'),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.check_circle),
+                                label: const Text('Done'),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
