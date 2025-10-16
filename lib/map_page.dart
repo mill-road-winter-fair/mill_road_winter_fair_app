@@ -223,7 +223,7 @@ class MapPageState extends State<MapPage> {
         polygonId: const PolygonId('roadClosure'),
         points: roadClosurePolygonPoints,
         strokeWidth: 6,
-        strokeColor: Theme.of(context).colorScheme.tertiary,
+        strokeColor: Theme.of(context).colorScheme.tertiary.withAlpha(50),
         fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
   }
 
@@ -605,7 +605,7 @@ class MapPageState extends State<MapPage> {
                   Divider(color: Colors.grey[350]),
                   CheckboxListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text("Road Closures"),
+                    title: const Text("Pedestrianised areas"),
                     value: filterSettings["Road Closures"],
                     onChanged: (value) {
                       setState(() {
@@ -1284,14 +1284,14 @@ class MapPageState extends State<MapPage> {
                               decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
                                 border: Border.all(
-                                  color: Theme.of(context).colorScheme.tertiary,
+                                  color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
                                   width: 3,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Road closures',
+                              'Pedestrianised areas',
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.tertiary,
                                 fontWeight: FontWeight.w600,
