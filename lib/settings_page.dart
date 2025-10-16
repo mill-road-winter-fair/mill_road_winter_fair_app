@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -79,6 +78,7 @@ Future<void> loadSettings(bool onTest) async {
 
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
+
   } else if (onTest == true) {
     int savedUnitIndex = 0;
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
@@ -105,12 +105,13 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+
   @override
   void initState() {
     super.initState();
   }
 
-  // Save settings to shared preferences
+// Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
@@ -120,15 +121,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> _changeTheme(String themeKey) async {
     themeNotifier.value = themeKey;
-  }
-
-  // Function to replay the initial welcome screen
-  void _replayWelcomeScreen(context) {
-    Navigator.pop(context);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-    );
   }
 
   @override
@@ -269,37 +261,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  const Text('Onboarding', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  ListTile(
-                    leading: const Icon(Icons.first_page),
-                    title: const Text('Replay Welcome Screen'),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      _replayWelcomeScreen(context);
-                    },
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10),
-                  const Text('App Information', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  ListTile(
-                    leading: const Icon(Icons.info),
-                    title: const Text('About'),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      showAboutDialog(
-                          context: context, applicationName: 'Mill Road\nWinter Fair', applicationVersion: 'v 0.9.8', applicationIcon: const MyAppIcon());
-                    },
                   ),
                 ],
               ),
