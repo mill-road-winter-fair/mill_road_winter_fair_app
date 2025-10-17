@@ -35,6 +35,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool isRefreshing = false;
   bool useFallbackSorting = false;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -44,7 +46,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   void dispose() {
-    _scrollController.dispose(); // Clean up
+    _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -208,7 +211,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         final allListings = snapshot.data as List;
 
         // Filter the listings based on the primaryType
-        final filteredListings = allListings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+        final filteredListings = allListings
+            .where((listing) =>
+                listing['primaryType'] == widget.filterPrimaryType &&
+                (listing['displayName'].toString().toLowerCase().contains(_searchQuery) ||
+                    listing['secondaryType']?.toString().toLowerCase().contains(_searchQuery) == true ||
+                    listing['tertiaryType']?.toString().toLowerCase().contains(_searchQuery) == true))
+            .toList();
 
         final homePageState = context.findAncestorStateOfType<HomePageState>();
 
@@ -231,17 +240,16 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surfaceDim,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 66),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            flex: 6,
                             child: DropdownMenu(
                               initialSelection: preferredSortingMethod,
-                              width: MediaQuery.of(context).size.width * 0.6,
                               label: const Text(
                                 "Sort by",
                                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -276,8 +284,44 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               onSelected: sortingDropdownCallback,
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          Expanded(
+                            flex: 4,
+                            child: TextField(
+                              controller: _searchController,
+                              keyboardType: TextInputType.text,
+                              textInputAction: TextInputAction.search,
+                              autocorrect: true,
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                              },
+                              onChanged: (value) {
+                                setState(() {
+                                  _searchQuery = value.toLowerCase();
+                                });
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'Search...',
+                                prefixIcon: const Icon(Icons.search),
+                                suffixIcon: _searchQuery.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(Icons.clear),
+                                        onPressed: () {
+                                          HapticFeedback.selectionClick();
+                                          _searchController.clear();
+                                          setState(() {
+                                            _searchQuery = '';
+                                          });
+                                        },
+                                      )
+                                    : null,
+                                filled: true,
+                                fillColor: Theme.of(context).colorScheme.secondaryContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
