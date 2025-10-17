@@ -15,6 +15,7 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('WelcomeScreen build() called');
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
     );
@@ -51,7 +52,20 @@ class OnBoardingPageState extends State<OnBoardingPage> {
   }
 
   @override
+  void initState() {
+    debugPrint('OnBoardingPageState initState() called');
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    debugPrint('OnBoardingPageState dispose() called');
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    debugPrint('OnBoardingPageState build() called');
     var bodyStyle = TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary);
 
     var pageDecoration = PageDecoration(

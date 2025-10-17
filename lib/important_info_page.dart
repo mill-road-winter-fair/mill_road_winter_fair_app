@@ -8,6 +8,7 @@ class ImportantInfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('ImportantInfoPage build() called');
     return Scaffold(
       appBar: AppBar(title: const Text('Important Information')),
       body: SingleChildScrollView(

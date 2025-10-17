@@ -9,6 +9,7 @@ List<Map<String, dynamic>> listings = [];
 
 // Fetch listings from Heroku caching layer
 Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
+  debugPrint('fetchListings called');
   try {
     // Load environment variables
     await dotenv.load(fileName: ".env");
@@ -16,34 +17,39 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     final uri = Uri.parse(herokuApi);
 
     final response = await client.get(uri);
+    debugPrint('API response status: ${response.statusCode}');
 
     // Retry up to 10 times for transient failures
     if (response.statusCode != 200) {
       for (var i = 0; i < 9; i++) {
         await Future.delayed(const Duration(seconds: 2));
         final retryResponse = await client.get(uri);
+        debugPrint('Retry ${i+1} response status: ${retryResponse.statusCode}');
         if (retryResponse.statusCode == 200) {
+          debugPrint('Listings fetched after retry');
           return _parseListings(retryResponse.body);
         }
       }
+      debugPrint('All retries failed');
       throw HttpException('Heroku API returned ${response.statusCode}');
     }
 
     // Success
     final newListings = _parseListings(response.body);
     listings = newListings;
+    debugPrint('Listings successfully parsed and stored');
     return listings;
   } on SocketException catch (_) {
-    debugPrint('⚠️ Network error: unable to reach server, using stale listings.');
+    debugPrint('\u26a0\ufe0f Network error: unable to reach server, using stale listings.');
     return listings.isNotEmpty ? listings : [];
   } on HttpException catch (e) {
-    debugPrint('⚠️ Server responded with an error: $e');
+    debugPrint('\u26a0\ufe0f Server responded with an error: $e');
     return listings.isNotEmpty ? listings : [];
   } on FormatException catch (e) {
-    debugPrint('⚠️ Bad response format: $e');
+    debugPrint('\u26a0\ufe0f Bad response format: $e');
     return listings.isNotEmpty ? listings : [];
   } catch (e, stack) {
-    debugPrint('⚠️ Unexpected error fetching listings: $e');
+    debugPrint('\u26a0\ufe0f Unexpected error fetching listings: $e');
     debugPrint(stack.toString());
     return listings.isNotEmpty ? listings : [];
   }

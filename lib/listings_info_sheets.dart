@@ -19,6 +19,7 @@ class GroupListingInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('GroupListingInfoSheet build() called');
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
@@ -106,6 +107,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('SpecificListingInfoSheet build() called');
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -224,6 +226,7 @@ class SimplifiedListingInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('SimplifiedListingInfoSheet build() called');
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(

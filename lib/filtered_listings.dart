@@ -38,12 +38,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   void initState() {
+    debugPrint('FilteredListingsPageState initState() called');
     _sortedListings = sortListings();
     super.initState();
   }
 
   @override
   void dispose() {
+    debugPrint('FilteredListingsPageState dispose() called');
     _scrollController.dispose(); // Clean up
     super.dispose();
   }
@@ -161,6 +163,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('FilteredListingsPageState build() called');
     return FutureBuilder(
       future: _sortedListings = sortListings(),
       initialData: listings,
