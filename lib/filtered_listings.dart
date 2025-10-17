@@ -35,8 +35,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool isRefreshing = false;
   bool useFallbackSorting = false;
   final ScrollController _scrollController = ScrollController();
+  bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -240,88 +242,124 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surfaceDim,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            flex: 6,
-                            child: DropdownMenu(
-                              initialSelection: preferredSortingMethod,
-                              label: const Text(
-                                "Sort by",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              leadingIcon: const Icon(Icons.sort),
-                              inputDecorationTheme: InputDecorationTheme(
-                                filled: true,
-                                fillColor: Theme.of(context).colorScheme.secondary,
-                              ),
-                              dropdownMenuEntries: [
-                                DropdownMenuEntry(
-                                  value: SortingMethod.values[1],
-                                  label: "Nearest",
-                                  leadingIcon: const Icon(Icons.directions_walk),
-                                ),
-                                DropdownMenuEntry(
-                                  value: SortingMethod.values[3],
-                                  label: "Location (a-z)",
-                                  leadingIcon: const Icon(Icons.signpost),
-                                ),
-                                DropdownMenuEntry(
-                                  value: SortingMethod.values[0],
-                                  label: "Name (a-z)",
-                                  leadingIcon: const Icon(Icons.sort_by_alpha),
-                                ),
-                                DropdownMenuEntry(
-                                  value: SortingMethod.values[2],
-                                  label: "Time",
-                                  leadingIcon: const Icon(Icons.alarm),
+                    child: Stack(
+                      alignment: Alignment.centerRight,
+                      children: [
+                        // Sorting dropdown (only visible when not searching)
+                        if (!_isSearching)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: DropdownMenu(
+                                    initialSelection: preferredSortingMethod,
+                                    label: const Text(
+                                      "Sort by",
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    leadingIcon: const Icon(Icons.sort),
+                                    inputDecorationTheme: InputDecorationTheme(
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.secondaryContainer,
+                                    ),
+                                    dropdownMenuEntries: [
+                                      DropdownMenuEntry(
+                                        value: SortingMethod.values[1],
+                                        label: "Nearest",
+                                        leadingIcon: const Icon(Icons.directions_walk),
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: SortingMethod.values[3],
+                                        label: "Location (a-z)",
+                                        leadingIcon: const Icon(Icons.signpost),
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: SortingMethod.values[0],
+                                        label: "Name (a-z)",
+                                        leadingIcon: const Icon(Icons.sort_by_alpha),
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: SortingMethod.values[2],
+                                        label: "Time",
+                                        leadingIcon: const Icon(Icons.alarm),
+                                      ),
+                                    ],
+                                    onSelected: sortingDropdownCallback,
+                                  ),
                                 ),
                               ],
-                              onSelected: sortingDropdownCallback,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 4,
-                            child: TextField(
-                              controller: _searchController,
-                              keyboardType: TextInputType.text,
-                              textInputAction: TextInputAction.search,
-                              autocorrect: true,
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                              },
-                              onChanged: (value) {
-                                setState(() {
-                                  _searchQuery = value.toLowerCase();
-                                });
-                              },
-                              decoration: InputDecoration(
-                                hintText: 'Search...',
-                                prefixIcon: const Icon(Icons.search),
-                                suffixIcon: _searchQuery.isNotEmpty
-                                    ? IconButton(
-                                        icon: const Icon(Icons.clear),
+
+                        // Floating search button / expanded search bar
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 250),
+                          transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                          child: _isSearching
+                              ? Padding(
+                                  key: const ValueKey('search_bar'),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: TextField(
+                                    controller: _searchController,
+                                    focusNode: _searchFocusNode,
+                                    //autofocus: true,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _searchQuery = value.toLowerCase();
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      prefixIcon: const Icon(Icons.search),
+                                      suffixIcon: IconButton(
+                                        icon: const Icon(Icons.close),
                                         onPressed: () {
-                                          HapticFeedback.selectionClick();
-                                          _searchController.clear();
                                           setState(() {
+                                            _searchController.clear();
+                                            _searchFocusNode.unfocus();
                                             _searchQuery = '';
+                                            _isSearching = false;
+                                          });
+                                          FocusScope.of(context).unfocus();
+                                        },
+                                      ),
+                                      hintText: 'Search...',
+                                      filled: true,
+                                      fillColor: Theme.of(context).colorScheme.secondaryContainer,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+                                    ),
+                                  ),
+                                )
+                              : Align(
+                                  key: const ValueKey('fab'),
+                                  alignment: Alignment.centerRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 4),
+                                    child: SizedBox(
+                                      height: 56,
+                                      width: 56,
+                                      child: FloatingActionButton.small(
+                                        heroTag: 'searchFAB',
+                                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                                        foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                                        elevation: 0,
+                                        onPressed: () {
+                                          setState(() {
+                                            _isSearching = true;
                                           });
                                         },
-                                      )
-                                    : null,
-                                filled: true,
-                                fillColor: Theme.of(context).colorScheme.secondaryContainer,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                                        child: const Icon(Icons.search),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
