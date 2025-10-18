@@ -193,79 +193,85 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         onRefresh: refreshListings,
         backgroundColor: Theme.of(context).colorScheme.primary,
         color: Theme.of(context).colorScheme.onPrimary,
-        child: CustomScrollView(
-          slivers: [
-            // Header area
-            SliverToBoxAdapter(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _isSearching
-                    ? Padding(
-                        key: const ValueKey('searchBar'),
-                        padding: const EdgeInsets.all(8.0),
-                        child: SearchBar(
-                          autoFocus: true,
-                          hintText: 'Search listings...',
-                          leading: const Icon(Icons.search),
-                          trailing: [
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () {
-                                setState(() {
-                                  _isSearching = false;
-                                  _searchQuery = '';
-                                });
-                              },
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value.toLowerCase();
-                            });
+        child: Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: true,
+          thickness: 4,
+          radius: const Radius.circular(8),
+          child: CustomScrollView(
+            slivers: [
+              // Header area
+              SliverToBoxAdapter(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _isSearching
+                      ? Padding(
+                          key: const ValueKey('searchBar'),
+                          padding: const EdgeInsets.all(8.0),
+                          child: SearchBar(
+                            autoFocus: true,
+                            hintText: 'Search listings...',
+                            leading: const Icon(Icons.search),
+                            trailing: [
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  setState(() {
+                                    _isSearching = false;
+                                    _searchQuery = '';
+                                  });
+                                },
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value.toLowerCase();
+                              });
+                            },
+                          ),
+                        )
+                      : _buildSortingDropdown(context),
+                ),
+              ),
+
+              // Listings
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final listing = filteredListings[index];
+                    final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                    final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+
+                    return Column(
+                      children: [
+                        SpecificListingInfoSheet(
+                          title: listing['displayName'],
+                          categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+                          openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                          approxDistance: approximateDistance,
+                          phoneNumber: listing['phone'],
+                          website: listing['website'],
+                          onGetDirections: () {
+                            if (homePageState != null) {
+                              homePageState.navigateToMapAndGetDirections(
+                                listing['id'],
+                                destinationLatLng,
+                                http.Client(),
+                              );
+                            }
                           },
                         ),
-                      )
-                    : _buildSortingDropdown(context),
+                        // separator except after last item
+                        if (index != filteredListings.length - 1) Divider(color: Colors.grey[350]),
+                      ],
+                    );
+                  },
+                  childCount: filteredListings.length,
+                ),
               ),
-            ),
-
-            // Listings
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final listing = filteredListings[index];
-                  final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                  final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                  LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-
-                  return Column(
-                    children: [
-                      SpecificListingInfoSheet(
-                        title: listing['displayName'],
-                        categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                        openingTimes: "${listing['startTime']} - ${listing['endTime']}",
-                        approxDistance: approximateDistance,
-                        phoneNumber: listing['phone'],
-                        website: listing['website'],
-                        onGetDirections: () {
-                          if (homePageState != null) {
-                            homePageState.navigateToMapAndGetDirections(
-                              listing['id'],
-                              destinationLatLng,
-                              http.Client(),
-                            );
-                          }
-                        },
-                      ),
-                      // separator except after last item
-                      if (index != filteredListings.length - 1) Divider(color: Colors.grey[350]),
-                    ],
-                  );
-                },
-                childCount: filteredListings.length,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
