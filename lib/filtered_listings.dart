@@ -165,8 +165,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredListings = _applySearchFilter(listings);
     final homePageState = context.findAncestorStateOfType<HomePageState>();
+    // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
+    final primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+
+    // Step 2: Apply search filtering to that subset
+    final filteredListings = _applySearchFilter(primaryFiltered);
+
     return Scaffold(
       floatingActionButton: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
