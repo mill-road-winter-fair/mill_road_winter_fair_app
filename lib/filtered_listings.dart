@@ -45,7 +45,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -194,9 +193,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
   }
 
-  bool isSearching = false;
-  String searchQuery = '';
-
   @override
   Widget build(BuildContext context) {
     final filteredListings = _applySearchFilter(listings);
@@ -204,19 +200,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     return Scaffold(
       floatingActionButton: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        child: isSearching
+        child: _isSearching
             ? null // No FAB while searching
             : FloatingActionButton(
-          key: const ValueKey('searchFab'),
-          heroTag: 'search_fab',
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          onPressed: () {
-            setState(() {
-              isSearching = true;
-            });
-          },
-          child: const Icon(Icons.search),
-        ),
+                key: const ValueKey('searchFab'),
+                heroTag: 'search_fab',
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                onPressed: () {
+                  setState(() {
+                    _isSearching = true;
+                  });
+                },
+                child: const Icon(Icons.search),
+              ),
       ),
       body: RefreshIndicator(
         onRefresh: refreshListings,
@@ -228,32 +224,32 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             SliverToBoxAdapter(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
-                child: isSearching
+                child: _isSearching
                     ? Padding(
-                  key: const ValueKey('searchBar'),
-                  padding: const EdgeInsets.all(8.0),
-                  child: SearchBar(
-                    autoFocus: true,
-                    hintText: 'Search listings...',
-                    leading: const Icon(Icons.search),
-                    trailing: [
-                      IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          setState(() {
-                            isSearching = false;
-                            searchQuery = '';
-                          });
-                        },
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        searchQuery = value.toLowerCase();
-                      });
-                    },
-                  ),
-                )
+                        key: const ValueKey('searchBar'),
+                        padding: const EdgeInsets.all(8.0),
+                        child: SearchBar(
+                          autoFocus: true,
+                          hintText: 'Search listings...',
+                          leading: const Icon(Icons.search),
+                          trailing: [
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                setState(() {
+                                  _isSearching = false;
+                                  _searchQuery = '';
+                                });
+                              },
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value.toLowerCase();
+                            });
+                          },
+                        ),
+                      )
                     : _buildSortingDropdown(context),
               ),
             ),
@@ -261,35 +257,35 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             // Listings
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final listing = filteredListings[index];
-                      final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                      final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                      LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                (context, index) {
+                  final listing = filteredListings[index];
+                  final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                  final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                  LatLng destinationLatLng = stringToLatLng(listing['latLng']);
 
-                      return Column(
-                        children: [
-                          SpecificListingInfoSheet(
-                            title: listing['displayName'],
-                            categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                            openingTimes: "${listing['startTime']} - ${listing['endTime']}",
-                            approxDistance: approximateDistance,
-                            phoneNumber: listing['phone'],
-                            website: listing['website'],
-                            onGetDirections: () {
-                              if (homePageState != null) {
-                                homePageState.navigateToMapAndGetDirections(
-                                  listing['id'],
-                                  destinationLatLng,
-                                  http.Client(),
-                                );
-                              }
-                            },
-                          ),
-                          // separator except after last item
-                          if (index != filteredListings.length - 1) Divider(color: Colors.grey[350]),
-                        ],
-                      );
+                  return Column(
+                    children: [
+                      SpecificListingInfoSheet(
+                        title: listing['displayName'],
+                        categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+                        openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                        approxDistance: approximateDistance,
+                        phoneNumber: listing['phone'],
+                        website: listing['website'],
+                        onGetDirections: () {
+                          if (homePageState != null) {
+                            homePageState.navigateToMapAndGetDirections(
+                              listing['id'],
+                              destinationLatLng,
+                              http.Client(),
+                            );
+                          }
+                        },
+                      ),
+                      // separator except after last item
+                      if (index != filteredListings.length - 1) Divider(color: Colors.grey[350]),
+                    ],
+                  );
                 },
                 childCount: filteredListings.length,
               ),
@@ -350,12 +346,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
-    if (searchQuery.isEmpty) return allListings;
+    if (_searchQuery.isEmpty) return allListings;
     return allListings.where((listing) {
       final name = (listing['displayName'] ?? '').toString().toLowerCase();
       final secondary = (listing['secondaryType'] ?? '').toString().toLowerCase();
       final tertiary = (listing['tertiaryType'] ?? '').toString().toLowerCase();
-      return name.contains(searchQuery) || secondary.contains(searchQuery) || tertiary.contains(searchQuery);
+      return name.contains(_searchQuery) || secondary.contains(_searchQuery) || tertiary.contains(_searchQuery);
     }).toList();
   }
 }
