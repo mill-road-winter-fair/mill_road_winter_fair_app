@@ -15,6 +15,12 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+final GlobalKey<FilteredListingsPageState> foodPageKey = GlobalKey<FilteredListingsPageState>();
+final GlobalKey<FilteredListingsPageState> stallsPageKey = GlobalKey<FilteredListingsPageState>();
+final GlobalKey<FilteredListingsPageState> musicPageKey = GlobalKey<FilteredListingsPageState>();
+final GlobalKey<FilteredListingsPageState> eventsPageKey = GlobalKey<FilteredListingsPageState>();
+final GlobalKey<FilteredListingsPageState> servicesPageKey = GlobalKey<FilteredListingsPageState>();
+
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
   final List<Map<String, dynamic>> listings;
@@ -30,6 +36,7 @@ class FilteredListingsPage extends StatefulWidget {
 }
 
 class FilteredListingsPageState extends State<FilteredListingsPage> {
+  late GlobalKey<FilteredListingsPageState> pageKey;
   // ignore: unused_field
   late Future<List> _sortedListings;
   bool isRefreshing = false;
@@ -42,6 +49,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   void initState() {
+    setPageKey();
     _sortedListings = sortListings();
     super.initState();
   }
@@ -164,209 +172,95 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
   }
 
+  void setPageKey() {
+    switch (widget.filterPrimaryType) {
+      case 'Food':
+        pageKey = foodPageKey;
+        break;
+      case 'Shopping':
+        pageKey = stallsPageKey;
+        break;
+      case 'Music':
+        pageKey = musicPageKey;
+        break;
+      case 'Event':
+        pageKey = eventsPageKey;
+        break;
+      case 'Service':
+        pageKey = servicesPageKey;
+        break;
+      default:
+        throw Exception('Unknown filterPrimaryType: ${widget.filterPrimaryType}');
+    }
+  }
+
+  bool isSearching = false;
+  String searchQuery = '';
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _sortedListings = sortListings(),
-      initialData: listings,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              "Error: ${snapshot.error}",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                backgroundColor: Theme.of(context).colorScheme.error,
-                color: Theme.of(context).colorScheme.onError,
+    final filteredListings = _applySearchFilter(listings);
+    final homePageState = context.findAncestorStateOfType<HomePageState>();
+    return Scaffold(
+      floatingActionButton: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: isSearching
+            ? null // No FAB while searching
+            : FloatingActionButton(
+          key: const ValueKey('searchFab'),
+          heroTag: 'search_fab',
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          onPressed: () {
+            setState(() {
+              isSearching = true;
+            });
+          },
+          child: const Icon(Icons.search),
+        ),
+      ),
+      body: RefreshIndicator(
+        onRefresh: refreshListings,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        color: Theme.of(context).colorScheme.onPrimary,
+        child: CustomScrollView(
+          slivers: [
+            // Header area
+            SliverToBoxAdapter(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: isSearching
+                    ? Padding(
+                  key: const ValueKey('searchBar'),
+                  padding: const EdgeInsets.all(8.0),
+                  child: SearchBar(
+                    autoFocus: true,
+                    hintText: 'Search listings...',
+                    leading: const Icon(Icons.search),
+                    trailing: [
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          setState(() {
+                            isSearching = false;
+                            searchQuery = '';
+                          });
+                        },
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value.toLowerCase();
+                      });
+                    },
+                  ),
+                )
+                    : _buildSortingDropdown(context),
               ),
             ),
-          );
-        }
 
-        if (listings.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Unable to retrieve listings",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                isRefreshing
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton.icon(
-                        onPressed: refreshListings,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh Listings'),
-                      ),
-              ],
-            ),
-          );
-        }
-
-        final allListings = snapshot.data as List;
-
-        // Filter the listings based on the primaryType
-        final filteredListings = allListings
-            .where((listing) =>
-                listing['primaryType'] == widget.filterPrimaryType &&
-                (listing['displayName'].toString().toLowerCase().contains(_searchQuery) ||
-                    listing['secondaryType']?.toString().toLowerCase().contains(_searchQuery) == true ||
-                    listing['tertiaryType']?.toString().toLowerCase().contains(_searchQuery) == true))
-            .toList();
-
-        final homePageState = context.findAncestorStateOfType<HomePageState>();
-
-        return RefreshIndicator(
-          onRefresh: refreshListings,
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          color: Theme.of(context).colorScheme.onPrimary,
-          child: Scrollbar(
-            controller: _scrollController,
-            thumbVisibility: true, // or false if you prefer "show on scroll"
-            thickness: 4,
-            radius: const Radius.circular(8),
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                // Dropdown header that scrolls away
-                SliverToBoxAdapter(
-                  child: Container(
-                    height: 66,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceDim,
-                    ),
-                    child: Stack(
-                      alignment: Alignment.centerRight,
-                      children: [
-                        // Sorting dropdown (only visible when not searching)
-                        if (!_isSearching)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: DropdownMenu(
-                                    initialSelection: preferredSortingMethod,
-                                    label: const Text(
-                                      "Sort by",
-                                      style: TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    leadingIcon: const Icon(Icons.sort),
-                                    inputDecorationTheme: InputDecorationTheme(
-                                      filled: true,
-                                      fillColor: Theme.of(context).colorScheme.secondaryContainer,
-                                    ),
-                                    dropdownMenuEntries: [
-                                      DropdownMenuEntry(
-                                        value: SortingMethod.values[1],
-                                        label: "Nearest",
-                                        leadingIcon: const Icon(Icons.directions_walk),
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: SortingMethod.values[3],
-                                        label: "Location (a-z)",
-                                        leadingIcon: const Icon(Icons.signpost),
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: SortingMethod.values[0],
-                                        label: "Name (a-z)",
-                                        leadingIcon: const Icon(Icons.sort_by_alpha),
-                                      ),
-                                      DropdownMenuEntry(
-                                        value: SortingMethod.values[2],
-                                        label: "Time",
-                                        leadingIcon: const Icon(Icons.alarm),
-                                      ),
-                                    ],
-                                    onSelected: sortingDropdownCallback,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                        // Floating search button / expanded search bar
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 250),
-                          transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                          child: _isSearching
-                              ? Padding(
-                                  key: const ValueKey('search_bar'),
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                                  child: TextField(
-                                    controller: _searchController,
-                                    focusNode: _searchFocusNode,
-                                    //autofocus: true,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _searchQuery = value.toLowerCase();
-                                      });
-                                    },
-                                    decoration: InputDecoration(
-                                      prefixIcon: const Icon(Icons.search),
-                                      suffixIcon: IconButton(
-                                        icon: const Icon(Icons.close),
-                                        onPressed: () {
-                                          setState(() {
-                                            _searchController.clear();
-                                            _searchFocusNode.unfocus();
-                                            _searchQuery = '';
-                                            _isSearching = false;
-                                          });
-                                          FocusScope.of(context).unfocus();
-                                        },
-                                      ),
-                                      hintText: 'Search...',
-                                      filled: true,
-                                      fillColor: Theme.of(context).colorScheme.secondaryContainer,
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                                    ),
-                                  ),
-                                )
-                              : Align(
-                                  key: const ValueKey('fab'),
-                                  alignment: Alignment.centerRight,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 4),
-                                    child: SizedBox(
-                                      height: 56,
-                                      width: 56,
-                                      child: FloatingActionButton.small(
-                                        heroTag: 'searchFAB',
-                                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                                        foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                                        elevation: 0,
-                                        onPressed: () {
-                                          setState(() {
-                                            _isSearching = true;
-                                          });
-                                        },
-                                        child: const Icon(Icons.search),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Listings list
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
+            // Listings
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final listing = filteredListings[index];
                       final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
@@ -396,15 +290,72 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           if (index != filteredListings.length - 1) Divider(color: Colors.grey[350]),
                         ],
                       );
-                    },
-                    childCount: filteredListings.length,
-                  ),
+                },
+                childCount: filteredListings.length,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortingDropdown(BuildContext context) {
+    return Container(
+      key: const ValueKey('dropdown'),
+      height: 66,
+      color: Theme.of(context).colorScheme.surfaceDim,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: DropdownMenu(
+              initialSelection: preferredSortingMethod,
+              width: MediaQuery.of(context).size.width * 0.6,
+              label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
+              leadingIcon: const Icon(Icons.sort),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.secondary,
+              ),
+              dropdownMenuEntries: [
+                DropdownMenuEntry(
+                  value: SortingMethod.values[1],
+                  label: "Nearest",
+                  leadingIcon: const Icon(Icons.directions_walk),
+                ),
+                DropdownMenuEntry(
+                  value: SortingMethod.values[3],
+                  label: "Location (a-z)",
+                  leadingIcon: const Icon(Icons.signpost),
+                ),
+                DropdownMenuEntry(
+                  value: SortingMethod.values[0],
+                  label: "Name (a-z)",
+                  leadingIcon: const Icon(Icons.sort_by_alpha),
+                ),
+                DropdownMenuEntry(
+                  value: SortingMethod.values[2],
+                  label: "Time",
+                  leadingIcon: const Icon(Icons.alarm),
                 ),
               ],
+              onSelected: sortingDropdownCallback,
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
+  }
+
+  List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
+    if (searchQuery.isEmpty) return allListings;
+    return allListings.where((listing) {
+      final name = (listing['displayName'] ?? '').toString().toLowerCase();
+      final secondary = (listing['secondaryType'] ?? '').toString().toLowerCase();
+      final tertiary = (listing['tertiaryType'] ?? '').toString().toLowerCase();
+      return name.contains(searchQuery) || secondary.contains(searchQuery) || tertiary.contains(searchQuery);
+    }).toList();
   }
 }
