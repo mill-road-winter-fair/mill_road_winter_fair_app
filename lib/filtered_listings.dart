@@ -228,16 +228,22 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       },
                                     ),
                                   )
-                                : FloatingActionButton(
-                                    key: const ValueKey('searchFab'),
-                                    heroTag: 'search_fab',
-                                    backgroundColor: Theme.of(context).colorScheme.primary,
-                                    onPressed: () {
-                                      setState(() {
-                                        _isSearching = true;
-                                      });
-                                    },
-                                    child: const Icon(Icons.search),
+                                : SizedBox(
+                                    height: 56,
+                                    width: 56,
+                                    child: FloatingActionButton(
+                                      key: const ValueKey('searchFab'),
+                                      heroTag: 'search_fab',
+                                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                                      foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                                      elevation: 0,
+                                      onPressed: () {
+                                        setState(() {
+                                          _isSearching = true;
+                                        });
+                                      },
+                                      child: const Icon(Icons.search),
+                                    ),
                                   ),
                           ),
                         ],
