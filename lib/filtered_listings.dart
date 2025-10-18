@@ -15,12 +15,6 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-final GlobalKey<FilteredListingsPageState> foodPageKey = GlobalKey<FilteredListingsPageState>();
-final GlobalKey<FilteredListingsPageState> stallsPageKey = GlobalKey<FilteredListingsPageState>();
-final GlobalKey<FilteredListingsPageState> musicPageKey = GlobalKey<FilteredListingsPageState>();
-final GlobalKey<FilteredListingsPageState> eventsPageKey = GlobalKey<FilteredListingsPageState>();
-final GlobalKey<FilteredListingsPageState> servicesPageKey = GlobalKey<FilteredListingsPageState>();
-
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
   final List<Map<String, dynamic>> listings;
@@ -36,7 +30,6 @@ class FilteredListingsPage extends StatefulWidget {
 }
 
 class FilteredListingsPageState extends State<FilteredListingsPage> {
-  late GlobalKey<FilteredListingsPageState> pageKey;
   // ignore: unused_field
   late Future<List> _sortedListings;
   bool isRefreshing = false;
@@ -48,7 +41,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   void initState() {
-    setPageKey();
     _sortedListings = sortListings();
     super.initState();
   }
@@ -169,28 +161,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
-  }
-
-  void setPageKey() {
-    switch (widget.filterPrimaryType) {
-      case 'Food':
-        pageKey = foodPageKey;
-        break;
-      case 'Shopping':
-        pageKey = stallsPageKey;
-        break;
-      case 'Music':
-        pageKey = musicPageKey;
-        break;
-      case 'Event':
-        pageKey = eventsPageKey;
-        break;
-      case 'Service':
-        pageKey = servicesPageKey;
-        break;
-      default:
-        throw Exception('Unknown filterPrimaryType: ${widget.filterPrimaryType}');
-    }
   }
 
   @override
