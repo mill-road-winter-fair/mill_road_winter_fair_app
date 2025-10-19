@@ -231,7 +231,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   alignment: Alignment.centerRight,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
                         child: _isSearching
