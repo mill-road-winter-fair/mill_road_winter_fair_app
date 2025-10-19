@@ -329,11 +329,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 fillColor: Theme.of(context).colorScheme.secondary,
               ),
               dropdownMenuEntries: [
-                DropdownMenuEntry(
-                  value: SortingMethod.values[1],
-                  label: "Nearest",
-                  leadingIcon: const Icon(Icons.directions_walk),
-                ),
+                if (useFallbackSorting == true)
+                  DropdownMenuEntry(
+                    value: SortingMethod.values[1],
+                    label: "Nearest",
+                    leadingIcon: const Icon(Icons.directions_walk),
+                  ),
                 DropdownMenuEntry(
                   value: SortingMethod.values[3],
                   label: "Location (a-z)",
