@@ -65,12 +65,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
       if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
           preferredSortingMethod == SortingMethod.values[1]) {
-        // User prefers distance sorting but has disabled location permissions
+        // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
         preferredSortingMethod = SortingMethod.values[0];
       }
 
       if ((locationServicesEnabled == false || currentLatLng == null) && preferredSortingMethod == SortingMethod.values[1]) {
-        // Location unavailable; use fallback (a-z)
+        // User prefers distance sorting but their location services are disabled or we cannot get the user's location, use fallback (a-z) sorting but don't change their saved preferences
         useFallbackSorting = true;
       } else {
         useFallbackSorting = false;
@@ -92,23 +92,26 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         // Sort by name
         allListings.sort((a, b) => a['name'].compareTo(b['name']));
       } else if (preferredSortingMethod == SortingMethod.values[1]) {
-        // Sort by distance (nearest first)
+        // Sort by distance to user (nearest first)
         allListings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
       } else if (preferredSortingMethod == SortingMethod.values[2]) {
-        // Sort by start time, then name
+        // Sort by start time, if the start time is the same sort by name
         allListings.sort((a, b) {
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           return timeCompare != 0 ? timeCompare : a['name'].compareTo(b['name']);
         });
       } else {
-        // Sort by secondaryType, then startTime, then name
+        // The only other option is location sorting
         allListings.sort((a, b) {
+          // 1. Compare by location (secondaryType)
           final locationCompare = a['secondaryType'].compareTo(b['secondaryType']);
           if (locationCompare != 0) return locationCompare;
 
+          // 2. If location is the same, compare by startTime
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           if (timeCompare != 0) return timeCompare;
 
+          // 3. If startTime is also the same, compare by name
           return a['name'].compareTo(b['name']);
         });
       }
@@ -186,10 +189,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             isRefreshing
                 ? const CircularProgressIndicator()
                 : ElevatedButton.icon(
-              onPressed: refreshListings,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Refresh Listings'),
-            ),
+                    onPressed: refreshListings,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Refresh Listings'),
+                  ),
           ],
         ),
       );
@@ -354,7 +357,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 fillColor: Theme.of(context).colorScheme.secondary,
               ),
               dropdownMenuEntries: [
-                if (useFallbackSorting == true)
+                if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
                   DropdownMenuEntry(
                     value: SortingMethod.values[1],
                     label: "Nearest",
