@@ -170,6 +170,31 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   @override
   Widget build(BuildContext context) {
     final homePageState = context.findAncestorStateOfType<HomePageState>();
+
+    // Show error if there are no listings
+    if (listings.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Unable to retrieve listings",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            isRefreshing
+                ? const CircularProgressIndicator()
+                : ElevatedButton.icon(
+              onPressed: refreshListings,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh Listings'),
+            ),
+          ],
+        ),
+      );
+    }
+
     // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
     final primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
 
