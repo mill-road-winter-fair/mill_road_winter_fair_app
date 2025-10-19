@@ -182,6 +182,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         thickness: 4,
         radius: const Radius.circular(8),
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             // Header area, which scrolls away
             SliverToBoxAdapter(
