@@ -275,7 +275,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     width: 56,
                                     child: FloatingActionButton(
                                       key: const ValueKey('searchFab'),
-                                      heroTag: 'search_fab',
+                                      heroTag: 'searchFab_${widget.filterPrimaryType}_page',
                                       backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
                                       foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
                                       elevation: 0,
