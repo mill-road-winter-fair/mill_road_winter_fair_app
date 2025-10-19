@@ -245,7 +245,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       autoFocus: true,
                                       elevation: const WidgetStatePropertyAll(0),
                                       hintText: switch (widget.filterPrimaryType) {
-                                        'Food' => 'Search food vendors...',
+                                        'Food' => 'Search food & drink vendors...',
                                         'Shopping' => 'Search market stalls...',
                                         'Music' => 'Search musical performances...',
                                         'Event' => 'Search events...',
