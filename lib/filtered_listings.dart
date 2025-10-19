@@ -270,7 +270,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 if (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event')
                                   DropdownMenuEntry(
                                     value: SortingMethod.values[2],
-                                    label: "Time",
+                                    label: "Start time",
                                     leadingIcon: const Icon(Icons.alarm),
                                   ),
                               ],

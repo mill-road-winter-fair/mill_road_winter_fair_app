@@ -185,7 +185,7 @@ void main() async {
 
     await tester.tap(find.byType(DropdownMenu<SortingMethod>));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Time').last);
+    await tester.tap(find.text('Start time').last);
     await tester.pumpAndSettle();
 
     expect(preferredSortingMethod, SortingMethod.values[2]);
