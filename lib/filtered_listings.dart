@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -214,7 +215,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       color: Theme.of(context).colorScheme.onPrimary,
       child: Scrollbar(
         controller: _scrollController,
-        thumbVisibility: true,
+        thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
         thickness: 4,
         radius: const Radius.circular(8),
         child: CustomScrollView(
