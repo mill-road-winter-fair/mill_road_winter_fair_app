@@ -173,27 +173,8 @@ void main() async {
   });
 
   testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {
-    // Override user location global
-    currentLatLng = const LatLng(52.199174, 0.140929);
-    // Define mock values
-    listings = [
-      {
-        'displayName': 'Glazed and Confused',
-        'endTime': '16:30',
-        'id': '1',
-        'name': 'glazedandconfused',
-        'phone': '01223 111111',
-        'latLng': '52.199687,0.138813',
-        'primaryType': 'Food',
-        'secondaryType': 'Food',
-        'startTime': '10:30',
-        'tertiaryType': 'Doughnuts',
-        'website': 'https://www.glazedandconfused.com',
-      },
-    ];
-
     await loadSettings(true);
-    await pumpFilteredListingsPage(tester, 'Food', listings);
+    await pumpFilteredListingsPage(tester, 'Music', listings);
 
     await tester.tap(find.byType(DropdownMenu<SortingMethod>));
     await tester.pumpAndSettle();
@@ -204,7 +185,7 @@ void main() async {
 
     await tester.tap(find.byType(DropdownMenu<SortingMethod>));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Time').last);
+    await tester.tap(find.text('Start time').last);
     await tester.pumpAndSettle();
 
     expect(preferredSortingMethod, SortingMethod.values[2]);
