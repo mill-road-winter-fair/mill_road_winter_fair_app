@@ -30,6 +30,7 @@ class FilteredListingsPage extends StatefulWidget {
 }
 
 class FilteredListingsPageState extends State<FilteredListingsPage> {
+  List<Map<String, dynamic>> filteredListings = [];
   bool isRefreshing = false;
   bool useFallbackSorting = false;
   final ScrollController _scrollController = ScrollController();
@@ -205,7 +206,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final sortedListings = _applySorting(primaryFiltered);
     // Step 3: Apply search filtering to that subset
 
-    final filteredListings = _applySearchFilter(sortedListings);
+    filteredListings = _applySearchFilter(sortedListings);
 
     return RefreshIndicator(
       onRefresh: refreshListings,
