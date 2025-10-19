@@ -244,7 +244,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     child: SearchBar(
                                       autoFocus: true,
                                       elevation: const WidgetStatePropertyAll(0),
-                                      hintText: 'Search the Fair...',
+                                      hintText: switch (widget.filterPrimaryType) {
+                                        'Food' => 'Search food vendors...',
+                                        'Shopping' => 'Search market stalls...',
+                                        'Music' => 'Search musical performances...',
+                                        'Event' => 'Search events...',
+                                        'Service' => 'Search services...',
+                                        _ => 'Search listings...',
+                                      },
                                       leading: const Icon(Icons.search),
                                       trailing: [
                                         IconButton(
