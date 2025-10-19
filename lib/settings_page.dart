@@ -40,6 +40,7 @@ late ValueNotifier<String> themeNotifier;
 late String mapStyle;
 
 Future<void> loadSettings(bool onTest) async {
+  debugPrint('loadSettings called, onTest=$onTest');
   if (onTest == false) {
     // Load settings from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
@@ -79,6 +80,7 @@ Future<void> loadSettings(bool onTest) async {
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
 
+    debugPrint('Settings loaded from SharedPreferences');
   } else if (onTest == true) {
     int savedUnitIndex = 0;
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
