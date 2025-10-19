@@ -196,14 +196,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
-                          AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            child: _isSearching
-                                ? ConstrainedBox(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: _isSearching
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ConstrainedBox(
                                     key: const ValueKey('searchBar'),
                                     constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
                                     child: SearchBar(
@@ -228,8 +227,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         });
                                       },
                                     ),
-                                  )
-                                : SizedBox(
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
+                                  SizedBox(
                                     height: 56,
                                     width: 56,
                                     child: FloatingActionButton(
@@ -246,8 +251,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       child: const Icon(Icons.search),
                                     ),
                                   ),
-                          ),
-                        ],
+                                ],
+                              ),
                       ),
                     ),
                   ],
