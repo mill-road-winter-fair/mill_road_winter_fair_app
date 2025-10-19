@@ -30,8 +30,6 @@ class FilteredListingsPage extends StatefulWidget {
 }
 
 class FilteredListingsPageState extends State<FilteredListingsPage> {
-  // ignore: unused_field
-  late Future<List> _sortedListings;
   bool isRefreshing = false;
   bool useFallbackSorting = false;
   final ScrollController _scrollController = ScrollController();
@@ -41,7 +39,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   void initState() {
-    _sortedListings = sortListings();
     super.initState();
   }
 
@@ -52,18 +49,28 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     super.dispose();
   }
 
-  Future<List> sortListings() async {
+  List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
+    if (_searchQuery.isEmpty) return allListings;
+    return allListings.where((listing) {
+      final name = (listing['displayName'] ?? '').toString().toLowerCase();
+      final secondary = (listing['secondaryType'] ?? '').toString().toLowerCase();
+      final tertiary = (listing['tertiaryType'] ?? '').toString().toLowerCase();
+      return name.contains(_searchQuery) || secondary.contains(_searchQuery) || tertiary.contains(_searchQuery);
+    }).toList();
+  }
+
+  List<Map<String, dynamic>> _applySorting(List<Map<String, dynamic>> allListings) {
     try {
-      if (listings.isEmpty) throw Exception("No listings exist");
+      if (allListings.isEmpty) throw Exception("No listings exist");
 
       if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
           preferredSortingMethod == SortingMethod.values[1]) {
-        // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
+        // User prefers distance sorting but has disabled location permissions
         preferredSortingMethod = SortingMethod.values[0];
       }
 
       if ((locationServicesEnabled == false || currentLatLng == null) && preferredSortingMethod == SortingMethod.values[1]) {
-        // User prefers distance sorting but their location services are disabled or we cannot get the user's location, use fallback (a-z) sorting but don't change their saved preferences
+        // Location unavailable; use fallback (a-z)
         useFallbackSorting = true;
       } else {
         useFallbackSorting = false;
@@ -73,7 +80,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           locationServicesEnabled == true &&
           useFallbackSorting == false) {
         // Add distance to each listing
-        listings = listings.map((listing) {
+        allListings = allListings.map((listing) {
           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
           final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
           return {...listing, 'approximateDistanceMetres': distance};
@@ -83,38 +90,36 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       // Sort based on preference
       if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
         // Sort by name
-        listings.sort((a, b) => a['name'].compareTo(b['name']));
+        allListings.sort((a, b) => a['name'].compareTo(b['name']));
       } else if (preferredSortingMethod == SortingMethod.values[1]) {
-        // Sort by distance to user (nearest first)
-        listings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
+        // Sort by distance (nearest first)
+        allListings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
       } else if (preferredSortingMethod == SortingMethod.values[2]) {
-        // Sort by start time, if the start time is the same sort by name
-        listings.sort((a, b) {
+        // Sort by start time, then name
+        allListings.sort((a, b) {
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           return timeCompare != 0 ? timeCompare : a['name'].compareTo(b['name']);
         });
       } else {
-        // The only other option is location sorting
-        listings.sort((a, b) {
-          // 1. Compare by location (secondaryType)
+        // Sort by secondaryType, then startTime, then name
+        allListings.sort((a, b) {
           final locationCompare = a['secondaryType'].compareTo(b['secondaryType']);
           if (locationCompare != 0) return locationCompare;
 
-          // 2. If location is the same, compare by startTime
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           if (timeCompare != 0) return timeCompare;
 
-          // 3. If startTime is also the same, compare by name
           return a['name'].compareTo(b['name']);
         });
       }
 
-      return listings;
+      return allListings;
     } on Exception catch (e) {
       debugPrint('Error sorting listings: $e');
-      return listings;
+      return allListings;
     } catch (e) {
-      return Future.error('Error sorting listings: $e');
+      debugPrint('Unexpected error sorting listings: $e');
+      return allListings;
     }
   }
 
@@ -130,7 +135,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       establishLocation();
     } finally {
       setState(() {
-        _sortedListings = sortListings();
         isRefreshing = false;
       });
     }
@@ -169,8 +173,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
     final primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
 
-    // Step 2: Apply search filtering to that subset
-    final filteredListings = _applySearchFilter(primaryFiltered);
+    // Step 2: Sort the filtered listings
+    final sortedListings = _applySorting(primaryFiltered);
+    // Step 3: Apply search filtering to that subset
+
+    final filteredListings = _applySearchFilter(sortedListings);
 
     return RefreshIndicator(
       onRefresh: refreshListings,
@@ -349,15 +356,5 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         ],
       ),
     );
-  }
-
-  List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
-    if (_searchQuery.isEmpty) return allListings;
-    return allListings.where((listing) {
-      final name = (listing['displayName'] ?? '').toString().toLowerCase();
-      final secondary = (listing['secondaryType'] ?? '').toString().toLowerCase();
-      final tertiary = (listing['tertiaryType'] ?? '').toString().toLowerCase();
-      return name.contains(_searchQuery) || secondary.contains(_searchQuery) || tertiary.contains(_searchQuery);
-    }).toList();
   }
 }
