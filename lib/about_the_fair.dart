@@ -7,7 +7,12 @@ class AboutTheFairPage extends StatelessWidget {
   Widget build(BuildContext context) {
     debugPrint('AboutTheFairPage build() called');
     return Scaffold(
-      appBar: AppBar(title: const Text("About Mill Road Winter Fair")),
+      appBar: AppBar(
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text('About Mill Road Winter Fair'),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(16.0),
