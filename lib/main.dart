@@ -252,13 +252,10 @@ class HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Expanded(flex: 4, child: Container()),
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              'Mill Road Winter Fair 2025',
-                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19, fontWeight: FontWeight.bold),
+                          FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Mill Road Winter Fair 2025', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19, fontWeight: FontWeight.bold)),
                             ),
-                          ),
                           Expanded(flex: 1, child: Container())
                         ],
                       ),
