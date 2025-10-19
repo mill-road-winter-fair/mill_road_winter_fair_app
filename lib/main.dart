@@ -173,29 +173,29 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text('Mill Road Winter Fair 2025', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            IconButton(
-              icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-              },
-            ),
-          ],
-        ),
+     appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
+              HapticFeedback.lightImpact();
               Scaffold.of(context).openDrawer();
-            },
+              },
           ),
         ),
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text('Mill Road Winter Fair 2025', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ),
+        actions: [
+          IconButton(
+            icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+            },
+          ),
+        ],
       ),
       body: IndexedStack(
         index: index,
