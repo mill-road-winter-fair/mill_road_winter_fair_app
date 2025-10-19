@@ -336,7 +336,7 @@ class MapPageState extends State<MapPage> {
     setState(() {
       markers.updateAll((id, oldMarker) {
         final listing = listings.firstWhere(
-              (l) => l['id'].toString() == id.value,
+          (l) => l['id'].toString() == id.value,
           orElse: () => {},
         );
         if (listing.isEmpty) return oldMarker;
@@ -450,31 +450,48 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            filterSettings.forEach((key, _) {
-                              filterSettings[key] = true;
-                            });
-                          });
-                          showAllMarkers();
-                        },
-                        icon: const Icon(Icons.filter_alt),
-                        label: const Text('Show All'),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            filterSettings.forEach((key, _) {
-                              filterSettings[key] = false;
-                            });
-                          });
-                          hideAllMarkers();
-                        },
-                        icon: const Icon(Icons.filter_alt_off),
-                        label: const Text('Hide All'),
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Row(
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    filterSettings.forEach((key, _) {
+                                      filterSettings[key] = true;
+                                    });
+                                  });
+                                  showAllMarkers();
+                                },
+                                icon: const Icon(Icons.filter_alt),
+                                label: const Text('Show All'),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    filterSettings.forEach((key, _) {
+                                      filterSettings[key] = false;
+                                    });
+                                  });
+                                  hideAllMarkers();
+                                },
+                                icon: const Icon(Icons.filter_alt_off),
+                                label: const Text('Hide All'),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.check_circle),
+                                label: const Text('Done'),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -630,7 +647,7 @@ class MapPageState extends State<MapPage> {
       setState(() {
         final distanceMetres = result.totalDistanceValue ?? 0;
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
-        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;  
+        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
         _polylines.clear();
         _polylines.add(
@@ -639,7 +656,7 @@ class MapPageState extends State<MapPage> {
             points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace*0.75)],
+            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
           ),
         );
 
