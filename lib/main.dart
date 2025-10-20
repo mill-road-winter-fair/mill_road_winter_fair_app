@@ -17,19 +17,24 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 Future<void> main() async {
+  debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
   await loadSettings(false);
+  debugPrint('Settings loaded');
 
   listings = await fetchListings(http.Client());
+  debugPrint('Listings fetched: count = ${listings.length}');
 
   // Check whether location services are enabled and permissions are granted to the app
   locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
   locationPermission = await Geolocator.checkPermission();
+  debugPrint('Location services enabled: $locationServicesEnabled, permission: $locationPermission');
 
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
+  debugPrint('Setting preferred orientation and running app');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
 }
 
@@ -38,9 +43,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('MyApp build() called');
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
       builder: (context, selectedThemeKey, _) {
+        debugPrint('Theme changed: $selectedThemeKey');
         return MaterialApp(
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],

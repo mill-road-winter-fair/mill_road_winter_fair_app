@@ -41,11 +41,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   void initState() {
+    debugPrint('FilteredListingsPageState initState() called');
     super.initState();
   }
 
   @override
   void dispose() {
+    debugPrint('FilteredListingsPageState dispose() called');
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -174,6 +176,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('FilteredListingsPageState build() called');
     final homePageState = context.findAncestorStateOfType<HomePageState>();
 
     // Show error if there are no listings
@@ -384,7 +387,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 ),
                 DropdownMenuEntry(
                   value: SortingMethod.values[2],
-                  label: "Time",
+                  label: "Start time",
                   leadingIcon: const Icon(Icons.alarm),
                 ),
               ],

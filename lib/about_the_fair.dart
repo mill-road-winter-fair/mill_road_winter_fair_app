@@ -5,6 +5,7 @@ class AboutTheFairPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('AboutTheFairPage build() called');
     return Scaffold(
       appBar: AppBar(title: const Text("About Mill Road Winter Fair")),
       body: SingleChildScrollView(
