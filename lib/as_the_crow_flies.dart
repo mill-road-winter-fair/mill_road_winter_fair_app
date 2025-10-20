@@ -1,9 +1,12 @@
 import 'dart:math' as math;
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 int asTheCrowFlies(LatLng? origin, LatLng destination) {
+  debugPrint('asTheCrowFlies called: origin=$origin, destination=$destination');
   // If the user has location tracking disabled we need to return nothing here.
   if (origin == null) {
+    debugPrint('Origin is null, returning 0');
     return 0;
   }
 
@@ -29,6 +32,6 @@ int asTheCrowFlies(LatLng? origin, LatLng destination) {
   // Apply the fudge factor (See above)
   // Round the figure to 0 decimal places
   var distanceMetres = (((12742 * math.asin(math.sqrt(a))) * 1000) * fudgeFactor).round();
-
+  debugPrint('Distance calculated: $distanceMetres metres');
   return distanceMetres;
 }

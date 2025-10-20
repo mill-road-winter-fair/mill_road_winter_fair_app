@@ -17,19 +17,24 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 Future<void> main() async {
+  debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
   await loadSettings(false);
+  debugPrint('Settings loaded');
 
   listings = await fetchListings(http.Client());
+  debugPrint('Listings fetched: count = ${listings.length}');
 
   // Check whether location services are enabled and permissions are granted to the app
   locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
   locationPermission = await Geolocator.checkPermission();
+  debugPrint('Location services enabled: $locationServicesEnabled, permission: $locationPermission');
 
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
+  debugPrint('Setting preferred orientation and running app');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
 }
 
@@ -38,9 +43,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('MyApp build() called');
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
       builder: (context, selectedThemeKey, _) {
+        debugPrint('Theme changed: $selectedThemeKey');
         return MaterialApp(
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
@@ -50,6 +57,78 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+Widget emailDetailsDialog() {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
+          return ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('info@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('volunteers@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('events@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('stalls@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('it@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('app@millroadwinterfair.org'),
+                  const SizedBox(height: 45),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Close',
+                        style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmailLink(String email) {
+    return InkWell(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        final Uri mailUri = Uri(scheme: 'mailto', path: email);
+        if (await canLaunchUrl(mailUri)) {
+          await launchUrl(mailUri);
+        } else {
+          throw Exception('Could not launch email client');
+        }
+      },
+      child: Text(
+        email,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.blue,
+        ),
+      ),
+    );
+  }
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -89,27 +168,6 @@ class HomePageState extends State<HomePage> {
       index = 0;
       mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
     });
-  }
-
-  Widget _buildEmailLink(String email) {
-    return InkWell(
-      onTap: () async {
-        HapticFeedback.lightImpact();
-        final Uri mailUri = Uri(scheme: 'mailto', path: email);
-        if (await canLaunchUrl(mailUri)) {
-          await launchUrl(mailUri);
-        } else {
-          throw Exception('Could not launch email client');
-        }
-      },
-      child: Text(
-        email,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.blue,
-        ),
-      ),
-    );
   }
 
   void aboutDialog() {
@@ -166,29 +224,29 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text('Mill Road Winter Fair 2025', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            IconButton(
-              icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-              },
-            ),
-          ],
-        ),
+     appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
+              HapticFeedback.lightImpact();
               Scaffold.of(context).openDrawer();
-            },
+              },
           ),
         ),
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text('Mill Road Winter Fair 2025', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ),
+        actions: [
+          IconButton(
+            icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+            },
+          ),
+        ],
       ),
       body: IndexedStack(
         index: index,
@@ -245,13 +303,10 @@ class HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Expanded(flex: 4, child: Container()),
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              'Mill Road Winter Fair 2025',
-                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19, fontWeight: FontWeight.bold),
+                          FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Mill Road Winter Fair 2025', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19, fontWeight: FontWeight.bold)),
                             ),
-                          ),
                           Expanded(flex: 1, child: Container())
                         ],
                       ),
@@ -288,54 +343,7 @@ class HomePageState extends State<HomePage> {
                     title: const Text('Email us', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () => showDialog<String>(
                       context: context,
-                      builder: (BuildContext context) => Dialog(
-                        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
-                            return ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: maxWidth),
-                              child: Padding(
-                                padding: const EdgeInsets.all(32.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('info@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('volunteers@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('events@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('stalls@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('it@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('app@millroadwinterfair.org'),
-                                    const SizedBox(height: 45),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: Text(
-                                          'Close',
-                                          style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      builder: (BuildContext context) => emailDetailsDialog(),
                     ),
                   ),
                 ],
@@ -416,3 +424,4 @@ class HomePageState extends State<HomePage> {
     );
   }
 }
+

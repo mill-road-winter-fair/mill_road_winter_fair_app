@@ -68,6 +68,7 @@ class MapPageState extends State<MapPage> {
 
   @override
   void initState() {
+    debugPrint('MapPageState initState() called');
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
     setMarkerLists();
@@ -240,6 +241,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
+    debugPrint('updateMarkerVisibility called');
     setState(() {
       for (var id in idList) {
         final currentMarker = markers[id];
@@ -253,6 +255,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void setMarkerLists() {
+    debugPrint('setMarkerLists called');
     // Reset marker lists
     _foodMarkerIds = [];
     _stallsMarkerIds = [];
@@ -278,6 +281,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addAllVisibleMarkers(bool onTest) {
+    debugPrint('addAllVisibleMarkers called');
     // Ensure the markers list is empty
     markers.clear();
 
@@ -296,6 +300,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<bool> createAllMarkerBitmaps() async {
+    debugPrint('createAllMarkerBitmaps called');
     for (var listingType in 'Food, Shopping, Music, Event, Service, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'.split(', ')) {
       BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
       bitmapDescriptors[listingType] = newBitmapDescriptor;
@@ -309,6 +314,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addGroupMarker(listing, bool onTest) async {
+    debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
@@ -437,6 +443,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addSpecificMarker(listing, bool onTest) async {
+    debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
@@ -482,6 +489,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> updateMarkersAndPolygonsForTheme() async {
+    debugPrint('updateMarkersAndPolygonsForTheme called');
     // Recreate marker bitmaps for the new theme colors
     await createAllMarkerBitmaps();
 
@@ -507,14 +515,17 @@ class MapPageState extends State<MapPage> {
   }
 
   void hideAllMarkers() {
+    debugPrint('hideAllMarkers called');
     updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, false);
   }
 
   void showAllMarkers() {
+    debugPrint('showAllMarkers called');
     updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, true);
   }
 
   void showFilteredMarkers() {
+    debugPrint('showFilteredMarkers called');
     updateMarkerVisibility(_foodMarkerIds, filterSettings['Food']!);
     updateMarkerVisibility(_stallsMarkerIds, filterSettings['Stalls']!);
     updateMarkerVisibility(_musicMarkerIds, filterSettings['Music']!);
@@ -523,6 +534,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void showFilterMenu() {
+    debugPrint('showFilterMenu called');
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 0.8,
       context: context,
@@ -615,33 +627,50 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            filterSettings.forEach((key, _) {
-                              filterSettings[key] = true;
-                            });
-                          });
-                          showAllMarkers();
-                          updateRoadClosurePolygonVisibility(true);
-                        },
-                        icon: const Icon(Icons.filter_alt),
-                        label: const Text('Show All'),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            filterSettings.forEach((key, _) {
-                              filterSettings[key] = false;
-                            });
-                          });
-                          hideAllMarkers();
-                          updateRoadClosurePolygonVisibility(false);
-                        },
-                        icon: const Icon(Icons.filter_alt_off),
-                        label: const Text('Hide All'),
+                      Expanded(
+                        child: FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Row(
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    filterSettings.forEach((key, _) {
+                                      filterSettings[key] = true;
+                                    });
+                                  });
+                                  showAllMarkers();
+                                  updateRoadClosurePolygonVisibility(true);
+                                },
+                                icon: const Icon(Icons.filter_alt),
+                                label: const Text('Show All'),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    filterSettings.forEach((key, _) {
+                                      filterSettings[key] = false;
+                                    });
+                                  });
+                                  hideAllMarkers();
+                                  updateRoadClosurePolygonVisibility(false);
+                                },
+                                icon: const Icon(Icons.filter_alt_off),
+                                label: const Text('Hide All'),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.check_circle),
+                                label: const Text('Done'),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -655,6 +684,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    debugPrint('getDirections called for listing ID: $id');
     // Set navigation as in progress
     _navigationInProgress = true;
 
@@ -697,6 +727,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void cancelNavigation() {
+    debugPrint('cancelNavigation called');
     // Halt the location subscription
     _positionStream?.cancel();
 
@@ -719,12 +750,14 @@ class MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
+    debugPrint('MapPageState dispose() called');
     // Cancel the location subscription when the page is disposed
     _positionStream?.cancel();
     super.dispose();
   }
 
   Future<void> startLocationUpdates(LatLng destination) async {
+    debugPrint('startLocationUpdates called');
     // Store the destination
     _destination = destination;
 
@@ -746,6 +779,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
+    debugPrint('updatePolyline called');
     try {
       // Load environment variables
       await dotenv.load(fileName: ".env");
@@ -792,7 +826,7 @@ class MapPageState extends State<MapPage> {
       setState(() {
         final distanceMetres = result.totalDistanceValue ?? 0;
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
-        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;  
+        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
         _polylines.clear();
         _polylines.add(
@@ -801,7 +835,7 @@ class MapPageState extends State<MapPage> {
             points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace*0.75)],
+            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
           ),
         );
 
@@ -846,12 +880,14 @@ class MapPageState extends State<MapPage> {
 
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
+    debugPrint('_saveSettings called');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
     await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
   }
 
   void _setMapCameraToFitMapMarkers() {
+    debugPrint('_setMapCameraToFitMapMarkers called');
     // Set default LatLngs bounds
     // southwest
     double markerMinLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : 52.199174;
@@ -885,6 +921,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
+    debugPrint('_setMapCameraToFitPolyline called');
     double polylineMinLat = polylines.first.points.first.latitude;
     double polylineMinLong = polylines.first.points.first.longitude;
     double polylineMaxLat = polylines.first.points.first.latitude;
@@ -905,6 +942,7 @@ class MapPageState extends State<MapPage> {
   }
 
   _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
+    debugPrint('_moveCameraToBoundsWithRotation called');
     double theZoom;
 
     if (mapWidth != null && mapHeight != null) {
@@ -940,6 +978,7 @@ class MapPageState extends State<MapPage> {
     Size mapSize, {
     double padding = 0,
   }) {
+    debugPrint('zoomForBounds called');
     const worldDIM = 256.0;
     const zoomMax = 21.0;
 
@@ -999,6 +1038,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> refreshListings() async {
+    debugPrint('refreshListings called');
     setState(() {
       isRefreshing = true;
     });
@@ -1017,6 +1057,7 @@ class MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('MapPageState build() called');
     return FutureBuilder(
       future: _fetchListings,
       builder: (context, snapshot) {

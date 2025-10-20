@@ -16,6 +16,7 @@ class ListingUpdateNotifier {
   // }
 
   static Future<void> maybeShowNotice(BuildContext context) async {
+    debugPrint('maybeShowNotice called');
     // Capture the theme colours and initialise Toast before async gaps
     final theme = Theme.of(context);
     final backgroundColor = theme.colorScheme.primary;
@@ -27,16 +28,20 @@ class ListingUpdateNotifier {
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
 
-    if (now.isAfter(_cutoffDate)) return;
+    if (now.isAfter(_cutoffDate)) {
+      debugPrint('Current date is after cutoff, not showing notice');
+      return;
+    }
 
     final lastShownMillis = prefs.getInt(_lastShownKey);
     if (lastShownMillis != null) {
       final lastShown = DateTime.fromMillisecondsSinceEpoch(lastShownMillis);
       if (now.difference(lastShown).inDays < _showIntervalDays) {
+        debugPrint('Notice shown recently, not showing again');
         return;
       }
     }
-
+    debugPrint('Showing listings update notice');
     await prefs.setInt(_lastShownKey, now.millisecondsSinceEpoch);
 
     // --- Custom FToast with longer duration ---
