@@ -256,7 +256,15 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.check_box_outlined, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Then simply select the\ncategories you want to see", style: bodyStyle),
+                          Text("Then simply select the marker\ncategories you want to see", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.no_transfer, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Choose whether or not to see\nour pedestrianised areas", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 10),
