@@ -561,11 +561,12 @@ class MapPageState extends State<MapPage> {
     // Show markers which have enabled filters
     showFilteredMarkers();
 
+    // Set navigation as not in progress
+    _navigationInProgress = false;
+
     // Reset the camera position
     _setMapCameraToFitMapMarkers();
 
-    // Set navigation as not in progress
-    _navigationInProgress = false;
     setState(() {});
   }
 
