@@ -67,13 +67,19 @@ The app currently uses the the Google Maps Platform within GCP in order to acces
 1. Maps SDK for Android (To render the interactive map on the app's homepage.)
 2. Google Maps Directions API
 
-## Release Steps
+## Android Release Steps
 
 1. Increment the version number and build number in `pubspec.yaml`.
 
-2. Increment the version number in `lib/settings_page.dart`.
+2. Run the tests with coverage. 
 
-3. Set environment variables for the signing key store.
+3. Add & commit the changes to Git and push to an MR.
+
+4. Merge the MR into `main`.
+
+5. Create a release titled with the version number, detail all of the changes made. 
+
+6. Set environment variables for the signing key store.
 ```shell
 $env:KEYSTORE_FILE='C:\Users\alexb\Development\google_play_keystore\upload-keystore.jks'
 $env:KEYSTORE_PASSWORD=REDACTED
@@ -81,14 +87,14 @@ $env:KEY_ALIAS='upload'
 $env:KEY_PASSWORD=REDACTED
 ```
 
-4. Run the following command in the terminal:
+7. Run the following command in the terminal:
 ```shell
 flutter build appbundle --release --dart-define-from-file=.env
 ```
 
-5. Upload the following file to the Google Play Console as a new release: `/build/app/outputs/bundle/release/app-release.aab`
+8. Upload the following file to the Google Play Console as a new release: `/build/app/outputs/bundle/release/app-release.aab`
 
-6. If required, add the following folder to a `.zip` file and upload it to the Release as a Debug Symbols artifact: `build/app/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib/x86_64`
+9. If required, add the following folder to a `.zip` file and upload it to the Release as a Debug Symbols artifact: `build/app/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib/x86_64`
 
 ## Other Links
 - [Mill Road Winter Fair Caching API](https://github.com/MarauderOne/mill_road_winter_fair_app_db_api)
