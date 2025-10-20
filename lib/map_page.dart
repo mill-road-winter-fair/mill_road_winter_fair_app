@@ -1267,7 +1267,7 @@ class MapPageState extends State<MapPage> {
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, bottom: 40.0),
+                    padding: const EdgeInsets.only(left: 5.0, bottom: 6.0),
                     child: Material(
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
@@ -1295,6 +1295,7 @@ class MapPageState extends State<MapPage> {
                             Text(
                               'Pedestrianised areas',
                               style: TextStyle(
+                                fontSize: 12,
                                 color: Theme.of(context).colorScheme.tertiary,
                                 fontWeight: FontWeight.w600,
                               ),
