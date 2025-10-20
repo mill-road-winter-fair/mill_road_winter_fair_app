@@ -58,6 +58,78 @@ class MyApp extends StatelessWidget {
   }
 }
 
+Widget emailDetailsDialog() {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
+          return ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('info@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('volunteers@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('events@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('stalls@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('it@millroadwinterfair.org'),
+                  const SizedBox(height: 15),
+                  const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  _buildEmailLink('app@millroadwinterfair.org'),
+                  const SizedBox(height: 45),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Close',
+                        style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmailLink(String email) {
+    return InkWell(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        final Uri mailUri = Uri(scheme: 'mailto', path: email);
+        if (await canLaunchUrl(mailUri)) {
+          await launchUrl(mailUri);
+        } else {
+          throw Exception('Could not launch email client');
+        }
+      },
+      child: Text(
+        email,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.blue,
+        ),
+      ),
+    );
+  }
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -96,27 +168,6 @@ class HomePageState extends State<HomePage> {
       index = 0;
       mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
     });
-  }
-
-  Widget _buildEmailLink(String email) {
-    return InkWell(
-      onTap: () async {
-        HapticFeedback.lightImpact();
-        final Uri mailUri = Uri(scheme: 'mailto', path: email);
-        if (await canLaunchUrl(mailUri)) {
-          await launchUrl(mailUri);
-        } else {
-          throw Exception('Could not launch email client');
-        }
-      },
-      child: Text(
-        email,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.blue,
-        ),
-      ),
-    );
   }
 
   void aboutDialog() {
@@ -292,54 +343,7 @@ class HomePageState extends State<HomePage> {
                     title: const Text('Email us', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () => showDialog<String>(
                       context: context,
-                      builder: (BuildContext context) => Dialog(
-                        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
-                            return ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: maxWidth),
-                              child: Padding(
-                                padding: const EdgeInsets.all(32.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('info@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('volunteers@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('events@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('stalls@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('it@millroadwinterfair.org'),
-                                    const SizedBox(height: 15),
-                                    const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    _buildEmailLink('app@millroadwinterfair.org'),
-                                    const SizedBox(height: 45),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: Text(
-                                          'Close',
-                                          style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      builder: (BuildContext context) => emailDetailsDialog(),
                     ),
                   ),
                 ],
@@ -420,3 +424,4 @@ class HomePageState extends State<HomePage> {
     );
   }
 }
+
