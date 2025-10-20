@@ -537,7 +537,7 @@ class MapPageState extends State<MapPage> {
                 children: [
                   const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                     Text(
-                      "Filter Map Pins",
+                      "Filter Map Layers",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.left,
                     )
@@ -605,7 +605,7 @@ class MapPageState extends State<MapPage> {
                   Divider(color: Colors.grey[350]),
                   CheckboxListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const Text("Pedestrianised areas"),
+                    title: const Text("Shade pedestrianised areas"),
                     value: filterSettings["Road Closures"],
                     onChanged: (value) {
                       setState(() {
