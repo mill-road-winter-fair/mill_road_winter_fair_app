@@ -222,8 +222,8 @@ class MapPageState extends State<MapPage> {
     return Polygon(
         polygonId: const PolygonId('roadClosure'),
         points: roadClosurePolygonPoints,
-        strokeWidth: 6,
-        strokeColor: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+        strokeWidth: 3,
+        strokeColor: Theme.of(context).colorScheme.tertiary,
         fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
   }
 
@@ -1286,7 +1286,7 @@ class MapPageState extends State<MapPage> {
                               decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
                                 border: Border.all(
-                                  color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                  color: Theme.of(context).colorScheme.tertiary,
                                   width: 3,
                                 ),
                               ),
