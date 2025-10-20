@@ -37,8 +37,8 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: const Color.fromRGBO(30, 30, 30, 1.0),
-      onPrimary: Colors.white,
+      primary: const Color.fromRGBO(255, 196, 0, 1.0),
+      onPrimary: Colors.black,
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
       onSecondary: Colors.white,
       tertiary: const Color.fromRGBO(255, 196, 0, 1.0),
