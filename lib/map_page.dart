@@ -40,6 +40,7 @@ class MapPageState extends State<MapPage> {
   late List<MarkerId> _eventMarkerIds;
   late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
+  final Set<Polygon> _polygons = {}; // For displaying the road closure polygon
   final Set<Polyline> _polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
@@ -62,6 +63,7 @@ class MapPageState extends State<MapPage> {
     'Music': true,
     'Events': true,
     'Services': true,
+    'Road Closures': true,
   };
 
   @override
@@ -74,9 +76,168 @@ class MapPageState extends State<MapPage> {
     addAllVisibleMarkers(false);
     establishLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _polygons.add(roadClosurePolygon());
       ListingUpdateNotifier.maybeShowNotice(context);
     });
     super.initState();
+  }
+
+  Polygon roadClosurePolygon() {
+    final List<LatLng> roadClosurePolygonPoints = [];
+    roadClosurePolygonPoints.add(const LatLng(52.20235281420999, 0.1310619082596975));
+    roadClosurePolygonPoints.add(const LatLng(52.20231516801594, 0.1311597848998902));
+    roadClosurePolygonPoints.add(const LatLng(52.20234751634417, 0.1312922180728582));
+    roadClosurePolygonPoints.add(const LatLng(52.20233631517088, 0.1314355240724652));
+    roadClosurePolygonPoints.add(const LatLng(52.20200908093806, 0.1322005128635384));
+    roadClosurePolygonPoints.add(const LatLng(52.20197859926515, 0.1322488316534076));
+    roadClosurePolygonPoints.add(const LatLng(52.2019422735798, 0.1322292934474145));
+    roadClosurePolygonPoints.add(const LatLng(52.2012105622847, 0.1316364880114951));
+    roadClosurePolygonPoints.add(const LatLng(52.20117278129067, 0.1317673350512383));
+    roadClosurePolygonPoints.add(const LatLng(52.20190848239522, 0.1323816884898998));
+    roadClosurePolygonPoints.add(const LatLng(52.20191780047099, 0.1324033494486065));
+    roadClosurePolygonPoints.add(const LatLng(52.20191206154605, 0.1324377833024948));
+    roadClosurePolygonPoints.add(const LatLng(52.20180722003214, 0.1326842889403568));
+    roadClosurePolygonPoints.add(const LatLng(52.20154108514724, 0.1333489959015899));
+    roadClosurePolygonPoints.add(const LatLng(52.20124796928181, 0.1340602671079827));
+    roadClosurePolygonPoints.add(const LatLng(52.2009753675207, 0.1347188867023652));
+    roadClosurePolygonPoints.add(const LatLng(52.20078759974723, 0.1351815253610478));
+    roadClosurePolygonPoints.add(const LatLng(52.20060350929509, 0.1356303405175474));
+    roadClosurePolygonPoints.add(const LatLng(52.20033257981164, 0.1363163764622999));
+    roadClosurePolygonPoints.add(const LatLng(52.20016584154403, 0.1367620437365646));
+    roadClosurePolygonPoints.add(const LatLng(52.20014486316023, 0.1367911433027813));
+    roadClosurePolygonPoints.add(const LatLng(52.2001218686615, 0.1367779005334402));
+    roadClosurePolygonPoints.add(const LatLng(52.19998306812768, 0.1366803857699761));
+    roadClosurePolygonPoints.add(const LatLng(52.19995058464553, 0.136812478115258));
+    roadClosurePolygonPoints.add(const LatLng(52.20007112413746, 0.1368946557236161));
+    roadClosurePolygonPoints.add(const LatLng(52.20008936448654, 0.1369210598442261));
+    roadClosurePolygonPoints.add(const LatLng(52.20007929576207, 0.1369620891686041));
+    roadClosurePolygonPoints.add(const LatLng(52.20000944413438, 0.1371278011066357));
+    roadClosurePolygonPoints.add(const LatLng(52.19960936113254, 0.1381715386581228));
+    roadClosurePolygonPoints.add(const LatLng(52.1995865061542, 0.1381953576575357));
+    roadClosurePolygonPoints.add(const LatLng(52.19955963533969, 0.1381996076168601));
+    roadClosurePolygonPoints.add(const LatLng(52.19938594800258, 0.1380926323613463));
+    roadClosurePolygonPoints.add(const LatLng(52.19934316751451, 0.1382500101117978));
+    roadClosurePolygonPoints.add(const LatLng(52.1995022352211, 0.1383479669667653));
+    roadClosurePolygonPoints.add(const LatLng(52.19951582917572, 0.1383766977703216));
+    roadClosurePolygonPoints.add(const LatLng(52.1995114294751, 0.1384144685687305));
+    roadClosurePolygonPoints.add(const LatLng(52.19939091995906, 0.1386707785667762));
+    roadClosurePolygonPoints.add(const LatLng(52.19917741656872, 0.1392624799447906));
+    roadClosurePolygonPoints.add(const LatLng(52.19916631280751, 0.1392828751651831));
+    roadClosurePolygonPoints.add(const LatLng(52.1991446428936, 0.1392756075048496));
+    roadClosurePolygonPoints.add(const LatLng(52.1989175486481, 0.1391726819940953));
+    roadClosurePolygonPoints.add(const LatLng(52.19889771872434, 0.1392709721100016));
+    roadClosurePolygonPoints.add(const LatLng(52.19911453244046, 0.1393715381498972));
+    roadClosurePolygonPoints.add(const LatLng(52.19913034133225, 0.1393917519890997));
+    roadClosurePolygonPoints.add(const LatLng(52.19913119844188, 0.1394384318111475));
+    roadClosurePolygonPoints.add(const LatLng(52.19905709832486, 0.1396793349892134));
+    roadClosurePolygonPoints.add(const LatLng(52.19888886920802, 0.1401470573250951));
+    roadClosurePolygonPoints.add(const LatLng(52.19872575446356, 0.1406882487196137));
+    roadClosurePolygonPoints.add(const LatLng(52.19857919460625, 0.1412221159165639));
+    roadClosurePolygonPoints.add(const LatLng(52.19830401464963, 0.1420795096207583));
+    roadClosurePolygonPoints.add(const LatLng(52.19805523258207, 0.1428446992033949));
+    roadClosurePolygonPoints.add(const LatLng(52.19796058547896, 0.1431700690124305));
+    roadClosurePolygonPoints.add(const LatLng(52.19777043831322, 0.1439182506974968));
+    roadClosurePolygonPoints.add(const LatLng(52.19773906069497, 0.1440271555659201));
+    roadClosurePolygonPoints.add(const LatLng(52.19760690963302, 0.1446079456685312));
+    roadClosurePolygonPoints.add(const LatLng(52.19752098068638, 0.1450090212216604));
+    roadClosurePolygonPoints.add(const LatLng(52.19728430868131, 0.1458929568071077));
+    roadClosurePolygonPoints.add(const LatLng(52.19718620331415, 0.1462664966187099));
+    roadClosurePolygonPoints.add(const LatLng(52.19715943539327, 0.1464441477274536));
+    roadClosurePolygonPoints.add(const LatLng(52.19713596405279, 0.1469755713590337));
+    roadClosurePolygonPoints.add(const LatLng(52.19712231441085, 0.148011136800752));
+    roadClosurePolygonPoints.add(const LatLng(52.19710307516238, 0.148069413077816));
+    roadClosurePolygonPoints.add(const LatLng(52.19707444705853, 0.1481099103727335));
+    roadClosurePolygonPoints.add(const LatLng(52.19704767600419, 0.1481444468743121));
+    roadClosurePolygonPoints.add(const LatLng(52.19721043817059, 0.1481847622388588));
+    roadClosurePolygonPoints.add(const LatLng(52.19722302277, 0.1474140266218704));
+    roadClosurePolygonPoints.add(const LatLng(52.19722565195199, 0.146889669990915));
+    roadClosurePolygonPoints.add(const LatLng(52.19726897902555, 0.1464747706739122));
+    roadClosurePolygonPoints.add(const LatLng(52.19733900493154, 0.1461190078434771));
+    roadClosurePolygonPoints.add(const LatLng(52.19739118450674, 0.1458830211390794));
+    roadClosurePolygonPoints.add(const LatLng(52.19755813717495, 0.1452606860195216));
+    roadClosurePolygonPoints.add(const LatLng(52.19757901364062, 0.1452168759986305));
+    roadClosurePolygonPoints.add(const LatLng(52.19761552409477, 0.1451996552309986));
+    roadClosurePolygonPoints.add(const LatLng(52.19797077273405, 0.1454282307815458));
+    roadClosurePolygonPoints.add(const LatLng(52.19800074143257, 0.1453174537048341));
+    roadClosurePolygonPoints.add(const LatLng(52.19764604071845, 0.1450942683488377));
+    roadClosurePolygonPoints.add(const LatLng(52.19762791445593, 0.1450806419496486));
+    roadClosurePolygonPoints.add(const LatLng(52.19762480908257, 0.1450539383381266));
+    roadClosurePolygonPoints.add(const LatLng(52.19770791836908, 0.14475061805028));
+    roadClosurePolygonPoints.add(const LatLng(52.19783188969217, 0.1442675574167662));
+    roadClosurePolygonPoints.add(const LatLng(52.19794279870698, 0.1438312258765273));
+    roadClosurePolygonPoints.add(const LatLng(52.19803501146946, 0.1434695710127309));
+    roadClosurePolygonPoints.add(const LatLng(52.19808263193191, 0.1432575640823996));
+    roadClosurePolygonPoints.add(const LatLng(52.19810430566206, 0.1432082446911287));
+    roadClosurePolygonPoints.add(const LatLng(52.19814007266301, 0.143197469994214));
+    roadClosurePolygonPoints.add(const LatLng(52.19823619993755, 0.1432444901333763));
+    roadClosurePolygonPoints.add(const LatLng(52.19826647248333, 0.143117556460064));
+    roadClosurePolygonPoints.add(const LatLng(52.19817736904658, 0.143079741532075));
+    roadClosurePolygonPoints.add(const LatLng(52.19814857116783, 0.1430312397977263));
+    roadClosurePolygonPoints.add(const LatLng(52.19813774401835, 0.1429826127655653));
+    roadClosurePolygonPoints.add(const LatLng(52.1981395496733, 0.1429257420584218));
+    roadClosurePolygonPoints.add(const LatLng(52.19838239595334, 0.1421511196770431));
+    roadClosurePolygonPoints.add(const LatLng(52.19866819899372, 0.1412727505878197));
+    roadClosurePolygonPoints.add(const LatLng(52.1988946308355, 0.140430858937366));
+    roadClosurePolygonPoints.add(const LatLng(52.19898785139731, 0.1401239799499643));
+    roadClosurePolygonPoints.add(const LatLng(52.1990949156823, 0.1398575281699244));
+    roadClosurePolygonPoints.add(const LatLng(52.19916224790448, 0.1398825903315903));
+    roadClosurePolygonPoints.add(const LatLng(52.19960636796143, 0.1400957500436917));
+    roadClosurePolygonPoints.add(const LatLng(52.19963166053221, 0.1399841997340023));
+    roadClosurePolygonPoints.add(const LatLng(52.19920869096963, 0.1397790582244829));
+    roadClosurePolygonPoints.add(const LatLng(52.19918395215315, 0.1397595337506052));
+    roadClosurePolygonPoints.add(const LatLng(52.19917858268948, 0.1397261437714437));
+    roadClosurePolygonPoints.add(const LatLng(52.19925561252868, 0.1393610777706944));
+    roadClosurePolygonPoints.add(const LatLng(52.19938272725695, 0.1390182457566169));
+    roadClosurePolygonPoints.add(const LatLng(52.19957938929511, 0.1385117709767414));
+    roadClosurePolygonPoints.add(const LatLng(52.19959849381066, 0.1384832104027955));
+    roadClosurePolygonPoints.add(const LatLng(52.1996205426845, 0.138488654837039));
+    roadClosurePolygonPoints.add(const LatLng(52.19988950470529, 0.1386132646940519));
+    roadClosurePolygonPoints.add(const LatLng(52.19991965694164, 0.1384589372589007));
+    roadClosurePolygonPoints.add(const LatLng(52.1997044021644, 0.1383681140327409));
+    roadClosurePolygonPoints.add(const LatLng(52.19968147601194, 0.1383525488609494));
+    roadClosurePolygonPoints.add(const LatLng(52.19968791077611, 0.1382998401510327));
+    roadClosurePolygonPoints.add(const LatLng(52.19976017735745, 0.1380852582527425));
+    roadClosurePolygonPoints.add(const LatLng(52.19994474305631, 0.1376361571871065));
+    roadClosurePolygonPoints.add(const LatLng(52.20024124768548, 0.1368691189440052));
+    roadClosurePolygonPoints.add(const LatLng(52.20044131744081, 0.1363590732360365));
+    roadClosurePolygonPoints.add(const LatLng(52.20047559338849, 0.1362605493615976));
+    roadClosurePolygonPoints.add(const LatLng(52.20060058749072, 0.1359530811674525));
+    roadClosurePolygonPoints.add(const LatLng(52.20078215089771, 0.135500576050156));
+    roadClosurePolygonPoints.add(const LatLng(52.20106039161641, 0.1348202822524414));
+    roadClosurePolygonPoints.add(const LatLng(52.20119370680953, 0.1344925343925496));
+    roadClosurePolygonPoints.add(const LatLng(52.20136533156352, 0.1340803487453357));
+    roadClosurePolygonPoints.add(const LatLng(52.20147425034508, 0.1338054699789071));
+    roadClosurePolygonPoints.add(const LatLng(52.20170022686337, 0.1332403201753118));
+    roadClosurePolygonPoints.add(const LatLng(52.20185494572683, 0.1328594526718563));
+    roadClosurePolygonPoints.add(const LatLng(52.2020821221406, 0.1323470401379923));
+    roadClosurePolygonPoints.add(const LatLng(52.20217853160823, 0.1322296546103541));
+    roadClosurePolygonPoints.add(const LatLng(52.20226261801045, 0.1320472213527735));
+    roadClosurePolygonPoints.add(const LatLng(52.20229087498912, 0.1319118627783045));
+    roadClosurePolygonPoints.add(const LatLng(52.2024125802474, 0.1316399501782883));
+    roadClosurePolygonPoints.add(const LatLng(52.20246156812499, 0.1315758165697245));
+    roadClosurePolygonPoints.add(const LatLng(52.20253475854415, 0.1315288299783668));
+    roadClosurePolygonPoints.add(const LatLng(52.20259725355452, 0.1315025919232182));
+    roadClosurePolygonPoints.add(const LatLng(52.2026438385976, 0.1313751782097183));
+    roadClosurePolygonPoints.add(const LatLng(52.20235281420999, 0.1310619082596975));
+
+    return Polygon(
+        polygonId: const PolygonId('roadClosure'),
+        points: roadClosurePolygonPoints,
+        strokeWidth: 3,
+        strokeColor: Theme.of(context).colorScheme.tertiary,
+        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
+  }
+
+  void updateRoadClosurePolygonVisibility(bool visibleState) {
+    setState(() {
+      switch (visibleState) {
+        case true:
+          _polygons.add(roadClosurePolygon());
+          break;
+        case false:
+          _polygons.clear();
+      }
+    });
   }
 
   void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
@@ -327,8 +488,8 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  Future<void> updateMarkerIconsForTheme() async {
-    debugPrint('updateMarkerIconsForTheme called');
+  Future<void> updateMarkersAndPolygonsForTheme() async {
+    debugPrint('updateMarkersAndPolygonsForTheme called');
     // Recreate marker bitmaps for the new theme colors
     await createAllMarkerBitmaps();
 
@@ -346,6 +507,10 @@ class MapPageState extends State<MapPage> {
 
         return oldMarker.copyWith(iconParam: newIcon);
       });
+
+      // Update polygon colour to match theme
+      _polygons.clear();
+      _polygons.add(roadClosurePolygon());
     });
   }
 
@@ -384,7 +549,7 @@ class MapPageState extends State<MapPage> {
                 children: [
                   const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                     Text(
-                      "Filter Map Pins",
+                      "Filter Map Layers",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.left,
                     )
@@ -449,6 +614,18 @@ class MapPageState extends State<MapPage> {
                       updateMarkerVisibility(idList, value!);
                     },
                   ),
+                  Divider(color: Colors.grey[350]),
+                  CheckboxListTile(
+                    activeColor: Theme.of(context).colorScheme.tertiary,
+                    title: const Text("Shade pedestrianised areas"),
+                    value: filterSettings["Road Closures"],
+                    onChanged: (value) {
+                      setState(() {
+                        filterSettings["Road Closures"] = value!;
+                      });
+                      updateRoadClosurePolygonVisibility(value!);
+                    },
+                  ),
                   Row(
                     children: [
                       Expanded(
@@ -464,6 +641,7 @@ class MapPageState extends State<MapPage> {
                                     });
                                   });
                                   showAllMarkers();
+                                  updateRoadClosurePolygonVisibility(true);
                                 },
                                 icon: const Icon(Icons.filter_alt),
                                 label: const Text('Show All'),
@@ -477,6 +655,7 @@ class MapPageState extends State<MapPage> {
                                     });
                                   });
                                   hideAllMarkers();
+                                  updateRoadClosurePolygonVisibility(false);
                                 },
                                 icon: const Icon(Icons.filter_alt_off),
                                 label: const Text('Hide All'),
@@ -982,6 +1161,7 @@ class MapPageState extends State<MapPage> {
                         }
                       });
                     },
+                    polygons: _polygons,
                     markers: markers.values.toSet(),
                     polylines: _polylines,
                   );
@@ -1124,6 +1304,49 @@ class MapPageState extends State<MapPage> {
                     ),
                   ),
                 ),
+              if (filterSettings['Road Closures'] == true)
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 5.0, bottom: 6.0),
+                    child: Material(
+                      elevation: 3,
+                      borderRadius: BorderRadius.circular(8),
+                      color: Theme.of(context).colorScheme.surface,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.tertiary,
+                                  width: 3,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Pedestrianised areas',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.tertiary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
             ],
           ),
         );

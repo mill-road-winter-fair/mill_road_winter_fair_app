@@ -230,7 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         }
                       });
                       _saveSettings();
-                      mapPageKey.currentState?.updateMarkerIconsForTheme();
+                      mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
                     },
                     child: Column(
                       children: [

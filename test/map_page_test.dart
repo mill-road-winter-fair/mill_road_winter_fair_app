@@ -309,7 +309,7 @@ void main() async {
     await tester.pumpAndSettle();
 
     // Verify the "Filter Map Pins" title text is shown
-    expect(find.text("Filter Map Pins"), findsOneWidget);
+    expect(find.text("Filter Map Layers"), findsOneWidget);
 
     // Verify all checkboxes are present
     expect(find.widgetWithText(CheckboxListTile, "Food"), findsOneWidget);
@@ -427,7 +427,7 @@ void main() async {
     );
     await tester.tap(showAll);
     await tester.pumpAndSettle();
-    expect(find.text("Filter Map Pins"), findsOne);
+    expect(find.text("Filter Map Layers"), findsOne);
     expect(mapPageState.markers[const MarkerId('1')]?.visible, true);
     expect(mapPageState.markers[const MarkerId('2')]?.visible, true);
     expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
@@ -443,7 +443,7 @@ void main() async {
     );
     await tester.tap(hideAll);
     await tester.pumpAndSettle();
-    expect(find.text("Filter Map Pins"), findsOne);
+    expect(find.text("Filter Map Layers"), findsOne);
     expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
     expect(mapPageState.markers[const MarkerId('2')]?.visible, false);
     expect(mapPageState.markers[const MarkerId('3')]?.visible, false);
