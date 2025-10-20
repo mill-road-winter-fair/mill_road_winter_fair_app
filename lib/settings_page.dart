@@ -129,7 +129,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text('Settings'),
+        ),
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),

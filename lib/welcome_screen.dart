@@ -88,9 +88,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           height: 60,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.tertiary),
-            child: Text(
-              'Take me straight to the app!',
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+            child:  FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text('Take me straight to the app!',
+                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
             ),
             onPressed: () {
               HapticFeedback.heavyImpact();
@@ -103,7 +104,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork00.jpg',
-          title: "Welcome to the official\nMill Road Winter Fair app!",
+          titleWidget: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Text('Welcome to the official\nMill Road Winter Fair app!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+          ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -167,7 +172,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork01.jpg',
-          title: "What do the pins mean?",
+          titleWidget: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Text('What do the pins mean?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+          ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -244,7 +253,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork02.jpg',
-          title: "Choosing what’s shown",
+          titleWidget: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Text('Choosing what’s shown', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+          ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -297,7 +310,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork03.jpg',
-          title: "What’s on and when",
+          titleWidget: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Text('What’s on and when', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+          ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -360,7 +377,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork04.jpg',
-          title: "A few final things…",
+          titleWidget: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.center,
+            child: Text('A few final things…', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+          ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
