@@ -60,6 +60,7 @@ void main() async {
         'secondaryType': 'Food',
         'startTime': '10:30',
         'tertiaryType': 'Doughnuts',
+        'visibleOnMap': true,
         'website': 'https://www.glazedandconfused.com',
       },
       {
@@ -73,6 +74,7 @@ void main() async {
         'secondaryType': 'Food',
         'startTime': '12:00',
         'tertiaryType': 'Sushi',
+        'visibleOnMap': true,
         'website': 'https://www.sushisquad.com',
       },
     ];
@@ -90,6 +92,7 @@ void main() async {
     expect(find.text('12:00 - 16:30'), findsOneWidget);
     expect(find.text('approx. 197 m'), findsOneWidget);
     expect(find.text('01223 222222'), findsOneWidget);
+    // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
     expect(find.byIcon(Icons.directions_walk), findsExactly(3));
     expect(find.byIcon(Icons.public), findsExactly(2));
 
@@ -114,6 +117,7 @@ void main() async {
         'secondaryType': 'Food',
         'startTime': '10:30',
         'tertiaryType': 'Doughnuts',
+        'visibleOnMap': true,
         'website': 'https://www.glazedandconfused.com',
       },
       {
@@ -127,6 +131,7 @@ void main() async {
         'secondaryType': 'Food',
         'startTime': '12:00',
         'tertiaryType': 'Sushi',
+        'visibleOnMap': true,
         'website': 'https://www.sushisquad.com',
       },
       {
@@ -140,6 +145,7 @@ void main() async {
         'secondaryType': 'Food',
         'startTime': '14:00',
         'tertiaryType': 'Burgers',
+        'visibleOnMap': true,
         'website': 'https://www.biteclub.com',
       },
     ];
@@ -148,28 +154,31 @@ void main() async {
     preferredSortingMethod = SortingMethod.values[1];
 
     await pumpFilteredListingsPage(tester, 'Food', listings);
+    var filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
-    expect(listings[0]['name'], 'sushisquad');
-    expect(listings[1]['name'], 'glazedandconfused');
-    expect(listings[2]['name'], 'biteclub');
+    expect(filteredListingsPageState.filteredListings[0]['name'], 'sushisquad');
+    expect(filteredListingsPageState.filteredListings[1]['name'], 'glazedandconfused');
+    expect(filteredListingsPageState.filteredListings[2]['name'], 'biteclub');
 
     // Mock sorting preference is alphabetical
     preferredSortingMethod = SortingMethod.values[0];
 
     await pumpFilteredListingsPage(tester, 'Food', listings);
+    filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
-    expect(listings[0]['name'], 'biteclub');
-    expect(listings[1]['name'], 'glazedandconfused');
-    expect(listings[2]['name'], 'sushisquad');
+    expect(filteredListingsPageState.filteredListings[0]['name'], 'biteclub');
+    expect(filteredListingsPageState.filteredListings[1]['name'], 'glazedandconfused');
+    expect(filteredListingsPageState.filteredListings[2]['name'], 'sushisquad');
 
     // Mock sorting preference is time
     preferredSortingMethod = SortingMethod.values[2];
 
     await pumpFilteredListingsPage(tester, 'Food', listings);
+    filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
-    expect(listings[0]['name'], 'glazedandconfused');
-    expect(listings[1]['name'], 'sushisquad');
-    expect(listings[2]['name'], 'biteclub');
+    expect(filteredListingsPageState.filteredListings[0]['name'], 'glazedandconfused');
+    expect(filteredListingsPageState.filteredListings[1]['name'], 'sushisquad');
+    expect(filteredListingsPageState.filteredListings[2]['name'], 'biteclub');
   });
 
   testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {

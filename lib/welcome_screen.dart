@@ -333,7 +333,15 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("You can sort the listing by\ndistance from you or start time", style: bodyStyle),
+                          Text("You can sort the list by distance\nfrom you or start time", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.search, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Tap the search icon and type to\nfind specific listings", style: bodyStyle),
                         ],
                       ),
                     ],
