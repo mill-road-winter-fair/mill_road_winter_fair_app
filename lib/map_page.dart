@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/gestures.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
@@ -19,6 +20,7 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
@@ -238,6 +240,86 @@ class MapPageState extends State<MapPage> {
           _polygons.clear();
       }
     });
+  }
+
+  Widget roadClosuresDialog() {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
+          return ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Pedestrianised areas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  const SizedBox(height: 10),
+                  const Text(
+                      'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
+                  const SizedBox(height: 10),
+                  const Text('Pedestrians should exercise particular care before the road is fully closed.', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  const Text('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                  const SizedBox(height: 10),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(
+                            text:
+                                'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
+                        TextSpan(
+                            text: 'www.millroadwinterfair.org',
+                            style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                HapticFeedback.lightImpact();
+                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                              }),
+                        const TextSpan(text: '.'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    TextButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        setState(() {
+                          filterSettings["Road Closures"] = false;
+                        });
+                        updateRoadClosurePolygonVisibility(false);
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'Hide pedestrianised areas',
+                        style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'Close',
+                        style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                      ),
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
@@ -1314,35 +1396,46 @@ class MapPageState extends State<MapPage> {
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
                       color: Theme.of(context).colorScheme.surface,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 20,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
-                                border: Border.all(
-                                  color: Theme.of(context).colorScheme.tertiary,
-                                  width: 3,
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return roadClosuresDialog();
+                            },
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 20,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.tertiary,
+                                    width: 3,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Pedestrianised areas',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context).colorScheme.tertiary,
-                                fontWeight: FontWeight.w600,
+                              const SizedBox(width: 8),
+                              Text(
+                                'Pedestrianised areas',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).colorScheme.tertiary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
