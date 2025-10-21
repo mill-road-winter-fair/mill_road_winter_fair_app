@@ -305,7 +305,11 @@ class HomePageState extends State<HomePage> {
                           Expanded(flex: 4, child: Container()),
                           FittedBox(
                               fit: BoxFit.scaleDown,
-                              child: Text('Mill Road Winter Fair 2025', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19, fontWeight: FontWeight.bold)),
+                              child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
+                            ),
+                          FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('  Saturday 6 December 2025 10.30 – 4.30 ', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
                             ),
                           Expanded(flex: 1, child: Container())
                         ],

@@ -9,11 +9,11 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.light,
-      primary: const Color.fromRGBO(200, 0, 10, 1),
+      primary: const Color.fromRGBO(166, 34, 43, 1),
       onPrimary: Colors.white,
       secondary: Colors.white,
       onSecondary: Colors.black,
-      tertiary: const Color.fromRGBO(200, 0, 10, 1),
+      tertiary: const Color.fromRGBO(166, 34, 43, 1),
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
@@ -22,11 +22,11 @@ final Map<String, ThemeData> appThemes = {
       onSurfaceVariant: Colors.grey[700]!,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(200, 0, 10, 1),
+      backgroundColor: Color.fromRGBO(166, 34, 43, 1),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(200, 0, 10, 1),
+      selectedItemColor: Color.fromRGBO(166, 34, 43, 1),
       unselectedItemColor: Colors.grey,
     ),
     drawerTheme: const DrawerThemeData(
