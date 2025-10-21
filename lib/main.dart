@@ -180,11 +180,17 @@ class HomePageState extends State<HomePage> {
         ListTile(
           dense: true,
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.face),
-          title: const Text('Android app by Alex Berridge',
-              style: TextStyle(), textAlign: TextAlign.left),
-          subtitle: Text('http://theberridge.com',
-              style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary), textAlign: TextAlign.left),
+          leading: const Icon(Icons.phone_android),
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Android app by Alex Berridge')
+          ),
+          subtitle: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('http://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://theberridge.com'));
@@ -193,11 +199,17 @@ class HomePageState extends State<HomePage> {
         ListTile(
           dense: true,
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.face),
-          title: const Text('iPhone version by Matt Whiting',
-              style: TextStyle(), textAlign: TextAlign.left),
-          subtitle: Text('http://mattwhiting.com',
-              style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary), textAlign: TextAlign.left),
+          leading: const Icon(Icons.phone_iphone),
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('iPhone version by Matt Whiting')
+          ),
+          subtitle: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://mattwhiting.com'));
@@ -207,10 +219,16 @@ class HomePageState extends State<HomePage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.feedback),
-          title: const Text('Tell us if you like this app',
-              style: TextStyle(), textAlign: TextAlign.left),
-          subtitle: Text('Open a feedback form',
-              style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary), textAlign: TextAlign.left),
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Tell us if you like this app')
+          ),
+          subtitle: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse(
