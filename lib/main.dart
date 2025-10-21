@@ -218,6 +218,25 @@ class HomePageState extends State<HomePage> {
         ListTile(
           dense: true,
           contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.palette),
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Illustrations by Clare McEwan')
+          ),
+          subtitle: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
+          ),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+          },
+        ),
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.feedback),
           title: const FittedBox(
             fit: BoxFit.scaleDown,
