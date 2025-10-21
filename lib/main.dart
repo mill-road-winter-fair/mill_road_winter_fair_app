@@ -93,7 +93,10 @@ Widget emailDetailsDialog() {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.pop(context);
+                      },
                       child: Text(
                         'Close',
                         style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
@@ -341,10 +344,15 @@ class HomePageState extends State<HomePage> {
                   ListTile(
                     leading: const Icon(Icons.email),
                     title: const Text('Email us', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () => showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) => emailDetailsDialog(),
-                    ),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return emailDetailsDialog();
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
