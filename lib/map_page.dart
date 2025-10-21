@@ -252,68 +252,86 @@ class MapPageState extends State<MapPage> {
             constraints: BoxConstraints(maxWidth: maxWidth),
             child: Padding(
               padding: const EdgeInsets.all(32.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Pedestrianised areas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                  const SizedBox(height: 10),
-                  const Text(
-                      'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
-                  const SizedBox(height: 10),
-                  const Text('Pedestrians should exercise particular care before the road is fully closed.', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  const Text('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
-                  const SizedBox(height: 10),
-                  Text.rich(
-                    TextSpan(
+              child: Scrollbar(
+                controller: ScrollController(),
+                thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
+                thickness: 4,
+                radius: const Radius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const TextSpan(
-                            text:
-                                'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
-                        TextSpan(
-                            text: 'www.millroadwinterfair.org',
-                            style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                HapticFeedback.lightImpact();
-                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
-                              }),
-                        const TextSpan(text: '.'),
+                        const Text('Pedestrianised areas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                        const SizedBox(height: 10),
+                        const Text(
+                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
+                        const SizedBox(height: 10),
+                        const Text('Pedestrians should exercise particular care before the road is fully closed.',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        const Text('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                        const SizedBox(height: 10),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              const TextSpan(
+                                  text:
+                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
+                              TextSpan(
+                                  text: 'www.millroadwinterfair.org',
+                                  style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      HapticFeedback.lightImpact();
+                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                                    }),
+                              const TextSpan(text: '.'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  setState(() {
+                                    filterSettings["Road Closures"] = false;
+                                  });
+                                  updateRoadClosurePolygonVisibility(false);
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  'Hide pedestrianised areas',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  'Close',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 15),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        setState(() {
-                          filterSettings["Road Closures"] = false;
-                        });
-                        updateRoadClosurePolygonVisibility(false);
-                        Navigator.pop(context);
-                      },
-                      child: Text(
-                        'Hide pedestrianised areas',
-                        style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        Navigator.pop(context);
-                      },
-                      child: Text(
-                        'Close',
-                        style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                    ),
-                  ]),
-                ],
+                ),
               ),
             ),
           );
