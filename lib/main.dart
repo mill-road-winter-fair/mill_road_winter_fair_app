@@ -184,7 +184,7 @@ class HomePageState extends State<HomePage> {
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text('Android app by Alex Berridge')
+            child: Text('Android app by Alexander Berridge')
           ),
           subtitle: FittedBox(
             fit: BoxFit.scaleDown,
