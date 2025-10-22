@@ -204,7 +204,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
 
     // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
-    final primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+    List<Map<String, dynamic>> primaryFiltered = [];
+    if (widget.filterPrimaryType == 'Service') {
+      primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
+    } else {
+      primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+    }
 
     // Step 2: Sort the filtered listings
     final sortedListings = _applySorting(primaryFiltered);

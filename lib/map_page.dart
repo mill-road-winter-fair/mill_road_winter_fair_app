@@ -274,7 +274,7 @@ class MapPageState extends State<MapPage> {
         _musicMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Event" || listing['primaryType'] == "Group-Event") {
         _eventMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Service" || listing['primaryType'] == "Group-Service") {
+      } else if (listing['primaryType'].startsWith("Service") || listing['primaryType'] == "Group-Service") {
         _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
       }
     }

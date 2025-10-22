@@ -267,7 +267,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(243, 190, 66, 1.0);
       return color;
-    } else if (primaryType == "Service" || primaryType == "Group-Service") {
+    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(84, 145, 245, 1.0);
       return color;
     }
@@ -288,7 +288,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(255, 196, 0, 1.0);
       return color;
-    } else if (primaryType == "Service" || primaryType == "Group-Service") {
+    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(29, 112, 198, 1.0);
       return color;
     }
@@ -309,7 +309,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(204, 161, 51, 1.0);
       return color;
-    } else if (primaryType == "Service" || primaryType == "Group-Service") {
+    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(37, 63, 128, 1.0);
       return color;
     }
@@ -330,7 +330,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(151, 143, 0, 1.0);
       return color;
-    } else if (primaryType == "Service" || primaryType == "Group-Service") {
+    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(0, 120, 114, 1.0);
       return color;
     }
@@ -351,7 +351,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(255, 196, 0, 1.0);
       return color;
-    } else if (primaryType == "Service" || primaryType == "Group-Service") {
+    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(153, 0, 255, 1.0);
       return color;
     }
