@@ -264,7 +264,7 @@ class MapPageState extends State<MapPage> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Pedestrianised areas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                        const Text('Road closures', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                         const SizedBox(height: 10),
                         const Text(
                             'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
@@ -311,7 +311,7 @@ class MapPageState extends State<MapPage> {
                                   Navigator.pop(context);
                                 },
                                 child: Text(
-                                  'Hide pedestrianised areas',
+                                  'Hide road closures',
                                   style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
                                 ),
                               ),
@@ -717,7 +717,7 @@ class MapPageState extends State<MapPage> {
                   Divider(color: Colors.grey[350]),
                   CheckboxListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const FittedBox(fit: BoxFit.scaleDown, child: Text("Shade pedestrianised areas")),
+                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade road closures")),
                     value: filterSettings["Road Closures"],
                     onChanged: (value) {
                       setState(() {
@@ -1445,7 +1445,7 @@ class MapPageState extends State<MapPage> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Pedestrianised areas',
+                                'Road closures',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Theme.of(context).colorScheme.tertiary,

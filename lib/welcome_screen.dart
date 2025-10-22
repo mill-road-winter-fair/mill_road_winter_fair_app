@@ -291,7 +291,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.no_transfer, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Choose whether or not to see\nour pedestrianised areas", style: bodyStyle),
+                          Text("Choose whether or not\nto see the road closures", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 10),
