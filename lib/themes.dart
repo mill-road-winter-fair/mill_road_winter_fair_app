@@ -182,25 +182,42 @@ String colourBlindMap =
     '[{"featureType":"all","elementType":"all","stylers":[{"saturation":"-100"}]},{"featureType":"landscape.man_made","elementType":"all","stylers":[{"color":"#f5f5f5"}]},{"featureType":"landscape.natural","elementType":"all","stylers":[{"color":"#f5f5f5"}]},{"featureType":"poi","elementType":"all","stylers":[{"color":"#e8e8e8"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"},{"color":"#fe934c"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#666666"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#9a96c5"}]}]';
 
 Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async {
-  late String assetPath = "assets/mapMarkers/";
+  late String assetPath;
   final ByteData backdropData;
 
-  switch (primaryType.substring(primaryType.indexOf('-') + 1)) {
+  switch (primaryType) {
+    case 'Group-Food':
+      assetPath = 'assets/mapMarkers/foodGroupMarker.png';
+    case 'Food':
+      assetPath = 'assets/mapMarkers/foodMarker.png';
+    case 'Group-Shopping':
+      assetPath = 'assets/mapMarkers/stallsGroupMarker.png';
     case 'Shopping':
-      assetPath += 'stalls';
+      assetPath = 'assets/mapMarkers/stallsMarker.png';
+    case 'Group-Music':
+      assetPath = 'assets/mapMarkers/musicGroupMarker.png';
+    case 'Music':
+      assetPath = 'assets/mapMarkers/musicMarker.png';
+    case 'Group-Event':
+      assetPath = 'assets/mapMarkers/eventsGroupMarker.png';
     case 'Event':
+      assetPath = 'assets/mapMarkers/eventsMarker.png';
+    case 'Group-Service':
+      assetPath = 'assets/mapMarkers/serviceGroupMarker.png';
     case 'Service':
-      assetPath += '${primaryType.substring(primaryType.indexOf('-') + 1).toLowerCase()}s';
-    default:
-      assetPath += primaryType.substring(primaryType.indexOf('-') + 1).toLowerCase();
+      assetPath = 'assets/mapMarkers/servicesMarker.png';
+    case 'Service-Information':
+      assetPath = 'assets/mapMarkers/serviceInformationMarker.png';
+    case 'Service-FirstAid':
+      assetPath = 'assets/mapMarkers/serviceFirstAidMarker.png';
+    case 'Service-Toilet':
+      assetPath = 'assets/mapMarkers/serviceToiletMarker.png';
   }
 
   // Adjust the asset path if this is a group and load the relevant backdrop image (frame)
   if (primaryType.contains('Group-')) {
-    assetPath += "GroupMarker.png";
     backdropData = await rootBundle.load("assets/mapMarkers/groupMarkerIconFrame.png");
   } else {
-    assetPath += "Marker.png";
     backdropData = await rootBundle.load("assets/mapMarkers/markerIconFrame.png");
   }
 
