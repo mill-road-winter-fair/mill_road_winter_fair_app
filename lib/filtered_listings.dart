@@ -130,10 +130,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
         // Sort by startTime first, then by name
         validListings.sort((a, b) {
-          final aStart = a['startTime'] ?? '';
-          final bStart = b['startTime'] ?? '';
-          final timeCompare = aStart.compareTo(bStart);
-          return timeCompare != 0 ? timeCompare : (a['name'] ?? '').compareTo(b['name'] ?? '');
+          final timeCompare = a['startTime'].compareTo(b['startTime']);
+          return timeCompare != 0 ? timeCompare : a['name'].compareTo(b['name']);
         });
 
         return validListings;
