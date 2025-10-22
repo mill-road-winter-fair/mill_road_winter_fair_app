@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
@@ -15,6 +14,9 @@ import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+// Define a GlobalKey for HomePageState to allow access from other parts of the app:
+final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -51,7 +53,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
-          home: const HomePage(),
+          home: HomePage(key: homePageKey),
         );
       },
     );
@@ -158,18 +160,17 @@ class HomePageState extends State<HomePage> {
     _initPackageInfo();
   }
 
+  void setCurrentIndex(int newIndex) {
+    setState(() {
+      index = newIndex;
+    });
+  }
+
   // Fetch package information (from pubspec.yaml)
   Future<void> _initPackageInfo() async {
     final info = await PackageInfo.fromPlatform();
     setState(() {
       _packageInfo = info;
-    });
-  }
-
-  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
-    setState(() {
-      index = 0;
-      mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
     });
   }
 
