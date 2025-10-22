@@ -261,6 +261,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         IconButton(
                                           icon: const Icon(Icons.close),
                                           onPressed: () {
+                                            HapticFeedback.lightImpact();
                                             setState(() {
                                               _isSearching = false;
                                               _searchQuery = '';
@@ -291,6 +292,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
                                       elevation: 0,
                                       onPressed: () {
+                                        HapticFeedback.lightImpact();
                                         setState(() {
                                           _isSearching = true;
                                         });

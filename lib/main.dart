@@ -93,7 +93,10 @@ Widget emailDetailsDialog() {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.pop(context);
+                      },
                       child: Text(
                         'Close',
                         style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
@@ -180,11 +183,17 @@ class HomePageState extends State<HomePage> {
         ListTile(
           dense: true,
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.face),
-          title: const Text('Android app by Alex Berridge',
-              style: TextStyle(), textAlign: TextAlign.left),
-          subtitle: Text('http://theberridge.com',
-              style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary), textAlign: TextAlign.left),
+          leading: const Icon(Icons.phone_android),
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Android app by Alexander Berridge')
+          ),
+          subtitle: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('http://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://theberridge.com'));
@@ -193,11 +202,17 @@ class HomePageState extends State<HomePage> {
         ListTile(
           dense: true,
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.face),
-          title: const Text('iPhone version by Matt Whiting',
-              style: TextStyle(), textAlign: TextAlign.left),
-          subtitle: Text('http://mattwhiting.com',
-              style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary), textAlign: TextAlign.left),
+          leading: const Icon(Icons.phone_iphone),
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('iPhone version by Matt Whiting')
+          ),
+          subtitle: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://mattwhiting.com'));
@@ -206,11 +221,36 @@ class HomePageState extends State<HomePage> {
         ListTile(
           dense: true,
           contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.palette),
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Illustrations by Clare McEwan')
+          ),
+          subtitle: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
+          ),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+          },
+        ),
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.feedback),
-          title: const Text('Tell us if you like this app',
-              style: TextStyle(), textAlign: TextAlign.left),
-          subtitle: Text('Open a feedback form',
-              style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary), textAlign: TextAlign.left),
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Tell us if you like this app')
+          ),
+          subtitle: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse(
@@ -341,10 +381,15 @@ class HomePageState extends State<HomePage> {
                   ListTile(
                     leading: const Icon(Icons.email),
                     title: const Text('Email us', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () => showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) => emailDetailsDialog(),
-                    ),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return emailDetailsDialog();
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
