@@ -353,6 +353,21 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 childCount: filteredListings.length,
               ),
             ),
+
+            if (filteredListings.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
