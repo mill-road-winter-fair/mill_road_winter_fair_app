@@ -15,6 +15,7 @@ import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -754,6 +755,11 @@ class MapPageState extends State<MapPage> {
 
     // Reset the camera position
     _setMapCameraToFitMapMarkers();
+
+    // If we came from a page other than the map page, go back to that page
+    if (previousIndex != 0) {
+      homePageKey.currentState?.setCurrentIndex(previousIndex);
+    }
 
     setState(() {});
   }

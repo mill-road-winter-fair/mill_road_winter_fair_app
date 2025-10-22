@@ -16,6 +16,12 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
+// Define a GlobalKey for HomePageState to allow access from other parts of the app:
+final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
+
+// Define a global variable for routing back to a previous index
+int previousIndex = 0;
+
 Future<void> main() async {
   debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
@@ -51,7 +57,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
-          home: const HomePage(),
+          home: HomePage(key: homePageKey),
         );
       },
     );
@@ -158,6 +164,12 @@ class HomePageState extends State<HomePage> {
     _initPackageInfo();
   }
 
+  void setCurrentIndex(int newIndex) {
+    setState(() {
+      index = newIndex;
+    });
+  }
+
   // Fetch package information (from pubspec.yaml)
   Future<void> _initPackageInfo() async {
     final info = await PackageInfo.fromPlatform();
@@ -168,6 +180,7 @@ class HomePageState extends State<HomePage> {
 
   Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
     setState(() {
+      previousIndex = index;
       index = 0;
       mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
     });
