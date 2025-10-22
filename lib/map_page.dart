@@ -245,21 +245,21 @@ class MapPageState extends State<MapPage> {
 
   Widget roadClosuresDialog() {
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
           return ConstrainedBox(
             constraints: BoxConstraints(maxWidth: maxWidth),
             child: Padding(
-              padding: const EdgeInsets.all(32.0),
+              padding: const EdgeInsets.all(24.0),
               child: Scrollbar(
                 controller: _roadClosuresDialogScrollController,
                 thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
                 thickness: 4,
                 radius: const Radius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 6.0),
+                  padding: const EdgeInsets.all(0),
                   child: SingleChildScrollView(
                     controller: _roadClosuresDialogScrollController,
                     primary: false,
@@ -298,7 +298,7 @@ class MapPageState extends State<MapPage> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 10),
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Row(
