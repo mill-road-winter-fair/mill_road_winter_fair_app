@@ -99,11 +99,44 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         // Sort by distance to user (nearest first)
         allListings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
       } else if (preferredSortingMethod == SortingMethod.values[2]) {
-        // Sort by start time, if the start time is the same sort by name
-        allListings.sort((a, b) {
-          final timeCompare = a['startTime'].compareTo(b['startTime']);
-          return timeCompare != 0 ? timeCompare : a['name'].compareTo(b['name']);
+        // Hardcode fair date for 2025, change this today's date for testing
+        final DateTime fairDate = DateTime(2025, 12, 6);
+        final now = DateTime.now();
+
+        // Filter out events whose endTime has already passed
+        final validListings = allListings.where((listing) {
+          final endTimeStr = listing['endTime'] as String?;
+          if (endTimeStr == null || endTimeStr.isEmpty) return true; // keep if no endTime
+
+          try {
+            final parts = endTimeStr.split(':');
+            final endHour = int.parse(parts[0]);
+            final endMinute = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+            final endDateTime = DateTime(
+              fairDate.year,
+              fairDate.month,
+              fairDate.day,
+              endHour,
+              endMinute,
+            );
+
+            return endDateTime.isAfter(now);
+          } catch (_) {
+            // If parsing fails, just keep the listing
+            return true;
+          }
+        }).toList();
+
+        // Sort by startTime first, then by name
+        validListings.sort((a, b) {
+          final aStart = a['startTime'] ?? '';
+          final bStart = b['startTime'] ?? '';
+          final timeCompare = aStart.compareTo(bStart);
+          return timeCompare != 0 ? timeCompare : (a['name'] ?? '').compareTo(b['name'] ?? '');
         });
+
+        return validListings;
       } else {
         // The only other option is location sorting
         allListings.sort((a, b) {
