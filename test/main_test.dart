@@ -241,6 +241,7 @@ void main() async {
         'secondaryType': 'Food',
         'startTime': '10:30',
         'tertiaryType': 'Doughnuts',
+        'visibleOnMap': true,
         'website': 'https://www.glazedandconfused.com',
       }
     ];
@@ -257,12 +258,8 @@ void main() async {
     await tester.pumpAndSettle();
     expect(homePageState.index, 1);
 
-    // Convert String to LatLng
-    LatLng destinationCoordinates = stringToLatLng("52.199687,0.138813");
-
-    // Trigger the navigation to map and fetch directions
-    await homePageState.navigateToMapAndGetDirections("1", destinationCoordinates, mockClient);
-
+    await tester.tap(find.text('Get Directions'));
+    await tester.pumpAndSettle();
     expect(homePageState.index, 0);
   });
 }
