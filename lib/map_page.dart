@@ -617,7 +617,7 @@ class MapPageState extends State<MapPage> {
                   Divider(color: Colors.grey[350]),
                   CheckboxListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const FittedBox(fit: BoxFit.scaleDown, child: Text("Shade pedestrianised areas")),
+                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade pedestrianised areas")),
                     value: filterSettings["Road Closures"],
                     onChanged: (value) {
                       setState(() {
