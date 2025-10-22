@@ -58,6 +58,7 @@ class MapPageState extends State<MapPage> {
   GoogleMapController? _controller;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
+  final ScrollController _roadClosuresDialogScrollController = ScrollController();
   // Declare default filters
   final Map<String, bool> filterSettings = {
     'Food': true,
@@ -253,13 +254,15 @@ class MapPageState extends State<MapPage> {
             child: Padding(
               padding: const EdgeInsets.all(32.0),
               child: Scrollbar(
-                controller: ScrollController(),
+                controller: _roadClosuresDialogScrollController,
                 thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
                 thickness: 4,
                 radius: const Radius.circular(8),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 6.0),
                   child: SingleChildScrollView(
+                    controller: _roadClosuresDialogScrollController,
+                    primary: false,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
