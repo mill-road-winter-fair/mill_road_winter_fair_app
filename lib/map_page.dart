@@ -401,7 +401,7 @@ class MapPageState extends State<MapPage> {
                       itemBuilder: (context, index) {
                         final rel = relatedListings[index];
                         int approximateDistanceMetres = asTheCrowFlies(
-                          currentLatLng,
+                          currentLatLng!,
                           stringToLatLng(rel['latLng']),
                         );
 
@@ -464,7 +464,7 @@ class MapPageState extends State<MapPage> {
         HapticFeedback.lightImpact();
         // Update user's location
         establishLocation();
-        int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
+        int approximateDistanceMetres = asTheCrowFlies(currentLatLng!, destinationLatLng);
         // Show bottom sheet with listing information
         showModalBottomSheet(
           context: context,
