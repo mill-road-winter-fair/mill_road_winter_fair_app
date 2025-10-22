@@ -559,6 +559,7 @@ class MapPageState extends State<MapPage> {
                     title: const Text("Food"),
                     value: filterSettings["Food"],
                     onChanged: (value) {
+                      HapticFeedback.selectionClick();
                       setState(() {
                         filterSettings["Food"] = value!;
                       });
@@ -571,6 +572,7 @@ class MapPageState extends State<MapPage> {
                     title: const Text("Stalls"),
                     value: filterSettings["Stalls"],
                     onChanged: (value) {
+                      HapticFeedback.selectionClick();
                       setState(() {
                         filterSettings["Stalls"] = value!;
                       });
@@ -583,6 +585,7 @@ class MapPageState extends State<MapPage> {
                     title: const Text("Music"),
                     value: filterSettings["Music"],
                     onChanged: (value) {
+                      HapticFeedback.selectionClick();
                       setState(() {
                         filterSettings["Music"] = value!;
                       });
@@ -595,6 +598,7 @@ class MapPageState extends State<MapPage> {
                     title: const Text("Events"),
                     value: filterSettings["Events"],
                     onChanged: (value) {
+                      HapticFeedback.selectionClick();
                       setState(() {
                         filterSettings["Events"] = value!;
                       });
@@ -607,6 +611,7 @@ class MapPageState extends State<MapPage> {
                     title: const Text("Services"),
                     value: filterSettings["Services"],
                     onChanged: (value) {
+                      HapticFeedback.selectionClick();
                       setState(() {
                         filterSettings["Services"] = value!;
                       });
@@ -620,6 +625,7 @@ class MapPageState extends State<MapPage> {
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade pedestrianised areas")),
                     value: filterSettings["Road Closures"],
                     onChanged: (value) {
+                      HapticFeedback.selectionClick();
                       setState(() {
                         filterSettings["Road Closures"] = value!;
                       });
@@ -635,6 +641,7 @@ class MapPageState extends State<MapPage> {
                             children: [
                               ElevatedButton.icon(
                                 onPressed: () {
+                                  HapticFeedback.lightImpact();
                                   setState(() {
                                     filterSettings.forEach((key, _) {
                                       filterSettings[key] = true;
@@ -649,6 +656,7 @@ class MapPageState extends State<MapPage> {
                               const SizedBox(width: 10),
                               ElevatedButton.icon(
                                 onPressed: () {
+                                  HapticFeedback.lightImpact();
                                   setState(() {
                                     filterSettings.forEach((key, _) {
                                       filterSettings[key] = false;
@@ -663,6 +671,7 @@ class MapPageState extends State<MapPage> {
                               const SizedBox(width: 10),
                               ElevatedButton.icon(
                                 onPressed: () {
+                                  HapticFeedback.lightImpact();
                                   Navigator.pop(context);
                                 },
                                 icon: const Icon(Icons.check_circle),
