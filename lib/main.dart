@@ -358,7 +358,7 @@ class HomePageState extends State<HomePage> {
                 padding: EdgeInsets.zero,
                 children: <Widget>[
                   ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 480),
+                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 500),
                     child: DrawerHeader(
                       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
                       child: Column(
@@ -482,7 +482,7 @@ class HomePageState extends State<HomePage> {
                       aboutDialog();
                     },
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 15),
                 ],
               ),
             ),
