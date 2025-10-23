@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
@@ -175,14 +174,6 @@ class HomePageState extends State<HomePage> {
     final info = await PackageInfo.fromPlatform();
     setState(() {
       _packageInfo = info;
-    });
-  }
-
-  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
-    setState(() {
-      previousIndex = index;
-      index = 0;
-      mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
     });
   }
 

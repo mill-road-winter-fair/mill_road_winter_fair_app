@@ -42,7 +42,7 @@ class MapPageState extends State<MapPage> {
   late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polygon> _polygons = {}; // For displaying the road closure polygon
-  final Set<Polyline> _polylines = {}; // For displaying the route polyline
+  final Set<Polyline> polylines = {}; // For displaying the route polyline
   late PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   late double _mapBearing;
@@ -705,7 +705,7 @@ class MapPageState extends State<MapPage> {
 
     // Clear any existing polylines and hide the markers
     setState(() {
-      _polylines.clear();
+      polylines.clear();
       hideAllMarkers();
     });
 
@@ -716,7 +716,7 @@ class MapPageState extends State<MapPage> {
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
       await updatePolyline(currentLatLng, destination);
       // Set the camera position once, at the beginning of the navigation
-      _setMapCameraToFitPolyline(_polylines);
+      _setMapCameraToFitPolyline(polylines);
 
       // Start location updates
       await startLocationUpdates(destination);
@@ -742,7 +742,7 @@ class MapPageState extends State<MapPage> {
     _positionStream?.cancel();
 
     // Clear the polylines
-    _polylines.clear();
+    polylines.clear();
 
     // Reset the distance to destination
     _distanceToDestination = null;
@@ -844,8 +844,8 @@ class MapPageState extends State<MapPage> {
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
         final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
-        _polylines.clear();
-        _polylines.add(
+        polylines.clear();
+        polylines.add(
           Polyline(
             polylineId: const PolylineId('route'),
             points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
@@ -874,7 +874,7 @@ class MapPageState extends State<MapPage> {
 
   void _handlePolylineError(String message) {
     setState(() {
-      _polylines.clear();
+      polylines.clear();
       _distanceToDestination = null;
       hideAllMarkers();
       addAllVisibleMarkers(false);
@@ -1179,8 +1179,7 @@ class MapPageState extends State<MapPage> {
                     },
                     polygons: _polygons,
                     markers: markers.values.toSet(),
-                    polylines: _polylines,
-                  );
+                    polylines: polylines                  );
                 },
               ),
               Positioned(
@@ -1310,7 +1309,7 @@ class MapPageState extends State<MapPage> {
                       heroTag: 'navigationBtn',
                       onPressed: () {
                         HapticFeedback.lightImpact();
-                        _setMapCameraToFitPolyline(_polylines);
+                        _setMapCameraToFitPolyline(polylines);
                       },
                       icon: const Icon(Icons.directions),
                       label: Text(

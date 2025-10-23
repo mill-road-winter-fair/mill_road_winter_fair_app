@@ -53,6 +53,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     super.dispose();
   }
 
+  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
+    // Remember the previous index to allow returning back
+    previousIndex = homePageKey.currentState!.index;
+
+    // Request the map page to show directions
+    mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
+
+    // Switch to map tab on the home page
+    homePageKey.currentState?.setCurrentIndex(0);
+  }
+
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
     if (_searchQuery.isEmpty) return allListings;
     return allListings.where((listing) {
@@ -329,7 +340,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         website: listing['website'],
                         onGetDirections: () {
                           if (homePageState != null) {
-                            homePageState.navigateToMapAndGetDirections(
+                            navigateToMapAndGetDirections(
                               listing['id'],
                               destinationLatLng,
                               http.Client(),
@@ -345,6 +356,21 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 childCount: filteredListings.length,
               ),
             ),
+
+            if (filteredListings.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
