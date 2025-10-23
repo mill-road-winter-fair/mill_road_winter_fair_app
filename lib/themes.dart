@@ -203,15 +203,15 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
     case 'Event':
       assetPath = 'assets/mapMarkers/eventsMarker.png';
     case 'Group-Service':
-      assetPath = 'assets/mapMarkers/serviceGroupMarker.png';
+      assetPath = 'assets/mapMarkers/servicesGroupMarker.png';
+    case 'Service-Information':
+      assetPath = 'assets/mapMarkers/servicesInformationMarker.png';
+    case 'Service-FirstAid':
+      assetPath = 'assets/mapMarkers/servicesFirstAidMarker.png';
+    case 'Service-Toilet':
+      assetPath = 'assets/mapMarkers/servicesToiletsMarker.png';
     case 'Service':
       assetPath = 'assets/mapMarkers/servicesMarker.png';
-    case 'Service-Information':
-      assetPath = 'assets/mapMarkers/serviceInformationMarker.png';
-    case 'Service-FirstAid':
-      assetPath = 'assets/mapMarkers/serviceFirstAidMarker.png';
-    case 'Service-Toilet':
-      assetPath = 'assets/mapMarkers/serviceToiletMarker.png';
   }
 
   // Adjust the asset path if this is a group and load the relevant backdrop image (frame)

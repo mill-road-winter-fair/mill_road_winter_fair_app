@@ -72,7 +72,6 @@ class MapPageState extends State<MapPage> {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
     setMarkerLists();
-    createAllMarkerBitmaps();
     addAllVisibleMarkers(false);
     establishLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -280,8 +279,12 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  void addAllVisibleMarkers(bool onTest) {
+  void addAllVisibleMarkers(bool onTest) async {
     debugPrint('addAllVisibleMarkers called');
+
+    // Create all marker bitmaps first
+    await createAllMarkerBitmaps();
+
     // Ensure the markers list is empty
     markers.clear();
 
@@ -301,7 +304,7 @@ class MapPageState extends State<MapPage> {
 
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('createAllMarkerBitmaps called');
-    for (var listingType in 'Food, Shopping, Music, Event, Service, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'.split(', ')) {
+    for (var listingType in 'Food, Shopping, Music, Event, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'.split(', ')) {
       BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
       bitmapDescriptors[listingType] = newBitmapDescriptor;
     }
@@ -321,10 +324,10 @@ class MapPageState extends State<MapPage> {
     late BitmapDescriptor customMarker;
 
     if (onTest == false) {
-      customMarker = await getColoredMarker(listing['primaryType'], color);
+      customMarker = bitmapDescriptors[listing['primaryType']]!;
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
+      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
@@ -449,10 +452,10 @@ class MapPageState extends State<MapPage> {
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
     late BitmapDescriptor customMarker;
     if (onTest == false) {
-      customMarker = await getColoredMarker(listing['primaryType'], color);
+      customMarker = bitmapDescriptors[listing['primaryType']]!;
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
+      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
