@@ -705,6 +705,7 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines and hide the markers
     setState(() {
       polylines.clear();
+      _polygons.clear();
       hideAllMarkers();
     });
 
@@ -742,6 +743,11 @@ class MapPageState extends State<MapPage> {
 
     // Clear the polylines
     polylines.clear();
+
+    // Re-add the polygons
+    if (filterSettings["Road Closures"] == true) {
+      _polygons.add(roadClosurePolygon());
+    }
 
     // Reset the distance to destination
     _distanceToDestination = null;
@@ -1173,7 +1179,8 @@ class MapPageState extends State<MapPage> {
                     },
                     polygons: _polygons,
                     markers: markers.values.toSet(),
-                    polylines: polylines                  );
+                    polylines: polylines
+                  );
                 },
               ),
               Positioned(
@@ -1313,7 +1320,7 @@ class MapPageState extends State<MapPage> {
                     ),
                   ),
                 ),
-              if (filterSettings['Road Closures'] == true)
+              if (filterSettings['Road Closures'] == true && _navigationInProgress == false)
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
