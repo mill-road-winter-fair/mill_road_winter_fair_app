@@ -96,9 +96,9 @@ Widget emailDetailsDialog() {
                   Text.rich(
                     TextSpan(
                       children: [
-                        const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: 'On the day of the Fair, you can also phone '),
+                        const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
                         TextSpan(
-                          text: '07303 142689',
+                          text: '07303\u{00A0}142689',
                           style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () async {
