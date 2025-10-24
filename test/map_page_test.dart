@@ -4,17 +4,21 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 void main() async {
+  // We're on test
+  onTest = true;
+
   // Mock location services and permissions
   locationServicesEnabled = true;
   locationPermission = LocationPermission.always;
 
   // Mock user settings
-  await loadSettings(true);
+  await loadSettings();
 
   listings = [
     {
@@ -107,7 +111,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
-    mapPageState.addAllVisibleMarkers(true);
+    mapPageState.addAllVisibleMarkers();
 
     // Configure the map marker filter
     mapPageState.filterSettings["Food"] = true;
@@ -148,7 +152,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
-    mapPageState.addAllVisibleMarkers(true);
+    mapPageState.addAllVisibleMarkers();
 
     // Simulate a tap on the map marker
     const markerId = MarkerId('1');
@@ -184,7 +188,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
-    mapPageState.addAllVisibleMarkers(true);
+    mapPageState.addAllVisibleMarkers();
 
     // Simulate a tap on the map marker
     const markerId = MarkerId('3');
@@ -293,7 +297,7 @@ void main() async {
 
     // Obtain the state after mounting
     mapPageState = tester.state<MapPageState>(find.byType(MapPage));
-    mapPageState.addAllVisibleMarkers(true);
+    mapPageState.addAllVisibleMarkers();
 
     // Verify that the expected marker was added
     expect(mapPageState.markers.isNotEmpty, true);
@@ -481,7 +485,7 @@ void main() async {
 
     // Obtain the state after mounting
     final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
-    mapPageState.addAllVisibleMarkers(true);
+    mapPageState.addAllVisibleMarkers();
 
     expect(mapPageState.markers.isNotEmpty, true);
     expect(mapPageState.markers[const MarkerId('1')]?.visible, true);

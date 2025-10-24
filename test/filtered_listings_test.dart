@@ -5,15 +5,20 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 void main() async {
+  // We're on test
+  onTest = true;
+
   // Mock location services and permissions
   locationServicesEnabled = true;
   locationPermission = LocationPermission.always;
 
   // Mock user settings
-  await loadSettings(true);
+  await loadSettings();
 
   // Build widget tree
   Future<void> pumpFilteredListingsPage(
@@ -79,7 +84,7 @@ void main() async {
       },
     ];
 
-    await loadSettings(true);
+    await loadSettings();
     await pumpFilteredListingsPage(tester, 'Food', listings);
 
     expect(find.text('Glazed and Confused'), findsOneWidget);
@@ -101,7 +106,7 @@ void main() async {
   });
 
   testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
-    await loadSettings(true);
+    await loadSettings();
     // Override user location global
     currentLatLng = const LatLng(52.199174, 0.140929);
 
@@ -182,7 +187,7 @@ void main() async {
   });
 
   testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {
-    await loadSettings(true);
+    await loadSettings();
     await pumpFilteredListingsPage(tester, 'Music', listings);
 
     await tester.tap(find.byType(DropdownMenu<SortingMethod>));
@@ -238,7 +243,7 @@ void main() async {
       },
     ];
 
-    await loadSettings(true);
+    await loadSettings();
     await pumpFilteredListingsPage(tester, 'Food', listings);
 
     // Preferred sorting method should have been reset to 0 (alphabetical)
@@ -246,7 +251,7 @@ void main() async {
   });
 
   testWidgets('use fallback sorting when location is unavailable, do not use it when location returns', (WidgetTester tester) async {
-    await loadSettings(true);
+    await loadSettings();
 
     // Mock sorting preference is distance
     preferredSortingMethod = SortingMethod.values[1];
@@ -308,5 +313,41 @@ void main() async {
 
     // Preferred sorting method should be unchanged
     expect(preferredSortingMethod, SortingMethod.values[1]);
+  });
+
+  testWidgets('FilteredListingsPage navigateToMapAndGetDirections function changes to MapPage', (WidgetTester tester) async {
+    listings = [
+      {
+        'displayName': 'Glazed and Confused',
+        'endTime': '16:30',
+        'id': '1',
+        'name': 'glazedandconfused',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813',
+        'primaryType': 'Food',
+        'secondaryType': 'Food',
+        'startTime': '10:30',
+        'tertiaryType': 'Doughnuts',
+        'visibleOnMap': true,
+        'website': 'https://www.glazedandconfused.com',
+      }
+    ];
+
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    // Obtain the state after mounting
+    final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
+    final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
+    mapPageState.addAllVisibleMarkers();
+
+    await tester.tap(find.text('Food'));
+    await tester.pumpAndSettle();
+    expect(homePageState.index, 1);
+
+    await tester.tap(find.text('Get Directions'));
+    await tester.pumpAndSettle();
+
+    expect(homePageState.index, 0);
   });
 }

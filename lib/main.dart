@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/gestures.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
@@ -26,7 +27,7 @@ Future<void> main() async {
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
-  await loadSettings(false);
+  await loadSettings();
   debugPrint('Settings loaded');
 
   listings = await fetchListings(http.Client());
@@ -42,6 +43,9 @@ Future<void> main() async {
   debugPrint('Setting preferred orientation and running app');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
 }
+
+// Define global variable as to whether we are onTest or not
+bool onTest = false;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -94,7 +98,29 @@ Widget emailDetailsDialog() {
                   const SizedBox(height: 15),
                   const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
                   _buildEmailLink('app@millroadwinterfair.org'),
-                  const SizedBox(height: 45),
+                  const SizedBox(height: 15),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
+                        TextSpan(
+                          text: '07303\u{00A0}142689',
+                          style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                              if (await canLaunchUrl(phoneUri)) {
+                                await launchUrl(phoneUri);
+                              } else {
+                                throw Exception('Could not dial 07303 142689');
+                              }
+                            }
+                        ),
+                        const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 15),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -131,7 +157,6 @@ Widget emailDetailsDialog() {
       child: Text(
         email,
         style: const TextStyle(
-          fontWeight: FontWeight.bold,
           color: Colors.blue,
         ),
       ),
@@ -339,7 +364,7 @@ class HomePageState extends State<HomePage> {
                 padding: EdgeInsets.zero,
                 children: <Widget>[
                   ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 480),
+                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 500),
                     child: DrawerHeader(
                       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
                       child: Column(
@@ -384,7 +409,7 @@ class HomePageState extends State<HomePage> {
                   ),
                   ListTile(
                     leading: const Icon(Icons.email),
-                    title: const Text('Email us', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       showDialog(
@@ -463,7 +488,7 @@ class HomePageState extends State<HomePage> {
                       aboutDialog();
                     },
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 15),
                 ],
               ),
             ),

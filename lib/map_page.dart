@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/gestures.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
@@ -20,6 +21,7 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
@@ -57,6 +59,7 @@ class MapPageState extends State<MapPage> {
   GoogleMapController? _controller;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
+  final ScrollController _roadClosuresDialogScrollController = ScrollController();
   // Declare default filters
   final Map<String, bool> filterSettings = {
     'Food': true,
@@ -73,8 +76,7 @@ class MapPageState extends State<MapPage> {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
     setMarkerLists();
-    createAllMarkerBitmaps();
-    addAllVisibleMarkers(false);
+    addAllVisibleMarkers();
     establishLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _polygons.add(roadClosurePolygon());
@@ -241,6 +243,106 @@ class MapPageState extends State<MapPage> {
     });
   }
 
+  Widget roadClosuresDialog() {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
+          return ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Scrollbar(
+                controller: _roadClosuresDialogScrollController,
+                thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
+                thickness: 4,
+                radius: const Radius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: SingleChildScrollView(
+                    controller: _roadClosuresDialogScrollController,
+                    primary: false,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Road closures', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                        const SizedBox(height: 10),
+                        const Text(style: TextStyle(height: 1.25),
+                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
+                        const SizedBox(height: 10),
+                        const Text('Pedestrians should exercise particular care before the road is fully closed.',
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                        const SizedBox(height: 10),
+                        const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                        const SizedBox(height: 10),
+                        const Text(style: TextStyle(height: 1.25), 'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                        const SizedBox(height: 10),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              const TextSpan(style: TextStyle(height: 1.25),
+                                  text:
+                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
+                              TextSpan(
+                                  text: 'www.millroadwinterfair.org',
+                                  style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, height: 1.25),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      HapticFeedback.lightImpact();
+                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                                    }),
+                              const TextSpan(style: TextStyle(height: 1.25), text: '.'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: AlignmentGeometry.bottomRight,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  setState(() {
+                                    filterSettings["Road Closures"] = false;
+                                  });
+                                  updateRoadClosurePolygonVisibility(false);
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  'Hide road closures',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  'Close',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
     debugPrint('updateMarkerVisibility called');
     setState(() {
@@ -275,14 +377,20 @@ class MapPageState extends State<MapPage> {
         _musicMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Event" || listing['primaryType'] == "Group-Event") {
         _eventMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Service" || listing['primaryType'] == "Group-Service") {
+      } else if (listing['primaryType'].startsWith("Service") || listing['primaryType'] == "Group-Service") {
         _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
       }
     }
   }
 
-  void addAllVisibleMarkers(bool onTest) {
+  void addAllVisibleMarkers() async {
     debugPrint('addAllVisibleMarkers called');
+
+    // Create all marker bitmaps first, but only if not onTest
+    if (onTest == false) {
+      await createAllMarkerBitmaps();
+    }
+
     // Ensure the markers list is empty
     markers.clear();
 
@@ -290,11 +398,11 @@ class MapPageState extends State<MapPage> {
       if (listing['visibleOnMap'] == 'TRUE') {
         // Add Group markers
         if (listing['primaryType'].startsWith('Group-')) {
-          addGroupMarker(listing, onTest);
+          addGroupMarker(listing);
         }
         // Add Specific markers
         if (!listing['primaryType'].startsWith('Group-')) {
-          addSpecificMarker(listing, onTest);
+          addSpecificMarker(listing);
         }
       }
     }
@@ -302,7 +410,9 @@ class MapPageState extends State<MapPage> {
 
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('createAllMarkerBitmaps called');
-    for (var listingType in 'Food, Shopping, Music, Event, Service, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'.split(', ')) {
+    for (var listingType
+        in 'Food, Shopping, Music, Event, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'
+            .split(', ')) {
       BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
       bitmapDescriptors[listingType] = newBitmapDescriptor;
     }
@@ -314,7 +424,7 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  void addGroupMarker(listing, bool onTest) async {
+  void addGroupMarker(listing) async {
     debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -322,10 +432,10 @@ class MapPageState extends State<MapPage> {
     late BitmapDescriptor customMarker;
 
     if (onTest == false) {
-      customMarker = await getColoredMarker(listing['primaryType'], color);
+      customMarker = bitmapDescriptors[listing['primaryType']]!;
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
+      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
@@ -443,17 +553,17 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  void addSpecificMarker(listing, bool onTest) async {
+  void addSpecificMarker(listing) async {
     debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
     late BitmapDescriptor customMarker;
     if (onTest == false) {
-      customMarker = await getColoredMarker(listing['primaryType'], color);
+      customMarker = bitmapDescriptors[listing['primaryType']]!;
     } else {
       double hue = HSVColor.fromColor(color).hue;
-      customMarker = bitmapDescriptors[listing['primaryType']] ?? BitmapDescriptor.defaultMarkerWithHue(hue);
+      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
@@ -623,7 +733,7 @@ class MapPageState extends State<MapPage> {
                   Divider(color: Colors.grey[350]),
                   CheckboxListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
-                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade pedestrianised areas")),
+                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade road closures")),
                     value: filterSettings["Road Closures"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
@@ -706,6 +816,7 @@ class MapPageState extends State<MapPage> {
     // Clear any existing polylines and hide the markers
     setState(() {
       polylines.clear();
+      _polygons.clear();
       hideAllMarkers();
     });
 
@@ -733,7 +844,7 @@ class MapPageState extends State<MapPage> {
 
     // Add destination map marker
     Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
-    addSpecificMarker(destinationListing, false);
+    addSpecificMarker(destinationListing);
   }
 
   void cancelNavigation() {
@@ -743,6 +854,11 @@ class MapPageState extends State<MapPage> {
 
     // Clear the polylines
     polylines.clear();
+
+    // Re-add the polygons
+    if (filterSettings["Road Closures"] == true) {
+      _polygons.add(roadClosurePolygon());
+    }
 
     // Reset the distance to destination
     _distanceToDestination = null;
@@ -877,7 +993,7 @@ class MapPageState extends State<MapPage> {
       polylines.clear();
       _distanceToDestination = null;
       hideAllMarkers();
-      addAllVisibleMarkers(false);
+      addAllVisibleMarkers();
       _setMapCameraToFitMapMarkers();
       _navigationInProgress = false;
     });
@@ -1062,7 +1178,7 @@ class MapPageState extends State<MapPage> {
     try {
       listings = await fetchListings(http.Client());
       setMarkerLists();
-      addAllVisibleMarkers(false);
+      addAllVisibleMarkers();
       establishLocation();
     } finally {
       setState(() {
@@ -1179,7 +1295,8 @@ class MapPageState extends State<MapPage> {
                     },
                     polygons: _polygons,
                     markers: markers.values.toSet(),
-                    polylines: polylines                  );
+                    polylines: polylines
+                  );
                 },
               ),
               Positioned(
@@ -1319,7 +1436,7 @@ class MapPageState extends State<MapPage> {
                     ),
                   ),
                 ),
-              if (filterSettings['Road Closures'] == true)
+              if (filterSettings['Road Closures'] == true && _navigationInProgress == false)
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
@@ -1328,35 +1445,46 @@ class MapPageState extends State<MapPage> {
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
                       color: Theme.of(context).colorScheme.surface,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 20,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
-                                border: Border.all(
-                                  color: Theme.of(context).colorScheme.tertiary,
-                                  width: 3,
+                      child: GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return roadClosuresDialog();
+                            },
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 20,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.tertiary,
+                                    width: 3,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Pedestrianised areas',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context).colorScheme.tertiary,
-                                fontWeight: FontWeight.w600,
+                              const SizedBox(width: 8),
+                              Text(
+                                'Road closures',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).colorScheme.tertiary,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
