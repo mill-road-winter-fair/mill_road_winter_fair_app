@@ -2,13 +2,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-int asTheCrowFlies(LatLng? origin, LatLng destination) {
+int asTheCrowFlies(LatLng origin, LatLng destination) {
   debugPrint('asTheCrowFlies called: origin=$origin, destination=$destination');
-  // If the user has location tracking disabled we need to return nothing here.
-  if (origin == null) {
-    debugPrint('Origin is null, returning 0');
-    return 0;
-  }
 
   // Constant value for converting degrees to radians (π/180)
   const p = 0.017453292519943295;
