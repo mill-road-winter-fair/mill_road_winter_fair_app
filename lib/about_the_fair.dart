@@ -63,9 +63,9 @@ TableRow eventRow(context, eventTime, eventTitle, [eventSubtitle]) {
 
 // Make a row in the events table. Needed as can't style the entire table or pad an entire row in one go
 
-  var eventsTimeStyle = TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary);
-  var eventsTitleStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary);
-  var eventsSubtitleStyle = TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onPrimary);
+  var eventsTimeStyle = TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
+  var eventsTitleStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
+  var eventsSubtitleStyle = TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
 
   return TableRow(
     decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
@@ -107,7 +107,7 @@ class AboutTheFairPage extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(10.0),
           child: Column(
             children: [
               const TextImageRow(
@@ -127,14 +127,14 @@ class AboutTheFairPage extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   SizedBox(
-                    width: 250,
+                    width: 227,
                     // Flutter tables don't support spanning, so need two of them to do a header row
                     child: Column(children: [Table(
                       columnWidths: const <int, TableColumnWidth>{
-                        0: FixedColumnWidth(250),
+                        0: FixedColumnWidth(227),
                       },
                       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                       children: <TableRow>[
@@ -155,7 +155,7 @@ class AboutTheFairPage extends StatelessWidget {
                     Table(
                       columnWidths: const <int, TableColumnWidth>{
                         0: FixedColumnWidth(50),
-                        1: FixedColumnWidth(200),
+                        1: FixedColumnWidth(177),
                       },
                       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                       children: <TableRow>[
@@ -173,8 +173,8 @@ class AboutTheFairPage extends StatelessWidget {
                     )
                   ),
                   SizedBox(
-                    width: 85,
-                    child: Image.asset("assets/aboutPage/MRWF25_trafficlights.png", fit: BoxFit.contain),
+                    width: 70,
+                    child: Image.asset("assets/aboutPage/MRWF25_trafficlights.png", fit: BoxFit.fill, width: 70),
                   ),
                 ],
               ),
