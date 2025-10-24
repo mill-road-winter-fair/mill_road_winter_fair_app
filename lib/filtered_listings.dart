@@ -336,7 +336,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       SpecificListingInfoSheet(
                         title: listing['displayName'],
                         categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                        openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                        startTime: "${listing['startTime']}",
+                        endTime: "${listing['endTime']}",
                         approxDistance: approximateDistance,
                         phoneNumber: listing['phone'],
                         website: listing['website'],
