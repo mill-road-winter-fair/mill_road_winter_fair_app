@@ -520,8 +520,8 @@ class MapPageState extends State<MapPage> {
                           return SimplifiedListingInfoSheet(
                             title: rel['displayName'],
                             categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
-                            startTime: "${listing['startTime']}",
-                            endTime: "${listing['endTime']}",
+                            startTime: "${rel['startTime']}",
+                            endTime: "${rel['endTime']}",
                             phoneNumber: rel['phone'],
                             website: rel['website'],
                             onGetDirections: () => getDirections(

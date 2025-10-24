@@ -157,10 +157,12 @@ void main() async {
     await tester.pumpAndSettle();
 
     // Check the text content in the bottom sheet
+    // Group marker content
     expect(find.text('Food Group'), findsOneWidget);
     expect(find.text('10:30 - 16:30'), findsOneWidget);
     expect(find.text('Food'), findsOneWidget);
     expect(find.text('approx. 199 m'), findsOneWidget);
+    // Specific marker content
     expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(find.text('11:00 - 15:00'), findsOneWidget);
     expect(find.text('Fake Street • Doughnuts'), findsOneWidget);
