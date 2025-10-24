@@ -15,7 +15,8 @@ void main() {
   Widget createWidgetUnderTest({
     required String title,
     required String categories,
-    required String openingTimes,
+    required String startTime,
+    required String endTime,
     required String approxDistance,
     required String phoneNumber,
     required String website,
@@ -26,7 +27,8 @@ void main() {
         body: SpecificListingInfoSheet(
           title: title,
           categories: categories,
-          openingTimes: openingTimes,
+          startTime: startTime,
+          endTime: endTime,
           approxDistance: approxDistance,
           phoneNumber: phoneNumber,
           website: website,
@@ -40,7 +42,8 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest(
       title: 'Glazed and Confused',
       categories: 'Food • Doughnuts',
-      openingTimes: '10:30 - 16:30',
+      startTime: '10:30',
+      endTime: '16:30',
       approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
       phoneNumber: '01223 111111',
       website: 'https://www.glazedandconfused.com',
@@ -58,7 +61,8 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest(
       title: 'Glazed and Confused',
       categories: 'Food • Doughnuts',
-      openingTimes: '10:30 - 16:30',
+      startTime: '10:30',
+      endTime: '16:30',
       approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
       phoneNumber: '01223 111111',
       website: '',
@@ -81,7 +85,8 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest(
       title: 'Glazed and Confused',
       categories: 'Food • Doughnuts',
-      openingTimes: '10:30 - 16:30',
+      startTime: '10:30',
+      endTime: '16:30',
       approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
       phoneNumber: '01223 111111',
       website: 'https://www.glazedandconfused.com',
