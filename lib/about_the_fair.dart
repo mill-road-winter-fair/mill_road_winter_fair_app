@@ -119,7 +119,7 @@ class AboutTheFairPage extends StatelessWidget {
               Text('The 2025 Fair will be on Saturday 6th December, 10.30am to 4.30pm.', style: bodyStyle.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               const TextImageRow(
-                textSpan: TextSpan(text: 'This year, we celebrate 20 years since the first Fair in 2005! Be sure to come early so that you don’t miss out! We have so much to see! The fire engine pull, opening ceremony and parade are all in the morning, as well as lots of amazing stalls, performance and events.',),
+                textSpan: TextSpan(text: 'This year, we celebrate 20 years since the first Fair in 2005! It’s been a remarkable journey, but we still hold true to the Fair’s original aim of celebrating all that is great about the Mill Road area. We have a huge range of activities to discover throughout the day; it’s sure to be the best Fair yet! Be sure to come early so that you don’t miss out!',),
                 imagePath: "assets/aboutPage/MRWF25_people_cake.png",
                 textWidthProportion: 0.67,
                 imageOnLeft: true,
@@ -179,34 +179,8 @@ class AboutTheFairPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-
-
-/*               TextImageRow(
-                textSpan: TextSpan(
-                  children: [
-                    const TextSpan(text: 'There are lots of opportunities to volunteer for the Fair – from communications, finding performers, setting stuff up, stewarding and just plain old organising – so do '),
-                    TextSpan(
-                        text: 'get in touch',
-                        style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            HapticFeedback.lightImpact();
-                            showDialog<String>(
-                              context: context,
-                              builder: (BuildContext context) => emailDetailsDialog(),
-                            );
-                          }),
-                    const TextSpan(text: ' if you’d like to be involved, or if you have ideas or questions about the Fair.'),
-                  ],
-                ),
-                imagePath: "assets/aboutPage/MRWF25_people_sax.png",
-                textWidthProportion: 0.7, 
-                ),
-              const SizedBox(height: 12),
-              Text('We also have a number of Fringe events throughout the year, with which we’d love you to get involved.', style: bodyStyle),
-              const SizedBox(height: 12),
-  */             const TextImageRow(
-                textSpan: TextSpan(text: 'We are grateful for the support of our generous sponsors: Bush & Co Sales and Lettings (lead sponsor), Anglia Ruskin University, Hughes Hall, Taank Optometrists, Regalstar catering and Love Mill Road. The Mill Road Winter Fair is supported by a Cambridge City Council Community Grant and the Mill Road Traders Association.',),
+              const TextImageRow(
+                textSpan: TextSpan(text: 'We are grateful for the generous support of Bush & Co Sales and Lettings (lead sponsor), Al-Amin, Anglia Ruskin University, Hughes Hall, Love Mill Road, Regalstar Catering and Taank Optometrists. The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.',),
                 imagePath: "assets/aboutPage/MRWF25_people_juggle.png",
                 textWidthProportion: 0.75,
                 imageOnLeft: true,
