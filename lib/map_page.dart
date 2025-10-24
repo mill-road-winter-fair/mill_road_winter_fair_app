@@ -259,7 +259,7 @@ class MapPageState extends State<MapPage> {
                 thickness: 4,
                 radius: const Radius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.all(0),
+                  padding: const EdgeInsets.only(right: 8),
                   child: SingleChildScrollView(
                     controller: _roadClosuresDialogScrollController,
                     primary: false,
@@ -269,40 +269,40 @@ class MapPageState extends State<MapPage> {
                       children: [
                         const Text('Road closures', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                         const SizedBox(height: 10),
-                        const Text(
+                        const Text(style: TextStyle(height: 1.25),
                             'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
                         const SizedBox(height: 10),
                         const Text('Pedestrians should exercise particular care before the road is fully closed.',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
                         const SizedBox(height: 10),
                         const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
                         const SizedBox(height: 10),
-                        const Text('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                        const Text(style: TextStyle(height: 1.25), 'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
                             children: [
-                              const TextSpan(
+                              const TextSpan(style: TextStyle(height: 1.25),
                                   text:
                                       'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                               TextSpan(
                                   text: 'www.millroadwinterfair.org',
-                                  style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                                  style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, height: 1.25),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
                                       launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
                                     }),
-                              const TextSpan(text: '.'),
+                              const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
                           ),
                         ),
                         const SizedBox(height: 10),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
+                        Align(
+                          alignment: AlignmentGeometry.bottomRight,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               TextButton(
                                 onPressed: () {
