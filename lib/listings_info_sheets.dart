@@ -51,6 +51,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     final bool ended = hasEventEnded(endTime);
     final timeStyle = TextStyle(
       fontSize: 14,
+      color: Theme.of(context).colorScheme.onPrimary,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
