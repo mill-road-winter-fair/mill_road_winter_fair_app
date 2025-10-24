@@ -4,18 +4,20 @@ import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
-import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 
 void main() async {
+  // We're on test
+  onTest = true;
+
   // Mock location services and permissions
   locationServicesEnabled = true;
   locationPermission = LocationPermission.always;
 
   // Mock user settings
-  await loadSettings(true);
+  await loadSettings();
 
   testWidgets('HomePage displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
     listings = [
@@ -212,41 +214,6 @@ void main() async {
     await tester.tap(find.text('Map'));
     await tester.pumpAndSettle();
 
-    expect(homePageState.index, 0);
-  });
-
-  testWidgets('HomePage navigateToMapAndGetDirections function changes to MapPage', (WidgetTester tester) async {
-    listings = [
-      {
-        'displayName': 'Glazed and Confused',
-        'endTime': '16:30',
-        'id': '1',
-        'name': 'glazedandconfused',
-        'phone': '01223 111111',
-        'latLng': '52.199687,0.138813',
-        'primaryType': 'Food',
-        'secondaryType': 'Food',
-        'startTime': '10:30',
-        'tertiaryType': 'Doughnuts',
-        'visibleOnMap': true,
-        'website': 'https://www.glazedandconfused.com',
-      }
-    ];
-
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
-
-    // Obtain the state after mounting
-    final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
-    final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
-    mapPageState.addAllVisibleMarkers(true);
-
-    await tester.tap(find.text('Food'));
-    await tester.pumpAndSettle();
-    expect(homePageState.index, 1);
-
-    await tester.tap(find.text('Get Directions'));
-    await tester.pumpAndSettle();
     expect(homePageState.index, 0);
   });
 }

@@ -24,7 +24,7 @@ Future<void> main() async {
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
-  await loadSettings(false);
+  await loadSettings();
   debugPrint('Settings loaded');
 
   listings = await fetchListings(http.Client());
@@ -40,6 +40,9 @@ Future<void> main() async {
   debugPrint('Setting preferred orientation and running app');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
 }
+
+// Define global variable as to whether we are onTest or not
+bool onTest = false;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
