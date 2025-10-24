@@ -15,6 +15,7 @@ import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -72,7 +73,7 @@ class MapPageState extends State<MapPage> {
     _polylinePoints = PolylinePoints();
     _fetchListings = fetchExistingListings(http.Client());
     setMarkerLists();
-    addAllVisibleMarkers(false);
+    addAllVisibleMarkers();
     establishLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _polygons.add(roadClosurePolygon());
@@ -279,11 +280,13 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  void addAllVisibleMarkers(bool onTest) async {
+  void addAllVisibleMarkers() async {
     debugPrint('addAllVisibleMarkers called');
 
-    // Create all marker bitmaps first
-    await createAllMarkerBitmaps();
+    // Create all marker bitmaps first, but only if not onTest
+    if (onTest == false) {
+      await createAllMarkerBitmaps();
+    }
 
     // Ensure the markers list is empty
     markers.clear();
@@ -292,11 +295,11 @@ class MapPageState extends State<MapPage> {
       if (listing['visibleOnMap'] == 'TRUE') {
         // Add Group markers
         if (listing['primaryType'].startsWith('Group-')) {
-          addGroupMarker(listing, onTest);
+          addGroupMarker(listing);
         }
         // Add Specific markers
         if (!listing['primaryType'].startsWith('Group-')) {
-          addSpecificMarker(listing, onTest);
+          addSpecificMarker(listing);
         }
       }
     }
@@ -304,7 +307,9 @@ class MapPageState extends State<MapPage> {
 
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('createAllMarkerBitmaps called');
-    for (var listingType in 'Food, Shopping, Music, Event, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'.split(', ')) {
+    for (var listingType
+        in 'Food, Shopping, Music, Event, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'
+            .split(', ')) {
       BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
       bitmapDescriptors[listingType] = newBitmapDescriptor;
     }
@@ -316,7 +321,7 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  void addGroupMarker(listing, bool onTest) async {
+  void addGroupMarker(listing) async {
     debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -445,7 +450,7 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  void addSpecificMarker(listing, bool onTest) async {
+  void addSpecificMarker(listing) async {
     debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -735,7 +740,7 @@ class MapPageState extends State<MapPage> {
 
     // Add destination map marker
     Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
-    addSpecificMarker(destinationListing, false);
+    addSpecificMarker(destinationListing);
   }
 
   void cancelNavigation() {
@@ -874,7 +879,7 @@ class MapPageState extends State<MapPage> {
       _polylines.clear();
       _distanceToDestination = null;
       hideAllMarkers();
-      addAllVisibleMarkers(false);
+      addAllVisibleMarkers();
       _setMapCameraToFitMapMarkers();
       _navigationInProgress = false;
     });
@@ -1059,7 +1064,7 @@ class MapPageState extends State<MapPage> {
     try {
       listings = await fetchListings(http.Client());
       setMarkerLists();
-      addAllVisibleMarkers(false);
+      addAllVisibleMarkers();
       establishLocation();
     } finally {
       setState(() {
