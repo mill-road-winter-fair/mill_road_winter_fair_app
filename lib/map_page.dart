@@ -512,7 +512,7 @@ class MapPageState extends State<MapPage> {
                       itemBuilder: (context, index) {
                         final rel = relatedListings[index];
                         int approximateDistanceMetres = asTheCrowFlies(
-                          currentLatLng,
+                          currentLatLng!,
                           stringToLatLng(rel['latLng']),
                         );
 
@@ -520,14 +520,16 @@ class MapPageState extends State<MapPage> {
                           return GroupListingInfoSheet(
                             title: rel['displayName'],
                             categories: "${rel['tertiaryType']}",
-                            openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                            startTime: "${listing['startTime']}",
+                            endTime: "${listing['endTime']}",
                             approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
                           );
                         } else {
                           return SimplifiedListingInfoSheet(
                             title: rel['displayName'],
                             categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
-                            openingTimes: "${rel['startTime']} - ${rel['endTime']}",
+                            startTime: "${rel['startTime']}",
+                            endTime: "${rel['endTime']}",
                             phoneNumber: rel['phone'],
                             website: rel['website'],
                             onGetDirections: () => getDirections(
@@ -575,7 +577,7 @@ class MapPageState extends State<MapPage> {
         HapticFeedback.lightImpact();
         // Update user's location
         establishLocation();
-        int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
+        int approximateDistanceMetres = asTheCrowFlies(currentLatLng!, destinationLatLng);
         // Show bottom sheet with listing information
         showModalBottomSheet(
           context: context,
@@ -583,7 +585,8 @@ class MapPageState extends State<MapPage> {
             return SpecificListingInfoSheet(
               title: listing['displayName'],
               categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-              openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+              startTime: "${listing['startTime']}",
+              endTime: "${listing['endTime']}",
               approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
               phoneNumber: listing['phone'],
               website: listing['website'],
