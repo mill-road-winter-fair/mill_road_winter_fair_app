@@ -77,10 +77,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
 
     return IntroductionScreen(
       key: introKey,
-      autoScrollDuration: 150000,
+      autoScrollDuration: onTest ? null : 150000,
+      infiniteAutoScroll: onTest ? false : true,
       globalBackgroundColor: Theme.of(context).colorScheme.secondary,
       allowImplicitScrolling: true,
-      infiniteAutoScroll: true,
       globalFooter: Padding(
         padding: const EdgeInsets.fromLTRB(6, 0, 6, 28),
         child: SizedBox(
@@ -88,7 +88,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           height: 60,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.tertiary),
-            child:  FittedBox(
+            child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text('Take me straight to the app!',
                   style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
@@ -107,7 +107,8 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           titleWidget: const FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: Text('Welcome to the official\nMill Road Winter Fair app!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            child: Text('Welcome to the official\nMill Road Winter Fair app!',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
           ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -340,9 +341,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.smart_button, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                              "There’s a button for each listings\ncategory at the bottom of the app",
-                              style: bodyStyle),
+                          Text("There’s a button for each listings\ncategory at the bottom of the app", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -418,17 +417,17 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(text: "Please do make sure you’ve read the\n",
-                                    style: bodyStyle),
-                                TextSpan(text:  "important information",
-                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline), 
-                                  recognizer: TapGestureRecognizer()..onTap = () {
-                                    HapticFeedback.lightImpact();
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
-                                  },
+                                TextSpan(text: "Please do make sure you’ve read the\n", style: bodyStyle),
+                                TextSpan(
+                                  text: "important information",
+                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      HapticFeedback.lightImpact();
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                                    },
                                 ),
-                                TextSpan(text: " about the Fair",
-                                    style: bodyStyle),
+                                TextSpan(text: " about the Fair", style: bodyStyle),
                               ],
                             ),
                           ),
@@ -442,13 +441,15 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(text: "Did you know the Fair is organised\nentirely by volunteers? To get\ninvolved, just visit our ",
-                                    style: bodyStyle),
-                                TextSpan(text:  "website",
-                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline), 
-                                  recognizer: TapGestureRecognizer()..onTap = () { 
-                                    HapticFeedback.lightImpact();
-                                    launchUrl(Uri.parse('https://www.millroadwinterfair.org/')); 
+                                TextSpan(
+                                    text: "Did you know the Fair is organised\nentirely by volunteers? To get\ninvolved, just visit our ", style: bodyStyle),
+                                TextSpan(
+                                  text: "website",
+                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      HapticFeedback.lightImpact();
+                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
                                     },
                                 ),
                               ],
@@ -464,14 +465,16 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(text: "If you have feedback about the app\nwe’d love to hear from you!\nJust fill in ",
-                                    style: bodyStyle),
-                                TextSpan(text:  "this form",
-                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline), 
-                                  recognizer: TapGestureRecognizer()..onTap = () { 
-                                    HapticFeedback.lightImpact();
-                                    launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link')); 
-                                  },
+                                TextSpan(text: "If you have feedback about the app\nwe’d love to hear from you!\nJust fill in ", style: bodyStyle),
+                                TextSpan(
+                                  text: "this form",
+                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      HapticFeedback.lightImpact();
+                                      launchUrl(Uri.parse(
+                                          'https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+                                    },
                                 ),
                               ],
                             ),
