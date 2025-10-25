@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-Widget emailDetailsDialog() {
+Widget contactUsDialog() {
   final ScrollController emailDetailsDialogScrollController = ScrollController();
 
     return Dialog(
@@ -428,7 +428,7 @@ class HomePageState extends State<HomePage> {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return emailDetailsDialog();
+                          return contactUsDialog();
                         },
                       );
                     },
