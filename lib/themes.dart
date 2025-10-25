@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 
 final Map<String, ThemeData> appThemes = {
   'light': ThemeData(
@@ -221,6 +222,10 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
     backdropData = await rootBundle.load("assets/mapMarkers/markerIconFrame.png");
   }
 
+  if (onTest == true) {
+    // Return a default marker during unit tests to avoid crashes
+    return BitmapDescriptor.defaultMarker;
+  }
   try {
     int markerPixelSize = 288;
     final ui.Codec backdropCodec = await ui.instantiateImageCodec(
