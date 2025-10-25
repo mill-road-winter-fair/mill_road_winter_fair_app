@@ -68,52 +68,53 @@ class MyApp extends StatelessWidget {
 Widget contactUsDialog() {
   final ScrollController emailDetailsDialogScrollController = ScrollController();
 
-    return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
-          return ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxWidth),
-            child: Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Scrollbar(
-                controller: emailDetailsDialogScrollController,
-                thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
-                thickness: 4,
-                radius: const Radius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: SingleChildScrollView(
-                    controller: emailDetailsDialogScrollController,
-                    primary: false,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        _buildEmailLink('info@millroadwinterfair.org'),
-                        const SizedBox(height: 15),
-                        const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        _buildEmailLink('volunteers@millroadwinterfair.org'),
-                        const SizedBox(height: 15),
-                        const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        _buildEmailLink('events@millroadwinterfair.org'),
-                        const SizedBox(height: 15),
-                        const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        _buildEmailLink('stalls@millroadwinterfair.org'),
-                        const SizedBox(height: 15),
-                        const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        _buildEmailLink('it@millroadwinterfair.org'),
-                        const SizedBox(height: 15),
-                        const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                        _buildEmailLink('app@millroadwinterfair.org'),
-                        const SizedBox(height: 15),
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
-                              TextSpan(
+  return Dialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Scrollbar(
+              controller: emailDetailsDialogScrollController,
+              thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
+              thickness: 4,
+              radius: const Radius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: SingleChildScrollView(
+                  controller: emailDetailsDialogScrollController,
+                  primary: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      _buildEmailLink('info@millroadwinterfair.org'),
+                      const SizedBox(height: 15),
+                      const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      _buildEmailLink('volunteers@millroadwinterfair.org'),
+                      const SizedBox(height: 15),
+                      const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      _buildEmailLink('events@millroadwinterfair.org'),
+                      const SizedBox(height: 15),
+                      const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      _buildEmailLink('stalls@millroadwinterfair.org'),
+                      const SizedBox(height: 15),
+                      const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      _buildEmailLink('it@millroadwinterfair.org'),
+                      const SizedBox(height: 15),
+                      const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      _buildEmailLink('app@millroadwinterfair.org'),
+                      const SizedBox(height: 15),
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            const TextSpan(
+                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
+                            TextSpan(
                                 text: '07303\u{00A0}142689',
                                 style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
                                 recognizer: TapGestureRecognizer()
@@ -124,57 +125,56 @@ Widget contactUsDialog() {
                                     } else {
                                       throw Exception('Could not dial 07303 142689');
                                     }
-                                  }
-                              ),
-                              const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
-                            ],
+                                  }),
+                            const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'Close',
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
                           ),
                         ),
-                        const SizedBox(height: 15),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              'Close',
-                              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildEmailLink(String email) {
-    return InkWell(
-      onTap: () async {
-        HapticFeedback.lightImpact();
-        final Uri mailUri = Uri(scheme: 'mailto', path: email);
-        if (await canLaunchUrl(mailUri)) {
-          await launchUrl(mailUri);
-        } else {
-          throw Exception('Could not launch email client');
-        }
+          ),
+        );
       },
-      child: Text(
-        email,
-        style: const TextStyle(
-          color: Colors.blue,
-        ),
+    ),
+  );
+}
+
+Widget _buildEmailLink(String email) {
+  return InkWell(
+    onTap: () async {
+      HapticFeedback.lightImpact();
+      final Uri mailUri = Uri(scheme: 'mailto', path: email);
+      if (await canLaunchUrl(mailUri)) {
+        await launchUrl(mailUri);
+      } else {
+        throw Exception('Could not launch email client');
+      }
+    },
+    child: Text(
+      email,
+      style: const TextStyle(
+        color: Colors.blue,
       ),
-    );
-  }
+    ),
+  );
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -226,16 +226,11 @@ class HomePageState extends State<HomePage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.phone_android),
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Android app by Alexander Berridge')
-          ),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Android app by Alexander Berridge')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('http://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('http://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://theberridge.com'));
@@ -245,16 +240,11 @@ class HomePageState extends State<HomePage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.phone_iphone),
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('iPhone version by Matt Whiting')
-          ),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('iPhone version by Matt Whiting')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://mattwhiting.com'));
@@ -264,16 +254,12 @@ class HomePageState extends State<HomePage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.palette),
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Illustrations by Clare McEwan')
-          ),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Illustrations by Clare McEwan')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child:
+                  Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
@@ -283,20 +269,14 @@ class HomePageState extends State<HomePage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.feedback),
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Tell us if you like this app')
-          ),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tell us if you like this app')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
-            launchUrl(Uri.parse(
-                'https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+            launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
           },
         ),
       ],
@@ -306,14 +286,14 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
               HapticFeedback.lightImpact();
               Scaffold.of(context).openDrawer();
-              },
+            },
           ),
         ),
         title: const FittedBox(
@@ -342,33 +322,32 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.only(right: 10),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          showUnselectedLabels: true,
-          elevation: 0,
-          currentIndex: index,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          iconSize: 30,
-          onTap: (selectedIndex) {
-            HapticFeedback.selectionClick();
-            // Update the user's location
-            establishLocation();
-            setState(() {
-              index = selectedIndex;
-            });
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-            BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
-          ],
-        )
-      ),
+          margin: const EdgeInsets.only(right: 10),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            showUnselectedLabels: true,
+            elevation: 0,
+            currentIndex: index,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            iconSize: 30,
+            onTap: (selectedIndex) {
+              HapticFeedback.selectionClick();
+              // Update the user's location
+              establishLocation();
+              setState(() {
+                index = selectedIndex;
+              });
+            },
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+              BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
+              BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
+              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
+              BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
+              BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
+            ],
+          )),
       drawer: Drawer(
         child: Column(
           children: <Widget>[
@@ -386,9 +365,10 @@ class HomePageState extends State<HomePage> {
                         children: <Widget>[
                           Expanded(flex: 4, child: Container()),
                           FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('Mill Road Winter Fair 2025', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19, fontWeight: FontWeight.bold)),
-                            ),
+                            fit: BoxFit.scaleDown,
+                            child: Text('Mill Road Winter Fair 2025',
+                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19, fontWeight: FontWeight.bold)),
+                          ),
                           Expanded(flex: 1, child: Container())
                         ],
                       ),
@@ -409,7 +389,7 @@ class HomePageState extends State<HomePage> {
                     onTap: () {
                       HapticFeedback.lightImpact();
                       Navigator.pop(context);
-                      Navigator.push(context,MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
                     },
                   ),
                   ListTile(
@@ -511,4 +491,3 @@ class HomePageState extends State<HomePage> {
     );
   }
 }
-
