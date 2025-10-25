@@ -807,6 +807,23 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    // Cancelling of any previous navigation
+    // Halt the location subscription
+    _positionStream?.cancel();
+    // Clear the polylines
+    polylines.clear();
+    // Clear the polygons
+    _polygons.clear();
+    hideAllMarkers();
+    // Reset the distance to destination
+    _distanceToDestination = null;
+    // Set navigation as not in progress
+    _navigationInProgress = false;
+    setState(() {});
+
+    // Remember the previous index to allow returning back
+    previousIndex = homePageKey.currentState!.index;
+
     debugPrint('getDirections called for listing ID: $id');
     // Set navigation as in progress
     _navigationInProgress = true;
@@ -815,13 +832,6 @@ class MapPageState extends State<MapPage> {
     if (navigatorPop == true) {
       Navigator.pop(context);
     }
-
-    // Clear any existing polylines and hide the markers
-    setState(() {
-      polylines.clear();
-      _polygons.clear();
-      hideAllMarkers();
-    });
 
     // If user has location tracking enabled
     if (currentLatLng != null) {
@@ -874,6 +884,11 @@ class MapPageState extends State<MapPage> {
 
     // Reset the camera position
     _setMapCameraToFitMapMarkers();
+
+    // If we came from a page other than the map page, go back to that page
+    if (previousIndex != 0) {
+      homePageKey.currentState?.setCurrentIndex(previousIndex);
+    }
 
     setState(() {});
   }

@@ -54,8 +54,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
+    // Remember the previous index to allow returning back
+    previousIndex = homePageKey.currentState!.index;
+
     // Request the map page to show directions
-    mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
+    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
 
     // Switch to map tab on the home page
     homePageKey.currentState?.setCurrentIndex(0);
