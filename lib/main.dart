@@ -318,7 +318,7 @@ class HomePageState extends State<HomePage> {
                     ),
                   ),
                   ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.info),
                     title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -328,7 +328,7 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                   ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.warning),
                     title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -337,23 +337,30 @@ class HomePageState extends State<HomePage> {
                       Navigator.push(context,MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
                     },
                   ),
-/*                   ListTile(
+                  ListTile(
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.public),
-                    title: const Text('Visit our Website', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
                     },
                   ),
-                   ListTile(
+                  ListTile(
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.email),
-                    title: const Text('Email us', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () => showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) => emailDetailsDialog(),
-                    ),
+                    title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return emailDetailsDialog();
+                        },
+                      );
+                    },
                   ),
- */               ],
+                ],
               ),
             ),
             Align(
@@ -361,59 +368,41 @@ class HomePageState extends State<HomePage> {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    spacing: 0,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          showDialog<String>(
-                            context: context,
-                            builder: (BuildContext context) => emailDetailsDialog(),
-                          );
-                        },
-                        icon: FaIcon(FontAwesomeIcons.envelope, size: 32, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.globe, size: 32, color: Theme.of(context).colorScheme.tertiary),
-                      ),
                       IconButton(
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 32, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 48, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://x.com/millroadfair'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 32, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 48, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 32, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 48, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.flickr, size: 32, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.flickr, size: 48, color: Theme.of(context).colorScheme.tertiary),
                       ),
                     ],
                   ),
                   const Divider(),
                   ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.settings),
                     title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -423,7 +412,7 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                   ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.first_page),
                     title: const Text('Replay welcome screen', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -433,7 +422,7 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                   ListTile(
-                    visualDensity: const VisualDensity(vertical: -4),
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.info),
                     title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -442,7 +431,7 @@ class HomePageState extends State<HomePage> {
                       aboutDialog();
                     },
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
