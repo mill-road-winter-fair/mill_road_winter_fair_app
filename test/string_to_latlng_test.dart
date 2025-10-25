@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() {

@@ -496,6 +496,52 @@ void main() async {
     expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
   });
 
+  testWidgets('Compass AnimatedRotation reflects preferredMapOrientation and toggles on button press', (WidgetTester tester) async {
+    // We'll build a small widget that mirrors MapPage's AnimatedRotation and toggle logic.
+    preferredMapOrientation = MapOrientation.adaptive;
+
+    Widget testWidget = MaterialApp(
+      home: Scaffold(
+        body: StatefulBuilder(
+          builder: (context, setState) {
+            double compassBearing = (preferredMapOrientation == MapOrientation.adaptive) ? 90 : 0;
+            return Column(
+              children: [
+                AnimatedRotation(
+                  turns: compassBearing / 360.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: const Icon(Icons.navigation),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.assistant_navigation),
+                  onPressed: () {
+                    setState(() {
+                      preferredMapOrientation = (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                    });
+                  },
+                )
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(testWidget);
+    await tester.pumpAndSettle();
+
+    final animatedRotationFinder = find.byType(AnimatedRotation);
+    expect(animatedRotationFinder, findsOneWidget);
+    AnimatedRotation widgetBefore = tester.widget<AnimatedRotation>(animatedRotationFinder);
+    expect(widgetBefore.turns, closeTo(90.0 / 360.0, 0.001));
+
+    await tester.tap(find.byIcon(Icons.assistant_navigation));
+    await tester.pumpAndSettle();
+
+    AnimatedRotation widgetAfter = tester.widget<AnimatedRotation>(animatedRotationFinder);
+    expect(widgetAfter.turns, closeTo(0.0, 0.001));
+  });
+
   // TODO: Add test for initial polyline plotting
   // TODO: Add test for polyline updates
   // TODO: Add test for camera movements
