@@ -2,34 +2,36 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
-void main() async {
-  test('convertDistanceUnits returns metres', () {
-    final testDistance = convertDistanceUnits(697, DistanceUnits.metric);
+void main() {
+  group('ConvertDistanceUnits', () {
+    test('convertDistanceUnits returns metres', () {
+      final testDistance = convertDistanceUnits(697, DistanceUnits.metric);
 
-    expect(testDistance, "697 m");
-  });
+      expect(testDistance, "697 m");
+    });
 
-  test('convertDistanceUnits returns kilometres', () {
-    final testDistance = convertDistanceUnits(5248, DistanceUnits.metric);
+    test('convertDistanceUnits returns kilometres', () {
+      final testDistance = convertDistanceUnits(5248, DistanceUnits.metric);
 
-    expect(testDistance, "5.25 km");
-  });
+      expect(testDistance, "5.25 km");
+    });
 
-  test('convertDistanceUnits returns feet', () {
-    final testDistance = convertDistanceUnits(90, DistanceUnits.imperial);
+    test('convertDistanceUnits returns feet', () {
+      final testDistance = convertDistanceUnits(90, DistanceUnits.imperial);
 
-    expect(testDistance, "295 ft");
-  });
+      expect(testDistance, "295 ft");
+    });
 
-  test('convertDistanceUnits returns miles', () {
-    final testDistance = convertDistanceUnits(3042, DistanceUnits.imperial);
+    test('convertDistanceUnits returns miles', () {
+      final testDistance = convertDistanceUnits(3042, DistanceUnits.imperial);
 
-    expect(testDistance, "1.89 miles");
-  });
+      expect(testDistance, "1.89 miles");
+    });
 
-  test('convertDistanceUnits returns punts', () {
-    final testDistance = convertDistanceUnits(444, DistanceUnits.cambridge);
+    test('convertDistanceUnits returns punts', () {
+      final testDistance = convertDistanceUnits(444, DistanceUnits.cambridge);
 
-    expect(testDistance, "111 punts");
+      expect(testDistance, "111 punts");
+    });
   });
 }
