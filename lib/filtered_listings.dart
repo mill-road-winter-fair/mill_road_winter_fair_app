@@ -58,7 +58,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     previousIndex = homePageKey.currentState!.index;
 
     // Request the map page to show directions
-    mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
+    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
 
     // Switch to map tab on the home page
     homePageKey.currentState?.setCurrentIndex(0);
