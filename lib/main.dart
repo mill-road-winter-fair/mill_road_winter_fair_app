@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
@@ -65,6 +66,8 @@ class MyApp extends StatelessWidget {
 }
 
 Widget emailDetailsDialog() {
+  final ScrollController emailDetailsDialogScrollController = ScrollController();
+
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: LayoutBuilder(
@@ -74,64 +77,77 @@ Widget emailDetailsDialog() {
             constraints: BoxConstraints(maxWidth: maxWidth),
             child: Padding(
               padding: const EdgeInsets.all(32.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  _buildEmailLink('info@millroadwinterfair.org'),
-                  const SizedBox(height: 15),
-                  const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  _buildEmailLink('volunteers@millroadwinterfair.org'),
-                  const SizedBox(height: 15),
-                  const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  _buildEmailLink('events@millroadwinterfair.org'),
-                  const SizedBox(height: 15),
-                  const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  _buildEmailLink('stalls@millroadwinterfair.org'),
-                  const SizedBox(height: 15),
-                  const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  _buildEmailLink('it@millroadwinterfair.org'),
-                  const SizedBox(height: 15),
-                  const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  _buildEmailLink('app@millroadwinterfair.org'),
-                  const SizedBox(height: 15),
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
-                        TextSpan(
-                          text: '07303\u{00A0}142689',
-                          style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () async {
-                              final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                              if (await canLaunchUrl(phoneUri)) {
-                                await launchUrl(phoneUri);
-                              } else {
-                                throw Exception('Could not dial 07303 142689');
-                              }
-                            }
+              child: Scrollbar(
+                controller: emailDetailsDialogScrollController,
+                thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
+                thickness: 4,
+                radius: const Radius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: SingleChildScrollView(
+                    controller: emailDetailsDialogScrollController,
+                    primary: false,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        _buildEmailLink('info@millroadwinterfair.org'),
+                        const SizedBox(height: 15),
+                        const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        _buildEmailLink('volunteers@millroadwinterfair.org'),
+                        const SizedBox(height: 15),
+                        const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        _buildEmailLink('events@millroadwinterfair.org'),
+                        const SizedBox(height: 15),
+                        const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        _buildEmailLink('stalls@millroadwinterfair.org'),
+                        const SizedBox(height: 15),
+                        const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        _buildEmailLink('it@millroadwinterfair.org'),
+                        const SizedBox(height: 15),
+                        const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        _buildEmailLink('app@millroadwinterfair.org'),
+                        const SizedBox(height: 15),
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
+                              TextSpan(
+                                text: '07303\u{00A0}142689',
+                                style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                    if (await canLaunchUrl(phoneUri)) {
+                                      await launchUrl(phoneUri);
+                                    } else {
+                                      throw Exception('Could not dial 07303 142689');
+                                    }
+                                  }
+                              ),
+                              const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
+                            ],
+                          ),
                         ),
-                        const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
+                        const SizedBox(height: 15),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              'Close',
+                              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 15),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        Navigator.pop(context);
-                      },
-                      child: Text(
-                        'Close',
-                        style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           );
