@@ -94,7 +94,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         // Add distance to each listing
         allListings = allListings.map((listing) {
           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-          final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
+          final distance = asTheCrowFlies(currentLatLng!, destinationLatLng);
           return {...listing, 'approximateDistanceMetres': distance};
         }).toList();
       }
@@ -336,7 +336,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       SpecificListingInfoSheet(
                         title: listing['displayName'],
                         categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                        openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                        startTime: "${listing['startTime']}",
+                        endTime: "${listing['endTime']}",
                         approxDistance: approximateDistance,
                         phoneNumber: listing['phone'],
                         website: listing['website'],
