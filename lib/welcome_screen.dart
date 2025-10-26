@@ -145,7 +145,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.language, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Find the websites and social\nlinks for the Fair and its stalls", style: bodyStyle),
+                          Text("Find the websites for those\ntaking part in the Fair", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -202,7 +202,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.storefront, size: 40, color: getCategoryColor(selectedThemeKey, "Shopping")),
                           const SizedBox(width: 8),
-                          Text("The stalls of the various shops,\ncharities and other organisations", style: bodyStyle),
+                          Text("Stalls with arts, crafts and goodies;\ncharities and other organisations", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -291,7 +291,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.no_transfer, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Choose whether or not to see\nour pedestrianised areas", style: bodyStyle),
+                          Text("Choose whether or not to see\nour road closure", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -300,6 +300,14 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           Text("When you tap back on the map\nonly those will be showing", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Icon(Icons.assistant_navigation, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Other buttons change the map’s\norientation and display style", style: bodyStyle),
                         ],
                       ),
                     ],
@@ -358,7 +366,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("You can sort the list by distance\nfrom you or start time", style: bodyStyle),
+                          Text("Sort the list by location,\nnearest, name or time", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 10),
