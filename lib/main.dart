@@ -353,13 +353,14 @@ class HomePageState extends State<HomePage> {
           )),
       drawer: Drawer(
         child: Column(
+          spacing: 0,
           children: <Widget>[
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: <Widget>[
                   ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 500),
+                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
                     child: DrawerHeader(
                       decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
                       child: Column(
@@ -368,16 +369,20 @@ class HomePageState extends State<HomePage> {
                         children: <Widget>[
                           Expanded(flex: 4, child: Container()),
                           FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text('Mill Road Winter Fair 2025',
-                                style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 19, fontWeight: FontWeight.bold)),
-                          ),
+                              fit: BoxFit.scaleDown,
+                              child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
+                            ),
+                          FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('  Saturday 6 December 2025 10.30 – 4.30 ', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                            ),
                           Expanded(flex: 1, child: Container())
                         ],
                       ),
                     ),
                   ),
                   ListTile(
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.info),
                     title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -387,6 +392,7 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                   ListTile(
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.warning),
                     title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -396,14 +402,16 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                   ListTile(
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.public),
-                    title: const Text('Visit our Website', style: TextStyle(fontWeight: FontWeight.bold)),
+                    title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
                       HapticFeedback.lightImpact();
                       launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
                     },
                   ),
                   ListTile(
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.email),
                     title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -431,33 +439,34 @@ class HomePageState extends State<HomePage> {
                           HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 60, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 48, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://x.com/millroadfair'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 60, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 48, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 60, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 48, color: Theme.of(context).colorScheme.tertiary),
                       ),
                       IconButton(
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                         },
-                        icon: FaIcon(FontAwesomeIcons.flickr, size: 60, color: Theme.of(context).colorScheme.tertiary),
+                        icon: FaIcon(FontAwesomeIcons.flickr, size: 48, color: Theme.of(context).colorScheme.tertiary),
                       ),
                     ],
                   ),
                   const Divider(),
                   ListTile(
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.settings),
                     title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -467,6 +476,7 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                   ListTile(
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.first_page),
                     title: const Text('Replay welcome screen', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -476,6 +486,7 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                   ListTile(
+                    visualDensity: const VisualDensity(vertical: -3.6),
                     leading: const Icon(Icons.info),
                     title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
                     onTap: () {
@@ -484,7 +495,7 @@ class HomePageState extends State<HomePage> {
                       aboutDialog();
                     },
                   ),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
