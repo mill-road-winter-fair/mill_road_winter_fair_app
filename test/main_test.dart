@@ -74,10 +74,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DrawerHeader), findsOneWidget);
-      expect(find.text('Mill Road Winter Fair 2025'), findsExactly(2));
+      expect(find.text('Mill Road Winter Fair 2025'), findsOneWidget);
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
-      expect(find.text('Visit our Website'), findsOneWidget);
+      expect(find.text('Visit our website'), findsOneWidget);
       expect(find.byType(IconButton), findsExactly(7));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('Replay welcome screen'), findsOneWidget);
