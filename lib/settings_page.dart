@@ -239,30 +239,65 @@ class _SettingsPageState extends State<SettingsPage> {
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
                           title: const Text('Light'),
+                          subtitle: Text(
+                            'The default for devices set to light mode',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                           visualDensity: VisualDensity.compact,
                           value: 'light',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
                           title: const Text('Dark'),
+                          subtitle: Text(
+                            'The default for devices set to dark mode',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                           visualDensity: VisualDensity.compact,
                           value: 'dark',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
                           title: const Text('2024 Colour Scheme'),
+                          subtitle: Text(
+                            'For the Fair that blew away',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                           visualDensity: VisualDensity.compact,
                           value: '2024',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
                           title: const Text('High Contrast'),
+                          subtitle: Text(
+                            'For users with visual accessibility needs',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                           visualDensity: VisualDensity.compact,
                           value: 'highContrast',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
                           title: const Text('Colour Blind Friendly'),
+                          subtitle: Text(
+                            'For users with colour blindness',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                           visualDensity: VisualDensity.compact,
                           value: 'colourBlindFriendly',
                         ),
