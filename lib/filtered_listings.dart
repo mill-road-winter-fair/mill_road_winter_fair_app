@@ -53,6 +53,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     super.dispose();
   }
 
+  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
+    // Remember the previous index to allow returning back
+    previousIndex = homePageKey.currentState!.index;
+
+    // Request the map page to show directions
+    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
+
+    // Switch to map tab on the home page
+    homePageKey.currentState?.setCurrentIndex(0);
+  }
+
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
     if (_searchQuery.isEmpty) return allListings;
     return allListings.where((listing) {
@@ -86,7 +97,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         // Add distance to each listing
         allListings = allListings.map((listing) {
           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-          final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
+          final distance = asTheCrowFlies(currentLatLng!, destinationLatLng);
           return {...listing, 'approximateDistanceMetres': distance};
         }).toList();
       }
@@ -138,7 +149,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     try {
       listings = await fetchListings(http.Client());
       mapPageKey.currentState?.setMarkerLists();
-      mapPageKey.currentState?.addAllVisibleMarkers(false);
+      mapPageKey.currentState?.addAllVisibleMarkers();
       establishLocation();
     } finally {
       setState(() {
@@ -204,7 +215,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
 
     // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
-    final primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+    List<Map<String, dynamic>> primaryFiltered = [];
+    if (widget.filterPrimaryType == 'Service') {
+      primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
+    } else {
+      primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+    }
 
     // Step 2: Sort the filtered listings
     final sortedListings = _applySorting(primaryFiltered);
@@ -261,6 +277,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         IconButton(
                                           icon: const Icon(Icons.close),
                                           onPressed: () {
+                                            HapticFeedback.lightImpact();
                                             setState(() {
                                               _isSearching = false;
                                               _searchQuery = '';
@@ -291,6 +308,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
                                       elevation: 0,
                                       onPressed: () {
+                                        HapticFeedback.lightImpact();
                                         setState(() {
                                           _isSearching = true;
                                         });
@@ -321,13 +339,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       SpecificListingInfoSheet(
                         title: listing['displayName'],
                         categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                        openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                        startTime: "${listing['startTime']}",
+                        endTime: "${listing['endTime']}",
                         approxDistance: approximateDistance,
                         phoneNumber: listing['phone'],
                         website: listing['website'],
                         onGetDirections: () {
                           if (homePageState != null) {
-                            homePageState.navigateToMapAndGetDirections(
+                            navigateToMapAndGetDirections(
                               listing['id'],
                               destinationLatLng,
                               http.Client(),
@@ -343,6 +362,21 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 childCount: filteredListings.length,
               ),
             ),
+
+            if (filteredListings.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

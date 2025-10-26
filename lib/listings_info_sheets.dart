@@ -3,16 +3,42 @@ import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// Function to determine if the event has ended based on endTime string
+bool hasEventEnded(String endTime) {
+  // Hardcoded fair date for 2025, change this today's date for testing
+  final fairDate = DateTime(2025, 12, 6);
+
+  try {
+    final parts = endTime.split(':');
+    final endHour = int.parse(parts[0]);
+    final endMinute = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+    final endDateTime = DateTime(
+      fairDate.year,
+      fairDate.month,
+      fairDate.day,
+      endHour,
+      endMinute,
+    );
+
+    return DateTime.now().isAfter(endDateTime);
+  } catch (_) {
+    return false; // default to not ended if parsing fails
+  }
+}
+
 class GroupListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;
-  final String openingTimes;
+  final String startTime;
+  final String endTime;
   final String approxDistance;
 
   const GroupListingInfoSheet({
     required this.title,
     required this.categories,
-    required this.openingTimes,
+    required this.startTime,
+    required this.endTime,
     required this.approxDistance,
     super.key,
   });
@@ -20,6 +46,15 @@ class GroupListingInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     debugPrint('GroupListingInfoSheet build() called');
+
+    // Determine if the event has ended, update text style accordingly
+    final bool ended = hasEventEnded(endTime);
+    final timeStyle = TextStyle(
+      fontSize: 14,
+      color: Theme.of(context).colorScheme.onPrimary,
+      decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
@@ -50,8 +85,8 @@ class GroupListingInfoSheet extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: Text(
-                  openingTimes,
-                  style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary),
+                  "$startTime - $endTime",
+                  style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
               ),
@@ -88,7 +123,8 @@ class GroupListingInfoSheet extends StatelessWidget {
 class SpecificListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;
-  final String openingTimes;
+  final String startTime;
+  final String endTime;
   final String approxDistance;
   final String phoneNumber;
   final String website;
@@ -97,7 +133,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
   const SpecificListingInfoSheet({
     required this.title,
     required this.categories,
-    required this.openingTimes,
+    required this.startTime,
+    required this.endTime,
     required this.approxDistance,
     required this.phoneNumber,
     required this.website,
@@ -108,6 +145,15 @@ class SpecificListingInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     debugPrint('SpecificListingInfoSheet build() called');
+
+    // Determine if the event has ended, update text style accordingly
+    final bool ended = hasEventEnded(endTime);
+    final timeStyle = TextStyle(
+      fontSize: 14,
+      color: ended ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
+      decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
+    );
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -127,8 +173,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: Text(
-                  openingTimes,
-                  style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  "$startTime - $endTime",
+                  style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
               ),
@@ -209,7 +255,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
 class SimplifiedListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;
-  final String openingTimes;
+  final String startTime;
+  final String endTime;
   final String phoneNumber;
   final String website;
   final Function onGetDirections;
@@ -217,7 +264,8 @@ class SimplifiedListingInfoSheet extends StatelessWidget {
   const SimplifiedListingInfoSheet({
     required this.title,
     required this.categories,
-    required this.openingTimes,
+    required this.startTime,
+    required this.endTime,
     required this.phoneNumber,
     required this.website,
     required this.onGetDirections,
@@ -227,6 +275,15 @@ class SimplifiedListingInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     debugPrint('SimplifiedListingInfoSheet build() called');
+
+    // Determine if the event has ended, update text style accordingly
+    final bool ended = hasEventEnded(endTime);
+    final timeStyle = TextStyle(
+      fontSize: 14,
+      color: ended ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
+      decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -246,8 +303,8 @@ class SimplifiedListingInfoSheet extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: Text(
-                  openingTimes,
-                  style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  "$startTime - $endTime",
+                  style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
               ),
