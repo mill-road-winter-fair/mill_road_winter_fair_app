@@ -26,8 +26,6 @@ class ImportantInfoPage extends StatelessWidget {
                 child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/hiVis_cropped.jpg', fit: BoxFit.fitWidth)),
               ),
               const SizedBox(height: 20),
-              const Text('Stewards', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-              const SizedBox(height: 10),
               bulletPoint('Stewards wearing hi-vis jackets are available to assist you.'),
               bulletPoint('To help ensure your safety, please comply promptly with any instructions from stewards.'),
               bulletPoint('If you see anything unsafe or suspicious, please report it to a steward immediately.'),
@@ -47,7 +45,7 @@ class ImportantInfoPage extends StatelessWidget {
               bulletPoint('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.', isBold: true),
               bulletPoint('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
               const SizedBox(height: 15),
-              const Text('First Aid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              const Text('First aid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               const Text('If you require first aid, ask the nearest steward or go to Mill Road Baptist Church.'),
               const SizedBox(height: 20),
@@ -69,12 +67,12 @@ class ImportantInfoPage extends StatelessWidget {
                   children: [
                     const TextSpan(text: 'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                     TextSpan(
-                        text: 'www.millroadwinterfair.org',
+                        text: 'www.millroadwinterfair.org/rcn',
                         style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/rcn'));
                           }),
                     const TextSpan(text: '.'),
                   ],
