@@ -549,7 +549,7 @@ class MapPageState extends State<MapPage> {
                 children: [
                   const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                     Text(
-                      "Filter Map Layers",
+                      "Filter map layers",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.left,
                     )
