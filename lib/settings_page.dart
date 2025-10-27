@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -109,10 +110,19 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  // Scroll controller for the page's scrollable content so we can attach a visible scrollbar
+  late ScrollController _settingsPageScrollController;
 
   @override
   void initState() {
     super.initState();
+    _settingsPageScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _settingsPageScrollController.dispose();
+    super.dispose();
   }
 
 // Save settings to shared preferences
@@ -138,140 +148,186 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Scrollbar(
+          controller: _settingsPageScrollController,
+          thumbVisibility: Platform.isIOS ? false : true,
+          thickness: 4,
+          radius: const Radius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: SingleChildScrollView(
+              controller: _settingsPageScrollController,
+              primary: false,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  RadioGroup<DistanceUnits>(
-                    groupValue: preferredDistanceUnits,
-                    onChanged: (DistanceUnits? value) {
-                      setState(() {
-                        HapticFeedback.selectionClick();
-                        preferredDistanceUnits = value!;
-                      });
-                      _saveSettings();
-                    },
-                    child: Column(
-                      children: [
-                        RadioListTile<DistanceUnits>(
-                          activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('Metric'),
-                          subtitle: Text(
-                            'Metres & Kilometres',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                      RadioGroup<DistanceUnits>(
+                        groupValue: preferredDistanceUnits,
+                        onChanged: (DistanceUnits? value) {
+                          setState(() {
+                            HapticFeedback.selectionClick();
+                            preferredDistanceUnits = value!;
+                          });
+                          _saveSettings();
+                        },
+                        child: Column(
+                          children: [
+                            RadioListTile<DistanceUnits>(
+                              activeColor: Theme.of(context).colorScheme.tertiary,
+                              title: const Text('Metric'),
+                              subtitle: Text(
+                                'Metres & Kilometres',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              value: DistanceUnits.metric,
                             ),
-                          ),
-                          visualDensity: VisualDensity.compact,
-                          value: DistanceUnits.metric,
-                        ),
-                        RadioListTile<DistanceUnits>(
-                          activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('Imperial'),
-                          subtitle: Text(
-                            'Feet & Miles',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            RadioListTile<DistanceUnits>(
+                              activeColor: Theme.of(context).colorScheme.tertiary,
+                              title: const Text('Imperial'),
+                              subtitle: Text(
+                                'Feet & Miles',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              value: DistanceUnits.imperial,
                             ),
-                          ),
-                          visualDensity: VisualDensity.compact,
-                          value: DistanceUnits.imperial,
-                        ),
-                        RadioListTile<DistanceUnits>(
-                          activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('Cambridge'),
-                          subtitle: Text(
-                            'Punt lengths',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            RadioListTile<DistanceUnits>(
+                              activeColor: Theme.of(context).colorScheme.tertiary,
+                              title: const Text('Cambridge'),
+                              subtitle: Text(
+                                'Punt lengths',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              value: DistanceUnits.cambridge,
                             ),
-                          ),
-                          visualDensity: VisualDensity.compact,
-                          value: DistanceUnits.cambridge,
+                          ],
                         ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  RadioGroup<String>(
-                    groupValue: themeNotifier.value,
-                    onChanged: (value) {
-                      HapticFeedback.selectionClick();
-                      selectedThemeKey = value!;
-                      setState(() {
-                        _changeTheme(value);
-                        switch (value) {
-                          case 'light':
-                            mapStyle = standardMap;
-                            break;
-                          case 'dark':
-                            mapStyle = darkMap;
-                            break;
-                          case '2024':
-                            mapStyle = retroMap;
-                            break;
-                          case 'highContrast':
-                            mapStyle = darkMap;
-                            break;
-                          case 'colourBlindFriendly':
-                            mapStyle = colourBlindMap;
-                            break;
-                        }
-                      });
-                      _saveSettings();
-                      mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
-                    },
-                    child: Column(
-                      children: [
-                        RadioListTile<String>(
-                          activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('Light'),
-                          visualDensity: VisualDensity.compact,
-                          value: 'light',
+                      )
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                      RadioGroup<String>(
+                        groupValue: themeNotifier.value,
+                        onChanged: (value) {
+                          HapticFeedback.selectionClick();
+                          selectedThemeKey = value!;
+                          setState(() {
+                            _changeTheme(value);
+                            switch (value) {
+                              case 'light':
+                                mapStyle = standardMap;
+                                break;
+                              case 'dark':
+                                mapStyle = darkMap;
+                                break;
+                              case '2024':
+                                mapStyle = retroMap;
+                                break;
+                              case 'highContrast':
+                                mapStyle = darkMap;
+                                break;
+                              case 'colourBlindFriendly':
+                                mapStyle = colourBlindMap;
+                                break;
+                            }
+                          });
+                          _saveSettings();
+                          mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
+                        },
+                        child: Column(
+                          children: [
+                            RadioListTile<String>(
+                              activeColor: Theme.of(context).colorScheme.tertiary,
+                              title: const Text('Light'),
+                              subtitle: Text(
+                                'The default for devices set to light mode',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              value: 'light',
+                            ),
+                            RadioListTile<String>(
+                              activeColor: Theme.of(context).colorScheme.tertiary,
+                              title: const Text('Dark'),
+                              subtitle: Text(
+                                'The default for devices set to dark mode',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              value: 'dark',
+                            ),
+                            RadioListTile<String>(
+                              activeColor: Theme.of(context).colorScheme.tertiary,
+                              title: const Text('2024 Colour Scheme'),
+                              subtitle: Text(
+                                'For the Fair that blew away',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              value: '2024',
+                            ),
+                            RadioListTile<String>(
+                              activeColor: Theme.of(context).colorScheme.tertiary,
+                              title: const Text('High Contrast'),
+                              subtitle: Text(
+                                'For users with visual accessibility needs',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              value: 'highContrast',
+                            ),
+                            RadioListTile<String>(
+                              activeColor: Theme.of(context).colorScheme.tertiary,
+                              title: const Text('Colour Blind Friendly'),
+                              subtitle: Text(
+                                'For users with colour blindness',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              value: 'colourBlindFriendly',
+                            ),
+                          ],
                         ),
-                        RadioListTile<String>(
-                          activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('Dark'),
-                          visualDensity: VisualDensity.compact,
-                          value: 'dark',
-                        ),
-                        RadioListTile<String>(
-                          activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('2024 Colour Scheme'),
-                          visualDensity: VisualDensity.compact,
-                          value: '2024',
-                        ),
-                        RadioListTile<String>(
-                          activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('High Contrast'),
-                          visualDensity: VisualDensity.compact,
-                          value: 'highContrast',
-                        ),
-                        RadioListTile<String>(
-                          activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('Colour Blind Friendly'),
-                          visualDensity: VisualDensity.compact,
-                          value: 'colourBlindFriendly',
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
