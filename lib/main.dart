@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
@@ -405,142 +406,173 @@ class HomePageState extends State<HomePage> {
           spacing: 0,
           children: <Widget>[
             Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
-                    child: DrawerHeader(
-                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(flex: 4, child: Container()),
-                          FittedBox(
-                            fit: BoxFit.scaleDown,
-                              child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
-                            ),
-                          FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('  Saturday 6 December 2025 10.30 – 4.30 ', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
-                              ),                          Expanded(flex: 1, child: Container())
-                        ],
-                      ),
-                    ),
+              flex: 0,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
+                child: DrawerHeader(
+                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(flex: 4, child: Container()),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                          child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
+                        ),
+                      Expanded(flex: 2, child: Container()),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(' Saturday 6 December 2025 10.30 – 4.30', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                          ),
+                      Expanded(flex: 2, child: Container())
+                    ],
                   ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.info),
-                    title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.warning),
+                title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  Navigator.push(context,MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.public),
+                title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.email),
+                title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return contactUsDialog();
                     },
+                  );
+                },
+              ),
+            ),
+            Expanded(
+              // needed as Expanded() is relative and this needs a fixed space on larger screens
+              flex: (max((MediaQuery.of(context).size.height.toInt() - 500),0) / 50).toInt(),  
+              child: const Spacer(),
+            ),
+            Expanded(
+              flex: 3,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                    },
+                    icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
                   ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.warning),
-                    title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
+                  IconButton(
+                    onPressed: () {
                       HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      Navigator.push(context,MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                      launchUrl(Uri.parse('https://x.com/millroadfair'));
                     },
+                    icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
                   ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.public),
-                    title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
+                  IconButton(
+                    onPressed: () {
                       HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                      launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                     },
+                    icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
                   ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.email),
-                    title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
+                  IconButton(
+                    onPressed: () {
                       HapticFeedback.lightImpact();
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return contactUsDialog();
-                        },
-                      );
+                      launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                     },
+                    icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
                   ),
                 ],
               ),
             ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://x.com/millroadfair'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.settings),
-                    title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
-                    },
-                  ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.first_page),
-                    title: const Text('Replay welcome screen', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
-                    },
-                  ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.info),
-                    title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      aboutDialog();
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                ],
+            const Expanded(
+              flex: 2,
+              child: Spacer(),
+            ),
+            const Expanded(
+              flex: 0,
+              child: Divider(),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.first_page),
+                title: const Text('Replay welcome screen', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  aboutDialog();
+                },
+              ),
+            ),
+            const Expanded(
+              flex: 2,
+              child: SizedBox(height: 20),
+            ),
+          ],
         ),
       ),
     );
