@@ -129,39 +129,6 @@ Widget contactUsDialog() {
                         ),
                       ),
                       const SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 48, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://x.com/millroadfair'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 48, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 48, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.flickr, size: 48, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                    ],
-                  ),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
