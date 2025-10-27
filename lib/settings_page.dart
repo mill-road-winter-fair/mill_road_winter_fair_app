@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
@@ -39,7 +40,7 @@ late ValueNotifier<String> themeNotifier;
 // Initialise map style variable
 late String mapStyle;
 
-Future<void> loadSettings(bool onTest) async {
+Future<void> loadSettings() async {
   debugPrint('loadSettings called, onTest=$onTest');
   if (onTest == false) {
     // Load settings from SharedPreferences
@@ -107,10 +108,19 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  // Scroll controller for the page's scrollable content so we can attach a visible scrollbar
+  late ScrollController _settingsPageScrollController;
 
   @override
   void initState() {
     super.initState();
+    _settingsPageScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _settingsPageScrollController.dispose();
+    super.dispose();
   }
 
 // Save settings to shared preferences

@@ -54,8 +54,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
+    // Remember the previous index to allow returning back
+    previousIndex = homePageKey.currentState!.index;
+
     // Request the map page to show directions
-    mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
+    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
 
     // Switch to map tab on the home page
     homePageKey.currentState?.setCurrentIndex(0);
@@ -94,7 +97,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         // Add distance to each listing
         allListings = allListings.map((listing) {
           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-          final distance = asTheCrowFlies(currentLatLng, destinationLatLng);
+          final distance = asTheCrowFlies(currentLatLng!, destinationLatLng);
           return {...listing, 'approximateDistanceMetres': distance};
         }).toList();
       }
@@ -146,7 +149,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     try {
       listings = await fetchListings(http.Client());
       mapPageKey.currentState?.setMarkerLists();
-      mapPageKey.currentState?.addAllVisibleMarkers(false);
+      mapPageKey.currentState?.addAllVisibleMarkers();
       establishLocation();
     } finally {
       setState(() {
@@ -212,7 +215,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
 
     // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
-    final primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+    List<Map<String, dynamic>> primaryFiltered = [];
+    if (widget.filterPrimaryType == 'Service') {
+      primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
+    } else {
+      primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+    }
 
     // Step 2: Sort the filtered listings
     final sortedListings = _applySorting(primaryFiltered);
@@ -331,7 +339,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       SpecificListingInfoSheet(
                         title: listing['displayName'],
                         categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
-                        openingTimes: "${listing['startTime']} - ${listing['endTime']}",
+                        startTime: "${listing['startTime']}",
+                        endTime: "${listing['endTime']}",
                         approxDistance: approximateDistance,
                         phoneNumber: listing['phone'],
                         website: listing['website'],
