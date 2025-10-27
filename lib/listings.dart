@@ -57,6 +57,7 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
 
 // Helper to parse JSON into the app’s listing structure
 List<Map<String, dynamic>> _parseListings(String body) {
+  debugPrint('_parseListings called');
   final data = json.decode(body);
   final rows = data['values'] as List<dynamic>;
   // Defensive: ensure we have at least header row
@@ -92,6 +93,7 @@ List<Map<String, dynamic>> _parseListings(String body) {
 
 // Fetch listings only if we don't already have them
 Future<List<Map<String, dynamic>>> fetchExistingListings(http.Client client) async {
+  debugPrint('fetchExistingListings called');
   if (listings.isEmpty) {
     try {
       return await fetchListings(client);
