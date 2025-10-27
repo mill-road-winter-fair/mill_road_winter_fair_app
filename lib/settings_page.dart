@@ -144,7 +144,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  const Text('Distance units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   RadioGroup<DistanceUnits>(
                     groupValue: preferredDistanceUnits,
                     onChanged: (DistanceUnits? value) {
