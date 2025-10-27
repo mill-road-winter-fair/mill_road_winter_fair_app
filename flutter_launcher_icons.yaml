@@ -1,17 +1,17 @@
 # flutter pub run flutter_launcher_icons
 flutter_launcher_icons:
-  image_path: "assets/icons/icon.png"
+  image_path: "assets/icons/splashScreenIcon.png"
 
   android: true
   # image_path_android: "assets/icons/icon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
-  adaptive_icon_background: "#c8000a"
-  adaptive_icon_foreground: "assets/icons/icon.png"
+  adaptive_icon_background: "#a6222b"
+  adaptive_icon_foreground: "assets/icons/splashScreenIcon.png"
   # adaptive_icon_foreground: "assets/icons/foreground.png"
   # adaptive_icon_monochrome: "assets/icons/monochrome.png"
 
   ios: true
-  image_path_ios: "assets/icons/icon.png"
+  image_path_ios: "assets/icons/splashScreenIcon.png"
   # remove_alpha_channel_ios: true
   # image_path_ios_dark_transparent: "assets/icons/icon_dark.png"
   # image_path_ios_tinted_grayscale: "assets/icons/icon_tinted.png"

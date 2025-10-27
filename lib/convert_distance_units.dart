@@ -6,16 +6,13 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
   String distanceToDestination = "Distance conversion error";
 
   if (preferredDistanceUnits == DistanceUnits.metric) {
-
     if (distanceMetres <= 999) {
       distanceToDestination = '$distanceMetres m';
     } else {
       final distanceKilometresRounded = (distanceMetres / 1000).toStringAsFixed(2);
       distanceToDestination = '$distanceKilometresRounded km';
     }
-
   } else if (preferredDistanceUnits == DistanceUnits.imperial) {
-
     if (distanceMetres <= 161) {
       final distanceFeetRounded = (distanceMetres * 3.28084).toStringAsFixed(0);
       distanceToDestination = '$distanceFeetRounded ft';
@@ -23,12 +20,9 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
       final distanceMilesRounded = (distanceMetres / 1609.34).toStringAsFixed(2);
       distanceToDestination = '$distanceMilesRounded miles';
     }
-
   } else if (preferredDistanceUnits == DistanceUnits.cambridge) {
-
     final puntLengths = (distanceMetres / 4).toStringAsFixed(0);
     distanceToDestination = '$puntLengths punts';
-
   }
 
   debugPrint('Distance converted: $distanceToDestination');

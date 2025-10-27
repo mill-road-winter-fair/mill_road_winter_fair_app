@@ -31,31 +31,31 @@ class TextImageRow extends StatelessWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: imageOnLeft? [
-            SizedBox(
-              height: textHeight,
-              width: constraints.maxWidth * (1 - textWidthProportion),
-              child: Image.asset(imagePath, fit: BoxFit.contain),
-            ),
-            SizedBox(
-              width: constraints.maxWidth * textWidthProportion,
-              child: Text.rich(
-                textSpan,
-              )
-            ),
-          ] : [
-            SizedBox(
-              width: constraints.maxWidth * textWidthProportion,
-              child: Text.rich(
-                textSpan,
-              )
-            ),
-            SizedBox(
-              height: textHeight,
-              width: constraints.maxWidth * (1 - textWidthProportion),
-              child: Image.asset(imagePath, fit: BoxFit.contain),
-            ),
-          ],
+          children: imageOnLeft
+              ? [
+                  SizedBox(
+                    height: textHeight,
+                    width: constraints.maxWidth * (1 - textWidthProportion),
+                    child: Image.asset(imagePath, fit: BoxFit.contain),
+                  ),
+                  SizedBox(
+                      width: constraints.maxWidth * textWidthProportion,
+                      child: Text.rich(
+                        textSpan,
+                      )),
+                ]
+              : [
+                  SizedBox(
+                      width: constraints.maxWidth * textWidthProportion,
+                      child: Text.rich(
+                        textSpan,
+                      )),
+                  SizedBox(
+                    height: textHeight,
+                    width: constraints.maxWidth * (1 - textWidthProportion),
+                    child: Image.asset(imagePath, fit: BoxFit.contain),
+                  ),
+                ],
         );
       },
     );
@@ -128,7 +128,10 @@ class AboutTheFairPage extends StatelessWidget {
           child: Column(
             children: [
               const TextImageRow(
-                textSpan: TextSpan(text: 'Mill Road Winter Fair is a celebration of community along one of the most diverse and vibrant roads in Cambridge. Usually held on the first Saturday of December, the Fair brings together local businesses and organisations, shops and stallholders, musicians, artists and dancers in one day of festival joy.',),
+                textSpan: TextSpan(
+                  text:
+                      'Mill Road Winter Fair is a celebration of community along one of the most diverse and vibrant roads in Cambridge. Usually held on the first Saturday of December, the Fair brings together local businesses and organisations, shops and stallholders, musicians, artists and dancers in one day of festival joy.',
+                ),
                 imagePath: "assets/aboutPage/MRWF25_people_hat.png",
                 textWidthProportion: 0.75,
               ),
@@ -136,7 +139,10 @@ class AboutTheFairPage extends StatelessWidget {
               Text('The 2025 Fair will be on Saturday 6th December, 10.30am to 4.30pm.', style: bodyStyle.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               const TextImageRow(
-                textSpan: TextSpan(text: 'This year, we celebrate 20 years since the first Fair in 2005! It’s been a remarkable journey, but we still hold true to the Fair’s original aim of celebrating all that is great about the Mill Road area. We have a huge range of activities to discover throughout the day; it’s sure to be the best Fair yet! Be sure to come early so that you don’t miss out!',),
+                textSpan: TextSpan(
+                  text:
+                      'This year, we celebrate 20 years since the first Fair in 2005! It’s been a remarkable journey, but we still hold true to the Fair’s original aim of celebrating all that is great about the Mill Road area. We have a huge range of activities to discover throughout the day; it’s sure to be the best Fair yet! Be sure to come early so that you don’t miss out!',
+                ),
                 imagePath: "assets/aboutPage/MRWF25_people_cake.png",
                 textWidthProportion: 0.67,
                 imageOnLeft: true,
@@ -147,28 +153,31 @@ class AboutTheFairPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   SizedBox(
-                    width: 227,
-                    // Flutter tables don't support spanning, so need two of them to do a header row
-                    child: Column(children: [Table(
-                      columnWidths: const <int, TableColumnWidth>{
-                        0: FixedColumnWidth(227),
-                      },
-                      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                      children: <TableRow>[
-                        TableRow(
-                          decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                          children: <Widget> [
-                            TableCell(
-                              verticalAlignment: TableCellVerticalAlignment.top,
-                              child: Container(
-                                padding: const EdgeInsets.only(left: 8),
-                                child: Text('Key events', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
+                      width: 227,
+                      // Flutter tables don't support spanning, so need two of them to do a header row
+                      child: Column(
+                        children: [
+                          Table(
+                            columnWidths: const <int, TableColumnWidth>{
+                              0: FixedColumnWidth(227),
+                            },
+                            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                            children: <TableRow>[
+                              TableRow(
+                                decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+                                children: <Widget>[
+                                  TableCell(
+                                    verticalAlignment: TableCellVerticalAlignment.top,
+                                    child: Container(
+                                      padding: const EdgeInsets.only(left: 8),
+                                      child: Text('Key events',
+                                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
                           ],
                         ),
-                      ],
-                    ),
                     Table(
                       columnWidths: const <int, TableColumnWidth>{
                         0: FixedColumnWidth(50),
@@ -275,7 +284,10 @@ class AboutTheFairPage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               const TextImageRow(
-                textSpan: TextSpan(text: 'We are grateful for the generous support of Bush & Co Sales and Lettings (lead sponsor), Al-Amin, Anglia Ruskin University, Hughes Hall, Love Mill Road, Regalstar Catering and Taank Optometrists. The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.',),
+                textSpan: TextSpan(
+                  text:
+                      'We are grateful for the generous support of Bush & Co Sales and Lettings (lead sponsor), Al-Amin, Anglia Ruskin University, Hughes Hall, Love Mill Road, Regalstar Catering and Taank Optometrists. The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.',
+                ),
                 imagePath: "assets/aboutPage/MRWF25_people_juggle.png",
                 textWidthProportion: 0.75,
                 imageOnLeft: true,

@@ -24,7 +24,7 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
       for (var i = 0; i < 9; i++) {
         await Future.delayed(const Duration(seconds: 2));
         final retryResponse = await client.get(uri);
-        debugPrint('Retry ${i+1} response status: ${retryResponse.statusCode}');
+        debugPrint('Retry ${i + 1} response status: ${retryResponse.statusCode}');
         if (retryResponse.statusCode == 200) {
           debugPrint('Listings fetched after retry');
           return _parseListings(retryResponse.body);

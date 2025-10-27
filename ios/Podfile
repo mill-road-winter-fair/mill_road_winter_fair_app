@@ -1,6 +1,6 @@
 # Uncomment this line to define a global platform for your project
 # uncommented MW to try to stop version clash warnings
-platform :ios, '15.6'
+platform :ios, '15.5'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'

@@ -21,12 +21,15 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 // Define a GlobalKey for HomePageState to allow access from other parts of the app:
 final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 
+// Define a global variable for routing back to a previous index
+int previousIndex = 0;
+
 Future<void> main() async {
   debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
-  await loadSettings(false);
+  await loadSettings();
   debugPrint('Settings loaded');
 
   listings = await fetchListings(http.Client());
@@ -42,6 +45,9 @@ Future<void> main() async {
   debugPrint('Setting preferred orientation and running app');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
 }
+
+// Define global variable as to whether we are onTest or not
+bool onTest = false;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -154,26 +160,25 @@ Widget contactUsDialog() {
   );
 }
 
-
-  Widget _buildEmailLink(String email) {
-    return InkWell(
-      onTap: () async {
-        HapticFeedback.lightImpact();
-        final Uri mailUri = Uri(scheme: 'mailto', path: email);
-        if (await canLaunchUrl(mailUri)) {
-          await launchUrl(mailUri);
-        } else {
-          throw Exception('Could not launch email client');
-        }
-      },
-      child: Text(
-        email,
-        style: const TextStyle(
-          color: Colors.blue,
-        ),
+Widget _buildEmailLink(String email) {
+  return InkWell(
+    onTap: () async {
+      HapticFeedback.lightImpact();
+      final Uri mailUri = Uri(scheme: 'mailto', path: email);
+      if (await canLaunchUrl(mailUri)) {
+        await launchUrl(mailUri);
+      } else {
+        throw Exception('Could not launch email client');
+      }
+    },
+    child: Text(
+      email,
+      style: const TextStyle(
+        color: Colors.blue,
       ),
-    );
-  }
+    ),
+  );
+}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -225,16 +230,11 @@ class HomePageState extends State<HomePage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.phone_android),
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Android app by Alexander Berridge')
-          ),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Android app by Alexander Berridge')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('http://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('http://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://theberridge.com'));
@@ -244,16 +244,11 @@ class HomePageState extends State<HomePage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.phone_iphone),
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('iPhone version by Matt Whiting')
-          ),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('iPhone version by Matt Whiting')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://mattwhiting.com'));
@@ -263,16 +258,12 @@ class HomePageState extends State<HomePage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.palette),
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Illustrations by Clare McEwan')
-          ),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Illustrations by Clare McEwan')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child:
+                  Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
@@ -282,20 +273,14 @@ class HomePageState extends State<HomePage> {
           dense: true,
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.feedback),
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Tell us if you like this app')
-          ),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tell us if you like this app')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
-            launchUrl(Uri.parse(
-                'https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+            launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
           },
         ),
       ],
@@ -305,14 +290,14 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
               HapticFeedback.lightImpact();
               Scaffold.of(context).openDrawer();
-              },
+            },
           ),
         ),
         title: const FittedBox(
@@ -366,7 +351,7 @@ class HomePageState extends State<HomePage> {
             BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
             BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
           ],
-        )
+        ),
       ),
       drawer: Drawer(
         child: Column(
@@ -385,13 +370,14 @@ class HomePageState extends State<HomePage> {
                       Expanded(flex: 4, child: Container()),
                       FittedBox(
                         fit: BoxFit.scaleDown,
-                          child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
-                        ),
+                        child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
+                      ),
                       Expanded(flex: 2, child: Container()),
                       FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(' Saturday 6 December 2025 10.30 – 4.30', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
-                          ),
+                        child: Text(' Saturday 6 December 2025 10.30 – 4.30',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                      ),
                       Expanded(flex: 2, child: Container())
                     ],
                   ),
@@ -418,7 +404,7 @@ class HomePageState extends State<HomePage> {
                 onTap: () {
                   HapticFeedback.lightImpact();
                   Navigator.pop(context);
-                  Navigator.push(context,MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
                 },
               ),
             ),
@@ -451,7 +437,7 @@ class HomePageState extends State<HomePage> {
             ),
             Expanded(
               // needed as Expanded() is relative and this needs a fixed space on larger screens
-              flex: (max((MediaQuery.of(context).size.height.toInt() - 500),0) / 50).toInt(),  
+              flex: (max((MediaQuery.of(context).size.height.toInt() - 500), 0) / 50).toInt(),
               child: const Spacer(),
             ),
             Expanded(
@@ -545,4 +531,3 @@ class HomePageState extends State<HomePage> {
     );
   }
 }
-
