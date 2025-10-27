@@ -59,11 +59,33 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
 List<Map<String, dynamic>> _parseListings(String body) {
   final data = json.decode(body);
   final rows = data['values'] as List<dynamic>;
-  final headers = rows.first as List<dynamic>;
+  // Defensive: ensure we have at least header row
+  if (rows.isEmpty) return [];
+
+  // Normalise headers to a list of strings
+  final headers = (rows.first as List<dynamic>).map((h) => h?.toString() ?? '').toList();
+  final headerCount = headers.length;
+
   return rows.skip(1).map((row) {
+    // Each `row` (after row 1) should be a list of cells. Make a mutable copy.
+    final cells = List<dynamic>.from(row as List<dynamic>);
+
+    // If a row has fewer cells than headers, pad with empty strings so lengths match.
+    if (cells.length < headerCount) {
+      cells.addAll(List.filled(headerCount - cells.length, ''));
+    } else if (cells.length > headerCount) {
+      // If a row has extra cells, truncate to header length.
+      cells.removeRange(headerCount, cells.length);
+    }
+
+    // Replace any explicit null cell values with empty strings to avoid nulls in the map.
+    for (var i = 0; i < cells.length; i++) {
+      if (cells[i] == null) cells[i] = '';
+    }
+
     return Map<String, dynamic>.fromIterables(
       headers.cast<String>(),
-      row.cast<dynamic>(),
+      cells.cast<dynamic>(),
     );
   }).toList();
 }
