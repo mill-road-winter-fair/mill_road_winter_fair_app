@@ -160,7 +160,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           activeColor: Theme.of(context).colorScheme.tertiary,
                           title: const Text('Metric'),
                           subtitle: Text(
-                            'Metres & Kilometres',
+                            'Metres and kilometres',
                             style: TextStyle(
                               fontSize: 14,
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -173,7 +173,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           activeColor: Theme.of(context).colorScheme.tertiary,
                           title: const Text('Imperial'),
                           subtitle: Text(
-                            'Feet & Miles',
+                            'Feet and miles',
                             style: TextStyle(
                               fontSize: 14,
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -248,19 +248,19 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('2024 Colour Scheme'),
+                          title: const Text('2024 colour scheme'),
                           visualDensity: VisualDensity.compact,
                           value: '2024',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('High Contrast'),
+                          title: const Text('High contrast'),
                           visualDensity: VisualDensity.compact,
                           value: 'highContrast',
                         ),
                         RadioListTile<String>(
                           activeColor: Theme.of(context).colorScheme.tertiary,
-                          title: const Text('Colour Blind Friendly'),
+                          title: const Text('Colour blind friendly'),
                           visualDensity: VisualDensity.compact,
                           value: 'colourBlindFriendly',
                         ),

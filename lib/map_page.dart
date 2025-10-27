@@ -651,7 +651,7 @@ class MapPageState extends State<MapPage> {
                                   updateRoadClosurePolygonVisibility(true);
                                 },
                                 icon: const Icon(Icons.filter_alt),
-                                label: const Text('Show All'),
+                                label: const Text('Show all'),
                               ),
                               const SizedBox(width: 10),
                               ElevatedButton.icon(
@@ -666,7 +666,7 @@ class MapPageState extends State<MapPage> {
                                   updateRoadClosurePolygonVisibility(false);
                                 },
                                 icon: const Icon(Icons.filter_alt_off),
-                                label: const Text('Hide All'),
+                                label: const Text('Hide all'),
                               ),
                               const SizedBox(width: 10),
                               ElevatedButton.icon(
@@ -1104,7 +1104,7 @@ class MapPageState extends State<MapPage> {
                     : ElevatedButton.icon(
                         onPressed: refreshListings,
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh Listings'),
+                        label: const Text('Refresh listings'),
                       ),
               ],
             ),

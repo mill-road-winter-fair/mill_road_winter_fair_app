@@ -13,7 +13,7 @@ class ImportantInfoPage extends StatelessWidget {
       appBar: AppBar(
         title: const FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text('Important Information'),
+          child: Text('Important information'),
         ),
       ),
       body: SingleChildScrollView(

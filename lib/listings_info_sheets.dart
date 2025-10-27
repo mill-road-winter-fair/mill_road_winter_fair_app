@@ -182,7 +182,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     onGetDirections();
                   },
                   icon: const Icon(Icons.directions_walk),
-                  label: const FittedBox(child: Text('Get Directions')),
+                  label: const FittedBox(child: Text('Get directions')),
                 ),
               ),
               Flexible(flex: 1, child: Container()),
@@ -195,7 +195,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                       launchUrl(Uri.parse(website));
                     },
                     icon: const Icon(Icons.public),
-                    label: const FittedBox(child: Text('Open Website')),
+                    label: const FittedBox(child: Text('Open website')),
                   ),
                 ),
             ],
@@ -298,7 +298,7 @@ class SimplifiedListingInfoSheet extends StatelessWidget {
                     onGetDirections();
                   },
                   icon: const Icon(Icons.directions_walk),
-                  label: const FittedBox(child: Text('Get Directions')),
+                  label: const FittedBox(child: Text('Get directions')),
                 ),
               ),
               Flexible(flex: 1, child: Container()),
@@ -311,7 +311,7 @@ class SimplifiedListingInfoSheet extends StatelessWidget {
                       launchUrl(Uri.parse(website));
                     },
                     icon: const Icon(Icons.public),
-                    label: const FittedBox(child: Text('Open Website')),
+                    label: const FittedBox(child: Text('Open website')),
                   ),
                 ),
             ],
