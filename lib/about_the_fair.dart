@@ -124,7 +124,7 @@ class AboutTheFairPage extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Container(
-          padding: const EdgeInsets.all(10.0),
+          padding: EdgeInsets.all(10.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 50).toInt()),
           child: Column(
             children: [
               const TextImageRow(
@@ -297,7 +297,7 @@ class AboutTheFairPage extends StatelessWidget {
                 fit: BoxFit.fill,
                 child: Image.asset("assets/aboutPage/MRWF25_sponsor_logos.png"),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
             ],
           ), // Add event details here
         ),
