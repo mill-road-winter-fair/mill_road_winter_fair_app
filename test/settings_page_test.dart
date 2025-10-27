@@ -10,11 +10,11 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
 
     // Verify the Distance Units section
-    expect(find.text('Distance Units'), findsOneWidget);
+    expect(find.text('Distance units'), findsOneWidget);
     expect(find.text('Metric'), findsOneWidget);
-    expect(find.text('Metres & Kilometres'), findsOneWidget);
+    expect(find.text('Metres and kilometres'), findsOneWidget);
     expect(find.text('Imperial'), findsOneWidget);
-    expect(find.text('Feet & Miles'), findsOneWidget);
+    expect(find.text('Feet and miles'), findsOneWidget);
     expect(find.text('Cambridge'), findsOneWidget);
     expect(find.text('Punt lengths'), findsOneWidget);
 
@@ -22,9 +22,9 @@ void main() {
     expect(find.text('Theme'), findsOneWidget);
     expect(find.text('Light'), findsOneWidget);
     expect(find.text('Dark'), findsOneWidget);
-    expect(find.text('2024 Colour Scheme'), findsOneWidget);
-    expect(find.text('High Contrast'), findsOneWidget);
-    expect(find.text('Colour Blind Friendly'), findsOneWidget);
+    expect(find.text('2024 colour scheme'), findsOneWidget);
+    expect(find.text('High contrast'), findsOneWidget);
+    expect(find.text('Colour blind friendly'), findsOneWidget);
 
     // Verify default settings
     expect(preferredDistanceUnits, DistanceUnits.metric);
@@ -60,7 +60,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
 
     // Tap on the Colour Blind Friendly theme radio button
-    await tester.tap(find.text('Colour Blind Friendly'));
+    await tester.tap(find.text('Colour blind friendly'));
     await tester.pumpAndSettle();
 
     // Verify the selected theme
@@ -76,7 +76,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Change theme to High Contrast
-    await tester.tap(find.text('High Contrast'));
+    await tester.tap(find.text('High contrast'));
     await tester.pumpAndSettle();
 
     // Verify SharedPreferences values

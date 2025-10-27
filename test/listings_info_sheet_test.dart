@@ -90,7 +90,7 @@ void main() {
       },
     ));
 
-    final getDirectionsButton = find.text('Get Directions');
+    final getDirectionsButton = find.text('Get directions');
     expect(getDirectionsButton, findsOneWidget);
 
     await tester.tap(getDirectionsButton);
