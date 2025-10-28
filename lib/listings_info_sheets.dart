@@ -122,28 +122,22 @@ class GroupListingInfoSheet extends StatelessWidget {
 
 class SpecificListingInfoSheet extends StatelessWidget {
   final String title;
-  final String secondaryType;
-  final String tertiaryType;
+  final String categories;
   final String startTime;
   final String endTime;
   final String approxDistance;
   final String phoneNumber;
   final String website;
-  final String email;
-  final String details;
   final Function onGetDirections;
 
   const SpecificListingInfoSheet({
     required this.title,
-    required this.secondaryType,
-    required this.tertiaryType,
+    required this.categories,
     required this.startTime,
     required this.endTime,
     required this.approxDistance,
     required this.phoneNumber,
     required this.website,
-    required this.email,
-    required this.details,
     required this.onGetDirections,
     super.key,
   });
@@ -161,11 +155,10 @@ class SpecificListingInfoSheet extends StatelessWidget {
     );
 
     return Container(
-      padding: EdgeInsets.all(10.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 50).toInt()),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 0,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -180,7 +173,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: Text(
-                  tertiaryType,
+                  "$startTime - $endTime",
                   style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
@@ -191,90 +184,66 @@ class SpecificListingInfoSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(flex: 7, child: Text("$secondaryType${currentLatLng != null ? " ($approxDistance)" : ""}")),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  "$startTime—$endTime",
-                  style: timeStyle,
-                  textAlign: TextAlign.end,
+              Expanded(flex: 7, child: Text(categories)),
+              if (currentLatLng != null)
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    approxDistance,
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    textAlign: TextAlign.end,
+                  ),
                 ),
-              ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
+          if (phoneNumber.isNotEmpty)
+            GestureDetector(
+              onTap: () async {
+                HapticFeedback.lightImpact();
+                final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+                if (await canLaunchUrl(phoneUri)) {
+                  await launchUrl(phoneUri);
+                } else {
+                  throw Exception('Could not launch $phoneNumber');
+                }
+              },
+              child: Row(
+                children: [
+                  const Icon(Icons.phone, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Text(phoneNumber),
+                ],
+              ),
+            ),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ElevatedButton.icon(
-//                style: ElevatedButton.styleFrom(fixedSize: const Size(110, 24), padding: const EdgeInsets.symmetric(vertical: 0), shadowColor: Theme.of(context).shadowColor, elevation: 3),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  onGetDirections();
-                },
-                icon: const Icon(Icons.directions_walk),
-                label: const FittedBox(child: Text('Directions')),
-              ),
-              if (details.isNotEmpty) const SizedBox(height: 8, width: 8),
-              if (details.isNotEmpty) 
-                ElevatedButton.icon(
-//                    style: ElevatedButton.styleFrom(fixedSize: const Size(110, 24), padding: const EdgeInsets.symmetric(vertical: 0), shadowColor: Theme.of(context).shadowColor, elevation: 3),
+              Flexible(
+                flex: 8,
+                child: ElevatedButton.icon(
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    launchUrl(Uri.parse(website));
+                    onGetDirections();
                   },
-                  icon: const Icon(Icons.info),
-                  label: const FittedBox(child: Text('Details')),
+                  icon: const Icon(Icons.directions_walk),
+                  label: const FittedBox(child: Text('Get Directions')),
                 ),
+              ),
               Flexible(flex: 1, child: Container()),
               if (website.isNotEmpty)
-                GestureDetector(
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    launchUrl(Uri.parse(website));
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.public, color: Theme.of(context).colorScheme.primary, size: 36, shadows: [Shadow(offset: const Offset(2, 2), color: Theme.of(context).shadowColor)]),
-                    ],
+                Flexible(
+                  flex: 8,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      launchUrl(Uri.parse(website));
+                    },
+                    icon: const Icon(Icons.public),
+                    label: const FittedBox(child: Text('Open Website')),
                   ),
                 ),
-                if (email.isNotEmpty) const SizedBox(height: 8, width: 8),
-                if (email.isNotEmpty)
-                  GestureDetector(
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      final Uri mailUri = Uri(scheme: 'mailto', path: email);
-                      if (await canLaunchUrl(mailUri)) {
-                        await launchUrl(mailUri);
-                      } else {
-                        throw Exception('Could not launch email client');
-                      }
-                    },
-                    child: Row(
-                      children: [
-                        Icon(Icons.email, color: Theme.of(context).colorScheme.primary, size: 36, shadows: [Shadow(offset: const Offset(2, 2), color: Theme.of(context).shadowColor)]),
-                      ],
-                    ),
-                  ),
-                if (phoneNumber.isNotEmpty) const SizedBox(height: 8, width: 8),
-                if (phoneNumber.isNotEmpty)
-                  GestureDetector(
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-                      if (await canLaunchUrl(phoneUri)) {
-                        await launchUrl(phoneUri);
-                      } else {
-                        throw Exception('Could not launch $phoneNumber');
-                      }
-                    },
-                    child: Row(
-                      children: [
-                        Icon(Icons.phone, color: Theme.of(context).colorScheme.primary, size: 36, shadows: [Shadow(offset: const Offset(2, 2), color: Theme.of(context).shadowColor)]),
-                      ],
-                    ),
-                  ),
             ],
           ),
         ],

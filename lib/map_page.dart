@@ -584,15 +584,12 @@ class MapPageState extends State<MapPage> {
           builder: (BuildContext context) {
             return SpecificListingInfoSheet(
               title: listing['displayName'],
-              secondaryType: listing['secondaryType'],
-              tertiaryType: listing['tertiaryType'],
+              categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
               startTime: "${listing['startTime']}",
               endTime: "${listing['endTime']}",
               approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
               phoneNumber: listing['phone'],
               website: listing['website'],
-              email: 'testywestywoowah@mattwhiting.com',
-              details: "I do not feel this to be a root problem with the app. The app was never designed to provide up-to-the-minute news/posts/updates about the Fair and there was never a request that it should do so. When I first built the app and asked the committee for feedback I counselled against using the app to attempt to replace something like Twitter or Facebook. These apps already have huge audiences, countless features and rigorous testing - it would be futile to compete with them. At best we would be duplicating the news and posts that are already being put on social media by Donna, et al, and our posts wouldn't even be likeable or shareable.",
               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
             );
           },
