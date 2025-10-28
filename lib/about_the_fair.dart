@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
-//import 'package:mill_road_winter_fair_app/main.dart'; // needed if we restore link to Contact Us
 
 class TextImageRow extends StatelessWidget {
   final TextSpan textSpan;
@@ -62,9 +61,8 @@ class TextImageRow extends StatelessWidget {
   }
 }
 
-TableRow eventRow(context, eventTime, eventTitle, [List<TextSpan>? eventSubtitle]) {
-
 // Make a row in the events table. Needed as can't style the entire table or pad an entire row in one go
+TableRow eventRow(context, eventTime, eventTitle, [List<TextSpan>? eventSubtitle]) {
 
   var eventsTimeStyle = TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
   var eventsTitleStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);

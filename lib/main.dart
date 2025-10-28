@@ -69,18 +69,18 @@ class MyApp extends StatelessWidget {
   }
 }
 
-Widget contactUsDialog() {
+Widget contactUsDialog(BuildContext theBuildContext) {
   final ScrollController emailDetailsDialogScrollController = ScrollController();
 
   return Dialog(
-    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+    insetPadding: EdgeInsets.all(10.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
     child: LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
         return ConstrainedBox(
           constraints: BoxConstraints(maxWidth: maxWidth),
           child: Padding(
-            padding: const EdgeInsets.all(32.0),
+            padding: EdgeInsets.all(16.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
             child: Scrollbar(
               controller: emailDetailsDialogScrollController,
               thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
@@ -120,7 +120,7 @@ Widget contactUsDialog() {
                                 style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
                             TextSpan(
                                 text: '07303\u{00A0}142689',
-                                style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                                style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () async {
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
@@ -174,7 +174,7 @@ Widget _buildEmailLink(String email) {
     child: Text(
       email,
       style: const TextStyle(
-        color: Colors.blue,
+        decoration: TextDecoration.underline
       ),
     ),
   );
@@ -429,7 +429,7 @@ class HomePageState extends State<HomePage> {
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return contactUsDialog();
+                      return contactUsDialog(context);
                     },
                   );
                 },

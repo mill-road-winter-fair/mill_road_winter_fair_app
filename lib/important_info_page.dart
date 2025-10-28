@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 
 class ImportantInfoPage extends StatelessWidget {
   const ImportantInfoPage({super.key});
@@ -72,7 +73,7 @@ class ImportantInfoPage extends StatelessWidget {
                             'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                     TextSpan(
                         text: 'www.millroadwinterfair.org/rcn',
-                        style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                        style: const TextStyle(decoration: TextDecoration.underline),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
@@ -85,7 +86,39 @@ class ImportantInfoPage extends StatelessWidget {
               const SizedBox(height: 15),
               const Text('Updates and contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
-              bulletPoint('Please follow Mill Road Winter Fair on social media or check this app for the latest updates.'),
+              bulletPoint('Please follow Mill Road Winter Fair on social media for the latest news and updates or check this app for the latest listings.'),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2.0), // tighten spacing
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('• ', style: TextStyle(height: 1.2)),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            const TextSpan(text: 'Email addresses for the Fair can be found '),
+                            TextSpan(
+                                text: 'here',
+                                style: const TextStyle(decoration: TextDecoration.underline),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    HapticFeedback.lightImpact();
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return contactUsDialog(context);
+                                      },
+                                    );
+                                  }),
+                            const TextSpan(text: '.'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2.0), // tighten spacing
                 child: Row(
@@ -99,9 +132,10 @@ class ImportantInfoPage extends StatelessWidget {
                             const TextSpan(text: 'On the day, you can also phone '),
                             TextSpan(
                                 text: '07303 142689',
-                                style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
+                                style: const TextStyle(decoration: TextDecoration.underline),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () async {
+                                    HapticFeedback.lightImpact();
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
                                     if (await canLaunchUrl(phoneUri)) {
                                       await launchUrl(phoneUri);
