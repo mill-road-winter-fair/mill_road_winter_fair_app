@@ -884,7 +884,7 @@ class MapPageState extends State<MapPage> {
     }
 
     // GENERIC ids come from non-listing source e.g. Key Events table on About The Fair
-    if (id.substring(0,7) == 'GENERIC') {
+    if (id.length > 7 && id.substring(0,7) == 'GENERIC') {
       if (id.length > 8) {
         addSimpleMarker(id.substring(8), id.substring(8), destination);
       } else {
