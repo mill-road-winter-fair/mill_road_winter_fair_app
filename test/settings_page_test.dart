@@ -30,10 +30,15 @@ void main() {
       // Verify the Theme section
       expect(find.text('Theme'), findsOneWidget);
       expect(find.text('Light'), findsOneWidget);
+      expect(find.text('The default for devices set to light mode'), findsOneWidget);
       expect(find.text('Dark'), findsOneWidget);
+      expect(find.text('The default for devices set to dark mode'), findsOneWidget);
       expect(find.text('2024 colour scheme'), findsOneWidget);
+      expect(find.text('For the Fair that blew away'), findsOneWidget);
       expect(find.text('High contrast'), findsOneWidget);
+      expect(find.text('For users with visual accessibility needs'), findsOneWidget);
       expect(find.text('Colour blind friendly'), findsOneWidget);
+      expect(find.text('For users with colour blindness'), findsOneWidget);
 
       // Verify default settings
       expect(preferredDistanceUnits, DistanceUnits.metric);
