@@ -98,6 +98,7 @@ TableRow eventRow(context, eventTime, eventTitle, [List<TextSpan>? eventSubtitle
 
 void showDirectionsTo(BuildContext context, String id, LatLng theDest) {
 
+  debugPrint('showDirectionsTo build() called for id: $id');
   mapPageKey.currentState?.getDirections(id, theDest, true);
   // Switch to map tab on the home page
   homePageKey.currentState?.setCurrentIndex(0);
@@ -194,7 +195,7 @@ class AboutTheFairPage extends StatelessWidget {
                                 ..onTap = () 
                                 {
                                   HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, 'East Road', const LatLng(52.202488, 0.131207));
+                                  showDirectionsTo(context, 'GENERIC Event', const LatLng(52.202488, 0.131207));
                                 }
                             ),
                             TextSpan(text: ' to ', style: eventsSubtitleStyle),
@@ -204,7 +205,7 @@ class AboutTheFairPage extends StatelessWidget {
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, 'Mill Road bridge', const LatLng(52.198682, 0.141051));
+                                  showDirectionsTo(context, 'GENERIC Event', const LatLng(52.198682, 0.141051));
                                 }
                             ),
                           ],
@@ -217,7 +218,7 @@ class AboutTheFairPage extends StatelessWidget {
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, 'Ditchburn Gardens', const LatLng(52.200389, 0.136465));
+                                  showDirectionsTo(context, 'GENERIC Event', const LatLng(52.200389, 0.136465));
                                 }),
                           ],
                         ),
@@ -229,7 +230,7 @@ class AboutTheFairPage extends StatelessWidget {
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, 'Salisbury Club', const LatLng(52.1970778,0.1472252));
+                                  showDirectionsTo(context, 'GENERIC Event', const LatLng(52.1970778,0.1472252));
                                 }
                             ),
                             TextSpan(text: ' to ', style: eventsSubtitleStyle),
@@ -239,7 +240,7 @@ class AboutTheFairPage extends StatelessWidget {
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, 'Petersfield', const LatLng(52.202858, 0.132253));
+                                  showDirectionsTo(context, 'GENERIC Event', const LatLng(52.202858, 0.132253));
                                 }
                             ),
                           ],
@@ -252,7 +253,7 @@ class AboutTheFairPage extends StatelessWidget {
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, 'Gwydir Street', const LatLng(52.199627, 0.138407));
+                                  showDirectionsTo(context, 'GENERIC Event', const LatLng(52.199627, 0.138407));
                                 }
                             ),
                             TextSpan(text: ' to ', style: eventsSubtitleStyle),
@@ -262,7 +263,7 @@ class AboutTheFairPage extends StatelessWidget {
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, 'Petersfield', const LatLng(52.202858, 0.132253));
+                                  showDirectionsTo(context, 'GENERIC Event', const LatLng(52.202858, 0.132253));
                                 }
                             ),
                           ],

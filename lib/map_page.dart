@@ -606,6 +606,31 @@ class MapPageState extends State<MapPage> {
     });
   }
 
+ void addSimpleMarker(markerName, primaryType, destinationLatLng) async {
+
+    debugPrint('addSimpleMarker called for marker name: $markerName');
+    MarkerId markerId = MarkerId(markerName);
+    Color color = getCategoryColor(selectedThemeKey, primaryType);
+    late BitmapDescriptor customMarker;
+    if (onTest == false) {
+      customMarker = bitmapDescriptors[primaryType]!;
+    } else {
+      double hue = HSVColor.fromColor(color).hue;
+      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
+    }
+
+    Marker newMarker = Marker(
+      markerId: markerId,
+      position: destinationLatLng,
+      icon: customMarker,
+      visible: true,
+    );
+
+    setState(() {
+      markers[markerId] = newMarker;
+    });
+  }
+
   Future<void> updateMarkersAndPolygonsForTheme() async {
     debugPrint('updateMarkersAndPolygonsForTheme called');
     // Recreate marker bitmaps for the new theme colors
@@ -845,7 +870,6 @@ class MapPageState extends State<MapPage> {
       await updatePolyline(currentLatLng, destination);
       // Set the camera position once, at the beginning of the navigation
       _setMapCameraToFitPolyline(polylines);
-
       // Start location updates
       await startLocationUpdates(destination);
     } else {
@@ -859,9 +883,19 @@ class MapPageState extends State<MapPage> {
       );
     }
 
-    // Add destination map marker
-    Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
-    addSpecificMarker(destinationListing);
+    // GENERIC ids come from non-listing source e.g. Key Events table on About The Fair
+    if (id.substring(0,7) == 'GENERIC') {
+      if (id.length > 8) {
+        addSimpleMarker(id.substring(8), id.substring(8), destination);
+      } else {
+        debugPrint('Adding Event type marker as category was not specified: $id');
+        addSimpleMarker('Event', 'Event', destination);
+      }
+    } else {
+      // Add destination map marker
+      Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
+      addSpecificMarker(destinationListing);
+    }
   }
 
   void cancelNavigation() {
