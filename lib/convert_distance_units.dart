@@ -1,5 +1,5 @@
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:flutter/foundation.dart';
+//import 'package:flutter/foundation.dart'; // need for the debugPrint()
 
 String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceUnits) {
 //  debugPrint('convertDistanceUnits called: distanceMetres=$distanceMetres, preferredDistanceUnits=$preferredDistanceUnits');
