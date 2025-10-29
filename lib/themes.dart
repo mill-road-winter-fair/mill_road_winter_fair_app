@@ -33,7 +33,7 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.1),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   'dark': ThemeData(
     useMaterial3: true,

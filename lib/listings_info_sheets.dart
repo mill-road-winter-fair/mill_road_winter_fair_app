@@ -130,7 +130,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final String phoneNumber;
   final String website;
   final String email;
-  final String details;
+  final String description;
   final Function onGetDirections;
 
   const SpecificListingInfoSheet({
@@ -143,7 +143,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     required this.phoneNumber,
     required this.website,
     required this.email,
-    required this.details,
+    required this.description,
     required this.onGetDirections,
     super.key,
   });
@@ -159,9 +159,9 @@ class SpecificListingInfoSheet extends StatelessWidget {
       color: ended ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
-
+debugPrint('width of ${MediaQuery.of(context).size.width}');
     return Container(
-      padding: EdgeInsets.all(10.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 50).toInt()),
+      padding: EdgeInsets.all(2.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,7 +191,11 @@ class SpecificListingInfoSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(flex: 7, child: Text("$secondaryType${currentLatLng != null ? " ($approxDistance)" : ""}")),
+              Expanded(flex: 7, child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(text: secondaryType),
+                  TextSpan(style: const TextStyle(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
+            ], ), ), ),
               Expanded(
                 flex: 3,
                 child: Text(
@@ -205,9 +209,10 @@ class SpecificListingInfoSheet extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               ElevatedButton.icon(
-//                style: ElevatedButton.styleFrom(fixedSize: const Size(110, 24), padding: const EdgeInsets.symmetric(vertical: 0), shadowColor: Theme.of(context).shadowColor, elevation: 3),
+                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   onGetDirections();
@@ -215,10 +220,20 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 icon: const Icon(Icons.directions_walk),
                 label: const FittedBox(child: Text('Directions')),
               ),
-              if (details.isNotEmpty) const SizedBox(height: 8, width: 8),
-              if (details.isNotEmpty) 
+              if (description.isNotEmpty) const SizedBox(height: 8, width: 8),
+              // below is safeguard in case someone overloads a listing with Details (for Music/Events) as well as Email/Phone/Website (for others)
+              if (description.isNotEmpty && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 350)
+                ElevatedButton(
+                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    launchUrl(Uri.parse(website));
+                  },
+                  child: const Icon(Icons.info),
+              ) 
+              else if (description.isNotEmpty)
                 ElevatedButton.icon(
-//                    style: ElevatedButton.styleFrom(fixedSize: const Size(110, 24), padding: const EdgeInsets.symmetric(vertical: 0), shadowColor: Theme.of(context).shadowColor, elevation: 3),
+                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     launchUrl(Uri.parse(website));
@@ -227,6 +242,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   label: const FittedBox(child: Text('Details')),
                 ),
               Flexible(flex: 1, child: Container()),
+              if (website.isNotEmpty) const SizedBox(width: 6),
               if (website.isNotEmpty)
                 GestureDetector(
                   onTap: () async {
@@ -235,11 +251,11 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   },
                   child: Row(
                     children: [
-                      Icon(Icons.public, color: Theme.of(context).colorScheme.primary, size: 36, shadows: [Shadow(offset: const Offset(2, 2), color: Theme.of(context).shadowColor)]),
+                      Icon(Icons.public, color: Theme.of(context).colorScheme.primary, size: 30, shadows: [Shadow(offset: const Offset(1, 3), blurRadius: 5, color: Theme.of(context).shadowColor)]),
                     ],
                   ),
                 ),
-                if (email.isNotEmpty) const SizedBox(height: 8, width: 8),
+                if (email.isNotEmpty) const SizedBox(width: 6),
                 if (email.isNotEmpty)
                   GestureDetector(
                     onTap: () async {
@@ -253,11 +269,11 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     },
                     child: Row(
                       children: [
-                        Icon(Icons.email, color: Theme.of(context).colorScheme.primary, size: 36, shadows: [Shadow(offset: const Offset(2, 2), color: Theme.of(context).shadowColor)]),
+                        Icon(Icons.email, color: Theme.of(context).colorScheme.primary, size: 30, shadows: [Shadow(offset: const Offset(1, 3), blurRadius: 5, color: Theme.of(context).shadowColor)]),
                       ],
                     ),
                   ),
-                if (phoneNumber.isNotEmpty) const SizedBox(height: 8, width: 8),
+                if (phoneNumber.isNotEmpty) const SizedBox(width: 8),
                 if (phoneNumber.isNotEmpty)
                   GestureDetector(
                     onTap: () async {
@@ -271,10 +287,71 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     },
                     child: Row(
                       children: [
-                        Icon(Icons.phone, color: Theme.of(context).colorScheme.primary, size: 36, shadows: [Shadow(offset: const Offset(2, 2), color: Theme.of(context).shadowColor)]),
+                        Icon(Icons.phone, color: Theme.of(context).colorScheme.primary, size: 30, shadows: [Shadow(offset: const Offset(1, 3), blurRadius: 5, color: Theme.of(context).shadowColor)]),
                       ],
                     ),
                   ),
+            ],
+          ),
+
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 0,
+            children: [
+              if (description.isNotEmpty) const SizedBox(height: 8),
+              if (description.isNotEmpty) Row(
+                children: [
+                  Flexible(
+                    child: Text(style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic), description),
+                  ),
+                ],
+              ),
+              if (website.isNotEmpty) const SizedBox(height: 8),
+              if (website.isNotEmpty) Row(
+                children: [
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                            TextSpan(style: TextStyle(fontSize: 12), text: website),
+                          ], 
+                        ),
+                      ), 
+                    ),
+                ],
+              ),
+              if (email.isNotEmpty) const SizedBox(height: 8),
+              if (email.isNotEmpty) Row(
+                children: [
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                      TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                      TextSpan(style: TextStyle(fontSize: 12), text: email),
+                          ], 
+                        ),
+                      ), 
+                    ),
+                ],
+              ),
+              if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
+              if (phoneNumber.isNotEmpty) Row(
+                children: [
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                      TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                      TextSpan(style: TextStyle(fontSize: 12), text: phoneNumber),
+                          ], 
+                        ),
+                      ), 
+                    ),
+                ],
+              ),
             ],
           ),
         ],

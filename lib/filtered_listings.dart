@@ -345,8 +345,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         approxDistance: approximateDistance,
                         phoneNumber: listing['phone'],
                         website: listing['website'],
-                        email: 'testywestywoowah@mattwhiting.com',
-                        details: "I do not feel this to be a root problem with the app. The app was never designed to provide up-to-the-minute news/posts/updates about the Fair and there was never a request that it should do so. When I first built the app and asked the committee for feedback I counselled against using the app to attempt to replace something like Twitter or Facebook. These apps already have huge audiences, countless features and rigorous testing - it would be futile to compete with them. At best we would be duplicating the news and posts that are already being put on social media by Donna, et al, and our posts wouldn't even be likeable or shareable.",
+                        email: listing['email'],
+                        description: listing['description'],
                         onGetDirections: () {
                           if (homePageState != null) {
                             navigateToMapAndGetDirections(
@@ -398,7 +398,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: DropdownMenu(
               initialSelection: preferredSortingMethod,
-              width: MediaQuery.of(context).size.width * 0.6,
+              width: MediaQuery.of(context).size.width * 0.6 + 40,
               label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
               leadingIcon: const Icon(Icons.sort),
               inputDecorationTheme: InputDecorationTheme(

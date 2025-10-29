@@ -591,8 +591,8 @@ class MapPageState extends State<MapPage> {
               approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
               phoneNumber: listing['phone'],
               website: listing['website'],
-              email: 'testywestywoowah@mattwhiting.com',
-              details: "I do not feel this to be a root problem with the app. The app was never designed to provide up-to-the-minute news/posts/updates about the Fair and there was never a request that it should do so. When I first built the app and asked the committee for feedback I counselled against using the app to attempt to replace something like Twitter or Facebook. These apps already have huge audiences, countless features and rigorous testing - it would be futile to compete with them. At best we would be duplicating the news and posts that are already being put on social media by Donna, et al, and our posts wouldn't even be likeable or shareable.",
+              email: listing['email'],
+              description: listing['description'],
               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
             );
           },
