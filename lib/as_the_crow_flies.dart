@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 int asTheCrowFlies(LatLng origin, LatLng destination) {
-  debugPrint('asTheCrowFlies called: origin=$origin, destination=$destination');
+//  debugPrint('asTheCrowFlies called: origin=$origin, destination=$destination');
 
   // Constant value for converting degrees to radians (π/180)
   const p = 0.017453292519943295;
@@ -27,6 +27,6 @@ int asTheCrowFlies(LatLng origin, LatLng destination) {
   // Apply the fudge factor (See above)
   // Round the figure to 0 decimal places
   var distanceMetres = (((12742 * math.asin(math.sqrt(a))) * 1000) * fudgeFactor).round();
-  debugPrint('Distance calculated: $distanceMetres metres');
+//  debugPrint('Distance calculated: $distanceMetres metres');
   return distanceMetres;
 }

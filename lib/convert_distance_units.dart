@@ -2,7 +2,7 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:flutter/foundation.dart';
 
 String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceUnits) {
-  debugPrint('convertDistanceUnits called: distanceMetres=$distanceMetres, preferredDistanceUnits=$preferredDistanceUnits');
+//  debugPrint('convertDistanceUnits called: distanceMetres=$distanceMetres, preferredDistanceUnits=$preferredDistanceUnits');
   String distanceToDestination = "Distance conversion error";
 
   if (preferredDistanceUnits == DistanceUnits.metric) {
@@ -25,6 +25,6 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
     distanceToDestination = '$puntLengths punts';
   }
 
-  debugPrint('Distance converted: $distanceToDestination');
+//  debugPrint('Distance converted: $distanceToDestination');
   return distanceToDestination;
 }

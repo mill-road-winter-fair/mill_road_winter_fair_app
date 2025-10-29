@@ -432,7 +432,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addGroupMarker(listing) async {
-    debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
+//    debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
