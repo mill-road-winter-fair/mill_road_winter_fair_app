@@ -63,7 +63,6 @@ class TextImageRow extends StatelessWidget {
 
 // Make a row in the events table. Needed as can't style the entire table or pad an entire row in one go
 TableRow eventRow(context, eventTime, eventTitle, [List<TextSpan>? eventSubtitle]) {
-
   var eventsTimeStyle = TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
   var eventsTitleStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
 
@@ -87,22 +86,17 @@ TableRow eventRow(context, eventTime, eventTitle, [List<TextSpan>? eventSubtitle
       ),
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
-        child: Container(
-          padding: const EdgeInsets.all(3),
-          child: Text.rich(TextSpan(children: allTitleSpans))
-        ),
+        child: Container(padding: const EdgeInsets.all(3), child: Text.rich(TextSpan(children: allTitleSpans))),
       ),
     ],
   );
 }
 
 void showDirectionsTo(BuildContext context, String id, LatLng theDest) {
-
   debugPrint('showDirectionsTo build() called for id: $id');
   mapPageKey.currentState?.getDirections(id, theDest, true);
   // Switch to map tab on the home page
   homePageKey.currentState?.setCurrentIndex(0);
-
 }
 
 class AboutTheFairPage extends StatelessWidget {
@@ -175,106 +169,111 @@ class AboutTheFairPage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                          ],
-                        ),
-                    Table(
-                      columnWidths: const <int, TableColumnWidth>{
-                        0: FixedColumnWidth(50),
-                        1: FixedColumnWidth(177),
-                      },
-                      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                      children: <TableRow>[
-                        eventRow(context, '9.00', 'Road closure starts'),
-                        eventRow(context, '10.30', 'Winter Fair opens'),
-                        eventRow(context, '10.30', 'Fire engine pull\n', 
-                          [
-                            TextSpan(
-                              text: 'East Road',
-                              style: eventsSubtitleLinkStyle,
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () 
-                                {
-                                  HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202488, 0.131207));
-                                }
-                            ),
-                            TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                            TextSpan(
-                              text: 'the bridge',
-                              style: eventsSubtitleLinkStyle,
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.198682, 0.141051));
-                                }
-                            ),
-                          ],
-                        ),
-                        eventRow(context, '10.30', 'Opening ceremony\n',
-                          [
-                            TextSpan(
-                              text: 'Ditchburn Gardens',
-                              style: eventsSubtitleLinkStyle,
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.200389, 0.136465));
-                                }),
-                          ],
-                        ),
-                        eventRow(context, '11.45', 'Parade\n',
-                          [
-                            TextSpan(
-                              text: 'Salisbury Club',
-                              style: eventsSubtitleLinkStyle,
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.1970778,0.1472252));
-                                }
-                            ),
-                            TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                            TextSpan(
-                              text: 'Petersfield',
-                              style: eventsSubtitleLinkStyle,
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
-                                }
-                            ),
-                          ],
-                        ),
-                        eventRow(context, '3.40', 'Final parade\n',
-                          [
-                            TextSpan(
-                              text: 'Gwydir Street',
-                              style: eventsSubtitleLinkStyle,
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.199627, 0.138407));
-                                }
-                            ),
-                            TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                            TextSpan(
-                              text: 'Petersfield',
-                              style: eventsSubtitleLinkStyle,
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  HapticFeedback.lightImpact();
-                                  showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
-                                }
-                            ),
-                          ],
-                        ),
-                        eventRow(context, '4.15', 'All trading ends'),
-                        eventRow(context, '4.30', 'Winter Fair ends'),
-                        eventRow(context, '5.30', 'Roads fully open'),
-                      ],
-                    ),],
-                    )
-                  ),
+                            ],
+                          ),
+                          Table(
+                            columnWidths: const <int, TableColumnWidth>{
+                              0: FixedColumnWidth(50),
+                              1: FixedColumnWidth(177),
+                            },
+                            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                            children: <TableRow>[
+                              eventRow(context, '9.00', 'Road closure starts'),
+                              eventRow(context, '10.30', 'Winter Fair opens'),
+                              eventRow(
+                                context,
+                                '10.30',
+                                'Fire engine pull\n',
+                                [
+                                  TextSpan(
+                                      text: 'East Road',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          showDirectionsTo(context, 'GENERIC Event', const LatLng(52.202488, 0.131207));
+                                        }),
+                                  TextSpan(text: ' to ', style: eventsSubtitleStyle),
+                                  TextSpan(
+                                      text: 'the bridge',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          showDirectionsTo(context, 'GENERIC Event', const LatLng(52.198682, 0.141051));
+                                        }),
+                                ],
+                              ),
+                              eventRow(
+                                context,
+                                '10.30',
+                                'Opening ceremony\n',
+                                [
+                                  TextSpan(
+                                      text: 'Ditchburn Gardens',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          showDirectionsTo(context, 'GENERIC Event', const LatLng(52.200389, 0.136465));
+                                        }),
+                                ],
+                              ),
+                              eventRow(
+                                context,
+                                '11.45',
+                                'Parade\n',
+                                [
+                                  TextSpan(
+                                      text: 'Salisbury Club',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          showDirectionsTo(context, 'GENERIC Event', const LatLng(52.1970778, 0.1472252));
+                                        }),
+                                  TextSpan(text: ' to ', style: eventsSubtitleStyle),
+                                  TextSpan(
+                                      text: 'Petersfield',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          showDirectionsTo(context, 'GENERIC Event', const LatLng(52.202858, 0.132253));
+                                        }),
+                                ],
+                              ),
+                              eventRow(
+                                context,
+                                '3.40',
+                                'Final parade\n',
+                                [
+                                  TextSpan(
+                                      text: 'Gwydir Street',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          showDirectionsTo(context, 'GENERIC Event', const LatLng(52.199627, 0.138407));
+                                        }),
+                                  TextSpan(text: ' to ', style: eventsSubtitleStyle),
+                                  TextSpan(
+                                      text: 'Petersfield',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          showDirectionsTo(context, 'GENERIC Event', const LatLng(52.202858, 0.132253));
+                                        }),
+                                ],
+                              ),
+                              eventRow(context, '4.15', 'All trading ends'),
+                              eventRow(context, '4.30', 'Winter Fair ends'),
+                              eventRow(context, '5.30', 'Roads fully open'),
+                            ],
+                          ),
+                        ],
+                      )),
                   SizedBox(
                     width: 70,
                     child: Image.asset("assets/aboutPage/MRWF25_trafficlights.png", fit: BoxFit.fill, width: 70),
