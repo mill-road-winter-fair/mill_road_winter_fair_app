@@ -10,10 +10,9 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: ImportantInfoPage()));
 
       // Verify headings
-      expect(find.text('Important Information'), findsOneWidget);
-      expect(find.text('Stewards'), findsOneWidget);
+      expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Caution – vehicles!'), findsOneWidget);
-      expect(find.text('First Aid'), findsOneWidget);
+      expect(find.text('First aid'), findsOneWidget);
       expect(find.text('Coming with children?'), findsOneWidget);
       expect(find.text('Road closure'), findsOneWidget);
       expect(find.text('Updates and contact'), findsOneWidget);

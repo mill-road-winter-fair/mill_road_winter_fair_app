@@ -78,6 +78,7 @@ void main() {
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
+      expect(find.text('Contact us'), findsOneWidget);
       expect(find.byType(IconButton), findsExactly(7));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('Replay welcome screen'), findsOneWidget);
@@ -224,7 +225,7 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
 
       // show the dialog
-      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog());
+      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context));
       await tester.pumpAndSettle();
 
       // Check for some known email addresses

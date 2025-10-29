@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
@@ -68,18 +69,18 @@ class MyApp extends StatelessWidget {
   }
 }
 
-Widget contactUsDialog() {
+Widget contactUsDialog(BuildContext theBuildContext) {
   final ScrollController emailDetailsDialogScrollController = ScrollController();
 
   return Dialog(
-    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+    insetPadding: EdgeInsets.all(10.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
     child: LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
         return ConstrainedBox(
           constraints: BoxConstraints(maxWidth: maxWidth),
           child: Padding(
-            padding: const EdgeInsets.all(32.0),
+            padding: EdgeInsets.all(16.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
             child: Scrollbar(
               controller: emailDetailsDialogScrollController,
               thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
@@ -119,7 +120,7 @@ Widget contactUsDialog() {
                                 style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
                             TextSpan(
                                 text: '07303\u{00A0}142689',
-                                style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                                style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () async {
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
@@ -173,7 +174,7 @@ Widget _buildEmailLink(String email) {
     child: Text(
       email,
       style: const TextStyle(
-        color: Colors.blue,
+        decoration: TextDecoration.underline
       ),
     ),
   );
@@ -325,179 +326,204 @@ class HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: Container(
-          margin: const EdgeInsets.only(right: 10),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            showUnselectedLabels: true,
-            elevation: 0,
-            currentIndex: index,
-            selectedFontSize: 12,
-            unselectedFontSize: 12,
-            iconSize: 30,
-            onTap: (selectedIndex) {
-              HapticFeedback.selectionClick();
-              // Update the user's location
-              establishLocation();
-              setState(() {
-                index = selectedIndex;
-              });
-            },
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-              BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-              BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-              BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-              BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
-            ],
-          )),
+        margin: const EdgeInsets.only(right: 10),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
+          elevation: 0,
+          currentIndex: index,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          iconSize: 30,
+          onTap: (selectedIndex) {
+            HapticFeedback.selectionClick();
+            // Update the user's location
+            establishLocation();
+            setState(() {
+              index = selectedIndex;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+            BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
+            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
+            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
+            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
+            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
+          ],
+        ),
+      ),
       drawer: Drawer(
         child: Column(
           spacing: 0,
           children: <Widget>[
             Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
-                    child: DrawerHeader(
-                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(flex: 4, child: Container()),
-                          FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
-                            ),
-                          FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text('  Saturday 6 December 2025 10.30 – 4.30 ', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
-                            ),
-                          Expanded(flex: 1, child: Container())
-                        ],
+              flex: 0,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
+                child: DrawerHeader(
+                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(flex: 4, child: Container()),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
                       ),
-                    ),
+                      Expanded(flex: 2, child: Container()),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(' Saturday 6 December 2025 10.30 – 4.30',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                      ),
+                      Expanded(flex: 2, child: Container())
+                    ],
                   ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.info),
-                    title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.warning),
+                title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.public),
+                title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.email),
+                title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return contactUsDialog(context);
                     },
+                  );
+                },
+              ),
+            ),
+            Expanded(
+              // needed as Expanded() is relative and this needs a fixed space on larger screens
+              flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 1),
+              child: const SizedBox.expand(),
+            ),
+            Expanded(
+              flex: 3,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                    },
+                    icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
                   ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.warning),
-                    title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
+                  IconButton(
+                    onPressed: () {
                       HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                      launchUrl(Uri.parse('https://x.com/millroadfair'));
                     },
+                    icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
                   ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.public),
-                    title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
+                  IconButton(
+                    onPressed: () {
                       HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                      launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                     },
+                    icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
                   ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.email),
-                    title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
+                  IconButton(
+                    onPressed: () {
                       HapticFeedback.lightImpact();
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return contactUsDialog();
-                        },
-                      );
+                      launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                     },
+                    icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
                   ),
                 ],
               ),
             ),
-            Align(
-              alignment: FractionalOffset.topCenter,
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 48, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://x.com/millroadfair'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 48, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 48, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
-                        },
-                        icon: FaIcon(FontAwesomeIcons.flickr, size: 48, color: Theme.of(context).colorScheme.tertiary),
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.settings),
-                    title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
-                    },
-                  ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.first_page),
-                    title: const Text('Replay welcome screen', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
-                    },
-                  ),
-                  ListTile(
-                    visualDensity: const VisualDensity(vertical: -3.6),
-                    leading: const Icon(Icons.info),
-                    title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                      aboutDialog();
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                ],
+            const Expanded(
+              flex: 2,
+              child: SizedBox.expand(),
+            ),
+            const Expanded(
+              flex: 0,
+              child: Divider(),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
+                },
               ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.first_page),
+                title: const Text('Replay welcome screen', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const Icon(Icons.info),
+                title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  aboutDialog();
+                },
+              ),
+            ),
+            const Expanded(
+              flex: 2,
+              child: SizedBox(height: 20),
             ),
           ],
         ),
