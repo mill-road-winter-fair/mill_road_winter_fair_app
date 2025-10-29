@@ -346,7 +346,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(homePageState.index, 1);
 
-      await tester.tap(find.text('Get Directions'));
+      await tester.tap(find.text('Get directions'));
       await tester.pumpAndSettle();
 
       expect(homePageState.index, 0);

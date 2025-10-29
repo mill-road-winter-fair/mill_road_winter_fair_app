@@ -3,10 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
-
-import 'main.dart';
 
 // Define variable for first execution status
 late bool firstExecution;
@@ -147,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       body: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(10.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 50).toInt()),
         child: Scrollbar(
           controller: _settingsPageScrollController,
           thumbVisibility: Platform.isIOS ? false : true,
@@ -165,7 +164,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Distance Units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                      const Text('Distance units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                       RadioGroup<DistanceUnits>(
                         groupValue: preferredDistanceUnits,
                         onChanged: (DistanceUnits? value) {
@@ -181,7 +180,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               activeColor: Theme.of(context).colorScheme.tertiary,
                               title: const Text('Metric'),
                               subtitle: Text(
-                                'Metres & Kilometres',
+                                'Metres and kilometres',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -194,7 +193,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               activeColor: Theme.of(context).colorScheme.tertiary,
                               title: const Text('Imperial'),
                               subtitle: Text(
-                                'Feet & Miles',
+                                'Feet and miles',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -283,7 +282,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             RadioListTile<String>(
                               activeColor: Theme.of(context).colorScheme.tertiary,
-                              title: const Text('2024 Colour Scheme'),
+                              title: const Text('2024 colour scheme'),
                               subtitle: Text(
                                 'For the Fair that blew away',
                                 style: TextStyle(
@@ -296,20 +295,20 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             RadioListTile<String>(
                               activeColor: Theme.of(context).colorScheme.tertiary,
-                              title: const Text('High Contrast'),
+                              title: const Text('High contrast'),
                               subtitle: Text(
-                                'For users with visual accessibility needs',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  'For users with visual accessibility needs',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
-                              ),
                               visualDensity: VisualDensity.compact,
                               value: 'highContrast',
                             ),
                             RadioListTile<String>(
                               activeColor: Theme.of(context).colorScheme.tertiary,
-                              title: const Text('Colour Blind Friendly'),
+                              title: const Text('Colour blind friendly'),
                               subtitle: Text(
                                 'For users with colour blindness',
                                 style: TextStyle(
