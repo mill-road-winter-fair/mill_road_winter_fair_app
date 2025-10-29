@@ -437,7 +437,7 @@ class HomePageState extends State<HomePage> {
             ),
             Expanded(
               // needed as Expanded() is relative and this needs a fixed space on larger screens
-              flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 50).toInt(), 1),
+              flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 1),
               child: const SizedBox.expand(),
             ),
             Expanded(
