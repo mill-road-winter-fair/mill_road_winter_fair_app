@@ -26,6 +26,9 @@ import 'package:url_launcher/url_launcher.dart';
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
+// Indicator for a simple map marker
+const String aSimpleMarkerId = 'SIMPLE';
+
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
 
@@ -69,7 +72,7 @@ class MapPageState extends State<MapPage> {
     'Services': true,
     'Road Closures': true,
   };
-
+  
   @override
   void initState() {
     debugPrint('MapPageState initState() called');
@@ -606,10 +609,10 @@ class MapPageState extends State<MapPage> {
     });
   }
 
- void addSimpleMarker(markerName, primaryType, destinationLatLng) async {
+ void addSimpleMarker(primaryType, destinationLatLng) async {
 
-    debugPrint('addSimpleMarker called for marker name: $markerName');
-    MarkerId markerId = MarkerId(markerName);
+    debugPrint('addSimpleMarker called for primary type: $primaryType');
+    MarkerId markerId = MarkerId(aSimpleMarkerId);
     Color color = getCategoryColor(selectedThemeKey, primaryType);
     late BitmapDescriptor customMarker;
     if (onTest == false) {
@@ -629,6 +632,7 @@ class MapPageState extends State<MapPage> {
     setState(() {
       markers[markerId] = newMarker;
     });
+
   }
 
   Future<void> updateMarkersAndPolygonsForTheme() async {
@@ -844,6 +848,8 @@ class MapPageState extends State<MapPage> {
     // Clear the polygons
     _polygons.clear();
     hideAllMarkers();
+    // Remove any simple marker shown
+    markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
     // Reset the distance to destination
     _distanceToDestination = null;
     // Set navigation as not in progress
@@ -883,13 +889,14 @@ class MapPageState extends State<MapPage> {
       );
     }
 
-    // GENERIC ids come from non-listing source e.g. Key Events table on About The Fair
-    if (id.length > 7 && id.substring(0,7) == 'GENERIC') {
-      if (id.length > 8) {
-        addSimpleMarker(id.substring(8), id.substring(8), destination);
+    // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
+    final int aSimpleMarkerIdLen = aSimpleMarkerId.length;
+    if (id.length > aSimpleMarkerIdLen && id.substring(0,aSimpleMarkerIdLen) == aSimpleMarkerId) {
+      if (id.length > (aSimpleMarkerIdLen + 1)) {
+        addSimpleMarker(id.substring(aSimpleMarkerIdLen + 1), destination);
       } else {
-        debugPrint('Adding Event type marker as category was not specified: $id');
-        addSimpleMarker('Event', 'Event', destination);
+        debugPrint('Adding Event type simple marker as category was not specified: $id');
+        addSimpleMarker('Event', destination);
       }
     } else {
       // Add destination map marker
@@ -913,6 +920,9 @@ class MapPageState extends State<MapPage> {
 
     // Reset the distance to destination
     _distanceToDestination = null;
+
+    // Remove any simple marker shown
+    markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
 
     // Show markers which have enabled filters
     showFilteredMarkers();
