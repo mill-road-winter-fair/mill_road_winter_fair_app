@@ -63,6 +63,7 @@ class MapPageState extends State<MapPage> {
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
   final ScrollController _roadClosuresDialogScrollController = ScrollController();
+
   // Declare default filters
   final Map<String, bool> filterSettings = {
     'Food': true,
@@ -72,7 +73,28 @@ class MapPageState extends State<MapPage> {
     'Services': true,
     'Road Closures': true,
   };
-  
+
+  String _prefKeyForFilter(String name) => 'filter_${name.toLowerCase().replaceAll(' ', '_')}';
+
+  Future<void> _loadFilterSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      for (final key in filterSettings.keys) {
+        filterSettings[key] = prefs.getBool(_prefKeyForFilter(key)) ?? true;
+      }
+    });
+    // Apply to UI elements after load
+    showFilteredMarkers();
+    updateRoadClosurePolygonVisibility(filterSettings['Road Closures']!);
+  }
+
+  Future<void> _saveFilterSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (final entry in filterSettings.entries) {
+      await prefs.setBool(_prefKeyForFilter(entry.key), entry.value);
+    }
+  }
+
   @override
   void initState() {
     debugPrint('MapPageState initState() called');
@@ -82,9 +104,13 @@ class MapPageState extends State<MapPage> {
     addAllVisibleMarkers();
     establishLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _polygons.add(roadClosurePolygon());
+      if (filterSettings["Road Closures"] == true) {
+        _polygons.add(roadClosurePolygon());
+      }
       ListingUpdateNotifier.maybeShowNotice(context);
     });
+    // Load persisted filter settings and apply
+    _loadFilterSettings();
     super.initState();
   }
 
@@ -258,7 +284,8 @@ class MapPageState extends State<MapPage> {
               padding: const EdgeInsets.all(24.0),
               child: Scrollbar(
                 controller: _roadClosuresDialogScrollController,
-                thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
+                thumbVisibility: Platform.isIOS ? false : true,
+                // iOS has its own scrollbar style
                 thickness: 4,
                 radius: const Radius.circular(8),
                 child: Padding(
@@ -318,6 +345,7 @@ class MapPageState extends State<MapPage> {
                                     filterSettings["Road Closures"] = false;
                                   });
                                   updateRoadClosurePolygonVisibility(false);
+                                  _saveFilterSettings();
                                   Navigator.pop(context);
                                 },
                                 child: Text(
@@ -609,8 +637,7 @@ class MapPageState extends State<MapPage> {
     });
   }
 
- void addSimpleMarker(primaryType, destinationLatLng) async {
-
+  void addSimpleMarker(primaryType, destinationLatLng) async {
     debugPrint('addSimpleMarker called for primary type: $primaryType');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
     Color color = getCategoryColor(selectedThemeKey, primaryType);
@@ -632,7 +659,6 @@ class MapPageState extends State<MapPage> {
     setState(() {
       markers[markerId] = newMarker;
     });
-
   }
 
   Future<void> updateMarkersAndPolygonsForTheme() async {
@@ -712,6 +738,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _foodMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      _saveFilterSettings();
                     },
                   ),
                   CheckboxListTile(
@@ -725,6 +752,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _stallsMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      _saveFilterSettings();
                     },
                   ),
                   CheckboxListTile(
@@ -738,6 +766,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _musicMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      _saveFilterSettings();
                     },
                   ),
                   CheckboxListTile(
@@ -751,6 +780,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _eventMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      _saveFilterSettings();
                     },
                   ),
                   CheckboxListTile(
@@ -764,6 +794,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _serviceMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      _saveFilterSettings();
                     },
                   ),
                   Divider(color: Colors.grey[350]),
@@ -777,6 +808,7 @@ class MapPageState extends State<MapPage> {
                         filterSettings["Road Closures"] = value!;
                       });
                       updateRoadClosurePolygonVisibility(value!);
+                      _saveFilterSettings();
                     },
                   ),
                   Row(
@@ -796,6 +828,7 @@ class MapPageState extends State<MapPage> {
                                   });
                                   showAllMarkers();
                                   updateRoadClosurePolygonVisibility(true);
+                                  _saveFilterSettings();
                                 },
                                 icon: const Icon(Icons.filter_alt),
                                 label: const Text('Show all'),
@@ -811,6 +844,7 @@ class MapPageState extends State<MapPage> {
                                   });
                                   hideAllMarkers();
                                   updateRoadClosurePolygonVisibility(false);
+                                  _saveFilterSettings();
                                 },
                                 icon: const Icon(Icons.filter_alt_off),
                                 label: const Text('Hide all'),
@@ -891,7 +925,7 @@ class MapPageState extends State<MapPage> {
 
     // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
     const int aSimpleMarkerIdLen = aSimpleMarkerId.length;
-    if (id.length > aSimpleMarkerIdLen && id.substring(0,aSimpleMarkerIdLen) == aSimpleMarkerId) {
+    if (id.length > aSimpleMarkerIdLen && id.substring(0, aSimpleMarkerIdLen) == aSimpleMarkerId) {
       if (id.length > (aSimpleMarkerIdLen + 1)) {
         addSimpleMarker(id.substring(aSimpleMarkerIdLen + 1), destination);
       } else {
@@ -1402,6 +1436,7 @@ class MapPageState extends State<MapPage> {
                               filterSettings['Services'] = true;
                               updateMarkerVisibility(idList, true);
                             });
+                            _saveFilterSettings();
                           }
                           _setMapCameraToFitMapMarkers();
                         },
