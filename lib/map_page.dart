@@ -582,6 +582,9 @@ class MapPageState extends State<MapPage> {
         // Show bottom sheet with listing information
         showModalBottomSheet(
           context: context,
+          showDragHandle: false,
+          enableDrag: false,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
           builder: (BuildContext context) {
             return SpecificListingInfoSheet(
               title: listing['displayName'],
@@ -594,8 +597,7 @@ class MapPageState extends State<MapPage> {
               website: listing['website'],
               email: listing['email'],
               description: listing['description'],
-              detailsVisible: detailsVisible,
-              onToggle: () => toggleDetailsRow(),
+              detailsVisible: true,
               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
             );
           },
