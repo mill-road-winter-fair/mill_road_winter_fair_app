@@ -487,81 +487,91 @@ class MapPageState extends State<MapPage> {
           builder: (BuildContext context) {
             double screenHeight = MediaQuery.of(context).size.height;
             // Estimate the height of a SimplifiedListingInfoSheet in pixels
-            double estimatedItemHeight = 145;
+            double estimatedItemHeight = 125;
             // Estimate the total height of the bottom sheet
             double estimatedSheetHeight = relatedListings.length * estimatedItemHeight;
             // Set the minimum size of the modalBottomSheet based on either the estimatedSheetHeight or 2/3 of the screen, whichever is lower
             double minFraction = min((estimatedSheetHeight / screenHeight), 0.66);
             // Set the maximum size of the modalBottomSheet based on either the estimatedSheetHeight or the whole screen, whichever is lower
             double maxFraction = min((estimatedSheetHeight / screenHeight), 0.9);
-            detailsVisibilityList = List<bool>.filled(relatedListings.length, false);;
+            detailsVisibilityList = List<bool>.filled(relatedListings.length, false);
 
-            return DraggableScrollableSheet(
-              expand: false,
-              initialChildSize: minFraction,
-              minChildSize: minFraction,
-              maxChildSize: maxFraction,
-              builder: (context, scrollController) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                  child: Scrollbar(
-                    controller: scrollController,
-                    thumbVisibility: false,
-                    thickness: 4,
-                    radius: const Radius.circular(8),
-                    child: ListView.separated(
-                      controller: scrollController,
-                      separatorBuilder: (BuildContext context, int index) => Divider(color: Colors.grey[350]),
-                      itemCount: relatedListings.length,
-                      itemBuilder: (context, index) {
-                        final rel = relatedListings[index];
-                        int approximateDistanceMetres = asTheCrowFlies(
-                          currentLatLng!,
-                          stringToLatLng(rel['latLng']),
-                        );
-
-                        if (rel['primaryType'].startsWith("Group")) {
-                          return GroupListingInfoSheet(
-                            title: rel['displayName'],
-                            categories: "${rel['tertiaryType']}",
-                            startTime: "${listing['startTime']}",
-                            endTime: "${listing['endTime']}",
-                            approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-                          );
-                        } else {
-                          return SpecificListingInfoSheet(
-                            title: rel['displayName'],
-                            secondaryType: '',
-                            tertiaryType: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
-                            startTime: '',
-                            endTime: '',
-                            approxDistance: '',
-                            phoneNumber: rel['phone'],
-                            website: rel['website'],
-                            email: rel['email'],
-                            description: rel['description'],
-                            detailsVisible: detailsVisibilityList[index],
-                            onToggle: () => toggleDetailsRow(index),
-                            onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                          );
-
- /*                          return SimplifiedListingInfoSheet(
-                            title: rel['displayName'],
-                            categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
-                            startTime: "${rel['startTime']}",
-                            endTime: "${rel['endTime']}",
-                            phoneNumber: rel['phone'],
-                            website: rel['website'],
-                            onGetDirections: () => getDirections(
-                              rel['id'],
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setModalState) {
+                void toggleDetailsRow(int index) {
+                  HapticFeedback.lightImpact();
+                  setModalState(() {
+                    detailsVisibilityList[index] = !detailsVisibilityList[index];
+                  });
+                }
+                return DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: minFraction,
+                  minChildSize: minFraction,
+                  maxChildSize: maxFraction,
+                  builder: (context, scrollController) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                      child: Scrollbar(
+                        controller: scrollController,
+                        thumbVisibility: false,
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: ListView.separated(
+                          controller: scrollController,
+                          separatorBuilder: (BuildContext context, int index) => Divider(color: Theme.of(context).colorScheme.surfaceDim),
+                          itemCount: relatedListings.length,
+                          itemBuilder: (context, index) {
+                            final rel = relatedListings[index];
+                            int approximateDistanceMetres = asTheCrowFlies(
+                              currentLatLng!,
                               stringToLatLng(rel['latLng']),
-                              true,
-                            ),
-                          );
- */                        }
-                      },
-                    ),
-                  ),
+                            );
+
+                            if (rel['primaryType'].startsWith("Group")) {
+                              return GroupListingInfoSheet(
+                                title: rel['displayName'],
+                                categories: "${rel['tertiaryType']}",
+                                startTime: "${listing['startTime']}",
+                                endTime: "${listing['endTime']}",
+                                approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                              );
+                            } else {
+                              return SpecificListingInfoSheet(
+                                title: rel['displayName'],
+                                secondaryType: '',
+                                tertiaryType: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
+                                startTime: '',
+                                endTime: '',
+                                approxDistance: '',
+                                phoneNumber: rel['phone'],
+                                website: rel['website'],
+                                email: rel['email'],
+                                description: rel['description'],
+                                detailsVisible: detailsVisibilityList[index],
+                                onToggle: () => toggleDetailsRow(index),
+                                onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                              );
+
+    /*                          return SimplifiedListingInfoSheet(
+                                title: rel['displayName'],
+                                categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
+                                startTime: "${rel['startTime']}",
+                                endTime: "${rel['endTime']}",
+                                phoneNumber: rel['phone'],
+                                website: rel['website'],
+                                onGetDirections: () => getDirections(
+                                  rel['id'],
+                                  stringToLatLng(rel['latLng']),
+                                  true,
+                                ),
+                              );
+    */                        }
+                          },
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             );
@@ -919,13 +929,6 @@ class MapPageState extends State<MapPage> {
     }
 
     setState(() {});
-  }
-
-  void toggleDetailsRow(int index) {
-    HapticFeedback.lightImpact();
-    setState(() {
-      detailsVisibilityList[index] = !detailsVisibilityList[index];
-    });
   }
 
   @override

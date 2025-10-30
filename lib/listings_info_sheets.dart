@@ -61,7 +61,7 @@ class GroupListingInfoSheet extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: BoxBorder.all(width: 1, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
