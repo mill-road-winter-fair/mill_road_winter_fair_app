@@ -132,7 +132,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final String email;
   final String description;
   final bool detailsVisible;
-  final VoidCallback onToggle;
+  final VoidCallback? onToggle;
   final Function onGetDirections;
 
   const SpecificListingInfoSheet({
@@ -147,7 +147,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     required this.email,
     required this.description,
     required this.detailsVisible,
-    required this.onToggle,
+    this.onToggle,
     required this.onGetDirections,
     super.key,
   });
@@ -165,7 +165,12 @@ class SpecificListingInfoSheet extends StatelessWidget {
     );
 
     return Container(
-      padding: EdgeInsets.all(2.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
+      padding: EdgeInsets.fromLTRB(
+        8.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
+        12,
+        8.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
+        12
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,19 +180,21 @@ class SpecificListingInfoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                flex: 7,
+                flex: 14,
                 child: Text(
                   title,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
-                flex: 3,
-                child: Text(
+                flex: 6,
+                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(
                   tertiaryType,
                   style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
+              ),
               ),
             ],
           ),
@@ -195,19 +202,22 @@ class SpecificListingInfoSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(flex: 7, child: Text.rich(
+              Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
                 TextSpan(children: [
                   TextSpan(text: secondaryType),
                   TextSpan(style: const TextStyle(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
                 ], ), 
               ), ),
+              ),
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
-                flex: 3,
-                child: Text(
+                flex: 6,
+                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(
                   "$startTime—$endTime",
                   style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
+              ),
               ),
             ],
           ),
@@ -225,18 +235,19 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 icon: const Icon(Icons.directions_walk),
                 label: const FittedBox(child: Text('Directions')),
               ),
-              if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8, width: 8),
-              // below is safeguard in case someone overloads a listing with Details (for Music/Events) as well as Email/Phone/Website (for others)
-              if (website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 350)
+              // only display the Details button, and the spacer before it, if there are some details to display (and they're not always shown)
+              if (onToggle != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 8),
+              // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
+              if (onToggle != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 350)
                 ElevatedButton(
                   style: detailsVisible ?
-                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: -1, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
                   :
                     ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -1, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: onToggle,
                   child: const Icon(Icons.info),
               ) 
-              else if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)
+              else if (onToggle != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
                 ElevatedButton.icon(
                   style: detailsVisible ?
                     ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
@@ -309,7 +320,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 if (description.isNotEmpty) Row(
                   children: [
                     Flexible(
-                      child: Text(style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic), description),
+                      child: Text(style: const TextStyle(fontSize: 12), description),
                     ),
                   ],
                 ),
@@ -360,6 +371,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 ),
               ],
             ),
+          // if we're on a modal bottom sheet, add some space
+          if (onToggle == null) const SizedBox(height: 20),
         ],
       ),
     );
