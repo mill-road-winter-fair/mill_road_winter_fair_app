@@ -131,6 +131,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final String website;
   final String email;
   final String description;
+  final bool detailsVisible;
+  final VoidCallback onToggle;
   final Function onGetDirections;
 
   const SpecificListingInfoSheet({
@@ -144,6 +146,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
     required this.website,
     required this.email,
     required this.description,
+    required this.detailsVisible,
+    required this.onToggle,
     required this.onGetDirections,
     super.key,
   });
@@ -159,7 +163,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
       color: ended ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
-debugPrint('width of ${MediaQuery.of(context).size.width}');
+
     return Container(
       padding: EdgeInsets.all(2.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
       child: Column(
@@ -195,7 +199,8 @@ debugPrint('width of ${MediaQuery.of(context).size.width}');
                 TextSpan(children: [
                   TextSpan(text: secondaryType),
                   TextSpan(style: const TextStyle(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
-            ], ), ), ),
+                ], ), 
+              ), ),
               Expanded(
                 flex: 3,
                 child: Text(
@@ -220,24 +225,24 @@ debugPrint('width of ${MediaQuery.of(context).size.width}');
                 icon: const Icon(Icons.directions_walk),
                 label: const FittedBox(child: Text('Directions')),
               ),
-              if (description.isNotEmpty) const SizedBox(height: 8, width: 8),
+              if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8, width: 8),
               // below is safeguard in case someone overloads a listing with Details (for Music/Events) as well as Email/Phone/Website (for others)
-              if (description.isNotEmpty && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 350)
+              if (website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 350)
                 ElevatedButton(
-                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    launchUrl(Uri.parse(website));
-                  },
+                  style: detailsVisible ?
+                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                  :
+                    ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -1, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: onToggle,
                   child: const Icon(Icons.info),
               ) 
-              else if (description.isNotEmpty)
+              else if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)
                 ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    launchUrl(Uri.parse(website));
-                  },
+                  style: detailsVisible ?
+                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                  :
+                    ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: onToggle,
                   icon: const Icon(Icons.info),
                   label: const FittedBox(child: Text('Details')),
                 ),
@@ -293,67 +298,68 @@ debugPrint('width of ${MediaQuery.of(context).size.width}');
                   ),
             ],
           ),
-
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 0,
-            children: [
-              if (description.isNotEmpty) const SizedBox(height: 8),
-              if (description.isNotEmpty) Row(
-                children: [
-                  Flexible(
-                    child: Text(style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic), description),
-                  ),
-                ],
-              ),
-              if (website.isNotEmpty) const SizedBox(height: 8),
-              if (website.isNotEmpty) Row(
-                children: [
+          if (detailsVisible)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 0,
+              children: [
+                if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
+                if (description.isNotEmpty) const SizedBox(height: 8),
+                if (description.isNotEmpty) Row(
+                  children: [
                     Flexible(
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
-                            TextSpan(style: TextStyle(fontSize: 12), text: website),
-                          ], 
-                        ),
-                      ), 
+                      child: Text(style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic), description),
                     ),
-                ],
-              ),
-              if (email.isNotEmpty) const SizedBox(height: 8),
-              if (email.isNotEmpty) Row(
-                children: [
-                    Flexible(
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                      TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
-                      TextSpan(style: TextStyle(fontSize: 12), text: email),
-                          ], 
-                        ),
-                      ), 
-                    ),
-                ],
-              ),
-              if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
-              if (phoneNumber.isNotEmpty) Row(
-                children: [
-                    Flexible(
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                      TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
-                      TextSpan(style: TextStyle(fontSize: 12), text: phoneNumber),
-                          ], 
-                        ),
-                      ), 
-                    ),
-                ],
-              ),
-            ],
-          ),
+                  ],
+                ),
+                if (website.isNotEmpty) const SizedBox(height: 8),
+                if (website.isNotEmpty) Row(
+                  children: [
+                      Flexible(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                              TextSpan(style: const TextStyle(fontSize: 12), text: website),
+                            ], 
+                          ),
+                        ), 
+                      ),
+                  ],
+                ),
+                if (email.isNotEmpty) const SizedBox(height: 8),
+                if (email.isNotEmpty) Row(
+                  children: [
+                      Flexible(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                              TextSpan(style: const TextStyle(fontSize: 12), text: email),
+                            ], 
+                          ),
+                        ), 
+                      ),
+                  ],
+                ),
+                if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
+                if (phoneNumber.isNotEmpty) Row(
+                  children: [
+                      Flexible(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                              TextSpan(style: const TextStyle(fontSize: 12), text: phoneNumber),
+                            ], 
+                          ),
+                        ), 
+                      ),
+                  ],
+                ),
+              ],
+            ),
         ],
       ),
     );

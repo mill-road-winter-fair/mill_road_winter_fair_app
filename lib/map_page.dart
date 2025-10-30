@@ -69,6 +69,7 @@ class MapPageState extends State<MapPage> {
     'Services': true,
     'Road Closures': true,
   };
+  bool detailsVisible = false;
 
   @override
   void initState() {
@@ -593,6 +594,8 @@ class MapPageState extends State<MapPage> {
               website: listing['website'],
               email: listing['email'],
               description: listing['description'],
+              detailsVisible: detailsVisible,
+              onToggle: () => toggleDetailsRow(),
               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
             );
           },
@@ -894,6 +897,12 @@ class MapPageState extends State<MapPage> {
     }
 
     setState(() {});
+  }
+
+  void toggleDetailsRow() {
+    setState(() {
+      detailsVisible = !detailsVisible;
+    });
   }
 
   @override

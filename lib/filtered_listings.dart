@@ -38,11 +38,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  late List<bool> detailsVisibilityList;
 
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
+    // allow up to 500 listings (we don't yet know how many there are)
+    detailsVisibilityList = List<bool>.filled(500, false);;
   }
 
   @override
@@ -185,6 +188,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
   }
 
+  void toggleDetailsRow(int index) {
+    HapticFeedback.lightImpact();
+    setState(() {
+      detailsVisibilityList[index] = !detailsVisibilityList[index];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called');
@@ -224,8 +234,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 2: Sort the filtered listings
     final sortedListings = _applySorting(primaryFiltered);
-    // Step 3: Apply search filtering to that subset
 
+    // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
 
     return RefreshIndicator(
@@ -347,6 +357,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         website: listing['website'],
                         email: listing['email'],
                         description: listing['description'],
+                        detailsVisible: detailsVisibilityList[index],
+                        onToggle: () => toggleDetailsRow(index),
                         onGetDirections: () {
                           if (homePageState != null) {
                             navigateToMapAndGetDirections(
@@ -358,7 +370,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         },
                       ),
                       // separator except after last item
-                      if (index != filteredListings.length - 1) Divider(color: Colors.grey[350]),
+                      if (index != filteredListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                     ],
                   );
                 },
