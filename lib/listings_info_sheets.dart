@@ -58,10 +58,10 @@ class GroupListingInfoSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
-        borderRadius: BorderRadius.circular(28),
-        border: BoxBorder.all(width: 1, color: Colors.grey[700]!),
+        borderRadius: BorderRadius.circular(16),
+        border: BoxBorder.all(width: 1, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,42 +70,49 @@ class GroupListingInfoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                flex: 7,
+                flex: 13,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 42), // cap text height
                   child: FittedBox(
                     alignment: Alignment.centerLeft,
+                    fit: BoxFit.scaleDown,
                     child: Text(
                       title,
-                      style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
                     ),
                   ),
                 ),
               ),
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
-                flex: 3,
+                flex: 7,
                 child: Text(
-                  "$startTime - $endTime",
+                  "$startTime—$endTime",
                   style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+//          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                flex: 7,
-                child: Text(
-                  categories,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
-                ),
+                flex: 10,
+                  child: FittedBox(
+                    alignment: Alignment.centerLeft,
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      categories,
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                    ),
+                  ),
               ),
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
               if (currentLatLng != null)
                 Expanded(
-                  flex: 3,
+                  flex: 10,
                   child: Text(
                     approxDistance,
                     style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary),
@@ -166,9 +173,9 @@ class SpecificListingInfoSheet extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.fromLTRB(
-        8.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
+        4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
         12,
-        8.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
+        4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
         12
       ),
       child: Column(
@@ -198,8 +205,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
+          if (secondaryType != '') const SizedBox(height: 8),
+          if (secondaryType != '') Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
@@ -221,7 +228,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          if (secondaryType != '') const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -372,7 +379,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ],
             ),
           // if we're on a modal bottom sheet, add some space
-          if (onToggle == null) const SizedBox(height: 20),
+          if (onToggle == null && secondaryType != '') const SizedBox(height: 20),
         ],
       ),
     );

@@ -69,7 +69,8 @@ class MapPageState extends State<MapPage> {
     'Services': true,
     'Road Closures': true,
   };
-  bool detailsVisible = false;
+  bool detailsVisible = false;  // for modal bottom sheet single listings
+  late List<bool> detailsVisibilityList;  // for modal bottom sheet group listings
 
   @override
   void initState() {
@@ -84,7 +85,7 @@ class MapPageState extends State<MapPage> {
       ListingUpdateNotifier.maybeShowNotice(context);
     });
     super.initState();
-  }
+}
 
   Polygon roadClosurePolygon() {
     final List<LatLng> roadClosurePolygonPoints = [];
@@ -480,6 +481,7 @@ class MapPageState extends State<MapPage> {
           context: context,
           showDragHandle: false,
           enableDrag: false,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
           isScrollControlled: true,
           useSafeArea: true,
           builder: (BuildContext context) {
@@ -492,6 +494,7 @@ class MapPageState extends State<MapPage> {
             double minFraction = min((estimatedSheetHeight / screenHeight), 0.66);
             // Set the maximum size of the modalBottomSheet based on either the estimatedSheetHeight or the whole screen, whichever is lower
             double maxFraction = min((estimatedSheetHeight / screenHeight), 0.9);
+            detailsVisibilityList = List<bool>.filled(relatedListings.length, false);;
 
             return DraggableScrollableSheet(
               expand: false,
@@ -526,7 +529,23 @@ class MapPageState extends State<MapPage> {
                             approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
                           );
                         } else {
-                          return SimplifiedListingInfoSheet(
+                          return SpecificListingInfoSheet(
+                            title: rel['displayName'],
+                            secondaryType: '',
+                            tertiaryType: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
+                            startTime: '',
+                            endTime: '',
+                            approxDistance: '',
+                            phoneNumber: rel['phone'],
+                            website: rel['website'],
+                            email: rel['email'],
+                            description: rel['description'],
+                            detailsVisible: detailsVisibilityList[index],
+                            onToggle: () => toggleDetailsRow(index),
+                            onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                          );
+
+ /*                          return SimplifiedListingInfoSheet(
                             title: rel['displayName'],
                             categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
                             startTime: "${rel['startTime']}",
@@ -539,7 +558,7 @@ class MapPageState extends State<MapPage> {
                               true,
                             ),
                           );
-                        }
+ */                        }
                       },
                     ),
                   ),
@@ -901,9 +920,10 @@ class MapPageState extends State<MapPage> {
     setState(() {});
   }
 
-  void toggleDetailsRow() {
+  void toggleDetailsRow(int index) {
+    HapticFeedback.lightImpact();
     setState(() {
-      detailsVisible = !detailsVisible;
+      detailsVisibilityList[index] = !detailsVisibilityList[index];
     });
   }
 
