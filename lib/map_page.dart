@@ -679,6 +679,7 @@ class MapPageState extends State<MapPage> {
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 0.8,
       context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
