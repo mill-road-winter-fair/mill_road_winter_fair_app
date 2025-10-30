@@ -1,8 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ImportantInfoPage extends StatelessWidget {
   const ImportantInfoPage({super.key});
