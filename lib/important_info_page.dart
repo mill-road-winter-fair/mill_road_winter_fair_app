@@ -155,7 +155,7 @@ class ImportantInfoPage extends StatelessWidget {
               const Text('Disclaimer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               const Text(
-                  'The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
+                  'The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers. Please refer to our social media pages for the latest updates and news.'),
               const SizedBox(height: 10),
             ],
           ),
