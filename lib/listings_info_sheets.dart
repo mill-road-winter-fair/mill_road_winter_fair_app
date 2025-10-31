@@ -328,7 +328,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 if (description.isNotEmpty) Row(
                   children: [
                     Flexible(
-                      child: Text(style: const TextStyle(fontSize: 12), description),
+                      child: Text(style: const TextStyle(fontSize: 13), description),
                     ),
                   ],
                 ),
@@ -344,8 +344,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
                           child: Text.rich(
                             TextSpan(
                               children: [
-                                TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
-                                TextSpan(style: const TextStyle(fontSize: 12, decoration: TextDecoration.underline), text: website),
+                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
                               ], 
                             ),
                           ), 
@@ -370,8 +370,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
                           child: Text.rich(
                             TextSpan(
                               children: [
-                                TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
-                                TextSpan(style: const TextStyle(fontSize: 12, decoration: TextDecoration.underline), text: email),
+                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
                               ], 
                             ),
                           ), 
@@ -396,8 +396,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
                           child: Text.rich(
                             TextSpan(
                               children: [
-                                TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
-                                TextSpan(style: const TextStyle(fontSize: 12, decoration: TextDecoration.underline), text: phoneNumber),
+                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
                               ], 
                             ),
                           ), 
