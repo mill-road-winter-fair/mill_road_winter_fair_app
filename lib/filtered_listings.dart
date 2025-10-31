@@ -217,7 +217,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 : ElevatedButton.icon(
                     onPressed: refreshListings,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Refresh Listings'),
+                    label: const Text('Refresh listings'),
                   ),
           ],
         ),

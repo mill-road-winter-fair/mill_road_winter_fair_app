@@ -61,7 +61,7 @@ class ListingUpdateNotifier {
       ),
       child: Text(
         "Please note that event details may change as the Fair approaches, "
-            "but this app will always show the most up-to-date information.",
+        "but this app will always show the most up-to-date information.",
         style: TextStyle(
           color: textColor,
           fontSize: 14,

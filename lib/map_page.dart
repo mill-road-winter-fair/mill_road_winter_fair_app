@@ -26,6 +26,9 @@ import 'package:url_launcher/url_launcher.dart';
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
+// Indicator for a simple map marker
+const String aSimpleMarkerId = 'SIMPLE';
+
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
 
@@ -271,7 +274,8 @@ class MapPageState extends State<MapPage> {
                       children: [
                         const Text('Road closures', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                         const SizedBox(height: 10),
-                        const Text(style: TextStyle(height: 1.25),
+                        const Text(
+                            style: TextStyle(height: 1.25),
                             'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
                         const SizedBox(height: 10),
                         const Text('Pedestrians should exercise particular care before the road is fully closed.',
@@ -280,12 +284,15 @@ class MapPageState extends State<MapPage> {
                         const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
                             style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
                         const SizedBox(height: 10),
-                        const Text(style: TextStyle(height: 1.25), 'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                        const Text(
+                            style: TextStyle(height: 1.25),
+                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
                             children: [
-                              const TextSpan(style: TextStyle(height: 1.25),
+                              const TextSpan(
+                                  style: TextStyle(height: 1.25),
                                   text:
                                       'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                               TextSpan(
@@ -427,7 +434,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addGroupMarker(listing) async {
-    debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
+//    debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
@@ -639,6 +646,32 @@ class MapPageState extends State<MapPage> {
     });
   }
 
+ void addSimpleMarker(primaryType, destinationLatLng) async {
+
+    debugPrint('addSimpleMarker called for primary type: $primaryType');
+    const MarkerId markerId = MarkerId(aSimpleMarkerId);
+    Color color = getCategoryColor(selectedThemeKey, primaryType);
+    late BitmapDescriptor customMarker;
+    if (onTest == false) {
+      customMarker = bitmapDescriptors[primaryType]!;
+    } else {
+      double hue = HSVColor.fromColor(color).hue;
+      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
+    }
+
+    Marker newMarker = Marker(
+      markerId: markerId,
+      position: destinationLatLng,
+      icon: customMarker,
+      visible: true,
+    );
+
+    setState(() {
+      markers[markerId] = newMarker;
+    });
+
+  }
+
   Future<void> updateMarkersAndPolygonsForTheme() async {
     debugPrint('updateMarkersAndPolygonsForTheme called');
     // Recreate marker bitmaps for the new theme colors
@@ -701,7 +734,7 @@ class MapPageState extends State<MapPage> {
                 children: [
                   const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                     Text(
-                      "Filter Map Layers",
+                      "Filter map layers",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.left,
                     )
@@ -803,7 +836,7 @@ class MapPageState extends State<MapPage> {
                                   updateRoadClosurePolygonVisibility(true);
                                 },
                                 icon: const Icon(Icons.filter_alt),
-                                label: const Text('Show All'),
+                                label: const Text('Show all'),
                               ),
                               const SizedBox(width: 10),
                               ElevatedButton.icon(
@@ -818,7 +851,7 @@ class MapPageState extends State<MapPage> {
                                   updateRoadClosurePolygonVisibility(false);
                                 },
                                 icon: const Icon(Icons.filter_alt_off),
-                                label: const Text('Hide All'),
+                                label: const Text('Hide all'),
                               ),
                               const SizedBox(width: 10),
                               ElevatedButton.icon(
@@ -853,6 +886,8 @@ class MapPageState extends State<MapPage> {
     // Clear the polygons
     _polygons.clear();
     hideAllMarkers();
+    // Remove any simple marker shown
+    markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
     // Reset the distance to destination
     _distanceToDestination = null;
     // Set navigation as not in progress
@@ -879,7 +914,6 @@ class MapPageState extends State<MapPage> {
       await updatePolyline(currentLatLng, destination);
       // Set the camera position once, at the beginning of the navigation
       _setMapCameraToFitPolyline(polylines);
-
       // Start location updates
       await startLocationUpdates(destination);
     } else {
@@ -893,9 +927,20 @@ class MapPageState extends State<MapPage> {
       );
     }
 
-    // Add destination map marker
-    Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
-    addSpecificMarker(destinationListing);
+    // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
+    const int aSimpleMarkerIdLen = aSimpleMarkerId.length;
+    if (id.length > aSimpleMarkerIdLen && id.substring(0,aSimpleMarkerIdLen) == aSimpleMarkerId) {
+      if (id.length > (aSimpleMarkerIdLen + 1)) {
+        addSimpleMarker(id.substring(aSimpleMarkerIdLen + 1), destination);
+      } else {
+        debugPrint('Adding Event type simple marker as category was not specified: $id');
+        addSimpleMarker('Event', destination);
+      }
+    } else {
+      // Add destination map marker
+      Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
+      addSpecificMarker(destinationListing);
+    }
   }
 
   void cancelNavigation() {
@@ -913,6 +958,9 @@ class MapPageState extends State<MapPage> {
 
     // Reset the distance to destination
     _distanceToDestination = null;
+
+    // Remove any simple marker shown
+    markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
 
     // Show markers which have enabled filters
     showFilteredMarkers();
@@ -1277,7 +1325,7 @@ class MapPageState extends State<MapPage> {
                     : ElevatedButton.icon(
                         onPressed: refreshListings,
                         icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh Listings'),
+                        label: const Text('Refresh listings'),
                       ),
               ],
             ),
@@ -1312,42 +1360,41 @@ class MapPageState extends State<MapPage> {
                   mapWidth = constraints.maxWidth;
                   mapHeight = constraints.maxHeight;
                   return GoogleMap(
-                    // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
-                    style: mapStyle,
-                    mapType: mapType,
-                    rotateGesturesEnabled: false,
-                    compassEnabled: false,
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
-                    mapToolbarEnabled: false,
-                    onMapCreated: (GoogleMapController controller) {
-                      _controller = controller;
-                      if (listings.isNotEmpty) {
-                        // We should have listings by this point so set the camera to their bounds
-                        _setMapCameraToFitMapMarkers();
-                      }
-                    },
-                    initialCameraPosition: CameraPosition(
-                      target: const LatLng(52.199174, 0.140929),
-                      zoom: 14.1,
-                      bearing: _mapBearing,
-                    ),
-                    onCameraMove: (CameraPosition position) {
-                      setState(() {
-                        switch (preferredMapOrientation) {
-                          case MapOrientation.adaptive:
-                            _compassBearing = 90;
-                            break;
-                          case MapOrientation.alwaysNorth:
-                            _compassBearing = 0;
-                            break;
+                      // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
+                      style: mapStyle,
+                      mapType: mapType,
+                      rotateGesturesEnabled: false,
+                      compassEnabled: false,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
+                      mapToolbarEnabled: false,
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller = controller;
+                        if (listings.isNotEmpty) {
+                          // We should have listings by this point so set the camera to their bounds
+                          _setMapCameraToFitMapMarkers();
                         }
-                      });
-                    },
-                    polygons: _polygons,
-                    markers: markers.values.toSet(),
-                    polylines: polylines
-                  );
+                      },
+                      initialCameraPosition: CameraPosition(
+                        target: const LatLng(52.199174, 0.140929),
+                        zoom: 14.1,
+                        bearing: _mapBearing,
+                      ),
+                      onCameraMove: (CameraPosition position) {
+                        setState(() {
+                          switch (preferredMapOrientation) {
+                            case MapOrientation.adaptive:
+                              _compassBearing = 90;
+                              break;
+                            case MapOrientation.alwaysNorth:
+                              _compassBearing = 0;
+                              break;
+                          }
+                        });
+                      },
+                      polygons: _polygons,
+                      markers: markers.values.toSet(),
+                      polylines: polylines);
                 },
               ),
               Positioned(
