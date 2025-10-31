@@ -205,6 +205,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
+          // add secondaryType (and space before/after) unless it's blank (which means it's a bottom modal group list)
           if (secondaryType != '') const SizedBox(height: 8),
           if (secondaryType != '') Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -242,10 +243,10 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 icon: const Icon(Icons.directions_walk),
                 label: const FittedBox(child: Text('Directions')),
               ),
-              // only display the Details button, and the spacer before it, if there are some details to display (and they're not always shown)
+              // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
               if (onToggle != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 8),
               // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
-              if (onToggle != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 350)
+              if (onToggle != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 360)
                 ElevatedButton(
                   style: detailsVisible ?
                     ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: -1, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
@@ -332,49 +333,77 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   ],
                 ),
                 if (website.isNotEmpty) const SizedBox(height: 8),
-                if (website.isNotEmpty) Row(
-                  children: [
-                      Flexible(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
-                              TextSpan(style: const TextStyle(fontSize: 12), text: website),
-                            ], 
-                          ),
-                        ), 
-                      ),
-                  ],
+                if (website.isNotEmpty) GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    launchUrl(Uri.parse(website));
+                  },
+                  child: Row(
+                    children: [
+                        Flexible(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                                TextSpan(style: const TextStyle(fontSize: 12, decoration: TextDecoration.underline), text: website),
+                              ], 
+                            ),
+                          ), 
+                        ),
+                    ],
+                  ),
                 ),
                 if (email.isNotEmpty) const SizedBox(height: 8),
-                if (email.isNotEmpty) Row(
-                  children: [
-                      Flexible(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
-                              TextSpan(style: const TextStyle(fontSize: 12), text: email),
-                            ], 
-                          ),
-                        ), 
-                      ),
-                  ],
+                if (email.isNotEmpty) GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    final Uri mailUri = Uri(scheme: 'mailto', path: email);
+                    if (await canLaunchUrl(mailUri)) {
+                      await launchUrl(mailUri);
+                    } else {
+                      throw Exception('Could not launch email client');
+                    }
+                  },
+                  child: Row(
+                    children: [
+                        Flexible(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                                TextSpan(style: const TextStyle(fontSize: 12, decoration: TextDecoration.underline), text: email),
+                              ], 
+                            ),
+                          ), 
+                        ),
+                    ],
+                  ),
                 ),
                 if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (phoneNumber.isNotEmpty) Row(
-                  children: [
-                      Flexible(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
-                              TextSpan(style: const TextStyle(fontSize: 12), text: phoneNumber),
-                            ], 
-                          ),
-                        ), 
-                      ),
-                  ],
+                if (phoneNumber.isNotEmpty) GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+                    if (await canLaunchUrl(phoneUri)) {
+                      await launchUrl(phoneUri);
+                    } else {
+                      throw Exception('Could not launch $phoneNumber');
+                    }
+                  },
+                  child: Row(
+                    children: [
+                        Flexible(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                                TextSpan(style: const TextStyle(fontSize: 12, decoration: TextDecoration.underline), text: phoneNumber),
+                              ], 
+                            ),
+                          ), 
+                        ),
+                    ],
+                  ),
                 ),
               ],
             ),
