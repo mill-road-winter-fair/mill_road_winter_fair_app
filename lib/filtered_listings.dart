@@ -57,11 +57,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Remember the previous index to allow returning back
     previousIndex = homePageKey.currentState!.index;
 
-    // Request the map page to show directions
-    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
-
     // Switch to map tab on the home page
     homePageKey.currentState?.setCurrentIndex(0);
+
+    // Request the map page to show directions
+    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
   }
 
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
@@ -234,7 +234,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       color: Theme.of(context).colorScheme.onPrimary,
       child: Scrollbar(
         controller: _scrollController,
-        thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
+        thumbVisibility: Platform.isIOS ? false : true,
+        // iOS has its own scrollbar style
         thickness: 4,
         radius: const Radius.circular(8),
         child: CustomScrollView(
