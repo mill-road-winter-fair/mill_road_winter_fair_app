@@ -27,7 +27,7 @@ void main() {
         'displayName': 'Food Group',
         'endTime': '16:30',
         'id': '1',
-        'latLng': '52.199838,0.139016',
+        'latLng': '52.199838,0.139016',  // 199m
         'phone': '',
         'primaryType': 'Group-Food',
         'secondaryType': 'Fake Street',
@@ -41,7 +41,7 @@ void main() {
         'displayName': 'Glazed and Confused',
         'endTime': '15:00',
         'id': '2',
-        'latLng': '52.199687,0.138813',
+        'latLng': '52.199687,0.138813',  // 535m
         'phone': '01223 111111',
         'primaryType': 'Food',
         'secondaryType': 'Fake Street',
@@ -55,7 +55,7 @@ void main() {
         'endTime': '16:30',
         'id': '3',
         'name': 'sushisquad',
-        'latLng': '52.199188,0.139437',
+        'latLng': '52.199188,0.139437',  // 135m
         'phone': '01223 222222',
         'primaryType': 'Food',
         'secondaryType': 'Implausible Avenue',
@@ -139,7 +139,7 @@ void main() {
       expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
     });
 
-    testWidgets('Adds markers, opens modal bottom sheet for specific marker, and checks content', (WidgetTester tester) async {
+    testWidgets('Adds markers, opens modal bottom sheet for group marker, and checks content', (WidgetTester tester) async {
       // Override user location global
       currentLatLng = const LatLng(52.199174, 0.140929);
 
@@ -166,18 +166,17 @@ void main() {
       // Check the text content in the bottom sheet
       // Group marker content
       expect(find.text('Food Group'), findsOneWidget);
-      expect(find.text('10:30 - 16:30'), findsOneWidget);
+      expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Food'), findsOneWidget);
       expect(find.text('approx. 199 m'), findsOneWidget);
       // Specific marker content
       expect(find.text('Glazed and Confused'), findsOneWidget);
-      expect(find.text('11:00 - 15:00'), findsOneWidget);
-      expect(find.text('Fake Street • Doughnuts'), findsOneWidget);
+      expect(find.text('Doughnuts\n11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
     });
 
-    testWidgets('Adds markers, opens modal bottom sheet for group marker, and checks content', (WidgetTester tester) async {
+    testWidgets('Adds markers, opens modal bottom sheet for specific marker, and checks content', (WidgetTester tester) async {
       // Override user location global
       currentLatLng = const LatLng(52.199174, 0.140929);
 
@@ -203,10 +202,9 @@ void main() {
 
       // Check the text content in the bottom sheet
       expect(find.text('Sushi Squad'), findsOneWidget);
-      expect(find.text('12:00 - 16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue • Sushi'), findsOneWidget);
-      expect(find.text('approx. 135 m'), findsOneWidget);
-      expect(find.text('01223 222222'), findsOneWidget);
+      expect(find.text('12:00—16:30'), findsOneWidget);
+      expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
+      expect(find.text('Telephone: 01223 222222'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
     });

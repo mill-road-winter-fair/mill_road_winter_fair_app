@@ -129,8 +129,8 @@ class GroupListingInfoSheet extends StatelessWidget {
 
 class SpecificListingInfoSheet extends StatelessWidget {
   final String title;
-  final String secondaryType;
-  final String tertiaryType;
+  final String location;
+  final String subtitle;
   final String startTime;
   final String endTime;
   final String approxDistance;
@@ -144,8 +144,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
 
   const SpecificListingInfoSheet({
     required this.title,
-    required this.secondaryType,
-    required this.tertiaryType,
+    required this.location,
+    required this.subtitle,
     required this.startTime,
     required this.endTime,
     required this.approxDistance,
@@ -197,7 +197,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               Expanded(
                 flex: 6,
                 child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(
-                  tertiaryType,
+                  subtitle,
                   style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
@@ -205,14 +205,14 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          // add secondaryType (and space before/after) unless it's blank (which means it's a bottom modal group list)
-          if (secondaryType != '') const SizedBox(height: 8),
-          if (secondaryType != '') Row(
+          // add location (and space before/after) unless it's blank (which means it's a bottom modal group list)
+          if (location != '') const SizedBox(height: 8),
+          if (location != '') Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
                 TextSpan(children: [
-                  TextSpan(text: secondaryType),
+                  TextSpan(text: location),
                   TextSpan(style: const TextStyle(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
                 ], ), 
               ), ),
@@ -229,7 +229,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          if (secondaryType != '') const SizedBox(height: 6),
+          if (location != '') const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -408,7 +408,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ],
             ),
           // if we're on a modal bottom sheet, add some space
-          if (onToggle == null && secondaryType != '') const SizedBox(height: 20),
+          if (onToggle == null && location != '') const SizedBox(height: 20),
         ],
       ),
     );

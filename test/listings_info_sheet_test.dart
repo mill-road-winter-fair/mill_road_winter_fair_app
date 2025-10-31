@@ -14,25 +14,33 @@ void main() {
   // Build widget tree
   Widget createWidgetUnderTest({
     required String title,
-    required String categories,
+    required String location,
+    required String subtitle,
     required String startTime,
     required String endTime,
     required String approxDistance,
     required String phoneNumber,
     required String website,
+    required String email,
+    required String description,
     required Function onGetDirections,
+    required bool detailsVisible,
   }) {
     return MaterialApp(
       home: Scaffold(
         body: SpecificListingInfoSheet(
           title: title,
-          categories: categories,
+          location: location,
+          subtitle: subtitle,
           startTime: startTime,
           endTime: endTime,
           approxDistance: approxDistance,
           phoneNumber: phoneNumber,
           website: website,
+          email: email,
+          description: description,
           onGetDirections: onGetDirections,
+          detailsVisible: detailsVisible,
         ),
       ),
     );
@@ -42,18 +50,22 @@ void main() {
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         title: 'Glazed and Confused',
-        categories: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        subtitle: 'Food • Doughnuts',
         startTime: '10:30',
         endTime: '16:30',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
         phoneNumber: '01223 111111',
         website: 'https://www.glazedandconfused.com',
+        email: 'sales@glazedandconfused.com',
+        description: 'Nice buns',
+        detailsVisible: true,
         onGetDirections: () {},
       ));
 
       expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
-      expect(find.text('10:30 - 16:30'), findsOneWidget);
+      expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
     });
@@ -61,18 +73,22 @@ void main() {
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         title: 'Glazed and Confused',
-        categories: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        subtitle: 'Food • Doughnuts',
         startTime: '10:30',
         endTime: '16:30',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
         phoneNumber: '01223 111111',
         website: '',
+        email: 'sales@glazedandconfused.com',
+        description: 'Nice buns',
+        detailsVisible: true,
         onGetDirections: () {},
       ));
 
       expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
-      expect(find.text('10:30 - 16:30'), findsOneWidget);
+      expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsNothing);
     });
@@ -85,18 +101,22 @@ void main() {
 
       await tester.pumpWidget(createWidgetUnderTest(
         title: 'Glazed and Confused',
-        categories: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        subtitle: 'Food • Doughnuts',
         startTime: '10:30',
         endTime: '16:30',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
         phoneNumber: '01223 111111',
         website: 'https://www.glazedandconfused.com',
+        email: 'sales@glazedandconfused.com',
+        description: 'Nice buns',
+        detailsVisible: false,
         onGetDirections: () {
           directionsCalled = true;
         },
       ));
 
-      final getDirectionsButton = find.text('Get directions');
+      final getDirectionsButton = find.text('Directions');
       expect(getDirectionsButton, findsOneWidget);
 
       await tester.tap(getDirectionsButton);

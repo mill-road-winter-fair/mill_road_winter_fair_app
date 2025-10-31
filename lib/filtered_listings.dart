@@ -45,7 +45,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
     // allow up to 500 listings (we don't yet know how many there are)
-    detailsVisibilityList = List<bool>.filled(500, false);;
+    detailsVisibilityList = List<bool>.filled(500, false);
   }
 
   @override
@@ -348,15 +348,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     children: [
                       SpecificListingInfoSheet(
                         title: listing['displayName'],
-                        secondaryType: listing['secondaryType'],
-                        tertiaryType: listing['tertiaryType'],
+                        location: listing['secondaryType'],
+                        subtitle: listing['tertiaryType'],
                         startTime: "${listing['startTime']}",
                         endTime: "${listing['endTime']}",
                         approxDistance: approximateDistance,
-                        phoneNumber: listing['phone'],
-                        website: listing['website'],
-                        email: listing['email'],
-                        description: listing['description'],
+                        phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                        website: (listing['website'] != null) ? listing['website'] : '',
+                        email: (listing['email'] != null) ? listing['email'] : '',
+                        description: (listing['description'] != null) ? listing['description'] : '',
                         detailsVisible: detailsVisibilityList[index],
                         onToggle: () => toggleDetailsRow(index),
                         onGetDirections: () {
