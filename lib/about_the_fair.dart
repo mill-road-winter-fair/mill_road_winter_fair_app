@@ -113,7 +113,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
 
   // Define sponsors and placeholder URLs - user will fill these in
   final Map<String, String> _sponsorUrls = {
-    'Bush & Co Sales and Lettings (lead sponsor)': 'https://bushandco.co.uk/',
+    'Bush & Co Sales and Lettings': 'https://bushandco.co.uk/',
     'Al-Amin': 'https://www.alamin.co.uk/',
     'Anglia Ruskin University': 'https://www.aru.ac.uk/',
     'Hughes Hall': 'https://www.hughes.cam.ac.uk/',
@@ -159,7 +159,30 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
     var bodyStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.primary);
     var eventsSubtitleStyle = TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
     var eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.onPrimary);
+
+    // Build a list of TextSpans for sponsors so we can special-case the Bush entry
+    final List<TextSpan> sponsorSpans = [];
+    final sponsorKeys = _sponsorUrls.keys.toList();
     var sponsorLinkStyle = bodyStyle.copyWith(decoration: TextDecoration.underline, color: Colors.blue);
+    for (var i = 0; i < sponsorKeys.length; i++) {
+      final name = sponsorKeys[i];
+      final isLast = i == sponsorKeys.length - 1;
+      final isSecondLast = i == sponsorKeys.length - 2;
+
+      if (name == 'Bush & Co Sales and Lettings') {
+        sponsorSpans.add(TextSpan(text: name, style: sponsorLinkStyle, recognizer: _recognizers[name]));
+        // Add non-clickable lead sponsor annotation
+        sponsorSpans.add(const TextSpan(text: ' (lead sponsor)'));
+      } else {
+        sponsorSpans.add(TextSpan(text: name, style: sponsorLinkStyle, recognizer: _recognizers[name]));
+      }
+
+      if (!isLast) {
+        sponsorSpans.add(TextSpan(text: isSecondLast ? ' and ' : ', '));
+      } else {
+        sponsorSpans.add(const TextSpan(text: '. '));
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -353,18 +376,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                         // Sponsor spans
                         const TextSpan(text: ''),
                         // Build sponsor spans with separators
-                        ..._sponsorUrls.keys.expand((name) sync* {
-                          // For each sponsor yield the clickable span and then the separator
-                          final isLast = name == _sponsorUrls.keys.last;
-                          final isSecondLast = name == _sponsorUrls.keys.elementAt(_sponsorUrls.keys.length - 2);
-                          yield TextSpan(text: name, style: sponsorLinkStyle, recognizer: _recognizers[name]);
-                          if (!isLast) {
-                            // use ', ' between items, and ' and ' before last
-                            yield TextSpan(text: isSecondLast ? ' and ' : ', ');
-                          } else {
-                            yield const TextSpan(text: '. ');
-                          }
-                        }),
+                        ...sponsorSpans,
                         const TextSpan(
                             text: 'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
                       ],
