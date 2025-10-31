@@ -159,7 +159,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
     var bodyStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.primary);
     var eventsSubtitleStyle = TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
     var eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.onPrimary);
-    var sponsorLinkStyle = bodyStyle.copyWith(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.primary);
+    var sponsorLinkStyle = bodyStyle.copyWith(decoration: TextDecoration.underline, color: Colors.blue);
 
     return Scaffold(
       appBar: AppBar(
