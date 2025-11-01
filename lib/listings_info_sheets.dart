@@ -139,7 +139,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final String email;
   final String description;
   final bool detailsVisible;
-  final VoidCallback? onToggle;
+  final VoidCallback? onDetailsTapped;
   final Function onGetDirections;
 
   const SpecificListingInfoSheet({
@@ -154,7 +154,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     required this.email,
     required this.description,
     required this.detailsVisible,
-    this.onToggle,
+    this.onDetailsTapped,
     required this.onGetDirections,
     super.key,
   });
@@ -244,24 +244,24 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 label: const FittedBox(child: Text('Directions')),
               ),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
-              if (onToggle != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 8),
+              if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 8),
               // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
-              if (onToggle != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 360)
+              if (onDetailsTapped != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 360)
                 ElevatedButton(
                   style: detailsVisible ?
                     ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: -1, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
                   :
                     ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -1, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: onToggle,
+                  onPressed: onDetailsTapped,
                   child: const Icon(Icons.info),
               ) 
-              else if (onToggle != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
+              else if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
                 ElevatedButton.icon(
                   style: detailsVisible ?
                     ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
                   :
                     ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: onToggle,
+                  onPressed: onDetailsTapped,
                   icon: const Icon(Icons.info),
                   label: const FittedBox(child: Text('Details')),
                 ),
@@ -408,7 +408,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ],
             ),
           // if we're on a modal bottom sheet, add some space
-          if (onToggle == null && location != '') const SizedBox(height: 20),
+          if (onDetailsTapped == null && location != '') const SizedBox(height: 20),
         ],
       ),
     );

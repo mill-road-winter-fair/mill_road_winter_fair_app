@@ -556,7 +556,7 @@ class MapPageState extends State<MapPage> {
                                 email: (rel['email'] != null) ? rel['email'] : '',
                                 description: (rel['description'] != null) ? rel['description'] : '',
                                 detailsVisible: detailsVisibilityList[index],
-                                onToggle: () => toggleDetailsRow(index),
+                                onDetailsTapped: () => toggleDetailsRow(index),
                                 onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
                               );
                             }

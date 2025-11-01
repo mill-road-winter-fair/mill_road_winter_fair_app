@@ -358,7 +358,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         email: (listing['email'] != null) ? listing['email'] : '',
                         description: (listing['description'] != null) ? listing['description'] : '',
                         detailsVisible: detailsVisibilityList[index],
-                        onToggle: () => toggleDetailsRow(index),
+                        onDetailsTapped: () => toggleDetailsRow(index),
                         onGetDirections: () {
                           if (homePageState != null) {
                             navigateToMapAndGetDirections(
