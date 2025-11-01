@@ -493,7 +493,7 @@ class MapPageState extends State<MapPage> {
           useSafeArea: true,
           builder: (BuildContext context) {
             double screenHeight = MediaQuery.of(context).size.height;
-            // Estimate the height of a SimplifiedListingInfoSheet in pixels
+            // Estimate the height of a SpecificListingInfoSheet in pixels
             double estimatedItemHeight = 125;
             // Estimate the total height of the bottom sheet
             double estimatedSheetHeight = relatedListings.length * estimatedItemHeight;
@@ -559,21 +559,7 @@ class MapPageState extends State<MapPage> {
                                 onToggle: () => toggleDetailsRow(index),
                                 onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
                               );
-
-    /*                          return SimplifiedListingInfoSheet(
-                                title: rel['displayName'],
-                                categories: "${rel['secondaryType']} • ${rel['tertiaryType']}",
-                                startTime: "${rel['startTime']}",
-                                endTime: "${rel['endTime']}",
-                                phoneNumber: rel['phone'],
-                                website: rel['website'],
-                                onGetDirections: () => getDirections(
-                                  rel['id'],
-                                  stringToLatLng(rel['latLng']),
-                                  true,
-                                ),
-                              );
-    */                        }
+                            }
                           },
                         ),
                       ),
