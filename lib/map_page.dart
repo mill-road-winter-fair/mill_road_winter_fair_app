@@ -1378,12 +1378,20 @@ class MapPageState extends State<MapPage> {
                           Icons.cancel,
                           size: 24,
                           color: Theme.of(context).colorScheme.onPrimary,
+                          shadows: [
+                            Shadow(
+                              color: Theme.of(context).shadowColor,
+                              offset: const Offset(1, 3),
+                              blurRadius: 5,
+                            ),
+                          ],
                         ),
                       ),
                     if (_navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'homeBtn',
                         shape: const CircleBorder(),
+                        elevation: 3,
                         mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
@@ -1414,6 +1422,7 @@ class MapPageState extends State<MapPage> {
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
                       shape: const CircleBorder(),
+                      elevation: 3,
                       mini: true,
                       onPressed: () {
                         HapticFeedback.lightImpact();
@@ -1445,6 +1454,7 @@ class MapPageState extends State<MapPage> {
                         child: FloatingActionButton(
                           heroTag: 'mapBearingBtn',
                           shape: const CircleBorder(),
+                          elevation: 3,
                           mini: true,
                           onPressed: () {
                             HapticFeedback.lightImpact();
@@ -1462,15 +1472,16 @@ class MapPageState extends State<MapPage> {
                       Row(
                         children: [
                           if (_navigationInProgress == false)
-                            IconButton.filled(
+                            FloatingActionButton(
+                              heroTag: 'filterBtn',
+                              shape: const CircleBorder(),
+                              elevation: 3,
+                              mini: true,
                               onPressed: () {
                                 showFilterMenu();
                                 setMarkerLists();
                               },
-                              icon: Icon(
-                                Icons.filter_alt,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
+                              child: const Icon(Icons.filter_alt),
                             ),
                         ],
                       ),
@@ -1483,6 +1494,7 @@ class MapPageState extends State<MapPage> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: FloatingActionButton.extended(
+                      elevation: 3,
                       heroTag: 'navigationBtn',
                       onPressed: () {
                         HapticFeedback.lightImpact();
