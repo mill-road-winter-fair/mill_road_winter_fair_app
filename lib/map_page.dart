@@ -72,7 +72,7 @@ class MapPageState extends State<MapPage> {
     'Services': true,
     'Road Closures': true,
   };
-  
+
   @override
   void initState() {
     debugPrint('MapPageState initState() called');
@@ -609,8 +609,7 @@ class MapPageState extends State<MapPage> {
     });
   }
 
- void addSimpleMarker(primaryType, destinationLatLng) async {
-
+  void addSimpleMarker(primaryType, destinationLatLng) async {
     debugPrint('addSimpleMarker called for primary type: $primaryType');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
     Color color = getCategoryColor(selectedThemeKey, primaryType);
@@ -632,7 +631,6 @@ class MapPageState extends State<MapPage> {
     setState(() {
       markers[markerId] = newMarker;
     });
-
   }
 
   Future<void> updateMarkersAndPolygonsForTheme() async {
@@ -891,7 +889,7 @@ class MapPageState extends State<MapPage> {
 
     // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
     const int aSimpleMarkerIdLen = aSimpleMarkerId.length;
-    if (id.length > aSimpleMarkerIdLen && id.substring(0,aSimpleMarkerIdLen) == aSimpleMarkerId) {
+    if (id.length > aSimpleMarkerIdLen && id.substring(0, aSimpleMarkerIdLen) == aSimpleMarkerId) {
       if (id.length > (aSimpleMarkerIdLen + 1)) {
         addSimpleMarker(id.substring(aSimpleMarkerIdLen + 1), destination);
       } else {
