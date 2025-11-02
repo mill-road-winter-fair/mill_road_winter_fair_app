@@ -268,20 +268,34 @@ class SpecificListingInfoSheet extends StatelessWidget {
               Flexible(flex: 1, child: Container()),
               if (website.isNotEmpty) const SizedBox(width: 6),
               if (website.isNotEmpty)
-                GestureDetector(
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    launchUrl(Uri.parse(website));
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.public, color: Theme.of(context).colorScheme.primary, size: 30, shadows: [Shadow(offset: const Offset(1, 3), blurRadius: 5, color: Theme.of(context).shadowColor)]),
-                    ],
+                Material(
+                  shape: const CircleBorder(),
+                  elevation: 3,
+                  color: Theme.of(context).colorScheme.primary,
+                  child: InkWell(
+                    onTap: () async {
+                      HapticFeedback.lightImpact();
+                      launchUrl(Uri.parse(website));
+                    },
+                    customBorder: const CircleBorder(),
+                    radius: 8,
+                    child:  Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.public,
+                        size: 22,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
                   ),
                 ),
-                if (email.isNotEmpty) const SizedBox(width: 6),
-                if (email.isNotEmpty)
-                  GestureDetector(
+              if (email.isNotEmpty) const SizedBox(width: 6),
+              if (email.isNotEmpty)
+                Material(
+                  shape: const CircleBorder(),
+                  elevation: 3,
+                  color: Theme.of(context).colorScheme.primary,
+                  child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
                       final Uri mailUri = Uri(scheme: 'mailto', path: email);
@@ -291,15 +305,25 @@ class SpecificListingInfoSheet extends StatelessWidget {
                         throw Exception('Could not launch email client');
                       }
                     },
-                    child: Row(
-                      children: [
-                        Icon(Icons.email, color: Theme.of(context).colorScheme.primary, size: 30, shadows: [Shadow(offset: const Offset(1, 3), blurRadius: 5, color: Theme.of(context).shadowColor)]),
-                      ],
+                    customBorder: const CircleBorder(),
+                    radius: 8,
+                    child:  Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.email,
+                        size: 22,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ),
-                if (phoneNumber.isNotEmpty) const SizedBox(width: 8),
-                if (phoneNumber.isNotEmpty)
-                  GestureDetector(
+                ),
+              if (phoneNumber.isNotEmpty) const SizedBox(width: 6),           
+              if (phoneNumber.isNotEmpty)
+                Material(
+                  shape: const CircleBorder(),
+                  elevation: 3,
+                  color: Theme.of(context).colorScheme.primary,
+                  child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
                       final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
@@ -309,12 +333,18 @@ class SpecificListingInfoSheet extends StatelessWidget {
                         throw Exception('Could not launch $phoneNumber');
                       }
                     },
-                    child: Row(
-                      children: [
-                        Icon(Icons.phone, color: Theme.of(context).colorScheme.primary, size: 30, shadows: [Shadow(offset: const Offset(1, 3), blurRadius: 5, color: Theme.of(context).shadowColor)]),
-                      ],
+                    customBorder: const CircleBorder(),
+                    radius: 8,
+                    child:  Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.phone,
+                        size: 22,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ),
+                ),
             ],
           ),
           if (detailsVisible)
