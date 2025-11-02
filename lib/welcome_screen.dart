@@ -414,7 +414,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.favorite, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Thank you for visiting Mill Road\nWinter Fair and using our new app", style: bodyStyle),
+                          Text("Thank you for visiting Mill\nRoad Winter Fair and using\nour new app", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -425,7 +425,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(text: "Please make sure you’ve read the\n", style: bodyStyle),
+                                TextSpan(text: "Please make sure you’ve read\nthe ", style: bodyStyle),
                                 TextSpan(
                                   text: "important information",
                                   style: bodyStyle.copyWith(decoration: TextDecoration.underline),
@@ -435,7 +435,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                                       Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
                                     },
                                 ),
-                                TextSpan(text: " about the Fair", style: bodyStyle),
+                                TextSpan(text: " about\nthe Fair", style: bodyStyle),
                               ],
                             ),
                           ),
