@@ -17,7 +17,8 @@ void main() {
       await ListingUpdateNotifier.maybeShowNotice(tester.element(find.byType(SizedBox)));
 
       // Advance time to allow the toast's internal timer (8s) to complete and avoid pending timers
-      await tester.pump(const Duration(seconds: 9));
+      // original was 9s; changed to 13s for the lengthier interim message
+      await tester.pump(const Duration(seconds: 13));
       await tester.pumpAndSettle();
 
       final prefs = await SharedPreferences.getInstance();
