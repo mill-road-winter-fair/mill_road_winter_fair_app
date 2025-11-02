@@ -4,7 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ListingUpdateNotifier {
   static const _lastShownKey = 'listing_notice_last_shown';
-  static const _showIntervalDays = 3;
+  // original repeat interval was 3 days
+  static const _showIntervalDays = 1;
   static final DateTime _cutoffDate = DateTime(2025, 12, 6);
 
   // I wouldn't usually keep commented out code but this function is handy for testing this toast notification
@@ -27,7 +28,7 @@ class ListingUpdateNotifier {
     // Safely perform async work
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
-await prefs.remove(_lastShownKey);
+
     if (now.isAfter(_cutoffDate)) {
       debugPrint('Current date is after cutoff, not showing notice');
       return;
