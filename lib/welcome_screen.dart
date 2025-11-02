@@ -66,7 +66,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('OnBoardingPageState build() called');
-    var bodyStyle = TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary);
+    var bodyStyle = TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary, height: 1.4);
 
     var pageDecoration = PageDecoration(
       titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
