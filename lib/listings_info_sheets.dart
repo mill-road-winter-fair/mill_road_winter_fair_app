@@ -174,7 +174,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     return Container(
       padding: EdgeInsets.fromLTRB(
         4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
-        12,
+        8,
         4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
         12
       ),
@@ -183,6 +183,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 0,
         children: [
+          // if we're on a modal bottom sheet, add a bit of space to avoid radius at top of dialog
+          if (onDetailsTapped == null && location != '') const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -205,7 +207,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          // add location (and space before/after) unless it's blank (which means it's a bottom modal group list)
+          // add location (and space before) unless it's blank (which means it's a bottom modal group list)
           if (location != '') const SizedBox(height: 8),
           if (location != '') Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -229,7 +231,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-          if (location != '') const SizedBox(height: 6),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -437,8 +439,9 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 ),
               ],
             ),
-          // if we're on a modal bottom sheet, add some space
+          // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
           if (onDetailsTapped == null && location != '') const SizedBox(height: 20),
+          if (onDetailsTapped != null || location == '') const SizedBox(height: 4),
         ],
       ),
     );
