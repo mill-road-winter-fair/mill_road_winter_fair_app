@@ -60,8 +60,15 @@ class ListingUpdateNotifier {
         ],
       ),
       child: Text(
-        "Please note that event details may change as the Fair approaches, "
-        "but this app will always show the most up-to-date information.",
+// original text - keep as we may restore closer to the Fair
+//        "Please note that event details may change as the Fair approaches, "
+//        "but this app will always show the most up-to-date information.",
+          "This app currently shows many of "
+          "the attractions you'll find at the\n"
+          "2025 Fair on Saturday 6th December,"
+          "and there’ll be more added in the "
+          "lead-up to the Fair.\n\n"
+          "Check back for the latest listings.",
         style: TextStyle(
           color: textColor,
           fontSize: 14,
