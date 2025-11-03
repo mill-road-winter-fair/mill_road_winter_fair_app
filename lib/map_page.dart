@@ -497,11 +497,11 @@ class MapPageState extends State<MapPage> {
           builder: (BuildContext context) {
             double screenHeight = MediaQuery.of(context).size.height;
             // Estimate the height of a SpecificListingInfoSheet in pixels
-            double estimatedItemHeight = 135;
+            double estimatedItemHeight = 145;
             // Estimate the total height of the bottom sheet
             double estimatedSheetHeight = relatedListings.length * estimatedItemHeight;
-            // Set the minimum size of the modalBottomSheet based on either the estimatedSheetHeight or 2/3 of the screen, whichever is lower
-            double minFraction = min((estimatedSheetHeight / screenHeight), 0.66);
+            // Set the minimum size of the modalBottomSheet based on either the estimatedSheetHeight or 4/5 of the screen, whichever is lower
+            double minFraction = min((estimatedSheetHeight / screenHeight), 0.8);
             // Set the maximum size of the modalBottomSheet based on either the estimatedSheetHeight or the whole screen, whichever is lower
             double maxFraction = min((estimatedSheetHeight / screenHeight), 0.9);
             detailsVisibilityList = List<bool>.filled(relatedListings.length, false);
