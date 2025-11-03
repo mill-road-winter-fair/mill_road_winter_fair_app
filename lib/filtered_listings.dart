@@ -38,14 +38,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  late List<bool> detailsVisibilityList;
+  List<bool> detailsVisibilityList = List<bool>.filled(500, false);  // start with plenty enough to load all listings
 
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
-    // allow up to 500 listings (we don't yet know how many there are)
-    detailsVisibilityList = List<bool>.filled(500, false);
+  }
+
+  void onTabVisible() {
+    // This is called when user switches to this tab
+    setState(() {
+      detailsVisibilityList = List<bool>.filled(filteredListings.length, false);
+    });
   }
 
   @override
@@ -199,7 +204,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called');
     final homePageState = context.findAncestorStateOfType<HomePageState>();
-
     // Show error if there are no listings
     if (listings.isEmpty) {
       return Center(

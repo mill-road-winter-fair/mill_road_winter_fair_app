@@ -219,6 +219,21 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  final _listingsKeyFood = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyShopping = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyMusic = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyEvent = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
+  
+  late final _pages = [
+    MapPage(listings: listings, key: mapPageKey),
+    FilteredListingsPage(filterPrimaryType: "Food", listings: listings, key: _listingsKeyFood),
+    FilteredListingsPage(filterPrimaryType: "Shopping", listings: listings, key: _listingsKeyShopping),
+    FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
+    FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
+    FilteredListingsPage(filterPrimaryType: "Service", listings: listings, key: _listingsKeyService),
+  ];
+
   void aboutDialog() {
     return showAboutDialog(
       context: context,
@@ -316,14 +331,7 @@ class HomePageState extends State<HomePage> {
       ),
       body: IndexedStack(
         index: index,
-        children: [
-          MapPage(listings: listings, key: mapPageKey),
-          FilteredListingsPage(filterPrimaryType: "Food", listings: listings),
-          FilteredListingsPage(filterPrimaryType: "Shopping", listings: listings),
-          FilteredListingsPage(filterPrimaryType: "Music", listings: listings),
-          FilteredListingsPage(filterPrimaryType: "Event", listings: listings),
-          FilteredListingsPage(filterPrimaryType: "Service", listings: listings),
-        ],
+        children: _pages,
       ),
       bottomNavigationBar: Container(
         margin: const EdgeInsets.only(right: 10),
@@ -339,6 +347,13 @@ class HomePageState extends State<HomePage> {
             HapticFeedback.selectionClick();
             // Update the user's location
             establishLocation();
+            switch (selectedIndex) {
+              case 1 : _listingsKeyFood.currentState?.onTabVisible();
+              case 2 : _listingsKeyShopping.currentState?.onTabVisible();
+              case 3 : _listingsKeyMusic.currentState?.onTabVisible();
+              case 4 : _listingsKeyEvent.currentState?.onTabVisible();
+              case 5 : _listingsKeyService.currentState?.onTabVisible();
+            }
             setState(() {
               index = selectedIndex;
             });

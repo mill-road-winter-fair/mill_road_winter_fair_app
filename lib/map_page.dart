@@ -72,7 +72,6 @@ class MapPageState extends State<MapPage> {
     'Services': true,
     'Road Closures': true,
   };
-  bool detailsVisible = false;  // for modal bottom sheet single listings
   late List<bool> detailsVisibilityList;  // for modal bottom sheet group listings
 
   @override
@@ -88,7 +87,11 @@ class MapPageState extends State<MapPage> {
       ListingUpdateNotifier.maybeShowNotice(context);
     });
     super.initState();
-}
+  }
+
+  void onTabVisible() {
+      // This is called when user switches to this tab
+  }
 
   Polygon roadClosurePolygon() {
     final List<LatLng> roadClosurePolygonPoints = [];
