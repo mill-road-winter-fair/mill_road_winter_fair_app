@@ -58,10 +58,10 @@ class GroupListingInfoSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
-        borderRadius: BorderRadius.circular(28),
-        border: BoxBorder.all(width: 1, color: Colors.grey[700]!),
+        borderRadius: BorderRadius.circular(12),
+        border: BoxBorder.all(width: 1, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,42 +70,49 @@ class GroupListingInfoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                flex: 7,
+                flex: 13,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 42), // cap text height
                   child: FittedBox(
                     alignment: Alignment.centerLeft,
+                    fit: BoxFit.scaleDown,
                     child: Text(
                       title,
-                      style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
                     ),
                   ),
                 ),
               ),
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
-                flex: 3,
+                flex: 7,
                 child: Text(
-                  "$startTime - $endTime",
+                  "$startTime—$endTime",
                   style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+//          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                flex: 7,
-                child: Text(
-                  categories,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
-                ),
+                flex: 10,
+                  child: FittedBox(
+                    alignment: Alignment.centerLeft,
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      categories,
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                    ),
+                  ),
               ),
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
               if (currentLatLng != null)
                 Expanded(
-                  flex: 3,
+                  flex: 10,
                   child: Text(
                     approxDistance,
                     style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary),
@@ -122,22 +129,32 @@ class GroupListingInfoSheet extends StatelessWidget {
 
 class SpecificListingInfoSheet extends StatelessWidget {
   final String title;
-  final String categories;
+  final String location;
+  final String subtitle;
   final String startTime;
   final String endTime;
   final String approxDistance;
   final String phoneNumber;
   final String website;
+  final String email;
+  final String description;
+  final bool detailsVisible;
+  final VoidCallback? onDetailsTapped;
   final Function onGetDirections;
 
   const SpecificListingInfoSheet({
     required this.title,
-    required this.categories,
+    required this.location,
+    required this.subtitle,
     required this.startTime,
     required this.endTime,
     required this.approxDistance,
     required this.phoneNumber,
     required this.website,
+    required this.email,
+    required this.description,
+    required this.detailsVisible,
+    this.onDetailsTapped,
     required this.onGetDirections,
     super.key,
   });
@@ -155,173 +172,160 @@ class SpecificListingInfoSheet extends StatelessWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.fromLTRB(
+        4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
+        8,
+        4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
+        12
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 0,
         children: [
+          // if we're on a modal bottom sheet, add a bit of space to avoid radius at top of dialog
+          if (onDetailsTapped == null && location != '') const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                flex: 7,
+                flex: 14,
                 child: Text(
                   title,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
-                flex: 3,
-                child: Text(
-                  "$startTime - $endTime",
+                flex: 6,
+                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(
+                  subtitle,
                   style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
               ),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
+          // add location (and space before) unless it's blank (which means it's a bottom modal group list)
+          if (location != '') const SizedBox(height: 8),
+          if (location != '') Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(flex: 7, child: Text(categories)),
-              if (currentLatLng != null)
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    approxDistance,
-                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                    textAlign: TextAlign.end,
-                  ),
+              Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(text: location),
+                  TextSpan(style: const TextStyle(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
+                ], ), 
+              ), ),
+              ),
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
+              Expanded(
+                flex: 6,
+                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(
+                  "$startTime—$endTime",
+                  style: timeStyle,
+                  textAlign: TextAlign.end,
                 ),
+              ),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
-          if (phoneNumber.isNotEmpty)
-            GestureDetector(
-              onTap: () async {
-                HapticFeedback.lightImpact();
-                final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-                if (await canLaunchUrl(phoneUri)) {
-                  await launchUrl(phoneUri);
-                } else {
-                  throw Exception('Could not launch $phoneNumber');
-                }
-              },
-              child: Row(
-                children: [
-                  const Icon(Icons.phone, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  Text(phoneNumber),
-                ],
-              ),
-            ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Flexible(
-                flex: 8,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    onGetDirections();
-                  },
-                  icon: const Icon(Icons.directions_walk),
-                  label: const FittedBox(child: Text('Get directions')),
-                ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  onGetDirections();
+                },
+                icon: const Icon(Icons.directions_walk),
+                label: const FittedBox(child: Text('Directions')),
               ),
+              // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
+              if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 8),
+              // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
+              if (onDetailsTapped != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 360)
+                ElevatedButton(
+                  style: detailsVisible ?
+                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: -1, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                  :
+                    ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -1, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: onDetailsTapped,
+                  child: const Icon(Icons.info),
+              ) 
+              else if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
+                ElevatedButton.icon(
+                  style: detailsVisible ?
+                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                  :
+                    ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: onDetailsTapped,
+                  icon: const Icon(Icons.info),
+                  label: const FittedBox(child: Text('Details')),
+                ),
               Flexible(flex: 1, child: Container()),
+              if (website.isNotEmpty) const SizedBox(width: 6),
               if (website.isNotEmpty)
-                Flexible(
-                  flex: 8,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
+                Material(
+                  shape: const CircleBorder(),
+                  elevation: 3,
+                  color: Theme.of(context).colorScheme.primary,
+                  child: InkWell(
+                    onTap: () async {
                       HapticFeedback.lightImpact();
                       launchUrl(Uri.parse(website));
                     },
-                    icon: const Icon(Icons.public),
-                    label: const FittedBox(child: Text('Open website')),
+                    customBorder: const CircleBorder(),
+                    radius: 8,
+                    child:  Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.public,
+                        size: 22,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
                   ),
                 ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class SimplifiedListingInfoSheet extends StatelessWidget {
-  final String title;
-  final String categories;
-  final String startTime;
-  final String endTime;
-  final String phoneNumber;
-  final String website;
-  final Function onGetDirections;
-
-  const SimplifiedListingInfoSheet({
-    required this.title,
-    required this.categories,
-    required this.startTime,
-    required this.endTime,
-    required this.phoneNumber,
-    required this.website,
-    required this.onGetDirections,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    debugPrint('SimplifiedListingInfoSheet build() called');
-
-    // Determine if the event has ended, update text style accordingly
-    final bool ended = hasEventEnded(endTime);
-    final timeStyle = TextStyle(
-      fontSize: 14,
-      color: ended ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
-      decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
-    );
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                flex: 7,
-                child: Text(
-                  title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              if (email.isNotEmpty) const SizedBox(width: 6),
+              if (email.isNotEmpty)
+                Material(
+                  shape: const CircleBorder(),
+                  elevation: 3,
+                  color: Theme.of(context).colorScheme.primary,
+                  child: InkWell(
+                    onTap: () async {
+                      HapticFeedback.lightImpact();
+                      final Uri mailUri = Uri(scheme: 'mailto', path: email);
+                      if (await canLaunchUrl(mailUri)) {
+                        await launchUrl(mailUri);
+                      } else {
+                        throw Exception('Could not launch email client');
+                      }
+                    },
+                    customBorder: const CircleBorder(),
+                    radius: 8,
+                    child:  Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.email,
+                        size: 22,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Text(
-                  "$startTime - $endTime",
-                  style: timeStyle,
-                  textAlign: TextAlign.end,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                flex: 6,
-                child: Text(categories),
-              ),
+              if (phoneNumber.isNotEmpty) const SizedBox(width: 6),           
               if (phoneNumber.isNotEmpty)
-                Expanded(
-                  flex: 4,
-                  child: GestureDetector(
+                Material(
+                  shape: const CircleBorder(),
+                  elevation: 3,
+                  color: Theme.of(context).colorScheme.primary,
+                  child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
                       final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
@@ -331,48 +335,113 @@ class SimplifiedListingInfoSheet extends StatelessWidget {
                         throw Exception('Could not launch $phoneNumber');
                       }
                     },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(Icons.phone, color: Colors.blue),
-                        const SizedBox(width: 2),
-                        Text(phoneNumber),
-                      ],
+                    customBorder: const CircleBorder(),
+                    radius: 8,
+                    child:  Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.phone,
+                        size: 22,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                flex: 8,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    onGetDirections();
-                  },
-                  icon: const Icon(Icons.directions_walk),
-                  label: const FittedBox(child: Text('Get directions')),
+          if (detailsVisible)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 0,
+              children: [
+                if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
+                if (description.isNotEmpty) const SizedBox(height: 8),
+                if (description.isNotEmpty) Row(
+                  children: [
+                    Flexible(
+                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
+                    ),
+                  ],
                 ),
-              ),
-              Flexible(flex: 1, child: Container()),
-              if (website.isNotEmpty)
-                Flexible(
-                  flex: 8,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse(website));
-                    },
-                    icon: const Icon(Icons.public),
-                    label: const FittedBox(child: Text('Open website')),
+                if (website.isNotEmpty) const SizedBox(height: 8),
+                if (website.isNotEmpty) GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    launchUrl(Uri.parse(website));
+                  },
+                  child: Row(
+                    children: [
+                        Flexible(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
+                              ], 
+                            ),
+                          ), 
+                        ),
+                    ],
                   ),
                 ),
-            ],
-          ),
+                if (email.isNotEmpty) const SizedBox(height: 8),
+                if (email.isNotEmpty) GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    final Uri mailUri = Uri(scheme: 'mailto', path: email);
+                    if (await canLaunchUrl(mailUri)) {
+                      await launchUrl(mailUri);
+                    } else {
+                      throw Exception('Could not launch email client');
+                    }
+                  },
+                  child: Row(
+                    children: [
+                        Flexible(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
+                              ], 
+                            ),
+                          ), 
+                        ),
+                    ],
+                  ),
+                ),
+                if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
+                if (phoneNumber.isNotEmpty) GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+                    if (await canLaunchUrl(phoneUri)) {
+                      await launchUrl(phoneUri);
+                    } else {
+                      throw Exception('Could not launch $phoneNumber');
+                    }
+                  },
+                  child: Row(
+                    children: [
+                        Flexible(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
+                              ], 
+                            ),
+                          ), 
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
+          if (onDetailsTapped == null && location != '') const SizedBox(height: 20),
+          if (onDetailsTapped != null || location == '') const SizedBox(height: 4),
         ],
       ),
     );

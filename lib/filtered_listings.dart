@@ -38,11 +38,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  List<bool> detailsVisibilityList = List<bool>.filled(500, false);  // start with plenty enough to load all listings
 
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
+  }
+
+  void onTabVisible() {
+    // This is called when user switches to this tab
+    setState(() {
+      detailsVisibilityList = List<bool>.filled(filteredListings.length, false);
+    });
   }
 
   @override
@@ -185,11 +193,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
   }
 
+  void toggleDetailsRow(int index) {
+    HapticFeedback.lightImpact();
+    setState(() {
+      detailsVisibilityList[index] = !detailsVisibilityList[index];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called');
     final homePageState = context.findAncestorStateOfType<HomePageState>();
-
     // Show error if there are no listings
     if (listings.isEmpty) {
       return Center(
@@ -224,8 +238,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 2: Sort the filtered listings
     final sortedListings = _applySorting(primaryFiltered);
-    // Step 3: Apply search filtering to that subset
 
+    // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
 
     return RefreshIndicator(
@@ -339,12 +353,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     children: [
                       SpecificListingInfoSheet(
                         title: listing['displayName'],
-                        categories: "${listing['secondaryType']} • ${listing['tertiaryType']}",
+                        location: listing['secondaryType'],
+                        subtitle: listing['tertiaryType'],
                         startTime: "${listing['startTime']}",
                         endTime: "${listing['endTime']}",
                         approxDistance: approximateDistance,
-                        phoneNumber: listing['phone'],
-                        website: listing['website'],
+                        phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                        website: (listing['website'] != null) ? listing['website'] : '',
+                        email: (listing['email'] != null) ? listing['email'] : '',
+                        description: (listing['description'] != null) ? listing['description'] : '',
+                        detailsVisible: detailsVisibilityList[index],
+                        onDetailsTapped: () => toggleDetailsRow(index),
                         onGetDirections: () {
                           if (homePageState != null) {
                             navigateToMapAndGetDirections(
@@ -356,7 +375,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         },
                       ),
                       // separator except after last item
-                      if (index != filteredListings.length - 1) Divider(color: Colors.grey[350]),
+                      if (index != filteredListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                     ],
                   );
                 },
@@ -396,7 +415,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: DropdownMenu(
               initialSelection: preferredSortingMethod,
-              width: MediaQuery.of(context).size.width * 0.6,
+              width: MediaQuery.of(context).size.width * 0.6 + 40,
               label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
               leadingIcon: const Icon(Icons.sort),
               inputDecorationTheme: InputDecorationTheme(

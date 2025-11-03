@@ -33,6 +33,7 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   'dark': ThemeData(
     useMaterial3: true,
@@ -67,21 +68,23 @@ final Map<String, ThemeData> appThemes = {
     listTileTheme: const ListTileThemeData(
       tileColor: Color.fromRGBO(44, 44, 44, 1.0),
     ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   '2024': ThemeData(
     useMaterial3: true,
-    colorScheme: const ColorScheme(
+    colorScheme: ColorScheme(
       brightness: Brightness.light,
-      primary: Color.fromRGBO(37, 63, 128, 1.0),
+      primary: const Color.fromRGBO(37, 63, 128, 1.0),
       onPrimary: Colors.white,
       secondary: Colors.white,
       onSecondary: Colors.black,
-      tertiary: Color.fromRGBO(37, 63, 128, 1.0),
+      tertiary: const Color.fromRGBO(37, 63, 128, 1.0),
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
       surfaceDim: Colors.grey,
       onSurface: Colors.black,
+      onSurfaceVariant: Colors.grey[700]!,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(37, 63, 128, 1.0),
@@ -94,6 +97,7 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
@@ -131,20 +135,22 @@ final Map<String, ThemeData> appThemes = {
       style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
     ),
     listTileTheme: const ListTileThemeData(tileColor: Colors.black),
-  ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
-    colorScheme: const ColorScheme(
+    colorScheme: ColorScheme(
       brightness: Brightness.light,
-      primary: Color.fromRGBO(102, 55, 133, 1.0),
+      primary: const Color.fromRGBO(102, 55, 133, 1.0),
       onPrimary: Colors.white,
-      secondary: Color.fromRGBO(255, 196, 0, 1.0),
+      secondary: const Color.fromRGBO(255, 196, 0, 1.0),
       onSecondary: Colors.black,
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
       surfaceDim: Colors.grey,
       onSurface: Colors.black,
+      onSurfaceVariant: Colors.grey[700]!,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(102, 55, 133, 1.0),
@@ -157,7 +163,8 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
-  ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+),
 };
 
 // Standard Google Maps themes (designed with https://mapstyle.withgoogle.com/)

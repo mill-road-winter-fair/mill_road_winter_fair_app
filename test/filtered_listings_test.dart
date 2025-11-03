@@ -63,9 +63,10 @@ void main() {
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
           'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'secondaryType': 'Gwydir St Car Park',
           'startTime': '10:30',
           'tertiaryType': 'Doughnuts',
+          'description': 'Nice buns',
           'visibleOnMap': true,
           'website': 'https://www.glazedandconfused.com',
         },
@@ -74,12 +75,13 @@ void main() {
           'endTime': '16:30',
           'id': '2',
           'name': 'sushisquad',
-          'phone': '01223 222222',
+          'phone': '',
           'latLng': '52.200063,0.139313',
           'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'secondaryType': 'Implausible Avenue',
           'startTime': '12:00',
           'tertiaryType': 'Sushi',
+          'description': 'Cold rice',
           'visibleOnMap': true,
           'website': 'https://www.sushisquad.com',
         },
@@ -89,20 +91,20 @@ void main() {
       await pumpFilteredListingsPage(tester, 'Food', listings);
 
       expect(find.text('Glazed and Confused'), findsOneWidget);
-      expect(find.text('Food • Doughnuts'), findsOneWidget);
-      expect(find.text('10:30 - 16:30'), findsOneWidget);
-      expect(find.text('approx. 206 m'), findsOneWidget);
-      expect(find.text('01223 111111'), findsOneWidget);
+      expect(find.text('Doughnuts'), findsOneWidget);
+      expect(find.text('10:30—16:30'), findsOneWidget);
+      expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
+      expect(find.text('01223 111111'), findsNothing);  // as Details won't be open
+      expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
-      expect(find.text('Food • Sushi'), findsOneWidget);
-      expect(find.text('12:00 - 16:30'), findsOneWidget);
-      expect(find.text('approx. 197 m'), findsOneWidget);
-      expect(find.text('01223 222222'), findsOneWidget);
+      expect(find.text('Sushi'), findsOneWidget);
+      expect(find.text('12:00—16:30'), findsOneWidget);
+      expect(find.text('Implausible Avenue (approx. 197 m)'), findsOneWidget);
       // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
       expect(find.byIcon(Icons.directions_walk), findsExactly(3));
       expect(find.byIcon(Icons.public), findsExactly(2));
 
-      final dividerFinder = find.byWidgetPredicate((widget) => widget is Divider && widget.color == Colors.grey[350]);
+      final dividerFinder = find.byWidgetPredicate((widget) => widget is Divider);
       expect(dividerFinder, findsWidgets);
     });
 
@@ -118,11 +120,12 @@ void main() {
           'id': '1',
           'name': 'glazedandconfused',
           'phone': '01223 111111',
-          'latLng': '52.200662,0.135547',
+          'latLng': '52.200662,0.135547', // 535m
           'primaryType': 'Food',
           'secondaryType': 'Food',
           'startTime': '10:30',
           'tertiaryType': 'Doughnuts',
+          'description': 'Nice buns',
           'visibleOnMap': true,
           'website': 'https://www.glazedandconfused.com',
         },
@@ -132,11 +135,12 @@ void main() {
           'id': '2',
           'name': 'sushisquad',
           'phone': '01223 222222',
-          'latLng': '52.199188,0.139437',
+          'latLng': '52.199188,0.139437', // 135m
           'primaryType': 'Food',
           'secondaryType': 'Food',
           'startTime': '12:00',
           'tertiaryType': 'Sushi',
+          'description': 'Cold rice',
           'visibleOnMap': true,
           'website': 'https://www.sushisquad.com',
         },
@@ -146,11 +150,12 @@ void main() {
           'id': '3',
           'name': 'biteclub',
           'phone': '01223 333333',
-          'latLng': '52.202313,0.131562',
+          'latLng': '52.202313,0.131562',  // 968m
           'primaryType': 'Food',
           'secondaryType': 'Food',
           'startTime': '14:00',
           'tertiaryType': 'Burgers',
+          'description': 'Dead cattle',
           'visibleOnMap': true,
           'website': 'https://www.biteclub.com',
         },
@@ -240,6 +245,8 @@ void main() {
           'secondaryType': 'Food',
           'startTime': '10:30',
           'tertiaryType': 'Doughnuts',
+          'description': 'Nice buns',
+          'visibleOnMap': true,
           'website': 'https://www.glazedandconfused.com',
         },
       ];
@@ -273,6 +280,8 @@ void main() {
           'secondaryType': 'Food',
           'startTime': '10:30',
           'tertiaryType': 'Doughnuts',
+          'description': 'Nice buns',
+          'visibleOnMap': true,
           'website': 'https://www.glazedandconfused.com',
         },
       ];
@@ -329,6 +338,7 @@ void main() {
           'secondaryType': 'Food',
           'startTime': '10:30',
           'tertiaryType': 'Doughnuts',
+          'description': 'Nice buns',
           'visibleOnMap': true,
           'website': 'https://www.glazedandconfused.com',
         }
@@ -346,7 +356,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(homePageState.index, 1);
 
-      await tester.tap(find.text('Get directions'));
+      await tester.tap(find.text('Directions'));
       await tester.pumpAndSettle();
 
       expect(homePageState.index, 0);
@@ -365,6 +375,7 @@ void main() {
           'secondaryType': 'Implausible Avenue',
           'startTime': '12:00',
           'tertiaryType': 'Sushi',
+          'description': 'Cold rice',
           'visibleOnMap': true,
           'website': 'https://www.sushisquad.com',
         },
@@ -376,9 +387,10 @@ void main() {
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
           'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'secondaryType': 'Gwydir St Car Park',
           'startTime': '10:30',
           'tertiaryType': 'Doughnuts',
+          'description': 'Nice buns',
           'visibleOnMap': true,
           'website': 'https://www.glazedandconfused.com',
         },
@@ -390,9 +402,10 @@ void main() {
           'phone': '01223 333333',
           'latLng': '52.202313,0.131562',
           'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'secondaryType': 'Gwydir St Car Park',
           'startTime': '14:00',
           'tertiaryType': 'Burgers',
+          'description': 'Dead cattle',
           'visibleOnMap': true,
           'website': 'https://www.biteclub.com',
         },
