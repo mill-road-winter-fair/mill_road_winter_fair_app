@@ -360,7 +360,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 if (description.isNotEmpty) Row(
                   children: [
                     Flexible(
-                      child: Text(style: const TextStyle(fontSize: 13), description),
+                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
                     ),
                   ],
                 ),

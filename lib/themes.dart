@@ -72,7 +72,7 @@ final Map<String, ThemeData> appThemes = {
   ),
   '2024': ThemeData(
     useMaterial3: true,
-    colorScheme: const ColorScheme(
+    colorScheme: ColorScheme(
       brightness: Brightness.light,
       primary: Color.fromRGBO(37, 63, 128, 1.0),
       onPrimary: Colors.white,
@@ -84,6 +84,7 @@ final Map<String, ThemeData> appThemes = {
       surface: Colors.white,
       surfaceDim: Colors.grey,
       onSurface: Colors.black,
+      onSurfaceVariant: Colors.grey[700]!,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(37, 63, 128, 1.0),
@@ -138,7 +139,7 @@ final Map<String, ThemeData> appThemes = {
 ),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
-    colorScheme: const ColorScheme(
+    colorScheme: ColorScheme(
       brightness: Brightness.light,
       primary: Color.fromRGBO(102, 55, 133, 1.0),
       onPrimary: Colors.white,
@@ -149,6 +150,7 @@ final Map<String, ThemeData> appThemes = {
       surface: Colors.white,
       surfaceDim: Colors.grey,
       onSurface: Colors.black,
+      onSurfaceVariant: Colors.grey[700]!,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(102, 55, 133, 1.0),
