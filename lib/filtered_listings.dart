@@ -319,8 +319,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     child: FloatingActionButton(
                                       key: const ValueKey('searchFab'),
                                       heroTag: 'searchFab_${widget.filterPrimaryType}_page',
-                                      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                                      foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
                                       elevation: 0,
                                       onPressed: () {
                                         HapticFeedback.lightImpact();
@@ -418,9 +418,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               width: MediaQuery.of(context).size.width * 0.6 + 40,
               label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
               leadingIcon: const Icon(Icons.sort),
+              textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
                 fillColor: Theme.of(context).colorScheme.secondary,
+                iconColor: Theme.of(context).colorScheme.onSecondary,
+                suffixIconColor: Theme.of(context).colorScheme.onSecondary,
+                prefixIconColor: Theme.of(context).colorScheme.onSecondary,
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
               ),
               dropdownMenuEntries: [
                 if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)

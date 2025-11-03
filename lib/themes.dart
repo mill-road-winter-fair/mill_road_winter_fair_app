@@ -101,12 +101,12 @@ final Map<String, ThemeData> appThemes = {
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
-    colorScheme: const ColorScheme.highContrastDark(
+    colorScheme: const ColorScheme(
       brightness: Brightness.dark,
-      primary: Colors.black,
-      onPrimary: Color.fromRGBO(255, 243, 0, 1.0),
-      secondary: Colors.black,
-      onSecondary: Color.fromRGBO(255, 243, 0, 1.0),
+      primary: Color.fromRGBO(255, 243, 0, 1.0),
+      onPrimary: Colors.black,
+      secondary: Color.fromRGBO(255, 243, 0, 1.0),
+      onSecondary: Colors.black,
       tertiary: Color.fromRGBO(8, 255, 0, 1.0),
       error: Colors.orange,
       onError: Colors.black,

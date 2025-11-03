@@ -156,14 +156,14 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('AboutTheFairPage build() called');
-    var bodyStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.primary);
+    var bodyStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.tertiary);
     var eventsSubtitleStyle = TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
     var eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.onPrimary);
 
     // Build a list of TextSpans for sponsors so we can special-case the Bush entry
     final List<TextSpan> sponsorSpans = [];
     final sponsorKeys = _sponsorUrls.keys.toList();
-    var sponsorLinkStyle = bodyStyle.copyWith(decoration: TextDecoration.underline, color: Colors.blue);
+    var sponsorLinkStyle = const TextStyle(decoration: TextDecoration.underline);
     for (var i = 0; i < sponsorKeys.length; i++) {
       final name = sponsorKeys[i];
       final isLast = i == sponsorKeys.length - 1;
@@ -192,7 +192,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
         ),
       ),
       body: Container(
-        padding: EdgeInsets.all(10.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 50).toInt()),
+        padding: EdgeInsets.all(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
         child: Scrollbar(
           controller: _aboutPageScrollController,
           thumbVisibility: Platform.isIOS ? false : true,
