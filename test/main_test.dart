@@ -79,7 +79,7 @@ void main() {
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
       expect(find.text('Contact us'), findsOneWidget);
-      expect(find.byType(IconButton), findsExactly(7));
+      expect(find.byType(IconButton), findsExactly(6));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('Replay welcome screen'), findsOneWidget);
       expect(find.text('About the app'), findsOneWidget);

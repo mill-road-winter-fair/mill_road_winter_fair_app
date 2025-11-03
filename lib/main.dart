@@ -295,7 +295,7 @@ class HomePageState extends State<HomePage> {
               child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+            launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
           },
         ),
       ],
