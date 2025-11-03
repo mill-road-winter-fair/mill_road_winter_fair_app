@@ -173,7 +173,6 @@ class SpecificListingInfoSheet extends StatelessWidget {
 
     // Determine if the event has been cancelled, update text style accordingly
     final bool cancelled = hasEventBeenCancelled(description);
-    if (cancelled) debugPrint('MW got a cancelled event for $title');
     final titleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
