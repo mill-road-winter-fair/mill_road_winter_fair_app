@@ -72,7 +72,7 @@ class MapPageState extends State<MapPage> {
     'Services': true,
     'Road Closures': true,
   };
-  late List<bool> detailsVisibilityList;  // for modal bottom sheet group listings
+  late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
 
   @override
   void initState() {
@@ -90,7 +90,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void onTabVisible() {
-      // This is called when user switches to this tab
+    // This is called when user switches to this tab
   }
 
   Polygon roadClosurePolygon() {
@@ -437,7 +437,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addGroupMarker(listing) async {
-//    debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
+    //debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
@@ -514,6 +514,7 @@ class MapPageState extends State<MapPage> {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
                 }
+
                 return DraggableScrollableSheet(
                   expand: false,
                   initialChildSize: minFraction,
@@ -610,20 +611,55 @@ class MapPageState extends State<MapPage> {
           showDragHandle: false,
           enableDrag: false,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
+          isScrollControlled: true,
+          useSafeArea: true,
           builder: (BuildContext context) {
-            return SpecificListingInfoSheet(
-              title: listing['displayName'],
-              location: listing['secondaryType'],
-              subtitle: listing['tertiaryType'],
-              startTime: "${listing['startTime']}",
-              endTime: "${listing['endTime']}",
-              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-              website: (listing['website'] != null) ? listing['website'] : '',
-              email: (listing['email'] != null) ? listing['email'] : '',
-              description: (listing['description'] != null) ? listing['description'] : '',
-              detailsVisible: true,
-              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+            double screenHeight = MediaQuery.of(context).size.height;
+            // Estimate the height of a SpecificListingInfoSheet in pixels
+            double estimatedItemHeight = 250;
+            // Set the minimum size of the modalBottomSheet based on the estimatedSheetHeight
+            double minFraction = (estimatedItemHeight / screenHeight);
+
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setModalState) {
+                return DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: minFraction,
+                  minChildSize: minFraction,
+                  maxChildSize: 0.66,
+                  builder: (context, specificSheetModalScrollController) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                      child: Scrollbar(
+                        controller: specificSheetModalScrollController,
+                        thumbVisibility: false,
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: ListView(
+                          controller: specificSheetModalScrollController,
+                          padding: EdgeInsets.zero,
+                          children: [
+                            SpecificListingInfoSheet(
+                              title: listing['displayName'],
+                              location: listing['secondaryType'],
+                              subtitle: listing['tertiaryType'],
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                              website: (listing['website'] != null) ? listing['website'] : '',
+                              email: (listing['email'] != null) ? listing['email'] : '',
+                              description: (listing['description'] != null) ? listing['description'] : '',
+                              detailsVisible: true,
+                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
             );
           },
         );
