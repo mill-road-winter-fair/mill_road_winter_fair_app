@@ -67,6 +67,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
   Widget build(BuildContext context) {
     debugPrint('OnBoardingPageState build() called');
     var bodyStyle = TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary, height: 1.4);
+    var titleStyle = TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary);
 
     var pageDecoration = PageDecoration(
       titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
@@ -104,11 +105,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork00.jpg',
-          titleWidget: const FittedBox(
+          titleWidget: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
             child: Text('Welcome to the official\nMill Road Winter Fair app!',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                style: titleStyle, textAlign: TextAlign.center),
           ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -173,10 +174,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork01.jpg',
-          titleWidget: const FittedBox(
+          titleWidget: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: Text('What do the pins mean?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            child: Text('What do the pins mean?', style: titleStyle, textAlign: TextAlign.center),
           ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -254,10 +255,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork02.jpg',
-          titleWidget: const FittedBox(
+          titleWidget: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: Text('Choosing what’s shown', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            child: Text('Choosing what’s shown', style: titleStyle, textAlign: TextAlign.center),
           ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -327,10 +328,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork03.jpg',
-          titleWidget: const FittedBox(
+          titleWidget: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: Text('What’s on and when', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            child: Text('What’s on and when', style: titleStyle, textAlign: TextAlign.center),
           ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -392,10 +393,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork04.jpg',
-          titleWidget: const FittedBox(
+          titleWidget: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: Text('A few final things…', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            child: Text('A few final things…', style: titleStyle, textAlign: TextAlign.center),
           ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
