@@ -145,6 +145,7 @@ final Map<String, ThemeData> appThemes = {
       onPrimary: Colors.white,
       secondary: const Color.fromRGBO(255, 196, 0, 1.0),
       onSecondary: Colors.black,
+      tertiary: const Color.fromRGBO(102, 55, 133, 1.0),
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
