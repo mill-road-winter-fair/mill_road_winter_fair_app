@@ -182,7 +182,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     updatedDescription = cancelled ? description.substring(cancelIdentifier.length) : description;
     updatedTimes = cancelled ? cancelIdentifier : "$startTime—$endTime";
 
-    final subStyle = titleStyle.copyWith(fontSize: 14);
+    final subStyle = titleStyle.copyWith(fontSize: 14, fontWeight: FontWeight.normal);
 
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(endTime);
