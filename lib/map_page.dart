@@ -304,7 +304,7 @@ class MapPageState extends State<MapPage> {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
-                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                                      launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
                                     }),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
