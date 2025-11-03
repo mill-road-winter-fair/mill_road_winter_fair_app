@@ -27,6 +27,12 @@ bool hasEventEnded(String endTime) {
   }
 }
 
+// Identifier and function for determining if the event has been marked as cancelled
+const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
+bool hasEventBeenCancelled(String description) {
+  return (description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
+}
+
 class GroupListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;
@@ -162,12 +168,27 @@ class SpecificListingInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     debugPrint('SpecificListingInfoSheet build() called');
+    String updatedDescription; // with cancel identifier removed if appropriate
+    String updatedTimes; // replaced with CANCELLED if appropriate
+
+    // Determine if the event has been cancelled, update text style accordingly
+    final bool cancelled = hasEventBeenCancelled(description);
+    if (cancelled) debugPrint('MW got a cancelled event for $title');
+    final titleStyle = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none,
+    );
+    updatedDescription = cancelled ? description.substring(cancelIdentifier.length) : description;
+    updatedTimes = cancelled ? cancelIdentifier : "$startTime—$endTime";
+
+    final subStyle = titleStyle.copyWith(fontSize: 14);
 
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(endTime);
-    final timeStyle = TextStyle(
-      fontSize: 14,
-      color: ended ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
+    final timeStyle = subStyle.copyWith(
+      color: ended || cancelled ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
@@ -192,7 +213,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 flex: 14,
                 child: Text(
                   title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: titleStyle,
                 ),
               ),
               const Expanded(flex: 1, child: SizedBox(width: 2)),
@@ -200,7 +221,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 flex: 6,
                 child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(
                   subtitle,
-                  style: timeStyle,
+                  style: subStyle,
                   textAlign: TextAlign.end,
                 ),
               ),
@@ -214,8 +235,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
             children: [
               Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
                 TextSpan(children: [
-                  TextSpan(text: location),
-                  TextSpan(style: const TextStyle(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
+                  TextSpan(style: subStyle, text: location),
+                  TextSpan(style: subStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
                 ], ), 
               ), ),
               ),
@@ -223,7 +244,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               Expanded(
                 flex: 6,
                 child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(
-                  "$startTime—$endTime",
+                  updatedTimes,
                   style: timeStyle,
                   textAlign: TextAlign.end,
                 ),
@@ -246,7 +267,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 label: const FittedBox(child: Text('Directions')),
               ),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
-              if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 8),
+              if (onDetailsTapped != null && (updatedDescription.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 8),
               // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
               if (onDetailsTapped != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width < 360)
                 ElevatedButton(
@@ -257,7 +278,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   onPressed: onDetailsTapped,
                   child: const Icon(Icons.info),
               ) 
-              else if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
+              else if (onDetailsTapped != null && (updatedDescription.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
                 ElevatedButton.icon(
                   style: detailsVisible ?
                     ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
@@ -355,12 +376,12 @@ class SpecificListingInfoSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 0,
               children: [
-                if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (description.isNotEmpty) const SizedBox(height: 8),
-                if (description.isNotEmpty) Row(
+                if (updatedDescription.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
+                if (updatedDescription.isNotEmpty) const SizedBox(height: 8),
+                if (updatedDescription.isNotEmpty) Row(
                   children: [
                     Flexible(
-                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
+                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), updatedDescription),
                     ),
                   ],
                 ),
