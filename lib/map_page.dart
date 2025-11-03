@@ -300,7 +300,7 @@ class MapPageState extends State<MapPage> {
                                       'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                               TextSpan(
                                   text: 'www.millroadwinterfair.org',
-                                  style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline, height: 1.25),
+                                  style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
