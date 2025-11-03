@@ -86,7 +86,10 @@ class ImportantInfoPage extends StatelessWidget {
               const SizedBox(height: 15),
               const Text('Updates and contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
-              bulletPoint('Please follow Mill Road Winter Fair on social media for the latest news and updates or check this app for the latest listings.'),
+// below is original single bullet point replaced by the two; likely to be restored before Fair
+//              bulletPoint('Please follow Mill Road Winter Fair on social media for the latest news and updates or check this app for the latest listings.'),
+              bulletPoint('This app currently shows many of the attractions you’ll find at the 2025 Fair on Saturday 6th December, and there’ll be more added in the lead-up to the Fair. Check back for the latest listings.'),
+              bulletPoint('Please follow Mill Road Winter Fair on social media for news and updates.'),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2.0), // tighten spacing
                 child: Row(
@@ -124,7 +127,7 @@ class ImportantInfoPage extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('• ', style: TextStyle(height: 1.2)),
+                    const Text('• ', style: TextStyle(height: 1.3)),
                     Expanded(
                       child: Text.rich(
                         TextSpan(
@@ -152,7 +155,7 @@ class ImportantInfoPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
-              const Text('Disclaimer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              const Text('Our responsibilities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 10),
               const Text(
                   'The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
@@ -170,11 +173,11 @@ class ImportantInfoPage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('• ', style: TextStyle(height: 1.2)),
+          const Text('• ', style: TextStyle(height: 1.3)),
           Expanded(
             child: Text(
               theText,
-              style: TextStyle(height: 1.2, fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+              style: TextStyle(height: 1.3, fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
             ),
           ),
         ],
