@@ -881,9 +881,6 @@ class MapPageState extends State<MapPage> {
     _navigationInProgress = false;
     setState(() {});
 
-    // Remember the previous index to allow returning back
-    previousIndex = homePageKey.currentState!.index;
-
     debugPrint('getDirections called for listing ID: $id');
     // Set navigation as in progress
     _navigationInProgress = true;
