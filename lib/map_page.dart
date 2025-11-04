@@ -620,7 +620,7 @@ class MapPageState extends State<MapPage> {
                   expand: false,
                   initialChildSize: 0.33,
                   minChildSize: 0.33,
-                  maxChildSize: 0.9,
+                  maxChildSize: 0.66,
                   builder: (context, specificSheetModalScrollController) {
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
