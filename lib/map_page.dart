@@ -609,22 +609,51 @@ class MapPageState extends State<MapPage> {
           context: context,
           showDragHandle: false,
           enableDrag: false,
-          isScrollControlled: true,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
+          isScrollControlled: true,
+          useSafeArea: true,
           builder: (BuildContext context) {
-            return SpecificListingInfoSheet(
-              title: listing['displayName'],
-              location: listing['secondaryType'],
-              subtitle: listing['tertiaryType'],
-              startTime: "${listing['startTime']}",
-              endTime: "${listing['endTime']}",
-              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-              website: (listing['website'] != null) ? listing['website'] : '',
-              email: (listing['email'] != null) ? listing['email'] : '',
-              description: (listing['description'] != null) ? listing['description'] : '',
-              detailsVisible: true,
-              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setModalState) {
+                return DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: 0.33,
+                  minChildSize: 0.33,
+                  maxChildSize: 0.9,
+                  builder: (context, specificSheetModalScrollController) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                      child: Scrollbar(
+                        controller: specificSheetModalScrollController,
+                        thumbVisibility: false,
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: ListView(
+                          controller: specificSheetModalScrollController,
+                          padding: EdgeInsets.zero,
+                          children: [
+                            SpecificListingInfoSheet(
+                              title: listing['displayName'],
+                              location: listing['secondaryType'],
+                              subtitle: listing['tertiaryType'],
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                              website: (listing['website'] != null) ? listing['website'] : '',
+                              email: (listing['email'] != null) ? listing['email'] : '',
+                              description: (listing['description'] != null) ? listing['description'] : '',
+                              detailsVisible: true,
+                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
             );
           },
         );
