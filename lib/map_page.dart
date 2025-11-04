@@ -776,19 +776,19 @@ class MapPageState extends State<MapPage> {
 
             final double estimatedItemHeight = estimateSpecificListingHeight();
             // Set the minimum size of the modalBottomSheet based on the estimated height
-            double minFraction = estimatedItemHeight / screenHeight;
-            const double maxChild = 0.66;
+            double minFraction = min((estimatedItemHeight / screenHeight), 0.3);
+            double maxFraction = min((estimatedItemHeight / screenHeight), 0.9);
             // Clamp within DraggableScrollableSheet constraints
-            if (minFraction > maxChild) minFraction = maxChild * 0.999; // must be strictly less or equal
-            if (minFraction < 0.2) minFraction = 0.2; // keep usable
+            if (minFraction > maxFraction) minFraction = maxFraction * 0.999; // must be strictly less or equal
+            if (minFraction < 0.3) minFraction = 0.3; // keep usable
 
             return StatefulBuilder(
               builder: (BuildContext context, StateSetter setModalState) {
                 return DraggableScrollableSheet(
                   expand: false,
-                  initialChildSize: minFraction,
+                  initialChildSize: maxFraction,
                   minChildSize: minFraction,
-                  maxChildSize: maxChild,
+                  maxChildSize: maxFraction,
                   builder: (context, specificSheetModalScrollController) {
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
