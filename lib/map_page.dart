@@ -775,9 +775,10 @@ class MapPageState extends State<MapPage> {
             }
 
             final double estimatedItemHeight = estimateSpecificListingHeight();
-            // Set the minimum size of the modalBottomSheet based on the estimated height
-            double minFraction = (estimatedItemHeight / screenHeight) > 0.4 ? (estimatedItemHeight / screenHeight) : 0.4;
-            double maxFraction = (estimatedItemHeight / screenHeight) < 0.9 ? (estimatedItemHeight / screenHeight) : 0.9;
+            // Set the minimum size of the modalBottomSheet based on the estimated height, unless it's less than 1/3 of the screen
+            double minFraction = max((estimatedItemHeight / screenHeight), 0.33);
+            // Set the maximum size of the modalBottomSheet based on either the estimated height or 90% of the screen, whichever is lower
+            double maxFraction = min(minFraction, 0.9);
             if (maxFraction < minFraction) maxFraction = minFraction;
 
             return StatefulBuilder(
