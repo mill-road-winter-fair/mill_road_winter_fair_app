@@ -533,10 +533,16 @@ class MapPageState extends State<MapPage> {
                           itemCount: relatedListings.length,
                           itemBuilder: (context, index) {
                             final rel = relatedListings[index];
-                            int approximateDistanceMetres = asTheCrowFlies(
-                              currentLatLng!,
-                              stringToLatLng(rel['latLng']),
-                            );
+
+                            // Calculate distance if current location is known
+                            var distanceMessage = 'Distance unknown';
+                            if (currentLatLng != null) {
+                              int approximateDistanceMetres = asTheCrowFlies(
+                                currentLatLng!,
+                                stringToLatLng(rel['latLng']),
+                              );
+                              distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                            }
 
                             if (rel['primaryType'].startsWith("Group")) {
                               return GroupListingInfoSheet(
@@ -544,7 +550,7 @@ class MapPageState extends State<MapPage> {
                                 categories: "${rel['tertiaryType']}",
                                 startTime: "${listing['startTime']}",
                                 endTime: "${listing['endTime']}",
-                                approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                                approxDistance: distanceMessage,
                               );
                             } else {
                               return SpecificListingInfoSheet(
@@ -603,7 +609,17 @@ class MapPageState extends State<MapPage> {
         HapticFeedback.lightImpact();
         // Update user's location
         establishLocation();
-        int approximateDistanceMetres = asTheCrowFlies(currentLatLng!, destinationLatLng);
+
+        // Calculate distance if current location is known
+        var distanceMessage = 'Distance unknown';
+        if (currentLatLng != null) {
+          int approximateDistanceMetres = asTheCrowFlies(
+            currentLatLng!,
+            stringToLatLng(listing['latLng']),
+          );
+          distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+        }
+
         // Show bottom sheet with listing information
         showModalBottomSheet(
           context: context,
@@ -618,7 +634,7 @@ class MapPageState extends State<MapPage> {
               subtitle: listing['tertiaryType'],
               startTime: "${listing['startTime']}",
               endTime: "${listing['endTime']}",
-              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+              approxDistance: distanceMessage,
               phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
               website: (listing['website'] != null) ? listing['website'] : '',
               email: (listing['email'] != null) ? listing['email'] : '',
