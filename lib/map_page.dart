@@ -595,6 +595,25 @@ class MapPageState extends State<MapPage> {
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
+    // Helper to measure text height for a given max width and style
+    double measureTextHeight({
+      required String text,
+      required TextStyle style,
+      required double maxWidth,
+      TextDirection textDirection = TextDirection.ltr,
+      int? maxLines,
+    }) {
+      if (text.isEmpty) return 0;
+      final tp = TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: textDirection,
+        maxLines: maxLines,
+        ellipsis: maxLines != null ? '…' : null,
+      );
+      tp.layout(minWidth: 0, maxWidth: maxWidth);
+      return tp.size.height;
+    }
+
     Marker newMarker = Marker(
       markerId: markerId,
       position: destinationLatLng,
@@ -615,10 +634,153 @@ class MapPageState extends State<MapPage> {
           useSafeArea: true,
           builder: (BuildContext context) {
             double screenHeight = MediaQuery.of(context).size.height;
-            // Estimate the height of a SpecificListingInfoSheet in pixels
-            double estimatedItemHeight = 250;
-            // Set the minimum size of the modalBottomSheet based on the estimatedSheetHeight
-            double minFraction = (estimatedItemHeight / screenHeight);
+            double screenWidth = MediaQuery.of(context).size.width;
+
+            // Compute an estimate of the SpecificListingInfoSheet height based on its content
+            double estimateSpecificListingHeight() {
+              // Outer padding around the ListView child
+              const double outerTopPadding = 8;
+              const double outerBottomPadding = 0; // per Padding in builder
+              const double outerHorizontalPadding = 8; // 4 left + 4 right
+
+              // Container internal padding in SpecificListingInfoSheet
+              final double sidePad = 4.0 + ((screenHeight.toInt() - 500) / 30).toInt();
+              const double topPad = 8.0;
+              const double bottomPad = 12.0;
+
+              // Available width for internal content
+              final double contentWidth = screenWidth - outerHorizontalPadding - (2 * sidePad);
+
+              // Flex layout width split for the two main rows (title/subtitle & location/times)
+              const int leftFlex = 14;
+              const int spacerFlex = 1; // acts as spacing
+              const int rightFlex = 6;
+              const int totalFlex = leftFlex + spacerFlex + rightFlex;
+              final double leftColWidth = contentWidth * (leftFlex / totalFlex);
+              final double rightColWidth = contentWidth * (rightFlex / totalFlex);
+
+              // Styles (sizes match SpecificListingInfoSheet)
+              const TextStyle titleStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
+              const TextStyle subStyle = TextStyle(fontSize: 14, fontWeight: FontWeight.bold);
+              const TextStyle timeStyle = TextStyle(fontSize: 14);
+              const TextStyle body13 = TextStyle(fontSize: 13);
+
+              // Extract fields with safe defaults
+              final String title = (listing['displayName'] ?? '').toString();
+              final String location = (listing['secondaryType'] ?? '').toString();
+              final String subtitle = (listing['tertiaryType'] ?? '').toString();
+              final String startTime = (listing['startTime'] ?? '').toString();
+              final String endTime = (listing['endTime'] ?? '').toString();
+              final String phone = (listing['phone'] ?? '').toString();
+              final String website = (listing['website'] ?? '').toString();
+              final String email = (listing['email'] ?? '').toString();
+              final String description = (listing['description'] ?? '').toString();
+
+              // CANCELLED handling like SpecificListingInfoSheet
+              final bool cancelled = hasEventBeenCancelled(description);
+              final String updatedDescription =
+                  cancelled && description.length > cancelIdentifier.length ? description.substring(cancelIdentifier.length) : (cancelled ? '' : description);
+              final String updatedTimes = cancelled ? cancelIdentifier : ((startTime.isNotEmpty || endTime.isNotEmpty) ? "$startTime—$endTime" : '');
+
+              // Build the same approxDistance suffix as UI (only when currentLatLng is known)
+              final String approxDistance =
+                  currentLatLng == null ? '' : ' (approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+
+              double h = 0;
+
+              // Include outer and inner paddings
+              h += outerTopPadding + outerBottomPadding + topPad + bottomPad;
+
+              final bool hasLocation = location.isNotEmpty;
+              final bool hasAnyContact = website.isNotEmpty || email.isNotEmpty || phone.isNotEmpty;
+
+              // Space above location row when showing location and onDetailsTapped == null (true for this sheet)
+              if (hasLocation) {
+                h += 8;
+              }
+
+              // Row 1: title (left) vs subtitle (right)
+              final double titleH = measureTextHeight(text: title, style: titleStyle, maxWidth: leftColWidth);
+              final double subtitleH = measureTextHeight(text: subtitle, style: subStyle, maxWidth: rightColWidth);
+              h += max(titleH, subtitleH);
+
+              // Row 2: location (left) vs times (right)
+              if (hasLocation) {
+                final double locationH = measureTextHeight(
+                  text: location + (currentLatLng == null ? '' : approxDistance),
+                  style: subStyle,
+                  maxWidth: leftColWidth,
+                );
+                final double timesH = measureTextHeight(
+                  text: updatedTimes,
+                  style: timeStyle,
+                  maxWidth: rightColWidth,
+                );
+                h += max(locationH, timesH);
+              }
+
+              // Space before buttons row
+              h += 12;
+
+              // Buttons row height (Directions + optional icon buttons) – approximate
+              h += 40;
+
+              // Details section is visible for this sheet
+              if (updatedDescription.isNotEmpty || hasAnyContact) {
+                // Space before details block
+                h += 8;
+
+                // Description block
+                if (updatedDescription.isNotEmpty) {
+                  h += 8; // spacing before description text
+                  h += measureTextHeight(text: updatedDescription, style: body13, maxWidth: contentWidth);
+                }
+
+                // Website row
+                if (website.isNotEmpty) {
+                  h += 8;
+                  h += measureTextHeight(
+                    text: 'Website: $website',
+                    style: body13,
+                    maxWidth: contentWidth,
+                  );
+                }
+
+                // Email row
+                if (email.isNotEmpty) {
+                  h += 8;
+                  h += measureTextHeight(
+                    text: 'Email: $email',
+                    style: body13,
+                    maxWidth: contentWidth,
+                  );
+                }
+
+                // Phone row
+                if (phone.isNotEmpty) {
+                  h += 8;
+                  h += measureTextHeight(
+                    text: 'Telephone: $phone',
+                    style: body13,
+                    maxWidth: contentWidth,
+                  );
+                }
+              }
+
+              // Bottom spacing depends on location and onDetailsTapped == null
+              h += hasLocation ? 20 : 4;
+
+              // Ensure a sensible minimum height so the sheet isn't too tiny
+              return h;
+            }
+
+            final double estimatedItemHeight = estimateSpecificListingHeight();
+            // Set the minimum size of the modalBottomSheet based on the estimated height
+            double minFraction = estimatedItemHeight / screenHeight;
+            const double maxChild = 0.66;
+            // Clamp within DraggableScrollableSheet constraints
+            if (minFraction > maxChild) minFraction = maxChild * 0.999; // must be strictly less or equal
+            if (minFraction < 0.2) minFraction = 0.2; // keep usable
 
             return StatefulBuilder(
               builder: (BuildContext context, StateSetter setModalState) {
@@ -626,7 +788,7 @@ class MapPageState extends State<MapPage> {
                   expand: false,
                   initialChildSize: minFraction,
                   minChildSize: minFraction,
-                  maxChildSize: 0.66,
+                  maxChildSize: maxChild,
                   builder: (context, specificSheetModalScrollController) {
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
