@@ -72,7 +72,7 @@ class MapPageState extends State<MapPage> {
     'Services': true,
     'Road Closures': true,
   };
-  late List<bool> detailsVisibilityList;  // for modal bottom sheet group listings
+  late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
 
   @override
   void initState() {
@@ -90,7 +90,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void onTabVisible() {
-      // This is called when user switches to this tab
+    // This is called when user switches to this tab
   }
 
   Polygon roadClosurePolygon() {
@@ -514,6 +514,7 @@ class MapPageState extends State<MapPage> {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
                 }
+
                 return DraggableScrollableSheet(
                   expand: false,
                   initialChildSize: minFraction,
@@ -613,7 +614,6 @@ class MapPageState extends State<MapPage> {
           isScrollControlled: true,
           useSafeArea: true,
           builder: (BuildContext context) {
-
             return StatefulBuilder(
               builder: (BuildContext context, StateSetter setModalState) {
                 return DraggableScrollableSheet(
