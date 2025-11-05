@@ -609,6 +609,7 @@ class MapPageState extends State<MapPage> {
           context: context,
           showDragHandle: false,
           enableDrag: false,
+          scrollControlDisabledMaxHeightRatio: 0.8,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
           builder: (BuildContext context) {
             return SpecificListingInfoSheet(
