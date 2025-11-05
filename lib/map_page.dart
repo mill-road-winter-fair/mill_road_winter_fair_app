@@ -492,7 +492,7 @@ class MapPageState extends State<MapPage> {
           showDragHandle: false,
           enableDrag: false,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
-          scrollControlDisabledMaxHeightRatio: 0.8,
+          isScrollControlled: true,
           useSafeArea: true,
           builder: (BuildContext context) {
             double screenHeight = MediaQuery.of(context).size.height;
@@ -609,7 +609,6 @@ class MapPageState extends State<MapPage> {
           context: context,
           showDragHandle: false,
           enableDrag: false,
-          scrollControlDisabledMaxHeightRatio: 0.8,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
           builder: (BuildContext context) {
             return SpecificListingInfoSheet(
