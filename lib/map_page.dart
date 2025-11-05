@@ -593,6 +593,7 @@ class MapPageState extends State<MapPage> {
       double hue = HSVColor.fromColor(color).hue;
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
+    debugPrint('Screen height of ${MediaQuery.of(context).size.height}');
 
     Marker newMarker = Marker(
       markerId: markerId,
@@ -609,7 +610,7 @@ class MapPageState extends State<MapPage> {
           context: context,
           showDragHandle: false,
           enableDrag: false,
-          scrollControlDisabledMaxHeightRatio: 0.8,
+          scrollControlDisabledMaxHeightRatio: 0.95,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
           builder: (BuildContext context) {
             return SpecificListingInfoSheet(
@@ -622,7 +623,7 @@ class MapPageState extends State<MapPage> {
               phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
               website: (listing['website'] != null) ? listing['website'] : '',
               email: (listing['email'] != null) ? listing['email'] : '',
-              description: (listing['description'] != null) ? listing['description'] : '',
+              description: (listing['description'] != null) ? (listing['description'].length >= 470 ? listing['description'].substring(0,470) + '…' : listing['description']): '',
               detailsVisible: true,
               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
             );
