@@ -709,9 +709,11 @@ class MapPageState extends State<MapPage> {
         return oldMarker.copyWith(iconParam: newIcon);
       });
 
-      // Update polygon colour to match theme
-      _polygons.clear();
-      _polygons.add(roadClosurePolygon());
+      // Update polygon colour to match theme, if filtered-in
+      if (filterSettings["Road Closures"] == true) {
+        _polygons.clear();
+        _polygons.add(roadClosurePolygon());
+      }
     });
   }
 
