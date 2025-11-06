@@ -915,9 +915,10 @@ class MapPageState extends State<MapPage> {
     // Set navigation as in progress
     _navigationInProgress = true;
 
-    // Pop the navigator if told to
     if (navigatorPop == true) {
       Navigator.pop(context);
+      // The navigator is only popped when called from the map page, so if this is true set the previousIndex to 0
+      previousIndex = 0;
     }
 
     // If user has location tracking enabled
