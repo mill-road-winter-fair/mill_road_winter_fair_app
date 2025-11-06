@@ -94,13 +94,16 @@ TableRow eventRow(context, eventTime, eventTitle, [List<TextSpan>? eventSubtitle
   );
 }
 
-void showDirectionsTo(BuildContext context, String id, LatLng theDest) {
+void showDirectionsTo(BuildContext context, String id, LatLng theDest) async {
   debugPrint('showDirectionsTo build() called for id: $id');
   // Set previousIndex to map page
   previousIndex = 0;
-  mapPageKey.currentState?.getDirections(id, theDest, true);
+
   // Switch to map tab on the home page
   homePageKey.currentState?.setCurrentIndex(0);
+
+  // Request the map page to show directions
+  await mapPageKey.currentState?.getDirections(id, theDest, true);
 }
 
 class AboutTheFairPage extends StatefulWidget {
