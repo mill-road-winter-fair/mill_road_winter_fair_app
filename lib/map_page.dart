@@ -1591,7 +1591,7 @@ class MapPageState extends State<MapPage> {
                                 width: 20,
                                 height: 14,
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                  color: selectedThemeKey == 'colourBlindFriendly' ? const Color.fromRGBO(224, 129, 87, 255) : Theme.of(context).colorScheme.tertiary.withAlpha(50),
                                   border: Border.all(
                                     color: Theme.of(context).colorScheme.tertiary,
                                     width: 3,
