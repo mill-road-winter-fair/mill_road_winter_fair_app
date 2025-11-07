@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
@@ -35,22 +36,37 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool isRefreshing = false;
   bool useFallbackSorting = false;
   final ScrollController _scrollController = ScrollController();
+  final ItemScrollController _itemScrollController = ItemScrollController();
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<bool> detailsVisibilityList = List<bool>.filled(500, false);  // start with plenty enough to load all listings
-
+  int firstNextListingIndex = -1;  // the first listing that hasn't passed its end date, when sorted by start date
+  
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
-  }
+}
 
   void onTabVisible() {
     // This is called when user switches to this tab
     setState(() {
       detailsVisibilityList = List<bool>.filled(filteredListings.length, false);
     });
+    if (firstNextListingIndex >= 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Runs after the first layout and paint (when firstNextListingIndex has been found)
+        if (firstNextListingIndex >= 0) {
+          _itemScrollController.scrollTo(
+            curve: Curves.linear,
+            index: firstNextListingIndex,
+            duration: const Duration(milliseconds: 300),
+            alignment: 0,
+          );
+        }
+      });
+    }
   }
 
   @override
@@ -99,8 +115,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         useFallbackSorting = false;
       }
 
-      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) &&
-          locationServicesEnabled == true &&
+      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) && 
+          locationServicesEnabled == true && 
           useFallbackSorting == false) {
         // Add distance to each listing
         allListings = allListings.map((listing) {
@@ -242,6 +258,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
 
+    // Step 4: If sorted by start date, find the first listing not to have ended
+    firstNextListingIndex = -1;
+    if (preferredSortingMethod == SortingMethod.values[2] && filteredListings.isNotEmpty) {
+      int i = 0;
+      do {
+        if (!hasEventEnded(filteredListings[i]['endTime'])) firstNextListingIndex = i;
+      } while (i++ < filteredListings.length && firstNextListingIndex < 0);
+    }
+
     return RefreshIndicator(
       onRefresh: refreshListings,
       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -252,152 +277,139 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         // iOS has its own scrollbar style
         thickness: 4,
         radius: const Radius.circular(8),
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            // Header area, which scrolls away
-            SliverToBoxAdapter(
-              child: Container(
-                height: 66,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceDim,
-                ),
-                child: Stack(
-                  alignment: Alignment.centerRight,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: _isSearching
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ConstrainedBox(
-                                    key: const ValueKey('searchBar'),
-                                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
-                                    child: SearchBar(
-                                      autoFocus: true,
-                                      elevation: const WidgetStatePropertyAll(0),
-                                      hintText: switch (widget.filterPrimaryType) {
-                                        'Food' => 'Search food & drink vendors...',
-                                        'Shopping' => 'Search market stalls...',
-                                        'Music' => 'Search musical performances...',
-                                        'Event' => 'Search events...',
-                                        'Service' => 'Search services...',
-                                        _ => 'Search listings...',
-                                      },
-                                      leading: const Icon(Icons.search),
-                                      trailing: [
-                                        IconButton(
-                                          icon: const Icon(Icons.close),
-                                          onPressed: () {
-                                            HapticFeedback.lightImpact();
-                                            setState(() {
-                                              _isSearching = false;
-                                              _searchQuery = '';
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _searchQuery = value.toLowerCase();
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
-                                  SizedBox(
-                                    height: 56,
-                                    width: 56,
-                                    child: FloatingActionButton(
-                                      key: const ValueKey('searchFab'),
-                                      heroTag: 'searchFab_${widget.filterPrimaryType}_page',
-                                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                      elevation: 0,
-                                      onPressed: () {
-                                        HapticFeedback.lightImpact();
-                                        setState(() {
-                                          _isSearching = true;
-                                        });
-                                      },
-                                      child: const Icon(Icons.search),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Listings
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final listing = filteredListings[index];
-                  final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                  final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                  LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-
-                  return Column(
-                    children: [
-                      SpecificListingInfoSheet(
-                        title: listing['displayName'],
-                        location: listing['secondaryType'],
-                        subtitle: listing['tertiaryType'],
-                        startTime: "${listing['startTime']}",
-                        endTime: "${listing['endTime']}",
-                        approxDistance: approximateDistance,
-                        phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                        website: (listing['website'] != null) ? listing['website'] : '',
-                        email: (listing['email'] != null) ? listing['email'] : '',
-                        description: (listing['description'] != null) ? listing['description'] : '',
-                        detailsVisible: detailsVisibilityList[index],
-                        onDetailsTapped: () => toggleDetailsRow(index),
-                        onGetDirections: () {
-                          if (homePageState != null) {
-                            navigateToMapAndGetDirections(
-                              listing['id'],
-                              destinationLatLng,
-                              http.Client(),
-                            );
-                          }
-                        },
-                      ),
-                      // separator except after last item
-                      if (index != filteredListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                    ],
-                  );
-                },
-                childCount: filteredListings.length,
-              ),
-            ),
-
-            if (filteredListings.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+        child: (filteredListings.isNotEmpty) ? ScrollablePositionedList.builder(
+          itemCount: filteredListings.length + 1,
+          itemScrollController: _itemScrollController,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return Container(
+                  height: 66,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceDim,
                   ),
-                ),
-              ),
-          ],
+                  child: Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: _isSearching
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ConstrainedBox(
+                                      key: const ValueKey('searchBar'),
+                                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
+                                      child: SearchBar(
+                                        autoFocus: true,
+                                        elevation: const WidgetStatePropertyAll(0),
+                                        hintText: switch (widget.filterPrimaryType) {
+                                          'Food' => 'Search food & drink vendors...',
+                                          'Shopping' => 'Search market stalls...',
+                                          'Music' => 'Search musical performances...',
+                                          'Event' => 'Search events...',
+                                          'Service' => 'Search services...',
+                                          _ => 'Search listings...',
+                                        },
+                                        leading: const Icon(Icons.search),
+                                        trailing: [
+                                          IconButton(
+                                            icon: const Icon(Icons.close),
+                                            onPressed: () {
+                                              HapticFeedback.lightImpact();
+                                              setState(() {
+                                                _isSearching = false;
+                                                _searchQuery = '';
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _searchQuery = value.toLowerCase();
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
+                                    SizedBox(
+                                      height: 56,
+                                      width: 56,
+                                      child: FloatingActionButton(
+                                        key: const ValueKey('searchFab'),
+                                        heroTag: 'searchFab_${widget.filterPrimaryType}_page',
+                                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                                        foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                        elevation: 0,
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          setState(() {
+                                            _isSearching = true;
+                                          });
+                                        },
+                                        child: const Icon(Icons.search),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                final listing = filteredListings[index - 1]; // since index=0 is the sort/search bar
+                final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+
+                return Column(
+                  children: [
+                    SpecificListingInfoSheet(
+                      title: listing['displayName'],
+                      location: listing['secondaryType'],
+                      subtitle: listing['tertiaryType'],
+                      startTime: "${listing['startTime']}",
+                      endTime: "${listing['endTime']}",
+                      approxDistance: approximateDistance,
+                      phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                      website: (listing['website'] != null) ? listing['website'] : '',
+                      email: (listing['email'] != null) ? listing['email'] : '',
+                      description: (listing['description'] != null) ? listing['description'] : '',
+                      detailsVisible: detailsVisibilityList[index - 1],
+                      onDetailsTapped: () => toggleDetailsRow(index - 1),
+                      onGetDirections: () {
+                        if (homePageState != null) {
+                          navigateToMapAndGetDirections(
+                            listing['id'],
+                            destinationLatLng,
+                            http.Client(),
+                          );
+                        }
+                      },
+                    ),
+                    // separator except after last item
+                    if (index > 0 && index != filteredListings.length - 1)
+                      SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                  ],
+                );
+              }
+          },
+        ) : Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
       ),
     );
