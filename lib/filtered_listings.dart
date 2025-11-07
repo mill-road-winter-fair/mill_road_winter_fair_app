@@ -271,135 +271,129 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       onRefresh: refreshListings,
       backgroundColor: Theme.of(context).colorScheme.primary,
       color: Theme.of(context).colorScheme.onPrimary,
-      child: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: Platform.isIOS ? false : true,
-        // iOS has its own scrollbar style
-        thickness: 4,
-        radius: const Radius.circular(8),
-        child: (filteredListings.isNotEmpty) ? ScrollablePositionedList.builder(
-          itemCount: filteredListings.length + 1,
-          itemScrollController: _itemScrollController,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Container(
-                  height: 66,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceDim,
-                  ),
-                  child: Stack(
-                    alignment: Alignment.centerRight,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: _isSearching
-                              ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    ConstrainedBox(
-                                      key: const ValueKey('searchBar'),
-                                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
-                                      child: SearchBar(
-                                        autoFocus: true,
-                                        elevation: const WidgetStatePropertyAll(0),
-                                        hintText: switch (widget.filterPrimaryType) {
-                                          'Food' => 'Search food & drink vendors...',
-                                          'Shopping' => 'Search market stalls...',
-                                          'Music' => 'Search musical performances...',
-                                          'Event' => 'Search events...',
-                                          'Service' => 'Search services...',
-                                          _ => 'Search listings...',
-                                        },
-                                        leading: const Icon(Icons.search),
-                                        trailing: [
-                                          IconButton(
-                                            icon: const Icon(Icons.close),
-                                            onPressed: () {
-                                              HapticFeedback.lightImpact();
-                                              setState(() {
-                                                _isSearching = false;
-                                                _searchQuery = '';
-                                              });
-                                            },
-                                          ),
-                                        ],
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _searchQuery = value.toLowerCase();
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
-                                    SizedBox(
-                                      height: 56,
-                                      width: 56,
-                                      child: FloatingActionButton(
-                                        key: const ValueKey('searchFab'),
-                                        heroTag: 'searchFab_${widget.filterPrimaryType}_page',
-                                        backgroundColor: Theme.of(context).colorScheme.secondary,
-                                        foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                        elevation: 0,
-                                        onPressed: () {
-                                          HapticFeedback.lightImpact();
-                                          setState(() {
-                                            _isSearching = true;
-                                          });
-                                        },
-                                        child: const Icon(Icons.search),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              } else {
-                final listing = filteredListings[index - 1]; // since index=0 is the sort/search bar
-                final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-
-                return Column(
+      child: (filteredListings.isNotEmpty) ? ScrollablePositionedList.builder(
+        itemCount: filteredListings.length + 1,
+        itemScrollController: _itemScrollController,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Container(
+                height: 66,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceDim,
+                ),
+                child: Stack(
+                  alignment: Alignment.centerRight,
                   children: [
-                    SpecificListingInfoSheet(
-                      title: listing['displayName'],
-                      location: listing['secondaryType'],
-                      subtitle: listing['tertiaryType'],
-                      startTime: "${listing['startTime']}",
-                      endTime: "${listing['endTime']}",
-                      approxDistance: approximateDistance,
-                      phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                      website: (listing['website'] != null) ? listing['website'] : '',
-                      email: (listing['email'] != null) ? listing['email'] : '',
-                      description: (listing['description'] != null) ? listing['description'] : '',
-                      detailsVisible: detailsVisibilityList[index - 1],
-                      onDetailsTapped: () => toggleDetailsRow(index - 1),
-                      onGetDirections: () {
-                        if (homePageState != null) {
-                          navigateToMapAndGetDirections(
-                            listing['id'],
-                            destinationLatLng,
-                            http.Client(),
-                          );
-                        }
-                      },
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: _isSearching
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ConstrainedBox(
+                                    key: const ValueKey('searchBar'),
+                                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
+                                    child: SearchBar(
+                                      autoFocus: true,
+                                      elevation: const WidgetStatePropertyAll(0),
+                                      hintText: switch (widget.filterPrimaryType) {
+                                        'Food' => 'Search food & drink vendors...',
+                                        'Shopping' => 'Search market stalls...',
+                                        'Music' => 'Search musical performances...',
+                                        'Event' => 'Search events...',
+                                        'Service' => 'Search services...',
+                                        _ => 'Search listings...',
+                                      },
+                                      leading: const Icon(Icons.search),
+                                      trailing: [
+                                        IconButton(
+                                          icon: const Icon(Icons.close),
+                                          onPressed: () {
+                                            HapticFeedback.lightImpact();
+                                            setState(() {
+                                              _isSearching = false;
+                                              _searchQuery = '';
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _searchQuery = value.toLowerCase();
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
+                                  SizedBox(
+                                    height: 56,
+                                    width: 56,
+                                    child: FloatingActionButton(
+                                      key: const ValueKey('searchFab'),
+                                      heroTag: 'searchFab_${widget.filterPrimaryType}_page',
+                                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                      elevation: 0,
+                                      onPressed: () {
+                                        HapticFeedback.lightImpact();
+                                        setState(() {
+                                          _isSearching = true;
+                                        });
+                                      },
+                                      child: const Icon(Icons.search),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
                     ),
-                    // separator except after last item
-                    if (index > 0 && index != filteredListings.length - 1)
-                      SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                   ],
-                );
-              }
+                ),
+              );
+            } else {
+              final listing = filteredListings[index - 1]; // since index=0 is the sort/search bar
+              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+              final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+
+              return Column(
+                children: [
+                  SpecificListingInfoSheet(
+                    title: listing['displayName'],
+                    location: listing['secondaryType'],
+                    subtitle: listing['tertiaryType'],
+                    startTime: "${listing['startTime']}",
+                    endTime: "${listing['endTime']}",
+                    approxDistance: approximateDistance,
+                    phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                    website: (listing['website'] != null) ? listing['website'] : '',
+                    email: (listing['email'] != null) ? listing['email'] : '',
+                    description: (listing['description'] != null) ? listing['description'] : '',
+                    detailsVisible: detailsVisibilityList[index - 1],
+                    onDetailsTapped: () => toggleDetailsRow(index - 1),
+                    onGetDirections: () {
+                      if (homePageState != null) {
+                        navigateToMapAndGetDirections(
+                          listing['id'],
+                          destinationLatLng,
+                          http.Client(),
+                        );
+                      }
+                    },
+                  ),
+                  // separator except after last item
+                  if (index > 0 && index != filteredListings.length - 1)
+                    SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                ],
+              );
+            }
           },
         ) : Center(
           child: Padding(
@@ -411,7 +405,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             ),
           ),
         ),
-      ),
     );
   }
 
