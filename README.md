@@ -96,6 +96,28 @@ flutter build appbundle --release --dart-define-from-file=.env
 
 9. If required, add the following folder to a `.zip` file and upload it to the Release as a Debug Symbols artifact: `build/app/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib/x86_64`
 
+## iOS Release Steps
+
+1-5. Same steps as (and aligned with) Android 
+    NB the build number has to have increased from the last one uploaded to Apple. 
+
+6. Run
+    flutter build ios --config-only --release
+    
+7. To get screen shots without 'DEBUG' (which Apple will reject) add this line to main.dart within MaterialApp() debugShowCheckedModeBanner:false
+   Get screen shots at the largest iPhone and iPad sizes (latest 6.9" Pro Max and 13" Pro), then remove the above.
+   
+8. In Xcode, go to Product -> Archive, and you will eventually see a new build in the Organiser window
+
+9. Click Distribute App, choose App Store Connect then click Distribute
+
+10. In App Store Connect on the web, go to the app, then Distribution and click the + under iOS app
+
+11. Fill in the version, add the screen shots, what's new etc., add the build, Save, then hit Add for Review, and wait for up to 48 hours
+
+12. Back in Xcode organiser, right-click on the new build, click Show in Finder, and upload this file to the Github release
+
+
 ## Other Links
 - [Mill Road Winter Fair Caching API](https://github.com/MarauderOne/mill_road_winter_fair_app_db_api)
 - [Test Data Spreadsheet](https://docs.google.com/spreadsheets/d/1-Dk_K8tvDJ4C9vSx0OJSEYhvhGrt6IEkabVRP83n0OM/edit?usp=sharing)
