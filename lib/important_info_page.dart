@@ -72,12 +72,12 @@ class ImportantInfoPage extends StatelessWidget {
                         text:
                             'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                     TextSpan(
-                        text: 'www.millroadwinterfair.org/rcn',
+                        text: 'www.millroadwinterfair.org',
                         style: const TextStyle(decoration: TextDecoration.underline),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/rcn'));
+                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
                           }),
                     const TextSpan(text: '.'),
                   ],

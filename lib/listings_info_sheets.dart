@@ -176,18 +176,19 @@ class SpecificListingInfoSheet extends StatelessWidget {
     final titleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      color: Theme.of(context).colorScheme.onSurface,
       decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
     updatedDescription = cancelled ? description.substring(cancelIdentifier.length) : description;
     updatedTimes = cancelled ? cancelIdentifier : "$startTime—$endTime";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
+    final subSubStyle = subStyle.copyWith(fontWeight: FontWeight.normal);
 
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(endTime);
-    final timeStyle = subStyle.copyWith(
-      color: ended || cancelled ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
+    final timeStyle = subSubStyle.copyWith(
+      color: ended || cancelled ? Colors.red : Theme.of(context).colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
@@ -234,8 +235,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
             children: [
               Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
                 TextSpan(children: [
-                  TextSpan(style: subStyle, text: location),
-                  TextSpan(style: subStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
+                  TextSpan(style: subSubStyle, text: location),
+                  TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
                 ], ), 
               ), ),
               ),
