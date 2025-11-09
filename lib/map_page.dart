@@ -89,10 +89,6 @@ class MapPageState extends State<MapPage> {
     super.initState();
   }
 
-  void onTabVisible() {
-    // This is called when user switches to this tab
-  }
-
   Polygon roadClosurePolygon() {
     final List<LatLng> roadClosurePolygonPoints = [];
     roadClosurePolygonPoints.add(const LatLng(52.20235281420999, 0.1310619082596975));
