@@ -16,6 +16,11 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Store the state of each listings page in a shared class
+class SharedListingsPageConfig {
+  static String theFilterPrimaryTypeToggle = ''; // which tab we're on so we can see if we've switched
+}
+
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
   final List<Map<String, dynamic>> listings;
@@ -42,7 +47,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   String _searchQuery = '';
   List<bool> detailsVisibilityList = List<bool>.filled(500, false);  // start with plenty enough to load all listings
   int firstNextListingIndex = -1;  // the first listing that hasn't passed its end date, when sorted by start date
-  String theFilterPrimaryTypeToggle = '';  // which tab we're on so we can see if we've switched
   
   @override
   void initState() {
@@ -55,28 +59,24 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     setState(() {
       detailsVisibilityList = List<bool>.filled(filteredListings.length, false);
     });
-//    if (itemScrollController.isAttached) itemScrollController.jumpTo(index: 0);
-    debugPrint('MW onTabVisible with firstNextListingIndex=$firstNextListingIndex and $itemScrollController.isAttached and theFilterPrimaryTypeToggle=$theFilterPrimaryTypeToggle');
     if (preferredSortingMethod == SortingMethod.values[2] && !useFallbackSorting) {
-      debugPrint('MW adding PFCB');
       firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Runs after the first layout and paint
         if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
-          debugPrint('MW onTabVisible addPostFrameCallback scrolling to $firstNextListingIndex with widget.filterPrimaryType=${widget.filterPrimaryType} theFilterPrimaryTypeToggle=$theFilterPrimaryTypeToggle');
           itemScrollController.scrollTo(
             curve: Curves.linear,
-            index: (theFilterPrimaryTypeToggle == widget.filterPrimaryType) ? firstNextListingIndex : 0,
+            index: (SharedListingsPageConfig.theFilterPrimaryTypeToggle == widget.filterPrimaryType) ? firstNextListingIndex : 0,
             duration: const Duration(milliseconds: 300),
             alignment: 0,
           );
         }
       });
     }
-    if (theFilterPrimaryTypeToggle == widget.filterPrimaryType) {
-      theFilterPrimaryTypeToggle = '';
+    if (SharedListingsPageConfig.theFilterPrimaryTypeToggle == widget.filterPrimaryType) {
+      SharedListingsPageConfig.theFilterPrimaryTypeToggle = '';
     } else {
-      theFilterPrimaryTypeToggle = widget.filterPrimaryType;
+      SharedListingsPageConfig.theFilterPrimaryTypeToggle = widget.filterPrimaryType;
     }
   }
 
@@ -215,11 +215,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         setState(() {
           preferredSortingMethod = selectedValue;
         });
-//        debugPrint('MW sortingDropdownCallback thinking about doing scroll with preferredSortingMethod=$preferredSortingMethod firstNextListingIndex=$firstNextListingIndex scroll=${itemScrollController.isAttached}');
         if (preferredSortingMethod == SortingMethod.values[2]) {
           firstNextListingIndex = findFirstNextListingIndex(filteredListings);
           if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
-//            debugPrint('MW sortingDropdownCallback scrolling to $firstNextListingIndex since preferredSortingMethod=$preferredSortingMethod');
             itemScrollController.scrollTo(
               curve: Curves.linear,
               index: firstNextListingIndex,
@@ -296,18 +294,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
-//debugPrint('MW filtered listings OK');
+
     // Step 4: If sorted by start date, find the first listing not to have ended
     firstNextListingIndex = -1;
     if (preferredSortingMethod == SortingMethod.values[2])
     { 
-//      debugPrint('MW preferredSortingMethod=$preferredSortingMethod');
       if (filteredListings.isNotEmpty) {
-      debugPrint('MW fline=${filteredListings.isNotEmpty}');
          firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       }
     }
-//debugPrint('MW got fnli OK: $firstNextListingIndex');
 
     return RefreshIndicator(
       onRefresh: refreshListings,
@@ -323,9 +318,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             itemScrollController: itemScrollController,
             itemPositionsListener: itemPositionsListener,
             itemBuilder: (context, index) {
-//debugPrint('MW doing build');
               if (index == 0) {
-//debugPrint('MW doing search row');
                 return Container(
                   height: 66,
                   decoration: BoxDecoration(
@@ -408,7 +401,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   ),
                 );
               } else {
-//debugPrint('MW doing listing row');
                 final listing = filteredListings[index - 1]; // since index=0 is the sort/search bar
                 final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                 final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
@@ -449,16 +441,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           ValueListenableBuilder<Iterable<ItemPosition>>(
             valueListenable: itemPositionsListener.itemPositions,
             builder: (context, positions, _) {
-//debugPrint('MW doing scroller');
               if (positions.isEmpty) return const SizedBox.shrink();
               final minIndex = positions.map((e) => e.index).reduce((a, b) => a < b ? a : b);
               final maxIndex = positions.map((e) => e.index).reduce((a, b) => a > b ? a : b);
               final visibleFraction = (maxIndex - minIndex + 1) / filteredListings.length;
-              //debugPrint('MW minIndex=$minIndex maxIndex=$maxIndex visibleFraction=$visibleFraction');
               if (visibleFraction < 1) {
                 final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
                 final thumbTop = trackHeight * (minIndex / filteredListings.length);
-                //debugPrint('MW trackHeight=$trackHeight thumbHeight=$thumbHeight thumbTop=$thumbTop');
 
                 return Positioned(
                   right: 0,
@@ -469,8 +458,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     onVerticalDragUpdate: (details) {
                       final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
                       final targetIndex = (fraction * filteredListings.length).floor();
-                      //              debugPrint('fraction=$fraction targetIndex=$targetIndex');
-                      debugPrint('MW GestureDetector to $firstNextListingIndex');
                       itemScrollController.scrollTo(
                         index: targetIndex,
                         duration: const Duration(milliseconds: 150),
