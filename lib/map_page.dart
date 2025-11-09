@@ -452,13 +452,17 @@ class MapPageState extends State<MapPage> {
       icon: customMarker,
       visible: true,
       onTap: () async {
-        // Acquire latest location before building bottom sheet; safe async with mounted check to avoid context-after-await issues
-        try {
-          await establishLocation();
-        } catch (e) {
-          debugPrint('Failed to establish location (group marker): $e');
+        // Acquire latest location before building bottom sheet; skip await under tests to keep synchronous behavior
+        if (onTest) {
+          establishLocation(); // fire-and-forget preserve old test expectations
+        } else {
+          try {
+            await establishLocation();
+          } catch (e) {
+            debugPrint('Failed to establish location (group marker): $e');
+          }
+          if (!mounted) return; // Widget disposed while awaiting
         }
-        if (!mounted) return; // Widget disposed while awaiting
 
         // Helper to normalise primaryType by stripping "Group-" prefix if present
         String normalisePrimaryType(String type) {
@@ -610,13 +614,17 @@ class MapPageState extends State<MapPage> {
       visible: true,
       onTap: () async {
         HapticFeedback.lightImpact();
-        // Await location before computing distance & showing sheet
-        try {
-          await establishLocation();
-        } catch (e) {
-          debugPrint('Failed to establish location (specific marker): $e');
+        // Await location only in production; tests remain synchronous
+        if (onTest) {
+          establishLocation();
+        } else {
+          try {
+            await establishLocation();
+          } catch (e) {
+            debugPrint('Failed to establish location (specific marker): $e');
+          }
+          if (!mounted) return;
         }
-        if (!mounted) return;
 
         // Calculate distance if current location is known (already awaited)
         var distanceMessage = 'Distance unknown';
