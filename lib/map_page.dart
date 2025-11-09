@@ -72,7 +72,7 @@ class MapPageState extends State<MapPage> {
     'Services': true,
     'Road Closures': true,
   };
-  late List<bool> detailsVisibilityList;  // for modal bottom sheet group listings
+  late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
 
   @override
   void initState() {
@@ -90,7 +90,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void onTabVisible() {
-      // This is called when user switches to this tab
+    // This is called when user switches to this tab
   }
 
   Polygon roadClosurePolygon() {
@@ -514,6 +514,7 @@ class MapPageState extends State<MapPage> {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
                 }
+
                 return DraggableScrollableSheet(
                   expand: false,
                   initialChildSize: minFraction,
@@ -625,22 +626,50 @@ class MapPageState extends State<MapPage> {
           context: context,
           showDragHandle: false,
           enableDrag: false,
-          isScrollControlled: true,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
+          isScrollControlled: true,
+          useSafeArea: true,
           builder: (BuildContext context) {
-            return SpecificListingInfoSheet(
-              title: listing['displayName'],
-              location: listing['secondaryType'],
-              subtitle: listing['tertiaryType'],
-              startTime: "${listing['startTime']}",
-              endTime: "${listing['endTime']}",
-              approxDistance: distanceMessage,
-              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-              website: (listing['website'] != null) ? listing['website'] : '',
-              email: (listing['email'] != null) ? listing['email'] : '',
-              description: (listing['description'] != null) ? listing['description'] : '',
-              detailsVisible: true,
-              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setModalState) {
+                return DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: 0.33,
+                  minChildSize: 0.33,
+                  maxChildSize: 0.66,
+                  builder: (context, specificSheetModalScrollController) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                      child: Scrollbar(
+                        controller: specificSheetModalScrollController,
+                        thumbVisibility: false,
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: ListView(
+                          controller: specificSheetModalScrollController,
+                          padding: EdgeInsets.zero,
+                          children: [
+                            SpecificListingInfoSheet(
+                              title: listing['displayName'],
+                              location: listing['secondaryType'],
+                              subtitle: listing['tertiaryType'],
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: distanceMessage,
+                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                              website: (listing['website'] != null) ? listing['website'] : '',
+                              email: (listing['email'] != null) ? listing['email'] : '',
+                              description: (listing['description'] != null) ? listing['description'] : '',
+                              detailsVisible: true,
+                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
             );
           },
         );
@@ -696,9 +725,11 @@ class MapPageState extends State<MapPage> {
         return oldMarker.copyWith(iconParam: newIcon);
       });
 
-      // Update polygon colour to match theme
-      _polygons.clear();
-      _polygons.add(roadClosurePolygon());
+      // Update polygon colour to match theme, if filtered-in
+      if (filterSettings["Road Closures"] == true) {
+        _polygons.clear();
+        _polygons.add(roadClosurePolygon());
+      }
     });
   }
 
@@ -902,9 +933,10 @@ class MapPageState extends State<MapPage> {
     // Set navigation as in progress
     _navigationInProgress = true;
 
-    // Pop the navigator if told to
     if (navigatorPop == true) {
       Navigator.pop(context);
+      // The navigator is only popped when called from the map page, so if this is true set the previousIndex to 0
+      previousIndex = 0;
     }
 
     // If user has location tracking enabled
@@ -1531,18 +1563,17 @@ class MapPageState extends State<MapPage> {
                 Align(
                   alignment: Alignment.topCenter,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: FloatingActionButton.extended(
-                      elevation: 3,
-                      heroTag: 'navigationBtn',
+                    padding: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(iconSize: 30, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: 0), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
                       },
-                      icon: const Icon(Icons.directions),
+                      icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
                       label: Text(
                         _distanceToDestination!,
-                        style: TextStyle(fontSize: 24, color: Theme.of(context).colorScheme.onPrimary),
+                        style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
                       ),
                     ),
                   ),
@@ -1578,7 +1609,7 @@ class MapPageState extends State<MapPage> {
                                 width: 20,
                                 height: 14,
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                  color: selectedThemeKey == 'colourBlindFriendly' ? const Color.fromRGBO(224, 129, 87, 255) : Theme.of(context).colorScheme.tertiary.withAlpha(50),
                                   border: Border.all(
                                     color: Theme.of(context).colorScheme.tertiary,
                                     width: 3,
