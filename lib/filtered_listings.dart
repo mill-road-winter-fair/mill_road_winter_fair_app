@@ -16,6 +16,11 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Store the state of each listings page in a shared class
+class SharedListingsPageConfig {
+  static String theFilterPrimaryTypeToggle = ''; // which tab we're on so we can see if we've switched
+}
+
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
   final List<Map<String, dynamic>> listings;
@@ -43,7 +48,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   String _searchQuery = '';
   List<bool> detailsVisibilityList = List<bool>.filled(500, false);  // start with plenty enough to load all listings
   int firstNextListingIndex = -1;  // the first listing that hasn't passed its end date, when sorted by start date
-  String theFilterPrimaryTypeToggle = '';  // which tab we're on so we can see if we've switched
   
   @override
   void initState() {
@@ -64,17 +68,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
           itemScrollController.scrollTo(
             curve: Curves.linear,
-            index: (theFilterPrimaryTypeToggle == widget.filterPrimaryType) ? firstNextListingIndex : 0,
+            index: (SharedListingsPageConfig.theFilterPrimaryTypeToggle == widget.filterPrimaryType) ? firstNextListingIndex : 0,
             duration: const Duration(milliseconds: 300),
             alignment: 0,
           );
         }
       });
     }
-    if (theFilterPrimaryTypeToggle == widget.filterPrimaryType) {
-      theFilterPrimaryTypeToggle = '';
+    if (SharedListingsPageConfig.theFilterPrimaryTypeToggle == widget.filterPrimaryType) {
+      SharedListingsPageConfig.theFilterPrimaryTypeToggle = '';
     } else {
-      theFilterPrimaryTypeToggle = widget.filterPrimaryType;
+      SharedListingsPageConfig.theFilterPrimaryTypeToggle = widget.filterPrimaryType;
     }
  */  }
 
@@ -133,12 +137,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           final distance = asTheCrowFlies(currentLatLng!, destinationLatLng);
           return {...listing, 'approximateDistanceMetres': distance};
         }).toList();
-      }
-
-      if ((preferredSortingMethod == SortingMethod.values[2] && !(widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event'))) {
-        // User prefers start time sorting but this isn't allowed, use fallback (a-z) sorting but don't change their saved preferences
-        // NB separate to the above test since we can still add the distances
-        useFallbackSorting = true;
       }
 
       // Sort based on preference
@@ -292,6 +290,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
+
     // Step 4: If sorted by start date, find the first listing not to have ended
     firstNextListingIndex = -1;
     if (preferredSortingMethod == SortingMethod.values[2])
@@ -498,7 +497,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     onVerticalDragUpdate: (details) {
                       final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
                       final targetIndex = (fraction * filteredListings.length).floor();
-                      //              debugPrint('fraction=$fraction targetIndex=$targetIndex');
                       itemScrollController.scrollTo(
                         index: targetIndex,
                         duration: const Duration(milliseconds: 150),
