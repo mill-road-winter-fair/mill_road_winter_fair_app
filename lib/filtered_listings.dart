@@ -35,12 +35,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool isRefreshing = false;
   bool useFallbackSorting = false;
   final ScrollController _scrollController = ScrollController();
-  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final itemPositionsListener = ItemPositionsListener.create();
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<bool> detailsVisibilityList = List<bool>.filled(500, false);  // start with plenty enough to load all listings
   int firstNextListingIndex = -1;  // the first listing that hasn't passed its end date, when sorted by start date
+  String theFilterPrimaryTypeToggle = '';  // which tab we're on so we can see if we've switched
   
   @override
   void initState() {
@@ -53,18 +55,28 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     setState(() {
       detailsVisibilityList = List<bool>.filled(filteredListings.length, false);
     });
-    if (firstNextListingIndex >= 0) {
+//    if (itemScrollController.isAttached) itemScrollController.jumpTo(index: 0);
+    debugPrint('MW onTabVisible with firstNextListingIndex=$firstNextListingIndex and $itemScrollController.isAttached and theFilterPrimaryTypeToggle=$theFilterPrimaryTypeToggle');
+    if (preferredSortingMethod == SortingMethod.values[2] && !useFallbackSorting) {
+      debugPrint('MW adding PFCB');
+      firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Runs after the first layout and paint (when firstNextListingIndex has been found)
-        if (firstNextListingIndex >= 0) {
-          _itemScrollController.scrollTo(
+        // Runs after the first layout and paint
+        if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
+          debugPrint('MW onTabVisible addPostFrameCallback scrolling to $firstNextListingIndex with widget.filterPrimaryType=${widget.filterPrimaryType} theFilterPrimaryTypeToggle=$theFilterPrimaryTypeToggle');
+          itemScrollController.scrollTo(
             curve: Curves.linear,
-            index: firstNextListingIndex,
+            index: (theFilterPrimaryTypeToggle == widget.filterPrimaryType) ? firstNextListingIndex : 0,
             duration: const Duration(milliseconds: 300),
             alignment: 0,
           );
         }
       });
+    }
+    if (theFilterPrimaryTypeToggle == widget.filterPrimaryType) {
+      theFilterPrimaryTypeToggle = '';
+    } else {
+      theFilterPrimaryTypeToggle = widget.filterPrimaryType;
     }
   }
 
@@ -123,6 +135,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           final distance = asTheCrowFlies(currentLatLng!, destinationLatLng);
           return {...listing, 'approximateDistanceMetres': distance};
         }).toList();
+      }
+
+      if ((preferredSortingMethod == SortingMethod.values[2] && !(widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event'))) {
+        // User prefers start time sorting but this isn't allowed, use fallback (a-z) sorting but don't change their saved preferences
+        // NB separate to the above test since we can still add the distances
+        useFallbackSorting = true;
       }
 
       // Sort based on preference
@@ -197,6 +215,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         setState(() {
           preferredSortingMethod = selectedValue;
         });
+//        debugPrint('MW sortingDropdownCallback thinking about doing scroll with preferredSortingMethod=$preferredSortingMethod firstNextListingIndex=$firstNextListingIndex scroll=${itemScrollController.isAttached}');
+        if (preferredSortingMethod == SortingMethod.values[2]) {
+          firstNextListingIndex = findFirstNextListingIndex(filteredListings);
+          if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
+//            debugPrint('MW sortingDropdownCallback scrolling to $firstNextListingIndex since preferredSortingMethod=$preferredSortingMethod');
+            itemScrollController.scrollTo(
+              curve: Curves.linear,
+              index: firstNextListingIndex,
+              duration: const Duration(milliseconds: 300),
+              alignment: 0,
+            );
+          }
+        }
         _saveSettings();
       }
     }
@@ -213,6 +244,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     setState(() {
       detailsVisibilityList[index] = !detailsVisibilityList[index];
     });
+  }
+
+  int findFirstNextListingIndex(List filteredListings) {
+    for (int i = 0; i < filteredListings.length; i++) {
+      if (!hasEventEnded(filteredListings[i]['endTime'])) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   @override
@@ -256,154 +296,212 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
-
+//debugPrint('MW filtered listings OK');
     // Step 4: If sorted by start date, find the first listing not to have ended
     firstNextListingIndex = -1;
-    if (preferredSortingMethod == SortingMethod.values[2] && filteredListings.isNotEmpty) {
-      int i = 0;
-      do {
-        if (!hasEventEnded(filteredListings[i]['endTime'])) firstNextListingIndex = i;
-      } while (i++ < filteredListings.length && firstNextListingIndex < 0);
+    if (preferredSortingMethod == SortingMethod.values[2])
+    { 
+//      debugPrint('MW preferredSortingMethod=$preferredSortingMethod');
+      if (filteredListings.isNotEmpty) {
+      debugPrint('MW fline=${filteredListings.isNotEmpty}');
+         firstNextListingIndex = findFirstNextListingIndex(filteredListings);
+      }
     }
+//debugPrint('MW got fnli OK: $firstNextListingIndex');
 
     return RefreshIndicator(
       onRefresh: refreshListings,
       backgroundColor: Theme.of(context).colorScheme.primary,
       color: Theme.of(context).colorScheme.onPrimary,
-      child: (filteredListings.isNotEmpty) ? ScrollablePositionedList.builder(
-        itemCount: filteredListings.length + 1,
-        itemScrollController: _itemScrollController,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return Container(
-                height: 66,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceDim,
-                ),
-                child: Stack(
-                  alignment: Alignment.centerRight,
+      child: SizedBox.expand(// ensure the Stack has a defined height
+          child: LayoutBuilder(builder: (context, constraints) {
+        final trackHeight = constraints.maxHeight;
+
+        return Stack(children: [
+          ScrollablePositionedList.builder(
+            itemCount: filteredListings.length + 1,
+            itemScrollController: itemScrollController,
+            itemPositionsListener: itemPositionsListener,
+            itemBuilder: (context, index) {
+//debugPrint('MW doing build');
+              if (index == 0) {
+//debugPrint('MW doing search row');
+                return Container(
+                  height: 66,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceDim,
+                  ),
+                  child: Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: _isSearching
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ConstrainedBox(
+                                      key: const ValueKey('searchBar'),
+                                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
+                                      child: SearchBar(
+                                        autoFocus: true,
+                                        elevation: const WidgetStatePropertyAll(0),
+                                        hintText: switch (widget.filterPrimaryType) {
+                                          'Food' => 'Search food & drink vendors...',
+                                          'Shopping' => 'Search market stalls...',
+                                          'Music' => 'Search musical performances...',
+                                          'Event' => 'Search events...',
+                                          'Service' => 'Search services...',
+                                          _ => 'Search listings...',
+                                        },
+                                        leading: const Icon(Icons.search),
+                                        trailing: [
+                                          IconButton(
+                                            icon: const Icon(Icons.close),
+                                            onPressed: () {
+                                              HapticFeedback.lightImpact();
+                                              setState(() {
+                                                _isSearching = false;
+                                                _searchQuery = '';
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _searchQuery = value.toLowerCase();
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
+                                    SizedBox(
+                                      height: 56,
+                                      width: 56,
+                                      child: FloatingActionButton(
+                                        key: const ValueKey('searchFab'),
+                                        heroTag: 'searchFab_${widget.filterPrimaryType}_page',
+                                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                                        foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                        elevation: 0,
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          setState(() {
+                                            _isSearching = true;
+                                          });
+                                        },
+                                        child: const Icon(Icons.search),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+//debugPrint('MW doing listing row');
+                final listing = filteredListings[index - 1]; // since index=0 is the sort/search bar
+                final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+
+                return Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: _isSearching
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ConstrainedBox(
-                                    key: const ValueKey('searchBar'),
-                                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
-                                    child: SearchBar(
-                                      autoFocus: true,
-                                      elevation: const WidgetStatePropertyAll(0),
-                                      hintText: switch (widget.filterPrimaryType) {
-                                        'Food' => 'Search food & drink vendors...',
-                                        'Shopping' => 'Search market stalls...',
-                                        'Music' => 'Search musical performances...',
-                                        'Event' => 'Search events...',
-                                        'Service' => 'Search services...',
-                                        _ => 'Search listings...',
-                                      },
-                                      leading: const Icon(Icons.search),
-                                      trailing: [
-                                        IconButton(
-                                          icon: const Icon(Icons.close),
-                                          onPressed: () {
-                                            HapticFeedback.lightImpact();
-                                            setState(() {
-                                              _isSearching = false;
-                                              _searchQuery = '';
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _searchQuery = value.toLowerCase();
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
-                                  SizedBox(
-                                    height: 56,
-                                    width: 56,
-                                    child: FloatingActionButton(
-                                      key: const ValueKey('searchFab'),
-                                      heroTag: 'searchFab_${widget.filterPrimaryType}_page',
-                                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                      elevation: 0,
-                                      onPressed: () {
-                                        HapticFeedback.lightImpact();
-                                        setState(() {
-                                          _isSearching = true;
-                                        });
-                                      },
-                                      child: const Icon(Icons.search),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                    SpecificListingInfoSheet(
+                      title: listing['displayName'],
+                      location: listing['secondaryType'],
+                      subtitle: listing['tertiaryType'],
+                      startTime: "${listing['startTime']}",
+                      endTime: "${listing['endTime']}",
+                      approxDistance: approximateDistance,
+                      phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                      website: (listing['website'] != null) ? listing['website'] : '',
+                      email: (listing['email'] != null) ? listing['email'] : '',
+                      description: (listing['description'] != null) ? listing['description'] : '',
+                      detailsVisible: detailsVisibilityList[index - 1],
+                      onDetailsTapped: () => toggleDetailsRow(index - 1),
+                      onGetDirections: () {
+                        if (homePageState != null) {
+                          navigateToMapAndGetDirections(
+                            listing['id'],
+                            destinationLatLng,
+                            http.Client(),
+                          );
+                        }
+                      },
+                    ),
+                    // separator except after last item
+                    if (index > 0 && index != filteredListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                  ],
+                );
+              }
+            },
+          ),
+          ValueListenableBuilder<Iterable<ItemPosition>>(
+            valueListenable: itemPositionsListener.itemPositions,
+            builder: (context, positions, _) {
+//debugPrint('MW doing scroller');
+              if (positions.isEmpty) return const SizedBox.shrink();
+              final minIndex = positions.map((e) => e.index).reduce((a, b) => a < b ? a : b);
+              final maxIndex = positions.map((e) => e.index).reduce((a, b) => a > b ? a : b);
+              final visibleFraction = (maxIndex - minIndex + 1) / filteredListings.length;
+              //debugPrint('MW minIndex=$minIndex maxIndex=$maxIndex visibleFraction=$visibleFraction');
+              if (visibleFraction < 1) {
+                final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
+                final thumbTop = trackHeight * (minIndex / filteredListings.length);
+                //debugPrint('MW trackHeight=$trackHeight thumbHeight=$thumbHeight thumbTop=$thumbTop');
+
+                return Positioned(
+                  right: 0,
+                  top: thumbTop, // position from top
+                  width: 6,
+                  height: thumbHeight, // set exact height
+                  child: GestureDetector(
+                    onVerticalDragUpdate: (details) {
+                      final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
+                      final targetIndex = (fraction * filteredListings.length).floor();
+                      //              debugPrint('fraction=$fraction targetIndex=$targetIndex');
+                      debugPrint('MW GestureDetector to $firstNextListingIndex');
+                      itemScrollController.scrollTo(
+                        index: targetIndex,
+                        duration: const Duration(milliseconds: 150),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(3),
                       ),
                     ),
-                  ],
-                ),
-              );
-            } else {
-              final listing = filteredListings[index - 1]; // since index=0 is the sort/search bar
-              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-              final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-
-              return Column(
-                children: [
-                  SpecificListingInfoSheet(
-                    title: listing['displayName'],
-                    location: listing['secondaryType'],
-                    subtitle: listing['tertiaryType'],
-                    startTime: "${listing['startTime']}",
-                    endTime: "${listing['endTime']}",
-                    approxDistance: approximateDistance,
-                    phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                    website: (listing['website'] != null) ? listing['website'] : '',
-                    email: (listing['email'] != null) ? listing['email'] : '',
-                    description: (listing['description'] != null) ? listing['description'] : '',
-                    detailsVisible: detailsVisibilityList[index - 1],
-                    onDetailsTapped: () => toggleDetailsRow(index - 1),
-                    onGetDirections: () {
-                      if (homePageState != null) {
-                        navigateToMapAndGetDirections(
-                          listing['id'],
-                          destinationLatLng,
-                          http.Client(),
-                        );
-                      }
-                    },
                   ),
-                  // separator except after last item
-                  if (index > 0 && index != filteredListings.length - 1)
-                    SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                ],
-              );
-            }
-          },
-        ) : Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          ),           (filteredListings.isEmpty)
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink()
+        ]);
+      })),
     );
   }
 
@@ -463,3 +561,5 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     );
   }
 }
+
+
