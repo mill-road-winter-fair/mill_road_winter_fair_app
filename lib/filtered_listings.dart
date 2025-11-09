@@ -38,6 +38,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   final ItemScrollController itemScrollController = ItemScrollController();
   final itemPositionsListener = ItemPositionsListener.create();
   bool _isSearching = false;
+  bool _hidePastListings = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<bool> detailsVisibilityList = List<bool>.filled(500, false);  // start with plenty enough to load all listings
@@ -55,15 +56,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     setState(() {
       detailsVisibilityList = List<bool>.filled(filteredListings.length, false);
     });
-//    if (itemScrollController.isAttached) itemScrollController.jumpTo(index: 0);
-    debugPrint('MW onTabVisible with firstNextListingIndex=$firstNextListingIndex and $itemScrollController.isAttached and theFilterPrimaryTypeToggle=$theFilterPrimaryTypeToggle');
-    if (preferredSortingMethod == SortingMethod.values[2] && !useFallbackSorting) {
-      debugPrint('MW adding PFCB');
+    if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
+/*    if (preferredSortingMethod == SortingMethod.values[2] && !useFallbackSorting) {
       firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Runs after the first layout and paint
         if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
-          debugPrint('MW onTabVisible addPostFrameCallback scrolling to $firstNextListingIndex with widget.filterPrimaryType=${widget.filterPrimaryType} theFilterPrimaryTypeToggle=$theFilterPrimaryTypeToggle');
           itemScrollController.scrollTo(
             curve: Curves.linear,
             index: (theFilterPrimaryTypeToggle == widget.filterPrimaryType) ? firstNextListingIndex : 0,
@@ -78,7 +76,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     } else {
       theFilterPrimaryTypeToggle = widget.filterPrimaryType;
     }
-  }
+ */  }
 
   @override
   void dispose() {
@@ -215,11 +213,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         setState(() {
           preferredSortingMethod = selectedValue;
         });
-//        debugPrint('MW sortingDropdownCallback thinking about doing scroll with preferredSortingMethod=$preferredSortingMethod firstNextListingIndex=$firstNextListingIndex scroll=${itemScrollController.isAttached}');
         if (preferredSortingMethod == SortingMethod.values[2]) {
           firstNextListingIndex = findFirstNextListingIndex(filteredListings);
           if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
-//            debugPrint('MW sortingDropdownCallback scrolling to $firstNextListingIndex since preferredSortingMethod=$preferredSortingMethod');
             itemScrollController.scrollTo(
               curve: Curves.linear,
               index: firstNextListingIndex,
@@ -296,18 +292,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
-//debugPrint('MW filtered listings OK');
     // Step 4: If sorted by start date, find the first listing not to have ended
     firstNextListingIndex = -1;
     if (preferredSortingMethod == SortingMethod.values[2])
     { 
-//      debugPrint('MW preferredSortingMethod=$preferredSortingMethod');
       if (filteredListings.isNotEmpty) {
-      debugPrint('MW fline=${filteredListings.isNotEmpty}');
          firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       }
     }
-//debugPrint('MW got fnli OK: $firstNextListingIndex');
 
     return RefreshIndicator(
       onRefresh: refreshListings,
@@ -323,9 +315,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             itemScrollController: itemScrollController,
             itemPositionsListener: itemPositionsListener,
             itemBuilder: (context, index) {
-//debugPrint('MW doing build');
               if (index == 0) {
-//debugPrint('MW doing search row');
                 return Container(
                   height: 66,
                   decoration: BoxDecoration(
@@ -381,10 +371,53 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               : Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
+                                    Expanded(child: _buildSortingDropdown(context)),
                                     SizedBox(
-                                      height: 56,
-                                      width: 56,
+                                      height: 44,
+                                      width: 44,
+                                      child: FloatingActionButton(
+                                        key: const ValueKey('nowFab'),
+                                        heroTag: 'nowFab_${widget.filterPrimaryType}_page',
+                                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                                        foregroundColor: (firstNextListingIndex > 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
+                                        elevation: 0,
+                                        onPressed: () {
+                                          if (firstNextListingIndex > 0) {
+                                            HapticFeedback.lightImpact();
+                                            itemScrollController.scrollTo(
+                                              curve: Curves.linear,
+                                              index: firstNextListingIndex,
+                                              duration: const Duration(milliseconds: 300),
+                                              alignment: 0,
+                                            );
+                                          }
+                                        },
+                                        child: const Icon(Icons.update),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    SizedBox(
+                                      height: 44,
+                                      width: 44,
+                                      child: FloatingActionButton(
+                                        key: const ValueKey('hidePastListingsFab'),
+                                        heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
+                                        backgroundColor: (_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
+                                        foregroundColor: (_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary,
+                                        elevation: 0,
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          setState(() {
+                                            _hidePastListings = !_hidePastListings;
+                                          });
+                                        },
+                                        child: const Icon(Icons.event_busy),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    SizedBox(
+                                      height: 44,
+                                      width: 44,
                                       child: FloatingActionButton(
                                         key: const ValueKey('searchFab'),
                                         heroTag: 'searchFab_${widget.filterPrimaryType}_page',
@@ -408,7 +441,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   ),
                 );
               } else {
-//debugPrint('MW doing listing row');
                 final listing = filteredListings[index - 1]; // since index=0 is the sort/search bar
                 final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                 final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
@@ -416,7 +448,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
                 return Column(
                   children: [
-                    SpecificListingInfoSheet(
+                    (!_hidePastListings || !hasEventEnded(listing['endTime'])) ? SpecificListingInfoSheet(
                       title: listing['displayName'],
                       location: listing['secondaryType'],
                       subtitle: listing['tertiaryType'],
@@ -438,9 +470,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           );
                         }
                       },
-                    ),
+                    ) : const SizedBox.shrink(),
                     // separator except after last item
-                    if (index > 0 && index != filteredListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                    if (index > 0 && index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                   ],
                 );
               }
@@ -449,16 +481,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           ValueListenableBuilder<Iterable<ItemPosition>>(
             valueListenable: itemPositionsListener.itemPositions,
             builder: (context, positions, _) {
-//debugPrint('MW doing scroller');
               if (positions.isEmpty) return const SizedBox.shrink();
               final minIndex = positions.map((e) => e.index).reduce((a, b) => a < b ? a : b);
               final maxIndex = positions.map((e) => e.index).reduce((a, b) => a > b ? a : b);
               final visibleFraction = (maxIndex - minIndex + 1) / filteredListings.length;
-              //debugPrint('MW minIndex=$minIndex maxIndex=$maxIndex visibleFraction=$visibleFraction');
               if (visibleFraction < 1) {
                 final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
                 final thumbTop = trackHeight * (minIndex / filteredListings.length);
-                //debugPrint('MW trackHeight=$trackHeight thumbHeight=$thumbHeight thumbTop=$thumbTop');
 
                 return Positioned(
                   right: 0,
@@ -470,7 +499,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
                       final targetIndex = (fraction * filteredListings.length).floor();
                       //              debugPrint('fraction=$fraction targetIndex=$targetIndex');
-                      debugPrint('MW GestureDetector to $firstNextListingIndex');
                       itemScrollController.scrollTo(
                         index: targetIndex,
                         duration: const Duration(milliseconds: 150),
@@ -508,7 +536,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Widget _buildSortingDropdown(BuildContext context) {
     return Container(
       key: const ValueKey('dropdown'),
-      height: 66,
+      height: 50,
       color: Theme.of(context).colorScheme.surfaceDim,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -517,7 +545,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: DropdownMenu(
               initialSelection: preferredSortingMethod,
-              width: MediaQuery.of(context).size.width * 0.6 + 40,
+              width: MediaQuery.of(context).size.width * 0.5 + 40,
               label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
               leadingIcon: const Icon(Icons.sort),
               textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
