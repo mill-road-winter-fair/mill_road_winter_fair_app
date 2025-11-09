@@ -451,9 +451,14 @@ class MapPageState extends State<MapPage> {
       position: destinationLatLng,
       icon: customMarker,
       visible: true,
-      onTap: () {
-        // Update the current location, do not await as this causes issues with using the context across async gaps
-        establishLocation();
+      onTap: () async {
+        // Acquire latest location before building bottom sheet; safe async with mounted check to avoid context-after-await issues
+        try {
+          await establishLocation();
+        } catch (e) {
+          debugPrint('Failed to establish location (group marker): $e');
+        }
+        if (!mounted) return; // Widget disposed while awaiting
 
         // Helper to normalise primaryType by stripping "Group-" prefix if present
         String normalisePrimaryType(String type) {
@@ -532,7 +537,7 @@ class MapPageState extends State<MapPage> {
                           itemBuilder: (context, index) {
                             final rel = relatedListings[index];
 
-                            // Calculate distance if current location is known
+                            // Calculate distance if current location is known (already awaited)
                             var distanceMessage = 'Distance unknown';
                             if (currentLatLng != null) {
                               int approximateDistanceMetres = asTheCrowFlies(
@@ -603,12 +608,17 @@ class MapPageState extends State<MapPage> {
       position: destinationLatLng,
       icon: customMarker,
       visible: true,
-      onTap: () {
+      onTap: () async {
         HapticFeedback.lightImpact();
-        // Update the current location, do not await as this causes issues with using the context across async gaps
-        establishLocation();
+        // Await location before computing distance & showing sheet
+        try {
+          await establishLocation();
+        } catch (e) {
+          debugPrint('Failed to establish location (specific marker): $e');
+        }
+        if (!mounted) return;
 
-        // Calculate distance if current location is known
+        // Calculate distance if current location is known (already awaited)
         var distanceMessage = 'Distance unknown';
         if (currentLatLng != null) {
           int approximateDistanceMetres = asTheCrowFlies(
