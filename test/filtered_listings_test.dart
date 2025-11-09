@@ -181,15 +181,15 @@ void main() {
       expect(filteredListingsPageState.filteredListings[1]['name'], 'glazedandconfused');
       expect(filteredListingsPageState.filteredListings[2]['name'], 'sushisquad');
 
-      // Mock sorting preference is time
+      // Mock sorting preference is time - which for Food should sort by A-Z since time isn't allowed for sorting
       preferredSortingMethod = SortingMethod.values[2];
 
       await pumpFilteredListingsPage(tester, 'Food', listings);
       filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
-      expect(filteredListingsPageState.filteredListings[0]['name'], 'glazedandconfused');
-      expect(filteredListingsPageState.filteredListings[1]['name'], 'sushisquad');
-      expect(filteredListingsPageState.filteredListings[2]['name'], 'biteclub');
+      expect(filteredListingsPageState.filteredListings[0]['name'], 'biteclub');
+      expect(filteredListingsPageState.filteredListings[1]['name'], 'glazedandconfused');
+      expect(filteredListingsPageState.filteredListings[2]['name'], 'sushisquad');
     });
 
     testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {
