@@ -1565,7 +1565,13 @@ class MapPageState extends State<MapPage> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(iconSize: 30, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: 0), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      style: ElevatedButton.styleFrom(
+                          iconSize: 30,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
+                          padding: const EdgeInsets.all(0),
+                          elevation: 3,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
@@ -1609,7 +1615,9 @@ class MapPageState extends State<MapPage> {
                                 width: 20,
                                 height: 14,
                                 decoration: BoxDecoration(
-                                  color: selectedThemeKey == 'colourBlindFriendly' ? const Color.fromRGBO(224, 129, 87, 255) : Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                  color: selectedThemeKey == 'colourBlindFriendly'
+                                      ? const Color.fromRGBO(224, 129, 87, 255)
+                                      : Theme.of(context).colorScheme.tertiary.withAlpha(50),
                                   border: Border.all(
                                     color: Theme.of(context).colorScheme.tertiary,
                                     width: 3,
