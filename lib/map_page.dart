@@ -1547,18 +1547,17 @@ class MapPageState extends State<MapPage> {
                 Align(
                   alignment: Alignment.topCenter,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: FloatingActionButton.extended(
-                      elevation: 3,
-                      heroTag: 'navigationBtn',
+                    padding: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(iconSize: 30, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: 0), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
                       },
-                      icon: const Icon(Icons.directions),
+                      icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
                       label: Text(
                         _distanceToDestination!,
-                        style: TextStyle(fontSize: 24, color: Theme.of(context).colorScheme.onPrimary),
+                        style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
                       ),
                     ),
                   ),

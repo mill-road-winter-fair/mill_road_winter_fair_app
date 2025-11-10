@@ -120,6 +120,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         }).toList();
       }
 
+      if ((preferredSortingMethod == SortingMethod.values[2] && !(widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event'))) {
+        // User prefers start time sorting but this isn't allowed, use fallback (a-z) sorting but don't change their saved preferences
+        // NB separate to the above test since we can still add the distances
+        useFallbackSorting = true;
+      }
+
       // Sort based on preference
       if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
         // Sort by name
@@ -187,6 +193,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           textColor: Theme.of(context).colorScheme.onPrimary,
           fontSize: 16,
           toastLength: Toast.LENGTH_LONG,
+          timeInSecForIosWeb: 4,  // needed as toastLength is just for Android
         );
       } else {
         setState(() {
