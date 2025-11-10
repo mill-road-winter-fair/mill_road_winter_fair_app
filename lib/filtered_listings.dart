@@ -281,234 +281,235 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       }
     }
 
-    return RefreshIndicator(
-      onRefresh: refreshListings,
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      color: Theme.of(context).colorScheme.onPrimary,
-      child: SizedBox.expand(// ensure the Stack has a defined height
-          child: LayoutBuilder(builder: (context, constraints) {
-        final trackHeight = constraints.maxHeight;
-
-        return Stack(children: [
-          ScrollablePositionedList.builder(
-            itemCount: filteredListings.length + 1,
-            itemScrollController: itemScrollController,
-            itemPositionsListener: itemPositionsListener,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Container(
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceDim,
-                  ),
-                  child: Stack(
-                    alignment: Alignment.centerRight,
+    return Column(
+      children: [
+        Container(
+          height: 52,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceDim,
+          ),
+          child: Stack(
+            alignment: Alignment.centerRight,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _isSearching ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: _isSearching
-                              ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    ConstrainedBox(
-                                      key: const ValueKey('searchBar'),
-                                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
-                                      child: SearchBar(
-                                        autoFocus: true,
-                                        elevation: const WidgetStatePropertyAll(0),
-                                        hintText: switch (widget.filterPrimaryType) {
-                                          'Food' => 'Search food & drink vendors...',
-                                          'Shopping' => 'Search market stalls...',
-                                          'Music' => 'Search musical performances...',
-                                          'Event' => 'Search events...',
-                                          'Service' => 'Search services...',
-                                          _ => 'Search listings...',
-                                        },
-                                        leading: const Icon(Icons.search),
-                                        trailing: [
-                                          IconButton(
-                                            iconSize: 20,
-                                            icon: const Icon(Icons.close),
-                                            onPressed: () {
-                                              HapticFeedback.lightImpact();
-                                              setState(() {
-                                                _isSearching = false;
-                                                _searchQuery = '';
-                                              });
-                                            },
-                                          ),
-                                        ],
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _searchQuery = value.toLowerCase();
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Expanded(child: _buildSortingDropdown(context)),
-                                    SizedBox(
-                                      height: 36,
-                                      width: 36,
-                                      child: FloatingActionButton(
-                                        key: const ValueKey('nowFab'),
-                                        heroTag: 'nowFab_${widget.filterPrimaryType}_page',
-                                        backgroundColor: Theme.of(context).colorScheme.secondary,
-                                        foregroundColor: (firstNextListingIndex >= 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
-                                        elevation: 0,
-                                        onPressed: () {
-                                          if (firstNextListingIndex > 0) {
-                                            HapticFeedback.lightImpact();
-                                            itemScrollController.scrollTo(
-                                              curve: Curves.linear,
-                                              index: firstNextListingIndex,
-                                              duration: const Duration(milliseconds: 300),
-                                              alignment: 0,
-                                            );
-                                          }
-                                        },
-                                        child: const Icon(Icons.update),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    SizedBox(
-                                      height: 36,
-                                      width: 36,
-                                      child: FloatingActionButton(
-                                        key: const ValueKey('hidePastListingsFab'),
-                                        heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
-                                        backgroundColor: (_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
-                                        foregroundColor: (_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary,
-                                        elevation: 0,
-                                        onPressed: () {
-                                          HapticFeedback.lightImpact();
-                                          setState(() {
-                                            _hidePastListings = !_hidePastListings;
-                                          });
-                                        },
-                                        child: const Icon(Icons.event_busy),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    SizedBox(
-                                      height: 36,
-                                      width: 36,
-                                      child: FloatingActionButton(
-                                        key: const ValueKey('searchFab'),
-                                        heroTag: 'searchFab_${widget.filterPrimaryType}_page',
-                                        backgroundColor: Theme.of(context).colorScheme.secondary,
-                                        foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                        elevation: 0,
-                                        onPressed: () {
-                                          HapticFeedback.lightImpact();
-                                          setState(() {
-                                            _isSearching = true;
-                                          });
-                                        },
-                                        child: const Icon(Icons.search),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                      ConstrainedBox(
+                        key: const ValueKey('searchBar'),
+                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
+                        child: SearchBar(
+                          autoFocus: true,
+                          elevation: const WidgetStatePropertyAll(0),
+                          hintText: switch (widget.filterPrimaryType) {
+                            'Food' => 'Search food & drink vendors...',
+                            'Shopping' => 'Search market stalls...',
+                            'Music' => 'Search musical performances...',
+                            'Event' => 'Search events...',
+                            'Service' => 'Search services...',
+                            _ => 'Search listings...',
+                          },
+                          leading: const Icon(Icons.search),
+                          trailing: [
+                            IconButton(
+                              iconSize: 20,
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                setState(() {
+                                  _isSearching = false;
+                                  _searchQuery = '';
+                                });
+                              },
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value.toLowerCase();
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ) : Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Expanded(child: _buildSortingDropdown(context)),
+                      SizedBox(
+                        height: 36,
+                        width: 36,
+                        child: FloatingActionButton(
+                          key: const ValueKey('nowFab'),
+                          heroTag: 'nowFab_${widget.filterPrimaryType}_page',
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                          foregroundColor: (firstNextListingIndex >= 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
+                          elevation: 0,
+                          onPressed: () {
+                            if (firstNextListingIndex > 0) {
+                              HapticFeedback.lightImpact();
+                              itemScrollController.scrollTo(
+                                curve: Curves.linear,
+                                index: firstNextListingIndex,
+                                duration: const Duration(milliseconds: 300),
+                                alignment: 0,
+                              );
+                            }
+                          },
+                          child: const Icon(Icons.update),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      SizedBox(
+                        height: 36,
+                        width: 36,
+                        child: FloatingActionButton(
+                          key: const ValueKey('hidePastListingsFab'),
+                          heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
+                          backgroundColor: (_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
+                          foregroundColor: (_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary,
+                          elevation: 0,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _hidePastListings = !_hidePastListings;
+                            });
+                          },
+                          child: const Icon(Icons.event_busy),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      SizedBox(
+                        height: 36,
+                        width: 36,
+                        child: FloatingActionButton(
+                          key: const ValueKey('searchFab'),
+                          heroTag: 'searchFab_${widget.filterPrimaryType}_page',
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                          elevation: 0,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _isSearching = true;
+                            });
+                          },
+                          child: const Icon(Icons.search),
                         ),
                       ),
                     ],
                   ),
-                );
-              } else {
-                final listing = filteredListings[index - 1]; // since index=0 is the sort/search bar
-                final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-
-                return Column(
-                  children: [
-                    (!_hidePastListings || !hasEventEnded(listing['endTime'])) ? SpecificListingInfoSheet(
-                      title: listing['displayName'],
-                      location: listing['secondaryType'],
-                      subtitle: listing['tertiaryType'],
-                      startTime: "${listing['startTime']}",
-                      endTime: "${listing['endTime']}",
-                      approxDistance: approximateDistance,
-                      phoneNumber: listing['phone'] ?? '',
-                      website: listing['website'] ?? '',
-                      email: listing['email'] ?? '',
-                      description: listing['description'] ?? '',
-                      detailsVisible: detailsVisibilityList[index - 1],
-                      onDetailsTapped: () => toggleDetailsRow(index - 1),
-                      onGetDirections: () {
-                        if (homePageState != null) {
-                          navigateToMapAndGetDirections(
-                            listing['id'],
-                            destinationLatLng,
-                            http.Client(),
-                          );
-                        }
-                      },
-                    ) : const SizedBox.shrink(),
-                    // separator except after last item
-                    if (index > 0 && index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                  ],
-                );
-              }
-            },
+                ),
+              ),
+            ],
           ),
-          ValueListenableBuilder<Iterable<ItemPosition>>(
-            valueListenable: itemPositionsListener.itemPositions,
-            builder: (context, positions, _) {
-              if (positions.isEmpty) return const SizedBox.shrink();
-              final minIndex = positions.map((e) => e.index).reduce((a, b) => a < b ? a : b);
-              final maxIndex = positions.map((e) => e.index).reduce((a, b) => a > b ? a : b);
-              final visibleFraction = (maxIndex - minIndex + 1) / filteredListings.length;
-              if (visibleFraction < 1) {
-                final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
-                final thumbTop = trackHeight * (minIndex / filteredListings.length);
-                return Positioned(
-                  right: 0,
-                  top: thumbTop, // position from top
-                  width: 6,
-                  height: thumbHeight, // set exact height
-                  child: GestureDetector(
-                    onVerticalDragUpdate: (details) {
-                      final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
-                      final targetIndex = (fraction * filteredListings.length).floor();
-                      itemScrollController.scrollTo(
-                        index: targetIndex,
-                        duration: const Duration(milliseconds: 150),
-                      );
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: refreshListings,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.onPrimary,
+            child: SizedBox.expand(// ensure the Stack has a defined height
+                child: LayoutBuilder(builder: (context, constraints) {
+                final trackHeight = constraints.maxHeight;
+                return Stack(children: [
+                  ScrollablePositionedList.builder(
+                    itemCount: filteredListings.length,
+                    itemScrollController: itemScrollController,
+                    itemPositionsListener: itemPositionsListener,
+                    itemBuilder: (context, index) {
+                        final listing = filteredListings[index]; // since index=0 is the sort/search bar
+                        final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                        final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                        LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                        return Column(
+                          children: [
+                            (!_hidePastListings || !hasEventEnded(listing['endTime'])) ? SpecificListingInfoSheet(
+                              title: listing['displayName'],
+                              location: listing['secondaryType'],
+                              subtitle: listing['tertiaryType'],
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: approximateDistance,
+                              phoneNumber: listing['phone'] ?? '',
+                              website: listing['website'] ?? '',
+                              email: listing['email'] ?? '',
+                              description: listing['description'] ?? '',
+                              detailsVisible: detailsVisibilityList[index],
+                              onDetailsTapped: () => toggleDetailsRow(index),
+                              onGetDirections: () {
+                                if (homePageState != null) {
+                                  navigateToMapAndGetDirections(
+                                    listing['id'],
+                                    destinationLatLng,
+                                    http.Client(),
+                                  );
+                                }
+                              },
+                            ) : const SizedBox.shrink(),
+                            // separator except after last item
+                            if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                          ],
+                        );
                     },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(3),
+                  ),
+                  ValueListenableBuilder<Iterable<ItemPosition>>(
+                    valueListenable: itemPositionsListener.itemPositions,
+                    builder: (context, positions, _) {
+                      if (positions.isEmpty) return const SizedBox.shrink();
+                      final minIndex = positions.map((e) => e.index).reduce((a, b) => a < b ? a : b);
+                      final maxIndex = positions.map((e) => e.index).reduce((a, b) => a > b ? a : b);
+                      final visibleFraction = (maxIndex - minIndex + 1) / filteredListings.length;
+                      if (visibleFraction < 1) {
+                        final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
+                        final thumbTop = trackHeight * (minIndex / filteredListings.length);
+                        return Positioned(
+                          right: 0,
+                          top: thumbTop, // position from top
+                          width: 6,
+                          height: thumbHeight, // set exact height
+                          child: GestureDetector(
+                            onVerticalDragUpdate: (details) {
+                              final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
+                              final targetIndex = (fraction * filteredListings.length).floor();
+                              itemScrollController.scrollTo(
+                                index: targetIndex,
+                                duration: const Duration(milliseconds: 150),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.4),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                  (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
-                  ),
-                );
-              } else {
-                return const SizedBox.shrink();
+                  )
+                  : const SizedBox.shrink(),
+                ]);
               }
-            },
-          ),
-          (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
             ),
-          )
-          : const SizedBox.shrink(),
-        ]);
-      })),
+            ),
+          ),
+        ),
+      ]
     );
   }
 
