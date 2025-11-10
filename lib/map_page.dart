@@ -493,79 +493,69 @@ class MapPageState extends State<MapPage> {
           showDragHandle: false,
           enableDrag: false,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
-          scrollControlDisabledMaxHeightRatio: 0.8,
+          isScrollControlled: true,
           useSafeArea: true,
-          builder: (BuildContext context) {
-            double screenHeight = MediaQuery.of(context).size.height;
-            // Estimate the height of a SpecificListingInfoSheet in pixels
-            double estimatedItemHeight = 135;
-            // Estimate the total height of the bottom sheet
-            double estimatedSheetHeight = relatedListings.length * estimatedItemHeight;
-            // Set the minimum size of the modalBottomSheet based on either the estimatedSheetHeight or 2/3 of the screen, whichever is lower
-            double minFraction = min((estimatedSheetHeight / screenHeight), 0.66);
-            // Set the maximum size of the modalBottomSheet based on either the estimatedSheetHeight or the whole screen, whichever is lower
-            double maxFraction = min((estimatedSheetHeight / screenHeight), 0.9);
+          builder: (context) {
             detailsVisibilityList = List<bool>.filled(relatedListings.length, false);
-
+            final groupSheetModalScrollController = ScrollController();
             return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setModalState) {
+              builder: (context, setModalState) {
                 void toggleDetailsRow(int index) {
                   HapticFeedback.lightImpact();
                   setModalState(() {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
                 }
-
-                return DraggableScrollableSheet(
-                  expand: false,
-                  initialChildSize: minFraction,
-                  minChildSize: minFraction,
-                  maxChildSize: maxFraction,
-                  builder: (context, scrollController) {
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: constraints.maxHeight * 0.95,
+                      ),
                       child: Scrollbar(
-                        controller: scrollController,
-                        thumbVisibility: false,
+                        controller: groupSheetModalScrollController,
+                        thumbVisibility: Platform.isIOS ? false : true,
                         thickness: 4,
                         radius: const Radius.circular(8),
-                        child: ListView.separated(
-                          controller: scrollController,
-                          separatorBuilder: (BuildContext context, int index) => Divider(color: Theme.of(context).colorScheme.surfaceDim),
-                          itemCount: relatedListings.length,
-                          itemBuilder: (context, index) {
-                            final rel = relatedListings[index];
-                            int approximateDistanceMetres = asTheCrowFlies(
-                              currentLatLng!,
-                              stringToLatLng(rel['latLng']),
-                            );
-
-                            if (rel['primaryType'].startsWith("Group")) {
-                              return GroupListingInfoSheet(
-                                title: rel['displayName'],
-                                categories: "${rel['tertiaryType']}",
-                                startTime: "${listing['startTime']}",
-                                endTime: "${listing['endTime']}",
-                                approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                        child: SingleChildScrollView(
+                          controller: groupSheetModalScrollController,
+                          child: ListView.separated(
+                            separatorBuilder: (BuildContext context, int index) => Divider(color: Theme.of(context).colorScheme.surfaceDim),
+                            itemCount: relatedListings.length,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              final rel = relatedListings[index];
+                              int approximateDistanceMetres = asTheCrowFlies(
+                                currentLatLng!,
+                                stringToLatLng(rel['latLng']),
                               );
-                            } else {
-                              return SpecificListingInfoSheet(
-                                title: rel['displayName'],
-                                location: '',
-                                subtitle: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
-                                startTime: '',
-                                endTime: '',
-                                approxDistance: '',
-                                phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                website: (rel['website'] != null) ? rel['website'] : '',
-                                email: (rel['email'] != null) ? rel['email'] : '',
-                                description: (rel['description'] != null) ? rel['description'] : '',
-                                detailsVisible: detailsVisibilityList[index],
-                                onDetailsTapped: () => toggleDetailsRow(index),
-                                onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                              );
-                            }
-                          },
+                              if (rel['primaryType'].startsWith("Group")) {
+                                return GroupListingInfoSheet(
+                                  title: rel['displayName'],
+                                  categories: "${rel['tertiaryType']}",
+                                  startTime: "${listing['startTime']}",
+                                  endTime: "${listing['endTime']}",
+                                  approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                                );
+                              } else {
+                                return SpecificListingInfoSheet(
+                                  title: rel['displayName'],
+                                  location: '',
+                                  subtitle: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
+                                  startTime: '',
+                                  endTime: '',
+                                  approxDistance: '',
+                                  phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                  website: (rel['website'] != null) ? rel['website'] : '',
+                                  email: (rel['email'] != null) ? rel['email'] : '',
+                                  description: (rel['description'] != null) ? rel['description'] : '',
+                                  detailsVisible: detailsVisibilityList[index],
+                                  onDetailsTapped: () => toggleDetailsRow(index),
+                                  onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                );
+                              }
+                            },
+                          ),
                         ),
                       ),
                     );
@@ -624,7 +614,7 @@ class MapPageState extends State<MapPage> {
                   ),
                   child: Scrollbar(
                     controller: specificSheetModalScrollController,
-                    thumbVisibility: false,
+                    thumbVisibility: Platform.isIOS ? false : true,
                     thickness: 4,
                     radius: const Radius.circular(8),
                     child: SingleChildScrollView(
