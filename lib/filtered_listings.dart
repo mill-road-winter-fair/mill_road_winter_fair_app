@@ -297,7 +297,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Container(
-                  height: 66,
+                  height: 52,
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surfaceDim,
                   ),
@@ -314,7 +314,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   children: [
                                     ConstrainedBox(
                                       key: const ValueKey('searchBar'),
-                                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
+                                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
                                       child: SearchBar(
                                         autoFocus: true,
                                         elevation: const WidgetStatePropertyAll(0),
@@ -329,6 +329,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         leading: const Icon(Icons.search),
                                         trailing: [
                                           IconButton(
+                                            iconSize: 20,
                                             icon: const Icon(Icons.close),
                                             onPressed: () {
                                               HapticFeedback.lightImpact();
@@ -353,8 +354,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   children: [
                                     Expanded(child: _buildSortingDropdown(context)),
                                     SizedBox(
-                                      height: 44,
-                                      width: 44,
+                                      height: 36,
+                                      width: 36,
                                       child: FloatingActionButton(
                                         key: const ValueKey('nowFab'),
                                         heroTag: 'nowFab_${widget.filterPrimaryType}_page',
@@ -377,8 +378,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     ),
                                     const SizedBox(width: 4),
                                     SizedBox(
-                                      height: 44,
-                                      width: 44,
+                                      height: 36,
+                                      width: 36,
                                       child: FloatingActionButton(
                                         key: const ValueKey('hidePastListingsFab'),
                                         heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
@@ -396,8 +397,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     ),
                                     const SizedBox(width: 4),
                                     SizedBox(
-                                      height: 44,
-                                      width: 44,
+                                      height: 36,
+                                      width: 36,
                                       child: FloatingActionButton(
                                         key: const ValueKey('searchFab'),
                                         heroTag: 'searchFab_${widget.filterPrimaryType}_page',
@@ -514,19 +515,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Widget _buildSortingDropdown(BuildContext context) {
     return Container(
       key: const ValueKey('dropdown'),
-      height: 50,
+      height: 36,
       color: Theme.of(context).colorScheme.surfaceDim,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 2),
             child: DropdownMenu(
               initialSelection: preferredSortingMethod,
-              width: MediaQuery.of(context).size.width * 0.5 + 40,
+              width: MediaQuery.of(context).size.width * 0.45 + 40,
               label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
               leadingIcon: const Icon(Icons.sort),
-              textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+              textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
                 fillColor: Theme.of(context).colorScheme.secondary,
@@ -534,6 +535,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 suffixIconColor: Theme.of(context).colorScheme.onSecondary,
                 prefixIconColor: Theme.of(context).colorScheme.onSecondary,
                 labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                isDense: true,
+                visualDensity: const VisualDensity(horizontal: -4),
+                contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 6),
+                constraints: const BoxConstraints(maxHeight: 36),
               ),
               dropdownMenuEntries: [
                 if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
