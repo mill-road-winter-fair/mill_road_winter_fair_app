@@ -517,26 +517,27 @@ class MapPageState extends State<MapPage> {
                         thumbVisibility: Platform.isIOS ? false : true,
                         thickness: 4,
                         radius: const Radius.circular(8),
-                        child: ListView.separated(
-                            separatorBuilder: (BuildContext context, int index) => Divider(color: Theme.of(context).colorScheme.surfaceDim),
-                            itemCount: relatedListings.length,
-                            shrinkWrap: true,
-                            itemBuilder: (context, index) {
-                              final rel = relatedListings[index];
-                              int approximateDistanceMetres = asTheCrowFlies(
-                                currentLatLng!,
-                                stringToLatLng(rel['latLng']),
+                        child: ListView.builder(
+                          itemCount: relatedListings.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            final rel = relatedListings[index];
+                            int approximateDistanceMetres = asTheCrowFlies(
+                              currentLatLng!,
+                              stringToLatLng(rel['latLng']),
+                            );
+                            if (rel['primaryType'].startsWith("Group")) {
+                              return GroupListingInfoSheet(
+                                title: rel['displayName'],
+                                categories: "${rel['tertiaryType']}",
+                                startTime: "${listing['startTime']}",
+                                endTime: "${listing['endTime']}",
+                                approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
                               );
-                              if (rel['primaryType'].startsWith("Group")) {
-                                return GroupListingInfoSheet(
-                                  title: rel['displayName'],
-                                  categories: "${rel['tertiaryType']}",
-                                  startTime: "${listing['startTime']}",
-                                  endTime: "${listing['endTime']}",
-                                  approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-                                );
-                              } else {
-                                return SpecificListingInfoSheet(
+                            } else {
+                              return Column(
+                                children: [
+                                  SpecificListingInfoSheet(
                                   title: rel['displayName'],
                                   location: '',
                                   subtitle: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
@@ -550,10 +551,13 @@ class MapPageState extends State<MapPage> {
                                   detailsVisible: detailsVisibilityList[index],
                                   onDetailsTapped: () => toggleDetailsRow(index),
                                   onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                );
-                              }
-                            },
-                          ),
+                                ),
+                                if (index != relatedListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                ],
+                              );
+                            }
+                          },
+                        ),
                       ),
                     );
                   },
