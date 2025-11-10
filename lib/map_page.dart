@@ -961,6 +961,7 @@ class MapPageState extends State<MapPage> {
         textColor: Theme.of(context).colorScheme.onPrimary,
         fontSize: 16,
         toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
       );
     }
 
