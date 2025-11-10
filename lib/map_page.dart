@@ -454,7 +454,8 @@ class MapPageState extends State<MapPage> {
       onTap: () async {
         // Acquire latest location before building bottom sheet; skip await under tests to keep synchronous behavior
         if (onTest) {
-          establishLocation(); // fire-and-forget preserve old test expectations
+          // Fire-and-forget to maintain synchronous test behavior
+          establishLocation();
         } else {
           try {
             await establishLocation();
@@ -546,7 +547,7 @@ class MapPageState extends State<MapPage> {
                             if (currentLatLng != null) {
                               int approximateDistanceMetres = asTheCrowFlies(
                                 currentLatLng!,
-                                stringToLatLng(rel['latLng']),
+                                destinationLatLng,
                               );
                               distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
                             }
@@ -631,7 +632,7 @@ class MapPageState extends State<MapPage> {
         if (currentLatLng != null) {
           int approximateDistanceMetres = asTheCrowFlies(
             currentLatLng!,
-            stringToLatLng(listing['latLng']),
+            destinationLatLng,
           );
           distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
         }
