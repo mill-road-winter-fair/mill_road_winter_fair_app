@@ -61,26 +61,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       detailsVisibilityList = List<bool>.filled(filteredListings.length, false);
     });
     if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
-/*    if (preferredSortingMethod == SortingMethod.values[2] && !useFallbackSorting) {
-      firstNextListingIndex = findFirstNextListingIndex(filteredListings);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Runs after the first layout and paint
-        if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
-          itemScrollController.scrollTo(
-            curve: Curves.linear,
-            index: (SharedListingsPageConfig.theFilterPrimaryTypeToggle == widget.filterPrimaryType) ? firstNextListingIndex : 0,
-            duration: const Duration(milliseconds: 300),
-            alignment: 0,
-          );
-        }
-      });
-    }
-    if (SharedListingsPageConfig.theFilterPrimaryTypeToggle == widget.filterPrimaryType) {
-      SharedListingsPageConfig.theFilterPrimaryTypeToggle = '';
-    } else {
-      SharedListingsPageConfig.theFilterPrimaryTypeToggle = widget.filterPrimaryType;
-    }
- */  }
+  }
 
   @override
   void dispose() {
@@ -129,7 +110,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       }
 
       if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) && 
-          locationServicesEnabled == true && 
+          locationServicesEnabled == true &&
           useFallbackSorting == false) {
         // Add distance to each listing
         allListings = allListings.map((listing) {
@@ -294,7 +275,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Step 4: If sorted by start date, find the first listing not to have ended
     firstNextListingIndex = -1;
     if (preferredSortingMethod == SortingMethod.values[2])
-    { 
+    {
       if (filteredListings.isNotEmpty) {
          firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       }
@@ -378,7 +359,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         key: const ValueKey('nowFab'),
                                         heroTag: 'nowFab_${widget.filterPrimaryType}_page',
                                         backgroundColor: Theme.of(context).colorScheme.secondary,
-                                        foregroundColor: (firstNextListingIndex > 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
+                                        foregroundColor: (firstNextListingIndex >= 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
                                         elevation: 0,
                                         onPressed: () {
                                           if (firstNextListingIndex > 0) {
@@ -454,10 +435,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       startTime: "${listing['startTime']}",
                       endTime: "${listing['endTime']}",
                       approxDistance: approximateDistance,
-                      phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                      website: (listing['website'] != null) ? listing['website'] : '',
-                      email: (listing['email'] != null) ? listing['email'] : '',
-                      description: (listing['description'] != null) ? listing['description'] : '',
+                      phoneNumber: listing['phone'] ?? '',
+                      website: listing['website'] ?? '',
+                      email: listing['email'] ?? '',
+                      description: listing['description'] ?? '',
                       detailsVisible: detailsVisibilityList[index - 1],
                       onDetailsTapped: () => toggleDetailsRow(index - 1),
                       onGetDirections: () {
@@ -487,7 +468,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               if (visibleFraction < 1) {
                 final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
                 final thumbTop = trackHeight * (minIndex / filteredListings.length);
-
                 return Positioned(
                   right: 0,
                   top: thumbTop, // position from top
@@ -514,18 +494,18 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 return const SizedBox.shrink();
               }
             },
-          ),           (filteredListings.isEmpty)
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink()
+          ),
+          (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          )
+          : const SizedBox.shrink(),
         ]);
       })),
     );
