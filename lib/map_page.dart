@@ -619,6 +619,7 @@ class MapPageState extends State<MapPage> {
                     thickness: 4,
                     radius: const Radius.circular(8),
                     child: SingleChildScrollView(
+                      controller: specificSheetModalScrollController,
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
                         child: SpecificListingInfoSheet(
