@@ -963,6 +963,17 @@ class MapPageState extends State<MapPage> {
     // Reset the distance to destination
     _distanceToDestination = null;
 
+    // Remove any markers which are not supposed to be shown from the markers list
+    for (var marker in markers.values.toList()) {
+      final listing = listings.firstWhere(
+        (l) => l['id'].toString() == marker.markerId.value,
+        orElse: () => {},
+      );
+      if (listing.isEmpty || listing['visibleOnMap'] != 'TRUE') {
+        markers.remove(marker.markerId);
+      }
+    }
+
     // Remove any simple marker shown
     markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
 
