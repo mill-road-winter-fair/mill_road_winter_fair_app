@@ -372,9 +372,25 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                       const SizedBox(height: 20),
                       Row(
                         children: [
+                          Icon(Icons.update, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Tap this button to jump to the\ncurrent time in the list", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Icon(Icons.event_busy, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("This button hides all the listings\nthat have finished", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
                           Icon(Icons.search, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Tap the search icon and type to\nfind specific listings", style: bodyStyle),
+                          Text("Tap the search button and type\nto find specific listings", style: bodyStyle),
                         ],
                       ),
                     ],

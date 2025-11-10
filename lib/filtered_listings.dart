@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
@@ -15,6 +15,11 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Store the state of each listings page in a shared class
+class SharedListingsPageConfig {
+  static String theFilterPrimaryTypeToggle = ''; // which tab we're on so we can see if we've switched
+}
 
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
@@ -35,22 +40,29 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool isRefreshing = false;
   bool useFallbackSorting = false;
   final ScrollController _scrollController = ScrollController();
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final itemPositionsListener = ItemPositionsListener.create();
   bool _isSearching = false;
+  bool _hidePastListings = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<bool> detailsVisibilityList = List<bool>.filled(500, false);  // start with plenty enough to load all listings
-
+  int firstNextListingIndex = -1;  // the first listing that hasn't passed its end date, when sorted by start date
+  
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
-  }
+}
 
   void onTabVisible() {
     // This is called when user switches to this tab
     setState(() {
-      detailsVisibilityList = List<bool>.filled(filteredListings.length, false);
+      detailsVisibilityList = List<bool>.filled(500, false);
+      _searchQuery = '';
+      _isSearching = false;
     });
+    if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
   }
 
   @override
@@ -99,7 +111,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         useFallbackSorting = false;
       }
 
-      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) &&
+      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) && 
           locationServicesEnabled == true &&
           useFallbackSorting == false) {
         // Add distance to each listing
@@ -189,6 +201,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         setState(() {
           preferredSortingMethod = selectedValue;
         });
+        if (preferredSortingMethod == SortingMethod.values[2]) {
+          firstNextListingIndex = findFirstNextListingIndex(filteredListings);
+          if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
+            itemScrollController.scrollTo(
+              curve: Curves.linear,
+              index: firstNextListingIndex,
+              duration: const Duration(milliseconds: 300),
+              alignment: 0,
+            );
+          }
+        }
         _saveSettings();
       }
     }
@@ -205,6 +228,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     setState(() {
       detailsVisibilityList[index] = !detailsVisibilityList[index];
     });
+  }
+
+  int findFirstNextListingIndex(List filteredListings) {
+    for (int i = 0; i < filteredListings.length; i++) {
+      if (!hasEventEnded(filteredListings[i]['endTime'])) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   @override
@@ -249,183 +281,265 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
 
-    return RefreshIndicator(
-      onRefresh: refreshListings,
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      color: Theme.of(context).colorScheme.onPrimary,
-      child: Scrollbar(
-        controller: _scrollController,
-        thumbVisibility: Platform.isIOS ? false : true,
-        // iOS has its own scrollbar style
-        thickness: 4,
-        radius: const Radius.circular(8),
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            // Header area, which scrolls away
-            SliverToBoxAdapter(
-              child: Container(
-                height: 66,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceDim,
-                ),
-                child: Stack(
-                  alignment: Alignment.centerRight,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: _isSearching
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ConstrainedBox(
-                                    key: const ValueKey('searchBar'),
-                                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16),
-                                    child: SearchBar(
-                                      autoFocus: true,
-                                      elevation: const WidgetStatePropertyAll(0),
-                                      hintText: switch (widget.filterPrimaryType) {
-                                        'Food' => 'Search food & drink vendors...',
-                                        'Shopping' => 'Search market stalls...',
-                                        'Music' => 'Search musical performances...',
-                                        'Event' => 'Search events...',
-                                        'Service' => 'Search services...',
-                                        _ => 'Search listings...',
-                                      },
-                                      leading: const Icon(Icons.search),
-                                      trailing: [
-                                        IconButton(
-                                          icon: const Icon(Icons.close),
-                                          onPressed: () {
-                                            HapticFeedback.lightImpact();
-                                            setState(() {
-                                              _isSearching = false;
-                                              _searchQuery = '';
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _searchQuery = value.toLowerCase();
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  if (!_isSearching) Expanded(child: _buildSortingDropdown(context)),
-                                  SizedBox(
-                                    height: 56,
-                                    width: 56,
-                                    child: FloatingActionButton(
-                                      key: const ValueKey('searchFab'),
-                                      heroTag: 'searchFab_${widget.filterPrimaryType}_page',
-                                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                                      elevation: 0,
-                                      onPressed: () {
-                                        HapticFeedback.lightImpact();
-                                        setState(() {
-                                          _isSearching = true;
-                                        });
-                                      },
-                                      child: const Icon(Icons.search),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    // Step 4: If sorted by start date, find the first listing not to have ended
+    firstNextListingIndex = -1;
+    if (preferredSortingMethod == SortingMethod.values[2])
+    {
+      if (filteredListings.isNotEmpty) {
+         firstNextListingIndex = findFirstNextListingIndex(filteredListings);
+      }
+    }
 
-            // Listings
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final listing = filteredListings[index];
-                  final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                  final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                  LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-
-                  return Column(
+    return Column(
+      children: [
+        Container(
+          height: 52,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceDim,
+          ),
+          child: Stack(
+            alignment: Alignment.centerRight,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _isSearching ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SpecificListingInfoSheet(
-                        title: listing['displayName'],
-                        location: listing['secondaryType'],
-                        subtitle: listing['tertiaryType'],
-                        startTime: "${listing['startTime']}",
-                        endTime: "${listing['endTime']}",
-                        approxDistance: approximateDistance,
-                        phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                        website: (listing['website'] != null) ? listing['website'] : '',
-                        email: (listing['email'] != null) ? listing['email'] : '',
-                        description: (listing['description'] != null) ? listing['description'] : '',
-                        detailsVisible: detailsVisibilityList[index],
-                        onDetailsTapped: () => toggleDetailsRow(index),
-                        onGetDirections: () {
-                          if (homePageState != null) {
-                            navigateToMapAndGetDirections(
-                              listing['id'],
-                              destinationLatLng,
-                              http.Client(),
-                            );
-                          }
-                        },
+                      ConstrainedBox(
+                        key: const ValueKey('searchBar'),
+                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
+                        child: SearchBar(
+                          autoFocus: true,
+                          elevation: const WidgetStatePropertyAll(0),
+                          hintText: switch (widget.filterPrimaryType) {
+                            'Food' => 'Search food & drink vendors...',
+                            'Shopping' => 'Search market stalls...',
+                            'Music' => 'Search musical performances...',
+                            'Event' => 'Search events...',
+                            'Service' => 'Search services...',
+                            _ => 'Search listings...',
+                          },
+                          leading: const Icon(Icons.search),
+                          trailing: [
+                            IconButton(
+                              iconSize: 20,
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                setState(() {
+                                  _isSearching = false;
+                                  _searchQuery = '';
+                                });
+                              },
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value.toLowerCase();
+                            });
+                          },
+                        ),
                       ),
-                      // separator except after last item
-                      if (index != filteredListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                     ],
-                  );
-                },
-                childCount: filteredListings.length,
-              ),
-            ),
-
-            if (filteredListings.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
+                  ) : Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Expanded(child: _buildSortingDropdown(context)),
+                      SizedBox(
+                        height: 36,
+                        width: 36,
+                        child: FloatingActionButton(
+                          key: const ValueKey('nowFab'),
+                          heroTag: 'nowFab_${widget.filterPrimaryType}_page',
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                          foregroundColor: (isItEventDay() && firstNextListingIndex >= 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
+                          elevation: 0,
+                          onPressed: () {
+                            if (isItEventDay() && firstNextListingIndex >= 0) {
+                              HapticFeedback.lightImpact();
+                              itemScrollController.scrollTo(
+                                curve: Curves.linear,
+                                index: firstNextListingIndex,
+                                duration: const Duration(milliseconds: 300),
+                                alignment: 0,
+                              );
+                            }
+                          },
+                          child: const Icon(Icons.update),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      SizedBox(
+                        height: 36,
+                        width: 36,
+                        child: FloatingActionButton(
+                          key: const ValueKey('hidePastListingsFab'),
+                          heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
+                          backgroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary) : Theme.of(context).colorScheme.secondary,
+                          foregroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.surfaceDim,
+                          elevation: 0,
+                          onPressed: () {
+                            if (isItEventDay()) {
+                              HapticFeedback.lightImpact();
+                              setState(() {
+                                _hidePastListings = !_hidePastListings;
+                              });
+                            }
+                          },
+                          child: const Icon(Icons.event_busy),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      SizedBox(
+                        height: 36,
+                        width: 36,
+                        child: FloatingActionButton(
+                          key: const ValueKey('searchFab'),
+                          heroTag: 'searchFab_${widget.filterPrimaryType}_page',
+                          backgroundColor: Theme.of(context).colorScheme.secondary,
+                          foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                          elevation: 0,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _isSearching = true;
+                            });
+                          },
+                          child: const Icon(Icons.search),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-          ],
+            ],
+          ),
         ),
-      ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: refreshListings,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.onPrimary,
+            child: SizedBox.expand(// ensure the Stack has a defined height
+                child: LayoutBuilder(builder: (context, constraints) {
+                final trackHeight = constraints.maxHeight;
+                return Stack(children: [
+                  ScrollablePositionedList.builder(
+                    itemCount: filteredListings.length,
+                    itemScrollController: itemScrollController,
+                    itemPositionsListener: itemPositionsListener,
+                    itemBuilder: (context, index) {
+                        final listing = filteredListings[index]; // since index=0 is the sort/search bar
+                        final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                        final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                        LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                        return Column(
+                          children: [
+                            (!_hidePastListings || !hasEventEnded(listing['endTime'])) ? SpecificListingInfoSheet(
+                              title: listing['displayName'],
+                              location: listing['secondaryType'],
+                              subtitle: listing['tertiaryType'],
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: approximateDistance,
+                              phoneNumber: listing['phone'] ?? '',
+                              website: listing['website'] ?? '',
+                              email: listing['email'] ?? '',
+                              description: listing['description'] ?? '',
+                              detailsVisible: detailsVisibilityList[index],
+                              onDetailsTapped: () => toggleDetailsRow(index),
+                              onGetDirections: () {
+                                if (homePageState != null) {
+                                  navigateToMapAndGetDirections(
+                                    listing['id'],
+                                    destinationLatLng,
+                                    http.Client(),
+                                  );
+                                }
+                              },
+                            ) : const SizedBox.shrink(),
+                            // separator except after last item
+                            if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                          ],
+                        );
+                    },
+                  ),
+                  ValueListenableBuilder<Iterable<ItemPosition>>(
+                    valueListenable: itemPositionsListener.itemPositions,
+                    builder: (context, positions, _) {
+                      if (positions.isEmpty) return const SizedBox.shrink();
+                      final minIndex = positions.map((e) => e.index).reduce((a, b) => a < b ? a : b);
+                      final maxIndex = positions.map((e) => e.index).reduce((a, b) => a > b ? a : b);
+                      final visibleFraction = (maxIndex - minIndex + 1) / filteredListings.length;
+                      if (visibleFraction < 1) {
+                        final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
+                        final thumbTop = trackHeight * (minIndex / filteredListings.length);
+                        return Positioned(
+                          right: 0,
+                          top: thumbTop, // position from top
+                          width: 6,
+                          height: thumbHeight, // set exact height
+                          child: GestureDetector(
+                            onVerticalDragUpdate: (details) {
+                              final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
+                              final targetIndex = (fraction * filteredListings.length).floor();
+                              itemScrollController.scrollTo(
+                                index: targetIndex,
+                                duration: const Duration(milliseconds: 150),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.4),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                  (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  )
+                  : const SizedBox.shrink(),
+                ]);
+              }
+            ),
+            ),
+          ),
+        ),
+      ]
     );
   }
 
   Widget _buildSortingDropdown(BuildContext context) {
     return Container(
       key: const ValueKey('dropdown'),
-      height: 66,
+      height: 36,
       color: Theme.of(context).colorScheme.surfaceDim,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 2),
             child: DropdownMenu(
-              initialSelection: useFallbackSorting ? SortingMethod.values[0] : preferredSortingMethod,
-              width: MediaQuery.of(context).size.width * 0.6 + 40,
+              initialSelection: preferredSortingMethod,
+              width: MediaQuery.of(context).size.width * 0.45 + 40,
               label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
               leadingIcon: const Icon(Icons.sort),
-              textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+              textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
                 fillColor: Theme.of(context).colorScheme.secondary,
@@ -433,6 +547,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 suffixIconColor: Theme.of(context).colorScheme.onSecondary,
                 prefixIconColor: Theme.of(context).colorScheme.onSecondary,
                 labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                isDense: true,
+                visualDensity: const VisualDensity(horizontal: -4),
+                contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 6),
+                constraints: const BoxConstraints(maxHeight: 36),
               ),
               dropdownMenuEntries: [
                 if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
@@ -466,3 +584,5 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     );
   }
 }
+
+
