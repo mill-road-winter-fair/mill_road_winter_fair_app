@@ -519,6 +519,7 @@ class MapPageState extends State<MapPage> {
                         child: ListView.builder(
                           itemCount: relatedListings.length,
                           shrinkWrap: true,
+                          controller: groupSheetModalScrollController,
                           itemBuilder: (context, index) {
                             final rel = relatedListings[index];
                             int approximateDistanceMetres = asTheCrowFlies(
