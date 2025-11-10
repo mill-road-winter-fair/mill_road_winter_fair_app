@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// Hardcoded fair date for 2025; change this today's date for testing
+final fairDate = DateTime(2025, 12, 6);
+
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime) {
-  // Hardcoded fair date for 2025, change this today's date for testing
-  final fairDate = DateTime(2025, 12, 6);
-
   try {
     final parts = endTime.split(':');
     final endHour = int.parse(parts[0]);
@@ -26,6 +26,12 @@ bool hasEventEnded(String endTime) {
     return false; // default to not ended if parsing fails
   }
 }
+
+// Function to determine if the event is today
+bool isItEventDay() {
+  return DateUtils.isSameDay(fairDate, DateTime.now());
+}
+
 
 // Identifier and function for determining if the event has been marked as cancelled
 const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow

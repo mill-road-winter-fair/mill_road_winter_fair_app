@@ -354,10 +354,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           key: const ValueKey('nowFab'),
                           heroTag: 'nowFab_${widget.filterPrimaryType}_page',
                           backgroundColor: Theme.of(context).colorScheme.secondary,
-                          foregroundColor: (firstNextListingIndex >= 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
+                          foregroundColor: (isItEventDay() && firstNextListingIndex >= 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
                           elevation: 0,
                           onPressed: () {
-                            if (firstNextListingIndex > 0) {
+                            if (isItEventDay() && firstNextListingIndex >= 0) {
                               HapticFeedback.lightImpact();
                               itemScrollController.scrollTo(
                                 curve: Curves.linear,
@@ -377,14 +377,16 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         child: FloatingActionButton(
                           key: const ValueKey('hidePastListingsFab'),
                           heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
-                          backgroundColor: (_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
-                          foregroundColor: (_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary,
+                          backgroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary) : Theme.of(context).colorScheme.secondary,
+                          foregroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.surfaceDim,
                           elevation: 0,
                           onPressed: () {
-                            HapticFeedback.lightImpact();
-                            setState(() {
-                              _hidePastListings = !_hidePastListings;
-                            });
+                            if (isItEventDay()) {
+                              HapticFeedback.lightImpact();
+                              setState(() {
+                                _hidePastListings = !_hidePastListings;
+                              });
+                            }
                           },
                           child: const Icon(Icons.event_busy),
                         ),
