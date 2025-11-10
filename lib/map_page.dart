@@ -487,58 +487,45 @@ class MapPageState extends State<MapPage> {
           return a['name'].compareTo(b['name']);
         });
 
+        final groupSheetModalScrollController = ScrollController();
         showModalBottomSheet(
           context: context,
           showDragHandle: false,
           enableDrag: false,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
-          scrollControlDisabledMaxHeightRatio: 0.8,
+          isScrollControlled: true,
           useSafeArea: true,
-          builder: (BuildContext context) {
-            double screenHeight = MediaQuery.of(context).size.height;
-            // Estimate the height of a SpecificListingInfoSheet in pixels
-            double estimatedItemHeight = 135;
-            // Estimate the total height of the bottom sheet
-            double estimatedSheetHeight = relatedListings.length * estimatedItemHeight;
-            // Set the minimum size of the modalBottomSheet based on either the estimatedSheetHeight or 2/3 of the screen, whichever is lower
-            double minFraction = min((estimatedSheetHeight / screenHeight), 0.66);
-            // Set the maximum size of the modalBottomSheet based on either the estimatedSheetHeight or the whole screen, whichever is lower
-            double maxFraction = min((estimatedSheetHeight / screenHeight), 0.9);
+          builder: (context) {
             detailsVisibilityList = List<bool>.filled(relatedListings.length, false);
-
             return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setModalState) {
+              builder: (context, setModalState) {
                 void toggleDetailsRow(int index) {
                   HapticFeedback.lightImpact();
                   setModalState(() {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
                 }
-
-                return DraggableScrollableSheet(
-                  expand: false,
-                  initialChildSize: minFraction,
-                  minChildSize: minFraction,
-                  maxChildSize: maxFraction,
-                  builder: (context, scrollController) {
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: constraints.maxHeight * 0.95,
+                      ),
                       child: Scrollbar(
-                        controller: scrollController,
-                        thumbVisibility: false,
+                        controller: groupSheetModalScrollController,
+                        thumbVisibility: Platform.isIOS ? false : true,
                         thickness: 4,
                         radius: const Radius.circular(8),
-                        child: ListView.separated(
-                          controller: scrollController,
-                          separatorBuilder: (BuildContext context, int index) => Divider(color: Theme.of(context).colorScheme.surfaceDim),
+                        child: ListView.builder(
                           itemCount: relatedListings.length,
+                          shrinkWrap: true,
+                          controller: groupSheetModalScrollController,
                           itemBuilder: (context, index) {
                             final rel = relatedListings[index];
                             int approximateDistanceMetres = asTheCrowFlies(
                               currentLatLng!,
                               stringToLatLng(rel['latLng']),
                             );
-
                             if (rel['primaryType'].startsWith("Group")) {
                               return GroupListingInfoSheet(
                                 title: rel['displayName'],
@@ -548,20 +535,25 @@ class MapPageState extends State<MapPage> {
                                 approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
                               );
                             } else {
-                              return SpecificListingInfoSheet(
-                                title: rel['displayName'],
-                                location: '',
-                                subtitle: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
-                                startTime: '',
-                                endTime: '',
-                                approxDistance: '',
-                                phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                website: (rel['website'] != null) ? rel['website'] : '',
-                                email: (rel['email'] != null) ? rel['email'] : '',
-                                description: (rel['description'] != null) ? rel['description'] : '',
-                                detailsVisible: detailsVisibilityList[index],
-                                onDetailsTapped: () => toggleDetailsRow(index),
-                                onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                              return Column(
+                                children: [
+                                  SpecificListingInfoSheet(
+                                  title: rel['displayName'],
+                                  location: '',
+                                  subtitle: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
+                                  startTime: '',
+                                  endTime: '',
+                                  approxDistance: '',
+                                  phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                  website: (rel['website'] != null) ? rel['website'] : '',
+                                  email: (rel['email'] != null) ? rel['email'] : '',
+                                  description: (rel['description'] != null) ? rel['description'] : '',
+                                  detailsVisible: detailsVisibilityList[index],
+                                  onDetailsTapped: () => toggleDetailsRow(index),
+                                  onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                ),
+                                if (index != relatedListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                ],
                               );
                             }
                           },
@@ -614,50 +606,45 @@ class MapPageState extends State<MapPage> {
           isScrollControlled: true,
           useSafeArea: true,
           builder: (BuildContext context) {
-            return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setModalState) {
-                return DraggableScrollableSheet(
-                  expand: false,
-                  initialChildSize: 0.33,
-                  minChildSize: 0.33,
-                  maxChildSize: 0.66,
-                  builder: (context, specificSheetModalScrollController) {
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                      child: Scrollbar(
-                        controller: specificSheetModalScrollController,
-                        thumbVisibility: false,
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: ListView(
-                          controller: specificSheetModalScrollController,
-                          padding: EdgeInsets.zero,
-                          children: [
-                            SpecificListingInfoSheet(
-                              title: listing['displayName'],
-                              location: listing['secondaryType'],
-                              subtitle: listing['tertiaryType'],
-                              startTime: "${listing['startTime']}",
-                              endTime: "${listing['endTime']}",
-                              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                              website: (listing['website'] != null) ? listing['website'] : '',
-                              email: (listing['email'] != null) ? listing['email'] : '',
-                              description: (listing['description'] != null) ? listing['description'] : '',
-                              detailsVisible: true,
-                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
-                            ),
-                          ],
+            final specificSheetModalScrollController = ScrollController();
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: constraints.maxHeight * 0.95,
+                  ),
+                  child: Scrollbar(
+                    controller: specificSheetModalScrollController,
+                    thumbVisibility: Platform.isIOS ? false : true,
+                    thickness: 4,
+                    radius: const Radius.circular(8),
+                    child: SingleChildScrollView(
+                      controller: specificSheetModalScrollController,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                        child: SpecificListingInfoSheet(
+                          title: listing['displayName'],
+                          location: listing['secondaryType'],
+                          subtitle: listing['tertiaryType'],
+                          startTime: "${listing['startTime']}",
+                          endTime: "${listing['endTime']}",
+                          approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                          phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                          website: (listing['website'] != null) ? listing['website'] : '',
+                          email: (listing['email'] != null) ? listing['email'] : '',
+                          description: (listing['description'] != null) ? listing['description'] : '',
+                          detailsVisible: true,
+                          onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
                         ),
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 );
-              },
+              }
             );
           },
         );
-      },
+      }
     );
 
     setState(() {
