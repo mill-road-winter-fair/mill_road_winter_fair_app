@@ -488,6 +488,7 @@ class MapPageState extends State<MapPage> {
           return a['name'].compareTo(b['name']);
         });
 
+        final groupSheetModalScrollController = ScrollController();
         showModalBottomSheet(
           context: context,
           showDragHandle: false,
@@ -497,7 +498,6 @@ class MapPageState extends State<MapPage> {
           useSafeArea: true,
           builder: (context) {
             detailsVisibilityList = List<bool>.filled(relatedListings.length, false);
-            final groupSheetModalScrollController = ScrollController();
             return StatefulBuilder(
               builder: (context, setModalState) {
                 void toggleDetailsRow(int index) {
@@ -517,9 +517,7 @@ class MapPageState extends State<MapPage> {
                         thumbVisibility: Platform.isIOS ? false : true,
                         thickness: 4,
                         radius: const Radius.circular(8),
-                        child: SingleChildScrollView(
-                          controller: groupSheetModalScrollController,
-                          child: ListView.separated(
+                        child: ListView.separated(
                             separatorBuilder: (BuildContext context, int index) => Divider(color: Theme.of(context).colorScheme.surfaceDim),
                             itemCount: relatedListings.length,
                             shrinkWrap: true,
@@ -556,7 +554,6 @@ class MapPageState extends State<MapPage> {
                               }
                             },
                           ),
-                        ),
                       ),
                     );
                   },
