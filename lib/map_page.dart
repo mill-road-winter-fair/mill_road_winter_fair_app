@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
@@ -614,50 +615,44 @@ class MapPageState extends State<MapPage> {
           isScrollControlled: true,
           useSafeArea: true,
           builder: (BuildContext context) {
-            return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setModalState) {
-                return DraggableScrollableSheet(
-                  expand: false,
-                  initialChildSize: 0.33,
-                  minChildSize: 0.33,
-                  maxChildSize: 0.66,
-                  builder: (context, specificSheetModalScrollController) {
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                      child: Scrollbar(
-                        controller: specificSheetModalScrollController,
-                        thumbVisibility: false,
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: ListView(
-                          controller: specificSheetModalScrollController,
-                          padding: EdgeInsets.zero,
-                          children: [
-                            SpecificListingInfoSheet(
-                              title: listing['displayName'],
-                              location: listing['secondaryType'],
-                              subtitle: listing['tertiaryType'],
-                              startTime: "${listing['startTime']}",
-                              endTime: "${listing['endTime']}",
-                              approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
-                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                              website: (listing['website'] != null) ? listing['website'] : '',
-                              email: (listing['email'] != null) ? listing['email'] : '',
-                              description: (listing['description'] != null) ? listing['description'] : '',
-                              detailsVisible: true,
-                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
-                            ),
-                          ],
+            final specificSheetModalScrollController = ScrollController();
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: constraints.maxHeight * 0.95,
+                  ),
+                  child: Scrollbar(
+                    controller: specificSheetModalScrollController,
+                    thumbVisibility: false,
+                    thickness: 4,
+                    radius: const Radius.circular(8),
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                        child: SpecificListingInfoSheet(
+                          title: listing['displayName'],
+                          location: listing['secondaryType'],
+                          subtitle: listing['tertiaryType'],
+                          startTime: "${listing['startTime']}",
+                          endTime: "${listing['endTime']}",
+                          approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                          phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                          website: (listing['website'] != null) ? listing['website'] : '',
+                          email: (listing['email'] != null) ? listing['email'] : '',
+                          description: (listing['description'] != null) ? listing['description'] : '',
+                          detailsVisible: true,
+                          onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
                         ),
                       ),
-                    );
-                  },
+                    ),
+                  ),
                 );
-              },
+              }
             );
           },
         );
-      },
+      }
     );
 
     setState(() {
