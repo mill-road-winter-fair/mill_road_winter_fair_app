@@ -58,7 +58,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void onTabVisible() {
     // This is called when user switches to this tab
     setState(() {
-      detailsVisibilityList = List<bool>.filled(filteredListings.length, false);
+      detailsVisibilityList = List<bool>.filled(500, false);
+      _searchQuery = '';
+      _isSearching = false;
     });
     if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
   }
