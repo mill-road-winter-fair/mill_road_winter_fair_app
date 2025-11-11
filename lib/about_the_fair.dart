@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -29,6 +30,7 @@ class TextImageRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final textHeight = _measureTextHeight(textSpan, constraints.maxWidth * textWidthProportion);
+        debugPrint('MW textHeight=$textHeight and width=${constraints.maxWidth} out of ${MediaQuery.of(context).size.width} of which text is ${constraints.maxWidth * (1 - textWidthProportion) - 4} and image is ${constraints.maxWidth * textWidthProportion}');
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -36,9 +38,10 @@ class TextImageRow extends StatelessWidget {
               ? [
                   SizedBox(
                     height: textHeight,
-                    width: constraints.maxWidth * (1 - textWidthProportion),
-                    child: Image.asset(imagePath, fit: BoxFit.contain),
+                    width: constraints.maxWidth * (1 - textWidthProportion) - 2,
+                    child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerLeft),
                   ),
+                  const Expanded(child: SizedBox()),
                   SizedBox(
                       width: constraints.maxWidth * textWidthProportion,
                       child: Text.rich(
@@ -51,10 +54,11 @@ class TextImageRow extends StatelessWidget {
                       child: Text.rich(
                         textSpan,
                       )),
+                  const Expanded(child: SizedBox()),
                   SizedBox(
                     height: textHeight,
-                    width: constraints.maxWidth * (1 - textWidthProportion),
-                    child: Image.asset(imagePath, fit: BoxFit.contain),
+                    width: constraints.maxWidth * (1 - textWidthProportion) - 2,
+                    child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerRight),
                   ),
                 ],
         );
@@ -82,13 +86,19 @@ TableRow eventRow(context, eventTime, eventTitle, [List<TextSpan>? eventSubtitle
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
         child: Container(
-          padding: const EdgeInsets.all(4),
-          child: Text(eventTime, style: eventsTimeStyle, textAlign: TextAlign.right),
+          padding: const EdgeInsets.fromLTRB(4, 4, 2, 4), 
+          child: FittedBox(
+            fit: BoxFit.scaleDown, 
+            child: Text(eventTime, style: eventsTimeStyle, textAlign: TextAlign.right),
+          ),
         ),
       ),
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
-        child: Container(padding: const EdgeInsets.all(3), child: Text.rich(TextSpan(children: allTitleSpans))),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(2, 4, 2, 4), 
+          child: Text.rich(TextSpan(children: allTitleSpans))
+        ),
       ),
     ],
   );
@@ -196,7 +206,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
           child: Text('About Mill Road Winter Fair'),
         ),
       ),
-      body: Container(
+      body: Container(width: min(MediaQuery.of(context).size.width - 8, 500),
         padding: EdgeInsets.all(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
         child: Scrollbar(
           controller: _aboutPageScrollController,
@@ -236,15 +246,15 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       SizedBox(
-                        width: 227,
+                        width: 221,
                         // Flutter tables don't support spanning, so need two of them to do a header row
                         child: Column(
                           children: [
                             Table(
                               columnWidths: const <int, TableColumnWidth>{
-                                0: FixedColumnWidth(227),
+                                0: FixedColumnWidth(221),
                               },
-                              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                              defaultVerticalAlignment: TableCellVerticalAlignment.top,
                               children: <TableRow>[
                                 TableRow(
                                   decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
@@ -263,7 +273,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                             ),
                             Table(
                               columnWidths: const <int, TableColumnWidth>{
-                                0: FixedColumnWidth(50),
+                                0: FixedColumnWidth(44),
                                 1: FixedColumnWidth(177),
                               },
                               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
@@ -365,6 +375,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                           ],
                         ),
                       ),
+                      const Expanded(child: SizedBox()),
                       SizedBox(
                         width: 70,
                         child: Image.asset("assets/aboutPage/MRWF25_trafficlights.png", fit: BoxFit.fill, width: 70),
