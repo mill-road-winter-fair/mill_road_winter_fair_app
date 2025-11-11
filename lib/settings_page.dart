@@ -41,6 +41,9 @@ late ValueNotifier<String> themeNotifier;
 // Initialise map style variable
 late String mapStyle;
 
+// Initialise setting for whether the road closure polygon is shown;
+late bool preferredRoadClosurePolygonVisible;
+
 Future<void> loadSettings() async {
   debugPrint('loadSettings called, onTest=$onTest');
   if (onTest == false) {
@@ -60,6 +63,9 @@ Future<void> loadSettings() async {
     // Load preferred map type from shared preferences
     preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
 
+    // Set default road closure polygon as visible
+    preferredRoadClosurePolygonVisible = prefs.getBool('preferredRoadClosurePolygonVisible') ?? true;
+    
     // Set default sorting method as nearest (1 in the index)
     int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 1;
     // Load preferred sorting method from shared preferences
@@ -92,6 +98,7 @@ Future<void> loadSettings() async {
     preferredMapOrientation = MapOrientation.values[savedMapOrientationIndex];
     int savedMapStyleTypeIndex = 0;
     preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
+    preferredRoadClosurePolygonVisible = true;
 
     selectedThemeKey = 'light';
     // Create a ValueNotifier to hold the current theme
@@ -130,6 +137,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
+    await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
   }
 
   Future<void> _changeTheme(String themeKey) async {

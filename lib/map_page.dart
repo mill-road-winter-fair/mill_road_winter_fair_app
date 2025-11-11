@@ -70,7 +70,7 @@ class MapPageState extends State<MapPage> {
     'Music': true,
     'Events': true,
     'Services': true,
-    'Road Closures': true,
+//    'Road Closures': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
 
@@ -83,7 +83,7 @@ class MapPageState extends State<MapPage> {
     addAllVisibleMarkers();
     establishLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _polygons.add(roadClosurePolygon());
+      if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
       ListingUpdateNotifier.maybeShowNotice(context);
     });
     super.initState();
@@ -240,6 +240,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void updateRoadClosurePolygonVisibility(bool visibleState) {
+    preferredRoadClosurePolygonVisible = visibleState;
     setState(() {
       switch (visibleState) {
         case true:
@@ -249,6 +250,7 @@ class MapPageState extends State<MapPage> {
           _polygons.clear();
       }
     });
+    _saveSettings();
   }
 
   Widget roadClosuresDialog() {
@@ -319,9 +321,9 @@ class MapPageState extends State<MapPage> {
                               TextButton(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  setState(() {
-                                    filterSettings["Road Closures"] = false;
-                                  });
+//                                  setState(() {
+//                                    preferredRoadClosurePolygonVisible = false;
+//                                  });
                                   updateRoadClosurePolygonVisibility(false);
                                   Navigator.pop(context);
                                 },
@@ -697,7 +699,7 @@ class MapPageState extends State<MapPage> {
       });
 
       // Update polygon colour to match theme, if filtered-in
-      if (filterSettings["Road Closures"] == true) {
+      if (preferredRoadClosurePolygonVisible) {
         _polygons.clear();
         _polygons.add(roadClosurePolygon());
       }
@@ -814,11 +816,11 @@ class MapPageState extends State<MapPage> {
                   CheckboxListTile(
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade road closures")),
-                    value: filterSettings["Road Closures"],
+                    value: preferredRoadClosurePolygonVisible,
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        filterSettings["Road Closures"] = value!;
+                        preferredRoadClosurePolygonVisible = value!;
                       });
                       updateRoadClosurePolygonVisibility(value!);
                     },
@@ -889,8 +891,8 @@ class MapPageState extends State<MapPage> {
     _positionStream?.cancel();
     // Clear the polylines
     polylines.clear();
-    // Clear the polygons
-    _polygons.clear();
+    // Clear the polygons if they're shown
+    if (preferredRoadClosurePolygonVisible) _polygons.clear();
     hideAllMarkers();
     // Remove any simple marker shown
     markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
@@ -956,7 +958,7 @@ class MapPageState extends State<MapPage> {
     polylines.clear();
 
     // Re-add the polygons
-    if (filterSettings["Road Closures"] == true) {
+    if (preferredRoadClosurePolygonVisible) {
       _polygons.add(roadClosurePolygon());
     }
 
@@ -1130,7 +1132,8 @@ class MapPageState extends State<MapPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
     await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
-  }
+    await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
+}
 
   void _setMapCameraToFitMapMarkers() {
     debugPrint('_setMapCameraToFitMapMarkers called');
@@ -1560,7 +1563,7 @@ class MapPageState extends State<MapPage> {
                     ),
                   ),
                 ),
-              if (filterSettings['Road Closures'] == true && _navigationInProgress == false)
+              if (preferredRoadClosurePolygonVisible && _navigationInProgress == false)
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
