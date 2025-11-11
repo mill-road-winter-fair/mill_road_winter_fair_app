@@ -70,7 +70,6 @@ class MapPageState extends State<MapPage> {
     'Music': true,
     'Events': true,
     'Services': true,
-//    'Road Closures': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
 
