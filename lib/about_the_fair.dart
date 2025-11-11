@@ -30,7 +30,6 @@ class TextImageRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final textHeight = _measureTextHeight(textSpan, constraints.maxWidth * textWidthProportion);
-        debugPrint('MW textHeight=$textHeight and width=${constraints.maxWidth} out of ${MediaQuery.of(context).size.width} of which text is ${constraints.maxWidth * (1 - textWidthProportion) - 4} and image is ${constraints.maxWidth * textWidthProportion}');
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
