@@ -252,7 +252,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                           children: [
                             Table(
                               columnWidths: const <int, TableColumnWidth>{
-                                0: FixedColumnWidth(221),
+                                0: FixedColumnWidth(150),
+                                1: FixedColumnWidth(71),
                               },
                               defaultVerticalAlignment: TableCellVerticalAlignment.top,
                               children: <TableRow>[
@@ -260,12 +261,19 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                   decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
                                   children: <Widget>[
                                     TableCell(
-                                      verticalAlignment: TableCellVerticalAlignment.top,
+                                      verticalAlignment: TableCellVerticalAlignment.middle,
                                       child: Container(
-                                        padding: const EdgeInsets.only(left: 8),
+                                        padding: const EdgeInsets.only(left: 4),
                                         child: Text('Key events',
-                                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
+                                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
                                       ),
+                                    ),
+                                    TableCell(
+                                      verticalAlignment: TableCellVerticalAlignment.top,
+                                      child: SizedBox(
+                                          width: 71,
+                                          child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft),
+                                        ),
                                     ),
                                   ],
                                 ),
