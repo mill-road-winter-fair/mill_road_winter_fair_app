@@ -946,7 +946,7 @@ class MapPageState extends State<MapPage> {
     // If user has location tracking enabled
     if (currentLatLng != null) {
       // Get the user's current location
-      Position position = await getCurrentPosition();
+      Position position = await getBestAvailablePosition();
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
       await updatePolyline(currentLatLng, destination);
       // Set the camera position once, at the beginning of the navigation
