@@ -88,10 +88,6 @@ class MapPageState extends State<MapPage> {
     super.initState();
   }
 
-  void onTabVisible() {
-    // This is called when user switches to this tab
-  }
-
   Polygon roadClosurePolygon() {
     final List<LatLng> roadClosurePolygonPoints = [];
     roadClosurePolygonPoints.add(const LatLng(52.20235281420999, 0.1310619082596975));
@@ -438,7 +434,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addGroupMarker(listing) async {
-//    debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
+    // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
@@ -456,8 +452,19 @@ class MapPageState extends State<MapPage> {
       position: destinationLatLng,
       icon: customMarker,
       visible: true,
-      onTap: () {
-        establishLocation();
+      onTap: () async {
+        // Acquire latest location before building bottom sheet; skip await under tests to keep synchronous behavior
+        if (onTest) {
+          // Fire-and-forget to maintain synchronous test behavior
+          establishLocation();
+        } else {
+          try {
+            await establishLocation();
+          } catch (e) {
+            debugPrint('Failed to establish location (group marker): $e');
+          }
+          if (!mounted) return; // Widget disposed while awaiting
+        }
 
         // Helper to normalise primaryType by stripping "Group-" prefix if present
         String normalisePrimaryType(String type) {
@@ -523,17 +530,24 @@ class MapPageState extends State<MapPage> {
                           controller: groupSheetModalScrollController,
                           itemBuilder: (context, index) {
                             final rel = relatedListings[index];
-                            int approximateDistanceMetres = asTheCrowFlies(
-                              currentLatLng!,
-                              stringToLatLng(rel['latLng']),
-                            );
+
+                            // Calculate distance if current location is known (already awaited)
+                            var distanceMessage = 'Distance unknown';
+                            if (currentLatLng != null) {
+                              int approximateDistanceMetres = asTheCrowFlies(
+                                currentLatLng!,
+                                stringToLatLng(rel['latLng']),
+                              );
+                              distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                            }
+
                             if (rel['primaryType'].startsWith("Group")) {
                               return GroupListingInfoSheet(
                                 title: rel['displayName'],
                                 categories: "${rel['tertiaryType']}",
                                 startTime: "${listing['startTime']}",
                                 endTime: "${listing['endTime']}",
-                                approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                                approxDistance: distanceMessage,
                               );
                             } else {
                               return Column(
@@ -593,11 +607,30 @@ class MapPageState extends State<MapPage> {
       position: destinationLatLng,
       icon: customMarker,
       visible: true,
-      onTap: () {
+      onTap: () async {
         HapticFeedback.lightImpact();
-        // Update user's location
-        establishLocation();
-        int approximateDistanceMetres = asTheCrowFlies(currentLatLng!, destinationLatLng);
+        // Await location only in production; tests remain synchronous
+        if (onTest) {
+          establishLocation();
+        } else {
+          try {
+            await establishLocation();
+          } catch (e) {
+            debugPrint('Failed to establish location (specific marker): $e');
+          }
+          if (!mounted) return;
+        }
+
+        // Calculate distance if current location is known (already awaited)
+        var distanceMessage = 'Distance unknown';
+        if (currentLatLng != null) {
+          int approximateDistanceMetres = asTheCrowFlies(
+            currentLatLng!,
+            destinationLatLng,
+          );
+          distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+        }
+
         // Show bottom sheet with listing information
         showModalBottomSheet(
           context: context,
@@ -629,7 +662,7 @@ class MapPageState extends State<MapPage> {
                           subtitle: listing['tertiaryType'],
                           startTime: "${listing['startTime']}",
                           endTime: "${listing['endTime']}",
-                          approxDistance: 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}',
+                          approxDistance: distanceMessage,
                           phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
                           website: (listing['website'] != null) ? listing['website'] : '',
                           email: (listing['email'] != null) ? listing['email'] : '',
@@ -914,7 +947,7 @@ class MapPageState extends State<MapPage> {
     // If user has location tracking enabled
     if (currentLatLng != null) {
       // Get the user's current location
-      Position position = await getCurrentPosition();
+      Position position = await getBestAvailablePosition();
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
       await updatePolyline(currentLatLng, destination);
       // Set the camera position once, at the beginning of the navigation
@@ -929,6 +962,7 @@ class MapPageState extends State<MapPage> {
         textColor: Theme.of(context).colorScheme.onPrimary,
         fontSize: 16,
         toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
       );
     }
 
@@ -1593,7 +1627,9 @@ class MapPageState extends State<MapPage> {
                                 width: 20,
                                 height: 14,
                                 decoration: BoxDecoration(
-                                  color: selectedThemeKey == 'colourBlindFriendly' ? const Color.fromRGBO(224, 129, 87, 255) : Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                  color: selectedThemeKey == 'colourBlindFriendly'
+                                      ? const Color.fromRGBO(224, 129, 87, 255)
+                                      : Theme.of(context).colorScheme.tertiary.withAlpha(50),
                                   border: Border.all(
                                     color: Theme.of(context).colorScheme.tertiary,
                                     width: 3,

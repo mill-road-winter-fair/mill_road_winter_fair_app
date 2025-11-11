@@ -16,7 +16,7 @@ void main() {
       promptedUserToEnableLocationServices = 2;
 
       // Call and expect an exception describing disabled services
-      expect(() async => await getCurrentPosition(), throwsA(predicate((e) => e is Exception && e.toString().contains('Location services are disabled'))));
+      expect(() async => await getBestAvailablePosition(), throwsA(predicate((e) => e is Exception && e.toString().contains('Location services are disabled'))));
     });
 
     test('getCurrentPosition throws when permission denied forever', () async {
@@ -25,7 +25,7 @@ void main() {
       locationPermission = LocationPermission.deniedForever;
 
       // Call and expect an exception describing permanently denied permissions
-      expect(() async => await getCurrentPosition(), throwsA(predicate((e) => e is Exception && e.toString().contains('permanently denied'))));
+      expect(() async => await getBestAvailablePosition(), throwsA(predicate((e) => e is Exception && e.toString().contains('permanently denied'))));
     });
   });
 }

@@ -195,7 +195,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           textColor: Theme.of(context).colorScheme.onPrimary,
           fontSize: 16,
           toastLength: Toast.LENGTH_LONG,
-          timeInSecForIosWeb: 4,  // needed as toastLength is just for Android
+          timeInSecForIosWeb: 4,
         );
       } else {
         setState(() {
