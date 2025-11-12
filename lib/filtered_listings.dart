@@ -136,11 +136,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         // Sort by distance to user (nearest first)
         allListings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
       } else if (preferredSortingMethod == SortingMethod.values[2]) {
-        // Sort by start time, if the start time is the same sort by location (secondaryType)
-        allListings.sort((a, b) {
-          final timeCompare = a['startTime'].compareTo(b['startTime']);
-          return timeCompare != 0 ? timeCompare : a['secondaryType'].compareTo(b['secondaryType']);
-        });
+        if (currentLatLng != null) {
+          // Sort by start time, if the start time is the same sort by nearest
+          allListings.sort((a, b) {
+            final timeCompare = a['startTime'].compareTo(b['startTime']);
+            return timeCompare != 0 ? timeCompare : a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']);
+          });
+        } else {
+          // Sort by start time, if the start time is the same sort by location (secondaryType)
+          allListings.sort((a, b) {
+            final timeCompare = a['startTime'].compareTo(b['startTime']);
+            return timeCompare != 0 ? timeCompare : a['secondaryType'].compareTo(b['secondaryType']);
+          });
+        }
       } else {
         // The only other option is location sorting
         allListings.sort((a, b) {
