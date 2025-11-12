@@ -453,6 +453,7 @@ class MapPageState extends State<MapPage> {
       icon: customMarker,
       visible: true,
       onTap: () {
+        HapticFeedback.lightImpact();
         // Update the current location, do not await as this causes issues with using the context across async gaps
         establishLocation();
 
