@@ -452,19 +452,9 @@ class MapPageState extends State<MapPage> {
       position: destinationLatLng,
       icon: customMarker,
       visible: true,
-      onTap: () async {
-        // Acquire latest location before building bottom sheet; skip await under tests to keep synchronous behavior
-        if (onTest) {
-          // Fire-and-forget to maintain synchronous test behavior
-          establishLocation();
-        } else {
-          try {
-            await establishLocation();
-          } catch (e) {
-            debugPrint('Failed to establish location (group marker): $e');
-          }
-          if (!mounted) return; // Widget disposed while awaiting
-        }
+      onTap: () {
+        // Update the current location, do not await as this causes issues with using the context across async gaps
+        establishLocation();
 
         // Helper to normalise primaryType by stripping "Group-" prefix if present
         String normalisePrimaryType(String type) {
@@ -531,7 +521,7 @@ class MapPageState extends State<MapPage> {
                           itemBuilder: (context, index) {
                             final rel = relatedListings[index];
 
-                            // Calculate distance if current location is known (already awaited)
+                            // Calculate distance if current location is known
                             var distanceMessage = 'Distance unknown';
                             if (currentLatLng != null) {
                               int approximateDistanceMetres = asTheCrowFlies(
@@ -553,21 +543,22 @@ class MapPageState extends State<MapPage> {
                               return Column(
                                 children: [
                                   SpecificListingInfoSheet(
-                                  title: rel['displayName'],
-                                  location: '',
-                                  subtitle: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
-                                  startTime: '',
-                                  endTime: '',
-                                  approxDistance: '',
-                                  phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                  website: (rel['website'] != null) ? rel['website'] : '',
-                                  email: (rel['email'] != null) ? rel['email'] : '',
-                                  description: (rel['description'] != null) ? rel['description'] : '',
-                                  detailsVisible: detailsVisibilityList[index],
-                                  onDetailsTapped: () => toggleDetailsRow(index),
-                                  onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                ),
-                                if (index != relatedListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                    title: rel['displayName'],
+                                    location: '',
+                                    subtitle: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
+                                    startTime: '',
+                                    endTime: '',
+                                    approxDistance: '',
+                                    phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                    website: (rel['website'] != null) ? rel['website'] : '',
+                                    email: (rel['email'] != null) ? rel['email'] : '',
+                                    description: (rel['description'] != null) ? rel['description'] : '',
+                                    detailsVisible: detailsVisibilityList[index],
+                                    onDetailsTapped: () => toggleDetailsRow(index),
+                                    onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                  ),
+                                  if (index != relatedListings.length - 1)
+                                    SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                                 ],
                               );
                             }
@@ -603,46 +594,36 @@ class MapPageState extends State<MapPage> {
     }
 
     Marker newMarker = Marker(
-      markerId: markerId,
-      position: destinationLatLng,
-      icon: customMarker,
-      visible: true,
-      onTap: () async {
-        HapticFeedback.lightImpact();
-        // Await location only in production; tests remain synchronous
-        if (onTest) {
+        markerId: markerId,
+        position: destinationLatLng,
+        icon: customMarker,
+        visible: true,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          // Update the current location, do not await as this causes issues with using the context across async gaps
           establishLocation();
-        } else {
-          try {
-            await establishLocation();
-          } catch (e) {
-            debugPrint('Failed to establish location (specific marker): $e');
+
+          // Calculate distance if current location is known
+          var distanceMessage = 'Distance unknown';
+          if (currentLatLng != null) {
+            int approximateDistanceMetres = asTheCrowFlies(
+              currentLatLng!,
+              destinationLatLng,
+            );
+            distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
           }
-          if (!mounted) return;
-        }
 
-        // Calculate distance if current location is known (already awaited)
-        var distanceMessage = 'Distance unknown';
-        if (currentLatLng != null) {
-          int approximateDistanceMetres = asTheCrowFlies(
-            currentLatLng!,
-            destinationLatLng,
-          );
-          distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-        }
-
-        // Show bottom sheet with listing information
-        showModalBottomSheet(
-          context: context,
-          showDragHandle: false,
-          enableDrag: false,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
-          isScrollControlled: true,
-          useSafeArea: true,
-          builder: (BuildContext context) {
-            final specificSheetModalScrollController = ScrollController();
-            return LayoutBuilder(
-              builder: (context, constraints) {
+          // Show bottom sheet with listing information
+          showModalBottomSheet(
+            context: context,
+            showDragHandle: false,
+            enableDrag: false,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
+            isScrollControlled: true,
+            useSafeArea: true,
+            builder: (BuildContext context) {
+              final specificSheetModalScrollController = ScrollController();
+              return LayoutBuilder(builder: (context, constraints) {
                 return ConstrainedBox(
                   constraints: BoxConstraints(
                     maxHeight: constraints.maxHeight * 0.95,
@@ -674,12 +655,10 @@ class MapPageState extends State<MapPage> {
                     ),
                   ),
                 );
-              }
-            );
-          },
-        );
-      }
-    );
+              });
+            },
+          );
+        });
 
     setState(() {
       markers[markerId] = newMarker;
@@ -947,7 +926,7 @@ class MapPageState extends State<MapPage> {
     // If user has location tracking enabled
     if (currentLatLng != null) {
       // Get the user's current location
-      Position position = await getBestAvailablePosition();
+      Position position = await getCurrentPosition();
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
       await updatePolyline(currentLatLng, destination);
       // Set the camera position once, at the beginning of the navigation
@@ -1166,7 +1145,7 @@ class MapPageState extends State<MapPage> {
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
     await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
-}
+  }
 
   void _setMapCameraToFitMapMarkers() {
     debugPrint('_setMapCameraToFitMapMarkers called');
@@ -1583,7 +1562,13 @@ class MapPageState extends State<MapPage> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(iconSize: 30, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: 0), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                      style: ElevatedButton.styleFrom(
+                          iconSize: 30,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
+                          padding: const EdgeInsets.all(0),
+                          elevation: 3,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
