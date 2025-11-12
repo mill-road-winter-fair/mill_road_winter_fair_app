@@ -249,10 +249,10 @@ class HomePageState extends State<HomePage> {
           subtitle: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text('http://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+              child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('http://theberridge.com'));
+            launchUrl(Uri.parse('https://theberridge.com'));
           },
         ),
         ListTile(
