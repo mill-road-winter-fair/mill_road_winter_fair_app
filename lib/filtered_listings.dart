@@ -46,14 +46,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool _hidePastListings = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  List<bool> detailsVisibilityList = List<bool>.filled(500, false);  // start with plenty enough to load all listings
-  int firstNextListingIndex = -1;  // the first listing that hasn't passed its end date, when sorted by start date
-  
+  List<bool> detailsVisibilityList = List<bool>.filled(500, false); // start with plenty enough to load all listings
+  int firstNextListingIndex = -1; // the first listing that hasn't passed its end date, when sorted by start date
+
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
-}
+  }
 
   void onTabVisible() {
     // This is called when user switches to this tab
@@ -111,7 +111,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         useFallbackSorting = false;
       }
 
-      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) && 
+      if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) &&
           locationServicesEnabled == true &&
           useFallbackSorting == false) {
         // Add distance to each listing
@@ -130,11 +130,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
       // Sort based on preference
       if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
-        // Sort by name
-        allListings.sort((a, b) => a['name'].compareTo(b['name']));
+        // Sort by name, if the name is the same sort by start time
+        allListings.sort((a, b) {
+          final nameCompare = a['name'].compareTo(b['name']);
+          return nameCompare != 0 ? nameCompare : a['startTime'].compareTo(b['startTime']);
+        });
       } else if (preferredSortingMethod == SortingMethod.values[1]) {
-        // Sort by distance to user (nearest first)
-        allListings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
+        // Sort by distance to user (nearest first); if the distance is the same sort by start time
+        allListings.sort((a, b) {
+            final distanceCompare = a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']);
+            return distanceCompare != 0 ? distanceCompare : a['startTime'].compareTo(b['startTime']);
+        });
       } else if (preferredSortingMethod == SortingMethod.values[2]) {
         // Sort by start time, if the start time is the same sort by name
         allListings.sort((a, b) {
@@ -283,10 +289,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 4: If sorted by start date, find the first listing not to have ended
     firstNextListingIndex = -1;
-    if (preferredSortingMethod == SortingMethod.values[2])
-    {
+    if (preferredSortingMethod == SortingMethod.values[2]) {
       if (filteredListings.isNotEmpty) {
-         firstNextListingIndex = findFirstNextListingIndex(filteredListings);
+        firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       }
     }
 
@@ -584,5 +589,3 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     );
   }
 }
-
-
