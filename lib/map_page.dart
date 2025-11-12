@@ -316,9 +316,6 @@ class MapPageState extends State<MapPage> {
                               TextButton(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-//                                  setState(() {
-//                                    preferredRoadClosurePolygonVisible = false;
-//                                  });
                                   updateRoadClosurePolygonVisibility(false);
                                   Navigator.pop(context);
                                 },
