@@ -113,7 +113,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
       if ((locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always) && 
           locationServicesEnabled == true &&
-          useFallbackSorting == false) {
+          useFallbackSorting == false &&
+          currentLatLng != null) {
         // Add distance to each listing
         allListings = allListings.map((listing) {
           LatLng destinationLatLng = stringToLatLng(listing['latLng']);
