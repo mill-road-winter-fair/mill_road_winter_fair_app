@@ -68,7 +68,7 @@ class ListingUpdateNotifier {
   //        "but this app will always show the most up-to-date information.",
             "This app currently shows many of "
             "the attractions you'll find at the "
-            "2025 Fair on Saturday 6th December,"
+            "2025 Fair on Saturday 6th December, "
             "and there’ll be more added in the "
             "lead-up to the Fair.\n\n"
             "Check back for the latest listings.",
