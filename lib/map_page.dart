@@ -453,6 +453,7 @@ class MapPageState extends State<MapPage> {
       icon: customMarker,
       visible: true,
       onTap: () {
+        HapticFeedback.lightImpact();
          // Acquire latest location before building bottom sheet
         if (onTest) {
           // Fire-and-forget to maintain synchronous test behavior
