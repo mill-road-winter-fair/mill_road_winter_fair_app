@@ -136,8 +136,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           return nameCompare != 0 ? nameCompare : a['startTime'].compareTo(b['startTime']);
         });
       } else if (preferredSortingMethod == SortingMethod.values[1]) {
-        // Sort by distance to user (nearest first)
-        allListings.sort((a, b) => a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']));
+        // Sort by distance to user (nearest first); if the distance is the same sort by start time
+        allListings.sort((a, b) {
+            final distanceCompare = a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']);
+            return distanceCompare != 0 ? distanceCompare : a['startTime'].compareTo(b['startTime']);
+        });
       } else if (preferredSortingMethod == SortingMethod.values[2]) {
         // Sort by start time, if the start time is the same sort by name
         allListings.sort((a, b) {
