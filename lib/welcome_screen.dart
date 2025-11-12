@@ -498,7 +498,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
                                       launchUrl(Uri.parse(
-                                          'https://docs.google.com/forms/d/e/1FAIpQLSehyC3H9mCzVP3Ao5Tl2-fv-mIVS73hN7BLriif80LQ6vRv8w/viewform?usp=sf_link'));
+                                          'https://www.millroadwinterfair.org/app-feedback-form/'));
                                     },
                                 ),
                               ],
