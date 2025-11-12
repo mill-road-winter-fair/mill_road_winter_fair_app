@@ -13,9 +13,14 @@ LatLng? currentLatLng;
 
 Future<void> establishLocation() async {
   debugPrint('establishLocation called');
-  Position position = await getCurrentPosition();
-  currentLatLng = LatLng(position.latitude, position.longitude);
-  debugPrint('Current location established: $currentLatLng');
+  try {
+    Position position = await getCurrentPosition();
+    currentLatLng = LatLng(position.latitude, position.longitude);
+    debugPrint('Current location established: $currentLatLng');
+  } catch (e) {
+    debugPrint('establishLocation: failed to get current position: $e');
+    // If no position could be established, don't overwrite any previous location and don't rethrow error as calling functions don't handle it
+  }
 }
 
 // Helper function to get the current location
