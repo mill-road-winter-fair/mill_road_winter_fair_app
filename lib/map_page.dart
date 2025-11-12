@@ -452,14 +452,14 @@ class MapPageState extends State<MapPage> {
       position: destinationLatLng,
       icon: customMarker,
       visible: true,
-      onTap: () async {
-        // Acquire latest location before building bottom sheet; skip await under tests to keep synchronous behavior
+      onTap: () {
+         // Acquire latest location before building bottom sheet
         if (onTest) {
           // Fire-and-forget to maintain synchronous test behavior
           establishLocation();
         } else {
           try {
-            await establishLocation();
+            establishLocation();
           } catch (e) {
             debugPrint('Failed to establish location (group marker): $e');
           }
@@ -607,14 +607,14 @@ class MapPageState extends State<MapPage> {
       position: destinationLatLng,
       icon: customMarker,
       visible: true,
-      onTap: () async {
+      onTap: () {
         HapticFeedback.lightImpact();
         // Await location only in production; tests remain synchronous
         if (onTest) {
           establishLocation();
         } else {
           try {
-            await establishLocation();
+            establishLocation();
           } catch (e) {
             debugPrint('Failed to establish location (specific marker): $e');
           }
