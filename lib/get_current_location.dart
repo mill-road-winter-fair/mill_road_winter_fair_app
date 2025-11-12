@@ -23,8 +23,7 @@ Future<void> establishLocation() async {
     // Keep establishLocation simple: if we couldn't get a position, clear currentLatLng and propagate the error.
     debugPrint('establishLocation: failed to get current position: $e');
 
-    // If no position could be established, ensure currentLatLng is null and propagate the error
-    currentLatLng = null;
+    // If no position could be established, retain any previous location but propagate the error
     rethrow;
   }
 }
