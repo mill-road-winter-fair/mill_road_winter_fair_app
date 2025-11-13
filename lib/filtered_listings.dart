@@ -236,6 +236,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
+    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
   }
 
   void toggleDetailsRow(int index) {
@@ -252,6 +253,22 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       }
     }
     return -1;
+  }
+
+  // Function to toggle the listing's presence in the list of favourites
+  void favouriteOrNotListing(String listingID) {
+    if (isListingFavourited(listingID)) {
+      favouriteListingKeys.remove(listingID);
+    } else {
+      favouriteListingKeys.add(listingID);
+    }
+    setState(() {});
+    _saveSettings();
+  }
+
+  // Function to determine if the listing has been added to favourites
+  bool isListingFavourited(listingID) {
+    return favouriteListingKeys.contains(listingID);
   }
 
   @override
@@ -463,7 +480,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               email: listing['email'] ?? '',
                               description: listing['description'] ?? '',
                               detailsVisible: detailsVisibilityList[index],
+                              listingFavourited: isListingFavourited(listing['id']),
                               onDetailsTapped: () => toggleDetailsRow(index),
+                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () {
                                 if (homePageState != null) {
                                   navigateToMapAndGetDirections(
