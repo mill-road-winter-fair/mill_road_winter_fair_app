@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/favourite_listings.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
@@ -408,6 +409,18 @@ class HomePageState extends State<HomePage> {
                   HapticFeedback.lightImpact();
                   Navigator.pop(context);
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                },
+              ),
+            ),
+            Expanded(
+              flex: 4,
+              child: ListTile(
+                leading: const FaIcon(FontAwesomeIcons.solidHeart),
+                title: const Text('Favourite listings', style: TextStyle(fontWeight: FontWeight.bold)),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => FavouriteListingsPage(listings: listings)));
                 },
               ),
             ),
