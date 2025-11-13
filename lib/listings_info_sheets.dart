@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,7 +32,6 @@ bool hasEventEnded(String endTime) {
 bool isItEventDay() {
   return DateUtils.isSameDay(fairDate, DateTime.now());
 }
-
 
 // Identifier and function for determining if the event has been marked as cancelled
 const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
@@ -151,7 +151,9 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final String email;
   final String description;
   final bool detailsVisible;
+  final bool listingFavourited;
   final VoidCallback? onDetailsTapped;
+  final VoidCallback? onFavouriteTapped;
   final Function onGetDirections;
 
   const SpecificListingInfoSheet({
@@ -166,7 +168,9 @@ class SpecificListingInfoSheet extends StatelessWidget {
     required this.email,
     required this.description,
     required this.detailsVisible,
+    required this.listingFavourited,
     this.onDetailsTapped,
+    this.onFavouriteTapped,
     required this.onGetDirections,
     super.key,
   });
@@ -263,6 +267,18 @@ class SpecificListingInfoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              IconButton(
+                onPressed: onFavouriteTapped,
+                padding: const EdgeInsets.all(0),
+                style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                icon:FaIcon(
+                  shadows: [Shadow( color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                  (listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                  size: 22, color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+
+              const SizedBox(width: 6),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {
