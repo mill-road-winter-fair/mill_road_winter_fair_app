@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,8 +42,11 @@ late ValueNotifier<String> themeNotifier;
 // Initialise map style variable
 late String mapStyle;
 
-// Initialise setting for whether the road closure polygon is shown;
+// Initialise setting for whether the road closure polygon is shown
 late bool preferredRoadClosurePolygonVisible;
+
+// Initialise the list of favourited listings
+late Set<String> favouriteListingKeys;
 
 Future<void> loadSettings() async {
   debugPrint('loadSettings called, onTest=$onTest');
@@ -76,6 +80,14 @@ Future<void> loadSettings() async {
     // Load preferred distance unit from shared preferences
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 
+    // Get the list of favourited listings
+    final favouriteListingStrings = prefs.getStringList('favouritesList');
+    if (favouriteListingStrings != null) {
+      favouriteListingKeys = favouriteListingStrings.toSet();
+    } else {
+      favouriteListingKeys = {};
+    }
+
     // Detect system brightness
     Brightness systemBrightness = PlatformDispatcher.instance.platformBrightness;
 
@@ -108,6 +120,25 @@ Future<void> loadSettings() async {
   }
 }
 
+// probably not needed
+Future<void> saveList(boolList, prefs) async {
+  // Save a list of bools to prefs (as SharedPreferences can't do this natively)
+  final jsonString = jsonEncode(boolList);
+  await prefs.setString('favouritesList', jsonString);
+}
+
+// probably not needed
+Future<List<Map<String, bool>>> loadBoolList(prefs) async {
+  // Load a list of bools from prefs (as SharedPreferences can't do this natively)
+  final jsonString = prefs.getString('bool_list');
+  if (jsonString == null) return [];
+  final decoded = jsonDecode(jsonString) as List<dynamic>;
+  return decoded
+      .map((item) => (item as Map<String, dynamic>)
+          .map((key, value) => MapEntry(key, value as bool)))
+      .toList();
+}
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -138,6 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
+    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
   }
 
   Future<void> _changeTheme(String themeKey) async {
