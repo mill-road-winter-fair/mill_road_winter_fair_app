@@ -72,6 +72,7 @@ class MapPageState extends State<MapPage> {
     'Services': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
+  Map<ClusterManagerId, ClusterManager> clusterManagers = <ClusterManagerId, ClusterManager>{}; // For managing clusters
 
   @override
   void initState() {
@@ -444,11 +445,26 @@ class MapPageState extends State<MapPage> {
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
+    ClusterManagerId theClusterManagerId;
+    var theClusterManager = clusterManagers[ClusterManagerId("${listing['primaryType']}")];
+    if (theClusterManager == null) {
+      debugPrint('MW Creating new ClusterManager for ${listing['primaryType']} for ${listing['displayName']}');
+      ClusterManager newClusterManager = ClusterManager(
+          clusterManagerId: ClusterManagerId(listing['primaryType']),
+      );
+      clusterManagers[ClusterManagerId("${listing['primaryType']}")] = newClusterManager;
+      theClusterManagerId = newClusterManager.clusterManagerId;
+    } else {
+      debugPrint('MW Re-using existing ClusterManager for ${listing['primaryType']} for ${listing['displayName']}');
+      theClusterManagerId = theClusterManager.clusterManagerId;
+    }
+
     Marker newMarker = Marker(
       markerId: markerId,
       position: destinationLatLng,
       icon: customMarker,
       visible: true,
+      clusterManagerId: theClusterManagerId,
       onTap: () {
         HapticFeedback.lightImpact();
         // Update the current location, do not await as this causes issues with using the context across async gaps
@@ -591,11 +607,27 @@ class MapPageState extends State<MapPage> {
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
+    ClusterManagerId theClusterManagerId;
+    var theClusterManager = clusterManagers[ClusterManagerId("${listing['primaryType']}")];
+    if (theClusterManager == null) {
+      debugPrint('MW Creating new ClusterManager for ${listing['primaryType']} for ${listing['displayName']}');
+      ClusterManager newClusterManager = ClusterManager(
+          clusterManagerId: ClusterManagerId(listing['primaryType']),
+      );
+      clusterManagers[ClusterManagerId("${listing['primaryType']}")] = newClusterManager;
+      theClusterManagerId = newClusterManager.clusterManagerId;
+    } else {
+      debugPrint('MW Re-using existing ClusterManager for ${listing['primaryType']} for ${listing['displayName']}');
+      theClusterManagerId = theClusterManager.clusterManagerId;
+    }
+
+
     Marker newMarker = Marker(
         markerId: markerId,
         position: destinationLatLng,
         icon: customMarker,
         visible: true,
+        clusterManagerId: theClusterManagerId,
         onTap: () {
           HapticFeedback.lightImpact();
           // Update the current location, do not await as this causes issues with using the context across async gaps
@@ -1422,6 +1454,7 @@ class MapPageState extends State<MapPage> {
                       },
                       polygons: _polygons,
                       markers: markers.values.toSet(),
+                      clusterManagers: Set<ClusterManager>.of(clusterManagers.values),
                       polylines: polylines);
                 },
               ),
