@@ -505,7 +505,7 @@ class MapPageState extends State<MapPage> {
                   builder: (context, constraints) {
                     return ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.95,
+                        maxHeight: constraints.maxHeight * 0.90,
                       ),
                       child: Scrollbar(
                         controller: groupSheetModalScrollController,
@@ -624,7 +624,7 @@ class MapPageState extends State<MapPage> {
               return LayoutBuilder(builder: (context, constraints) {
                 return ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxHeight: constraints.maxHeight * 0.95,
+                    maxHeight: constraints.maxHeight * 0.90,
                   ),
                   child: Scrollbar(
                     controller: specificSheetModalScrollController,
