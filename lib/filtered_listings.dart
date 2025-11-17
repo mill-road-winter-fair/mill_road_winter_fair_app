@@ -285,7 +285,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
     List<Map<String, dynamic>> primaryFiltered = [];
-    if (widget.filterPrimaryType == 'Service') {
+    if (widget.filterPrimaryType == 'Other') {
       primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
     } else {
       primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
@@ -334,7 +334,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             'Music' => 'Search musical performances...',
                             'Event' => 'Search events...',
                             'Place' => 'Search venues and places...',
-                            'Service' => 'Search services...',
+                            'Other' => 'Search other services...',
                             _ => 'Search listings...',
                           },
                           leading: const Icon(Icons.search),

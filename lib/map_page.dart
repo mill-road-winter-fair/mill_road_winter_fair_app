@@ -71,7 +71,7 @@ class MapPageState extends State<MapPage> {
     'Music': true,
     'Events': true,
     'Places': true,
-    'Services': true,
+    'Other': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
 
@@ -737,7 +737,7 @@ class MapPageState extends State<MapPage> {
     updateMarkerVisibility(_musicMarkerIds, filterSettings['Music']!);
     updateMarkerVisibility(_eventMarkerIds, filterSettings['Events']!);
     updateMarkerVisibility(_placeMarkerIds, filterSettings['Places']!);
-    updateMarkerVisibility(_serviceMarkerIds, filterSettings['Services']!);
+    updateMarkerVisibility(_serviceMarkerIds, filterSettings['Other']!);
   }
 
   void showFilterMenu() {
@@ -829,12 +829,12 @@ class MapPageState extends State<MapPage> {
                   ),
                   CheckboxListTile(
                     activeColor: getCategoryColor(selectedThemeKey, 'Service'),
-                    title: const Text("Services"),
-                    value: filterSettings["Services"],
+                    title: const Text("Other"),
+                    value: filterSettings["Other"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        filterSettings["Services"] = value!;
+                        filterSettings["Other"] = value!;
                       });
                       final idList = _serviceMarkerIds;
                       updateMarkerVisibility(idList, value!);
@@ -1486,7 +1486,7 @@ class MapPageState extends State<MapPage> {
                               filterSettings['Music'] == false &&
                               filterSettings['Events'] == false &&
                               filterSettings['Places'] == false &&
-                              filterSettings['Services'] == false) {
+                              filterSettings['Other'] == false) {
                             final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
                             setState(() {
                               filterSettings['Food'] = true;
@@ -1494,7 +1494,7 @@ class MapPageState extends State<MapPage> {
                               filterSettings['Music'] = true;
                               filterSettings['Events'] = true;
                               filterSettings['Places'] = true;
-                              filterSettings['Services'] = true;
+                              filterSettings['Other'] = true;
                               updateMarkerVisibility(idList, true);
                             });
                           }

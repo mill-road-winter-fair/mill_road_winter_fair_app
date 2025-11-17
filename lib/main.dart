@@ -234,7 +234,7 @@ class HomePageState extends State<HomePage> {
     FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
     FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
     FilteredListingsPage(filterPrimaryType: "Place", listings: listings, key: _listingsKeyPlace),
-    FilteredListingsPage(filterPrimaryType: "Service", listings: listings, key: _listingsKeyService),
+    FilteredListingsPage(filterPrimaryType: "Other", listings: listings, key: _listingsKeyService),
   ];
 
   void aboutDialog() {
@@ -370,7 +370,7 @@ class HomePageState extends State<HomePage> {
             BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
             BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
             BottomNavigationBarItem(icon: Icon(Icons.gite), label: "Places"),
-            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
+            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
           ],
         ),
       ),
