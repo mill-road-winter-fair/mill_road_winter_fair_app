@@ -333,6 +333,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             'Shopping' => 'Search market stalls...',
                             'Music' => 'Search musical performances...',
                             'Event' => 'Search events...',
+                            'Place' => 'Search venues and places...',
                             'Service' => 'Search services...',
                             _ => 'Search listings...',
                           },
