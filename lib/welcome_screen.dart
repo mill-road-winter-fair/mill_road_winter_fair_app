@@ -83,10 +83,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       globalBackgroundColor: Theme.of(context).colorScheme.secondary,
       allowImplicitScrolling: true,
       globalFooter: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 0, 6, 28),
+        padding: const EdgeInsets.fromLTRB(6, 0, 6, 16),
         child: SizedBox(
           width: double.infinity,
-          height: 60,
+          height: 50,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
             child: FittedBox(
@@ -199,7 +199,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Our delicious ready-to-eat food\nand drink stalls and trucks", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Icon(Icons.storefront, size: 40, color: getCategoryColor(selectedThemeKey, "Shopping")),
@@ -207,7 +207,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Stalls with arts, crafts and goodies;\ncharities and other organisations", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Icon(Icons.music_note, size: 40, color: getCategoryColor(selectedThemeKey, "Music")),
@@ -215,7 +215,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("The Fair’s amazing and talented\nmusicians, buskers and bands", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Icon(Icons.event, size: 40, color: getCategoryColor(selectedThemeKey, "Event")),
@@ -223,15 +223,15 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Our exciting events, such as\nSanta’s Grotto and the parade", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
-                          Icon(Icons.gite, size: 40, color: getCategoryColor(selectedThemeKey, "Place")),
+                          Icon(Icons.home_work, size: 40, color: getCategoryColor(selectedThemeKey, "Place")),
                           const SizedBox(width: 8),
                           Text("Other organisations or venues with\nactivities, events, food and drinks", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Icon(Icons.wheelchair_pickup, size: 40, color: getCategoryColor(selectedThemeKey, "Service")),
@@ -239,7 +239,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("All our important services, such\nas toilets and first aid points", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Image.asset('assets/mapMarkers/genericGroupMarker.png', height: 40, width: 40, color: Theme.of(context).colorScheme.onSecondary),
