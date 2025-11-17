@@ -220,7 +220,15 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.event, size: 40, color: getCategoryColor(selectedThemeKey, "Event")),
                           const SizedBox(width: 8),
-                          Text("Other exciting events, such as\nSanta’s Grotto and the parade", style: bodyStyle),
+                          Text("Our exciting events, such as\nSanta’s Grotto and the parade", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Icon(Icons.gite, size: 40, color: getCategoryColor(selectedThemeKey, "Place")),
+                          const SizedBox(width: 8),
+                          Text("Other organisations or venues with\nactivities, events, food and drinks", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 20),
