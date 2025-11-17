@@ -224,6 +224,7 @@ class HomePageState extends State<HomePage> {
   final _listingsKeyShopping = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyMusic = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyEvent = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyPlace = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
@@ -232,6 +233,7 @@ class HomePageState extends State<HomePage> {
     FilteredListingsPage(filterPrimaryType: "Shopping", listings: listings, key: _listingsKeyShopping),
     FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
     FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
+    FilteredListingsPage(filterPrimaryType: "Place", listings: listings, key: _listingsKeyPlace),
     FilteredListingsPage(filterPrimaryType: "Service", listings: listings, key: _listingsKeyService),
   ];
 
@@ -354,7 +356,8 @@ class HomePageState extends State<HomePage> {
               case 2 : _listingsKeyShopping.currentState?.onTabVisible();
               case 3 : _listingsKeyMusic.currentState?.onTabVisible();
               case 4 : _listingsKeyEvent.currentState?.onTabVisible();
-              case 5 : _listingsKeyService.currentState?.onTabVisible();
+              case 5 : _listingsKeyPlace.currentState?.onTabVisible();
+              case 6 : _listingsKeyService.currentState?.onTabVisible();
             }
             setState(() {
               index = selectedIndex;
@@ -366,6 +369,7 @@ class HomePageState extends State<HomePage> {
             BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
             BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
             BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
+            BottomNavigationBarItem(icon: Icon(Icons.gite), label: "Places"),
             BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
           ],
         ),
