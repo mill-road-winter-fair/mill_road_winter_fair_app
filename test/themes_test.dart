@@ -13,7 +13,8 @@ void main() {
       expect(getCategoryColor('light', 'Group-Food'), const Color.fromRGBO(242, 153, 0, 1.0));
       expect(getCategoryColor('light', 'Shopping'), const Color.fromRGBO(209, 81, 85, 1.0));
       expect(getCategoryColor('light', 'Music'), const Color.fromRGBO(190, 110, 230, 1.0));
-      expect(getCategoryColor('light', 'Event'), const Color.fromRGBO(243, 190, 66, 1.0));
+      expect(getCategoryColor('light', 'Event'), const Color.fromRGBO(200, 200, 0, 1.0));
+      expect(getCategoryColor('light', 'Place'), const Color.fromRGBO(122, 74, 0, 1.0));
       expect(getCategoryColor('light', 'Service'), const Color.fromRGBO(84, 145, 245, 1.0));
       expect(getCategoryColor('light', 'Unknown'), const Color.fromRGBO(0, 0, 0, 1.0));
     });
@@ -22,7 +23,8 @@ void main() {
       expect(getCategoryColor('dark', 'Food'), const Color.fromRGBO(189, 70, 0, 1.0));
       expect(getCategoryColor('dark', 'Shopping'), const Color.fromRGBO(204, 22, 22, 1.0));
       expect(getCategoryColor('dark', 'Music'), const Color.fromRGBO(183, 13, 204, 1.0));
-      expect(getCategoryColor('dark', 'Event'), const Color.fromRGBO(255, 196, 0, 1.0));
+      expect(getCategoryColor('dark', 'Event'), const Color.fromRGBO(200, 200, 0, 1.0));
+      expect(getCategoryColor('dark', 'Place'), const Color.fromRGBO(169, 104, 0, 1.0));
       expect(getCategoryColor('dark', 'Service'), const Color.fromRGBO(29, 112, 198, 1.0));
       expect(getCategoryColor('dark', 'Unknown'), const Color.fromRGBO(0, 0, 0, 1.0));
     });
@@ -31,7 +33,8 @@ void main() {
       expect(getCategoryColor('2024', 'Food'), const Color.fromRGBO(204, 110, 51, 1.0));
       expect(getCategoryColor('2024', 'Shopping'), const Color.fromRGBO(200, 0, 10, 1.0));
       expect(getCategoryColor('2024', 'Music'), const Color.fromRGBO(175, 98, 214, 1.0));
-      expect(getCategoryColor('2024', 'Event'), const Color.fromRGBO(204, 161, 51, 1.0));
+      expect(getCategoryColor('2024', 'Event'), const Color.fromRGBO(200, 200, 0, 1.0));
+      expect(getCategoryColor('2024', 'Place'), const Color.fromRGBO(122, 74, 0, 1.0));
       expect(getCategoryColor('2024', 'Service'), const Color.fromRGBO(37, 63, 128, 1.0));
       expect(getCategoryColor('2024', 'Unknown'), const Color.fromRGBO(0, 0, 0, 1.0));
     });
@@ -40,7 +43,8 @@ void main() {
       expect(getCategoryColor('highContrast', 'Food'), const Color.fromRGBO(131, 0, 0, 1.0));
       expect(getCategoryColor('highContrast', 'Shopping'), const Color.fromRGBO(5, 117, 0, 1.0));
       expect(getCategoryColor('highContrast', 'Music'), const Color.fromRGBO(125, 0, 140, 1.0));
-      expect(getCategoryColor('highContrast', 'Event'), const Color.fromRGBO(151, 143, 0, 1.0));
+      expect(getCategoryColor('highContrast', 'Event'), const Color.fromRGBO(200, 200, 0, 1.0));
+      expect(getCategoryColor('highContrast', 'Place'), const Color.fromRGBO(169, 104, 0, 1.0));
       expect(getCategoryColor('highContrast', 'Service'), const Color.fromRGBO(0, 120, 114, 1.0));
       expect(getCategoryColor('highContrast', 'Unknown'), const Color.fromRGBO(0, 0, 0, 1.0));
     });
@@ -49,7 +53,8 @@ void main() {
       expect(getCategoryColor('colourBlindFriendly', 'Food'), const Color.fromRGBO(255, 100, 0, 1.0));
       expect(getCategoryColor('colourBlindFriendly', 'Shopping'), const Color.fromRGBO(255, 0, 0, 1.0));
       expect(getCategoryColor('colourBlindFriendly', 'Music'), const Color.fromRGBO(51, 204, 176, 1.0));
-      expect(getCategoryColor('colourBlindFriendly', 'Event'), const Color.fromRGBO(255, 196, 0, 1.0));
+      expect(getCategoryColor('colourBlindFriendly', 'Event'), const Color.fromRGBO(200, 200, 0, 1.0));
+      expect(getCategoryColor('colourBlindFriendly', 'Place'), const Color.fromRGBO(169, 104, 0, 1.0));
       expect(getCategoryColor('colourBlindFriendly', 'Service'), const Color.fromRGBO(153, 0, 255, 1.0));
       expect(getCategoryColor('colourBlindFriendly', 'Unknown'), const Color.fromRGBO(255, 0, 0, 1.0));
     });
@@ -69,6 +74,8 @@ void main() {
         'Music',
         'Group-Event',
         'Event',
+        'Group-Place',
+        'Place',
         'Group-Service',
         'Service-Information',
         'Service-FirstAid',

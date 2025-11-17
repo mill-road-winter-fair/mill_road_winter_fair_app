@@ -130,12 +130,14 @@ void main() {
       final shoppingColor = getCategoryColor("light", "Shopping");
       final musicColor = getCategoryColor("light", "Music");
       final eventColor = getCategoryColor("light", "Event");
+      final placeColor = getCategoryColor("light", "Place");
       final serviceColor = getCategoryColor("light", "Service");
 
       expect(foodColor, const Color.fromRGBO(242, 153, 0, 1.0));
       expect(shoppingColor, const Color.fromRGBO(209, 81, 85, 1.0));
       expect(musicColor, const Color.fromRGBO(190, 110, 230, 1.0));
-      expect(eventColor, const Color.fromRGBO(243, 190, 66, 1.0));
+      expect(eventColor, const Color.fromRGBO(200, 200, 0, 1.0));
+      expect(placeColor, const Color.fromRGBO(122, 74, 0, 1.0));
       expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
     });
 
@@ -323,7 +325,8 @@ void main() {
       expect(find.widgetWithText(CheckboxListTile, "Stalls"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Music"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Events"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Places"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Other"), findsOneWidget);
 
       // Test Food checkbox
       await tester.tap(find.widgetWithText(CheckboxListTile, "Food"));
@@ -406,7 +409,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Services checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Other"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -415,7 +418,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, false);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Other"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);

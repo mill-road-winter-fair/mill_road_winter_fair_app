@@ -48,7 +48,8 @@ void main() {
       expect(find.text('Stalls'), findsOneWidget);
       expect(find.text('Music'), findsOneWidget);
       expect(find.text('Events'), findsOneWidget);
-      expect(find.text('Services'), findsOneWidget);
+      expect(find.text('Places'), findsOneWidget);
+      expect(find.text('Other'), findsOneWidget);
     });
 
     testWidgets('drawer displays expected widgets', (WidgetTester tester) async {
@@ -210,10 +211,15 @@ void main() {
 
       expect(homePageState.index, 4);
 
-      await tester.tap(find.text('Services'));
+      await tester.tap(find.text('Places'));
       await tester.pumpAndSettle();
 
       expect(homePageState.index, 5);
+
+      await tester.tap(find.text('Other'));
+      await tester.pumpAndSettle();
+
+      expect(homePageState.index, 6);
 
       await tester.tap(find.text('Map'));
       await tester.pumpAndSettle();
