@@ -320,7 +320,7 @@ class HomePageState extends State<HomePage> {
         ),
         title: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text(appBarTitle, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ),
         actions: [
           IconButton(
