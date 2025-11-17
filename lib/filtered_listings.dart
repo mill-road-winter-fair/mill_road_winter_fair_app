@@ -61,6 +61,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       detailsVisibilityList = List<bool>.filled(500, false);
       _searchQuery = '';
       _isSearching = false;
+      appBarTitle = "${widget.filterPrimaryType} listings";
     });
     if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
   }

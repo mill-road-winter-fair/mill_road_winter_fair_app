@@ -23,6 +23,7 @@ final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 
 // Define a global variable for routing back to a previous index
 int previousIndex = 0;
+String appBarTitle = 'Mill Road Winter Fair 2025';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -315,9 +316,9 @@ class HomePageState extends State<HomePage> {
             },
           ),
         ),
-        title: const FittedBox(
+        title: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text('Mill Road Winter Fair 2025', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          child: Text(appBarTitle, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ),
         actions: [
           IconButton(
@@ -348,6 +349,7 @@ class HomePageState extends State<HomePage> {
             // Update the user's location
             establishLocation();
             switch (selectedIndex) {
+              case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
               case 1 : _listingsKeyFood.currentState?.onTabVisible();
               case 2 : _listingsKeyShopping.currentState?.onTabVisible();
               case 3 : _listingsKeyMusic.currentState?.onTabVisible();
