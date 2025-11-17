@@ -1495,7 +1495,7 @@ class MapPageState extends State<MapPage> {
                               filterSettings['Events'] == false &&
                               filterSettings['Places'] == false &&
                               filterSettings['Other'] == false) {
-                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds;
                             setState(() {
                               filterSettings['Food'] = true;
                               filterSettings['Stalls'] = true;
