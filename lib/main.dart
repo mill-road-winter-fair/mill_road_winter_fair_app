@@ -369,7 +369,7 @@ class HomePageState extends State<HomePage> {
             BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
             BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
             BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-            BottomNavigationBarItem(icon: Icon(Icons.gite), label: "Places"),
+            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
             BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
           ],
         ),
