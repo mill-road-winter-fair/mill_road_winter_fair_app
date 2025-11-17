@@ -743,7 +743,7 @@ class MapPageState extends State<MapPage> {
   void showFilterMenu() {
     debugPrint('showFilterMenu called');
     showModalBottomSheet(
-      scrollControlDisabledMaxHeightRatio: 0.8,
+      scrollControlDisabledMaxHeightRatio: 0.85,
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
       builder: (BuildContext context) {
@@ -763,6 +763,7 @@ class MapPageState extends State<MapPage> {
                     )
                   ]),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Food'),
                     title: const Text("Food"),
                     value: filterSettings["Food"],
@@ -776,6 +777,7 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
                     title: const Text("Stalls"),
                     value: filterSettings["Stalls"],
@@ -789,6 +791,7 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Music'),
                     title: const Text("Music"),
                     value: filterSettings["Music"],
@@ -802,6 +805,7 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Event'),
                     title: const Text("Events"),
                     value: filterSettings["Events"],
@@ -815,6 +819,7 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Place'),
                     title: const Text("Places"),
                     value: filterSettings["Places"],
@@ -828,6 +833,7 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Service'),
                     title: const Text("Other"),
                     value: filterSettings["Other"],
@@ -842,6 +848,7 @@ class MapPageState extends State<MapPage> {
                   ),
                   Divider(color: Colors.grey[350]),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade road closures")),
                     value: preferredRoadClosurePolygonVisible,
@@ -874,7 +881,7 @@ class MapPageState extends State<MapPage> {
                                 icon: const Icon(Icons.filter_alt),
                                 label: const Text('Show all'),
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 4),
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
@@ -889,7 +896,7 @@ class MapPageState extends State<MapPage> {
                                 icon: const Icon(Icons.filter_alt_off),
                                 label: const Text('Hide all'),
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 4),
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
@@ -904,6 +911,7 @@ class MapPageState extends State<MapPage> {
                       ),
                     ],
                   ),
+                  const Row(children:[SizedBox(height: 12)]),
                 ],
               ),
             );
