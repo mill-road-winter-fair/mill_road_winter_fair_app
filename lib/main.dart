@@ -333,8 +333,7 @@ class HomePageState extends State<HomePage> {
         index: index,
         children: _pages,
       ),
-      bottomNavigationBar: Container(
-        child: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           showUnselectedLabels: true,
           elevation: 0,
@@ -366,7 +365,6 @@ class HomePageState extends State<HomePage> {
             BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
           ],
         ),
-      ),
       drawer: Drawer(
         child: Column(
           spacing: 0,
