@@ -44,6 +44,7 @@ class MapPageState extends State<MapPage> {
   late List<MarkerId> _stallsMarkerIds;
   late List<MarkerId> _musicMarkerIds;
   late List<MarkerId> _eventMarkerIds;
+  late List<MarkerId> _placeMarkerIds;
   late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polygon> _polygons = {}; // For displaying the road closure polygon
@@ -69,7 +70,8 @@ class MapPageState extends State<MapPage> {
     'Stalls': true,
     'Music': true,
     'Events': true,
-    'Services': true,
+    'Places': true,
+    'Other': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
 
@@ -369,6 +371,7 @@ class MapPageState extends State<MapPage> {
     _foodMarkerIds = [];
     _stallsMarkerIds = [];
     _musicMarkerIds = [];
+    _placeMarkerIds = [];
     _eventMarkerIds = [];
     _serviceMarkerIds = [];
 
@@ -383,6 +386,8 @@ class MapPageState extends State<MapPage> {
         _musicMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'] == "Event" || listing['primaryType'] == "Group-Event") {
         _eventMarkerIds.add(MarkerId(listing['id'].toString()));
+      } else if (listing['primaryType'] == "Place" || listing['primaryType'] == "Group-Place") {
+        _placeMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if (listing['primaryType'].startsWith("Service") || listing['primaryType'] == "Group-Service") {
         _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
       }
@@ -417,7 +422,7 @@ class MapPageState extends State<MapPage> {
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('createAllMarkerBitmaps called');
     for (var listingType
-        in 'Food, Shopping, Music, Event, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Service'
+        in 'Food, Shopping, Music, Event, Place, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Place, Group-Service'
             .split(', ')) {
       BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
       bitmapDescriptors[listingType] = newBitmapDescriptor;
@@ -717,12 +722,12 @@ class MapPageState extends State<MapPage> {
 
   void hideAllMarkers() {
     debugPrint('hideAllMarkers called');
-    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, false);
+    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds, false);
   }
 
   void showAllMarkers() {
     debugPrint('showAllMarkers called');
-    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds, true);
+    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds, true);
   }
 
   void showFilteredMarkers() {
@@ -731,13 +736,14 @@ class MapPageState extends State<MapPage> {
     updateMarkerVisibility(_stallsMarkerIds, filterSettings['Stalls']!);
     updateMarkerVisibility(_musicMarkerIds, filterSettings['Music']!);
     updateMarkerVisibility(_eventMarkerIds, filterSettings['Events']!);
-    updateMarkerVisibility(_serviceMarkerIds, filterSettings['Services']!);
+    updateMarkerVisibility(_placeMarkerIds, filterSettings['Places']!);
+    updateMarkerVisibility(_serviceMarkerIds, filterSettings['Other']!);
   }
 
   void showFilterMenu() {
     debugPrint('showFilterMenu called');
     showModalBottomSheet(
-      scrollControlDisabledMaxHeightRatio: 0.8,
+      scrollControlDisabledMaxHeightRatio: 0.85,
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
       builder: (BuildContext context) {
@@ -757,6 +763,7 @@ class MapPageState extends State<MapPage> {
                     )
                   ]),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Food'),
                     title: const Text("Food"),
                     value: filterSettings["Food"],
@@ -770,6 +777,7 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
                     title: const Text("Stalls"),
                     value: filterSettings["Stalls"],
@@ -783,6 +791,7 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Music'),
                     title: const Text("Music"),
                     value: filterSettings["Music"],
@@ -796,6 +805,7 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Event'),
                     title: const Text("Events"),
                     value: filterSettings["Events"],
@@ -809,13 +819,28 @@ class MapPageState extends State<MapPage> {
                     },
                   ),
                   CheckboxListTile(
-                    activeColor: getCategoryColor(selectedThemeKey, 'Service'),
-                    title: const Text("Services"),
-                    value: filterSettings["Services"],
+                    visualDensity: const VisualDensity(vertical: -4),
+                    activeColor: getCategoryColor(selectedThemeKey, 'Place'),
+                    title: const Text("Places"),
+                    value: filterSettings["Places"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        filterSettings["Services"] = value!;
+                        filterSettings["Places"] = value!;
+                      });
+                      final idList = _placeMarkerIds;
+                      updateMarkerVisibility(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
+                    activeColor: getCategoryColor(selectedThemeKey, 'Service'),
+                    title: const Text("Other"),
+                    value: filterSettings["Other"],
+                    onChanged: (value) {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        filterSettings["Other"] = value!;
                       });
                       final idList = _serviceMarkerIds;
                       updateMarkerVisibility(idList, value!);
@@ -823,6 +848,7 @@ class MapPageState extends State<MapPage> {
                   ),
                   Divider(color: Colors.grey[350]),
                   CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4),
                     activeColor: Theme.of(context).colorScheme.tertiary,
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade road closures")),
                     value: preferredRoadClosurePolygonVisible,
@@ -855,7 +881,7 @@ class MapPageState extends State<MapPage> {
                                 icon: const Icon(Icons.filter_alt),
                                 label: const Text('Show all'),
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 4),
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
@@ -870,7 +896,7 @@ class MapPageState extends State<MapPage> {
                                 icon: const Icon(Icons.filter_alt_off),
                                 label: const Text('Hide all'),
                               ),
-                              const SizedBox(width: 10),
+                              const SizedBox(width: 4),
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
@@ -885,6 +911,7 @@ class MapPageState extends State<MapPage> {
                       ),
                     ],
                   ),
+                  const Row(children:[SizedBox(height: 12)]),
                 ],
               ),
             );
@@ -1466,14 +1493,16 @@ class MapPageState extends State<MapPage> {
                               filterSettings['Stalls'] == false &&
                               filterSettings['Music'] == false &&
                               filterSettings['Events'] == false &&
-                              filterSettings['Services'] == false) {
-                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _serviceMarkerIds;
+                              filterSettings['Places'] == false &&
+                              filterSettings['Other'] == false) {
+                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds;
                             setState(() {
                               filterSettings['Food'] = true;
                               filterSettings['Stalls'] = true;
                               filterSettings['Music'] = true;
                               filterSettings['Events'] = true;
-                              filterSettings['Services'] = true;
+                              filterSettings['Places'] = true;
+                              filterSettings['Other'] = true;
                               updateMarkerVisibility(idList, true);
                             });
                           }
