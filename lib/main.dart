@@ -233,6 +233,7 @@ class HomePageState extends State<HomePage> {
     FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
     FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
     FilteredListingsPage(filterPrimaryType: "Service", listings: listings, key: _listingsKeyService),
+    FilteredListingsPage(filterPrimaryType: "Saved", listings: listings),
   ];
 
   void aboutDialog() {
@@ -416,11 +417,11 @@ class HomePageState extends State<HomePage> {
               flex: 4,
               child: ListTile(
                 leading: const FaIcon(FontAwesomeIcons.solidHeart),
-                title: const Text('Favourite listings', style: TextStyle(fontWeight: FontWeight.bold)),
+                title: const Text('Saved listings', style: TextStyle(fontWeight: FontWeight.bold)),
                 onTap: () {
                   HapticFeedback.lightImpact();
                   Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => FavouriteListingsPage(listings: listings)));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", listings: listings)));
                 },
               ),
             ),
