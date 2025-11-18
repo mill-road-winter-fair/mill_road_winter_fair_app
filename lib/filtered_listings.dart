@@ -319,6 +319,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     List<Map<String, dynamic>> primaryFiltered = [];
     if (widget.filterPrimaryType == 'Service') {
       primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
+    } else if (widget.filterPrimaryType == 'Saved') {
+      primaryFiltered = listings.where((listing) => favouriteListingKeys.contains(listing['id'])).toList();
     } else {
       primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
     }
@@ -366,6 +368,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             'Music' => 'Search musical performances...',
                             'Event' => 'Search events...',
                             'Service' => 'Search services...',
+                            'Saved' => 'Search saved listings...',
                             _ => 'Search listings...',
                           },
                           leading: const Icon(Icons.search),
