@@ -334,7 +334,6 @@ class HomePageState extends State<HomePage> {
         children: _pages,
       ),
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.only(right: 10),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           showUnselectedLabels: true,
