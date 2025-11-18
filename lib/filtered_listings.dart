@@ -274,6 +274,22 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called');
+    if (widget.filterPrimaryType == 'Saved') {
+      return Scaffold(
+      appBar: AppBar(
+        title: const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text('Saved listings'),
+        ),
+      ),
+      body: generateListingsList(),
+      );
+    } else {
+      return generateListingsList();
+    }
+  }
+
+  Widget generateListingsList() {
     final homePageState = context.findAncestorStateOfType<HomePageState>();
     // Show error if there are no listings
     if (listings.isEmpty) {
