@@ -329,7 +329,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           elevation: const WidgetStatePropertyAll(0),
                           hintText: switch (widget.filterPrimaryType) {
                             'Food' => 'Search food & drink vendors...',
-                            'Shopping' => 'Search market stalls...',
+                            'Stalls' => 'Search market stalls...',
                             'Music' => 'Search musical performances...',
                             'Event' => 'Search events...',
                             'Service' => 'Search services...',

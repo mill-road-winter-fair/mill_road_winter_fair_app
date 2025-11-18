@@ -228,7 +228,7 @@ class HomePageState extends State<HomePage> {
   late final _pages = [
     MapPage(listings: listings, key: mapPageKey),
     FilteredListingsPage(filterPrimaryType: "Food", listings: listings, key: _listingsKeyFood),
-    FilteredListingsPage(filterPrimaryType: "Shopping", listings: listings, key: _listingsKeyShopping),
+    FilteredListingsPage(filterPrimaryType: "Stalls", listings: listings, key: _listingsKeyShopping),
     FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
     FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
     FilteredListingsPage(filterPrimaryType: "Service", listings: listings, key: _listingsKeyService),
