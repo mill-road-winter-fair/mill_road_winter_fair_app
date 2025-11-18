@@ -515,8 +515,8 @@ class HomePageState extends State<HomePage> {
             Expanded(
               flex: 4,
               child: ListTile(
-                leading: const Icon(Icons.first_page),
-                title: const Text('Replay welcome screen', style: TextStyle(fontWeight: FontWeight.bold)),
+                leading: const Icon(Icons.menu_book),
+                title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
                 onTap: () {
                   HapticFeedback.lightImpact();
                   Navigator.pop(context);
