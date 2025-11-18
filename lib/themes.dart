@@ -302,7 +302,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
       Color color = const Color.fromRGBO(243, 190, 66, 1.0);
       return color;
     } else if (primaryType == "Place" || primaryType == "Group-Place") {
-      Color color = const Color.fromRGBO(122, 74, 0, 1.0);
+      Color color = const Color.fromRGBO(79, 184, 75, 1.0);
       return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(84, 145, 245, 1.0);
@@ -314,7 +314,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     return color;
   } else if (selectedThemeKey == "dark") {
     if (primaryType == "Food" || primaryType == "Group-Food") {
-      Color color = const Color.fromRGBO(189, 70, 0, 1.0);
+      Color color = const Color.fromRGBO(221, 85, 0, 1.0);
       return color;
     } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
       Color color = const Color.fromRGBO(204, 22, 22, 1.0);
@@ -326,7 +326,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
       Color color = const Color.fromRGBO(255, 196, 0, 1.0);
       return color;
     } else if (primaryType == "Place" || primaryType == "Group-Place") {
-      Color color = const Color.fromRGBO(169, 104, 0, 1.0);
+      Color color = const Color.fromRGBO(7, 128, 0, 1.0);
       return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(29, 112, 198, 1.0);
@@ -338,7 +338,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     return color;
   } else if (selectedThemeKey == "2024") {
     if (primaryType == "Food" || primaryType == "Group-Food") {
-      Color color = const Color.fromRGBO(204, 110, 51, 1.0);
+      Color color = const Color.fromRGBO(216, 114, 50, 1.0);
       return color;
     } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
       Color color = const Color.fromRGBO(200, 0, 10, 1);
@@ -350,7 +350,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
       Color color = const Color.fromRGBO(204, 161, 51, 1.0);
       return color;
     } else if (primaryType == "Place" || primaryType == "Group-Place") {
-      Color color = const Color.fromRGBO(122, 74, 0, 1.0);
+      Color color = const Color.fromRGBO(0, 115, 37, 1.0);
       return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(37, 63, 128, 1.0);
@@ -362,22 +362,22 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     return color;
   } else if (selectedThemeKey == "highContrast") {
     if (primaryType == "Food" || primaryType == "Group-Food") {
-      Color color = const Color.fromRGBO(131, 0, 0, 1.0);
+      Color color = const Color.fromRGBO(255, 115, 0, 1.0);
       return color;
     } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
-      Color color = const Color.fromRGBO(5, 117, 0, 1.0);
+      Color color = const Color.fromRGBO(255, 0, 0, 1.0);
       return color;
     } else if (primaryType == "Music" || primaryType == "Group-Music") {
-      Color color = const Color.fromRGBO(125, 0, 140, 1.0);
+      Color color = const Color.fromRGBO(228, 0, 255, 1.0);
       return color;
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
-      Color color = const Color.fromRGBO(151, 143, 0, 1.0);
+      Color color = const Color.fromRGBO(237, 201, 0, 1.0);
       return color;
     } else if (primaryType == "Place" || primaryType == "Group-Place") {
-      Color color = const Color.fromRGBO(169, 104, 0, 1.0);
+      Color color = const Color.fromRGBO(28, 213, 0, 1.0);
       return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
-      Color color = const Color.fromRGBO(0, 120, 114, 1.0);
+      Color color = const Color.fromRGBO(0, 187, 255, 1.0);
       return color;
     }
 
@@ -386,22 +386,22 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     return color;
   } else if (selectedThemeKey == "colourBlindFriendly") {
     if (primaryType == "Food" || primaryType == "Group-Food") {
-      Color color = const Color.fromRGBO(255, 100, 0, 1.0);
+      Color color = const Color.fromRGBO(213, 94, 0, 1.0);
       return color;
     } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
-      Color color = const Color.fromRGBO(255, 0, 0, 1.0);
+      Color color = const Color.fromRGBO(230, 159, 0, 1.0);
       return color;
     } else if (primaryType == "Music" || primaryType == "Group-Music") {
-      Color color = const Color.fromRGBO(51, 204, 176, 1.0);
+      Color color = const Color.fromRGBO(204, 121, 167, 1.0);
       return color;
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
-      Color color = const Color.fromRGBO(255, 196, 0, 1.0);
+      Color color = const Color.fromRGBO(240, 228, 66, 1.0);
       return color;
     } else if (primaryType == "Place" || primaryType == "Group-Place") {
-      Color color = const Color.fromRGBO(169, 104, 0, 1.0);
+      Color color = const Color.fromRGBO(0, 158, 115, 1.0);
       return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
-      Color color = const Color.fromRGBO(153, 0, 255, 1.0);
+      Color color = const Color.fromRGBO(0, 114, 178, 1.0);
       return color;
     }
 
