@@ -276,7 +276,7 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
     final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-    return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: 48.0, width: 48.0);
+    return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: 40.0, width: 40.0);
   } catch (e) {
     debugPrint("Custom marker rendering failed: $e");
     return BitmapDescriptor.defaultMarker;
