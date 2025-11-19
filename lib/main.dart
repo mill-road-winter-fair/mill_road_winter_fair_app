@@ -23,6 +23,7 @@ final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 
 // Define a global variable for routing back to a previous index
 int previousIndex = 0;
+String appBarTitle = 'Mill Road Winter Fair 2025';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -223,6 +224,7 @@ class HomePageState extends State<HomePage> {
   final _listingsKeyShopping = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyMusic = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyEvent = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyPlace = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
@@ -231,7 +233,8 @@ class HomePageState extends State<HomePage> {
     FilteredListingsPage(filterPrimaryType: "Shopping", listings: listings, key: _listingsKeyShopping),
     FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
     FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
-    FilteredListingsPage(filterPrimaryType: "Service", listings: listings, key: _listingsKeyService),
+    FilteredListingsPage(filterPrimaryType: "Place", listings: listings, key: _listingsKeyPlace),
+    FilteredListingsPage(filterPrimaryType: "Other", listings: listings, key: _listingsKeyService),
     FilteredListingsPage(filterPrimaryType: "Saved", listings: listings),
   ];
 
@@ -316,9 +319,9 @@ class HomePageState extends State<HomePage> {
             },
           ),
         ),
-        title: const FittedBox(
+        title: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Text('Mill Road Winter Fair 2025', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ),
         actions: [
           IconButton(
@@ -349,11 +352,13 @@ class HomePageState extends State<HomePage> {
             // Update the user's location
             establishLocation();
             switch (selectedIndex) {
+              case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
               case 1 : _listingsKeyFood.currentState?.onTabVisible();
               case 2 : _listingsKeyShopping.currentState?.onTabVisible();
               case 3 : _listingsKeyMusic.currentState?.onTabVisible();
               case 4 : _listingsKeyEvent.currentState?.onTabVisible();
-              case 5 : _listingsKeyService.currentState?.onTabVisible();
+              case 5 : _listingsKeyPlace.currentState?.onTabVisible();
+              case 6 : _listingsKeyService.currentState?.onTabVisible();
             }
             setState(() {
               index = selectedIndex;
@@ -365,7 +370,8 @@ class HomePageState extends State<HomePage> {
             BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
             BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
             BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
+            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
+            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
           ],
         ),
       ),
