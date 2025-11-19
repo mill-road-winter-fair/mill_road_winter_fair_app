@@ -84,7 +84,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       globalBackgroundColor: Theme.of(context).colorScheme.secondary,
       allowImplicitScrolling: true,
       globalFooter: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 0, 6, 16),
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
         child: SizedBox(
           width: double.infinity,
           height: 50,
