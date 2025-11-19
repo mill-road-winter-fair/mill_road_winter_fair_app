@@ -9,8 +9,8 @@ void main() {
 
   group('Themes', () {
     test('getCategoryColor returns expected colors for light theme', () {
-      expect(getCategoryColor('light', 'Food'), const Color.fromRGBO(242, 153, 0, 1.0));
-      expect(getCategoryColor('light', 'Group-Food'), const Color.fromRGBO(242, 153, 0, 1.0));
+      expect(getCategoryColor('light', 'Food'), const Color.fromRGBO(255, 156, 26, 1.0));
+      expect(getCategoryColor('light', 'Group-Food'), const Color.fromRGBO(255, 156, 26, 1.0));
       expect(getCategoryColor('light', 'Shopping'), const Color.fromRGBO(209, 81, 85, 1.0));
       expect(getCategoryColor('light', 'Music'), const Color.fromRGBO(190, 110, 230, 1.0));
       expect(getCategoryColor('light', 'Event'), const Color.fromRGBO(243, 190, 66, 1.0));
@@ -20,7 +20,7 @@ void main() {
     });
 
     test('getCategoryColor returns expected colors for dark theme', () {
-      expect(getCategoryColor('dark', 'Food'), const Color.fromRGBO(221, 85, 0, 1.0));
+      expect(getCategoryColor('dark', 'Food'), const Color.fromRGBO(241, 108, 0, 1.0));
       expect(getCategoryColor('dark', 'Shopping'), const Color.fromRGBO(204, 22, 22, 1.0));
       expect(getCategoryColor('dark', 'Music'), const Color.fromRGBO(183, 13, 204, 1.0));
       expect(getCategoryColor('dark', 'Event'), const Color.fromRGBO(255, 196, 0, 1.0));
