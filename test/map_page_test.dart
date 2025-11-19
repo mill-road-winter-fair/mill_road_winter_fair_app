@@ -133,11 +133,11 @@ void main() {
       final placeColor = getCategoryColor("light", "Place");
       final serviceColor = getCategoryColor("light", "Service");
 
-      expect(foodColor, const Color.fromRGBO(242, 153, 0, 1.0));
+      expect(foodColor, const Color.fromRGBO(255, 156, 26, 1.0));
       expect(shoppingColor, const Color.fromRGBO(209, 81, 85, 1.0));
       expect(musicColor, const Color.fromRGBO(190, 110, 230, 1.0));
       expect(eventColor, const Color.fromRGBO(243, 190, 66, 1.0));
-      expect(placeColor, const Color.fromRGBO(122, 74, 0, 1.0));
+      expect(placeColor, const Color.fromRGBO(79, 184, 75, 1.0));
       expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
     });
 

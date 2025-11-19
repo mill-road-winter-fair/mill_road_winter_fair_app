@@ -317,6 +317,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
     } else if (widget.filterPrimaryType == 'Saved') {
       primaryFiltered = listings.where((listing) => favouriteListingKeys.contains(listing['id'])).toList();
+    } else if (widget.filterPrimaryType == 'Stalls') {
+      // special case to prevent the rename breaking existing data
+      primaryFiltered = listings.where((listing) => (listing['primaryType'] == 'Shopping' || listing['primaryType'] == widget.filterPrimaryType)).toList();
     } else {
       primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
     }
@@ -360,7 +363,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           elevation: const WidgetStatePropertyAll(0),
                           hintText: switch (widget.filterPrimaryType) {
                             'Food' => 'Search food & drink vendors...',
-                            'Shopping' => 'Search market stalls...',
+                            'Stalls' => 'Search market stalls...',
                             'Music' => 'Search musical performances...',
                             'Event' => 'Search events...',
                             'Place' => 'Search venues and places...',
@@ -555,7 +558,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+                        "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : '.\nCheck back for the latest listings\nin the lead-up to the Fair'}.",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
