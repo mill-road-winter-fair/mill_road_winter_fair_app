@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -353,7 +354,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("There’s a button for each listings\ncategory at the bottom of the app", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -361,7 +362,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Tap on these to see everything\nthat’s on in that category", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -369,7 +370,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Sort the list by location,\nnearest, name or time", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Icon(Icons.update, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -377,7 +378,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Tap this button to jump to the\ncurrent time in the list", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Icon(Icons.event_busy, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -385,12 +386,20 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("This button hides all the listings\nthat have finished", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Icon(Icons.search, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           Text("Tap the search button and type\nto find specific listings", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("Save your favourite listings, and\nview these from the main menu", style: bodyStyle),
                         ],
                       ),
                     ],
