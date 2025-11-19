@@ -73,7 +73,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     super.dispose();
   }
 
-  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
+  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client, bool navigatorPop) async {
     // Remember the previous index to allow returning back
     previousIndex = homePageKey.currentState!.index;
 
@@ -81,7 +81,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     homePageKey.currentState?.setCurrentIndex(0);
 
     // Request the map page to show directions
-    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
+    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
   }
 
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
@@ -276,13 +276,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     debugPrint('FilteredListingsPageState build() called');
     if (widget.filterPrimaryType == 'Saved') {
       return Scaffold(
-      appBar: AppBar(
-        title: const FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text('Saved listings'),
+        appBar: AppBar(
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('Saved listings'),
+          ),
         ),
-      ),
-      body: generateListingsList(),
+        body: generateListingsList(),
       );
     } else {
       return generateListingsList();
@@ -503,13 +503,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               onDetailsTapped: () => toggleDetailsRow(index),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () {
-                                if (homePageState != null) {
-                                  navigateToMapAndGetDirections(
-                                    listing['id'],
-                                    destinationLatLng,
-                                    http.Client(),
-                                  );
-                                }
+                                navigateToMapAndGetDirections(
+                                  listing['id'],
+                                  destinationLatLng,
+                                  http.Client(),
+                                  (homePageState == null)
+                                );
                               },
                             ) : const SizedBox.shrink(),
                             // separator except after last item
