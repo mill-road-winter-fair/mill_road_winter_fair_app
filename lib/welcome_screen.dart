@@ -405,7 +405,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                       const SizedBox(height: 13),
                       Row(
                         children: [
-                          FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary),
+                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
                           Text("Save your favourite listings, and\nview these from the main menu", style: bodyStyle),
                         ],
