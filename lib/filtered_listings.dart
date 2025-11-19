@@ -222,6 +222,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               alignment: 0,
             );
           }
+        } else {
+          if (itemScrollController.isAttached) {
+            itemScrollController.scrollTo(
+              curve: Curves.linear,
+              index: 0,
+              duration: const Duration(milliseconds: 300),
+              alignment: 0,
+            );
+          }
         }
         _saveSettings();
       }
