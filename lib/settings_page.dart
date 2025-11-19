@@ -117,6 +117,8 @@ Future<void> loadSettings() async {
     themeNotifier = ValueNotifier(selectedThemeKey);
 
     mapStyle = 'standardMap';
+    favouriteListingKeys = {};
+
   }
 }
 

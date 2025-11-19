@@ -25,6 +25,7 @@ void main() {
     required String description,
     required Function onGetDirections,
     required bool detailsVisible,
+    required bool listingFavourited,
   }) {
     return MaterialApp(
       home: Scaffold(
@@ -41,6 +42,7 @@ void main() {
           description: description,
           onGetDirections: onGetDirections,
           detailsVisible: detailsVisible,
+          listingFavourited: listingFavourited,
         ),
       ),
     );
@@ -61,6 +63,7 @@ void main() {
         description: 'Nice buns',
         detailsVisible: true,
         onGetDirections: () {},
+        listingFavourited: false,
       ));
 
       expect(find.text('Glazed and Confused'), findsOneWidget);
@@ -84,6 +87,7 @@ void main() {
         description: 'Nice buns',
         detailsVisible: true,
         onGetDirections: () {},
+        listingFavourited: false,
       ));
 
       expect(find.text('Glazed and Confused'), findsOneWidget);
@@ -114,6 +118,7 @@ void main() {
         onGetDirections: () {
           directionsCalled = true;
         },
+        listingFavourited: false,
       ));
 
       final getDirectionsButton = find.text('Directions');
