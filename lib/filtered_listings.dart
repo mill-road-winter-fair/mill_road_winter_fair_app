@@ -286,6 +286,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     List<Map<String, dynamic>> primaryFiltered = [];
     if (widget.filterPrimaryType == 'Service') {
       primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
+    } else if (widget.filterPrimaryType == 'Stalls') {
+      // special case to prevent the rename breaking existing data
+      primaryFiltered = listings.where((listing) => (listing['primaryType'] == 'Shopping' || listing['primaryType'] == widget.filterPrimaryType)).toList();
     } else {
       primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
     }
