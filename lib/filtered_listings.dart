@@ -16,11 +16,6 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Store the state of each listings page in a shared class
-class SharedListingsPageConfig {
-  static String theFilterPrimaryTypeToggle = ''; // which tab we're on so we can see if we've switched
-}
-
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
   final List<Map<String, dynamic>> listings;
