@@ -536,7 +536,7 @@ void addGroupMarker(listing) async {
                   builder: (context, constraints) {
                     return ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.95,
+                        maxHeight: constraints.maxHeight * 0.90,
                       ),
                       child: Scrollbar(
                         controller: groupSheetModalScrollController,
@@ -669,7 +669,7 @@ void addGroupMarker(listing) async {
                   }
                   return ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxHeight: constraints.maxHeight * 0.95,
+                      maxHeight: constraints.maxHeight * 0.90,
                     ),
                     child: Scrollbar(
                       controller: specificSheetModalScrollController,
