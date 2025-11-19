@@ -230,7 +230,7 @@ class HomePageState extends State<HomePage> {
   late final _pages = [
     MapPage(listings: listings, key: mapPageKey),
     FilteredListingsPage(filterPrimaryType: "Food", listings: listings, key: _listingsKeyFood),
-    FilteredListingsPage(filterPrimaryType: "Shopping", listings: listings, key: _listingsKeyShopping),
+    FilteredListingsPage(filterPrimaryType: "Stalls", listings: listings, key: _listingsKeyShopping),
     FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
     FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
     FilteredListingsPage(filterPrimaryType: "Place", listings: listings, key: _listingsKeyPlace),
@@ -336,9 +336,7 @@ class HomePageState extends State<HomePage> {
         index: index,
         children: _pages,
       ),
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.only(right: 10),
-        child: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           showUnselectedLabels: true,
           elevation: 0,
@@ -373,7 +371,6 @@ class HomePageState extends State<HomePage> {
             BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
           ],
         ),
-      ),
       drawer: Drawer(
         child: Column(
           spacing: 0,
@@ -521,8 +518,8 @@ class HomePageState extends State<HomePage> {
             Expanded(
               flex: 4,
               child: ListTile(
-                leading: const Icon(Icons.first_page),
-                title: const Text('Replay welcome screen', style: TextStyle(fontWeight: FontWeight.bold)),
+                leading: const Icon(Icons.menu_book),
+                title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
                 onTap: () {
                   HapticFeedback.lightImpact();
                   Navigator.pop(context);
