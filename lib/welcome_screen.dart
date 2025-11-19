@@ -362,7 +362,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("There’s a button for each listings\ncategory at the bottom of the app", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 13),
                       Row(
                         children: [
                           Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -370,7 +370,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Tap on these to see everything\nthat’s on in that category", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 13),
                       Row(
                         children: [
                           Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -378,7 +378,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Sort the list by location,\nnearest, name or time", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 13),
                       Row(
                         children: [
                           Icon(Icons.update, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -386,7 +386,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Tap this button to jump to the\ncurrent time in the list", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 13),
                       Row(
                         children: [
                           Icon(Icons.event_busy, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -394,7 +394,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("This button hides all the listings\nthat have finished", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 13),
                       Row(
                         children: [
                           Icon(Icons.search, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -402,7 +402,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Tap the search button and type\nto find specific listings", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 13),
                       Row(
                         children: [
                           FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary),
