@@ -61,6 +61,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       detailsVisibilityList = List<bool>.filled(500, false);
       _searchQuery = '';
       _isSearching = false;
+      appBarTitle = "${widget.filterPrimaryType} listings";
     });
     if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
   }
@@ -284,7 +285,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
     List<Map<String, dynamic>> primaryFiltered = [];
-    if (widget.filterPrimaryType == 'Service') {
+    if (widget.filterPrimaryType == 'Other') {
       primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
     } else if (widget.filterPrimaryType == 'Stalls') {
       // special case to prevent the rename breaking existing data
@@ -335,7 +336,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             'Stalls' => 'Search market stalls...',
                             'Music' => 'Search musical performances...',
                             'Event' => 'Search events...',
-                            'Service' => 'Search services...',
+                            'Place' => 'Search venues and places...',
+                            'Other' => 'Search other services...',
                             _ => 'Search listings...',
                           },
                           leading: const Icon(Icons.search),

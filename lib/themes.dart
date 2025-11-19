@@ -211,6 +211,10 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
       assetPath = 'assets/mapMarkers/eventsGroupMarker.png';
     case 'Event':
       assetPath = 'assets/mapMarkers/eventsMarker.png';
+    case 'Group-Place':
+      assetPath = 'assets/mapMarkers/placesGroupMarker.png';
+    case 'Place':
+      assetPath = 'assets/mapMarkers/placesMarker.png';
     case 'Group-Service':
       assetPath = 'assets/mapMarkers/servicesGroupMarker.png';
     case 'Service-Information':
@@ -297,6 +301,9 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(243, 190, 66, 1.0);
       return color;
+    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+      Color color = const Color.fromRGBO(122, 74, 0, 1.0);
+      return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(84, 145, 245, 1.0);
       return color;
@@ -317,6 +324,9 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
       return color;
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(255, 196, 0, 1.0);
+      return color;
+    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+      Color color = const Color.fromRGBO(169, 104, 0, 1.0);
       return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(29, 112, 198, 1.0);
@@ -339,6 +349,9 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(204, 161, 51, 1.0);
       return color;
+    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+      Color color = const Color.fromRGBO(122, 74, 0, 1.0);
+      return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(37, 63, 128, 1.0);
       return color;
@@ -360,6 +373,9 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(151, 143, 0, 1.0);
       return color;
+    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+      Color color = const Color.fromRGBO(169, 104, 0, 1.0);
+      return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(0, 120, 114, 1.0);
       return color;
@@ -380,6 +396,9 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
       return color;
     } else if (primaryType == "Event" || primaryType == "Group-Event") {
       Color color = const Color.fromRGBO(255, 196, 0, 1.0);
+      return color;
+    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+      Color color = const Color.fromRGBO(169, 104, 0, 1.0);
       return color;
     } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
       Color color = const Color.fromRGBO(153, 0, 255, 1.0);
