@@ -290,7 +290,7 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
 Color getCategoryColor(String selectedThemeKey, String primaryType) {
   if (selectedThemeKey == "light") {
     if (primaryType == "Food" || primaryType == "Group-Food") {
-      Color color = const Color.fromRGBO(242, 153, 0, 1.0);
+      Color color = const Color.fromRGBO(255, 156, 26, 1.0);
       return color;
     } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
       Color color = const Color.fromRGBO(209, 81, 85, 1.0);
@@ -314,7 +314,7 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     return color;
   } else if (selectedThemeKey == "dark") {
     if (primaryType == "Food" || primaryType == "Group-Food") {
-      Color color = const Color.fromRGBO(221, 85, 0, 1.0);
+      Color color = const Color.fromRGBO(241, 108, 0, 1.0);
       return color;
     } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
       Color color = const Color.fromRGBO(204, 22, 22, 1.0);
