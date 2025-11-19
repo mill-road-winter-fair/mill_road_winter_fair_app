@@ -120,25 +120,6 @@ Future<void> loadSettings() async {
   }
 }
 
-// probably not needed
-Future<void> saveList(boolList, prefs) async {
-  // Save a list of bools to prefs (as SharedPreferences can't do this natively)
-  final jsonString = jsonEncode(boolList);
-  await prefs.setString('favouritesList', jsonString);
-}
-
-// probably not needed
-Future<List<Map<String, bool>>> loadBoolList(prefs) async {
-  // Load a list of bools from prefs (as SharedPreferences can't do this natively)
-  final jsonString = prefs.getString('bool_list');
-  if (jsonString == null) return [];
-  final decoded = jsonDecode(jsonString) as List<dynamic>;
-  return decoded
-      .map((item) => (item as Map<String, dynamic>)
-          .map((key, value) => MapEntry(key, value as bool)))
-      .toList();
-}
-
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
