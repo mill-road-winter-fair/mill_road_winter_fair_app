@@ -435,7 +435,23 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  void addGroupMarker(listing) async {
+  // Function to toggle a listing's presence in the list of favourites
+  void favouriteOrNotListing(String listingID) {
+    if (isListingFavourited(listingID)) {
+      favouriteListingKeys.remove(listingID);
+    } else {
+      favouriteListingKeys.add(listingID);
+    }
+    setState(() {});
+    _saveSettings();
+  }
+
+  // Function to determine if a listing has been added to favourites
+  bool isListingFavourited(listingID) {
+    return favouriteListingKeys.contains(listingID);
+  }
+
+void addGroupMarker(listing) async {
     // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -506,6 +522,16 @@ class MapPageState extends State<MapPage> {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
                 }
+                void favouriteOrNotListing(String listingID) {
+                  setModalState(() {
+                    if (favouriteListingKeys.contains(listingID)) {
+                      favouriteListingKeys.remove(listingID);
+                    } else {
+                      favouriteListingKeys.add(listingID);
+                    }
+                    _saveSettings();
+                  });
+                }
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     return ConstrainedBox(
@@ -558,6 +584,8 @@ class MapPageState extends State<MapPage> {
                                     description: (rel['description'] != null) ? rel['description'] : '',
                                     detailsVisible: detailsVisibilityList[index],
                                     onDetailsTapped: () => toggleDetailsRow(index),
+                                    listingFavourited: isListingFavourited(rel['id']),
+                                    onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                     onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
                                   ),
                                   if (index != relatedListings.length - 1)
@@ -624,45 +652,59 @@ class MapPageState extends State<MapPage> {
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
             isScrollControlled: true,
             useSafeArea: true,
-            builder: (BuildContext context) {
-              final specificSheetModalScrollController = ScrollController();
-              return LayoutBuilder(builder: (context, constraints) {
-                return ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: constraints.maxHeight * 0.90,
-                  ),
-                  child: Scrollbar(
-                    controller: specificSheetModalScrollController,
-                    thumbVisibility: Platform.isIOS ? false : true,
-                    thickness: 4,
-                    radius: const Radius.circular(8),
-                    child: SingleChildScrollView(
+            builder: (context) {
+              return LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                final specificSheetModalScrollController = ScrollController();
+                return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
+                  void favouriteOrNotListing(String listingID) {
+                    setModalState(() {
+                      if (favouriteListingKeys.contains(listingID)) {
+                        favouriteListingKeys.remove(listingID);
+                      } else {
+                        favouriteListingKeys.add(listingID);
+                      }
+                      _saveSettings();
+                    });
+                  }
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: constraints.maxHeight * 0.95,
+                    ),
+                    child: Scrollbar(
                       controller: specificSheetModalScrollController,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                        child: SpecificListingInfoSheet(
-                          title: listing['displayName'],
-                          location: listing['secondaryType'],
-                          subtitle: listing['tertiaryType'],
-                          startTime: "${listing['startTime']}",
-                          endTime: "${listing['endTime']}",
-                          approxDistance: distanceMessage,
-                          phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                          website: (listing['website'] != null) ? listing['website'] : '',
-                          email: (listing['email'] != null) ? listing['email'] : '',
-                          description: (listing['description'] != null) ? listing['description'] : '',
-                          detailsVisible: true,
-                          onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                      thumbVisibility: Platform.isIOS ? false : true,
+                      thickness: 4,
+                      radius: const Radius.circular(8),
+                      child: SingleChildScrollView(
+                        controller: specificSheetModalScrollController,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                          child: SpecificListingInfoSheet(
+                            title: listing['displayName'],
+                            location: listing['secondaryType'],
+                            subtitle: listing['tertiaryType'],
+                            startTime: "${listing['startTime']}",
+                            endTime: "${listing['endTime']}",
+                            approxDistance: distanceMessage,
+                            phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                            website: (listing['website'] != null) ? listing['website'] : '',
+                            email: (listing['email'] != null) ? listing['email'] : '',
+                            description: (listing['description'] != null) ? listing['description'] : '',
+                            detailsVisible: true,
+                            listingFavourited: isListingFavourited(listing['id']),
+                            onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                            onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
+                  );
+                });
               });
             },
           );
         });
-
     setState(() {
       markers[markerId] = newMarker;
     });
@@ -1170,6 +1212,7 @@ class MapPageState extends State<MapPage> {
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
     await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
+    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
   }
 
   void _setMapCameraToFitMapMarkers() {

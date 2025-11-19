@@ -16,11 +16,6 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Store the state of each listings page in a shared class
-class SharedListingsPageConfig {
-  static String theFilterPrimaryTypeToggle = ''; // which tab we're on so we can see if we've switched
-}
-
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
   final List<Map<String, dynamic>> listings;
@@ -74,7 +69,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     super.dispose();
   }
 
-  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client) async {
+  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client, bool navigatorPop) async {
     // Remember the previous index to allow returning back
     previousIndex = homePageKey.currentState!.index;
 
@@ -82,7 +77,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     homePageKey.currentState?.setCurrentIndex(0);
 
     // Request the map page to show directions
-    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, false);
+    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
   }
 
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
@@ -237,6 +232,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
+    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
   }
 
   void toggleDetailsRow(int index) {
@@ -255,9 +251,41 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     return -1;
   }
 
+  // Function to toggle the listing's presence in the list of favourites
+  void favouriteOrNotListing(String listingID) {
+    if (isListingFavourited(listingID)) {
+      favouriteListingKeys.remove(listingID);
+    } else {
+      favouriteListingKeys.add(listingID);
+    }
+    setState(() {});
+    _saveSettings();
+  }
+
+  // Function to determine if the listing has been added to favourites
+  bool isListingFavourited(listingID) {
+    return favouriteListingKeys.contains(listingID);
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called');
+    if (widget.filterPrimaryType == 'Saved') {
+      return Scaffold(
+        appBar: AppBar(
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('Saved listings'),
+          ),
+        ),
+        body: generateListingsList(),
+      );
+    } else {
+      return generateListingsList();
+    }
+  }
+
+  Widget generateListingsList() {
     final homePageState = context.findAncestorStateOfType<HomePageState>();
     // Show error if there are no listings
     if (listings.isEmpty) {
@@ -287,6 +315,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     List<Map<String, dynamic>> primaryFiltered = [];
     if (widget.filterPrimaryType == 'Other') {
       primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
+    } else if (widget.filterPrimaryType == 'Saved') {
+      primaryFiltered = listings.where((listing) => favouriteListingKeys.contains(listing['id'])).toList();
     } else if (widget.filterPrimaryType == 'Stalls') {
       // special case to prevent the rename breaking existing data
       primaryFiltered = listings.where((listing) => (listing['primaryType'] == 'Shopping' || listing['primaryType'] == widget.filterPrimaryType)).toList();
@@ -338,6 +368,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             'Event' => 'Search events...',
                             'Place' => 'Search venues and places...',
                             'Other' => 'Search other services...',
+                            'Saved' => 'Search saved listings...',
                             _ => 'Search listings...',
                           },
                           leading: const Icon(Icons.search),
@@ -468,15 +499,16 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               email: listing['email'] ?? '',
                               description: listing['description'] ?? '',
                               detailsVisible: detailsVisibilityList[index],
+                              listingFavourited: isListingFavourited(listing['id']),
                               onDetailsTapped: () => toggleDetailsRow(index),
+                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () {
-                                if (homePageState != null) {
-                                  navigateToMapAndGetDirections(
-                                    listing['id'],
-                                    destinationLatLng,
-                                    http.Client(),
-                                  );
-                                }
+                                navigateToMapAndGetDirections(
+                                  listing['id'],
+                                  destinationLatLng,
+                                  http.Client(),
+                                  (homePageState == null)
+                                );
                               },
                             ) : const SizedBox.shrink(),
                             // separator except after last item

@@ -41,8 +41,11 @@ late ValueNotifier<String> themeNotifier;
 // Initialise map style variable
 late String mapStyle;
 
-// Initialise setting for whether the road closure polygon is shown;
+// Initialise setting for whether the road closure polygon is shown
 late bool preferredRoadClosurePolygonVisible;
+
+// Initialise the list of favourited listings
+late Set<String> favouriteListingKeys;
 
 Future<void> loadSettings() async {
   debugPrint('loadSettings called, onTest=$onTest');
@@ -76,6 +79,14 @@ Future<void> loadSettings() async {
     // Load preferred distance unit from shared preferences
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 
+    // Get the list of favourited listings
+    final favouriteListingStrings = prefs.getStringList('favouritesList');
+    if (favouriteListingStrings != null) {
+      favouriteListingKeys = favouriteListingStrings.toSet();
+    } else {
+      favouriteListingKeys = {};
+    }
+
     // Detect system brightness
     Brightness systemBrightness = PlatformDispatcher.instance.platformBrightness;
 
@@ -105,6 +116,8 @@ Future<void> loadSettings() async {
     themeNotifier = ValueNotifier(selectedThemeKey);
 
     mapStyle = 'standardMap';
+    favouriteListingKeys = {};
+
   }
 }
 
@@ -138,6 +151,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
+    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
   }
 
   Future<void> _changeTheme(String themeKey) async {
