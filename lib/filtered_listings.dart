@@ -617,7 +617,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   label: "Name (a-z)",
                   leadingIcon: const Icon(Icons.sort_by_alpha),
                 ),
-                if (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event')
+                if (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved')
                   DropdownMenuEntry(
                     value: SortingMethod.values[2],
                     label: "Start time",
