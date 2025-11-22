@@ -413,17 +413,34 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           key: const ValueKey('nowFab'),
                           heroTag: 'nowFab_${widget.filterPrimaryType}_page',
                           backgroundColor: Theme.of(context).colorScheme.secondary,
-                          foregroundColor: (isItEventDay() && firstNextListingIndex >= 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
+                          foregroundColor: (isItEventDay() && (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved')) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
                           elevation: 0,
                           onPressed: () {
-                            if (isItEventDay() && firstNextListingIndex >= 0) {
+                            if (isItEventDay() && (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved')) {
                               HapticFeedback.lightImpact();
-                              itemScrollController.scrollTo(
-                                curve: Curves.linear,
-                                index: firstNextListingIndex,
-                                duration: const Duration(milliseconds: 300),
-                                alignment: 0,
-                              );
+                              if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
+                                SortingMethod savedSortingMethod = preferredSortingMethod;
+                                preferredSortingMethod = SortingMethod.values[2];
+                                List<Map<String, dynamic>> sortedListingsTemp = _applySorting(primaryFiltered);
+                                List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
+                                firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
+                                if (firstNextListingIndex < 0) {
+                                  preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to                                  
+                                } else {
+                                  filteredListings = filteredListingsTemp;
+                                  setState(() {
+                                    preferredSortingMethod = SortingMethod.values[2];
+                                  });
+                                }
+                              }
+                              if (firstNextListingIndex >= 0) {
+                                itemScrollController.scrollTo(
+                                  curve: Curves.linear,
+                                  index: firstNextListingIndex,
+                                  duration: const Duration(milliseconds: 300),
+                                  alignment: 0,
+                                );
+                              }
                             }
                           },
                           child: const Icon(Icons.update),
