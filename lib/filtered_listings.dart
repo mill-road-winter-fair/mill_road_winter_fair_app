@@ -212,25 +212,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         setState(() {
           preferredSortingMethod = selectedValue;
         });
-        if (preferredSortingMethod == SortingMethod.values[2]) {
-          firstNextListingIndex = findFirstNextListingIndex(filteredListings);
-          if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
-            itemScrollController.scrollTo(
-              curve: Curves.linear,
-              index: firstNextListingIndex,
-              duration: const Duration(milliseconds: 300),
-              alignment: 0,
-            );
-          }
-        } else {
-          if (itemScrollController.isAttached) {
-            itemScrollController.scrollTo(
-              curve: Curves.linear,
-              index: 0,
-              duration: const Duration(milliseconds: 300),
-              alignment: 0,
-            );
-          }
+        if (itemScrollController.isAttached) {
+          itemScrollController.scrollTo(
+            curve: Curves.linear,
+            index: 0,
+            duration: const Duration(milliseconds: 300),
+            alignment: 0,
+          );
         }
         _saveSettings();
       }
