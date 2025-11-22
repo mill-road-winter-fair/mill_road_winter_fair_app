@@ -120,17 +120,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       }
 
       if ((preferredSortingMethod == SortingMethod.values[2] && !(widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved'))) {
-        // User prefers start time sorting but this isn't allowed, use fallback (a-z) sorting but don't change their saved preferences
+        // User prefers time sorting but this isn't allowed; use fallback (a-z) sorting but don't change their saved preferences
         // NB separate to the above test since we can still add the distances
         useFallbackSorting = true;
       }
 
       // Sort based on preference
       if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
-        // Sort by name, if the name is the same sort by start time
+        // Sort by name; if this is the same sort by end time
         allListings.sort((a, b) {
           final nameCompare = a['name'].compareTo(b['name']);
-          return nameCompare != 0 ? nameCompare : a['startTime'].compareTo(b['startTime']);
+          return nameCompare != 0 ? nameCompare : a['endTime'].compareTo(b['endTime']);
         });
       } else if (preferredSortingMethod == SortingMethod.values[1]) {
         // Sort by distance to user (nearest first); if the distance is the same sort by start time
@@ -140,15 +140,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         });
       } else if (preferredSortingMethod == SortingMethod.values[2]) {
         if (currentLatLng != null) {
-          // Sort by start time, if the start time is the same sort by nearest
+          // Sort by end time; if this is the same sort by nearest
           allListings.sort((a, b) {
-            final timeCompare = a['startTime'].compareTo(b['startTime']);
+            final timeCompare = a['endTime'].compareTo(b['endTime']);
             return timeCompare != 0 ? timeCompare : a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']);
           });
         } else {
-          // Sort by start time, if the start time is the same sort by location (secondaryType)
+          // Sort by end time; if this is the same sort by location (secondaryType)
           allListings.sort((a, b) {
-            final timeCompare = a['startTime'].compareTo(b['startTime']);
+            final timeCompare = a['endTime'].compareTo(b['endTime']);
             return timeCompare != 0 ? timeCompare : a['secondaryType'].compareTo(b['secondaryType']);
           });
         }
@@ -632,7 +632,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 if (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved')
                   DropdownMenuEntry(
                     value: SortingMethod.values[2],
-                    label: "Start time",
+                    label: "Time",
                     leadingIcon: const Icon(Icons.alarm),
                   ),
               ],
