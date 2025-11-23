@@ -496,7 +496,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             color: Theme.of(context).colorScheme.onPrimary,
             child: SizedBox.expand(// ensure the Stack has a defined height
                 child: LayoutBuilder(builder: (context, constraints) {
-                final trackHeight = constraints.maxHeight;
                 return Stack(children: [
                   ScrollablePositionedList.builder(
                     itemCount: filteredListings.length,
