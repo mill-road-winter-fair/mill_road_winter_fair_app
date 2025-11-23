@@ -42,7 +42,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<bool> detailsVisibilityList = List<bool>.filled(500, false); // start with plenty enough to load all listings
-  int firstNextListingIndex = -1; // the first listing that hasn't passed its end date, when sorted by start date
+  int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
+  int numberOfVisibleListings = -1;
 
   @override
   void initState() {
@@ -327,12 +328,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
 
-    // Step 4: If sorted by start date, find the first listing not to have ended
+    // Step 4: If sorted by start time, find the first listing not to have ended
     firstNextListingIndex = -1;
     if (preferredSortingMethod == SortingMethod.values[2]) {
       if (filteredListings.isNotEmpty) {
         firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       }
+    }
+
+    // Step 5: Calculate number of visible listings for scroll thumb
+    if (_hidePastListings) {
+      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+    } else {
+      numberOfVisibleListings = filteredListings.length;
     }
 
     return Column(
@@ -534,38 +542,46 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   ValueListenableBuilder<Iterable<ItemPosition>>(
                     valueListenable: itemPositionsListener.itemPositions,
                     builder: (context, positions, _) {
+                      final positionsList = itemPositionsListener.itemPositions.value.toList();
                       if (positions.isEmpty) return const SizedBox.shrink();
-                      final minIndex = positions.map((e) => e.index).reduce((a, b) => a < b ? a : b);
-                      final maxIndex = positions.map((e) => e.index).reduce((a, b) => a > b ? a : b);
-                      final visibleFraction = (maxIndex - minIndex + 1) / filteredListings.length;
-                      if (visibleFraction < 1) {
-                        final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
-                        final thumbTop = trackHeight * (minIndex / filteredListings.length);
-                        return Positioned(
-                          right: 0,
-                          top: thumbTop, // position from top
-                          width: 6,
-                          height: thumbHeight, // set exact height
-                          child: GestureDetector(
-                            onVerticalDragUpdate: (details) {
-                              final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
-                              final targetIndex = (fraction * filteredListings.length).floor();
-                              itemScrollController.scrollTo(
-                                index: targetIndex,
-                                duration: const Duration(milliseconds: 150),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.4),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
+                      // get sorted indices (robust if indices are sparse/non-sequential)
+                      positionsList.sort((a, b) => a.index.compareTo(b.index));
+                      final minIndex = positionsList.first.index;
+                      final maxIndex = positionsList.last.index;
+                      // number of visible logical items
+                      final visibleCount = (maxIndex - minIndex + 1).clamp(1, numberOfVisibleListings);
+                      // fraction of list that's visible
+                      final thumbFraction = (visibleCount / numberOfVisibleListings).clamp(0.05, 1.0);
+                      // when computing top fraction, use itemCount - visibleCount as denominator so
+                      // the thumb can reach the bottom when last item is visible. guard against 0.
+                      final denom = (numberOfVisibleListings - visibleCount).clamp(1, numberOfVisibleListings);
+                      final topFraction = (minIndex / denom).clamp(0.0, 1.0);
+                      // now map to pixels
+                      final trackHeight = constraints.maxHeight;
+                      final thumbHeight = (trackHeight * thumbFraction).clamp(24.0, trackHeight);
+                      final thumbTop = (trackHeight - thumbHeight) * topFraction; // keep within bounds
+                      return Positioned(
+                        right: 0,
+                        top: thumbTop, // position from top
+                        width: 6,
+                        height: thumbHeight, // set exact height
+                        child: GestureDetector(
+                          onVerticalDragUpdate: (details) {
+                            final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
+                            final targetIndex = (fraction * numberOfVisibleListings).floor();
+                            itemScrollController.scrollTo(
+                              index: targetIndex,
+                              duration: const Duration(milliseconds: 150),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(3),
                             ),
                           ),
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
+                        ),
+                      );
                     },
                   ),
                   (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
