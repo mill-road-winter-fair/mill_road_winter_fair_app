@@ -402,68 +402,81 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Expanded(child: _buildSortingDropdown(context)),
-                      SizedBox(
-                        height: 36,
-                        width: 36,
-                        child: FloatingActionButton(
-                          key: const ValueKey('nowFab'),
-                          heroTag: 'nowFab_${widget.filterPrimaryType}_page',
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
-                          foregroundColor: (isItEventDay() && (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved')) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
-                          elevation: 0,
-                          onPressed: () {
-                            if (isItEventDay() && (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved')) {
-                              HapticFeedback.lightImpact();
-                              if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
-                                SortingMethod savedSortingMethod = preferredSortingMethod;
-                                preferredSortingMethod = SortingMethod.values[2];
-                                List<Map<String, dynamic>> sortedListingsTemp = _applySorting(primaryFiltered);
-                                List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
-                                firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
-                                if (firstNextListingIndex < 0) {
-                                  preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to                                  
+                      // only show the Scroll To Now button on Music/Events/Saved
+                      (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        SizedBox(
+                          height: 36,
+                          width: 36,
+                          child: FloatingActionButton(
+                            key: const ValueKey('nowFab'),
+                            heroTag: 'nowFab_${widget.filterPrimaryType}_page',
+                            backgroundColor: Theme.of(context).colorScheme.secondary,
+                            foregroundColor: (isItEventDay()) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
+                            elevation: 0,
+                            onPressed: () {
+                              if (isItEventDay()) {
+                                HapticFeedback.lightImpact();
+                                if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
+                                  SortingMethod savedSortingMethod = preferredSortingMethod;
+                                  preferredSortingMethod = SortingMethod.values[2];
+                                  List<Map<String, dynamic>> sortedListingsTemp = _applySorting(primaryFiltered);
+                                  List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
+                                  firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
+                                  if (firstNextListingIndex < 0) {
+                                    preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to                                  
+                                  } else {
+                                    filteredListings = filteredListingsTemp;
+                                    setState(() {
+                                      preferredSortingMethod = SortingMethod.values[2];
+                                    });
+                                  }
+                                }
+                                if (firstNextListingIndex >= 0) {
+                                  itemScrollController.scrollTo(
+                                    curve: Curves.linear,
+                                    index: firstNextListingIndex,
+                                    duration: const Duration(milliseconds: 300),
+                                    alignment: 0,
+                                  );
                                 } else {
-                                  filteredListings = filteredListingsTemp;
-                                  setState(() {
-                                    preferredSortingMethod = SortingMethod.values[2];
-                                  });
+                                  itemScrollController.scrollTo(
+                                    curve: Curves.linear,
+                                    index: filteredListings.length - 1,
+                                    duration: const Duration(milliseconds: 300),
+                                    alignment: 0,
+                                  );
                                 }
                               }
-                              if (firstNextListingIndex >= 0) {
-                                itemScrollController.scrollTo(
-                                  curve: Curves.linear,
-                                  index: firstNextListingIndex,
-                                  duration: const Duration(milliseconds: 300),
-                                  alignment: 0,
-                                );
+                            },
+                            child: const Icon(Icons.update),
+                          ),
+                        ) : const SizedBox.shrink(),
+                      (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        const SizedBox(width: 4) : const SizedBox.shrink(),
+                      // only show the Hide Past Listings button on Music/Events/Saved
+                      (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        SizedBox(
+                          height: 36,
+                          width: 36,
+                          child: FloatingActionButton(
+                            key: const ValueKey('hidePastListingsFab'),
+                            heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
+                            backgroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary) : Theme.of(context).colorScheme.secondary,
+                            foregroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.surfaceDim,
+                            elevation: 0,
+                            onPressed: () {
+                              if (isItEventDay()) {
+                                HapticFeedback.lightImpact();
+                                setState(() {
+                                  _hidePastListings = !_hidePastListings;
+                                });
                               }
-                            }
-                          },
-                          child: const Icon(Icons.update),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      SizedBox(
-                        height: 36,
-                        width: 36,
-                        child: FloatingActionButton(
-                          key: const ValueKey('hidePastListingsFab'),
-                          heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
-                          backgroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary) : Theme.of(context).colorScheme.secondary,
-                          foregroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.surfaceDim,
-                          elevation: 0,
-                          onPressed: () {
-                            if (isItEventDay()) {
-                              HapticFeedback.lightImpact();
-                              setState(() {
-                                _hidePastListings = !_hidePastListings;
-                              });
-                            }
-                          },
-                          child: const Icon(Icons.event_busy),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
+                            },
+                            child: const Icon(Icons.event_busy),
+                          ),
+                        ) : const SizedBox.shrink(),
+                      (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        const SizedBox(width: 4) : const SizedBox.shrink(),
                       SizedBox(
                         height: 36,
                         width: 36,
