@@ -70,11 +70,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client, bool navigatorPop) async {
+
     // Remember the previous index to allow returning back
     previousIndex = homePageKey.currentState!.index;
 
     // Switch to map tab on the home page
     homePageKey.currentState?.setCurrentIndex(0);
+
+    // If we're asked to pop the previous page we also need to set the title
+    if (navigatorPop) appBarTitle = 'Mill Road Winter Fair 2025';
 
     // Request the map page to show directions
     await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
