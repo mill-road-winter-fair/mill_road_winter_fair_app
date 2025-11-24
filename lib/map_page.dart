@@ -574,9 +574,9 @@ void addGroupMarker(listing) async {
                                   SpecificListingInfoSheet(
                                     title: rel['displayName'],
                                     location: '',
-                                    subtitle: "${rel['tertiaryType']}\n${rel['startTime']}—${rel['endTime']}",
-                                    startTime: '',
-                                    endTime: '',
+                                    subtitle: rel['tertiaryType'],
+                                    startTime: rel['startTime'],
+                                    endTime: rel['endTime'],
                                     approxDistance: '',
                                     phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
                                     website: (rel['website'] != null) ? rel['website'] : '',
