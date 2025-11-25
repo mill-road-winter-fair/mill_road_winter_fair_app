@@ -35,15 +35,14 @@ class ListingUpdateNotifier {
       showIntervalDays = 0.3; // 8 hours, so should show once on the day
       theMessageDuration = 20; // longer message
       theMessage = 
-        "It's the day of the Fair!\n\n"
-        "This app contains the latest "
-        "listings, and you can hide "
-        "those that have passed and "
-        "auto-scroll the list to the "
-        "current time.\n\n"
-        "We will aim to keep the "
-        "listings updated with any "
-        "changes that occur.\n\n"
+        "It’s the day of the Fair!\n"
+        "The fun starts at 10.30, and "
+        "we’re looking forward to seeing "
+        "you there.\n\n"
+        "This app contains all the latest "
+        "listings, updated if they change, "
+        "so you can easily see what’s on "
+        "when and where.\n\n"
         "Have a wonderful day!";
     } else if (now.isAfter(_cutoffDate)) {
       debugPrint('Current date is after cutoff, not showing notice');
