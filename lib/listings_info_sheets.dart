@@ -180,6 +180,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     debugPrint('SpecificListingInfoSheet build() called');
     String updatedDescription; // with cancel identifier removed if appropriate
     String updatedTimes; // replaced with CANCELLED if appropriate
+    Widget subDetails; // calculated subtitle/details field
 
     // Determine if the event has been cancelled, update text style accordingly
     final bool cancelled = hasEventBeenCancelled(description);
@@ -201,6 +202,15 @@ class SpecificListingInfoSheet extends StatelessWidget {
       color: ended || cancelled ? Colors.red : Theme.of(context).colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
+
+    if (location == '') { // this SpecificListingInfoSheet must be within a Group modal, so display differently
+       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(children: [
+        TextSpan(text: "$subtitle\n", style: subSubStyle),
+        TextSpan(text: updatedTimes, style: timeStyle),
+        ]));
+    } else {
+      subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: subtitle, style: timeStyle));
+    }
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -229,12 +239,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
                 flex: 6,
-                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(
-                  subtitle,
-                  style: subStyle,
-                  textAlign: TextAlign.end,
-                ),
-              ),
+                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: subDetails),
               ),
             ],
           ),
