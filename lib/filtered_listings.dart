@@ -567,7 +567,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : '.\nCheck back for the latest listings\nin the lead-up to the Fair'}.",
+                        "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
