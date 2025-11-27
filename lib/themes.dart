@@ -184,7 +184,7 @@ String aubergineMap =
 
 // Map theme taken from https://snazzymaps.com/style/18147/my-custom-style
 String colourBlindMap =
-    '[{"featureType":"all","elementType":"all","stylers":[{"saturation":"-100"}]},{"featureType":"landscape.man_made","elementType":"all","stylers":[{"color":"#f5f5f5"}]},{"featureType":"landscape.natural","elementType":"all","stylers":[{"color":"#f5f5f5"}]},{"featureType":"poi","elementType":"all","stylers":[{"color":"#e8e8e8"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"},{"color":"#fe934c"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#666666"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#9a96c5"}]}]';
+    '[{"featureType":"all","elementType":"all","stylers":[{"saturation":"-100"}]},{"featureType":"landscape.man_made","elementType":"all","stylers":[{"color":"#f5f5f5"}]},{"featureType":"landscape.natural","elementType":"all","stylers":[{"color":"#f5f5f5"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"geometry","stylers":[{"visibility":"simplified"},{"color":"#fe934c"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#666666"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#9a96c5"}]}]';
 
 Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async {
   late String assetPath;
