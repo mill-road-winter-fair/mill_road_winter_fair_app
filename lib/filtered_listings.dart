@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'dart:async';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
@@ -34,20 +36,23 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   List<Map<String, dynamic>> filteredListings = [];
   bool isRefreshing = false;
   bool useFallbackSorting = false;
-  final ScrollController _scrollController = ScrollController();
   final ItemScrollController itemScrollController = ItemScrollController();
   final itemPositionsListener = ItemPositionsListener.create();
+  final ValueNotifier<bool> thumbVisible = ValueNotifier<bool>(false);
+  Timer? _hideTimer; // for hiding scroll thumb when inactive i.e. iOS
   bool _isSearching = false;
   bool _hidePastListings = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<bool> detailsVisibilityList = List<bool>.filled(500, false); // start with plenty enough to load all listings
-  int firstNextListingIndex = -1; // the first listing that hasn't passed its end date, when sorted by start date
+  int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
+  int numberOfVisibleListings = -1;
 
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
+    // whenever visible positions change, show the thumb and ensure rebuild
   }
 
   void onTabVisible() {
@@ -64,7 +69,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   @override
   void dispose() {
     debugPrint('FilteredListingsPageState dispose() called');
-    _scrollController.dispose();
+    _hideTimer?.cancel();
+    itemPositionsListener.itemPositions.removeListener(() {});
+    thumbVisible.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -120,17 +127,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       }
 
       if ((preferredSortingMethod == SortingMethod.values[2] && !(widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved'))) {
-        // User prefers start time sorting but this isn't allowed, use fallback (a-z) sorting but don't change their saved preferences
+        // User prefers time sorting but this isn't allowed; use fallback (a-z) sorting but don't change their saved preferences
         // NB separate to the above test since we can still add the distances
         useFallbackSorting = true;
       }
 
       // Sort based on preference
       if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
-        // Sort by name, if the name is the same sort by start time
+        // Sort by name; if this is the same sort by end time
         allListings.sort((a, b) {
           final nameCompare = a['name'].compareTo(b['name']);
-          return nameCompare != 0 ? nameCompare : a['startTime'].compareTo(b['startTime']);
+          return nameCompare != 0 ? nameCompare : a['endTime'].compareTo(b['endTime']);
         });
       } else if (preferredSortingMethod == SortingMethod.values[1]) {
         // Sort by distance to user (nearest first); if the distance is the same sort by start time
@@ -140,15 +147,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         });
       } else if (preferredSortingMethod == SortingMethod.values[2]) {
         if (currentLatLng != null) {
-          // Sort by start time, if the start time is the same sort by nearest
+          // Sort by end time; if this is the same sort by nearest
           allListings.sort((a, b) {
-            final timeCompare = a['startTime'].compareTo(b['startTime']);
+            final timeCompare = a['endTime'].compareTo(b['endTime']);
             return timeCompare != 0 ? timeCompare : a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']);
           });
         } else {
-          // Sort by start time, if the start time is the same sort by location (secondaryType)
+          // Sort by end time; if this is the same sort by location (secondaryType)
           allListings.sort((a, b) {
-            final timeCompare = a['startTime'].compareTo(b['startTime']);
+            final timeCompare = a['endTime'].compareTo(b['endTime']);
             return timeCompare != 0 ? timeCompare : a['secondaryType'].compareTo(b['secondaryType']);
           });
         }
@@ -212,25 +219,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         setState(() {
           preferredSortingMethod = selectedValue;
         });
-        if (preferredSortingMethod == SortingMethod.values[2]) {
-          firstNextListingIndex = findFirstNextListingIndex(filteredListings);
-          if (firstNextListingIndex >= 0 && itemScrollController.isAttached) {
-            itemScrollController.scrollTo(
-              curve: Curves.linear,
-              index: firstNextListingIndex,
-              duration: const Duration(milliseconds: 300),
-              alignment: 0,
-            );
-          }
-        } else {
-          if (itemScrollController.isAttached) {
-            itemScrollController.scrollTo(
-              curve: Curves.linear,
-              index: 0,
-              duration: const Duration(milliseconds: 300),
-              alignment: 0,
-            );
-          }
+        if (itemScrollController.isAttached) {
+          itemScrollController.scrollTo(
+            curve: Curves.linear,
+            index: 0,
+            duration: const Duration(milliseconds: 300),
+            alignment: 0,
+          );
         }
         _saveSettings();
       }
@@ -274,6 +269,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   // Function to determine if the listing has been added to favourites
   bool isListingFavourited(listingID) {
     return favouriteListingKeys.contains(listingID);
+  }
+
+  // Support for hiding the scroll thumb when not active, for iOS
+  void _showThumb() {
+    thumbVisible.value = true;
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 1), () {
+      if (mounted && Platform.isIOS) thumbVisible.value = false;
+    });
   }
 
   @override
@@ -339,13 +343,21 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
 
-    // Step 4: If sorted by start date, find the first listing not to have ended
+    // Step 4: If sorted by start time, find the first listing not to have ended
     firstNextListingIndex = -1;
     if (preferredSortingMethod == SortingMethod.values[2]) {
       if (filteredListings.isNotEmpty) {
         firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       }
     }
+
+    // Step 5: Calculate number of visible listings for scroll thumb
+    if (_hidePastListings) {
+      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+    } else {
+      numberOfVisibleListings = filteredListings.length;
+    }
+    int? firstVisibleIndex; // will be used to store the first listing that is actually visible
 
     return Column(
       children: [
@@ -397,6 +409,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           onChanged: (value) {
                             setState(() {
                               _searchQuery = value.toLowerCase();
+                              numberOfVisibleListings = -1;
+                              firstVisibleIndex = null;
                             });
                           },
                         ),
@@ -406,51 +420,88 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Expanded(child: _buildSortingDropdown(context)),
-                      SizedBox(
-                        height: 36,
-                        width: 36,
-                        child: FloatingActionButton(
-                          key: const ValueKey('nowFab'),
-                          heroTag: 'nowFab_${widget.filterPrimaryType}_page',
-                          backgroundColor: Theme.of(context).colorScheme.secondary,
-                          foregroundColor: (isItEventDay() && firstNextListingIndex >= 0) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
-                          elevation: 0,
-                          onPressed: () {
-                            if (isItEventDay() && firstNextListingIndex >= 0) {
-                              HapticFeedback.lightImpact();
-                              itemScrollController.scrollTo(
-                                curve: Curves.linear,
-                                index: firstNextListingIndex,
-                                duration: const Duration(milliseconds: 300),
-                                alignment: 0,
-                              );
-                            }
-                          },
-                          child: const Icon(Icons.update),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      SizedBox(
-                        height: 36,
-                        width: 36,
-                        child: FloatingActionButton(
-                          key: const ValueKey('hidePastListingsFab'),
-                          heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
-                          backgroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary) : Theme.of(context).colorScheme.secondary,
-                          foregroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.surfaceDim,
-                          elevation: 0,
-                          onPressed: () {
-                            if (isItEventDay()) {
-                              HapticFeedback.lightImpact();
-                              setState(() {
-                                _hidePastListings = !_hidePastListings;
-                              });
-                            }
-                          },
-                          child: const Icon(Icons.event_busy),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
+                      // only show the Scroll To Now button on Music/Events/Saved
+                      (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        SizedBox(
+                          height: 36,
+                          width: 36,
+                          child: FloatingActionButton(
+                            key: const ValueKey('nowFab'),
+                            heroTag: 'nowFab_${widget.filterPrimaryType}_page',
+                            backgroundColor: Theme.of(context).colorScheme.secondary,
+                            foregroundColor: (isItEventDay()) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
+                            elevation: 0,
+                            onPressed: () {
+                              if (isItEventDay()) {
+                                HapticFeedback.lightImpact();
+                                if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
+                                  SortingMethod savedSortingMethod = preferredSortingMethod;
+                                  preferredSortingMethod = SortingMethod.values[2];
+                                  List<Map<String, dynamic>> sortedListingsTemp = _applySorting(primaryFiltered);
+                                  List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
+                                  firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
+                                  if (firstNextListingIndex < 0) {
+                                    preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to                                  
+                                  } else {
+                                    filteredListings = filteredListingsTemp;
+                                    if (_hidePastListings) {
+                                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+                                    } else {
+                                      numberOfVisibleListings = filteredListings.length;
+                                    }
+                                    setState(() {
+                                      preferredSortingMethod = SortingMethod.values[2];
+                                    });
+                                  }
+                                }
+                                if (firstNextListingIndex >= 0) {
+                                  itemScrollController.scrollTo(
+                                    curve: Curves.linear,
+                                    index: firstNextListingIndex,
+                                    duration: const Duration(milliseconds: 300),
+                                    alignment: 0,
+                                  );
+                                } else {
+                                  itemScrollController.scrollTo(
+                                    curve: Curves.linear,
+                                    index: filteredListings.length - 1,
+                                    duration: const Duration(milliseconds: 300),
+                                    alignment: 0,
+                                  );
+                                }
+                              }
+                            },
+                            child: const Icon(Icons.update),
+                          ),
+                        ) : const SizedBox.shrink(),
+                      (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        const SizedBox(width: 4) : const SizedBox.shrink(),
+                      // only show the Hide Past Listings button on Music/Events/Saved
+                      (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        SizedBox(
+                          height: 36,
+                          width: 36,
+                          child: FloatingActionButton(
+                            key: const ValueKey('hidePastListingsFab'),
+                            heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
+                            backgroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary) : Theme.of(context).colorScheme.secondary,
+                            foregroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.surfaceDim,
+                            elevation: 0,
+                            onPressed: () {
+                              if (isItEventDay()) {
+                                HapticFeedback.lightImpact();
+                                setState(() {
+                                  _hidePastListings = !_hidePastListings;
+                                  numberOfVisibleListings = -1;
+                                  firstVisibleIndex = null;
+                                });
+                              }
+                            },
+                            child: const Icon(Icons.event_busy),
+                          ),
+                        ) : const SizedBox.shrink(),
+                      (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        const SizedBox(width: 4) : const SizedBox.shrink(),
                       SizedBox(
                         height: 36,
                         width: 36,
@@ -485,15 +536,23 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 child: LayoutBuilder(builder: (context, constraints) {
                 final trackHeight = constraints.maxHeight;
                 return Stack(children: [
-                  ScrollablePositionedList.builder(
-                    itemCount: filteredListings.length,
-                    itemScrollController: itemScrollController,
-                    itemPositionsListener: itemPositionsListener,
-                    itemBuilder: (context, index) {
+                  NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is UserScrollNotification || notification is ScrollUpdateNotification) {
+                        _showThumb();
+                      }
+                      return false;
+                    },
+                    child: ScrollablePositionedList.builder(
+                      itemCount: filteredListings.length,
+                      itemScrollController: itemScrollController,
+                      itemPositionsListener: itemPositionsListener,
+                      itemBuilder: (context, index) {
                         final listing = filteredListings[index]; // since index=0 is the sort/search bar
                         final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                         final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
                         LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                        if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
                         return Column(
                           children: [
                             (!_hidePastListings || !hasEventEnded(listing['endTime'])) ? SpecificListingInfoSheet(
@@ -524,43 +583,64 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                           ],
                         );
-                    },
+                      },
+                    ),
                   ),
                   ValueListenableBuilder<Iterable<ItemPosition>>(
                     valueListenable: itemPositionsListener.itemPositions,
                     builder: (context, positions, _) {
-                      if (positions.isEmpty) return const SizedBox.shrink();
-                      final minIndex = positions.map((e) => e.index).reduce((a, b) => a < b ? a : b);
-                      final maxIndex = positions.map((e) => e.index).reduce((a, b) => a > b ? a : b);
-                      final visibleFraction = (maxIndex - minIndex + 1) / filteredListings.length;
-                      if (visibleFraction < 1) {
-                        final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
-                        final thumbTop = trackHeight * (minIndex / filteredListings.length);
-                        return Positioned(
-                          right: 0,
-                          top: thumbTop, // position from top
-                          width: 6,
-                          height: thumbHeight, // set exact height
-                          child: GestureDetector(
-                            onVerticalDragUpdate: (details) {
-                              final fraction = (details.localPosition.dy / trackHeight).clamp(0.0, 1.0);
-                              final targetIndex = (fraction * filteredListings.length).floor();
-                              itemScrollController.scrollTo(
-                                index: targetIndex,
-                                duration: const Duration(milliseconds: 150),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.4),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                            ),
-                          ),
-                        );
-                      } else {
+                      if (positions.isEmpty || firstVisibleIndex == null || numberOfVisibleListings == 0) {
                         return const SizedBox.shrink();
                       }
+                      final visiblePositions = positions.where((p) {
+                        return p.index >= firstVisibleIndex! && p.index < firstVisibleIndex! + numberOfVisibleListings;
+                      });
+                      if (visiblePositions.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      final indices = visiblePositions.map((p) => p.index);
+                      final minIndex = indices.reduce((a, b) => a < b ? a : b);
+                      final maxIndex = indices.reduce((a, b) => a > b ? a : b);
+                      final minIndexRelative = minIndex - firstVisibleIndex!;
+                      final visibleFraction = ((maxIndex - minIndex + 1) / numberOfVisibleListings).clamp(0.02, 1.0);
+                      final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
+                      final thumbTop = (minIndexRelative / numberOfVisibleListings) * trackHeight;
+                      return ValueListenableBuilder<bool>(
+                        valueListenable: thumbVisible,
+                        builder: (context, visible, _) {
+                          return Positioned(
+                            right: 3,
+                            top: thumbTop,
+                            width: 4,
+                            height: thumbHeight,
+                            child: AnimatedOpacity(
+                              opacity: visible ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeOut,
+                              child: GestureDetector(
+                                onVerticalDragStart: (_) => _showThumb(),
+                                onVerticalDragUpdate: (details) {
+                                  _showThumb();
+                                  final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
+                                  final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
+                                  final targetIndex = (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
+                                  itemScrollController.scrollTo(
+                                    index: targetIndex,
+                                    duration: const Duration(milliseconds: 120),
+                                  );
+                                },
+                                child: Container(
+                                  width: 2,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.4),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
                     },
                   ),
                   (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
@@ -632,7 +712,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 if (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved')
                   DropdownMenuEntry(
                     value: SortingMethod.values[2],
-                    label: "Start time",
+                    label: "Time",
                     leadingIcon: const Icon(Icons.alarm),
                   ),
               ],
