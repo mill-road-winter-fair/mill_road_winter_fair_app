@@ -174,6 +174,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -263,6 +264,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -336,6 +338,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -425,6 +428,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -538,6 +542,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
