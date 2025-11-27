@@ -127,36 +127,44 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                     children: [
                       Text("What can I do with the app?",
                           style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       Row(
                         children: [
                           Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Use our interactive map to help\nnavigate the Fair’s attractions", style: bodyStyle),
+                          Text("Use our interactive map to help\nyou navigate the Fair", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       Row(
                         children: [
-                          Icon(Icons.storefront, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          Icon(Icons.calendar_month, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("See listings of the Fair’s various\nstalls, events and facilities", style: bodyStyle),
+                          Text("See listings for stalls, events,\nmusic, food and venues", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       Row(
                         children: [
-                          Icon(Icons.language, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart , size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
-                          Text("Find the websites for those\ntaking part in the Fair", style: bodyStyle),
+                          Text("Get full details for all of these,\nand save your favourites", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Icon(Icons.radar, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          const SizedBox(width: 8),
+                          Text("See what’s on nearby or soon", style: bodyStyle),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
                       Row(
                         children: [
                           Icon(Icons.info, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Find out important and useful\ninformation about the Fair", style: bodyStyle),
+                          Text("Find important information about\nthe Fair and its facilities", style: bodyStyle),
                         ],
                       ),
                     ],
@@ -166,6 +174,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -229,7 +238,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.home_work, size: 40, color: getCategoryColor(selectedThemeKey, "Place")),
                           const SizedBox(width: 8),
-                          Text("Other organisations or venues with\nactivities, events, food and drinks", style: bodyStyle),
+                          Text("Venues or other organisations with\nactivities, events, food and drinks", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -237,7 +246,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.wheelchair_pickup, size: 40, color: getCategoryColor(selectedThemeKey, "Service")),
                           const SizedBox(width: 8),
-                          Text("All our important services, such\nas toilets and first aid points", style: bodyStyle),
+                          Text("Other important services, such\nas toilets, info and first aid points", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -255,6 +264,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -328,6 +338,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -362,7 +373,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("There’s a button for each listings\ncategory at the bottom of the app", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -370,7 +381,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Tap on these to see everything\nthat’s on in that category", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -378,7 +389,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Sort the list by location,\nnearest, name or time", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.update, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -386,7 +397,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Tap this button to jump to the\ncurrent time in the list", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.event_busy, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -394,7 +405,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("This button hides all the listings\nthat have finished", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.search, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -402,7 +413,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Tap the search button and type\nto find specific listings", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
@@ -417,6 +428,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -530,6 +542,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
+            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
