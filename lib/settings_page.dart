@@ -38,7 +38,7 @@ late DistanceUnits preferredDistanceUnits;
 late String selectedThemeKey;
 late ValueNotifier<String> themeNotifier;
 
-// Initialise map style variable
+// Initialise map style variable to store map styling json
 late String mapStyle;
 
 // Initialise setting for whether the road closure polygon is shown
@@ -95,6 +95,27 @@ Future<void> loadSettings() async {
     String defaultMapStyle = systemBrightness == Brightness.dark ? darkMap : standardMap;
     selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme;
     mapStyle = prefs.getString('selectedMapStyle') ?? defaultMapStyle;
+
+    // We're currently storing the mapStyle as a string in SharedPreferences
+    // If we update the mapStyles at any point the user will not get the updated styles unless they change theme
+    // To get around this, whenever we load the settings we re-apply the map style
+    switch (selectedThemeKey) {
+      case 'light':
+        mapStyle = standardMap;
+        break;
+      case 'dark':
+        mapStyle = darkMap;
+        break;
+      case '2024':
+        mapStyle = retroMap;
+        break;
+      case 'highContrast':
+        mapStyle = darkMap;
+        break;
+      case 'colourBlindFriendly':
+        mapStyle = colourBlindMap;
+        break;
+    }
 
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
