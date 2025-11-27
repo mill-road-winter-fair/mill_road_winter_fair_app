@@ -29,6 +29,12 @@ final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 // Indicator for a simple map marker
 const String aSimpleMarkerId = 'SIMPLE';
 
+// Identifier and function for determining if the event has been marked as cancelled
+const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
+bool hasEventBeenCancelled(String description) {
+  return (description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
+}
+
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
 
@@ -412,7 +418,7 @@ class MapPageState extends State<MapPage> {
           addGroupMarker(listing);
         }
         // Add Specific markers
-        if (!listing['primaryType'].startsWith('Group-')) {
+        if (!listing['primaryType'].startsWith('Group-') && !hasEventBeenCancelled(listing['description'])) {
           addSpecificMarker(listing);
         }
       }
