@@ -24,6 +24,11 @@ void main() {
     testWidgets('footer button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
+      // Since flutter's default test screen size is for desktop i.e. 800x600, set a sensible minimum mobile screen size
+      // 375x667 is the smallest size tracked at https://gs.statcounter.com/screen-resolution-stats/mobile/united-kingdom as of Nov 2025
+      TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.physicalSize = const Size(375, 667);
+      TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.devicePixelRatio = 1.0;
+
       // Manually unmount all widgets
       addTearDown(() async {
         await tester.pumpWidget(Container());
