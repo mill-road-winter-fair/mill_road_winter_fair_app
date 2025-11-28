@@ -1272,7 +1272,9 @@ void addGroupMarker(listing) async {
     }
 
     const double northUpBearing = 0;
-    double northUpPadding = mapWidth! * 0.07;
+    // add some extra padding, inversely proportional to the distance of the trip, so start/end aren't off screen
+    double extraPaddingForShortTrips = 0.00006 / pow(pow(polylineMaxLat - polylineMinLat, 2) + pow(polylineMaxLong - polylineMinLong, 2), 0.5);
+    double northUpPadding = mapWidth! * (0.07 + extraPaddingForShortTrips);
     _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), northUpPadding, northUpBearing);
   }
 
