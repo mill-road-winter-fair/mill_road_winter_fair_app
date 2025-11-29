@@ -981,8 +981,6 @@ void addGroupMarker(listing) async {
     setState(() {});
 
     debugPrint('getDirections called for listing ID: $id');
-    // Set navigation as in progress
-    _navigationInProgress = true;
 
     if (navigatorPop == true) {
       Navigator.pop(context);
@@ -1026,6 +1024,12 @@ void addGroupMarker(listing) async {
       Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
       addSpecificMarker(destinationListing);
     }
+
+    setState(() {
+    // Set navigation as in progress; do this late so cancel button isn't available before nav starts
+      _navigationInProgress = true;
+    });
+
   }
 
   void cancelNavigation() {
