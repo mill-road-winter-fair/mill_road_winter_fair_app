@@ -26,6 +26,9 @@ import 'package:url_launcher/url_launcher.dart';
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
+// Define whether navigation is in progress as a global variable
+bool navigationInProgress = false;
+
 // Indicator for a simple map marker
 const String aSimpleMarkerId = 'SIMPLE';
 
@@ -62,7 +65,6 @@ class MapPageState extends State<MapPage> {
   late double _compassBearing;
   double? mapWidth;
   double? mapHeight;
-  bool _navigationInProgress = false;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
@@ -983,12 +985,12 @@ void addGroupMarker(listing) async {
     // Reset the distance to destination
     _distanceToDestination = null;
     // Set navigation as not in progress
-    _navigationInProgress = false;
+    navigationInProgress = false;
     setState(() {});
 
     debugPrint('getDirections called for listing ID: $id');
     // Set navigation as in progress
-    _navigationInProgress = true;
+    navigationInProgress = true;
 
     if (navigatorPop == true) {
       Navigator.pop(context);
@@ -1068,7 +1070,7 @@ void addGroupMarker(listing) async {
     showFilteredMarkers();
 
     // Set navigation as not in progress
-    _navigationInProgress = false;
+    navigationInProgress = false;
 
     // Reset the camera position
     _setMapCameraToFitMapMarkers();
@@ -1196,7 +1198,7 @@ void addGroupMarker(listing) async {
       hideAllMarkers();
       addAllVisibleMarkers();
       _setMapCameraToFitMapMarkers();
-      _navigationInProgress = false;
+      navigationInProgress = false;
     });
     debugPrint(message);
     // Show a snackbar with the error
@@ -1319,7 +1321,7 @@ void addGroupMarker(listing) async {
 
     //Default bearing
     double bearing = 290;
-    if (preferredMapOrientation == MapOrientation.alwaysNorth || _navigationInProgress == true) {
+    if (preferredMapOrientation == MapOrientation.alwaysNorth || navigationInProgress == true) {
       bearing = 0;
     }
 
@@ -1507,7 +1509,7 @@ void addGroupMarker(listing) async {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_navigationInProgress == true)
+                    if (navigationInProgress == true)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
                         shape: const CircleBorder(),
@@ -1529,7 +1531,7 @@ void addGroupMarker(listing) async {
                           ],
                         ),
                       ),
-                    if (_navigationInProgress == false)
+                    if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'homeBtn',
                         shape: const CircleBorder(),
@@ -1590,7 +1592,7 @@ void addGroupMarker(listing) async {
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
-                    if (_navigationInProgress == false)
+                    if (navigationInProgress == false)
                       AnimatedRotation(
                         turns: _compassBearing / 360.0,
                         duration: const Duration(milliseconds: 200),
@@ -1612,10 +1614,10 @@ void addGroupMarker(listing) async {
                           child: const Icon(Icons.assistant_navigation),
                         ),
                       ),
-                    if (_navigationInProgress == false)
+                    if (navigationInProgress == false)
                       Row(
                         children: [
-                          if (_navigationInProgress == false)
+                          if (navigationInProgress == false)
                             FloatingActionButton(
                               heroTag: 'filterBtn',
                               shape: const CircleBorder(),
@@ -1657,7 +1659,7 @@ void addGroupMarker(listing) async {
                     ),
                   ),
                 ),
-              if (preferredRoadClosurePolygonVisible && _navigationInProgress == false)
+              if (preferredRoadClosurePolygonVisible && navigationInProgress == false)
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
