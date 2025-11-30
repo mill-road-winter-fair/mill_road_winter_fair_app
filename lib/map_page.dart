@@ -661,55 +661,61 @@ void addGroupMarker(listing) async {
             isScrollControlled: true,
             useSafeArea: true,
             builder: (context) {
-              return LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                final specificSheetModalScrollController = ScrollController();
-                return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
-                  void favouriteOrNotListing(String listingID) {
-                    setModalState(() {
-                      if (favouriteListingKeys.contains(listingID)) {
-                        favouriteListingKeys.remove(listingID);
-                      } else {
-                        favouriteListingKeys.add(listingID);
-                      }
-                      _saveSettings();
-                    });
-                  }
-                  return ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: constraints.maxHeight * 0.90,
-                    ),
-                    child: Scrollbar(
-                      controller: specificSheetModalScrollController,
-                      thumbVisibility: Platform.isIOS ? false : true,
-                      thickness: 4,
-                      radius: const Radius.circular(8),
-                      child: SingleChildScrollView(
+              return SafeArea(
+                top: false,
+                left: false,
+                right: false,
+                bottom: true,
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                  final specificSheetModalScrollController = ScrollController();
+                  return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
+                    void favouriteOrNotListing(String listingID) {
+                      setModalState(() {
+                        if (favouriteListingKeys.contains(listingID)) {
+                          favouriteListingKeys.remove(listingID);
+                        } else {
+                          favouriteListingKeys.add(listingID);
+                        }
+                        _saveSettings();
+                      });
+                    }
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: constraints.maxHeight * 0.90,
+                      ),
+                      child: Scrollbar(
                         controller: specificSheetModalScrollController,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                          child: SpecificListingInfoSheet(
-                            title: listing['displayName'],
-                            location: listing['secondaryType'],
-                            subtitle: listing['tertiaryType'],
-                            startTime: "${listing['startTime']}",
-                            endTime: "${listing['endTime']}",
-                            approxDistance: distanceMessage,
-                            phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                            website: (listing['website'] != null) ? listing['website'] : '',
-                            email: (listing['email'] != null) ? listing['email'] : '',
-                            description: (listing['description'] != null) ? listing['description'] : '',
-                            detailsVisible: true,
-                            listingFavourited: isListingFavourited(listing['id']),
-                            onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                            onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                        thumbVisibility: Platform.isIOS ? false : true,
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: SingleChildScrollView(
+                          controller: specificSheetModalScrollController,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                            child: SpecificListingInfoSheet(
+                              title: listing['displayName'],
+                              location: listing['secondaryType'],
+                              subtitle: listing['tertiaryType'],
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: distanceMessage,
+                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                              website: (listing['website'] != null) ? listing['website'] : '',
+                              email: (listing['email'] != null) ? listing['email'] : '',
+                              description: (listing['description'] != null) ? listing['description'] : '',
+                              detailsVisible: true,
+                              listingFavourited: isListingFavourited(listing['id']),
+                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                });
-              });
+                    );
+                  });
+                }),
+              );
             },
           );
         });
