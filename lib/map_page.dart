@@ -1158,8 +1158,6 @@ void addGroupMarker(listing) async {
 
       setState(() {
         final distanceMetres = result.totalDistanceValue ?? 0;
-        // empirical formula, since dashes don't space as if measured in pixels as per google's docs
-        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
         polylines.clear();
         polylines.add(
@@ -1168,7 +1166,7 @@ void addGroupMarker(listing) async {
             points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
+            patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
           ),
         );
 
