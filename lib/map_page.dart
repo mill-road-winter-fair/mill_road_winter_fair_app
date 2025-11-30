@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
@@ -665,7 +666,7 @@ void addGroupMarker(listing) async {
                 top: false,
                 left: false,
                 right: false,
-                bottom: true,
+                bottom: Platform.isAndroid && isNavBarVisible(context),
                 child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
                   final specificSheetModalScrollController = ScrollController();
