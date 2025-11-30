@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
@@ -308,263 +309,269 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Scaffold.of(context).openDrawer();
-            },
+    return SafeArea(
+      top: false,
+      left: false,
+      right: false,
+      bottom: Platform.isAndroid && isNavBarVisible(context),
+      child: Scaffold(
+        appBar: AppBar(
+          leading: Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Scaffold.of(context).openDrawer();
+              },
+            ),
           ),
-        ),
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        ),
-        actions: [
-          IconButton(
-            icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-            },
+          title: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           ),
-        ],
-      ),
-      body: IndexedStack(
-        index: index,
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          showUnselectedLabels: true,
-          elevation: 0,
-          currentIndex: index,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          iconSize: 30,
-          onTap: (selectedIndex) {
-            HapticFeedback.selectionClick();
-            // Update the user's location
-            establishLocation();
-            switch (selectedIndex) {
-              case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
-              case 1 : _listingsKeyFood.currentState?.onTabVisible();
-              case 2 : _listingsKeyShopping.currentState?.onTabVisible();
-              case 3 : _listingsKeyMusic.currentState?.onTabVisible();
-              case 4 : _listingsKeyEvent.currentState?.onTabVisible();
-              case 5 : _listingsKeyPlace.currentState?.onTabVisible();
-              case 6 : _listingsKeyService.currentState?.onTabVisible();
-            }
-            setState(() {
-              index = selectedIndex;
-            });
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-            BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
-            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
+          actions: [
+            IconButton(
+              icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+              },
+            ),
           ],
         ),
-      drawer: Drawer(
-        child: Column(
-          spacing: 0,
-          children: <Widget>[
-            Expanded(
-              flex: 0,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
-                child: DrawerHeader(
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Expanded(flex: 4, child: Container()),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
-                      ),
-                      Expanded(flex: 2, child: Container()),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(' Saturday 6 December 2025 10:30—16:30',
-                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
-                      ),
-                      Expanded(flex: 2, child: Container())
-                    ],
+        body: IndexedStack(
+          index: index,
+          children: _pages,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            showUnselectedLabels: true,
+            elevation: 0,
+            currentIndex: index,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            iconSize: 30,
+            onTap: (selectedIndex) {
+              HapticFeedback.selectionClick();
+              // Update the user's location
+              establishLocation();
+              switch (selectedIndex) {
+                case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
+                case 1 : _listingsKeyFood.currentState?.onTabVisible();
+                case 2 : _listingsKeyShopping.currentState?.onTabVisible();
+                case 3 : _listingsKeyMusic.currentState?.onTabVisible();
+                case 4 : _listingsKeyEvent.currentState?.onTabVisible();
+                case 5 : _listingsKeyPlace.currentState?.onTabVisible();
+                case 6 : _listingsKeyService.currentState?.onTabVisible();
+              }
+              setState(() {
+                index = selectedIndex;
+              });
+            },
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+              BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
+              BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
+              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
+              BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
+              BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
+              BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
+            ],
+          ),
+        drawer: Drawer(
+          child: Column(
+            spacing: 0,
+            children: <Widget>[
+              Expanded(
+                flex: 0,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
+                  child: DrawerHeader(
+                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(flex: 4, child: Container()),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
+                        ),
+                        Expanded(flex: 2, child: Container()),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(' Saturday 6 December 2025 10:30—16:30',
+                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                        ),
+                        Expanded(flex: 2, child: Container())
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              flex: 4,
-              child: ListTile(
-                leading: const Icon(Icons.info),
-                title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-                },
+              Expanded(
+                flex: 4,
+                child: ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                  },
+                ),
               ),
-            ),
-            Expanded(
-              flex: 4,
-              child: ListTile(
-                leading: const FaIcon(FontAwesomeIcons.solidHeart),
-                title: const Text('Saved listings', style: TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", listings: listings)));
-                },
+              Expanded(
+                flex: 4,
+                child: ListTile(
+                  leading: const FaIcon(FontAwesomeIcons.solidHeart),
+                  title: const Text('Saved listings', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", listings: listings)));
+                  },
+                ),
               ),
-            ),
-            Expanded(
-              flex: 4,
-              child: ListTile(
-                leading: const Icon(Icons.warning),
-                title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
-                },
+              Expanded(
+                flex: 4,
+                child: ListTile(
+                  leading: const Icon(Icons.warning),
+                  title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                  },
+                ),
               ),
-            ),
-            Expanded(
-              flex: 4,
-              child: ListTile(
-                leading: const Icon(Icons.public),
-                title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
-                },
+              Expanded(
+                flex: 4,
+                child: ListTile(
+                  leading: const Icon(Icons.public),
+                  title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                  },
+                ),
               ),
-            ),
-            Expanded(
-              flex: 4,
-              child: ListTile(
-                leading: const Icon(Icons.email),
-                title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return contactUsDialog(context);
-                    },
-                  );
-                },
+              Expanded(
+                flex: 4,
+                child: ListTile(
+                  leading: const Icon(Icons.email),
+                  title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return contactUsDialog(context);
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-            Expanded(
-              // needed as Expanded() is relative and this needs a fixed space on larger screens
-              flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 1),
-              child: const SizedBox.expand(),
-            ),
-            Expanded(
-              flex: 3,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
-                    },
-                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                    padding: EdgeInsets.zero,
-                    icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse('https://x.com/millroadfair'));
-                    },
-                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                    padding: EdgeInsets.zero,
-                    icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
-                    },
-                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                    padding: EdgeInsets.zero,
-                    icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
-                    },
-                    constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                    padding: EdgeInsets.zero,
-                    icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                  ),
-                ],
+              Expanded(
+                // needed as Expanded() is relative and this needs a fixed space on larger screens
+                flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 1),
+                child: const SizedBox.expand(),
               ),
-            ),
-            const Expanded(
-              flex: 2,
-              child: SizedBox.expand(),
-            ),
-            const Expanded(
-              flex: 0,
-              child: Divider(),
-            ),
-            Expanded(
-              flex: 4,
-              child: ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pop(context);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
-                },
+              Expanded(
+                flex: 3,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                      },
+                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                      padding: EdgeInsets.zero,
+                      icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        launchUrl(Uri.parse('https://x.com/millroadfair'));
+                      },
+                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                      padding: EdgeInsets.zero,
+                      icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
+                      },
+                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                      padding: EdgeInsets.zero,
+                      icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
+                      },
+                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                      padding: EdgeInsets.zero,
+                      icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              flex: 4,
-              child: ListTile(
-                leading: const Icon(Icons.menu_book),
-                title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pop(context);
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
-                },
+              const Expanded(
+                flex: 2,
+                child: SizedBox.expand(),
               ),
-            ),
-            Expanded(
-              flex: 4,
-              child: ListTile(
-                leading: const Icon(Icons.info),
-                title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.pop(context);
-                  aboutDialog();
-                },
+              const Expanded(
+                flex: 0,
+                child: Divider(),
               ),
-            ),
-            const Expanded(
-              flex: 2,
-              child: SizedBox(height: 20),
-            ),
-          ],
+              Expanded(
+                flex: 4,
+                child: ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
+                  },
+                ),
+              ),
+              Expanded(
+                flex: 4,
+                child: ListTile(
+                  leading: const Icon(Icons.menu_book),
+                  title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+                  },
+                ),
+              ),
+              Expanded(
+                flex: 4,
+                child: ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                    aboutDialog();
+                  },
+                ),
+              ),
+              const Expanded(
+                flex: 2,
+                child: SizedBox(height: 20),
+              ),
+            ],
+          ),
         ),
       ),
     );
