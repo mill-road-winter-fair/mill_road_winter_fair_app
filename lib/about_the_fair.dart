@@ -233,7 +233,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                     textWidthProportion: 0.75,
                   ),
                   const SizedBox(height: 12),
-                  Text('The 2025 Fair will be on Saturday 6th December, 10.30am to 4.30pm.', style: bodyStyle.copyWith(fontWeight: FontWeight.bold)),
+                  Text('The 2025 Fair will be on Saturday 6th December, 10:30 to 16:30.', style: bodyStyle.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   const TextImageRow(
                     textSpan: TextSpan(
@@ -290,11 +290,11 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                               },
                               defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                               children: <TableRow>[
-                                eventRow(context, '9.00', 'Road closure starts'),
-                                eventRow(context, '10.30', 'Winter Fair opens'),
+                                eventRow(context, '09:00', 'Road closure starts'),
+                                eventRow(context, '10:30', 'Winter Fair opens'),
                                 eventRow(
                                   context,
-                                  '10.30',
+                                  '10:30',
                                   'Fire engine pull\n',
                                   [
                                     TextSpan(
@@ -318,7 +318,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                 ),
                                 eventRow(
                                   context,
-                                  '10.30',
+                                  '10:30',
                                   'Opening ceremony\n',
                                   [
                                     TextSpan(
@@ -333,7 +333,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                 ),
                                 eventRow(
                                   context,
-                                  '11.45',
+                                  '11:45',
                                   'Parade\n',
                                   [
                                     TextSpan(
@@ -357,7 +357,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                 ),
                                 eventRow(
                                   context,
-                                  '3.40',
+                                  '15:40',
                                   'Final parade\n',
                                   [
                                     TextSpan(
@@ -379,9 +379,9 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           }),
                                   ],
                                 ),
-                                eventRow(context, '4.15', 'All trading ends'),
-                                eventRow(context, '4.30', 'Winter Fair ends'),
-                                eventRow(context, '5.30', 'Roads fully open'),
+                                eventRow(context, '16:15', 'All trading ends'),
+                                eventRow(context, '16:30', 'Winter Fair ends'),
+                                eventRow(context, '17:30', 'Roads fully open'),
                               ],
                             ),
                           ],

@@ -43,7 +43,7 @@ class ImportantInfoPage extends StatelessWidget {
               const Text('Caution – vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               const SizedBox(height: 15),
               bulletPoint(
-                  'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
+                  'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
               bulletPoint('Pedestrians should exercise particular care before the road is fully closed.', isBold: true),
               bulletPoint('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.', isBold: true),
               bulletPoint('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
