@@ -541,72 +541,78 @@ void addGroupMarker(listing) async {
                     _saveSettings();
                   });
                 }
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.90,
-                      ),
-                      child: Scrollbar(
-                        controller: groupSheetModalScrollController,
-                        thumbVisibility: Platform.isIOS ? false : true,
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: ListView.builder(
-                          itemCount: relatedListings.length,
-                          shrinkWrap: true,
-                          controller: groupSheetModalScrollController,
-                          itemBuilder: (context, index) {
-                            final rel = relatedListings[index];
-
-                            // Calculate distance if current location is known
-                            var distanceMessage = 'Distance unknown';
-                            if (currentLatLng != null) {
-                              int approximateDistanceMetres = asTheCrowFlies(
-                                currentLatLng!,
-                                stringToLatLng(rel['latLng']),
-                              );
-                              distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                            }
-
-                            if (rel['primaryType'].startsWith("Group")) {
-                              return GroupListingInfoSheet(
-                                title: rel['displayName'],
-                                categories: "${rel['tertiaryType']}",
-                                startTime: "${listing['startTime']}",
-                                endTime: "${listing['endTime']}",
-                                approxDistance: distanceMessage,
-                              );
-                            } else {
-                              return Column(
-                                children: [
-                                  SpecificListingInfoSheet(
-                                    title: rel['displayName'],
-                                    location: '',
-                                    subtitle: rel['tertiaryType'],
-                                    startTime: rel['startTime'],
-                                    endTime: rel['endTime'],
-                                    approxDistance: '',
-                                    phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                    website: (rel['website'] != null) ? rel['website'] : '',
-                                    email: (rel['email'] != null) ? rel['email'] : '',
-                                    description: (rel['description'] != null) ? rel['description'] : '',
-                                    detailsVisible: detailsVisibilityList[index],
-                                    onDetailsTapped: () => toggleDetailsRow(index),
-                                    listingFavourited: isListingFavourited(rel['id']),
-                                    onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                    onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                  ),
-                                  if (index != relatedListings.length - 1)
-                                    SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                                ],
-                              );
-                            }
-                          },
+                return SafeArea(
+                  top: false,
+                  left: false,
+                  right: false,
+                  bottom: Platform.isAndroid && isNavBarVisible(context),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: constraints.maxHeight * 0.90,
                         ),
-                      ),
-                    );
-                  },
+                        child: Scrollbar(
+                          controller: groupSheetModalScrollController,
+                          thumbVisibility: Platform.isIOS ? false : true,
+                          thickness: 4,
+                          radius: const Radius.circular(8),
+                          child: ListView.builder(
+                            itemCount: relatedListings.length,
+                            shrinkWrap: true,
+                            controller: groupSheetModalScrollController,
+                            itemBuilder: (context, index) {
+                              final rel = relatedListings[index];
+
+                              // Calculate distance if current location is known
+                              var distanceMessage = 'Distance unknown';
+                              if (currentLatLng != null) {
+                                int approximateDistanceMetres = asTheCrowFlies(
+                                  currentLatLng!,
+                                  stringToLatLng(rel['latLng']),
+                                );
+                                distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                              }
+
+                              if (rel['primaryType'].startsWith("Group")) {
+                                return GroupListingInfoSheet(
+                                  title: rel['displayName'],
+                                  categories: "${rel['tertiaryType']}",
+                                  startTime: "${listing['startTime']}",
+                                  endTime: "${listing['endTime']}",
+                                  approxDistance: distanceMessage,
+                                );
+                              } else {
+                                return Column(
+                                  children: [
+                                    SpecificListingInfoSheet(
+                                      title: rel['displayName'],
+                                      location: '',
+                                      subtitle: rel['tertiaryType'],
+                                      startTime: rel['startTime'],
+                                      endTime: rel['endTime'],
+                                      approxDistance: '',
+                                      phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                      website: (rel['website'] != null) ? rel['website'] : '',
+                                      email: (rel['email'] != null) ? rel['email'] : '',
+                                      description: (rel['description'] != null) ? rel['description'] : '',
+                                      detailsVisible: detailsVisibilityList[index],
+                                      onDetailsTapped: () => toggleDetailsRow(index),
+                                      listingFavourited: isListingFavourited(rel['id']),
+                                      onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                      onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                    ),
+                                    if (index != relatedListings.length - 1)
+                                      SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                  ],
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             );
