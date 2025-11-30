@@ -488,6 +488,8 @@ class HomePageState extends State<HomePage> {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                       },
+                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                      padding: EdgeInsets.zero,
                       icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
                     ),
                     IconButton(
@@ -495,6 +497,8 @@ class HomePageState extends State<HomePage> {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://x.com/millroadfair'));
                       },
+                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                      padding: EdgeInsets.zero,
                       icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
                     ),
                     IconButton(
@@ -502,6 +506,8 @@ class HomePageState extends State<HomePage> {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                       },
+                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                      padding: EdgeInsets.zero,
                       icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
                     ),
                     IconButton(
@@ -509,6 +515,8 @@ class HomePageState extends State<HomePage> {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                       },
+                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                      padding: EdgeInsets.zero,
                       icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
                     ),
                   ],
