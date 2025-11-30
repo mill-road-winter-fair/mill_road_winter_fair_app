@@ -35,8 +35,8 @@ bool isItEventDay() {
 
 // Identifier and function for determining if the event has been marked as cancelled
 const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
-bool hasEventBeenCancelled(String description) {
-  return (description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
+bool hasEventBeenCancelled(String? description) {
+  return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
 }
 
 class GroupListingInfoSheet extends StatelessWidget {

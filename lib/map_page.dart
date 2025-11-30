@@ -29,6 +29,12 @@ final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 // Indicator for a simple map marker
 const String aSimpleMarkerId = 'SIMPLE';
 
+// Identifier and function for determining if the event has been marked as cancelled
+const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
+bool hasEventBeenCancelled(String? description) {
+  return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
+}
+
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
 
@@ -378,17 +384,17 @@ class MapPageState extends State<MapPage> {
     final allListings = listings as List;
     for (var listing in allListings) {
       // Assign markerIds to maps for filtering
-      if (listing['primaryType'] == "Food" || listing['primaryType'] == "Group-Food") {
+      if ((listing['primaryType'] == "Food" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Food") {
         _foodMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Shopping" || listing['primaryType'] == "Group-Shopping") {
+      } else if ((listing['primaryType'] == "Shopping" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Shopping") {
         _stallsMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Music" || listing['primaryType'] == "Group-Music") {
+      } else if ((listing['primaryType'] == "Music" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Music") {
         _musicMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Event" || listing['primaryType'] == "Group-Event") {
+      } else if ((listing['primaryType'] == "Event" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Event") {
         _eventMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'] == "Place" || listing['primaryType'] == "Group-Place") {
+      } else if ((listing['primaryType'] == "Place" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Place") {
         _placeMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if (listing['primaryType'].startsWith("Service") || listing['primaryType'] == "Group-Service") {
+      } else if ((listing['primaryType'].startsWith("Service") && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Service") {
         _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
       }
     }
@@ -412,7 +418,7 @@ class MapPageState extends State<MapPage> {
           addGroupMarker(listing);
         }
         // Add Specific markers
-        if (!listing['primaryType'].startsWith('Group-')) {
+        if (!listing['primaryType'].startsWith('Group-') && !hasEventBeenCancelled(listing['description'])) {
           addSpecificMarker(listing);
         }
       }
