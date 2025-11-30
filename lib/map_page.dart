@@ -989,8 +989,6 @@ void addGroupMarker(listing) async {
     setState(() {});
 
     debugPrint('getDirections called for listing ID: $id');
-    // Set navigation as in progress
-    navigationInProgress = true;
 
     if (navigatorPop == true) {
       Navigator.pop(context);
@@ -1034,6 +1032,12 @@ void addGroupMarker(listing) async {
       Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
       addSpecificMarker(destinationListing);
     }
+
+    setState(() {
+    // Set navigation as in progress; do this late so cancel button isn't available before nav starts
+      navigationInProgress = true;
+    });
+
   }
 
   void cancelNavigation() {
@@ -1274,7 +1278,9 @@ void addGroupMarker(listing) async {
     }
 
     const double northUpBearing = 0;
-    double northUpPadding = mapWidth! * 0.07;
+    // add some extra padding, inversely proportional to the distance of the trip, so start/end aren't off screen
+    double extraPaddingForShortTrips = (0.00006 / pow(pow(polylineMaxLat - polylineMinLat, 2) + pow(polylineMaxLong - polylineMinLong, 2), 0.5)).clamp(0, 0.1);
+    double northUpPadding = mapWidth! * (0.07 + extraPaddingForShortTrips);
     _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), northUpPadding, northUpBearing);
   }
 
