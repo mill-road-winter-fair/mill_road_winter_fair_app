@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -79,7 +81,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
 
     return IntroductionScreen(
       key: introKey,
-      safeAreaList: const [false, false, false, true],
+      safeAreaList: [false, false, false, Platform.isAndroid && isNavBarVisible(context)],
       autoScrollDuration: onTest ? null : 150000,
       infiniteAutoScroll: onTest ? false : true,
       globalBackgroundColor: Theme.of(context).colorScheme.secondary,
@@ -371,50 +373,50 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                         children: [
                           Icon(Icons.smart_button, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("There’s a button for each listings\ncategory at the bottom of the app", style: bodyStyle),
+                          Text("There’s a button for each listings\ncategory at the bottom of the app", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Tap on these to see everything\nthat’s on in that category", style: bodyStyle),
+                          Text("Tap on these to see everything\nthat’s on in that category", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Sort the list by location,\nnearest, name or time", style: bodyStyle),
+                          Text("Sort the list by location,\nnearest, name or time", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Icon(Icons.update, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Tap this button to jump to the\ncurrent time in the list", style: bodyStyle),
+                          Text("Tap this button to jump to the\ncurrent time in the list", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Icon(Icons.event_busy, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("This button hides all the listings\nthat have finished", style: bodyStyle),
+                          Text("This button hides all the listings\nthat have finished", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Icon(Icons.search, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text("Tap the search button and type\nto find specific listings", style: bodyStyle),
+                          Text("Tap the search button and type\nto find specific listings", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
@@ -464,7 +466,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           Text("Thank you for visiting Mill\nRoad Winter Fair and using\nour new app", style: bodyStyle),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.report, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -482,13 +484,13 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                                       Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
                                     },
                                 ),
-                                TextSpan(text: " about\nthe Fair", style: bodyStyle),
+                                TextSpan(text: "\nabout the Fair", style: bodyStyle),
                               ],
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -497,7 +499,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                    text: "Did you know the Fair is organised\nentirely by volunteers? To get\ninvolved, just visit our ", style: bodyStyle),
+                                    text: "Did you know the Fair is run\nentirely by volunteers? To get\ninvolved, just visit our ", style: bodyStyle),
                                 TextSpan(
                                   text: "website",
                                   style: bodyStyle.copyWith(decoration: TextDecoration.underline),
@@ -512,7 +514,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary),
@@ -520,7 +522,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(text: "If you have feedback about the\napp we’d love to hear from you!\nJust fill in ", style: bodyStyle),
+                                TextSpan(text: "If you have feedback about\nthe app we’d love to hear from\nyou! Just fill in ", style: bodyStyle),
                                 TextSpan(
                                   text: "this form",
                                   style: bodyStyle.copyWith(decoration: TextDecoration.underline),
