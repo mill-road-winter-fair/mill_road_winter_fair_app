@@ -79,6 +79,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
 
     return IntroductionScreen(
       key: introKey,
+      safeAreaList: const [false, false, false, true],
       autoScrollDuration: onTest ? null : 150000,
       infiniteAutoScroll: onTest ? false : true,
       globalBackgroundColor: Theme.of(context).colorScheme.secondary,
