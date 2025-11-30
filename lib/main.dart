@@ -394,7 +394,7 @@ class HomePageState extends State<HomePage> {
                       Expanded(flex: 2, child: Container()),
                       FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(' Saturday 6 December 2025 10.30 – 4.30',
+                        child: Text(' Saturday 6 December 2025 10:30 – 16:30',
                             style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
                       ),
                       Expanded(flex: 2, child: Container())
