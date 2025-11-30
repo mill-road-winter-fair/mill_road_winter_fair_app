@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -111,8 +112,12 @@ void showDirectionsTo(BuildContext context, String id, LatLng theDest) async {
   // Switch to map tab on the home page
   homePageKey.currentState?.setCurrentIndex(0);
 
-  // Request the map page to show directions
-  await mapPageKey.currentState?.getDirections(id, theDest, true);
+  // We only want to attempt this kind of navigation if we already have the listings
+  // Otherwise, the map page will handle it when the listings eventually load
+  if (listings.isNotEmpty) {
+    // Request the map page to show directions
+    await mapPageKey.currentState?.getDirections(id, theDest, true);
+  }
 }
 
 class AboutTheFairPage extends StatefulWidget {
