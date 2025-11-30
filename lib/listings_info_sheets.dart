@@ -211,7 +211,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     } else {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: subtitle, style: timeStyle));
     }
-debugPrint('MW MediaQuery.of(context).size.width=${MediaQuery.of(context).size.width}');
+
     return Container(
       padding: EdgeInsets.fromLTRB(
         4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
