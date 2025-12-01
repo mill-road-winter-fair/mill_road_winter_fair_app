@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -203,224 +204,230 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text('About Mill Road Winter Fair'),
+    return SafeArea(
+      top: false,
+      left: false,
+      right: false,
+      bottom: Platform.isAndroid && isNavBarVisible(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('About Mill Road Winter Fair'),
+          ),
         ),
-      ),
-      body: Container(width: min(MediaQuery.of(context).size.width - 8, 500),
-        padding: EdgeInsets.all(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
-        child: Scrollbar(
-          controller: _aboutPageScrollController,
-          thumbVisibility: Platform.isIOS ? false : true,
-          thickness: 4,
-          radius: const Radius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: SingleChildScrollView(
-              controller: _aboutPageScrollController,
-              primary: false,
-              child: Column(
-                children: [
-                  const TextImageRow(
-                    textSpan: TextSpan(
-                      text:
-                          'Mill Road Winter Fair is a celebration of community along one of the most diverse and vibrant roads in Cambridge. Usually held on the first Saturday of December, the Fair brings together local businesses and organisations, shops and stallholders, musicians, artists and dancers in one day of festival joy.',
-                    ),
-                    imagePath: "assets/aboutPage/MRWF25_people_hat.png",
-                    textWidthProportion: 0.75,
-                  ),
-                  const SizedBox(height: 12),
-                  Text('The 2025 Fair will be on Saturday 6th December, 10:30 to 16:30.', style: bodyStyle.copyWith(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  const TextImageRow(
-                    textSpan: TextSpan(
-                      text:
-                          'This year, we celebrate 20 years since the first Fair in 2005! It’s been a remarkable journey, but we still hold true to the Fair’s original aim of celebrating all that is great about the Mill Road area. We have a huge range of activities to discover throughout the day; it’s sure to be the best Fair yet! Be sure to come early so that you don’t miss out!',
-                    ),
-                    imagePath: "assets/aboutPage/MRWF25_people_cake.png",
-                    textWidthProportion: 0.67,
-                    imageOnLeft: true,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      SizedBox(
-                        width: 221,
-                        // Flutter tables don't support spanning, so need two of them to do a header row
-                        child: Column(
-                          children: [
-                            Table(
-                              columnWidths: const <int, TableColumnWidth>{
-                                0: FixedColumnWidth(150),
-                                1: FixedColumnWidth(71),
-                              },
-                              defaultVerticalAlignment: TableCellVerticalAlignment.top,
-                              children: <TableRow>[
-                                TableRow(
-                                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                                  children: <Widget>[
-                                    TableCell(
-                                      verticalAlignment: TableCellVerticalAlignment.middle,
-                                      child: Container(
-                                        padding: const EdgeInsets.only(left: 4),
-                                        child: Text('Key events',
-                                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
-                                      ),
-                                    ),
-                                    TableCell(
-                                      verticalAlignment: TableCellVerticalAlignment.top,
-                                      child: SizedBox(
-                                          width: 71,
-                                          child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft),
-                                        ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Table(
-                              columnWidths: const <int, TableColumnWidth>{
-                                0: FixedColumnWidth(44),
-                                1: FixedColumnWidth(177),
-                              },
-                              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                              children: <TableRow>[
-                                eventRow(context, '09:00', 'Road closure starts'),
-                                eventRow(context, '10:30', 'Winter Fair opens'),
-                                eventRow(
-                                  context,
-                                  '10:30',
-                                  'Fire engine pull\n',
-                                  [
-                                    TextSpan(
-                                        text: 'East Road',
-                                        style: eventsSubtitleLinkStyle,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            HapticFeedback.lightImpact();
-                                            showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202488, 0.131207));
-                                          }),
-                                    TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                    TextSpan(
-                                        text: 'the bridge',
-                                        style: eventsSubtitleLinkStyle,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            HapticFeedback.lightImpact();
-                                            showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.198682, 0.141051));
-                                          }),
-                                  ],
-                                ),
-                                eventRow(
-                                  context,
-                                  '10:30',
-                                  'Opening ceremony\n',
-                                  [
-                                    TextSpan(
-                                        text: 'Ditchburn Gardens',
-                                        style: eventsSubtitleLinkStyle,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            HapticFeedback.lightImpact();
-                                            showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.200389, 0.136465));
-                                          }),
-                                  ],
-                                ),
-                                eventRow(
-                                  context,
-                                  '11:45',
-                                  'Parade\n',
-                                  [
-                                    TextSpan(
-                                        text: 'Salisbury Club',
-                                        style: eventsSubtitleLinkStyle,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            HapticFeedback.lightImpact();
-                                            showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.1970778, 0.1472252));
-                                          }),
-                                    TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                    TextSpan(
-                                        text: 'Petersfield',
-                                        style: eventsSubtitleLinkStyle,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            HapticFeedback.lightImpact();
-                                            showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
-                                          }),
-                                  ],
-                                ),
-                                eventRow(
-                                  context,
-                                  '15:40',
-                                  'Final parade\n',
-                                  [
-                                    TextSpan(
-                                        text: 'Gwydir Street',
-                                        style: eventsSubtitleLinkStyle,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            HapticFeedback.lightImpact();
-                                            showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.199627, 0.138407));
-                                          }),
-                                    TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                    TextSpan(
-                                        text: 'Petersfield',
-                                        style: eventsSubtitleLinkStyle,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            HapticFeedback.lightImpact();
-                                            showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
-                                          }),
-                                  ],
-                                ),
-                                eventRow(context, '16:15', 'All trading ends'),
-                                eventRow(context, '16:30', 'Winter Fair ends'),
-                                eventRow(context, '17:30', 'Roads fully open'),
-                              ],
-                            ),
-                          ],
-                        ),
+        body: Container(width: min(MediaQuery.of(context).size.width - 8, 500),
+          padding: EdgeInsets.all(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
+          child: Scrollbar(
+            controller: _aboutPageScrollController,
+            thumbVisibility: Platform.isIOS ? false : true,
+            thickness: 4,
+            radius: const Radius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: SingleChildScrollView(
+                controller: _aboutPageScrollController,
+                primary: false,
+                child: Column(
+                  children: [
+                    const TextImageRow(
+                      textSpan: TextSpan(
+                        text:
+                            'Mill Road Winter Fair is a celebration of community along one of the most diverse and vibrant roads in Cambridge. Usually held on the first Saturday of December, the Fair brings together local businesses and organisations, shops and stallholders, musicians, artists and dancers in one day of festival joy.',
                       ),
-                      const Expanded(child: SizedBox()),
-                      SizedBox(
-                        width: 70,
-                        child: Image.asset("assets/aboutPage/MRWF25_trafficlights.png", fit: BoxFit.fill, width: 70),
+                      imagePath: "assets/aboutPage/MRWF25_people_hat.png",
+                      textWidthProportion: 0.75,
+                    ),
+                    const SizedBox(height: 12),
+                    Text('The 2025 Fair will be on Saturday 6th December, 10:30 to 16:30.', style: bodyStyle.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    const TextImageRow(
+                      textSpan: TextSpan(
+                        text:
+                            'This year, we celebrate 20 years since the first Fair in 2005! It’s been a remarkable journey, but we still hold true to the Fair’s original aim of celebrating all that is great about the Mill Road area. We have a huge range of activities to discover throughout the day; it’s sure to be the best Fair yet! Be sure to come early so that you don’t miss out!',
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  TextImageRow(
-                    textSpan: TextSpan(
+                      imagePath: "assets/aboutPage/MRWF25_people_cake.png",
+                      textWidthProportion: 0.67,
+                      imageOnLeft: true,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        const TextSpan(text: 'We are grateful for the generous support of '),
-                        TextSpan(text: '', style: sponsorLinkStyle),
-                        const TextSpan(text: ''),
-                        // Sponsor spans
-                        const TextSpan(text: ''),
-                        // Build sponsor spans with separators
-                        ...sponsorSpans,
-                        const TextSpan(
-                            text: 'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
+                        SizedBox(
+                          width: 221,
+                          // Flutter tables don't support spanning, so need two of them to do a header row
+                          child: Column(
+                            children: [
+                              Table(
+                                columnWidths: const <int, TableColumnWidth>{
+                                  0: FixedColumnWidth(150),
+                                  1: FixedColumnWidth(71),
+                                },
+                                defaultVerticalAlignment: TableCellVerticalAlignment.top,
+                                children: <TableRow>[
+                                  TableRow(
+                                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+                                    children: <Widget>[
+                                      TableCell(
+                                        verticalAlignment: TableCellVerticalAlignment.middle,
+                                        child: Container(
+                                          padding: const EdgeInsets.only(left: 4),
+                                          child: Text('Key events',
+                                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
+                                        ),
+                                      ),
+                                      TableCell(
+                                        verticalAlignment: TableCellVerticalAlignment.top,
+                                        child: SizedBox(
+                                            width: 71,
+                                            child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft),
+                                          ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Table(
+                                columnWidths: const <int, TableColumnWidth>{
+                                  0: FixedColumnWidth(44),
+                                  1: FixedColumnWidth(177),
+                                },
+                                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                                children: <TableRow>[
+                                  eventRow(context, '09:00', 'Road closure starts'),
+                                  eventRow(context, '10:30', 'Winter Fair opens'),
+                                  eventRow(
+                                    context,
+                                    '10:30',
+                                    'Fire engine pull\n',
+                                    [
+                                      TextSpan(
+                                          text: 'East Road',
+                                          style: eventsSubtitleLinkStyle,
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              HapticFeedback.lightImpact();
+                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202488, 0.131207));
+                                            }),
+                                      TextSpan(text: ' to ', style: eventsSubtitleStyle),
+                                      TextSpan(
+                                          text: 'the bridge',
+                                          style: eventsSubtitleLinkStyle,
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              HapticFeedback.lightImpact();
+                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.198682, 0.141051));
+                                            }),
+                                    ],
+                                  ),
+                                  eventRow(
+                                    context,
+                                    '10:30',
+                                    'Opening ceremony\n',
+                                    [
+                                      TextSpan(
+                                          text: 'Ditchburn Gardens',
+                                          style: eventsSubtitleLinkStyle,
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              HapticFeedback.lightImpact();
+                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.200389, 0.136465));
+                                            }),
+                                    ],
+                                  ),
+                                  eventRow(
+                                    context,
+                                    '11:45',
+                                    'Parade\n',
+                                    [
+                                      TextSpan(
+                                          text: 'Salisbury Club',
+                                          style: eventsSubtitleLinkStyle,
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              HapticFeedback.lightImpact();
+                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.1970778, 0.1472252));
+                                            }),
+                                      TextSpan(text: ' to ', style: eventsSubtitleStyle),
+                                      TextSpan(
+                                          text: 'Petersfield',
+                                          style: eventsSubtitleLinkStyle,
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              HapticFeedback.lightImpact();
+                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
+                                            }),
+                                    ],
+                                  ),
+                                  eventRow(
+                                    context,
+                                    '15:40',
+                                    'Final parade\n',
+                                    [
+                                      TextSpan(
+                                          text: 'Gwydir Street',
+                                          style: eventsSubtitleLinkStyle,
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              HapticFeedback.lightImpact();
+                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.199627, 0.138407));
+                                            }),
+                                      TextSpan(text: ' to ', style: eventsSubtitleStyle),
+                                      TextSpan(
+                                          text: 'Petersfield',
+                                          style: eventsSubtitleLinkStyle,
+                                          recognizer: TapGestureRecognizer()
+                                            ..onTap = () {
+                                              HapticFeedback.lightImpact();
+                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
+                                            }),
+                                    ],
+                                  ),
+                                  eventRow(context, '16:15', 'All trading ends'),
+                                  eventRow(context, '16:30', 'Winter Fair ends'),
+                                  eventRow(context, '17:30', 'Roads fully open'),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Expanded(child: SizedBox()),
+                        SizedBox(
+                          width: 70,
+                          child: Image.asset("assets/aboutPage/MRWF25_trafficlights.png", fit: BoxFit.fill, width: 70),
+                        ),
                       ],
                     ),
-                    imagePath: "assets/aboutPage/MRWF25_people_juggle.png",
-                    textWidthProportion: 0.75,
-                    imageOnLeft: true,
-                  ),
-                  const SizedBox(height: 12),
-                  FittedBox(
-                    fit: BoxFit.fill,
-                    child: Image.asset("assets/aboutPage/MRWF25_sponsor_logos.png"),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ), // Add event details here
+                    const SizedBox(height: 12),
+                    TextImageRow(
+                      textSpan: TextSpan(
+                        children: [
+                          const TextSpan(text: 'We are grateful for the generous support of '),
+                          TextSpan(text: '', style: sponsorLinkStyle),
+                          const TextSpan(text: ''),
+                          // Sponsor spans
+                          const TextSpan(text: ''),
+                          // Build sponsor spans with separators
+                          ...sponsorSpans,
+                          const TextSpan(
+                              text: 'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
+                        ],
+                      ),
+                      imagePath: "assets/aboutPage/MRWF25_people_juggle.png",
+                      textWidthProportion: 0.75,
+                      imageOnLeft: true,
+                    ),
+                    const SizedBox(height: 12),
+                    FittedBox(
+                      fit: BoxFit.fill,
+                      child: Image.asset("assets/aboutPage/MRWF25_sponsor_logos.png"),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ), // Add event details here
+              ),
             ),
           ),
         ),

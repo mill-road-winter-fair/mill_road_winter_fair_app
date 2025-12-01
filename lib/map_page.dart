@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
@@ -540,72 +541,78 @@ void addGroupMarker(listing) async {
                     _saveSettings();
                   });
                 }
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.90,
-                      ),
-                      child: Scrollbar(
-                        controller: groupSheetModalScrollController,
-                        thumbVisibility: Platform.isIOS ? false : true,
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: ListView.builder(
-                          itemCount: relatedListings.length,
-                          shrinkWrap: true,
-                          controller: groupSheetModalScrollController,
-                          itemBuilder: (context, index) {
-                            final rel = relatedListings[index];
-
-                            // Calculate distance if current location is known
-                            var distanceMessage = 'Distance unknown';
-                            if (currentLatLng != null) {
-                              int approximateDistanceMetres = asTheCrowFlies(
-                                currentLatLng!,
-                                stringToLatLng(rel['latLng']),
-                              );
-                              distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                            }
-
-                            if (rel['primaryType'].startsWith("Group")) {
-                              return GroupListingInfoSheet(
-                                title: rel['displayName'],
-                                categories: "${rel['tertiaryType']}",
-                                startTime: "${listing['startTime']}",
-                                endTime: "${listing['endTime']}",
-                                approxDistance: distanceMessage,
-                              );
-                            } else {
-                              return Column(
-                                children: [
-                                  SpecificListingInfoSheet(
-                                    title: rel['displayName'],
-                                    location: '',
-                                    subtitle: rel['tertiaryType'],
-                                    startTime: rel['startTime'],
-                                    endTime: rel['endTime'],
-                                    approxDistance: '',
-                                    phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                    website: (rel['website'] != null) ? rel['website'] : '',
-                                    email: (rel['email'] != null) ? rel['email'] : '',
-                                    description: (rel['description'] != null) ? rel['description'] : '',
-                                    detailsVisible: detailsVisibilityList[index],
-                                    onDetailsTapped: () => toggleDetailsRow(index),
-                                    listingFavourited: isListingFavourited(rel['id']),
-                                    onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                    onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                  ),
-                                  if (index != relatedListings.length - 1)
-                                    SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                                ],
-                              );
-                            }
-                          },
+                return SafeArea(
+                  top: false,
+                  left: false,
+                  right: false,
+                  bottom: Platform.isAndroid && isNavBarVisible(context),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: constraints.maxHeight * 0.90,
                         ),
-                      ),
-                    );
-                  },
+                        child: Scrollbar(
+                          controller: groupSheetModalScrollController,
+                          thumbVisibility: Platform.isIOS ? false : true,
+                          thickness: 4,
+                          radius: const Radius.circular(8),
+                          child: ListView.builder(
+                            itemCount: relatedListings.length,
+                            shrinkWrap: true,
+                            controller: groupSheetModalScrollController,
+                            itemBuilder: (context, index) {
+                              final rel = relatedListings[index];
+
+                              // Calculate distance if current location is known
+                              var distanceMessage = 'Distance unknown';
+                              if (currentLatLng != null) {
+                                int approximateDistanceMetres = asTheCrowFlies(
+                                  currentLatLng!,
+                                  stringToLatLng(rel['latLng']),
+                                );
+                                distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                              }
+
+                              if (rel['primaryType'].startsWith("Group")) {
+                                return GroupListingInfoSheet(
+                                  title: rel['displayName'],
+                                  categories: "${rel['tertiaryType']}",
+                                  startTime: "${listing['startTime']}",
+                                  endTime: "${listing['endTime']}",
+                                  approxDistance: distanceMessage,
+                                );
+                              } else {
+                                return Column(
+                                  children: [
+                                    SpecificListingInfoSheet(
+                                      title: rel['displayName'],
+                                      location: '',
+                                      subtitle: rel['tertiaryType'],
+                                      startTime: rel['startTime'],
+                                      endTime: rel['endTime'],
+                                      approxDistance: '',
+                                      phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                      website: (rel['website'] != null) ? rel['website'] : '',
+                                      email: (rel['email'] != null) ? rel['email'] : '',
+                                      description: (rel['description'] != null) ? rel['description'] : '',
+                                      detailsVisible: detailsVisibilityList[index],
+                                      onDetailsTapped: () => toggleDetailsRow(index),
+                                      listingFavourited: isListingFavourited(rel['id']),
+                                      onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                      onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                    ),
+                                    if (index != relatedListings.length - 1)
+                                      SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                  ],
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             );
@@ -661,55 +668,61 @@ void addGroupMarker(listing) async {
             isScrollControlled: true,
             useSafeArea: true,
             builder: (context) {
-              return LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                final specificSheetModalScrollController = ScrollController();
-                return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
-                  void favouriteOrNotListing(String listingID) {
-                    setModalState(() {
-                      if (favouriteListingKeys.contains(listingID)) {
-                        favouriteListingKeys.remove(listingID);
-                      } else {
-                        favouriteListingKeys.add(listingID);
-                      }
-                      _saveSettings();
-                    });
-                  }
-                  return ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: constraints.maxHeight * 0.90,
-                    ),
-                    child: Scrollbar(
-                      controller: specificSheetModalScrollController,
-                      thumbVisibility: Platform.isIOS ? false : true,
-                      thickness: 4,
-                      radius: const Radius.circular(8),
-                      child: SingleChildScrollView(
+              return SafeArea(
+                top: false,
+                left: false,
+                right: false,
+                bottom: Platform.isAndroid && isNavBarVisible(context),
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                  final specificSheetModalScrollController = ScrollController();
+                  return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
+                    void favouriteOrNotListing(String listingID) {
+                      setModalState(() {
+                        if (favouriteListingKeys.contains(listingID)) {
+                          favouriteListingKeys.remove(listingID);
+                        } else {
+                          favouriteListingKeys.add(listingID);
+                        }
+                        _saveSettings();
+                      });
+                    }
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: constraints.maxHeight * 0.90,
+                      ),
+                      child: Scrollbar(
                         controller: specificSheetModalScrollController,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                          child: SpecificListingInfoSheet(
-                            title: listing['displayName'],
-                            location: listing['secondaryType'],
-                            subtitle: listing['tertiaryType'],
-                            startTime: "${listing['startTime']}",
-                            endTime: "${listing['endTime']}",
-                            approxDistance: distanceMessage,
-                            phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                            website: (listing['website'] != null) ? listing['website'] : '',
-                            email: (listing['email'] != null) ? listing['email'] : '',
-                            description: (listing['description'] != null) ? listing['description'] : '',
-                            detailsVisible: true,
-                            listingFavourited: isListingFavourited(listing['id']),
-                            onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                            onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                        thumbVisibility: Platform.isIOS ? false : true,
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: SingleChildScrollView(
+                          controller: specificSheetModalScrollController,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                            child: SpecificListingInfoSheet(
+                              title: listing['displayName'],
+                              location: listing['secondaryType'],
+                              subtitle: listing['tertiaryType'],
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: distanceMessage,
+                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                              website: (listing['website'] != null) ? listing['website'] : '',
+                              email: (listing['email'] != null) ? listing['email'] : '',
+                              description: (listing['description'] != null) ? listing['description'] : '',
+                              detailsVisible: true,
+                              listingFavourited: isListingFavourited(listing['id']),
+                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                });
-              });
+                    );
+                  });
+                }),
+              );
             },
           );
         });
