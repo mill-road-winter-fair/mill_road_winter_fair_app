@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +27,7 @@ class ImportantInfoPage extends StatelessWidget {
         ),
         body: SingleChildScrollView(
           child: Container(
+            width: min(MediaQuery.of(context).size.width - 8, 500),
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
