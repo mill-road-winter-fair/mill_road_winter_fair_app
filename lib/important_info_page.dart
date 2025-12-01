@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +27,7 @@ class ImportantInfoPage extends StatelessWidget {
         ),
         body: SingleChildScrollView(
           child: Container(
+            width: min(MediaQuery.of(context).size.width - 8, 500),
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
@@ -93,10 +95,10 @@ class ImportantInfoPage extends StatelessWidget {
                 const SizedBox(height: 15),
                 const Text('Updates and contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 10),
-      // below is original single bullet point replaced by the two; likely to be restored before Fair
-      //              bulletPoint('Please follow Mill Road Winter Fair on social media for the latest news and updates or check this app for the latest listings.'),
-                bulletPoint('This app currently shows many of the attractions you’ll find at the 2025 Fair on Saturday 6th December, and there’ll be more added in the lead-up to the Fair. Check back for the latest listings.'),
-                bulletPoint('Please follow Mill Road Winter Fair on social media for news and updates.'),
+                bulletPoint('Please follow Mill Road Winter Fair on social media for the latest news and updates or check this app for the latest listings.'),
+                // below is temporary wording for the releases prior to the Fair
+                // bulletPoint('This app currently shows many of the attractions you’ll find at the 2025 Fair on Saturday 6th December, and there’ll be more added in the lead-up to the Fair. Check back for the latest listings.'),
+                // bulletPoint('Please follow Mill Road Winter Fair on social media for news and updates.'),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2.0), // tighten spacing
                   child: Row(
