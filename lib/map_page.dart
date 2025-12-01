@@ -1276,10 +1276,15 @@ void addGroupMarker(listing) async {
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
     debugPrint('_setMapCameraToFitPolyline called');
-    double polylineMinLat = polylines.first.points.first.latitude;
-    double polylineMinLong = polylines.first.points.first.longitude;
-    double polylineMaxLat = polylines.first.points.first.latitude;
-    double polylineMaxLong = polylines.first.points.first.longitude;
+
+    double bearing; // the bearing to set the camera to, based on preference
+    double padding; // extra space on the map around the polyline and source marker
+
+    //include the current location in the bounding box calculation, in case it's beyond the polyline
+    double polylineMinLat = currentLatLng!.latitude;
+    double polylineMinLong = currentLatLng!.longitude;
+    double polylineMaxLat = currentLatLng!.latitude;
+    double polylineMaxLong = currentLatLng!.longitude;
 
     for (var polyline in polylines) {
       for (var point in polyline.points) {
@@ -1290,14 +1295,22 @@ void addGroupMarker(listing) async {
       }
     }
 
-    const double northUpBearing = 0;
     // add some extra padding, inversely proportional to the distance of the trip, so start/end aren't off screen
     double extraPaddingForShortTrips = (0.00006 / pow(pow(polylineMaxLat - polylineMinLat, 2) + pow(polylineMaxLong - polylineMinLong, 2), 0.5)).clamp(0, 0.1);
-    double northUpPadding = mapWidth! * (0.07 + extraPaddingForShortTrips);
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), northUpPadding, northUpBearing);
+
+    //Default bearing and padding
+    if (preferredMapOrientation == MapOrientation.alwaysNorth) {
+      bearing = 0;
+      padding = mapWidth! * (0.07 + extraPaddingForShortTrips);
+    } else {
+      bearing = 290;
+      padding = mapHeight! * (0.10 + extraPaddingForShortTrips);  // need a bit more space to avoid navigation distance marker
+    }
+
+    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
-  _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
+  void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
     debugPrint('_moveCameraToBoundsWithRotation called');
     double theZoom;
 
@@ -1340,7 +1353,7 @@ void addGroupMarker(listing) async {
 
     //Default bearing
     double bearing = 290;
-    if (preferredMapOrientation == MapOrientation.alwaysNorth || navigationInProgress == true) {
+    if (preferredMapOrientation == MapOrientation.alwaysNorth) {
       bearing = 0;
     }
 
