@@ -30,6 +30,9 @@ final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 // Define whether navigation is in progress as a global variable
 bool navigationInProgress = false;
 
+// Define whether navigation is being loaded as a global variable
+bool navigationLoading = false;
+
 // Indicator for a simple map marker
 const String aSimpleMarkerId = 'SIMPLE';
 
@@ -1002,6 +1005,8 @@ void addGroupMarker(listing) async {
     _distanceToDestination = null;
     // Set navigation as not in progress
     navigationInProgress = false;
+    // Set navigation loading as in progress
+    navigationLoading = true;
     setState(() {});
 
     debugPrint('getDirections called for listing ID: $id');
@@ -1050,8 +1055,9 @@ void addGroupMarker(listing) async {
     }
 
     setState(() {
-    // Set navigation as in progress; do this late so cancel button isn't available before nav starts
+      // Set loading finished and navigation as in progress; do this late so cancel button isn't available before nav starts
       navigationInProgress = true;
+      navigationLoading = false;
     });
 
   }
@@ -1749,7 +1755,13 @@ void addGroupMarker(listing) async {
                       ),
                     ),
                   ),
-                )
+                ),
+                (navigationLoading) ? Container(
+                  color: Colors.black54,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ) : const SizedBox.shrink(),
             ],
           ),
         );
