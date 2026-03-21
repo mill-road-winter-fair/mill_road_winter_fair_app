@@ -45,8 +45,17 @@ class ListingUpdateNotifier {
         "when and where.\n\n"
         "Have a wonderful day!";
     } else if (now.isAfter(_cutoffDate)) {
-      debugPrint('Current date is after cutoff, not showing notice');
-      return;
+      showIntervalDays = 3;
+      theMessageDuration = 20;
+      theMessage = 
+        "Thank you to everyone who came to "
+        "the 2025 Fair and made it such a "
+        "huge success.\n\n"
+        "We‘ll be back on December 5th 2026 "
+        "and will be updating the app as "
+        "that date approaches.\n\n"
+        "Check back later in the year for "
+        "the 2026 listings.";
     } else {
       showIntervalDays = 3;
       theMessageDuration = 12;
