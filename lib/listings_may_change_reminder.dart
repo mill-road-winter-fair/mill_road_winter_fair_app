@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Declaring the cutoffDate as a global variable
+final DateTime cutoffDate = DateTime(2025, 12, 6);
+
 class ListingUpdateNotifier {
   static const _lastShownKey = 'listing_notice_last_shown';
-  static final DateTime _cutoffDate = DateTime(2025, 12, 6);
 
   // I wouldn't usually keep commented out code but this function is handy for testing this toast notification
   // Simply uncomment it and add "ListingUpdateNotifier.resetNoticeTimer();" to the initState in map_page.dart
@@ -30,7 +32,7 @@ class ListingUpdateNotifier {
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
 
-    if (DateUtils.isSameDay(_cutoffDate, DateTime.now())) {
+    if (DateUtils.isSameDay(cutoffDate, DateTime.now())) {
       debugPrint('Current date is Fair date; showing special notice');
       showIntervalDays = 0.3; // 8 hours, so should show once on the day
       theMessageDuration = 20; // longer message
@@ -44,7 +46,7 @@ class ListingUpdateNotifier {
         "so you can easily see what’s on "
         "when and where.\n\n"
         "Have a wonderful day!";
-    } else if (now.isAfter(_cutoffDate)) {
+    } else if (now.isAfter(cutoffDate)) {
       debugPrint('Current date is after cutoff, not showing notice');
       return;
     } else {
