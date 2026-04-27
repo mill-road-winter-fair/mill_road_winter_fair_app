@@ -14,9 +14,10 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     // Load environment variables
     await dotenv.load(fileName: ".env");
     String herokuApi = dotenv.env['HEROKU_API'] ?? '';
-    final uri = Uri.parse(herokuApi);
+    String herokuApiKey = dotenv.env['HEROKU_API_KEY'] ?? '';
+    var uri = Uri.parse(herokuApi);
 
-    final response = await client.get(uri);
+    final response = await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
     debugPrint('API response status: ${response.statusCode}');
 
     // Retry up to 10 times for transient failures
