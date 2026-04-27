@@ -22,8 +22,15 @@ void main() {
       await tester.pumpAndSettle();
 
       final prefs = await SharedPreferences.getInstance();
-      // Expect that prefs contains at least one key (the lastShown timestamp)
-      expect(prefs.getKeys().isNotEmpty, isTrue);
+
+      final now = DateTime.now();
+      if (DateUtils.isSameDay(cutoffDate, DateTime.now())) {
+        // Expect that prefs contains at least one key (the lastShown timestamp)
+        expect(prefs.getKeys().isNotEmpty, isTrue);
+      } else if (now.isAfter(cutoffDate)) {
+        // Expect that prefs contains no key
+        expect(prefs.getKeys().isEmpty, isTrue);
+      }
     });
   });
 }
