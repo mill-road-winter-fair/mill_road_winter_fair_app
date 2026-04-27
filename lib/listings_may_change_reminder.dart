@@ -46,7 +46,7 @@ class ListingUpdateNotifier {
         "so you can easily see what’s on "
         "when and where.\n\n"
         "Have a wonderful day!";
-    } else if (now.isAfter(_cutoffDate)) {
+    } else if (now.isAfter(cutoffDate)) {
       showIntervalDays = 3;
       theMessageDuration = 20;
       theMessage = 
