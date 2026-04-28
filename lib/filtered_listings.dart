@@ -576,8 +576,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                         final approximateDistance = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
                         LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                        if (!_hidePastListings || !hasEventEnded(listing['endTime']))
+                        if (!_hidePastListings || !hasEventEnded(listing['endTime'])) {
                           firstVisibleIndex ??= index; // if this is the first visible item, capture its index
+                        }
                         return Column(
                           children: [
                             (!_hidePastListings || !hasEventEnded(listing['endTime']))
