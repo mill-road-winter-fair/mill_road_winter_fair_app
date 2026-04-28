@@ -33,7 +33,7 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   'dark': ThemeData(
     useMaterial3: true,
@@ -68,7 +68,7 @@ final Map<String, ThemeData> appThemes = {
     listTileTheme: const ListTileThemeData(
       tileColor: Color.fromRGBO(44, 44, 44, 1.0),
     ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   '2024': ThemeData(
     useMaterial3: true,
@@ -97,7 +97,7 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
@@ -135,8 +135,8 @@ final Map<String, ThemeData> appThemes = {
       style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
     ),
     listTileTheme: const ListTileThemeData(tileColor: Colors.black),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
-),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
+  ),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme(
@@ -164,8 +164,8 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
-),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
+  ),
 };
 
 // Standard Google Maps themes (designed with https://mapstyle.withgoogle.com/)

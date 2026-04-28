@@ -397,7 +397,8 @@ class MapPageState extends State<MapPage> {
         _eventMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if ((listing['primaryType'] == "Place" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Place") {
         _placeMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'].startsWith("Service") && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Service") {
+      } else if ((listing['primaryType'].startsWith("Service") && !hasEventBeenCancelled(listing['description'])) ||
+          listing['primaryType'] == "Group-Service") {
         _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
       }
     }
@@ -460,7 +461,7 @@ class MapPageState extends State<MapPage> {
     return favouriteListingKeys.contains(listingID);
   }
 
-void addGroupMarker(listing) async {
+  void addGroupMarker(listing) async {
     // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -531,6 +532,7 @@ void addGroupMarker(listing) async {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
                 }
+
                 void favouriteOrNotListing(String listingID) {
                   setModalState(() {
                     if (favouriteListingKeys.contains(listingID)) {
@@ -541,6 +543,7 @@ void addGroupMarker(listing) async {
                     _saveSettings();
                   });
                 }
+
                 return SafeArea(
                   top: false,
                   left: false,
@@ -676,8 +679,7 @@ void addGroupMarker(listing) async {
                 left: false,
                 right: false,
                 bottom: Platform.isAndroid && isNavBarVisible(context),
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
+                child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                   final specificSheetModalScrollController = ScrollController();
                   return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
                     void favouriteOrNotListing(String listingID) {
@@ -690,6 +692,7 @@ void addGroupMarker(listing) async {
                         _saveSettings();
                       });
                     }
+
                     return ConstrainedBox(
                       constraints: BoxConstraints(
                         maxHeight: constraints.maxHeight * 0.90,
@@ -977,7 +980,7 @@ void addGroupMarker(listing) async {
                       ),
                     ],
                   ),
-                  const Row(children:[SizedBox(height: 12)]),
+                  const Row(children: [SizedBox(height: 12)]),
                 ],
               ),
             );
@@ -1050,10 +1053,9 @@ void addGroupMarker(listing) async {
     }
 
     setState(() {
-    // Set navigation as in progress; do this late so cancel button isn't available before nav starts
+      // Set navigation as in progress; do this late so cancel button isn't available before nav starts
       navigationInProgress = true;
     });
-
   }
 
   void cancelNavigation() {
@@ -1307,10 +1309,11 @@ void addGroupMarker(listing) async {
       padding = mapWidth! * (0.07 + extraPaddingForShortTrips);
     } else {
       bearing = 290;
-      padding = mapHeight! * (0.10 + extraPaddingForShortTrips);  // need a bit more space to avoid navigation distance marker
+      padding = mapHeight! * (0.10 + extraPaddingForShortTrips); // need a bit more space to avoid navigation distance marker
     }
 
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
+    _moveCameraToBoundsWithRotation(
+        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {

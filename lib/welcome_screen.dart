@@ -112,8 +112,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           titleWidget: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: Text('Welcome to the official\nMill Road Winter Fair app!',
-                style: titleStyle, textAlign: TextAlign.center),
+            child: Text('Welcome to the official\nMill Road Winter Fair app!', style: titleStyle, textAlign: TextAlign.center),
           ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -149,7 +148,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart , size: 32, color: Theme.of(context).colorScheme.onSecondary))),
+                          SizedBox(
+                              width: 40,
+                              child: Align(
+                                  alignment: Alignment.center,
+                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
                           Text("Get full details for all of these,\nand save your favourites", style: bodyStyle),
                         ],
@@ -177,7 +180,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -267,7 +270,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -341,7 +344,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -419,7 +422,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
+                          SizedBox(
+                              width: 40,
+                              child: Align(
+                                  alignment: Alignment.center,
+                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
                           Text("Save your favourite listings, and\nview these from the main menu", style: bodyStyle),
                         ],
@@ -431,7 +438,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -498,8 +505,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(
-                                    text: "Did you know the Fair is run\nentirely by volunteers? To get\ninvolved, just visit our ", style: bodyStyle),
+                                TextSpan(text: "Did you know the Fair is run\nentirely by volunteers? To get\ninvolved, just visit our ", style: bodyStyle),
                                 TextSpan(
                                   text: "website",
                                   style: bodyStyle.copyWith(decoration: TextDecoration.underline),
@@ -529,8 +535,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
-                                      launchUrl(Uri.parse(
-                                          'https://www.millroadwinterfair.org/app-feedback-form/'));
+                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
                                     },
                                 ),
                               ],
@@ -545,7 +550,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar

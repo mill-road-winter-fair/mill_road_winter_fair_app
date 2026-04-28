@@ -87,19 +87,16 @@ TableRow eventRow(context, eventTime, eventTitle, [List<TextSpan>? eventSubtitle
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(4, 4, 2, 4), 
+          padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
           child: FittedBox(
-            fit: BoxFit.scaleDown, 
+            fit: BoxFit.scaleDown,
             child: Text(eventTime, style: eventsTimeStyle, textAlign: TextAlign.right),
           ),
         ),
       ),
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(2, 4, 2, 4), 
-          child: Text.rich(TextSpan(children: allTitleSpans))
-        ),
+        child: Container(padding: const EdgeInsets.fromLTRB(2, 4, 2, 4), child: Text.rich(TextSpan(children: allTitleSpans))),
       ),
     ],
   );
@@ -216,7 +213,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
             child: Text('About Mill Road Winter Fair'),
           ),
         ),
-        body: Container(width: min(MediaQuery.of(context).size.width - 8, 500),
+        body: Container(
+          width: min(MediaQuery.of(context).size.width - 8, 500),
           padding: EdgeInsets.all(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
           child: Scrollbar(
             controller: _aboutPageScrollController,
@@ -275,15 +273,16 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                         child: Container(
                                           padding: const EdgeInsets.only(left: 4),
                                           child: Text('Key events',
-                                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
+                                              style: TextStyle(
+                                                  fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
                                         ),
                                       ),
                                       TableCell(
                                         verticalAlignment: TableCellVerticalAlignment.top,
                                         child: SizedBox(
-                                            width: 71,
-                                            child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft),
-                                          ),
+                                          width: 71,
+                                          child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -412,7 +411,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                           // Build sponsor spans with separators
                           ...sponsorSpans,
                           const TextSpan(
-                              text: 'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
+                              text:
+                                  'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
                         ],
                       ),
                       imagePath: "assets/aboutPage/MRWF25_people_juggle.png",
