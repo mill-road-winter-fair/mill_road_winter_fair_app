@@ -557,57 +557,60 @@ void addGroupMarker(listing) async {
                           thumbVisibility: Platform.isIOS ? false : true,
                           thickness: 4,
                           radius: const Radius.circular(8),
-                          child: ListView.builder(
-                            itemCount: relatedListings.length,
-                            shrinkWrap: true,
-                            controller: groupSheetModalScrollController,
-                            itemBuilder: (context, index) {
-                              final rel = relatedListings[index];
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
+                            child: ListView.builder(
+                              itemCount: relatedListings.length,
+                              shrinkWrap: true,
+                              controller: groupSheetModalScrollController,
+                              itemBuilder: (context, index) {
+                                final rel = relatedListings[index];
 
-                              // Calculate distance if current location is known
-                              var distanceMessage = 'Distance unknown';
-                              if (currentLatLng != null) {
-                                int approximateDistanceMetres = asTheCrowFlies(
-                                  currentLatLng!,
-                                  stringToLatLng(rel['latLng']),
-                                );
-                                distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                              }
+                                // Calculate distance if current location is known
+                                var distanceMessage = 'Distance unknown';
+                                if (currentLatLng != null) {
+                                  int approximateDistanceMetres = asTheCrowFlies(
+                                    currentLatLng!,
+                                    stringToLatLng(rel['latLng']),
+                                  );
+                                  distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                                }
 
-                              if (rel['primaryType'].startsWith("Group")) {
-                                return GroupListingInfoSheet(
-                                  title: rel['displayName'],
-                                  categories: "${rel['tertiaryType']}",
-                                  startTime: "${listing['startTime']}",
-                                  endTime: "${listing['endTime']}",
-                                  approxDistance: distanceMessage,
-                                );
-                              } else {
-                                return Column(
-                                  children: [
-                                    SpecificListingInfoSheet(
-                                      title: rel['displayName'],
-                                      location: '',
-                                      subtitle: rel['tertiaryType'],
-                                      startTime: rel['startTime'],
-                                      endTime: rel['endTime'],
-                                      approxDistance: '',
-                                      phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                      website: (rel['website'] != null) ? rel['website'] : '',
-                                      email: (rel['email'] != null) ? rel['email'] : '',
-                                      description: (rel['description'] != null) ? rel['description'] : '',
-                                      detailsVisible: detailsVisibilityList[index],
-                                      onDetailsTapped: () => toggleDetailsRow(index),
-                                      listingFavourited: isListingFavourited(rel['id']),
-                                      onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                      onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                    ),
-                                    if (index != relatedListings.length - 1)
-                                      SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                                  ],
-                                );
-                              }
-                            },
+                                if (rel['primaryType'].startsWith("Group")) {
+                                  return GroupListingInfoSheet(
+                                    title: rel['displayName'],
+                                    categories: "${rel['tertiaryType']}",
+                                    startTime: "${listing['startTime']}",
+                                    endTime: "${listing['endTime']}",
+                                    approxDistance: distanceMessage,
+                                  );
+                                } else {
+                                  return Column(
+                                    children: [
+                                      SpecificListingInfoSheet(
+                                        title: rel['displayName'],
+                                        location: '',
+                                        subtitle: rel['tertiaryType'],
+                                        startTime: rel['startTime'],
+                                        endTime: rel['endTime'],
+                                        approxDistance: '',
+                                        phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                        website: (rel['website'] != null) ? rel['website'] : '',
+                                        email: (rel['email'] != null) ? rel['email'] : '',
+                                        description: (rel['description'] != null) ? rel['description'] : '',
+                                        detailsVisible: detailsVisibilityList[index],
+                                        onDetailsTapped: () => toggleDetailsRow(index),
+                                        listingFavourited: isListingFavourited(rel['id']),
+                                        onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                        onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                      ),
+                                      if (index != relatedListings.length - 1)
+                                        SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                    ],
+                                  );
+                                }
+                              },
+                            ),
                           ),
                         ),
                       );
@@ -1276,10 +1279,15 @@ void addGroupMarker(listing) async {
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
     debugPrint('_setMapCameraToFitPolyline called');
-    double polylineMinLat = polylines.first.points.first.latitude;
-    double polylineMinLong = polylines.first.points.first.longitude;
-    double polylineMaxLat = polylines.first.points.first.latitude;
-    double polylineMaxLong = polylines.first.points.first.longitude;
+
+    double bearing; // the bearing to set the camera to, based on preference
+    double padding; // extra space on the map around the polyline and source marker
+
+    //include the current location in the bounding box calculation, in case it's beyond the polyline
+    double polylineMinLat = currentLatLng!.latitude;
+    double polylineMinLong = currentLatLng!.longitude;
+    double polylineMaxLat = currentLatLng!.latitude;
+    double polylineMaxLong = currentLatLng!.longitude;
 
     for (var polyline in polylines) {
       for (var point in polyline.points) {
@@ -1290,14 +1298,22 @@ void addGroupMarker(listing) async {
       }
     }
 
-    const double northUpBearing = 0;
     // add some extra padding, inversely proportional to the distance of the trip, so start/end aren't off screen
     double extraPaddingForShortTrips = (0.00006 / pow(pow(polylineMaxLat - polylineMinLat, 2) + pow(polylineMaxLong - polylineMinLong, 2), 0.5)).clamp(0, 0.1);
-    double northUpPadding = mapWidth! * (0.07 + extraPaddingForShortTrips);
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), northUpPadding, northUpBearing);
+
+    //Default bearing and padding
+    if (preferredMapOrientation == MapOrientation.alwaysNorth) {
+      bearing = 0;
+      padding = mapWidth! * (0.07 + extraPaddingForShortTrips);
+    } else {
+      bearing = 290;
+      padding = mapHeight! * (0.10 + extraPaddingForShortTrips);  // need a bit more space to avoid navigation distance marker
+    }
+
+    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
-  _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
+  void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
     debugPrint('_moveCameraToBoundsWithRotation called');
     double theZoom;
 
@@ -1340,7 +1356,7 @@ void addGroupMarker(listing) async {
 
     //Default bearing
     double bearing = 290;
-    if (preferredMapOrientation == MapOrientation.alwaysNorth || navigationInProgress == true) {
+    if (preferredMapOrientation == MapOrientation.alwaysNorth) {
       bearing = 0;
     }
 
