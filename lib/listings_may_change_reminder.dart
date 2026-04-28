@@ -3,7 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Declaring the cutoffDate as a global variable
-final DateTime cutoffDate = DateTime(2026, 12, 5);
+final DateTime cutoffDate = DateTime(2025, 12, 6);
 
 class ListingUpdateNotifier {
   static const _lastShownKey = 'listing_notice_last_shown';
