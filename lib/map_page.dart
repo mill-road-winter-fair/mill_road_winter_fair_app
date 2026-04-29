@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl;
+import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/gestures.dart';
@@ -1171,12 +1171,13 @@ void addGroupMarker(listing) async {
         throw Exception("Google Maps Directions API key is missing.");
       }
 
-      // Fetch new directions from the Google Routes API
+      // Set up request for fetching new directions from the Google Routes API
       pl.RoutesApiRequest request = pl.RoutesApiRequest(
         origin: pl.PointLatLng(origin.latitude, origin.longitude),
         destination: pl.PointLatLng(destination.latitude, destination.longitude),
         travelMode: pl.TravelMode.walking,
         routingPreference: pl.RoutingPreference.unspecified,
+        headers: headers,
       );
 
       // Get route using Routes API
@@ -1185,22 +1186,16 @@ void addGroupMarker(listing) async {
       );
 
       if (response.routes.isEmpty) {
-        debugPrint('MW $response ${response.errorMessage}');
         throw Exception("No route points returned from Google Routes API. ");
       }
 
       pl.Route route = response.routes.first;
-      
-      // Access route information
-      debugPrint('Duration: ${route.durationMinutes} minutes');
-      debugPrint('Distance: ${route.distanceKm} km');
-      
+
       // Get polyline points
       List<pl.PointLatLng> points = route.polylinePoints ?? [];
 
-      // Access route information
-      debugPrint('Duration: ${route.durationMinutes} minutes');
-      debugPrint('Distance: ${route.distanceKm} km');
+      // Convert to LatLng for Google Maps
+      List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
       
       setState(() {
         final distanceMetres = response.routes.first.distanceMeters ?? 0;
@@ -1211,7 +1206,7 @@ void addGroupMarker(listing) async {
         polylines.add(
           Polyline(
             polylineId: const PolylineId('route'),
-            points: points as List<LatLng>,
+            points: polylineCoordinates,
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
             patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
