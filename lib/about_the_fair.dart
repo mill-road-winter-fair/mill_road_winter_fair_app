@@ -69,7 +69,7 @@ class TextImageRow extends StatelessWidget {
 }
 
 // Make a row in the events table. Needed as can't style the entire table or pad an entire row in one go
-TableRow eventRow(context, eventTime, eventTitle, [List<TextSpan>? eventSubtitle]) {
+TableRow eventRow(BuildContext context, String eventTime, String eventTitle, [List<TextSpan>? eventSubtitle]) {
   var eventsTimeStyle = TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
   var eventsTitleStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
 

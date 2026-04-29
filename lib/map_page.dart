@@ -464,11 +464,11 @@ class MapPageState extends State<MapPage> {
   }
 
   // Function to determine if a listing has been added to favourites
-  bool isListingFavourited(listingID) {
+  bool isListingFavourited(String listingID) {
     return favouriteListingKeys.contains(listingID);
   }
 
-void addGroupMarker(listing) async {
+void addGroupMarker(Map<String, dynamic> listing) async {
     // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -637,7 +637,7 @@ void addGroupMarker(listing) async {
     });
   }
 
-  void addSpecificMarker(listing) async {
+  void addSpecificMarker(Map<String, dynamic> listing) async {
     debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -742,7 +742,7 @@ void addGroupMarker(listing) async {
     });
   }
 
-  void addSimpleMarker(primaryType, destinationLatLng) async {
+  void addSimpleMarker(String primaryType, destinationLatLng) async {
     debugPrint('addSimpleMarker called for primary type: $primaryType');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
     Color color = getCategoryColor(selectedThemeKey, primaryType);

@@ -47,7 +47,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
     await prefs.setBool('firstExecution', false);
   }
 
-  void _onIntroEnd(context) {
+  void _onIntroEnd(BuildContext context) {
     _saveSettings();
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const MyApp()),
