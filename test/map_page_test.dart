@@ -27,7 +27,7 @@ void main() {
         'displayName': 'Food Group',
         'endTime': '16:30',
         'id': '1',
-        'latLng': '52.199838,0.139016',  // 199m
+        'latLng': '52.199838,0.139016', // 199m
         'phone': '',
         'primaryType': 'Group-Food',
         'secondaryType': 'Fake Street',
@@ -41,7 +41,7 @@ void main() {
         'displayName': 'Glazed and Confused',
         'endTime': '15:00',
         'id': '2',
-        'latLng': '52.199687,0.138813',  // 535m
+        'latLng': '52.199687,0.138813', // 535m
         'phone': '01223 111111',
         'primaryType': 'Food',
         'secondaryType': 'Fake Street',
@@ -55,7 +55,7 @@ void main() {
         'endTime': '16:30',
         'id': '3',
         'name': 'sushisquad',
-        'latLng': '52.199188,0.139437',  // 135m
+        'latLng': '52.199188,0.139437', // 135m
         'phone': '01223 222222',
         'primaryType': 'Food',
         'secondaryType': 'Implausible Avenue',

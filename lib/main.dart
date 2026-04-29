@@ -175,9 +175,7 @@ Widget _buildEmailLink(String email) {
     },
     child: Text(
       email,
-      style: const TextStyle(
-        decoration: TextDecoration.underline
-      ),
+      style: const TextStyle(decoration: TextDecoration.underline),
     ),
   );
 }
@@ -227,7 +225,7 @@ class HomePageState extends State<HomePage> {
   final _listingsKeyEvent = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyPlace = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
-  
+
   late final _pages = [
     MapPage(listings: listings, key: mapPageKey),
     FilteredListingsPage(filterPrimaryType: "Food", listings: listings, key: _listingsKeyFood),
@@ -344,40 +342,47 @@ class HomePageState extends State<HomePage> {
           children: _pages,
         ),
         bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            showUnselectedLabels: true,
-            elevation: 0,
-            currentIndex: index,
-            selectedFontSize: 12,
-            unselectedFontSize: 12,
-            iconSize: 30,
-            onTap: (selectedIndex) {
-              HapticFeedback.selectionClick();
-              // Update the user's location
-              establishLocation();
-              switch (selectedIndex) {
-                case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
-                case 1 : _listingsKeyFood.currentState?.onTabVisible();
-                case 2 : _listingsKeyShopping.currentState?.onTabVisible();
-                case 3 : _listingsKeyMusic.currentState?.onTabVisible();
-                case 4 : _listingsKeyEvent.currentState?.onTabVisible();
-                case 5 : _listingsKeyPlace.currentState?.onTabVisible();
-                case 6 : _listingsKeyService.currentState?.onTabVisible();
-              }
-              setState(() {
-                index = selectedIndex;
-              });
-            },
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-              BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-              BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-              BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-              BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
-              BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
-            ],
-          ),
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
+          elevation: 0,
+          currentIndex: index,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          iconSize: 30,
+          onTap: (selectedIndex) {
+            HapticFeedback.selectionClick();
+            // Update the user's location
+            establishLocation();
+            switch (selectedIndex) {
+              case 0:
+                if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
+              case 1:
+                _listingsKeyFood.currentState?.onTabVisible();
+              case 2:
+                _listingsKeyShopping.currentState?.onTabVisible();
+              case 3:
+                _listingsKeyMusic.currentState?.onTabVisible();
+              case 4:
+                _listingsKeyEvent.currentState?.onTabVisible();
+              case 5:
+                _listingsKeyPlace.currentState?.onTabVisible();
+              case 6:
+                _listingsKeyService.currentState?.onTabVisible();
+            }
+            setState(() {
+              index = selectedIndex;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+            BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
+            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
+            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
+            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
+            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
+            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
+          ],
+        ),
         drawer: Drawer(
           child: Column(
             spacing: 0,
