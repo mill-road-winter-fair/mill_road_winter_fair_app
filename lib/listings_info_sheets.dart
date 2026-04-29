@@ -177,7 +177,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //debugPrint('SpecificListingInfoSheet build() called');
+    debugPrint('SpecificListingInfoSheet build() called');
     String updatedDescription; // with cancel identifier removed if appropriate
     String updatedTimes; // replaced with CANCELLED if appropriate
     Widget subDetails; // calculated subtitle/details field

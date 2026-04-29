@@ -638,7 +638,7 @@ void addGroupMarker(listing) async {
   }
 
   void addSpecificMarker(listing) async {
-    //debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
+    debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
@@ -1217,7 +1217,6 @@ void addGroupMarker(listing) async {
 
         _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
-
     } on SocketException catch (e) {
       debugPrint("Network error while fetching route: $e");
       _handlePolylineError("Network connection issue. Please try again.");
@@ -1451,7 +1450,7 @@ void addGroupMarker(listing) async {
 
   @override
   Widget build(BuildContext context) {
-    //debugPrint('MapPageState build() called');
+    debugPrint('MapPageState build() called');
     return FutureBuilder(
       future: _fetchListings,
       builder: (context, snapshot) {
