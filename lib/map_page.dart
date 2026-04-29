@@ -1189,6 +1189,7 @@ void addGroupMarker(listing) async {
         throw Exception("No route points returned from Google Routes API. ");
       }
 
+      // Let's not complicate things and just choose the first
       pl.Route route = response.routes.first;
 
       // Get polyline points
@@ -1198,7 +1199,8 @@ void addGroupMarker(listing) async {
       List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
       
       setState(() {
-        final distanceMetres = response.routes.first.distanceMeters ?? 0;
+        // Get distace in meters. NB can also get route.durationMinutes which may be useful
+        final distanceMetres = route.distanceMeters ?? 0;
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
         final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
