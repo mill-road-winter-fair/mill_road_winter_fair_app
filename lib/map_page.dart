@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/gestures.dart';
@@ -33,6 +33,9 @@ bool navigationInProgress = false;
 // Indicator for a simple map marker
 const String aSimpleMarkerId = 'SIMPLE';
 
+// API key, contents will depend upon platform
+String googleMapsDirectionsApiKey = "";
+
 // Identifier and function for determining if the event has been marked as cancelled
 const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
 bool hasEventBeenCancelled(String? description) {
@@ -59,7 +62,7 @@ class MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polygon> _polygons = {}; // For displaying the road closure polygon
   final Set<Polyline> polylines = {}; // For displaying the route polyline
-  late PolylinePoints _polylinePoints; // For decoding points
+  late pl.PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   late double _mapBearing;
   late MapType mapType;
@@ -87,7 +90,12 @@ class MapPageState extends State<MapPage> {
   @override
   void initState() {
     debugPrint('MapPageState initState() called');
-    _polylinePoints = PolylinePoints();
+    if (Platform.isAndroid) {
+      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+    } else if (Platform.isIOS) {
+      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+    }
+    _polylinePoints = pl.PolylinePoints(apiKey: googleMapsDirectionsApiKey);
     _fetchListings = fetchExistingListings(http.Client());
     setMarkerLists();
     addAllVisibleMarkers();
@@ -630,7 +638,7 @@ void addGroupMarker(listing) async {
   }
 
   void addSpecificMarker(listing) async {
-    debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
+    //debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
@@ -1163,23 +1171,39 @@ void addGroupMarker(listing) async {
         throw Exception("Google Maps Directions API key is missing.");
       }
 
-      // Fetch new directions from the Google Directions API
-      final result = await _polylinePoints.getRouteBetweenCoordinates(
-        googleApiKey: googleMapsDirectionsApiKey,
-        request: PolylineRequest(
-          headers: headers,
-          origin: PointLatLng(origin.latitude, origin.longitude),
-          destination: PointLatLng(destination.latitude, destination.longitude),
-          mode: TravelMode.walking,
-        ),
+      // Fetch new directions from the Google Routes API
+      pl.RoutesApiRequest request = pl.RoutesApiRequest(
+        origin: pl.PointLatLng(origin.latitude, origin.longitude),
+        destination: pl.PointLatLng(destination.latitude, destination.longitude),
+        travelMode: pl.TravelMode.walking,
+        routingPreference: pl.RoutingPreference.unspecified,
       );
 
-      if (result.points.isEmpty) {
-        throw Exception("No route points returned from Google Directions API.");
+      // Get route using Routes API
+      pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(
+        request: request,
+      );
+
+      if (response.routes.isEmpty) {
+        debugPrint('MW $response ${response.errorMessage}');
+        throw Exception("No route points returned from Google Routes API. ");
       }
 
+      pl.Route route = response.routes.first;
+      
+      // Access route information
+      debugPrint('Duration: ${route.durationMinutes} minutes');
+      debugPrint('Distance: ${route.distanceKm} km');
+      
+      // Get polyline points
+      List<pl.PointLatLng> points = route.polylinePoints ?? [];
+
+      // Access route information
+      debugPrint('Duration: ${route.durationMinutes} minutes');
+      debugPrint('Distance: ${route.distanceKm} km');
+      
       setState(() {
-        final distanceMetres = result.totalDistanceValue ?? 0;
+        final distanceMetres = response.routes.first.distanceMeters ?? 0;
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
         final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
@@ -1187,7 +1211,7 @@ void addGroupMarker(listing) async {
         polylines.add(
           Polyline(
             polylineId: const PolylineId('route'),
-            points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+            points: points as List<LatLng>,
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
             patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
@@ -1196,6 +1220,7 @@ void addGroupMarker(listing) async {
 
         _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
+
     } on SocketException catch (e) {
       debugPrint("Network error while fetching route: $e");
       _handlePolylineError("Network connection issue. Please try again.");
@@ -1429,7 +1454,7 @@ void addGroupMarker(listing) async {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('MapPageState build() called');
+    //debugPrint('MapPageState build() called');
     return FutureBuilder(
       future: _fetchListings,
       builder: (context, snapshot) {
