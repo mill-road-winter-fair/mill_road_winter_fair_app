@@ -1,7 +1,5 @@
 PODS:
   - Flutter (1.0.0)
-  - flutter_keyboard_visibility (0.0.1):
-    - Flutter
   - fluttertoast (0.0.2):
     - Flutter
   - Google-Maps-iOS-Utils (6.1.0):
@@ -16,7 +14,6 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
 
@@ -28,8 +25,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  flutter_keyboard_visibility:
-    :path: ".symlinks/plugins/flutter_keyboard_visibility/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
   google_maps_flutter_ios:
@@ -37,7 +32,6 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_keyboard_visibility: 4625131e43015dbbe759d9b20daaf77e0e3f6619
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
   Google-Maps-iOS-Utils: 0a484b05ed21d88c9f9ebbacb007956edd508a96
   google_maps_flutter_ios: 17552876e72723da1d41accc22f03b5f7afbde69

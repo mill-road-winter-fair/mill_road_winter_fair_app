@@ -275,7 +275,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   // Function to determine if the listing has been added to favourites
-  bool isListingFavourited(listingID) {
+  bool isListingFavourited(String listingID) {
     return favouriteListingKeys.contains(listingID);
   }
 
