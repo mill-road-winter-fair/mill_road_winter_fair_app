@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/gestures.dart';
@@ -33,6 +33,9 @@ bool navigationInProgress = false;
 // Indicator for a simple map marker
 const String aSimpleMarkerId = 'SIMPLE';
 
+// API key, contents will depend upon platform
+String googleMapsDirectionsApiKey = "";
+
 // Identifier and function for determining if the event has been marked as cancelled
 const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
 bool hasEventBeenCancelled(String? description) {
@@ -59,7 +62,7 @@ class MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polygon> _polygons = {}; // For displaying the road closure polygon
   final Set<Polyline> polylines = {}; // For displaying the route polyline
-  late PolylinePoints _polylinePoints; // For decoding points
+  late pl.PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   late double _mapBearing;
   late MapType mapType;
@@ -87,7 +90,12 @@ class MapPageState extends State<MapPage> {
   @override
   void initState() {
     debugPrint('MapPageState initState() called');
-    _polylinePoints = PolylinePoints();
+    if (Platform.isAndroid) {
+      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+    } else if (Platform.isIOS) {
+      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+    }
+    _polylinePoints = pl.PolylinePoints(apiKey: googleMapsDirectionsApiKey);
     _fetchListings = fetchExistingListings(http.Client());
     setMarkerLists();
     addAllVisibleMarkers();
@@ -456,11 +464,11 @@ class MapPageState extends State<MapPage> {
   }
 
   // Function to determine if a listing has been added to favourites
-  bool isListingFavourited(listingID) {
+  bool isListingFavourited(String listingID) {
     return favouriteListingKeys.contains(listingID);
   }
 
-void addGroupMarker(listing) async {
+void addGroupMarker(Map<String, dynamic> listing) async {
     // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -629,7 +637,7 @@ void addGroupMarker(listing) async {
     });
   }
 
-  void addSpecificMarker(listing) async {
+  void addSpecificMarker(Map<String, dynamic> listing) async {
     debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -734,7 +742,7 @@ void addGroupMarker(listing) async {
     });
   }
 
-  void addSimpleMarker(primaryType, destinationLatLng) async {
+  void addSimpleMarker(String primaryType, destinationLatLng) async {
     debugPrint('addSimpleMarker called for primary type: $primaryType');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
     Color color = getCategoryColor(selectedThemeKey, primaryType);
@@ -1163,23 +1171,36 @@ void addGroupMarker(listing) async {
         throw Exception("Google Maps Directions API key is missing.");
       }
 
-      // Fetch new directions from the Google Directions API
-      final result = await _polylinePoints.getRouteBetweenCoordinates(
-        googleApiKey: googleMapsDirectionsApiKey,
-        request: PolylineRequest(
-          headers: headers,
-          origin: PointLatLng(origin.latitude, origin.longitude),
-          destination: PointLatLng(destination.latitude, destination.longitude),
-          mode: TravelMode.walking,
-        ),
+      // Set up request for fetching new directions from the Google Routes API
+      pl.RoutesApiRequest request = pl.RoutesApiRequest(
+        origin: pl.PointLatLng(origin.latitude, origin.longitude),
+        destination: pl.PointLatLng(destination.latitude, destination.longitude),
+        travelMode: pl.TravelMode.walking,
+        routingPreference: pl.RoutingPreference.unspecified,
+        headers: headers,
       );
 
-      if (result.points.isEmpty) {
-        throw Exception("No route points returned from Google Directions API.");
+      // Get route using Routes API
+      pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(
+        request: request,
+      );
+
+      if (response.routes.isEmpty) {
+        throw Exception("No route points returned from Google Routes API. ");
       }
 
+      // Let's not complicate things and just choose the first
+      pl.Route route = response.routes.first;
+
+      // Get polyline points
+      List<pl.PointLatLng> points = route.polylinePoints ?? [];
+
+      // Convert to LatLng for Google Maps
+      List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+      
       setState(() {
-        final distanceMetres = result.totalDistanceValue ?? 0;
+        // Get distace in meters. NB can also get route.durationMinutes which may be useful
+        final distanceMetres = route.distanceMeters ?? 0;
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
         final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
@@ -1187,7 +1208,7 @@ void addGroupMarker(listing) async {
         polylines.add(
           Polyline(
             polylineId: const PolylineId('route'),
-            points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+            points: polylineCoordinates,
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
             patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
@@ -1501,7 +1522,6 @@ void addGroupMarker(listing) async {
                   mapWidth = constraints.maxWidth;
                   mapHeight = constraints.maxHeight;
                   return GoogleMap(
-                      // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
                       style: mapStyle,
                       mapType: mapType,
                       rotateGesturesEnabled: false,

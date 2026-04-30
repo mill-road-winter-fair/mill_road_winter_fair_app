@@ -14,7 +14,7 @@ void main() {
 
   setUp(() async {
     mockClient = MockClient();
-    dotenv.testLoad(fileInput: '''
+    dotenv.loadFromString(envString: '''
     HEROKU_API=MOCK_API
     HEROKU_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
@@ -119,7 +119,7 @@ void main() {
       setUp(() async {
         mockClient = MockClient();
         listings = [];
-        dotenv.testLoad(fileInput: '''
+        dotenv.loadFromString(envString: '''
     HEROKU_API=MOCK_API
     HEROKU_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
