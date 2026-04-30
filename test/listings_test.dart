@@ -16,6 +16,7 @@ void main() {
     mockClient = MockClient();
     dotenv.loadFromString(envString: '''
     HEROKU_API=MOCK_API
+    HEROKU_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     IOS_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
@@ -30,14 +31,14 @@ void main() {
       test('retries 10 times and returns empty listings when status code is not 200 and we have no listings cached', () async {
         final invalidResponse = {};
 
-        when(mockClient.get(any)).thenAnswer(
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response(jsonEncode(invalidResponse), 500),
         );
 
         final result = await fetchExistingListings(mockClient);
 
         expect(result, []);
-        verify(mockClient.get(any)).called(equals(10));
+        verify(mockClient.get(any, headers: anyNamed('headers'))).called(equals(10));
       });
 
       test('returns a list of listings when response is valid', () async {
@@ -61,7 +62,7 @@ void main() {
           ]
         };
 
-        when(mockClient.get(any)).thenAnswer(
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response(jsonEncode(mockResponse), 200),
         );
 
@@ -87,7 +88,7 @@ void main() {
       });
 
       test('returns cached listings when status code is not 200', () async {
-        when(mockClient.get(any)).thenAnswer(
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response('Error', 500),
         );
 
@@ -120,6 +121,7 @@ void main() {
         listings = [];
         dotenv.loadFromString(envString: '''
     HEROKU_API=MOCK_API
+    HEROKU_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     IOS_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
@@ -150,7 +152,7 @@ void main() {
           ]
         };
 
-        when(mockClient.get(any)).thenAnswer(
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response(jsonEncode(mockResponse), 200),
         );
 
@@ -183,7 +185,7 @@ void main() {
           ]
         };
 
-        when(mockClient.get(any)).thenAnswer(
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response(jsonEncode(mockResponse), 200),
         );
 
@@ -218,7 +220,7 @@ void main() {
           ]
         };
 
-        when(mockClient.get(any)).thenAnswer(
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response(jsonEncode(mockResponse), 200),
         );
 

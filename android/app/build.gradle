@@ -47,6 +47,11 @@ android {
         } else {
             throw new GradleException("HEROKU_API is missing from dart-defines.")
         }
+        if (dartDefines.containsKey('HEROKU_API_KEY')) {
+            resValue "string", "HEROKU_API_KEY", dartDefines['HEROKU_API_KEY']
+        } else {
+            throw new GradleException("HEROKU_API_KEY is missing from dart-defines.")
+        }
         if (dartDefines.containsKey('ANDROID_GOOGLE_MAPS_SDK_API_KEY')) {
             resValue "string", "ANDROID_GOOGLE_MAPS_SDK_API_KEY", dartDefines['ANDROID_GOOGLE_MAPS_SDK_API_KEY']
         } else {
