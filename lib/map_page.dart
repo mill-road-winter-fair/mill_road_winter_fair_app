@@ -238,11 +238,12 @@ class MapPageState extends State<MapPage> {
     roadClosurePolygonPoints.add(const LatLng(52.20235281420999, 0.1310619082596975));
 
     return Polygon(
-        polygonId: const PolygonId('roadClosure'),
-        points: roadClosurePolygonPoints,
-        strokeWidth: 3,
-        strokeColor: Theme.of(context).colorScheme.tertiary,
-        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
+      polygonId: const PolygonId('roadClosure'),
+      points: roadClosurePolygonPoints,
+      strokeWidth: 3,
+      strokeColor: Theme.of(context).colorScheme.tertiary,
+      fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+    );
   }
 
   void updateRoadClosurePolygonVisibility(bool visibleState) {
@@ -286,34 +287,42 @@ class MapPageState extends State<MapPage> {
                         const Text('Road closures', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                         const SizedBox(height: 10),
                         const Text(
-                            style: TextStyle(height: 1.25),
-                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
-                        const SizedBox(height: 10),
-                        const Text('Pedestrians should exercise particular care before the road is fully closed.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
-                        const SizedBox(height: 10),
-                        const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                          style: TextStyle(height: 1.25),
+                          'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',
+                        ),
                         const SizedBox(height: 10),
                         const Text(
-                            style: TextStyle(height: 1.25),
-                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                          'Pedestrians should exercise particular care before the road is fully closed.',
+                          style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
+                          style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          style: TextStyle(height: 1.25),
+                          'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.',
+                        ),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
                             children: [
                               const TextSpan(
-                                  style: TextStyle(height: 1.25),
-                                  text:
-                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
+                                style: TextStyle(height: 1.25),
+                                text:
+                                    'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at ',
+                              ),
                               TextSpan(
-                                  text: 'www.millroadwinterfair.org',
-                                  style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      HapticFeedback.lightImpact();
-                                      launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                                    }),
+                                text: 'www.millroadwinterfair.org',
+                                style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    HapticFeedback.lightImpact();
+                                    launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                                  },
+                              ),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
                           ),
@@ -646,92 +655,97 @@ class MapPageState extends State<MapPage> {
     }
 
     Marker newMarker = Marker(
-        markerId: markerId,
-        position: destinationLatLng,
-        icon: customMarker,
-        visible: true,
-        onTap: () {
-          HapticFeedback.lightImpact();
-          // Update the current location, do not await as this causes issues with using the context across async gaps
-          establishLocation();
+      markerId: markerId,
+      position: destinationLatLng,
+      icon: customMarker,
+      visible: true,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        // Update the current location, do not await as this causes issues with using the context across async gaps
+        establishLocation();
 
-          // Calculate distance if current location is known
-          var distanceMessage = 'Distance unknown';
-          if (currentLatLng != null) {
-            int approximateDistanceMetres = asTheCrowFlies(
-              currentLatLng!,
-              destinationLatLng,
-            );
-            distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-          }
+        // Calculate distance if current location is known
+        var distanceMessage = 'Distance unknown';
+        if (currentLatLng != null) {
+          int approximateDistanceMetres = asTheCrowFlies(
+            currentLatLng!,
+            destinationLatLng,
+          );
+          distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+        }
 
-          // Show bottom sheet with listing information
-          showModalBottomSheet(
-            context: context,
-            showDragHandle: false,
-            enableDrag: false,
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
-            isScrollControlled: true,
-            useSafeArea: true,
-            builder: (context) {
-              return SafeArea(
-                top: false,
-                left: false,
-                right: false,
-                bottom: Platform.isAndroid && isNavBarVisible(context),
-                child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        // Show bottom sheet with listing information
+        showModalBottomSheet(
+          context: context,
+          showDragHandle: false,
+          enableDrag: false,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
+          isScrollControlled: true,
+          useSafeArea: true,
+          builder: (context) {
+            return SafeArea(
+              top: false,
+              left: false,
+              right: false,
+              bottom: Platform.isAndroid && isNavBarVisible(context),
+              child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
                   final specificSheetModalScrollController = ScrollController();
-                  return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
-                    void favouriteOrNotListing(String listingID) {
-                      setModalState(() {
-                        if (favouriteListingKeys.contains(listingID)) {
-                          favouriteListingKeys.remove(listingID);
-                        } else {
-                          favouriteListingKeys.add(listingID);
-                        }
-                        _saveSettings();
-                      });
-                    }
+                  return StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setModalState) {
+                      void favouriteOrNotListing(String listingID) {
+                        setModalState(() {
+                          if (favouriteListingKeys.contains(listingID)) {
+                            favouriteListingKeys.remove(listingID);
+                          } else {
+                            favouriteListingKeys.add(listingID);
+                          }
+                          _saveSettings();
+                        });
+                      }
 
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.90,
-                      ),
-                      child: Scrollbar(
-                        controller: specificSheetModalScrollController,
-                        thumbVisibility: Platform.isIOS ? false : true,
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: SingleChildScrollView(
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: constraints.maxHeight * 0.90,
+                        ),
+                        child: Scrollbar(
                           controller: specificSheetModalScrollController,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                            child: SpecificListingInfoSheet(
-                              title: listing['displayName'],
-                              location: listing['secondaryType'],
-                              subtitle: listing['tertiaryType'],
-                              startTime: "${listing['startTime']}",
-                              endTime: "${listing['endTime']}",
-                              approxDistance: distanceMessage,
-                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                              website: (listing['website'] != null) ? listing['website'] : '',
-                              email: (listing['email'] != null) ? listing['email'] : '',
-                              description: (listing['description'] != null) ? listing['description'] : '',
-                              detailsVisible: true,
-                              listingFavourited: isListingFavourited(listing['id']),
-                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                          thumbVisibility: Platform.isIOS ? false : true,
+                          thickness: 4,
+                          radius: const Radius.circular(8),
+                          child: SingleChildScrollView(
+                            controller: specificSheetModalScrollController,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                              child: SpecificListingInfoSheet(
+                                title: listing['displayName'],
+                                location: listing['secondaryType'],
+                                subtitle: listing['tertiaryType'],
+                                startTime: "${listing['startTime']}",
+                                endTime: "${listing['endTime']}",
+                                approxDistance: distanceMessage,
+                                phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                                website: (listing['website'] != null) ? listing['website'] : '',
+                                email: (listing['email'] != null) ? listing['email'] : '',
+                                description: (listing['description'] != null) ? listing['description'] : '',
+                                detailsVisible: true,
+                                listingFavourited: isListingFavourited(listing['id']),
+                                onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  });
-                }),
-              );
-            },
-          );
-        });
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
     setState(() {
       markers[markerId] = newMarker;
     });
@@ -824,13 +838,16 @@ class MapPageState extends State<MapPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text(
-                      "Filter map layers",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.left,
-                    )
-                  ]),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Filter map layers",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.left,
+                      ),
+                    ],
+                  ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Food'),
@@ -1313,7 +1330,11 @@ class MapPageState extends State<MapPage> {
     }
 
     _moveCameraToBoundsWithRotation(
-        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
+      LatLng(polylineMinLat, polylineMinLong),
+      LatLng(polylineMaxLat, polylineMaxLong),
+      padding * (1 + extraPaddingForShortTrips),
+      bearing,
+    );
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -1504,41 +1525,42 @@ class MapPageState extends State<MapPage> {
                   mapWidth = constraints.maxWidth;
                   mapHeight = constraints.maxHeight;
                   return GoogleMap(
-                      // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
-                      style: mapStyle,
-                      mapType: mapType,
-                      rotateGesturesEnabled: false,
-                      compassEnabled: false,
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
-                      mapToolbarEnabled: false,
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller = controller;
-                        if (listings.isNotEmpty) {
-                          // We should have listings by this point so set the camera to their bounds
-                          _setMapCameraToFitMapMarkers();
+                    // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
+                    style: mapStyle,
+                    mapType: mapType,
+                    rotateGesturesEnabled: false,
+                    compassEnabled: false,
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
+                    mapToolbarEnabled: false,
+                    onMapCreated: (GoogleMapController controller) {
+                      _controller = controller;
+                      if (listings.isNotEmpty) {
+                        // We should have listings by this point so set the camera to their bounds
+                        _setMapCameraToFitMapMarkers();
+                      }
+                    },
+                    initialCameraPosition: CameraPosition(
+                      target: const LatLng(52.199174, 0.140929),
+                      zoom: 14.1,
+                      bearing: _mapBearing,
+                    ),
+                    onCameraMove: (CameraPosition position) {
+                      setState(() {
+                        switch (preferredMapOrientation) {
+                          case MapOrientation.adaptive:
+                            _compassBearing = 90;
+                            break;
+                          case MapOrientation.alwaysNorth:
+                            _compassBearing = 0;
+                            break;
                         }
-                      },
-                      initialCameraPosition: CameraPosition(
-                        target: const LatLng(52.199174, 0.140929),
-                        zoom: 14.1,
-                        bearing: _mapBearing,
-                      ),
-                      onCameraMove: (CameraPosition position) {
-                        setState(() {
-                          switch (preferredMapOrientation) {
-                            case MapOrientation.adaptive:
-                              _compassBearing = 90;
-                              break;
-                            case MapOrientation.alwaysNorth:
-                              _compassBearing = 0;
-                              break;
-                          }
-                        });
-                      },
-                      polygons: _polygons,
-                      markers: markers.values.toSet(),
-                      polylines: polylines);
+                      });
+                    },
+                    polygons: _polygons,
+                    markers: markers.values.toSet(),
+                    polylines: polylines,
+                  );
                 },
               ),
               Positioned(
@@ -1679,12 +1701,13 @@ class MapPageState extends State<MapPage> {
                     padding: const EdgeInsets.only(top: 8),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                          iconSize: 30,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        iconSize: 30,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
+                        padding: const EdgeInsets.all(0),
+                        elevation: 3,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
@@ -1752,7 +1775,7 @@ class MapPageState extends State<MapPage> {
                       ),
                     ),
                   ),
-                )
+                ),
             ],
           ),
         );

@@ -95,8 +95,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text('Take me straight to the app!',
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
+              child: Text(
+                'Take me straight to the app!',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+              ),
             ),
             onPressed: () {
               HapticFeedback.heavyImpact();
@@ -127,8 +129,10 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("What can I do with the app?",
-                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      Text(
+                        "What can I do with the app?",
+                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
+                      ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
@@ -149,10 +153,12 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                       Row(
                         children: [
                           SizedBox(
-                              width: 40,
-                              child: Align(
-                                  alignment: Alignment.center,
-                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
+                            width: 40,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary),
+                            ),
+                          ),
                           const SizedBox(width: 8),
                           Text("Get full details for all of these,\nand save your favourites", style: bodyStyle),
                         ],
@@ -423,10 +429,12 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                       Row(
                         children: [
                           SizedBox(
-                              width: 40,
-                              child: Align(
-                                  alignment: Alignment.center,
-                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
+                            width: 40,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary),
+                            ),
+                          ),
                           const SizedBox(width: 8),
                           Text("Save your favourite listings, and\nview these from the main menu", style: bodyStyle),
                         ],

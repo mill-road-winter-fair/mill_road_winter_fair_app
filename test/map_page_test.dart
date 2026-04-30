@@ -226,7 +226,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Doughnuts",
           "visibleOnMap": "TRUE",
-          "website": "https://www.glazedandconfused.com"
+          "website": "https://www.glazedandconfused.com",
         },
         {
           "displayName": "The Crafty Canvas",
@@ -241,7 +241,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Crafts",
           "visibleOnMap": "TRUE",
-          "website": "https://www.craftycanvas.com"
+          "website": "https://www.craftycanvas.com",
         },
         {
           "displayName": "The Jazz Junction",
@@ -256,7 +256,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Jazz",
           "visibleOnMap": "TRUE",
-          "website": "https://www.jazzjunction.com"
+          "website": "https://www.jazzjunction.com",
         },
         {
           "displayName": "Santa",
@@ -271,7 +271,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Kindly Elf",
           "visibleOnMap": "TRUE",
-          "website": ""
+          "website": "",
         },
         {
           "displayName": "Information Point",
@@ -286,7 +286,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Help Point",
           "visibleOnMap": "TRUE",
-          "website": ""
+          "website": "",
         }
       ];
 
@@ -523,7 +523,7 @@ void main() {
                         preferredMapOrientation = (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
                       });
                     },
-                  )
+                  ),
                 ],
               );
             },

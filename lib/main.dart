@@ -119,19 +119,22 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                         TextSpan(
                           children: [
                             const TextSpan(
-                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              text: 'For any important enquiries on the day of the Fair please phone ',
+                            ),
                             TextSpan(
-                                text: '07303\u{00A0}142689',
-                                style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () async {
-                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                    if (await canLaunchUrl(phoneUri)) {
-                                      await launchUrl(phoneUri);
-                                    } else {
-                                      throw Exception('Could not dial 07303 142689');
-                                    }
-                                  }),
+                              text: '07303\u{00A0}142689',
+                              style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                  if (await canLaunchUrl(phoneUri)) {
+                                    await launchUrl(phoneUri);
+                                  } else {
+                                    throw Exception('Could not dial 07303 142689');
+                                  }
+                                },
+                            ),
                             const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
                           ],
                         ),
@@ -250,9 +253,10 @@ class HomePageState extends State<HomePage> {
           leading: const Icon(Icons.phone_android),
           title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Android app by Alexander Berridge')),
           subtitle: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://theberridge.com'));
@@ -264,9 +268,10 @@ class HomePageState extends State<HomePage> {
           leading: const Icon(Icons.phone_iphone),
           title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('iPhone version by Matt Whiting')),
           subtitle: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://mattwhiting.com'));
@@ -278,10 +283,10 @@ class HomePageState extends State<HomePage> {
           leading: const Icon(Icons.palette),
           title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Illustrations by Clare McEwan')),
           subtitle: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child:
-                  Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
@@ -293,9 +298,10 @@ class HomePageState extends State<HomePage> {
           leading: const Icon(Icons.feedback),
           title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tell us if you like this app')),
           subtitle: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
+          ),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
@@ -405,10 +411,12 @@ class HomePageState extends State<HomePage> {
                         Expanded(flex: 2, child: Container()),
                         FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Text(' Saturday 6 December 2025 10:30—16:30',
-                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                          child: Text(
+                            ' Saturday 6 December 2025 10:30—16:30',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                        Expanded(flex: 2, child: Container())
+                        Expanded(flex: 2, child: Container()),
                       ],
                     ),
                   ),

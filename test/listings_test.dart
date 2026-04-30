@@ -14,7 +14,8 @@ void main() {
 
   setUp(() async {
     mockClient = MockClient();
-    dotenv.testLoad(fileInput: '''
+    dotenv.testLoad(
+      fileInput: '''
     HEROKU_API=MOCK_API
     ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
@@ -22,7 +23,8 @@ void main() {
     IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     SIGNING_KEY=MOCK_CERT
     IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
+    ''',
+    );
   });
 
   group('Listings', () {
@@ -56,9 +58,9 @@ void main() {
               "Food",
               "10:30",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "https://www.glazedandconfused.com",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any)).thenAnswer(
@@ -81,7 +83,7 @@ void main() {
             'secondaryType': 'Food',
             'startTime': '10:30',
             'tertiaryType': 'Doughnuts',
-            'website': 'https://www.glazedandconfused.com'
+            'website': 'https://www.glazedandconfused.com',
           }
         ]);
       });
@@ -106,7 +108,7 @@ void main() {
             'secondaryType': 'Food',
             'startTime': '10:30',
             'tertiaryType': 'Doughnuts',
-            'website': 'https://www.glazedandconfused.com'
+            'website': 'https://www.glazedandconfused.com',
           }
         ]);
       });
@@ -118,7 +120,8 @@ void main() {
       setUp(() async {
         mockClient = MockClient();
         listings = [];
-        dotenv.testLoad(fileInput: '''
+        dotenv.testLoad(
+          fileInput: '''
     HEROKU_API=MOCK_API
     ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
@@ -126,7 +129,8 @@ void main() {
     IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     SIGNING_KEY=MOCK_CERT
     IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
+    ''',
+        );
       });
 
       test('handles rows with missing cells by padding to headers', () async {
@@ -145,9 +149,9 @@ void main() {
               "Food",
               "10:30",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "https://www.glazedandconfused.com",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any)).thenAnswer(
@@ -178,9 +182,9 @@ void main() {
               "Food",
               "10:30",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "https://www.glazedandconfused.com",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any)).thenAnswer(
@@ -213,9 +217,9 @@ void main() {
               "Food",
               "10:30",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "https://www.glazedandconfused.com",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any)).thenAnswer(
@@ -242,7 +246,7 @@ void main() {
             "secondaryType": "Food",
             "startTime": "10:30",
             "tertiaryType": "Doughnuts",
-            "website": "https://www.glazedandconfused.com"
+            "website": "https://www.glazedandconfused.com",
           }
         ];
 
