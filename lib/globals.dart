@@ -37,3 +37,6 @@ late MapOrientation preferredMapOrientation;
 
 // Map style options.
 enum MapStyleType { normal, hybrid }
+
+// The user's preferred map style type.
+late MapStyleType preferredMapStyleType;

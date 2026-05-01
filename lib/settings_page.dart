@@ -8,9 +8,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
-// Set default bearing of map display
-late MapStyleType preferredMapStyleType;
-
 // Define available sorting methods
 enum SortingMethod { alphabetical, nearest, startTime, location }
 
