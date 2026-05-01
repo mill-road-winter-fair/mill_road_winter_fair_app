@@ -24,3 +24,7 @@ String googleMapsDirectionsApiKey = "";
 
 // Prefix string used to mark cancelled events in listing descriptions. Must be at the very start of the description; anything else can follow
 const String cancelIdentifier = 'CANCELLED';
+
+// --- Settings and preferences (moved from settings_page.dart) ---
+// Whether this is the first execution of the app (controls welcome screen flow).
+late bool firstExecution;

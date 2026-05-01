@@ -8,9 +8,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
-// Define variable for first execution status
-late bool firstExecution;
-
 // Define available bearing of map display
 enum MapOrientation { adaptive, alwaysNorth }
 
