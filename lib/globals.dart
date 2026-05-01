@@ -9,3 +9,6 @@ String appBarTitle = 'Mill Road Winter Fair 2025';
 
 // Flag set by tests (when true the app reduces/delays animation and timers).
 bool onTest = false;
+
+// The cached list of listings fetched from the remote API.
+List<Map<String, dynamic>> listings = [];
