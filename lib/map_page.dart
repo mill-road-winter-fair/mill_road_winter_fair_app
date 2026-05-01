@@ -1197,9 +1197,9 @@ void addGroupMarker(Map<String, dynamic> listing) async {
 
       // Convert to LatLng for Google Maps
       List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
-      
+
       setState(() {
-        // Get distace in meters. NB can also get route.durationMinutes which may be useful
+        // Get distance in meters. NB can also get route.durationMinutes which may be useful
         final distanceMetres = route.distanceMeters ?? 0;
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
         final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
@@ -1211,7 +1211,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
             points: polylineCoordinates,
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
+            patterns: Platform.isIOS ? [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)] : <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
           ),
         );
 
