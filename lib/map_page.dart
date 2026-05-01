@@ -1211,7 +1211,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
             points: polylineCoordinates,
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
+            patterns: Platform.isIOS ? [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)] : <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
           ),
         );
 
