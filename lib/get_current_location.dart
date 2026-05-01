@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-// Initialise global variables for whether or not location services are enabled for the phone and permissions are granted to the app
-late bool locationServicesEnabled;
-late LocationPermission locationPermission;
-// Initialise global variable for whether or not the user has been prompted to enable location services
-int promptedUserToEnableLocationServices = 0;
-
-// Initialise the user's current location at the global level as it needs to be used by the filtered listings page as well as the map page
-LatLng? currentLatLng;
+import 'package:mill_road_winter_fair_app/globals.dart';
 
 Future<void> establishLocation() async {
   debugPrint('establishLocation called');

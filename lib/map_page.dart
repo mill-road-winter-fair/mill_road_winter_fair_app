@@ -14,30 +14,16 @@ import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Define a GlobalKey for MapPageState:
-final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
-
-// Define whether navigation is in progress as a global variable
-bool navigationInProgress = false;
-
-// Indicator for a simple map marker
-const String aSimpleMarkerId = 'SIMPLE';
-
-// API key, contents will depend upon platform
-String googleMapsDirectionsApiKey = "";
-
-// Identifier and function for determining if the event has been marked as cancelled
-const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
+// Function for determining if the event has been marked as cancelled
 bool hasEventBeenCancelled(String? description) {
   return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
 }
