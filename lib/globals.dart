@@ -40,3 +40,6 @@ enum MapStyleType { normal, hybrid }
 
 // The user's preferred map style type.
 late MapStyleType preferredMapStyleType;
+
+// Define available sorting methods
+enum SortingMethod { alphabetical, nearest, startTime, location }
