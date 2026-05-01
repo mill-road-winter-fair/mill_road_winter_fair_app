@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Hardcoded fair date for 2025; change this today's date for testing
@@ -33,8 +34,7 @@ bool isItEventDay() {
   return DateUtils.isSameDay(fairDate, DateTime.now());
 }
 
-// Identifier and function for determining if the event has been marked as cancelled
-const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
+// Function for determining if the event has been marked as cancelled
 bool hasEventBeenCancelled(String? description) {
   return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
 }

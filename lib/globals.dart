@@ -21,3 +21,6 @@ const String aSimpleMarkerId = 'SIMPLE';
 
 // API key for Google Maps Directions. Populated at runtime from dotenv.
 String googleMapsDirectionsApiKey = "";
+
+// Prefix string used to mark cancelled events in listing descriptions. Must be at the very start of the description; anything else can follow
+const String cancelIdentifier = 'CANCELLED';
