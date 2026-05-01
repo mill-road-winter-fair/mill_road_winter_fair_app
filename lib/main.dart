@@ -22,8 +22,6 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 // Define a GlobalKey for HomePageState to allow access from other parts of the app:
 final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 
-// Define a global variable for routing back to a previous index
-int previousIndex = 0;
 String appBarTitle = 'Mill Road Winter Fair 2025';
 
 Future<void> main() async {
