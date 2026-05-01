@@ -18,7 +18,7 @@ void main() {
 
       // Advance time to allow the toast's internal timer (8s) to complete and avoid pending timers
       // original was 9s; changed to 13s for the lengthier interim message
-      await tester.pump(const Duration(seconds: 13));
+      await tester.pump(const Duration(seconds: 21));
       await tester.pumpAndSettle();
 
       final prefs = await SharedPreferences.getInstance();

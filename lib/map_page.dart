@@ -4,12 +4,13 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
@@ -26,8 +27,14 @@ import 'package:url_launcher/url_launcher.dart';
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
+// Define whether navigation is in progress as a global variable
+bool navigationInProgress = false;
+
 // Indicator for a simple map marker
 const String aSimpleMarkerId = 'SIMPLE';
+
+// API key, contents will depend upon platform
+String googleMapsDirectionsApiKey = "";
 
 // Identifier and function for determining if the event has been marked as cancelled
 const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
@@ -55,14 +62,13 @@ class MapPageState extends State<MapPage> {
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polygon> _polygons = {}; // For displaying the road closure polygon
   final Set<Polyline> polylines = {}; // For displaying the route polyline
-  late PolylinePoints _polylinePoints; // For decoding points
+  late pl.PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   late double _mapBearing;
   late MapType mapType;
   late double _compassBearing;
   double? mapWidth;
   double? mapHeight;
-  bool _navigationInProgress = false;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
@@ -84,7 +90,12 @@ class MapPageState extends State<MapPage> {
   @override
   void initState() {
     debugPrint('MapPageState initState() called');
-    _polylinePoints = PolylinePoints();
+    if (Platform.isAndroid) {
+      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+    } else if (Platform.isIOS) {
+      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+    }
+    _polylinePoints = pl.PolylinePoints(apiKey: googleMapsDirectionsApiKey);
     _fetchListings = fetchExistingListings(http.Client());
     setMarkerLists();
     addAllVisibleMarkers();
@@ -284,7 +295,7 @@ class MapPageState extends State<MapPage> {
                         const SizedBox(height: 10),
                         const Text(
                             style: TextStyle(height: 1.25),
-                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm on the day, there will be some vehicle movement.'),
+                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
                         const SizedBox(height: 10),
                         const Text('Pedestrians should exercise particular care before the road is fully closed.',
                             style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
@@ -453,11 +464,11 @@ class MapPageState extends State<MapPage> {
   }
 
   // Function to determine if a listing has been added to favourites
-  bool isListingFavourited(listingID) {
+  bool isListingFavourited(String listingID) {
     return favouriteListingKeys.contains(listingID);
   }
 
-void addGroupMarker(listing) async {
+void addGroupMarker(Map<String, dynamic> listing) async {
     // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -538,72 +549,81 @@ void addGroupMarker(listing) async {
                     _saveSettings();
                   });
                 }
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.90,
-                      ),
-                      child: Scrollbar(
-                        controller: groupSheetModalScrollController,
-                        thumbVisibility: Platform.isIOS ? false : true,
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: ListView.builder(
-                          itemCount: relatedListings.length,
-                          shrinkWrap: true,
-                          controller: groupSheetModalScrollController,
-                          itemBuilder: (context, index) {
-                            final rel = relatedListings[index];
-
-                            // Calculate distance if current location is known
-                            var distanceMessage = 'Distance unknown';
-                            if (currentLatLng != null) {
-                              int approximateDistanceMetres = asTheCrowFlies(
-                                currentLatLng!,
-                                stringToLatLng(rel['latLng']),
-                              );
-                              distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                            }
-
-                            if (rel['primaryType'].startsWith("Group")) {
-                              return GroupListingInfoSheet(
-                                title: rel['displayName'],
-                                categories: "${rel['tertiaryType']}",
-                                startTime: "${listing['startTime']}",
-                                endTime: "${listing['endTime']}",
-                                approxDistance: distanceMessage,
-                              );
-                            } else {
-                              return Column(
-                                children: [
-                                  SpecificListingInfoSheet(
-                                    title: rel['displayName'],
-                                    location: '',
-                                    subtitle: rel['tertiaryType'],
-                                    startTime: rel['startTime'],
-                                    endTime: rel['endTime'],
-                                    approxDistance: '',
-                                    phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                    website: (rel['website'] != null) ? rel['website'] : '',
-                                    email: (rel['email'] != null) ? rel['email'] : '',
-                                    description: (rel['description'] != null) ? rel['description'] : '',
-                                    detailsVisible: detailsVisibilityList[index],
-                                    onDetailsTapped: () => toggleDetailsRow(index),
-                                    listingFavourited: isListingFavourited(rel['id']),
-                                    onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                    onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                  ),
-                                  if (index != relatedListings.length - 1)
-                                    SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                                ],
-                              );
-                            }
-                          },
+                return SafeArea(
+                  top: false,
+                  left: false,
+                  right: false,
+                  bottom: Platform.isAndroid && isNavBarVisible(context),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: constraints.maxHeight * 0.90,
                         ),
-                      ),
-                    );
-                  },
+                        child: Scrollbar(
+                          controller: groupSheetModalScrollController,
+                          thumbVisibility: Platform.isIOS ? false : true,
+                          thickness: 4,
+                          radius: const Radius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
+                            child: ListView.builder(
+                              itemCount: relatedListings.length,
+                              shrinkWrap: true,
+                              controller: groupSheetModalScrollController,
+                              itemBuilder: (context, index) {
+                                final rel = relatedListings[index];
+
+                                // Calculate distance if current location is known
+                                var distanceMessage = 'Distance unknown';
+                                if (currentLatLng != null) {
+                                  int approximateDistanceMetres = asTheCrowFlies(
+                                    currentLatLng!,
+                                    stringToLatLng(rel['latLng']),
+                                  );
+                                  distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                                }
+
+                                if (rel['primaryType'].startsWith("Group")) {
+                                  return GroupListingInfoSheet(
+                                    title: rel['displayName'],
+                                    categories: "${rel['tertiaryType']}",
+                                    startTime: "${listing['startTime']}",
+                                    endTime: "${listing['endTime']}",
+                                    approxDistance: distanceMessage,
+                                  );
+                                } else {
+                                  return Column(
+                                    children: [
+                                      SpecificListingInfoSheet(
+                                        title: rel['displayName'],
+                                        location: '',
+                                        subtitle: rel['tertiaryType'],
+                                        startTime: rel['startTime'],
+                                        endTime: rel['endTime'],
+                                        approxDistance: '',
+                                        phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                        website: (rel['website'] != null) ? rel['website'] : '',
+                                        email: (rel['email'] != null) ? rel['email'] : '',
+                                        description: (rel['description'] != null) ? rel['description'] : '',
+                                        detailsVisible: detailsVisibilityList[index],
+                                        onDetailsTapped: () => toggleDetailsRow(index),
+                                        listingFavourited: isListingFavourited(rel['id']),
+                                        onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                        onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                      ),
+                                      if (index != relatedListings.length - 1)
+                                        SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                    ],
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             );
@@ -617,7 +637,7 @@ void addGroupMarker(listing) async {
     });
   }
 
-  void addSpecificMarker(listing) async {
+  void addSpecificMarker(Map<String, dynamic> listing) async {
     debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -659,55 +679,61 @@ void addGroupMarker(listing) async {
             isScrollControlled: true,
             useSafeArea: true,
             builder: (context) {
-              return LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                final specificSheetModalScrollController = ScrollController();
-                return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
-                  void favouriteOrNotListing(String listingID) {
-                    setModalState(() {
-                      if (favouriteListingKeys.contains(listingID)) {
-                        favouriteListingKeys.remove(listingID);
-                      } else {
-                        favouriteListingKeys.add(listingID);
-                      }
-                      _saveSettings();
-                    });
-                  }
-                  return ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: constraints.maxHeight * 0.90,
-                    ),
-                    child: Scrollbar(
-                      controller: specificSheetModalScrollController,
-                      thumbVisibility: Platform.isIOS ? false : true,
-                      thickness: 4,
-                      radius: const Radius.circular(8),
-                      child: SingleChildScrollView(
+              return SafeArea(
+                top: false,
+                left: false,
+                right: false,
+                bottom: Platform.isAndroid && isNavBarVisible(context),
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                  final specificSheetModalScrollController = ScrollController();
+                  return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
+                    void favouriteOrNotListing(String listingID) {
+                      setModalState(() {
+                        if (favouriteListingKeys.contains(listingID)) {
+                          favouriteListingKeys.remove(listingID);
+                        } else {
+                          favouriteListingKeys.add(listingID);
+                        }
+                        _saveSettings();
+                      });
+                    }
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: constraints.maxHeight * 0.90,
+                      ),
+                      child: Scrollbar(
                         controller: specificSheetModalScrollController,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                          child: SpecificListingInfoSheet(
-                            title: listing['displayName'],
-                            location: listing['secondaryType'],
-                            subtitle: listing['tertiaryType'],
-                            startTime: "${listing['startTime']}",
-                            endTime: "${listing['endTime']}",
-                            approxDistance: distanceMessage,
-                            phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                            website: (listing['website'] != null) ? listing['website'] : '',
-                            email: (listing['email'] != null) ? listing['email'] : '',
-                            description: (listing['description'] != null) ? listing['description'] : '',
-                            detailsVisible: true,
-                            listingFavourited: isListingFavourited(listing['id']),
-                            onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                            onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                        thumbVisibility: Platform.isIOS ? false : true,
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: SingleChildScrollView(
+                          controller: specificSheetModalScrollController,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                            child: SpecificListingInfoSheet(
+                              title: listing['displayName'],
+                              location: listing['secondaryType'],
+                              subtitle: listing['tertiaryType'],
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: distanceMessage,
+                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                              website: (listing['website'] != null) ? listing['website'] : '',
+                              email: (listing['email'] != null) ? listing['email'] : '',
+                              description: (listing['description'] != null) ? listing['description'] : '',
+                              detailsVisible: true,
+                              listingFavourited: isListingFavourited(listing['id']),
+                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                });
-              });
+                    );
+                  });
+                }),
+              );
             },
           );
         });
@@ -716,7 +742,7 @@ void addGroupMarker(listing) async {
     });
   }
 
-  void addSimpleMarker(primaryType, destinationLatLng) async {
+  void addSimpleMarker(String primaryType, destinationLatLng) async {
     debugPrint('addSimpleMarker called for primary type: $primaryType');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
     Color color = getCategoryColor(selectedThemeKey, primaryType);
@@ -983,12 +1009,10 @@ void addGroupMarker(listing) async {
     // Reset the distance to destination
     _distanceToDestination = null;
     // Set navigation as not in progress
-    _navigationInProgress = false;
+    navigationInProgress = false;
     setState(() {});
 
     debugPrint('getDirections called for listing ID: $id');
-    // Set navigation as in progress
-    _navigationInProgress = true;
 
     if (navigatorPop == true) {
       Navigator.pop(context);
@@ -1032,6 +1056,12 @@ void addGroupMarker(listing) async {
       Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
       addSpecificMarker(destinationListing);
     }
+
+    setState(() {
+    // Set navigation as in progress; do this late so cancel button isn't available before nav starts
+      navigationInProgress = true;
+    });
+
   }
 
   void cancelNavigation() {
@@ -1068,7 +1098,7 @@ void addGroupMarker(listing) async {
     showFilteredMarkers();
 
     // Set navigation as not in progress
-    _navigationInProgress = false;
+    navigationInProgress = false;
 
     // Reset the camera position
     _setMapCameraToFitMapMarkers();
@@ -1141,32 +1171,47 @@ void addGroupMarker(listing) async {
         throw Exception("Google Maps Directions API key is missing.");
       }
 
-      // Fetch new directions from the Google Directions API
-      final result = await _polylinePoints.getRouteBetweenCoordinates(
-        googleApiKey: googleMapsDirectionsApiKey,
-        request: PolylineRequest(
-          headers: headers,
-          origin: PointLatLng(origin.latitude, origin.longitude),
-          destination: PointLatLng(destination.latitude, destination.longitude),
-          mode: TravelMode.walking,
-        ),
+      // Set up request for fetching new directions from the Google Routes API
+      pl.RoutesApiRequest request = pl.RoutesApiRequest(
+        origin: pl.PointLatLng(origin.latitude, origin.longitude),
+        destination: pl.PointLatLng(destination.latitude, destination.longitude),
+        travelMode: pl.TravelMode.walking,
+        routingPreference: pl.RoutingPreference.unspecified,
+        headers: headers,
       );
 
-      if (result.points.isEmpty) {
-        throw Exception("No route points returned from Google Directions API.");
+      // Get route using Routes API
+      pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(
+        request: request,
+      );
+
+      if (response.routes.isEmpty) {
+        throw Exception("No route points returned from Google Routes API. ");
       }
 
+      // Let's not complicate things and just choose the first
+      pl.Route route = response.routes.first;
+
+      // Get polyline points
+      List<pl.PointLatLng> points = route.polylinePoints ?? [];
+
+      // Convert to LatLng for Google Maps
+      List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+
       setState(() {
-        final distanceMetres = result.totalDistanceValue ?? 0;
+        // Get distace in meters. NB can also get route.durationMinutes which may be useful
+        final distanceMetres = route.distanceMeters ?? 0;
+        // empirical formula, since dashes don't space as if measured in pixels as per google's docs
+        final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
         polylines.clear();
         polylines.add(
           Polyline(
             polylineId: const PolylineId('route'),
-            points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+            points: polylineCoordinates,
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
+            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
           ),
         );
 
@@ -1194,7 +1239,7 @@ void addGroupMarker(listing) async {
       hideAllMarkers();
       addAllVisibleMarkers();
       _setMapCameraToFitMapMarkers();
-      _navigationInProgress = false;
+      navigationInProgress = false;
     });
     debugPrint(message);
     // Show a snackbar with the error
@@ -1255,10 +1300,15 @@ void addGroupMarker(listing) async {
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
     debugPrint('_setMapCameraToFitPolyline called');
-    double polylineMinLat = polylines.first.points.first.latitude;
-    double polylineMinLong = polylines.first.points.first.longitude;
-    double polylineMaxLat = polylines.first.points.first.latitude;
-    double polylineMaxLong = polylines.first.points.first.longitude;
+
+    double bearing; // the bearing to set the camera to, based on preference
+    double padding; // extra space on the map around the polyline and source marker
+
+    //include the current location in the bounding box calculation, in case it's beyond the polyline
+    double polylineMinLat = currentLatLng!.latitude;
+    double polylineMinLong = currentLatLng!.longitude;
+    double polylineMaxLat = currentLatLng!.latitude;
+    double polylineMaxLong = currentLatLng!.longitude;
 
     for (var polyline in polylines) {
       for (var point in polyline.points) {
@@ -1269,12 +1319,22 @@ void addGroupMarker(listing) async {
       }
     }
 
-    const double northUpBearing = 0;
-    double northUpPadding = mapWidth! * 0.07;
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), northUpPadding, northUpBearing);
+    // add some extra padding, inversely proportional to the distance of the trip, so start/end aren't off screen
+    double extraPaddingForShortTrips = (0.00006 / pow(pow(polylineMaxLat - polylineMinLat, 2) + pow(polylineMaxLong - polylineMinLong, 2), 0.5)).clamp(0, 0.1);
+
+    //Default bearing and padding
+    if (preferredMapOrientation == MapOrientation.alwaysNorth) {
+      bearing = 0;
+      padding = mapWidth! * (0.07 + extraPaddingForShortTrips);
+    } else {
+      bearing = 290;
+      padding = mapHeight! * (0.10 + extraPaddingForShortTrips);  // need a bit more space to avoid navigation distance marker
+    }
+
+    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
-  _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
+  void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
     debugPrint('_moveCameraToBoundsWithRotation called');
     double theZoom;
 
@@ -1317,7 +1377,7 @@ void addGroupMarker(listing) async {
 
     //Default bearing
     double bearing = 290;
-    if (preferredMapOrientation == MapOrientation.alwaysNorth || _navigationInProgress == true) {
+    if (preferredMapOrientation == MapOrientation.alwaysNorth) {
       bearing = 0;
     }
 
@@ -1462,7 +1522,6 @@ void addGroupMarker(listing) async {
                   mapWidth = constraints.maxWidth;
                   mapHeight = constraints.maxHeight;
                   return GoogleMap(
-                      // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
                       style: mapStyle,
                       mapType: mapType,
                       rotateGesturesEnabled: false,
@@ -1505,7 +1564,7 @@ void addGroupMarker(listing) async {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_navigationInProgress == true)
+                    if (navigationInProgress == true)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
                         shape: const CircleBorder(),
@@ -1527,7 +1586,7 @@ void addGroupMarker(listing) async {
                           ],
                         ),
                       ),
-                    if (_navigationInProgress == false)
+                    if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'homeBtn',
                         shape: const CircleBorder(),
@@ -1588,7 +1647,7 @@ void addGroupMarker(listing) async {
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
-                    if (_navigationInProgress == false)
+                    if (navigationInProgress == false)
                       AnimatedRotation(
                         turns: _compassBearing / 360.0,
                         duration: const Duration(milliseconds: 200),
@@ -1610,10 +1669,10 @@ void addGroupMarker(listing) async {
                           child: const Icon(Icons.assistant_navigation),
                         ),
                       ),
-                    if (_navigationInProgress == false)
+                    if (navigationInProgress == false)
                       Row(
                         children: [
-                          if (_navigationInProgress == false)
+                          if (navigationInProgress == false)
                             FloatingActionButton(
                               heroTag: 'filterBtn',
                               shape: const CircleBorder(),
@@ -1655,7 +1714,7 @@ void addGroupMarker(listing) async {
                     ),
                   ),
                 ),
-              if (preferredRoadClosurePolygonVisible && _navigationInProgress == false)
+              if (preferredRoadClosurePolygonVisible && navigationInProgress == false)
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(

@@ -29,7 +29,7 @@ void main() {
       TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.physicalSize = const Size(375, 667);
       TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.devicePixelRatio = 1.0;
 
-      // Manually unmount all widgets
+      // Unmount widgets in teardown; do NOT call Fluttertoast.cancel() (causes MissingPluginException in tests)
       addTearDown(() async {
         await tester.pumpWidget(Container());
         await tester.pump(); // allow disposal to complete
@@ -42,6 +42,10 @@ void main() {
 
       // Tap the footer button
       await tester.tap(find.text('Take me straight to the app!'));
+      await tester.pumpAndSettle();
+
+      // Let the 20s toast timer complete to avoid "Timer still pending" when test disposes widgets
+      await tester.pump(const Duration(seconds: 21));
       await tester.pumpAndSettle();
 
       // Check that shared prefs have been updated
