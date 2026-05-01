@@ -67,3 +67,7 @@ late bool preferredRoadClosurePolygonVisible;
 
 // Initialise the list of favourited listings
 late Set<String> favouriteListingKeys;
+
+// --- Location related globals (moved from get_current_location.dart) ---
+// Whether device location services are enabled and the permission status.
+late bool locationServicesEnabled;
