@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 
 // Consolidated global variables used across the app.
 // Move only top-level variables here so other files can import a single source.
+
+// GlobalKeys for accessing state of various pages from other parts of the app:
+final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 
 // Remember the previously selected bottom navigation index (used for back navigation).
 int previousIndex = 0;

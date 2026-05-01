@@ -20,9 +20,6 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
-// Define a GlobalKey for HomePageState to allow access from other parts of the app:
-final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
-
 Future<void> main() async {
   debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
