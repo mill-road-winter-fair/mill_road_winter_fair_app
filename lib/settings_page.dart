@@ -9,7 +9,6 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Initialise theme variables
-late String selectedThemeKey;
 late ValueNotifier<String> themeNotifier;
 
 // Initialise map style variable to store map styling json

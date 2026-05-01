@@ -52,3 +52,6 @@ enum DistanceUnits { metric, imperial, cambridge }
 
 // Set default distance units
 late DistanceUnits preferredDistanceUnits;
+
+// Initialise theme variables
+late String selectedThemeKey;
