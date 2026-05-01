@@ -3,3 +3,6 @@
 
 // Remember the previously selected bottom navigation index (used for back navigation).
 int previousIndex = 0;
+
+// App bar title shown on the HomePage.
+String appBarTitle = 'Mill Road Winter Fair 2025';

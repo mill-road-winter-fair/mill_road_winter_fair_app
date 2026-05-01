@@ -13,6 +13,7 @@ import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -21,8 +22,6 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 // Define a GlobalKey for HomePageState to allow access from other parts of the app:
 final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
-
-String appBarTitle = 'Mill Road Winter Fair 2025';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
