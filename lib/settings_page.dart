@@ -8,9 +8,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
-// Define available distance units
-enum DistanceUnits { metric, imperial, cambridge }
-
 // Set default distance units
 late DistanceUnits preferredDistanceUnits;
 

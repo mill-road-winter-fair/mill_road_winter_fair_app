@@ -46,3 +46,6 @@ enum SortingMethod { alphabetical, nearest, startTime, location }
 
 // Define variable for sorting method
 late SortingMethod preferredSortingMethod;
+
+// Define available distance units
+enum DistanceUnits { metric, imperial, cambridge }

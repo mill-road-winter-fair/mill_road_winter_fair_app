@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
-import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 
 void main() {
   group('ConvertDistanceUnits', () {
