@@ -8,9 +8,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
-// Initialise setting for whether the road closure polygon is shown
-late bool preferredRoadClosurePolygonVisible;
-
 // Initialise the list of favourited listings
 late Set<String> favouriteListingKeys;
 

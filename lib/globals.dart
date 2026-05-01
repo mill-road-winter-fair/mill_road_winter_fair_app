@@ -61,3 +61,6 @@ late ValueNotifier<String> themeNotifier;
 
 // Initialise map style variable to store map styling json
 late String mapStyle;
+
+// Initialise setting for whether the road closure polygon is shown
+late bool preferredRoadClosurePolygonVisible;
