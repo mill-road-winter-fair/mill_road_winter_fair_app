@@ -73,3 +73,6 @@ late Set<String> favouriteListingKeys;
 // Whether device location services are enabled and the permission status.
 late bool locationServicesEnabled;
 late LocationPermission locationPermission;
+
+// Small counter to limit how often we prompt the user to enable location services.
+int promptedUserToEnableLocationServices = 0;
