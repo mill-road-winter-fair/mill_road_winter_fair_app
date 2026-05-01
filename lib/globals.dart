@@ -15,3 +15,6 @@ List<Map<String, dynamic>> listings = [];
 
 // Whether map navigation is currently active.
 bool navigationInProgress = false;
+
+// Identifier for a simple (non-group) marker.
+const String aSimpleMarkerId = 'SIMPLE';

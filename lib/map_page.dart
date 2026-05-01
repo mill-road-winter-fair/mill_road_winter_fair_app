@@ -28,9 +28,6 @@ import 'package:url_launcher/url_launcher.dart';
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
-// Indicator for a simple map marker
-const String aSimpleMarkerId = 'SIMPLE';
-
 // API key, contents will depend upon platform
 String googleMapsDirectionsApiKey = "";
 
