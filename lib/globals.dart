@@ -28,3 +28,6 @@ const String cancelIdentifier = 'CANCELLED';
 // --- Settings and preferences (moved from settings_page.dart) ---
 // Whether this is the first execution of the app (controls welcome screen flow).
 late bool firstExecution;
+
+// Map orientation options (moved from settings_page.dart so globals can hold the values).
+enum MapOrientation { adaptive, alwaysNorth }
