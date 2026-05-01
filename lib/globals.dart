@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Consolidated global variables used across the app.
 // Move only top-level variables here so other files can import a single source.
@@ -76,3 +77,6 @@ late LocationPermission locationPermission;
 
 // Small counter to limit how often we prompt the user to enable location services.
 int promptedUserToEnableLocationServices = 0;
+
+// Cached user location used by the map and listings pages.
+LatLng? currentLatLng;

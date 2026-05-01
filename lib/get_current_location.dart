@@ -3,9 +3,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 
-// Initialise the user's current location at the global level as it needs to be used by the filtered listings page as well as the map page
-LatLng? currentLatLng;
-
 Future<void> establishLocation() async {
   debugPrint('establishLocation called');
   try {
