@@ -64,3 +64,6 @@ late String mapStyle;
 
 // Initialise setting for whether the road closure polygon is shown
 late bool preferredRoadClosurePolygonVisible;
+
+// Initialise the list of favourited listings
+late Set<String> favouriteListingKeys;
