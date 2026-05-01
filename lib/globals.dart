@@ -34,3 +34,6 @@ enum MapOrientation { adaptive, alwaysNorth }
 
 // Preferred map orientation value.
 late MapOrientation preferredMapOrientation;
+
+// Map style options.
+enum MapStyleType { normal, hybrid }
