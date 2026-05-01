@@ -28,9 +28,6 @@ import 'package:url_launcher/url_launcher.dart';
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
-// Define whether navigation is in progress as a global variable
-bool navigationInProgress = false;
-
 // Indicator for a simple map marker
 const String aSimpleMarkerId = 'SIMPLE';
 

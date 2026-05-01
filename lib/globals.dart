@@ -12,3 +12,6 @@ bool onTest = false;
 
 // The cached list of listings fetched from the remote API.
 List<Map<String, dynamic>> listings = [];
+
+// Whether map navigation is currently active.
+bool navigationInProgress = false;
