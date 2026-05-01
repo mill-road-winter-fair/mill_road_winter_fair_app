@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 // Consolidated global variables used across the app.
 // Move only top-level variables here so other files can import a single source.
@@ -71,3 +72,4 @@ late Set<String> favouriteListingKeys;
 // --- Location related globals (moved from get_current_location.dart) ---
 // Whether device location services are enabled and the permission status.
 late bool locationServicesEnabled;
+late LocationPermission locationPermission;

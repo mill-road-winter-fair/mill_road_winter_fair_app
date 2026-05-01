@@ -3,8 +3,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 
-// Initialise global variables for whether or not location services are enabled for the phone and permissions are granted to the app
-late LocationPermission locationPermission;
 // Initialise global variable for whether or not the user has been prompted to enable location services
 int promptedUserToEnableLocationServices = 0;
 
