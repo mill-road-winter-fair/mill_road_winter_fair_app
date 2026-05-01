@@ -18,3 +18,6 @@ bool navigationInProgress = false;
 
 // Identifier for a simple (non-group) marker.
 const String aSimpleMarkerId = 'SIMPLE';
+
+// API key for Google Maps Directions. Populated at runtime from dotenv.
+String googleMapsDirectionsApiKey = "";

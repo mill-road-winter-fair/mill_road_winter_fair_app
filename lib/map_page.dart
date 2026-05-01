@@ -28,9 +28,6 @@ import 'package:url_launcher/url_launcher.dart';
 // Define a GlobalKey for MapPageState:
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
-// API key, contents will depend upon platform
-String googleMapsDirectionsApiKey = "";
-
 // Identifier and function for determining if the event has been marked as cancelled
 const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
 bool hasEventBeenCancelled(String? description) {
