@@ -45,9 +45,6 @@ Future<void> main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
 }
 
-// Define global variable as to whether we are onTest or not
-bool onTest = false;
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

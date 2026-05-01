@@ -6,3 +6,6 @@ int previousIndex = 0;
 
 // App bar title shown on the HomePage.
 String appBarTitle = 'Mill Road Winter Fair 2025';
+
+// Flag set by tests (when true the app reduces/delays animation and timers).
+bool onTest = false;
