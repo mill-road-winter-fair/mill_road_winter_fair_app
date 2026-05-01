@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 // Consolidated global variables used across the app.
 // Move only top-level variables here so other files can import a single source.
 
@@ -55,3 +57,4 @@ late DistanceUnits preferredDistanceUnits;
 
 // Initialise theme variables
 late String selectedThemeKey;
+late ValueNotifier<String> themeNotifier;
