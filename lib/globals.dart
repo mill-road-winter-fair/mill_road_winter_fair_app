@@ -58,3 +58,6 @@ late DistanceUnits preferredDistanceUnits;
 // Initialise theme variables
 late String selectedThemeKey;
 late ValueNotifier<String> themeNotifier;
+
+// Initialise map style variable to store map styling json
+late String mapStyle;
