@@ -43,3 +43,6 @@ late MapStyleType preferredMapStyleType;
 
 // Define available sorting methods
 enum SortingMethod { alphabetical, nearest, startTime, location }
+
+// Define variable for sorting method
+late SortingMethod preferredSortingMethod;
