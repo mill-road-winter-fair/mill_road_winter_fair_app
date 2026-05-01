@@ -49,3 +49,6 @@ late SortingMethod preferredSortingMethod;
 
 // Define available distance units
 enum DistanceUnits { metric, imperial, cambridge }
+
+// Set default distance units
+late DistanceUnits preferredDistanceUnits;
