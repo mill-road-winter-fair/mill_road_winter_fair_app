@@ -80,3 +80,7 @@ int promptedUserToEnableLocationServices = 0;
 
 // Cached user location used by the map and listings pages.
 LatLng? currentLatLng;
+
+// --- Miscellaneous ---
+// Cutoff date used by the listing-update notifier.
+final DateTime cutoffDate = DateTime(2025, 12, 6);
