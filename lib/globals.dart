@@ -31,3 +31,6 @@ late bool firstExecution;
 
 // Map orientation options (moved from settings_page.dart so globals can hold the values).
 enum MapOrientation { adaptive, alwaysNorth }
+
+// Preferred map orientation value.
+late MapOrientation preferredMapOrientation;
