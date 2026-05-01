@@ -23,9 +23,6 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Define a GlobalKey for MapPageState:
-final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
-
 // Function for determining if the event has been marked as cancelled
 bool hasEventBeenCancelled(String? description) {
   return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
