@@ -11,8 +11,7 @@ void main() {
   setUp(() async {
     // default noop client
     mockClient = MockClient((request) async => http.Response('[]', 200));
-    dotenv.testLoad(
-      fileInput: '''
+    dotenv.loadFromString(envString: '''
     HEROKU_API=MOCK_API
     ''',
     );
