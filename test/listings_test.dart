@@ -22,7 +22,8 @@ void main() {
     IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     SIGNING_KEY=MOCK_CERT
     IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
+    ''',
+    );
   });
 
   group('Listings', () {
@@ -56,9 +57,9 @@ void main() {
               "Food",
               "10:30",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "https://www.glazedandconfused.com",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any)).thenAnswer(
@@ -81,7 +82,7 @@ void main() {
             'secondaryType': 'Food',
             'startTime': '10:30',
             'tertiaryType': 'Doughnuts',
-            'website': 'https://www.glazedandconfused.com'
+            'website': 'https://www.glazedandconfused.com',
           }
         ]);
       });
@@ -106,7 +107,7 @@ void main() {
             'secondaryType': 'Food',
             'startTime': '10:30',
             'tertiaryType': 'Doughnuts',
-            'website': 'https://www.glazedandconfused.com'
+            'website': 'https://www.glazedandconfused.com',
           }
         ]);
       });
@@ -126,7 +127,8 @@ void main() {
     IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     SIGNING_KEY=MOCK_CERT
     IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
+    ''',
+        );
       });
 
       test('handles rows with missing cells by padding to headers', () async {
@@ -145,9 +147,9 @@ void main() {
               "Food",
               "10:30",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "https://www.glazedandconfused.com",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any)).thenAnswer(
@@ -178,9 +180,9 @@ void main() {
               "Food",
               "10:30",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "https://www.glazedandconfused.com",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any)).thenAnswer(
@@ -213,9 +215,9 @@ void main() {
               "Food",
               "10:30",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "https://www.glazedandconfused.com",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any)).thenAnswer(
@@ -242,7 +244,7 @@ void main() {
             "secondaryType": "Food",
             "startTime": "10:30",
             "tertiaryType": "Doughnuts",
-            "website": "https://www.glazedandconfused.com"
+            "website": "https://www.glazedandconfused.com",
           }
         ];
 

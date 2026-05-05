@@ -27,7 +27,7 @@ void main() {
         'displayName': 'Food Group',
         'endTime': '16:30',
         'id': '1',
-        'latLng': '52.199838,0.139016',  // 199m
+        'latLng': '52.199838,0.139016', // 199m
         'phone': '',
         'primaryType': 'Group-Food',
         'secondaryType': 'Fake Street',
@@ -41,7 +41,7 @@ void main() {
         'displayName': 'Glazed and Confused',
         'endTime': '15:00',
         'id': '2',
-        'latLng': '52.199687,0.138813',  // 535m
+        'latLng': '52.199687,0.138813', // 535m
         'phone': '01223 111111',
         'primaryType': 'Food',
         'secondaryType': 'Fake Street',
@@ -55,7 +55,7 @@ void main() {
         'endTime': '16:30',
         'id': '3',
         'name': 'sushisquad',
-        'latLng': '52.199188,0.139437',  // 135m
+        'latLng': '52.199188,0.139437', // 135m
         'phone': '01223 222222',
         'primaryType': 'Food',
         'secondaryType': 'Implausible Avenue',
@@ -226,7 +226,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Doughnuts",
           "visibleOnMap": "TRUE",
-          "website": "https://www.glazedandconfused.com"
+          "website": "https://www.glazedandconfused.com",
         },
         {
           "displayName": "The Crafty Canvas",
@@ -241,7 +241,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Crafts",
           "visibleOnMap": "TRUE",
-          "website": "https://www.craftycanvas.com"
+          "website": "https://www.craftycanvas.com",
         },
         {
           "displayName": "The Jazz Junction",
@@ -256,7 +256,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Jazz",
           "visibleOnMap": "TRUE",
-          "website": "https://www.jazzjunction.com"
+          "website": "https://www.jazzjunction.com",
         },
         {
           "displayName": "Santa",
@@ -271,7 +271,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Kindly Elf",
           "visibleOnMap": "TRUE",
-          "website": ""
+          "website": "",
         },
         {
           "displayName": "Information Point",
@@ -286,7 +286,7 @@ void main() {
           "startTime": "10:30",
           "tertiaryType": "Help Point",
           "visibleOnMap": "TRUE",
-          "website": ""
+          "website": "",
         }
       ];
 
@@ -523,7 +523,7 @@ void main() {
                         preferredMapOrientation = (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
                       });
                     },
-                  )
+                  ),
                 ],
               );
             },

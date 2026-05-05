@@ -50,21 +50,23 @@ void main() {
 
   group('ListingsInfoSheet', () {
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        title: 'Glazed and Confused',
-        location: 'Gwydir St Car Park',
-        subtitle: 'Food • Doughnuts',
-        startTime: '10:30',
-        endTime: '16:30',
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        phoneNumber: '01223 111111',
-        website: 'https://www.glazedandconfused.com',
-        email: 'sales@glazedandconfused.com',
-        description: 'Nice buns',
-        detailsVisible: true,
-        onGetDirections: () {},
-        listingFavourited: false,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          title: 'Glazed and Confused',
+          location: 'Gwydir St Car Park',
+          subtitle: 'Food • Doughnuts',
+          startTime: '10:30',
+          endTime: '16:30',
+          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+          phoneNumber: '01223 111111',
+          website: 'https://www.glazedandconfused.com',
+          email: 'sales@glazedandconfused.com',
+          description: 'Nice buns',
+          detailsVisible: true,
+          onGetDirections: () {},
+          listingFavourited: false,
+        ),
+      );
 
       expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
@@ -74,21 +76,23 @@ void main() {
     });
 
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        title: 'Glazed and Confused',
-        location: 'Gwydir St Car Park',
-        subtitle: 'Food • Doughnuts',
-        startTime: '10:30',
-        endTime: '16:30',
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        phoneNumber: '01223 111111',
-        website: '',
-        email: 'sales@glazedandconfused.com',
-        description: 'Nice buns',
-        detailsVisible: true,
-        onGetDirections: () {},
-        listingFavourited: false,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          title: 'Glazed and Confused',
+          location: 'Gwydir St Car Park',
+          subtitle: 'Food • Doughnuts',
+          startTime: '10:30',
+          endTime: '16:30',
+          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+          phoneNumber: '01223 111111',
+          website: '',
+          email: 'sales@glazedandconfused.com',
+          description: 'Nice buns',
+          detailsVisible: true,
+          onGetDirections: () {},
+          listingFavourited: false,
+        ),
+      );
 
       expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
@@ -103,23 +107,25 @@ void main() {
     testWidgets('calls onGetDirections when Get Directions button is pressed', (WidgetTester tester) async {
       bool directionsCalled = false;
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        title: 'Glazed and Confused',
-        location: 'Gwydir St Car Park',
-        subtitle: 'Food • Doughnuts',
-        startTime: '10:30',
-        endTime: '16:30',
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        phoneNumber: '01223 111111',
-        website: 'https://www.glazedandconfused.com',
-        email: 'sales@glazedandconfused.com',
-        description: 'Nice buns',
-        detailsVisible: false,
-        onGetDirections: () {
-          directionsCalled = true;
-        },
-        listingFavourited: false,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          title: 'Glazed and Confused',
+          location: 'Gwydir St Car Park',
+          subtitle: 'Food • Doughnuts',
+          startTime: '10:30',
+          endTime: '16:30',
+          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+          phoneNumber: '01223 111111',
+          website: 'https://www.glazedandconfused.com',
+          email: 'sales@glazedandconfused.com',
+          description: 'Nice buns',
+          detailsVisible: false,
+          onGetDirections: () {
+            directionsCalled = true;
+          },
+          listingFavourited: false,
+        ),
+      );
 
       final getDirectionsButton = find.text('Directions');
       expect(getDirectionsButton, findsOneWidget);
