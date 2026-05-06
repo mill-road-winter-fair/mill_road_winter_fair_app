@@ -1728,12 +1728,14 @@ class MapPageState extends State<MapPage> {
                             }
                           } catch (e) {
                             debugPrint('Centre-on-user failed: $e');
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                content: Text('Unable to determine your location'),
-                              ),
-                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  content: Text('Unable to determine your location'),
+                                ),
+                              );
+                            }
                           }
                         },
                         child: Icon(
