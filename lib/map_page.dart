@@ -1577,13 +1577,6 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                           Icons.cancel,
                           size: 24,
                           color: Theme.of(context).colorScheme.onPrimary,
-                          shadows: [
-                            Shadow(
-                              color: Theme.of(context).shadowColor,
-                              offset: const Offset(1, 3),
-                              blurRadius: 5,
-                            ),
-                          ],
                         ),
                       ),
                     if (navigationInProgress == false)
