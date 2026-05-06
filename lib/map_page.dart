@@ -405,7 +405,8 @@ class MapPageState extends State<MapPage> {
         _eventMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if ((listing['primaryType'] == "Place" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Place") {
         _placeMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'].startsWith("Service") && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Service") {
+      } else if ((listing['primaryType'].startsWith("Service") && !hasEventBeenCancelled(listing['description'])) ||
+          listing['primaryType'] == "Group-Service") {
         _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
       }
     }
@@ -468,7 +469,7 @@ class MapPageState extends State<MapPage> {
     return favouriteListingKeys.contains(listingID);
   }
 
-void addGroupMarker(Map<String, dynamic> listing) async {
+  void addGroupMarker(Map<String, dynamic> listing) async {
     // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -539,6 +540,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
                 }
+
                 void favouriteOrNotListing(String listingID) {
                   setModalState(() {
                     if (favouriteListingKeys.contains(listingID)) {
@@ -549,6 +551,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                     _saveSettings();
                   });
                 }
+
                 return SafeArea(
                   top: false,
                   left: false,
@@ -556,70 +559,85 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                   bottom: Platform.isAndroid && isNavBarVisible(context),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
+                      final groupListingHeader = relatedListings[0];
+
+                      // Calculate distance if current location is known
+                      var distanceMessage = 'Distance unknown';
+                      if (currentLatLng != null) {
+                        int approximateDistanceMetres = asTheCrowFlies(
+                          currentLatLng!,
+                          stringToLatLng(groupListingHeader['latLng']),
+                        );
+                        distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                      }
+
                       return ConstrainedBox(
                         constraints: BoxConstraints(
                           maxHeight: constraints.maxHeight * 0.90,
                         ),
-                        child: Scrollbar(
-                          controller: groupSheetModalScrollController,
-                          thumbVisibility: Platform.isIOS ? false : true,
-                          thickness: 4,
-                          radius: const Radius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
-                            child: ListView.builder(
-                              itemCount: relatedListings.length,
-                              shrinkWrap: true,
-                              controller: groupSheetModalScrollController,
-                              itemBuilder: (context, index) {
-                                final rel = relatedListings[index];
-
-                                // Calculate distance if current location is known
-                                var distanceMessage = 'Distance unknown';
-                                if (currentLatLng != null) {
-                                  int approximateDistanceMetres = asTheCrowFlies(
-                                    currentLatLng!,
-                                    stringToLatLng(rel['latLng']),
-                                  );
-                                  distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                                }
-
-                                if (rel['primaryType'].startsWith("Group")) {
-                                  return GroupListingInfoSheet(
-                                    title: rel['displayName'],
-                                    categories: "${rel['tertiaryType']}",
-                                    startTime: "${listing['startTime']}",
-                                    endTime: "${listing['endTime']}",
-                                    approxDistance: distanceMessage,
-                                  );
-                                } else {
-                                  return Column(
-                                    children: [
-                                      SpecificListingInfoSheet(
-                                        title: rel['displayName'],
-                                        location: '',
-                                        subtitle: rel['tertiaryType'],
-                                        startTime: rel['startTime'],
-                                        endTime: rel['endTime'],
-                                        approxDistance: '',
-                                        phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                        website: (rel['website'] != null) ? rel['website'] : '',
-                                        email: (rel['email'] != null) ? rel['email'] : '',
-                                        description: (rel['description'] != null) ? rel['description'] : '',
-                                        detailsVisible: detailsVisibilityList[index],
-                                        onDetailsTapped: () => toggleDetailsRow(index),
-                                        listingFavourited: isListingFavourited(rel['id']),
-                                        onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                        onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                      ),
-                                      if (index != relatedListings.length - 1)
-                                        SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                                    ],
-                                  );
-                                }
-                              },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                              child: GroupListingInfoSheet(
+                                title: groupListingHeader['displayName'],
+                                categories: "${groupListingHeader['tertiaryType']}",
+                                startTime: "${listing['startTime']}",
+                                endTime: "${listing['endTime']}",
+                                approxDistance: distanceMessage,
+                              ),
                             ),
-                          ),
+                            Flexible(
+                              fit: FlexFit.loose,
+                              child: Scrollbar(
+                                controller: groupSheetModalScrollController,
+                                thumbVisibility: Platform.isIOS ? false : true,
+                                thickness: 4,
+                                radius: const Radius.circular(8),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                                  child: ListView.builder(
+                                    itemCount: relatedListings.length,
+                                    shrinkWrap: true,
+                                    controller: groupSheetModalScrollController,
+                                    itemBuilder: (context, index) {
+                                      final rel = relatedListings[index];
+
+                                      if (rel['primaryType'].startsWith('Group')) {
+                                        return const SizedBox.shrink();
+                                      } else {
+                                        return Column(
+                                          children: [
+                                            SpecificListingInfoSheet(
+                                              title: rel['displayName'],
+                                              location: '',
+                                              subtitle: rel['tertiaryType'],
+                                              startTime: rel['startTime'],
+                                              endTime: rel['endTime'],
+                                              approxDistance: '',
+                                              phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                              website: (rel['website'] != null) ? rel['website'] : '',
+                                              email: (rel['email'] != null) ? rel['email'] : '',
+                                              description: (rel['description'] != null) ? rel['description'] : '',
+                                              detailsVisible: detailsVisibilityList[index],
+                                              onDetailsTapped: () => toggleDetailsRow(index),
+                                              listingFavourited: isListingFavourited(rel['id']),
+                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                              onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                            ),
+                                            if (index != relatedListings.length - 1)
+                                              SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                          ],
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -684,8 +702,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                 left: false,
                 right: false,
                 bottom: Platform.isAndroid && isNavBarVisible(context),
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
+                child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                   final specificSheetModalScrollController = ScrollController();
                   return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
                     void favouriteOrNotListing(String listingID) {
@@ -698,6 +715,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                         _saveSettings();
                       });
                     }
+
                     return ConstrainedBox(
                       constraints: BoxConstraints(
                         maxHeight: constraints.maxHeight * 0.90,
@@ -985,7 +1003,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                       ),
                     ],
                   ),
-                  const Row(children:[SizedBox(height: 12)]),
+                  const Row(children: [SizedBox(height: 12)]),
                 ],
               ),
             );
@@ -1058,10 +1076,9 @@ void addGroupMarker(Map<String, dynamic> listing) async {
     }
 
     setState(() {
-    // Set navigation as in progress; do this late so cancel button isn't available before nav starts
+      // Set navigation as in progress; do this late so cancel button isn't available before nav starts
       navigationInProgress = true;
     });
-
   }
 
   void cancelNavigation() {
@@ -1197,7 +1214,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
 
       // Convert to LatLng for Google Maps
       List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
-      
+
       setState(() {
         // Get distace in meters. NB can also get route.durationMinutes which may be useful
         final distanceMetres = route.distanceMeters ?? 0;
@@ -1328,10 +1345,11 @@ void addGroupMarker(Map<String, dynamic> listing) async {
       padding = mapWidth! * (0.07 + extraPaddingForShortTrips);
     } else {
       bearing = 290;
-      padding = mapHeight! * (0.10 + extraPaddingForShortTrips);  // need a bit more space to avoid navigation distance marker
+      padding = mapHeight! * (0.10 + extraPaddingForShortTrips); // need a bit more space to avoid navigation distance marker
     }
 
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
+    _moveCameraToBoundsWithRotation(
+        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
