@@ -498,8 +498,11 @@ class MapPageState extends State<MapPage> {
           return type.startsWith("Group-") ? type.substring(6) : type;
         }
 
-        // Filter listings where both normalised primaryType and secondaryType match
+        // Filter listings where both normalised primaryType and secondaryType match,
+        // but exclude any listing whose primaryType starts with `Group-`.
         List<Map<String, dynamic>> relatedListings = listings.where((l) {
+          if ((l['primaryType'] ?? '').toString().startsWith('Group-')) return false;
+
           final listingPrimary = normalisePrimaryType(l['primaryType'] ?? '');
           final targetPrimary = normalisePrimaryType(listing['primaryType'] ?? '');
           final listingSecondary = l['secondaryType'] ?? '';
@@ -508,17 +511,10 @@ class MapPageState extends State<MapPage> {
           return listingPrimary == targetPrimary && listingSecondary == targetSecondary;
         }).toList();
 
-        // Sort listings: Group first → startTime → displayName
+        // Sort listings: startTime → displayName
         relatedListings.sort((a, b) {
-          if (a['primaryType'].startsWith("Group") && !b['primaryType'].startsWith("Group")) {
-            return -1;
-          } else if (b['primaryType'].startsWith("Group") && !a['primaryType'].startsWith("Group")) {
-            return 1;
-          }
-
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           if (timeCompare != 0) return timeCompare;
-
           return a['name'].compareTo(b['name']);
         });
 
@@ -559,14 +555,12 @@ class MapPageState extends State<MapPage> {
                   bottom: Platform.isAndroid && isNavBarVisible(context),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final groupListingHeader = relatedListings[0];
-
                       // Calculate distance if current location is known
                       var distanceMessage = 'Distance unknown';
                       if (currentLatLng != null) {
                         int approximateDistanceMetres = asTheCrowFlies(
                           currentLatLng!,
-                          stringToLatLng(groupListingHeader['latLng']),
+                          stringToLatLng(listing['latLng']),
                         );
                         distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
                       }
@@ -582,8 +576,8 @@ class MapPageState extends State<MapPage> {
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                               child: GroupListingInfoSheet(
-                                title: groupListingHeader['displayName'],
-                                categories: "${groupListingHeader['tertiaryType']}",
+                                title: listing['displayName'],
+                                categories: "${listing['tertiaryType']}",
                                 startTime: "${listing['startTime']}",
                                 endTime: "${listing['endTime']}",
                                 approxDistance: distanceMessage,
@@ -605,33 +599,29 @@ class MapPageState extends State<MapPage> {
                                     itemBuilder: (context, index) {
                                       final rel = relatedListings[index];
 
-                                      if (rel['primaryType'].startsWith('Group')) {
-                                        return const SizedBox.shrink();
-                                      } else {
-                                        return Column(
-                                          children: [
-                                            SpecificListingInfoSheet(
-                                              title: rel['displayName'],
-                                              location: '',
-                                              subtitle: rel['tertiaryType'],
-                                              startTime: rel['startTime'],
-                                              endTime: rel['endTime'],
-                                              approxDistance: '',
-                                              phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                              website: (rel['website'] != null) ? rel['website'] : '',
-                                              email: (rel['email'] != null) ? rel['email'] : '',
-                                              description: (rel['description'] != null) ? rel['description'] : '',
-                                              detailsVisible: detailsVisibilityList[index],
-                                              onDetailsTapped: () => toggleDetailsRow(index),
-                                              listingFavourited: isListingFavourited(rel['id']),
-                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                              onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                            ),
-                                            if (index != relatedListings.length - 1)
-                                              SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                                          ],
-                                        );
-                                      }
+                                      return Column(
+                                        children: [
+                                          SpecificListingInfoSheet(
+                                            title: rel['displayName'],
+                                            location: '',
+                                            subtitle: rel['tertiaryType'],
+                                            startTime: rel['startTime'],
+                                            endTime: rel['endTime'],
+                                            approxDistance: '',
+                                            phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                            website: (rel['website'] != null) ? rel['website'] : '',
+                                            email: (rel['email'] != null) ? rel['email'] : '',
+                                            description: (rel['description'] != null) ? rel['description'] : '',
+                                            detailsVisible: detailsVisibilityList[index],
+                                            onDetailsTapped: () => toggleDetailsRow(index),
+                                            listingFavourited: isListingFavourited(rel['id']),
+                                            onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                            onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                          ),
+                                          if (index != relatedListings.length - 1)
+                                            SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                        ],
+                                      );
                                     },
                                   ),
                                 ),
