@@ -405,7 +405,8 @@ class MapPageState extends State<MapPage> {
         _eventMarkerIds.add(MarkerId(listing['id'].toString()));
       } else if ((listing['primaryType'] == "Place" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Place") {
         _placeMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'].startsWith("Service") && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Service") {
+      } else if ((listing['primaryType'].startsWith("Service") && !hasEventBeenCancelled(listing['description'])) ||
+          listing['primaryType'] == "Group-Service") {
         _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
       }
     }
@@ -468,7 +469,7 @@ class MapPageState extends State<MapPage> {
     return favouriteListingKeys.contains(listingID);
   }
 
-void addGroupMarker(Map<String, dynamic> listing) async {
+  void addGroupMarker(Map<String, dynamic> listing) async {
     // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
@@ -539,6 +540,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
                 }
+
                 void favouriteOrNotListing(String listingID) {
                   setModalState(() {
                     if (favouriteListingKeys.contains(listingID)) {
@@ -549,6 +551,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                     _saveSettings();
                   });
                 }
+
                 return SafeArea(
                   top: false,
                   left: false,
@@ -686,53 +689,57 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                 bottom: Platform.isAndroid && isNavBarVisible(context),
                 child: LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
-                  final specificSheetModalScrollController = ScrollController();
-                  return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
-                    void favouriteOrNotListing(String listingID) {
-                      setModalState(() {
-                        if (favouriteListingKeys.contains(listingID)) {
-                          favouriteListingKeys.remove(listingID);
-                        } else {
-                          favouriteListingKeys.add(listingID);
+                    final specificSheetModalScrollController = ScrollController();
+                    return StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setModalState) {
+                        void favouriteOrNotListing(String listingID) {
+                          setModalState(() {
+                            if (favouriteListingKeys.contains(listingID)) {
+                              favouriteListingKeys.remove(listingID);
+                            } else {
+                              favouriteListingKeys.add(listingID);
+                            }
+                            _saveSettings();
+                          });
                         }
-                        _saveSettings();
-                      });
-                    }
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.90,
-                      ),
-                      child: Scrollbar(
-                        controller: specificSheetModalScrollController,
-                        thumbVisibility: Platform.isIOS ? false : true,
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: SingleChildScrollView(
-                          controller: specificSheetModalScrollController,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                            child: SpecificListingInfoSheet(
-                              title: listing['displayName'],
-                              location: listing['secondaryType'],
-                              subtitle: listing['tertiaryType'],
-                              startTime: "${listing['startTime']}",
-                              endTime: "${listing['endTime']}",
-                              approxDistance: distanceMessage,
-                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                              website: (listing['website'] != null) ? listing['website'] : '',
-                              email: (listing['email'] != null) ? listing['email'] : '',
-                              description: (listing['description'] != null) ? listing['description'] : '',
-                              detailsVisible: true,
-                              listingFavourited: isListingFavourited(listing['id']),
-                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+
+                        return ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: constraints.maxHeight * 0.90,
+                          ),
+                          child: Scrollbar(
+                            controller: specificSheetModalScrollController,
+                            thumbVisibility: Platform.isIOS ? false : true,
+                            thickness: 4,
+                            radius: const Radius.circular(8),
+                            child: SingleChildScrollView(
+                              controller: specificSheetModalScrollController,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                                child: SpecificListingInfoSheet(
+                                  title: listing['displayName'],
+                                  location: listing['secondaryType'],
+                                  subtitle: listing['tertiaryType'],
+                                  startTime: "${listing['startTime']}",
+                                  endTime: "${listing['endTime']}",
+                                  approxDistance: distanceMessage,
+                                  phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                                  website: (listing['website'] != null) ? listing['website'] : '',
+                                  email: (listing['email'] != null) ? listing['email'] : '',
+                                  description: (listing['description'] != null) ? listing['description'] : '',
+                                  detailsVisible: true,
+                                  listingFavourited: isListingFavourited(listing['id']),
+                                  onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                  onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     );
-                  });
-                }),
+                  },
+                ),
               );
             },
           );
@@ -985,7 +992,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                       ),
                     ],
                   ),
-                  const Row(children:[SizedBox(height: 12)]),
+                  const Row(children: [SizedBox(height: 12)]),
                 ],
               ),
             );
@@ -1058,10 +1065,9 @@ void addGroupMarker(Map<String, dynamic> listing) async {
     }
 
     setState(() {
-    // Set navigation as in progress; do this late so cancel button isn't available before nav starts
+      // Set navigation as in progress; do this late so cancel button isn't available before nav starts
       navigationInProgress = true;
     });
-
   }
 
   void cancelNavigation() {
@@ -1197,7 +1203,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
 
       // Convert to LatLng for Google Maps
       List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
-      
+
       setState(() {
         // Get distace in meters. NB can also get route.durationMinutes which may be useful
         final distanceMetres = route.distanceMeters ?? 0;
@@ -1328,10 +1334,11 @@ void addGroupMarker(Map<String, dynamic> listing) async {
       padding = mapWidth! * (0.07 + extraPaddingForShortTrips);
     } else {
       bearing = 290;
-      padding = mapHeight! * (0.10 + extraPaddingForShortTrips);  // need a bit more space to avoid navigation distance marker
+      padding = mapHeight! * (0.10 + extraPaddingForShortTrips); // need a bit more space to avoid navigation distance marker
     }
 
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
+    _moveCameraToBoundsWithRotation(
+        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -1527,7 +1534,7 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                       rotateGesturesEnabled: false,
                       compassEnabled: false,
                       myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
+                      myLocationButtonEnabled: false,
                       mapToolbarEnabled: false,
                       onMapCreated: (GoogleMapController controller) {
                         _controller = controller;
@@ -1689,6 +1696,55 @@ void addGroupMarker(Map<String, dynamic> listing) async {
                   ],
                 ),
               ),
+              // Top-right controls: centre-on-user button (only shown when location services are enabled and permission has been granted)
+              if (locationServicesEnabled == true && (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      FloatingActionButton(
+                        heroTag: 'centreOnUserBtn',
+                        shape: const CircleBorder(),
+                        elevation: 3,
+                        mini: true,
+                        onPressed: () async {
+                          HapticFeedback.lightImpact();
+                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
+                          try {
+                            if (currentLatLng == null) {
+                              final pos = await getCurrentPosition();
+                              currentLatLng = LatLng(pos.latitude, pos.longitude);
+                            }
+                            if (currentLatLng != null) {
+                              // Move camera to the user's location with a sensible zoom and bearing
+                              double currentZoom = await _controller!.getZoomLevel();
+                              _controller?.animateCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('Centre-on-user failed: $e');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                content: Text('Unable to determine your location'),
+                              ),
+                            );
+                          }
+                        },
+                        child: Icon(
+                          Icons.my_location,
+                          size: 22,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               if (_distanceToDestination != null)
                 Align(
                   alignment: Alignment.topCenter,
