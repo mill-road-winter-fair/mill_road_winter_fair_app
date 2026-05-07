@@ -6,12 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/firebase_options.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
@@ -30,6 +33,15 @@ Future<void> main() async {
   debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  debugPrint('Firebase loaded');
+
+  // Explicitly enable analytics data collection
+  await analytics.setAnalyticsCollectionEnabled(true);
+  debugPrint('Analytics collection enabled');
 
   await loadSettings();
   debugPrint('Settings loaded');
@@ -319,9 +331,15 @@ class HomePageState extends State<HomePage> {
           leading: Builder(
             builder: (context) => IconButton(
               icon: const Icon(Icons.menu),
-              onPressed: () {
+              onPressed: () async {
                 HapticFeedback.lightImpact();
                 Scaffold.of(context).openDrawer();
+                await analytics.logEvent(
+                  name: 'menu_button_clicked',
+                  parameters: {
+                    'screen': 'main',
+                  },
+                );
               },
             ),
           ),
