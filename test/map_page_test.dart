@@ -74,6 +74,29 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('all map buttons are present', (WidgetTester tester) async {
+      // Build the MapPage widget
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Check the map buttons
+      expect(find.byType(FloatingActionButton), findsExactly(5));
+      expect(find.byIcon(Icons.home), findsOneWidget);
+      expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
+      expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
+      expect(find.byIcon(Icons.filter_alt), findsOneWidget);
+      expect(find.byIcon(Icons.my_location), findsOneWidget);
+
+      // Check road closure button
+      expect(find.text('Road closures'), findsOneWidget);
+    });
+
     testWidgets('map type button changes map type', (WidgetTester tester) async {
       // Build the MapPage widget
       await tester.pumpWidget(
