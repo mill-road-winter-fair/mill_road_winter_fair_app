@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -122,7 +123,8 @@ void showDirectionsTo(BuildContext context, String id, LatLng theDest) async {
 }
 
 class AboutTheFairPage extends StatefulWidget {
-  const AboutTheFairPage({super.key});
+  final AnalyticsService analyticsService;
+  const AboutTheFairPage({super.key, required this.analyticsService});
 
   @override
   State<AboutTheFairPage> createState() => _AboutTheFairPageState();
@@ -147,6 +149,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
   @override
   void initState() {
     super.initState();
+    widget.analyticsService.setCurrentScreen('AboutPage');
     _aboutPageScrollController = ScrollController();
     // Create recognizers for each sponsor so we can dispose them later
     for (var name in _sponsorUrls.keys) {

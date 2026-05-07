@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -49,9 +50,15 @@ class OnBoardingPageState extends State<OnBoardingPage> {
 
   void _onIntroEnd(BuildContext context) {
     _saveSettings();
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MyApp()),
-    );
+    if (onTest) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => MyApp(analyticsService: FakeAnalyticsService())),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => MyApp(analyticsService: FirebaseAnalyticsService())),
+      );
+    }
   }
 
   @override

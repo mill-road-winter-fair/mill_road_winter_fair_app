@@ -37,7 +37,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  debugPrint('Firebase loaded');
+  debugPrint('Firebase initialised');
 
   // Explicitly enable analytics data collection
   await analytics.setAnalyticsCollectionEnabled(true);
@@ -57,14 +57,18 @@ Future<void> main() async {
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : MyApp(analyticsService: FirebaseAnalyticsService())));
 }
 
 // Define global variable as to whether we are onTest or not
 bool onTest = false;
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AnalyticsService analyticsService;
+  const MyApp({
+    super.key,
+    required this.analyticsService,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +80,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
-          home: HomePage(key: homePageKey),
+          home: HomePage(key: homePageKey, analyticsService: analyticsService),
         );
       },
     );
@@ -187,15 +191,14 @@ Widget _buildEmailLink(String email) {
     },
     child: Text(
       email,
-      style: const TextStyle(
-        decoration: TextDecoration.underline
-      ),
+      style: const TextStyle(decoration: TextDecoration.underline),
     ),
   );
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final AnalyticsService analyticsService;
+  const HomePage({super.key, required this.analyticsService});
 
   @override
   HomePageState createState() => HomePageState();
@@ -216,6 +219,7 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    widget.analyticsService.setCurrentScreen('MapPage');
     _initPackageInfo();
   }
 
@@ -334,12 +338,7 @@ class HomePageState extends State<HomePage> {
               onPressed: () async {
                 HapticFeedback.lightImpact();
                 Scaffold.of(context).openDrawer();
-                await analytics.logEvent(
-                  name: 'menu_button_clicked',
-                  parameters: {
-                    'screen': 'main',
-                  },
-                );
+                widget.analyticsService.logMenuButtonTapped();
               },
             ),
           ),
@@ -352,7 +351,7 @@ class HomePageState extends State<HomePage> {
               icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
               onPressed: () {
                 HapticFeedback.lightImpact();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
               },
             ),
           ],
@@ -435,7 +434,7 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
                   },
                 ),
               ),
