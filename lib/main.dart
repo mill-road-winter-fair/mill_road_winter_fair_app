@@ -43,6 +43,9 @@ Future<void> main() async {
   await analytics.setAnalyticsCollectionEnabled(true);
   debugPrint('Analytics collection enabled');
 
+  // We're on production so use the real analytics service
+  final AnalyticsService analyticsService = FirebaseAnalyticsService();
+
   await loadSettings();
   debugPrint('Settings loaded');
 
@@ -57,7 +60,8 @@ Future<void> main() async {
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : MyApp(analyticsService: FirebaseAnalyticsService())));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((value) => runApp(firstExecution ? WelcomeScreen(analyticsService: analyticsService) : MyApp(analyticsService: analyticsService)));
 }
 
 // Define global variable as to whether we are onTest or not
@@ -81,6 +85,7 @@ class MyApp extends StatelessWidget {
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
           home: HomePage(key: homePageKey, analyticsService: analyticsService),
+          navigatorObservers: [routeObserver],
         );
       },
     );
@@ -204,7 +209,7 @@ class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> with RouteAware {
   int index = 0;
 
   PackageInfo _packageInfo = PackageInfo(
@@ -219,8 +224,78 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    widget.analyticsService.setCurrentScreen('MapPage');
     _initPackageInfo();
+  }
+
+  @override
+  void dispose() {
+    debugPrint('HomePageState dispose() called');
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    switch (index) {
+      case 0:
+        debugPrint('[FIREBASE] Setting currentScreen to MapPage');
+        widget.analyticsService.setCurrentScreen('MapPage');
+      case 1:
+        debugPrint('[FIREBASE] Setting currentScreen to FoodListingsPage');
+        widget.analyticsService.setCurrentScreen('FoodListingsPage');
+      case 2:
+        debugPrint('[FIREBASE] Setting currentScreen to StallsListingsPage');
+        widget.analyticsService.setCurrentScreen('StallsListingsPage');
+      case 3:
+        debugPrint('[FIREBASE] Setting currentScreen to MusicListingsPage');
+        widget.analyticsService.setCurrentScreen('MusicListingsPage');
+      case 4:
+        debugPrint('[FIREBASE] Setting currentScreen to EventsListingsPage');
+        widget.analyticsService.setCurrentScreen('EventsListingsPage');
+      case 5:
+        debugPrint('[FIREBASE] Setting currentScreen to PlacesListingsPage');
+        widget.analyticsService.setCurrentScreen('PlacesListingsPage');
+      case 6:
+        debugPrint('[FIREBASE] Setting currentScreen to OtherListingsPage');
+        widget.analyticsService.setCurrentScreen('OtherListingsPage');
+    }
+  }
+
+  @override
+  void didPopNext() {
+    switch (index) {
+      case 0:
+        debugPrint('[FIREBASE] Setting currentScreen to MapPage');
+        widget.analyticsService.setCurrentScreen('MapPage');
+      case 1:
+        debugPrint('[FIREBASE] Setting currentScreen to FoodListingsPage');
+        widget.analyticsService.setCurrentScreen('FoodListingsPage');
+      case 2:
+        debugPrint('[FIREBASE] Setting currentScreen to StallsListingsPage');
+        widget.analyticsService.setCurrentScreen('StallsListingsPage');
+      case 3:
+        debugPrint('[FIREBASE] Setting currentScreen to MusicListingsPage');
+        widget.analyticsService.setCurrentScreen('MusicListingsPage');
+      case 4:
+        debugPrint('[FIREBASE] Setting currentScreen to EventsListingsPage');
+        widget.analyticsService.setCurrentScreen('EventsListingsPage');
+      case 5:
+        debugPrint('[FIREBASE] Setting currentScreen to PlacesListingsPage');
+        widget.analyticsService.setCurrentScreen('PlacesListingsPage');
+      case 6:
+        debugPrint('[FIREBASE] Setting currentScreen to OtherListingsPage');
+        widget.analyticsService.setCurrentScreen('OtherListingsPage');
+    }
   }
 
   void setCurrentIndex(int newIndex) {
@@ -243,16 +318,16 @@ class HomePageState extends State<HomePage> {
   final _listingsKeyEvent = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyPlace = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
-  
+
   late final _pages = [
-    MapPage(listings: listings, key: mapPageKey),
-    FilteredListingsPage(filterPrimaryType: "Food", listings: listings, key: _listingsKeyFood),
-    FilteredListingsPage(filterPrimaryType: "Stalls", listings: listings, key: _listingsKeyShopping),
-    FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
-    FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
-    FilteredListingsPage(filterPrimaryType: "Place", listings: listings, key: _listingsKeyPlace),
-    FilteredListingsPage(filterPrimaryType: "Other", listings: listings, key: _listingsKeyService),
-    FilteredListingsPage(filterPrimaryType: "Saved", listings: listings),
+    MapPage(listings: listings, analyticsService: widget.analyticsService, key: mapPageKey),
+    FilteredListingsPage(filterPrimaryType: "Food", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyFood),
+    FilteredListingsPage(filterPrimaryType: "Stalls", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyShopping),
+    FilteredListingsPage(filterPrimaryType: "Music", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyMusic),
+    FilteredListingsPage(filterPrimaryType: "Event", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyEvent),
+    FilteredListingsPage(filterPrimaryType: "Place", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyPlace),
+    FilteredListingsPage(filterPrimaryType: "Other", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyService),
+    FilteredListingsPage(filterPrimaryType: "Saved", analyticsService: widget.analyticsService, listings: listings),
   ];
 
   void aboutDialog() {
@@ -361,40 +436,61 @@ class HomePageState extends State<HomePage> {
           children: _pages,
         ),
         bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            showUnselectedLabels: true,
-            elevation: 0,
-            currentIndex: index,
-            selectedFontSize: 12,
-            unselectedFontSize: 12,
-            iconSize: 30,
-            onTap: (selectedIndex) {
-              HapticFeedback.selectionClick();
-              // Update the user's location
-              establishLocation();
-              switch (selectedIndex) {
-                case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
-                case 1 : _listingsKeyFood.currentState?.onTabVisible();
-                case 2 : _listingsKeyShopping.currentState?.onTabVisible();
-                case 3 : _listingsKeyMusic.currentState?.onTabVisible();
-                case 4 : _listingsKeyEvent.currentState?.onTabVisible();
-                case 5 : _listingsKeyPlace.currentState?.onTabVisible();
-                case 6 : _listingsKeyService.currentState?.onTabVisible();
-              }
-              setState(() {
-                index = selectedIndex;
-              });
-            },
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-              BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-              BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-              BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-              BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
-              BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
-            ],
-          ),
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
+          elevation: 0,
+          currentIndex: index,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          iconSize: 30,
+          onTap: (selectedIndex) {
+            HapticFeedback.selectionClick();
+            // Update the user's location
+            establishLocation();
+            switch (selectedIndex) {
+              case 0:
+                if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
+                debugPrint('[FIREBASE] Setting currentScreen to MapPage');
+                widget.analyticsService.setCurrentScreen('MapPage');
+              case 1:
+                _listingsKeyFood.currentState?.onTabVisible();
+                debugPrint('[FIREBASE] Setting currentScreen to FoodListingsPage');
+                widget.analyticsService.setCurrentScreen('FoodListingsPage');
+              case 2:
+                _listingsKeyShopping.currentState?.onTabVisible();
+                debugPrint('[FIREBASE] Setting currentScreen to StallsListingsPage');
+                widget.analyticsService.setCurrentScreen('StallsListingsPage');
+              case 3:
+                _listingsKeyMusic.currentState?.onTabVisible();
+                debugPrint('[FIREBASE] Setting currentScreen to MusicListingsPage');
+                widget.analyticsService.setCurrentScreen('MusicListingsPage');
+              case 4:
+                _listingsKeyEvent.currentState?.onTabVisible();
+                debugPrint('[FIREBASE] Setting currentScreen to EventsListingsPage');
+                widget.analyticsService.setCurrentScreen('EventsListingsPage');
+              case 5:
+                _listingsKeyPlace.currentState?.onTabVisible();
+                debugPrint('[FIREBASE] Setting currentScreen to PlacesListingsPage');
+                widget.analyticsService.setCurrentScreen('PlacesListingsPage');
+              case 6:
+                _listingsKeyService.currentState?.onTabVisible();
+                debugPrint('[FIREBASE] Setting currentScreen to OtherListingsPage');
+                widget.analyticsService.setCurrentScreen('OtherListingsPage');
+            }
+            setState(() {
+              index = selectedIndex;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+            BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
+            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
+            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
+            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
+            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
+            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
+          ],
+        ),
         drawer: Drawer(
           child: Column(
             spacing: 0,
@@ -446,7 +542,9 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", listings: listings)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", analyticsService: widget.analyticsService, listings: listings)));
+                    debugPrint('[FIREBASE] Setting currentScreen to SavedListingsPage');
+                    widget.analyticsService.setCurrentScreen('SavedListingsPage');
                   },
                 ),
               ),
@@ -458,7 +556,7 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
                   },
                 ),
               ),
@@ -555,7 +653,7 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(analyticsService: widget.analyticsService)));
                   },
                 ),
               ),
@@ -567,7 +665,7 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => WelcomeScreen(analyticsService: widget.analyticsService)));
                   },
                 ),
               ),

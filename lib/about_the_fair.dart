@@ -130,7 +130,7 @@ class AboutTheFairPage extends StatefulWidget {
   State<AboutTheFairPage> createState() => _AboutTheFairPageState();
 }
 
-class _AboutTheFairPageState extends State<AboutTheFairPage> {
+class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
   late ScrollController _aboutPageScrollController;
 
   // Define sponsors and placeholder URLs - user will fill these in
@@ -149,7 +149,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
   @override
   void initState() {
     super.initState();
-    widget.analyticsService.setCurrentScreen('AboutPage');
     _aboutPageScrollController = ScrollController();
     // Create recognizers for each sponsor so we can dispose them later
     for (var name in _sponsorUrls.keys) {
@@ -163,7 +162,30 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
     for (var r in _recognizers.values) {
       r.dispose();
     }
+    routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    debugPrint('[FIREBASE] Setting currentScreen to AboutPage');
+    widget.analyticsService.setCurrentScreen('AboutPage');
+  }
+
+  @override
+  void didPopNext() {
+    debugPrint('[FIREBASE] Setting currentScreen to AboutPage');
+    widget.analyticsService.setCurrentScreen('AboutPage');
   }
 
   void _onSponsorTap(String name) {

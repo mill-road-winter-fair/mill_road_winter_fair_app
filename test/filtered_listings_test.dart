@@ -33,6 +33,7 @@ void main() {
           body: FilteredListingsPage(
             filterPrimaryType: primaryType,
             listings: listings,
+            analyticsService: FakeAnalyticsService(),
           ),
         ),
       ),
@@ -95,7 +96,7 @@ void main() {
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
-      expect(find.text('01223 111111'), findsNothing);  // as Details won't be open
+      expect(find.text('01223 111111'), findsNothing); // as Details won't be open
       expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
@@ -151,7 +152,7 @@ void main() {
           'id': '3',
           'name': 'biteclub',
           'phone': '01223 333333',
-          'latLng': '52.202313,0.131562',  // 968m
+          'latLng': '52.202313,0.131562', // 968m
           'primaryType': 'Food',
           'secondaryType': 'Food',
           'startTime': '14:00',
@@ -421,7 +422,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterPrimaryType: 'Food', listings: sampleListings),
+            body: FilteredListingsPage(filterPrimaryType: 'Food', analyticsService: FakeAnalyticsService(), listings: sampleListings),
           ),
         ),
       );

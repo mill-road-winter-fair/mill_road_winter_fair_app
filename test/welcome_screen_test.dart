@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -35,7 +36,7 @@ void main() {
         await tester.pump(); // allow disposal to complete
       });
 
-      await tester.pumpWidget(const MaterialApp(home: WelcomeScreen()));
+      await tester.pumpWidget(MaterialApp(home: WelcomeScreen(analyticsService: FakeAnalyticsService())));
 
       // The footer button text should be present
       expect(find.text('Take me straight to the app!'), findsOneWidget);

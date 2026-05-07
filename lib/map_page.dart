@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
@@ -44,8 +45,9 @@ bool hasEventBeenCancelled(String? description) {
 
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
+  final AnalyticsService analyticsService;
 
-  const MapPage({required this.listings, super.key});
+  const MapPage({required this.listings, required this.analyticsService, super.key});
 
   @override
   MapPageState createState() => MapPageState();
@@ -1104,8 +1106,34 @@ void addGroupMarker(Map<String, dynamic> listing) async {
     _setMapCameraToFitMapMarkers();
 
     // If we came from a page other than the map page, go back to that page
-    if (previousIndex != 0) {
-      homePageKey.currentState?.setCurrentIndex(previousIndex);
+    switch (previousIndex) {
+      case 0:
+        debugPrint('[FIREBASE] Setting currentScreen to MapPage');
+        widget.analyticsService.setCurrentScreen('MapPage');
+      case 1:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        debugPrint('[FIREBASE] Setting currentScreen to FoodListingsPage');
+        widget.analyticsService.setCurrentScreen('FoodListingsPage');
+      case 2:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        debugPrint('[FIREBASE] Setting currentScreen to StallsListingsPage');
+        widget.analyticsService.setCurrentScreen('StallsListingsPage');
+      case 3:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        debugPrint('[FIREBASE] Setting currentScreen to MusicListingsPage');
+        widget.analyticsService.setCurrentScreen('MusicListingsPage');
+      case 4:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        debugPrint('[FIREBASE] Setting currentScreen to EventsListingsPage');
+        widget.analyticsService.setCurrentScreen('EventsListingsPage');
+      case 5:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        debugPrint('[FIREBASE] Setting currentScreen to PlacesListingsPage');
+        widget.analyticsService.setCurrentScreen('PlacesListingsPage');
+      case 6:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        debugPrint('[FIREBASE] Setting currentScreen to OtherListingsPage');
+        widget.analyticsService.setCurrentScreen('OtherListingsPage');
     }
 
     setState(() {});

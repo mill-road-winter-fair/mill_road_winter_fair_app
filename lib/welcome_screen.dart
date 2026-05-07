@@ -15,7 +15,8 @@ import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key});
+  final AnalyticsService analyticsService;
+  const WelcomeScreen({super.key, required this.analyticsService});
 
   @override
   Widget build(BuildContext context) {
@@ -28,19 +29,20 @@ class WelcomeScreen extends StatelessWidget {
       title: 'Welcome screen',
       debugShowCheckedModeBanner: false,
       theme: appThemes[selectedThemeKey],
-      home: const OnBoardingPage(),
+      home: OnBoardingPage(analyticsService: analyticsService,),
     );
   }
 }
 
 class OnBoardingPage extends StatefulWidget {
-  const OnBoardingPage({super.key});
+  final AnalyticsService analyticsService;
+  const OnBoardingPage({super.key, required this.analyticsService});
 
   @override
   OnBoardingPageState createState() => OnBoardingPageState();
 }
 
-class OnBoardingPageState extends State<OnBoardingPage> {
+class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   final introKey = GlobalKey<IntroductionScreenState>();
 
   Future<void> _saveSettings() async {
@@ -50,15 +52,9 @@ class OnBoardingPageState extends State<OnBoardingPage> {
 
   void _onIntroEnd(BuildContext context) {
     _saveSettings();
-    if (onTest) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => MyApp(analyticsService: FakeAnalyticsService())),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => MyApp(analyticsService: FirebaseAnalyticsService())),
-      );
-    }
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => MyApp(analyticsService: widget.analyticsService)),
+    );
   }
 
   @override
@@ -70,7 +66,30 @@ class OnBoardingPageState extends State<OnBoardingPage> {
   @override
   void dispose() {
     debugPrint('OnBoardingPageState dispose() called');
+    routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    debugPrint('[FIREBASE] Setting currentScreen to WelcomePage');
+    widget.analyticsService.setCurrentScreen('WelcomePage');
+  }
+
+  @override
+  void didPopNext() {
+    debugPrint('[FIREBASE] Setting currentScreen to WelcomePage');
+    widget.analyticsService.setCurrentScreen('WelcomePage');
   }
 
   @override
@@ -488,7 +507,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
                                     },
                                 ),
                                 TextSpan(text: "\nabout the Fair", style: bodyStyle),

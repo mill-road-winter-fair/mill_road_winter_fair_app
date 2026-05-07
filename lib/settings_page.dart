@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -144,13 +145,15 @@ Future<void> loadSettings() async {
 }
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final AnalyticsService analyticsService;
+  
+  const SettingsPage({super.key, required this.analyticsService});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage> with RouteAware {
   // Scroll controller for the page's scrollable content so we can attach a visible scrollbar
   late ScrollController _settingsPageScrollController;
 
@@ -163,7 +166,30 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void dispose() {
     _settingsPageScrollController.dispose();
+    routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    debugPrint('[FIREBASE] Setting currentScreen to SettingsPage');
+    widget.analyticsService.setCurrentScreen('SettingsPage');
+  }
+
+  @override
+  void didPopNext() {
+    debugPrint('[FIREBASE] Setting currentScreen to SettingsPage');
+    widget.analyticsService.setCurrentScreen('SettingsPage');
   }
 
 // Save settings to shared preferences

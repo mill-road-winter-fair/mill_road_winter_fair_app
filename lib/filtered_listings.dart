@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
@@ -22,10 +23,12 @@ import 'android_nav_bar_detector.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
+  final AnalyticsService analyticsService;
   final List<Map<String, dynamic>> listings;
 
   const FilteredListingsPage({
     required this.filterPrimaryType,
+    required this.analyticsService,
     required this.listings,
     super.key,
   });
@@ -91,6 +94,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Request the map page to show directions
     await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
+
+    debugPrint('[FIREBASE] Setting currentScreen to MapPage');
+    widget.analyticsService.setCurrentScreen('MapPage');
   }
 
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {

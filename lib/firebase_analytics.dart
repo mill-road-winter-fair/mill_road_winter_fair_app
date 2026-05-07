@@ -1,6 +1,11 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
 
+// Initialize Firebase Analytics instance
 final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+// A RouteObserver to track navigation events for analytics purposes
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
 // A service class to handle analytics events, using Firebase Analytics in production and a fake implementation for testing
 class FirebaseAnalyticsService implements AnalyticsService {

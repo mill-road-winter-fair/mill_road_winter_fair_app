@@ -5,10 +5,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 
-class ImportantInfoPage extends StatelessWidget {
-  const ImportantInfoPage({super.key});
+class ImportantInfoPage extends StatefulWidget {
+  final AnalyticsService analyticsService;
+
+  const ImportantInfoPage({super.key, required this.analyticsService});
+
+  @override
+  State<ImportantInfoPage> createState() => _ImportantInfoPageState();
+}
+
+class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
+  @override
+  void initState() {
+    debugPrint('_ImportantInfoPageState initState() called');
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    debugPrint('_ImportantInfoPageState dispose() called');
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    debugPrint('[FIREBASE] Setting currentScreen to ImportantInfoPage');
+    widget.analyticsService.setCurrentScreen('ImportantInfoPage');
+  }
+
+  @override
+  void didPopNext() {
+    debugPrint('[FIREBASE] Setting currentScreen to ImportantInfoPage');
+    widget.analyticsService.setCurrentScreen('ImportantInfoPage');
+  }
 
   @override
   Widget build(BuildContext context) {
