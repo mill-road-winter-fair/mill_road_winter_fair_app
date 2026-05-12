@@ -176,13 +176,11 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
 
   @override
   void didPush() {
-    debugPrint('[FIREBASE] Setting currentScreen to AboutPage');
     widget.analyticsService.setCurrentScreen('AboutPage');
   }
 
   @override
   void didPopNext() {
-    debugPrint('[FIREBASE] Setting currentScreen to AboutPage');
     widget.analyticsService.setCurrentScreen('AboutPage');
   }
 

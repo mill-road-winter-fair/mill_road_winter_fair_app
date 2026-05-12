@@ -94,7 +94,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Request the map page to show directions
     await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
 
-    debugPrint('[FIREBASE] Setting currentScreen to MapPage');
     widget.analyticsService.setCurrentScreen('MapPage');
   }
 

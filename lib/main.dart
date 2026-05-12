@@ -239,25 +239,18 @@ class HomePageState extends State<HomePage> with RouteAware {
   void didPush() {
     switch (index) {
       case 0:
-        debugPrint('[FIREBASE] Setting currentScreen to MapPage');
         widget.analyticsService.setCurrentScreen('MapPage');
       case 1:
-        debugPrint('[FIREBASE] Setting currentScreen to FoodListingsPage');
         widget.analyticsService.setCurrentScreen('FoodListingsPage');
       case 2:
-        debugPrint('[FIREBASE] Setting currentScreen to StallsListingsPage');
         widget.analyticsService.setCurrentScreen('StallsListingsPage');
       case 3:
-        debugPrint('[FIREBASE] Setting currentScreen to MusicListingsPage');
         widget.analyticsService.setCurrentScreen('MusicListingsPage');
       case 4:
-        debugPrint('[FIREBASE] Setting currentScreen to EventsListingsPage');
         widget.analyticsService.setCurrentScreen('EventsListingsPage');
       case 5:
-        debugPrint('[FIREBASE] Setting currentScreen to PlacesListingsPage');
         widget.analyticsService.setCurrentScreen('PlacesListingsPage');
       case 6:
-        debugPrint('[FIREBASE] Setting currentScreen to OtherListingsPage');
         widget.analyticsService.setCurrentScreen('OtherListingsPage');
     }
   }
@@ -266,25 +259,18 @@ class HomePageState extends State<HomePage> with RouteAware {
   void didPopNext() {
     switch (index) {
       case 0:
-        debugPrint('[FIREBASE] Setting currentScreen to MapPage');
         widget.analyticsService.setCurrentScreen('MapPage');
       case 1:
-        debugPrint('[FIREBASE] Setting currentScreen to FoodListingsPage');
         widget.analyticsService.setCurrentScreen('FoodListingsPage');
       case 2:
-        debugPrint('[FIREBASE] Setting currentScreen to StallsListingsPage');
         widget.analyticsService.setCurrentScreen('StallsListingsPage');
       case 3:
-        debugPrint('[FIREBASE] Setting currentScreen to MusicListingsPage');
         widget.analyticsService.setCurrentScreen('MusicListingsPage');
       case 4:
-        debugPrint('[FIREBASE] Setting currentScreen to EventsListingsPage');
         widget.analyticsService.setCurrentScreen('EventsListingsPage');
       case 5:
-        debugPrint('[FIREBASE] Setting currentScreen to PlacesListingsPage');
         widget.analyticsService.setCurrentScreen('PlacesListingsPage');
       case 6:
-        debugPrint('[FIREBASE] Setting currentScreen to OtherListingsPage');
         widget.analyticsService.setCurrentScreen('OtherListingsPage');
     }
   }
@@ -442,31 +428,24 @@ class HomePageState extends State<HomePage> with RouteAware {
             switch (selectedIndex) {
               case 0:
                 if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
-                debugPrint('[FIREBASE] Setting currentScreen to MapPage');
                 widget.analyticsService.setCurrentScreen('MapPage');
               case 1:
                 _listingsKeyFood.currentState?.onTabVisible();
-                debugPrint('[FIREBASE] Setting currentScreen to FoodListingsPage');
                 widget.analyticsService.setCurrentScreen('FoodListingsPage');
               case 2:
                 _listingsKeyShopping.currentState?.onTabVisible();
-                debugPrint('[FIREBASE] Setting currentScreen to StallsListingsPage');
                 widget.analyticsService.setCurrentScreen('StallsListingsPage');
               case 3:
                 _listingsKeyMusic.currentState?.onTabVisible();
-                debugPrint('[FIREBASE] Setting currentScreen to MusicListingsPage');
                 widget.analyticsService.setCurrentScreen('MusicListingsPage');
               case 4:
                 _listingsKeyEvent.currentState?.onTabVisible();
-                debugPrint('[FIREBASE] Setting currentScreen to EventsListingsPage');
                 widget.analyticsService.setCurrentScreen('EventsListingsPage');
               case 5:
                 _listingsKeyPlace.currentState?.onTabVisible();
-                debugPrint('[FIREBASE] Setting currentScreen to PlacesListingsPage');
                 widget.analyticsService.setCurrentScreen('PlacesListingsPage');
               case 6:
                 _listingsKeyService.currentState?.onTabVisible();
-                debugPrint('[FIREBASE] Setting currentScreen to OtherListingsPage');
                 widget.analyticsService.setCurrentScreen('OtherListingsPage');
             }
             setState(() {
@@ -535,7 +514,6 @@ class HomePageState extends State<HomePage> with RouteAware {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", analyticsService: widget.analyticsService, listings: listings)));
-                    debugPrint('[FIREBASE] Setting currentScreen to SavedListingsPage');
                     widget.analyticsService.setCurrentScreen('SavedListingsPage');
                   },
                 ),

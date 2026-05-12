@@ -44,13 +44,11 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
 
   @override
   void didPush() {
-    debugPrint('[FIREBASE] Setting currentScreen to ImportantInfoPage');
     widget.analyticsService.setCurrentScreen('ImportantInfoPage');
   }
 
   @override
   void didPopNext() {
-    debugPrint('[FIREBASE] Setting currentScreen to ImportantInfoPage');
     widget.analyticsService.setCurrentScreen('ImportantInfoPage');
   }
 

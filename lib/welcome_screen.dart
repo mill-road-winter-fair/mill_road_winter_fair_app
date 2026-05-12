@@ -82,13 +82,11 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
 
   @override
   void didPush() {
-    debugPrint('[FIREBASE] Setting currentScreen to WelcomePage');
     widget.analyticsService.setCurrentScreen('WelcomePage');
   }
 
   @override
   void didPopNext() {
-    debugPrint('[FIREBASE] Setting currentScreen to WelcomePage');
     widget.analyticsService.setCurrentScreen('WelcomePage');
   }
 

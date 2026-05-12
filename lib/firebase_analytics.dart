@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 
 // A service class to handle analytics events, using Firebase Analytics in production and a fake implementation for testing
@@ -8,6 +9,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
   Future<void> setCurrentScreen(String screenName) async {
     currentScreen = screenName;
 
+    debugPrint('[FIREBASE] Setting currentScreen to $currentScreen');
     await analytics.logScreenView(
       screenName: screenName,
     );

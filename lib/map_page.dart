@@ -1101,31 +1101,24 @@ class MapPageState extends State<MapPage> {
     // If we came from a page other than the map page, go back to that page
     switch (previousIndex) {
       case 0:
-        debugPrint('[FIREBASE] Setting currentScreen to MapPage');
         widget.analyticsService.setCurrentScreen('MapPage');
       case 1:
         homePageKey.currentState?.setCurrentIndex(previousIndex);
-        debugPrint('[FIREBASE] Setting currentScreen to FoodListingsPage');
         widget.analyticsService.setCurrentScreen('FoodListingsPage');
       case 2:
         homePageKey.currentState?.setCurrentIndex(previousIndex);
-        debugPrint('[FIREBASE] Setting currentScreen to StallsListingsPage');
         widget.analyticsService.setCurrentScreen('StallsListingsPage');
       case 3:
         homePageKey.currentState?.setCurrentIndex(previousIndex);
-        debugPrint('[FIREBASE] Setting currentScreen to MusicListingsPage');
         widget.analyticsService.setCurrentScreen('MusicListingsPage');
       case 4:
         homePageKey.currentState?.setCurrentIndex(previousIndex);
-        debugPrint('[FIREBASE] Setting currentScreen to EventsListingsPage');
         widget.analyticsService.setCurrentScreen('EventsListingsPage');
       case 5:
         homePageKey.currentState?.setCurrentIndex(previousIndex);
-        debugPrint('[FIREBASE] Setting currentScreen to PlacesListingsPage');
         widget.analyticsService.setCurrentScreen('PlacesListingsPage');
       case 6:
         homePageKey.currentState?.setCurrentIndex(previousIndex);
-        debugPrint('[FIREBASE] Setting currentScreen to OtherListingsPage');
         widget.analyticsService.setCurrentScreen('OtherListingsPage');
     }
 

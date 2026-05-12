@@ -141,13 +141,11 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
 
   @override
   void didPush() {
-    debugPrint('[FIREBASE] Setting currentScreen to SettingsPage');
     widget.analyticsService.setCurrentScreen('SettingsPage');
   }
 
   @override
   void didPopNext() {
-    debugPrint('[FIREBASE] Setting currentScreen to SettingsPage');
     widget.analyticsService.setCurrentScreen('SettingsPage');
   }
 
