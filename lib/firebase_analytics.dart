@@ -17,6 +17,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logMenuButtonTapped() async {
+    debugPrint('[FIREBASE] Logging menu button tapped on screen $currentScreen');
     await analytics.logEvent(
       name: 'menu_button_tapped',
       parameters: {
@@ -27,6 +28,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logSnowflakeButtonTapped() async {
+    debugPrint('[FIREBASE] Logging snowflake button tapped on screen $currentScreen');
     await analytics.logEvent(
       name: 'menu_button_tapped',
       parameters: {
