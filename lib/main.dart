@@ -502,6 +502,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
+                    widget.analyticsService.logButtonTapped('about_the_fair');
                   },
                 ),
               ),
@@ -514,6 +515,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", analyticsService: widget.analyticsService, listings: listings)));
+                    widget.analyticsService.logButtonTapped('saved_listings');
                     widget.analyticsService.setCurrentScreen('SavedListingsPage');
                   },
                 ),
@@ -527,6 +529,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
+                    widget.analyticsService.logButtonTapped('important_information');
                   },
                 ),
               ),
@@ -538,6 +541,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                    widget.analyticsService.logButtonTapped('visit_our_website');
                   },
                 ),
               ),
@@ -554,6 +558,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                         return contactUsDialog(context);
                       },
                     );
+                    widget.analyticsService.logButtonTapped('contact_us');
                   },
                 ),
               ),
@@ -572,6 +577,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                        widget.analyticsService.logButtonTapped('facebook_social');
                       },
                       constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                       padding: EdgeInsets.zero,
@@ -581,6 +587,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://x.com/millroadfair'));
+                        widget.analyticsService.logButtonTapped('x_social');
                       },
                       constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                       padding: EdgeInsets.zero,
@@ -590,6 +597,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
+                        widget.analyticsService.logButtonTapped('instagram_social');
                       },
                       constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                       padding: EdgeInsets.zero,
@@ -599,6 +607,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
+                        widget.analyticsService.logButtonTapped('flickr_social');
                       },
                       constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                       padding: EdgeInsets.zero,
@@ -624,6 +633,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(analyticsService: widget.analyticsService)));
+                    widget.analyticsService.logButtonTapped('settings');
                   },
                 ),
               ),
@@ -636,6 +646,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => WelcomeScreen(analyticsService: widget.analyticsService)));
+                    widget.analyticsService.logButtonTapped('app_guide');
                   },
                 ),
               ),
@@ -648,6 +659,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     aboutDialog();
+                    widget.analyticsService.logButtonTapped('about_the_app');
                   },
                 ),
               ),
