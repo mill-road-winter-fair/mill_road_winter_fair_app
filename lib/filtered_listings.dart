@@ -216,6 +216,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void sortingDropdownCallback(SortingMethod? selectedValue) {
     HapticFeedback.selectionClick();
+    widget.analyticsService.logButtonTapped('sorting_dropdown_option');
     if (selectedValue is SortingMethod) {
       if (selectedValue == SortingMethod.values[1] && currentLatLng == null) {
         Fluttertoast.showToast(
@@ -420,6 +421,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     _isSearching = false;
                                     _searchQuery = '';
                                   });
+                                  widget.analyticsService.logButtonTapped('search_close');
                                 },
                               ),
                             ],
@@ -487,6 +489,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     );
                                   }
                                 }
+                                widget.analyticsService.logButtonTapped('scroll_to_now');
                               },
                               child: const Icon(Icons.update),
                             ),
@@ -513,6 +516,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     firstVisibleIndex = null;
                                   });
                                 }
+                                widget.analyticsService.logButtonTapped('hide_past_listings');
                               },
                               child: const Icon(Icons.event_busy),
                             ),
@@ -533,6 +537,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               setState(() {
                                 _isSearching = true;
                               });
+                              widget.analyticsService.logButtonTapped('search');
                             },
                             child: const Icon(Icons.search),
                           ),
