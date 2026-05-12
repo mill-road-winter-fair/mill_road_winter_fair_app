@@ -1,4 +1,4 @@
-import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 //import 'package:flutter/foundation.dart'; // need for the debugPrint()
 
 String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceUnits) {
