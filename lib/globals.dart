@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -90,3 +91,10 @@ LatLng? currentLatLng;
 // --- Miscellaneous ---
 // Cutoff date used by the listing-update notifier.
 final DateTime cutoffDate = DateTime(2025, 12, 6);
+
+// --- Firebase Analytics globals (moved from firebase_analytics.dart) ---
+// Initialize Firebase Analytics instance
+final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+// A RouteObserver to track navigation events for analytics purposes
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
