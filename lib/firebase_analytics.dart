@@ -22,12 +22,23 @@ class FirebaseAnalyticsService implements AnalyticsService {
       },
     );
   }
+
+  @override
+  Future<void> logSnowflakeButtonTapped() async {
+    await analytics.logEvent(
+      name: 'menu_button_tapped',
+      parameters: {
+        'screen': currentScreen,
+      },
+    );
+  }
 }
 
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
 abstract class AnalyticsService {
   Future<void> setCurrentScreen(String screenName);
   Future<void> logMenuButtonTapped();
+  Future<void> logSnowflakeButtonTapped();
 }
 
 // A fake implementation of AnalyticsService for testing purposes
@@ -38,6 +49,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logMenuButtonTapped() async {
+    // Do nothing
+  }
+  @override
+  Future<void> logSnowflakeButtonTapped() async {
     // Do nothing
   }
 }

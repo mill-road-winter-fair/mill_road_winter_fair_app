@@ -418,6 +418,7 @@ class HomePageState extends State<HomePage> with RouteAware {
               onPressed: () {
                 HapticFeedback.lightImpact();
                 Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
+                widget.analyticsService.logSnowflakeButtonTapped();
               },
             ),
           ],
