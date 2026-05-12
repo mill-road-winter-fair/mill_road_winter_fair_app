@@ -16,21 +16,10 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
-  Future<void> logMenuButtonTapped() async {
-    debugPrint('[FIREBASE] Logging menu button tapped on screen $currentScreen');
+  Future<void> logButtonTapped(String buttonName) async {
+    debugPrint('[FIREBASE] Logging $buttonName button tapped on screen $currentScreen');
     await analytics.logEvent(
-      name: 'menu_button_tapped',
-      parameters: {
-        'screen': currentScreen,
-      },
-    );
-  }
-
-  @override
-  Future<void> logSnowflakeButtonTapped() async {
-    debugPrint('[FIREBASE] Logging snowflake button tapped on screen $currentScreen');
-    await analytics.logEvent(
-      name: 'menu_button_tapped',
+      name: '${buttonName}_button_tapped',
       parameters: {
         'screen': currentScreen,
       },
@@ -41,8 +30,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
 abstract class AnalyticsService {
   Future<void> setCurrentScreen(String screenName);
-  Future<void> logMenuButtonTapped();
-  Future<void> logSnowflakeButtonTapped();
+  Future<void> logButtonTapped(String buttonName);
 }
 
 // A fake implementation of AnalyticsService for testing purposes
@@ -52,11 +40,7 @@ class FakeAnalyticsService implements AnalyticsService {
     // Do nothing
   }
   @override
-  Future<void> logMenuButtonTapped() async {
-    // Do nothing
-  }
-  @override
-  Future<void> logSnowflakeButtonTapped() async {
+  Future<void> logButtonTapped(String buttonName) async {
     // Do nothing
   }
 }

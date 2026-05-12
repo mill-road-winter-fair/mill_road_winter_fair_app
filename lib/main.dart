@@ -390,7 +390,7 @@ class HomePageState extends State<HomePage> with RouteAware {
               onPressed: () async {
                 HapticFeedback.lightImpact();
                 Scaffold.of(context).openDrawer();
-                widget.analyticsService.logMenuButtonTapped();
+                widget.analyticsService.logButtonTapped('menu');
               },
             ),
           ),
@@ -404,7 +404,7 @@ class HomePageState extends State<HomePage> with RouteAware {
               onPressed: () {
                 HapticFeedback.lightImpact();
                 Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
-                widget.analyticsService.logSnowflakeButtonTapped();
+                widget.analyticsService.logButtonTapped('snowflake');
               },
             ),
           ],
