@@ -280,7 +280,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               IconButton(
-                onPressed: widget.onFavouriteTapped,
+                onPressed: () {
+                  widget.onFavouriteTapped;
+                  widget.analyticsService.logButtonTapped('save_listing');
+                  },
                 padding: const EdgeInsets.all(0),
                 style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 icon:FaIcon(
@@ -296,6 +299,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   widget.onGetDirections();
+                  widget.analyticsService.logButtonTapped('directions_to_listing');
                 },
                 icon: const Icon(Icons.directions_walk),
                 label: const FittedBox(child: Text('Directions')),
@@ -309,7 +313,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
                   :
                     ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: widget.onDetailsTapped,
+                  onPressed: () {
+                    widget.onDetailsTapped;
+                    widget.analyticsService.logButtonTapped('listing_details');
+                    },
                   child: const Icon(Icons.info),
               )
               else if (widget.onDetailsTapped != null && (updatedDescription.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
@@ -333,6 +340,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     onTap: () async {
                       HapticFeedback.lightImpact();
                       launchUrl(Uri.parse(widget.website));
+                      widget.analyticsService.logButtonTapped('visit_listing_website');
                     },
                     customBorder: const CircleBorder(),
                     radius: 8,
@@ -361,6 +369,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       } else {
                         throw Exception('Could not launch email client');
                       }
+                      widget.analyticsService.logButtonTapped('email_listing');
                     },
                     customBorder: const CircleBorder(),
                     radius: 8,
@@ -389,6 +398,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       } else {
                         throw Exception('Could not launch ${widget.phoneNumber}');
                       }
+                      widget.analyticsService.logButtonTapped('phone_listing');
                     },
                     customBorder: const CircleBorder(),
                     radius: 8,
