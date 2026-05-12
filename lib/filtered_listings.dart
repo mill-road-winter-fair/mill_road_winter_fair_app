@@ -600,6 +600,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     (homePageState == null)
                                   );
                                 },
+                                analyticsService: widget.analyticsService,
                               ) : const SizedBox.shrink(),
                               // separator except after last item
                               if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
