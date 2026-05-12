@@ -1614,6 +1614,48 @@ class MapPageState extends State<MapPage> {
                           color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
+                    // Centre-on-user button (only shown when location services are enabled and permission has been granted)
+                    if (locationServicesEnabled == true && (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
+                      FloatingActionButton(
+                        heroTag: 'centreOnUserBtn',
+                        shape: const CircleBorder(),
+                        elevation: 3,
+                        mini: true,
+                        onPressed: () async {
+                          HapticFeedback.lightImpact();
+                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
+                          try {
+                            if (currentLatLng == null) {
+                              final pos = await getCurrentPosition();
+                              currentLatLng = LatLng(pos.latitude, pos.longitude);
+                            }
+                            if (currentLatLng != null) {
+                              // Move camera to the user's location with a sensible zoom and bearing
+                              double currentZoom = await _controller!.getZoomLevel();
+                              _controller?.animateCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('Centre-on-user failed: $e');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  content: Text('Unable to determine your location'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        child: Icon(
+                          Icons.my_location,
+                          size: 22,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
                       shape: const CircleBorder(),
@@ -1683,57 +1725,6 @@ class MapPageState extends State<MapPage> {
                   ],
                 ),
               ),
-              // Top-right controls: centre-on-user button (only shown when location services are enabled and permission has been granted)
-              if (locationServicesEnabled == true && (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      FloatingActionButton(
-                        heroTag: 'centreOnUserBtn',
-                        shape: const CircleBorder(),
-                        elevation: 3,
-                        mini: true,
-                        onPressed: () async {
-                          HapticFeedback.lightImpact();
-                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
-                          try {
-                            if (currentLatLng == null) {
-                              final pos = await getCurrentPosition();
-                              currentLatLng = LatLng(pos.latitude, pos.longitude);
-                            }
-                            if (currentLatLng != null) {
-                              // Move camera to the user's location with a sensible zoom and bearing
-                              double currentZoom = await _controller!.getZoomLevel();
-                              _controller?.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            debugPrint('Centre-on-user failed: $e');
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: Theme.of(context).colorScheme.primary,
-                                  content: Text('Unable to determine your location'),
-                                ),
-                              );
-                            }
-                          }
-                        },
-                        child: Icon(
-                          Icons.my_location,
-                          size: 22,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               if (_distanceToDestination != null)
                 Align(
                   alignment: Alignment.topCenter,
