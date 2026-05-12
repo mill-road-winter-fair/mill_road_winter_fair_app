@@ -1591,6 +1591,7 @@ class MapPageState extends State<MapPage> {
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           cancelNavigation();
+                          widget.analyticsService.logButtonTapped('cancel_navigation');
                         },
                         child: Icon(
                           Icons.cancel,
@@ -1632,6 +1633,7 @@ class MapPageState extends State<MapPage> {
                             });
                           }
                           _setMapCameraToFitMapMarkers();
+                          widget.analyticsService.logButtonTapped('home');
                         },
                         child: Icon(
                           Icons.home,
@@ -1659,6 +1661,7 @@ class MapPageState extends State<MapPage> {
                             _saveSettings();
                           }
                         });
+                        widget.analyticsService.logButtonTapped('map_type_toggle');
                       },
                       child: Icon(
                         _layersIcon,
@@ -1684,6 +1687,7 @@ class MapPageState extends State<MapPage> {
                               _saveSettings();
                             });
                             _setMapCameraToFitMapMarkers();
+                            widget.analyticsService.logButtonTapped('map_orientation_toggle');
                           },
                           child: const Icon(Icons.assistant_navigation),
                         ),
@@ -1700,6 +1704,7 @@ class MapPageState extends State<MapPage> {
                               onPressed: () {
                                 showFilterMenu();
                                 setMarkerLists();
+                                widget.analyticsService.logButtonTapped('map_filter');
                               },
                               child: const Icon(Icons.filter_alt),
                             ),
@@ -1724,6 +1729,7 @@ class MapPageState extends State<MapPage> {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
+                        widget.analyticsService.logButtonTapped('distance_to_destination');
                       },
                       icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
                       label: Text(
