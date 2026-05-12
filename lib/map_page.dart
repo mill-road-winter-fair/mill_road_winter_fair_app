@@ -1504,7 +1504,10 @@ class MapPageState extends State<MapPage> {
                 isRefreshing
                     ? const CircularProgressIndicator()
                     : ElevatedButton.icon(
-                        onPressed: refreshListings,
+                        onPressed: () {
+                          refreshListings;
+                          widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                        },
                         icon: const Icon(Icons.refresh),
                         label: const Text('Refresh listings'),
                       ),
