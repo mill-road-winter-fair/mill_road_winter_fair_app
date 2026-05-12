@@ -626,6 +626,7 @@ class MapPageState extends State<MapPage> {
             );
           },
         );
+        widget.analyticsService.logButtonTapped('group_map_marker');
       },
     );
 
@@ -734,6 +735,7 @@ class MapPageState extends State<MapPage> {
               );
             },
           );
+          widget.analyticsService.logButtonTapped('specific_map_marker');
         });
     setState(() {
       markers[markerId] = newMarker;
@@ -1749,6 +1751,7 @@ class MapPageState extends State<MapPage> {
                               return roadClosuresDialog();
                             },
                           );
+                          widget.analyticsService.logButtonTapped('road_closures_legend');
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
