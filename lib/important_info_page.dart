@@ -162,7 +162,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                                       showDialog(
                                         context: context,
                                         builder: (BuildContext context) {
-                                          return contactUsDialog(context);
+                                          return contactUsDialog(context, widget.analyticsService);
                                         },
                                       );
                                       widget.analyticsService.logButtonTapped('mrwf_email_hyperlink');

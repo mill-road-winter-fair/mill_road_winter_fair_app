@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-Widget contactUsDialog(BuildContext theBuildContext) {
+Widget contactUsDialog(BuildContext theBuildContext, AnalyticsService analyticsService) {
   final ScrollController emailDetailsDialogScrollController = ScrollController();
 
   return Dialog(
@@ -110,22 +110,22 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('info@millroadwinterfair.org'),
+                      _buildEmailLink('info@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('volunteers@millroadwinterfair.org'),
+                      _buildEmailLink('volunteers@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('events@millroadwinterfair.org'),
+                      _buildEmailLink('events@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('stalls@millroadwinterfair.org'),
+                      _buildEmailLink('stalls@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('it@millroadwinterfair.org'),
+                      _buildEmailLink('it@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('app@millroadwinterfair.org'),
+                      _buildEmailLink('app@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       Text.rich(
                         TextSpan(
@@ -155,6 +155,7 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                           onPressed: () {
                             HapticFeedback.lightImpact();
                             Navigator.pop(context);
+                            analyticsService.logButtonTapped('contactUs_close');
                           },
                           child: Text(
                             'Close',
@@ -174,7 +175,7 @@ Widget contactUsDialog(BuildContext theBuildContext) {
   );
 }
 
-Widget _buildEmailLink(String email) {
+Widget _buildEmailLink(String email, AnalyticsService analyticsService) {
   return InkWell(
     onTap: () async {
       HapticFeedback.lightImpact();
@@ -184,6 +185,7 @@ Widget _buildEmailLink(String email) {
       } else {
         throw Exception('Could not launch email client');
       }
+      analyticsService.logButtonTapped('${email}_contactUs_hyperlink');
     },
     child: Text(
       email,
@@ -562,7 +564,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return contactUsDialog(context);
+                        return contactUsDialog(context, widget.analyticsService);
                       },
                     );
                     widget.analyticsService.logButtonTapped('contact_us');

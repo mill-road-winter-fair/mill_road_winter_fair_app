@@ -231,7 +231,7 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
 
       // show the dialog
-      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context));
+      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context, FakeAnalyticsService()));
       await tester.pumpAndSettle();
 
       // Check for some known email addresses
