@@ -428,24 +428,31 @@ class HomePageState extends State<HomePage> with RouteAware {
             switch (selectedIndex) {
               case 0:
                 if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
+                widget.analyticsService.logButtonTapped('map_navbar');
                 widget.analyticsService.setCurrentScreen('MapPage');
               case 1:
                 _listingsKeyFood.currentState?.onTabVisible();
+                widget.analyticsService.logButtonTapped('food_navbar');
                 widget.analyticsService.setCurrentScreen('FoodListingsPage');
               case 2:
                 _listingsKeyShopping.currentState?.onTabVisible();
+                widget.analyticsService.logButtonTapped('stalls_navbar');
                 widget.analyticsService.setCurrentScreen('StallsListingsPage');
               case 3:
                 _listingsKeyMusic.currentState?.onTabVisible();
+                widget.analyticsService.logButtonTapped('music_navbar');
                 widget.analyticsService.setCurrentScreen('MusicListingsPage');
               case 4:
                 _listingsKeyEvent.currentState?.onTabVisible();
+                widget.analyticsService.logButtonTapped('events_navbar');
                 widget.analyticsService.setCurrentScreen('EventsListingsPage');
               case 5:
                 _listingsKeyPlace.currentState?.onTabVisible();
+                widget.analyticsService.logButtonTapped('places_navbar');
                 widget.analyticsService.setCurrentScreen('PlacesListingsPage');
               case 6:
                 _listingsKeyService.currentState?.onTabVisible();
+                widget.analyticsService.logButtonTapped('other_navbar');
                 widget.analyticsService.setCurrentScreen('OtherListingsPage');
             }
             setState(() {
