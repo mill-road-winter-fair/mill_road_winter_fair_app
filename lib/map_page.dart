@@ -14,30 +14,16 @@ import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Define a GlobalKey for MapPageState:
-final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
-
-// Define whether navigation is in progress as a global variable
-bool navigationInProgress = false;
-
-// Indicator for a simple map marker
-const String aSimpleMarkerId = 'SIMPLE';
-
-// API key, contents will depend upon platform
-String googleMapsDirectionsApiKey = "";
-
-// Identifier and function for determining if the event has been marked as cancelled
-const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
+// Function for determining if the event has been marked as cancelled
 bool hasEventBeenCancelled(String? description) {
   return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
 }
@@ -498,8 +484,11 @@ class MapPageState extends State<MapPage> {
           return type.startsWith("Group-") ? type.substring(6) : type;
         }
 
-        // Filter listings where both normalised primaryType and secondaryType match
+        // Filter listings where both normalised primaryType and secondaryType match,
+        // but exclude any listing whose primaryType starts with `Group-`.
         List<Map<String, dynamic>> relatedListings = listings.where((l) {
+          if ((l['primaryType'] ?? '').toString().startsWith('Group-')) return false;
+
           final listingPrimary = normalisePrimaryType(l['primaryType'] ?? '');
           final targetPrimary = normalisePrimaryType(listing['primaryType'] ?? '');
           final listingSecondary = l['secondaryType'] ?? '';
@@ -508,17 +497,10 @@ class MapPageState extends State<MapPage> {
           return listingPrimary == targetPrimary && listingSecondary == targetSecondary;
         }).toList();
 
-        // Sort listings: Group first → startTime → displayName
+        // Sort listings: startTime → displayName
         relatedListings.sort((a, b) {
-          if (a['primaryType'].startsWith("Group") && !b['primaryType'].startsWith("Group")) {
-            return -1;
-          } else if (b['primaryType'].startsWith("Group") && !a['primaryType'].startsWith("Group")) {
-            return 1;
-          }
-
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           if (timeCompare != 0) return timeCompare;
-
           return a['name'].compareTo(b['name']);
         });
 
@@ -559,70 +541,79 @@ class MapPageState extends State<MapPage> {
                   bottom: Platform.isAndroid && isNavBarVisible(context),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
+                      // Calculate distance if current location is known
+                      var distanceMessage = 'Distance unknown';
+                      if (currentLatLng != null) {
+                        int approximateDistanceMetres = asTheCrowFlies(
+                          currentLatLng!,
+                          stringToLatLng(listing['latLng']),
+                        );
+                        distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                      }
+
                       return ConstrainedBox(
                         constraints: BoxConstraints(
                           maxHeight: constraints.maxHeight * 0.90,
                         ),
-                        child: Scrollbar(
-                          controller: groupSheetModalScrollController,
-                          thumbVisibility: Platform.isIOS ? false : true,
-                          thickness: 4,
-                          radius: const Radius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
-                            child: ListView.builder(
-                              itemCount: relatedListings.length,
-                              shrinkWrap: true,
-                              controller: groupSheetModalScrollController,
-                              itemBuilder: (context, index) {
-                                final rel = relatedListings[index];
-
-                                // Calculate distance if current location is known
-                                var distanceMessage = 'Distance unknown';
-                                if (currentLatLng != null) {
-                                  int approximateDistanceMetres = asTheCrowFlies(
-                                    currentLatLng!,
-                                    stringToLatLng(rel['latLng']),
-                                  );
-                                  distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                                }
-
-                                if (rel['primaryType'].startsWith("Group")) {
-                                  return GroupListingInfoSheet(
-                                    title: rel['displayName'],
-                                    categories: "${rel['tertiaryType']}",
-                                    startTime: "${listing['startTime']}",
-                                    endTime: "${listing['endTime']}",
-                                    approxDistance: distanceMessage,
-                                  );
-                                } else {
-                                  return Column(
-                                    children: [
-                                      SpecificListingInfoSheet(
-                                        title: rel['displayName'],
-                                        location: '',
-                                        subtitle: rel['tertiaryType'],
-                                        startTime: rel['startTime'],
-                                        endTime: rel['endTime'],
-                                        approxDistance: '',
-                                        phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                        website: (rel['website'] != null) ? rel['website'] : '',
-                                        email: (rel['email'] != null) ? rel['email'] : '',
-                                        description: (rel['description'] != null) ? rel['description'] : '',
-                                        detailsVisible: detailsVisibilityList[index],
-                                        onDetailsTapped: () => toggleDetailsRow(index),
-                                        listingFavourited: isListingFavourited(rel['id']),
-                                        onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                        onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                      ),
-                                      if (index != relatedListings.length - 1)
-                                        SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                                    ],
-                                  );
-                                }
-                              },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                              child: GroupListingInfoSheet(
+                                title: listing['displayName'],
+                                categories: "${listing['tertiaryType']}",
+                                startTime: "${listing['startTime']}",
+                                endTime: "${listing['endTime']}",
+                                approxDistance: distanceMessage,
+                              ),
                             ),
-                          ),
+                            Flexible(
+                              fit: FlexFit.loose,
+                              child: Scrollbar(
+                                controller: groupSheetModalScrollController,
+                                thumbVisibility: Platform.isIOS ? false : true,
+                                thickness: 4,
+                                radius: const Radius.circular(8),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                                  child: ListView.builder(
+                                    itemCount: relatedListings.length,
+                                    shrinkWrap: true,
+                                    controller: groupSheetModalScrollController,
+                                    itemBuilder: (context, index) {
+                                      final rel = relatedListings[index];
+
+                                      return Column(
+                                        children: [
+                                          SpecificListingInfoSheet(
+                                            title: rel['displayName'],
+                                            location: '',
+                                            subtitle: rel['tertiaryType'],
+                                            startTime: rel['startTime'],
+                                            endTime: rel['endTime'],
+                                            approxDistance: '',
+                                            phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
+                                            website: (rel['website'] != null) ? rel['website'] : '',
+                                            email: (rel['email'] != null) ? rel['email'] : '',
+                                            description: (rel['description'] != null) ? rel['description'] : '',
+                                            detailsVisible: detailsVisibilityList[index],
+                                            onDetailsTapped: () => toggleDetailsRow(index),
+                                            listingFavourited: isListingFavourited(rel['id']),
+                                            onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                            onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                          ),
+                                          if (index != relatedListings.length - 1)
+                                            SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -687,59 +678,55 @@ class MapPageState extends State<MapPage> {
                 left: false,
                 right: false,
                 bottom: Platform.isAndroid && isNavBarVisible(context),
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    final specificSheetModalScrollController = ScrollController();
-                    return StatefulBuilder(
-                      builder: (BuildContext context, StateSetter setModalState) {
-                        void favouriteOrNotListing(String listingID) {
-                          setModalState(() {
-                            if (favouriteListingKeys.contains(listingID)) {
-                              favouriteListingKeys.remove(listingID);
-                            } else {
-                              favouriteListingKeys.add(listingID);
-                            }
-                            _saveSettings();
-                          });
+                child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                  final specificSheetModalScrollController = ScrollController();
+                  return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
+                    void favouriteOrNotListing(String listingID) {
+                      setModalState(() {
+                        if (favouriteListingKeys.contains(listingID)) {
+                          favouriteListingKeys.remove(listingID);
+                        } else {
+                          favouriteListingKeys.add(listingID);
                         }
+                        _saveSettings();
+                      });
+                    }
 
-                        return ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxHeight: constraints.maxHeight * 0.90,
-                          ),
-                          child: Scrollbar(
-                            controller: specificSheetModalScrollController,
-                            thumbVisibility: Platform.isIOS ? false : true,
-                            thickness: 4,
-                            radius: const Radius.circular(8),
-                            child: SingleChildScrollView(
-                              controller: specificSheetModalScrollController,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                                child: SpecificListingInfoSheet(
-                                  title: listing['displayName'],
-                                  location: listing['secondaryType'],
-                                  subtitle: listing['tertiaryType'],
-                                  startTime: "${listing['startTime']}",
-                                  endTime: "${listing['endTime']}",
-                                  approxDistance: distanceMessage,
-                                  phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                                  website: (listing['website'] != null) ? listing['website'] : '',
-                                  email: (listing['email'] != null) ? listing['email'] : '',
-                                  description: (listing['description'] != null) ? listing['description'] : '',
-                                  detailsVisible: true,
-                                  listingFavourited: isListingFavourited(listing['id']),
-                                  onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                  onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
-                                ),
-                              ),
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: constraints.maxHeight * 0.90,
+                      ),
+                      child: Scrollbar(
+                        controller: specificSheetModalScrollController,
+                        thumbVisibility: Platform.isIOS ? false : true,
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: SingleChildScrollView(
+                          controller: specificSheetModalScrollController,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                            child: SpecificListingInfoSheet(
+                              title: listing['displayName'],
+                              location: listing['secondaryType'],
+                              subtitle: listing['tertiaryType'],
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: distanceMessage,
+                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
+                              website: (listing['website'] != null) ? listing['website'] : '',
+                              email: (listing['email'] != null) ? listing['email'] : '',
+                              description: (listing['description'] != null) ? listing['description'] : '',
+                              detailsVisible: true,
+                              listingFavourited: isListingFavourited(listing['id']),
+                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     );
-                  },
-                ),
+                  });
+                }),
               );
             },
           );

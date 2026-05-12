@@ -13,18 +13,12 @@ import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-
-// Define a GlobalKey for HomePageState to allow access from other parts of the app:
-final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
-
-// Define a global variable for routing back to a previous index
-int previousIndex = 0;
-String appBarTitle = 'Mill Road Winter Fair 2025';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -47,9 +41,6 @@ Future<void> main() async {
   debugPrint('Setting preferred orientation and running app');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
 }
-
-// Define global variable as to whether we are onTest or not
-bool onTest = false;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
