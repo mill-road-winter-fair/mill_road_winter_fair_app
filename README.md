@@ -8,6 +8,7 @@ Currently the aim is for the app to provides listings of the various stalls, mus
 
 ### Status
 * ![build](https://github.com/mill-road-winter-fair/mill_road_winter_fair_app/actions/workflows/dart.yml/badge.svg)
+* ![coverage](https://github.com/mill-road-winter-fair/mill_road_winter_fair_app/blob/main/coverage_badge.svg)
 
 ### Developers
 * Alexander Berridge (Android)
