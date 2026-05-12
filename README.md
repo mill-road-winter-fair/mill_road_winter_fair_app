@@ -1,6 +1,9 @@
 # Mill Road Winter Fair App (2024)
 An Android & iOS app for use by attendees of the 2024 Mill Road Winter Fair in Cambridge.
 
+## License
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
 ## Purpose
 The app itself is a Flutter project which connects to a Google Sheet via an API. The API is a simple caching system which calls the Google Sheets API and caches the response, this API is managed in another repository. You can find the relevant links at the bottom of this document.
 
