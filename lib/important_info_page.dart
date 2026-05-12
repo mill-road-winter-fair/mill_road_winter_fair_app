@@ -129,6 +129,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                             ..onTap = () {
                               HapticFeedback.lightImpact();
                               launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                              widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
                             }),
                       const TextSpan(text: '.'),
                     ],
@@ -164,6 +165,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                                           return contactUsDialog(context);
                                         },
                                       );
+                                      widget.analyticsService.logButtonTapped('mrwf_email_hyperlink');
                                     }),
                               const TextSpan(text: '.'),
                             ],
@@ -196,6 +198,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                                       } else {
                                         throw Exception('Could not dial 07303 142689');
                                       }
+                                      widget.analyticsService.logButtonTapped('mrwf_phone_hyperlink');
                                     }),
                               const TextSpan(text: '.'),
                             ],
