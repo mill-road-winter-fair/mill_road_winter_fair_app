@@ -202,10 +202,12 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           onChanged: (DistanceUnits? value) {
                             setState(() {
                               HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
+                              widget.analyticsService.logDistanceUnitPreferenceSet(value.toString().split('.').last);
                               preferredDistanceUnits = value!;
                             });
                             _saveSettings();
-                            widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
+
                           },
                           child: Column(
                             children: [

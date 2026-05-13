@@ -69,6 +69,17 @@ class FirebaseAnalyticsService implements AnalyticsService {
       },
     );
   }
+
+  @override
+  Future<void> logDistanceUnitPreferenceSet(String distanceUnit) async {
+    debugPrint('[FIREBASE] Logging preferredDistanceUnits set to $distanceUnit');
+    await analytics.logEvent(
+      name: 'preferredDistanceUnits_set',
+      parameters: {
+        'visible': distanceUnit,
+      },
+    );
+  }
 }
 
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
@@ -79,6 +90,7 @@ abstract class AnalyticsService {
   Future<void> logMapOrientationPreferenceSet(String mapOrientation);
   Future<void> logMapMarkerFilterPreferenceSet(String mapMarkerCategory, bool visible);
   Future<void> logRoadClosurePolygonPreferenceSet(bool visible);
+  Future<void> logDistanceUnitPreferenceSet(String distanceUnit);
 }
 
 // A fake implementation of AnalyticsService for testing purposes
@@ -105,6 +117,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logRoadClosurePolygonPreferenceSet(bool visible) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logDistanceUnitPreferenceSet(String distanceUnit) async {
     // Do nothing
   }
 }
