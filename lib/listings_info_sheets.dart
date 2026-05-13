@@ -304,8 +304,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  widget.onGetDirections();
                   widget.analyticsService.logButtonTapped('directions_to_listing');
+                  widget.onGetDirections();
+                  widget.analyticsService.logDirectionsToListingRequested(widget.title);
                 },
                 icon: const Icon(Icons.directions_walk),
                 label: const FittedBox(child: Text('Directions')),
