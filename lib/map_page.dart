@@ -849,6 +849,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _foodMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('food', value);
                     },
                   ),
                   CheckboxListTile(
@@ -864,6 +865,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _stallsMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('stalls', value);
                     },
                   ),
                   CheckboxListTile(
@@ -879,6 +881,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _musicMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('music', value);
                     },
                   ),
                   CheckboxListTile(
@@ -894,6 +897,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _eventMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('event', value);
                     },
                   ),
                   CheckboxListTile(
@@ -909,6 +913,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _placeMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('places', value);
                     },
                   ),
                   CheckboxListTile(
@@ -924,6 +929,7 @@ class MapPageState extends State<MapPage> {
                       });
                       final idList = _serviceMarkerIds;
                       updateMarkerVisibility(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('other', value);
                     },
                   ),
                   Divider(color: Colors.grey[350]),
@@ -958,6 +964,7 @@ class MapPageState extends State<MapPage> {
                                     });
                                   });
                                   showAllMarkers();
+                                  widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
                                   updateRoadClosurePolygonVisibility(true);
                                 },
                                 icon: const Icon(Icons.filter_alt),
@@ -974,6 +981,7 @@ class MapPageState extends State<MapPage> {
                                     });
                                   });
                                   hideAllMarkers();
+                                  widget.analyticsService.logMapMarkerFilterPreferenceSet('all', false);
                                   updateRoadClosurePolygonVisibility(false);
                                 },
                                 icon: const Icon(Icons.filter_alt_off),

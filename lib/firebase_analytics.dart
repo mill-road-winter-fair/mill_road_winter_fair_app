@@ -47,6 +47,17 @@ class FirebaseAnalyticsService implements AnalyticsService {
       },
     );
   }
+
+  @override
+  Future<void> logMapMarkerFilterPreferenceSet(String mapMarkerCategory, bool visible) async {
+    debugPrint('[FIREBASE] Logging map marker filter preference: $mapMarkerCategory set to $visible');
+    await analytics.logEvent(
+      name: 'map_marker_filter_preference_set',
+      parameters: {
+        '${mapMarkerCategory}_map_markers_visible': visible,
+      },
+    );
+  }
 }
 
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
@@ -55,6 +66,7 @@ abstract class AnalyticsService {
   Future<void> logButtonTapped(String buttonName);
   Future<void> logMapTypePreferenceSet(String mapType);
   Future<void> logMapOrientationPreferenceSet(String mapOrientation);
+  Future<void> logMapMarkerFilterPreferenceSet(String mapMarkerCategory, bool visible);
 }
 
 // A fake implementation of AnalyticsService for testing purposes
@@ -73,6 +85,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logMapOrientationPreferenceSet(String mapOrientation) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logMapMarkerFilterPreferenceSet(String mapMarkerCategory, bool visible) async {
     // Do nothing
   }
 }
