@@ -39,7 +39,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       expect(find.text('Mill Road Winter Fair 2025'), findsOneWidget);
 
@@ -69,7 +69,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -103,7 +103,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -131,7 +131,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -159,7 +159,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -187,7 +187,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.text('Food'));
       await tester.pumpAndSettle();

@@ -52,16 +52,19 @@ Future<void> main() async {
   debugPrint('Location services enabled: $locationServicesEnabled, permission: $locationPermission');
 
   // Lock app in portrait rotation and run main app
-  // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((value) => runApp(firstExecution ? WelcomeScreen(analyticsService: analyticsService) : MyApp(analyticsService: analyticsService)));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  // Run the app
+  runApp(MyApp(firstExecution: firstExecution, analyticsService: analyticsService));
 }
 
 class MyApp extends StatelessWidget {
+  final bool firstExecution;
   final AnalyticsService analyticsService;
   const MyApp({
     super.key,
+    required this.firstExecution,
     required this.analyticsService,
   });
 
@@ -75,7 +78,9 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
-          home: HomePage(key: homePageKey, analyticsService: analyticsService),
+          home: firstExecution
+            ? WelcomeScreen(analyticsService: analyticsService)
+            : HomePage(key: homePageKey, analyticsService: analyticsService),
           navigatorObservers: [routeObserver],
         );
       },

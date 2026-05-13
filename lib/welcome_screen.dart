@@ -53,7 +53,11 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   void _onIntroEnd(BuildContext context) {
     _saveSettings();
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => MyApp(analyticsService: widget.analyticsService)),
+      MaterialPageRoute(
+        builder: (_) => HomePage(
+          analyticsService: widget.analyticsService,
+        ),
+      ),
     );
   }
 

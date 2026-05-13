@@ -345,7 +345,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
