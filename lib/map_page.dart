@@ -482,6 +482,8 @@ class MapPageState extends State<MapPage> {
       visible: true,
       onTap: () {
         HapticFeedback.lightImpact();
+        widget.analyticsService.logButtonTapped('group_map_marker');
+        widget.analyticsService.logMapMarkerTapped(listing['displayName']+' (Group)');
         // Update the current location, do not await as this causes issues with using the context across async gaps
         establishLocation();
 
@@ -630,7 +632,6 @@ class MapPageState extends State<MapPage> {
             );
           },
         );
-        widget.analyticsService.logButtonTapped('group_map_marker');
       },
     );
 
@@ -659,6 +660,8 @@ class MapPageState extends State<MapPage> {
         visible: true,
         onTap: () {
           HapticFeedback.lightImpact();
+          widget.analyticsService.logButtonTapped('specific_map_marker');
+          widget.analyticsService.logMapMarkerTapped(listing['displayName']);
           // Update the current location, do not await as this causes issues with using the context across async gaps
           establishLocation();
 
@@ -739,7 +742,6 @@ class MapPageState extends State<MapPage> {
               );
             },
           );
-          widget.analyticsService.logButtonTapped('specific_map_marker');
         });
     setState(() {
       markers[markerId] = newMarker;

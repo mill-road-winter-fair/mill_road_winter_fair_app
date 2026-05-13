@@ -27,6 +27,17 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
+  Future<void> logMapMarkerTapped(String listingName) async {
+    debugPrint('[FIREBASE] Logging map marker tapped for listing: $listingName');
+    await analytics.logEvent(
+      name: 'map_marker_tapped',
+      parameters: {
+        'listingName': listingName,
+      },
+    );
+  }
+
+  @override
   Future<void> logMapTypePreferenceSet(String mapType) async {
     debugPrint('[FIREBASE] Logging mapType preference set to $mapType');
     await analytics.logEvent(
@@ -129,6 +140,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
 abstract class AnalyticsService {
   Future<void> setCurrentScreen(String screenName);
+  Future<void> logMapMarkerTapped(String listingName);
   Future<void> logButtonTapped(String buttonName);
   Future<void> logMapTypePreferenceSet(String mapType);
   Future<void> logMapOrientationPreferenceSet(String mapOrientation);
@@ -145,6 +157,10 @@ abstract class AnalyticsService {
 class FakeAnalyticsService implements AnalyticsService {
   @override
   Future<void> setCurrentScreen(String screenName) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logMapMarkerTapped(String listingName) async {
     // Do nothing
   }
   @override
