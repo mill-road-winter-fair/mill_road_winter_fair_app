@@ -843,6 +843,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Food"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('food_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Food"] = value!;
                       });
@@ -857,6 +858,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Stalls"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('stalls_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Stalls"] = value!;
                       });
@@ -871,6 +873,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Music"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('music_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Music"] = value!;
                       });
@@ -885,6 +888,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Events"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('events_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Events"] = value!;
                       });
@@ -899,6 +903,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Places"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('places_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Places"] = value!;
                       });
@@ -913,6 +918,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Other"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('other_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Other"] = value!;
                       });
@@ -928,6 +934,7 @@ class MapPageState extends State<MapPage> {
                     value: preferredRoadClosurePolygonVisible,
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('roadClosure_filter_toggle');
                       setState(() {
                         preferredRoadClosurePolygonVisible = value!;
                       });
@@ -944,6 +951,7 @@ class MapPageState extends State<MapPage> {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('showAll_filter');
                                   setState(() {
                                     filterSettings.forEach((key, _) {
                                       filterSettings[key] = true;
@@ -959,6 +967,7 @@ class MapPageState extends State<MapPage> {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('hideAll_filter');
                                   setState(() {
                                     filterSettings.forEach((key, _) {
                                       filterSettings[key] = false;
@@ -974,6 +983,7 @@ class MapPageState extends State<MapPage> {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('filter_done');
                                   Navigator.pop(context);
                                 },
                                 icon: const Icon(Icons.check_circle),
