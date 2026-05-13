@@ -205,6 +205,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                               preferredDistanceUnits = value!;
                             });
                             _saveSettings();
+                            widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
                           },
                           child: Column(
                             children: [
@@ -283,6 +284,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                             mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
+                            widget.analyticsService.logButtonTapped('theme_preference_option');
                           },
                           child: Column(
                             children: [
