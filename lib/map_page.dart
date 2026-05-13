@@ -1651,20 +1651,22 @@ class MapPageState extends State<MapPage> {
                       mini: true,
                       onPressed: () {
                         HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('map_type_toggle');
                         setState(() {
                           if (mapType == MapType.normal) {
                             mapType = MapType.hybrid;
                             _layersIcon = Icons.map;
                             preferredMapStyleType = MapStyleType.hybrid;
                             _saveSettings();
+                            widget.analyticsService.logMapTypePreferenceSet('hybrid');
                           } else {
                             mapType = MapType.normal;
                             _layersIcon = Icons.satellite_alt;
                             preferredMapStyleType = MapStyleType.normal;
                             _saveSettings();
+                            widget.analyticsService.logMapTypePreferenceSet('normal');
                           }
                         });
-                        widget.analyticsService.logButtonTapped('map_type_toggle');
                       },
                       child: Icon(
                         _layersIcon,

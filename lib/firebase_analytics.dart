@@ -25,12 +25,24 @@ class FirebaseAnalyticsService implements AnalyticsService {
       },
     );
   }
+
+  @override
+  Future<void> logMapTypePreferenceSet(String mapType) async {
+    debugPrint('[FIREBASE] Logging mapType preference set to $mapType');
+    await analytics.logEvent(
+      name: 'mapType_preference_set',
+      parameters: {
+        'mapType': mapType,
+      },
+    );
+  }
 }
 
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
 abstract class AnalyticsService {
   Future<void> setCurrentScreen(String screenName);
   Future<void> logButtonTapped(String buttonName);
+  Future<void> logMapTypePreferenceSet(String mapType);
 }
 
 // A fake implementation of AnalyticsService for testing purposes
@@ -41,6 +53,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logButtonTapped(String buttonName) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logMapTypePreferenceSet(String mapType) async {
     // Do nothing
   }
 }
