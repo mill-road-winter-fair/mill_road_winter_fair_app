@@ -80,6 +80,17 @@ class FirebaseAnalyticsService implements AnalyticsService {
       },
     );
   }
+
+  @override
+  Future<void> logThemePreferenceSet(String theme) async {
+    debugPrint('[FIREBASE] Logging theme preference set to $theme');
+    await analytics.logEvent(
+      name: 'theme_preference_set',
+      parameters: {
+        'theme': theme,
+      },
+    );
+  }
 }
 
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
@@ -91,6 +102,7 @@ abstract class AnalyticsService {
   Future<void> logMapMarkerFilterPreferenceSet(String mapMarkerCategory, bool visible);
   Future<void> logRoadClosurePolygonPreferenceSet(bool visible);
   Future<void> logDistanceUnitPreferenceSet(String distanceUnit);
+  Future<void> logThemePreferenceSet(String theme);
 }
 
 // A fake implementation of AnalyticsService for testing purposes
@@ -121,6 +133,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logDistanceUnitPreferenceSet(String distanceUnit) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logThemePreferenceSet(String theme) async {
     // Do nothing
   }
 }

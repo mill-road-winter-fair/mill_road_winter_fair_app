@@ -263,6 +263,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           groupValue: themeNotifier.value,
                           onChanged: (value) {
                             HapticFeedback.selectionClick();
+                            widget.analyticsService.logButtonTapped('theme_preference_option');
                             selectedThemeKey = value!;
                             setState(() {
                               _changeTheme(value);
@@ -286,7 +287,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                             mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
-                            widget.analyticsService.logButtonTapped('theme_preference_option');
+                            widget.analyticsService.logThemePreferenceSet(value);
                           },
                           child: Column(
                             children: [
