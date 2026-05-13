@@ -58,6 +58,17 @@ class FirebaseAnalyticsService implements AnalyticsService {
       },
     );
   }
+
+  @override
+  Future<void> logRoadClosurePolygonPreferenceSet(bool visible) async {
+    debugPrint('[FIREBASE] Logging road closure polygon preference set to $visible');
+    await analytics.logEvent(
+      name: 'road_closure_polygon_preference_set',
+      parameters: {
+        'visible': visible,
+      },
+    );
+  }
 }
 
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
@@ -67,6 +78,7 @@ abstract class AnalyticsService {
   Future<void> logMapTypePreferenceSet(String mapType);
   Future<void> logMapOrientationPreferenceSet(String mapOrientation);
   Future<void> logMapMarkerFilterPreferenceSet(String mapMarkerCategory, bool visible);
+  Future<void> logRoadClosurePolygonPreferenceSet(bool visible);
 }
 
 // A fake implementation of AnalyticsService for testing purposes
@@ -89,6 +101,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logMapMarkerFilterPreferenceSet(String mapMarkerCategory, bool visible) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logRoadClosurePolygonPreferenceSet(bool visible) async {
     // Do nothing
   }
 }

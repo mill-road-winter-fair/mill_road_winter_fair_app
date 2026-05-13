@@ -309,6 +309,7 @@ class MapPageState extends State<MapPage> {
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
                                       launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                                      widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
                                     }),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
@@ -323,6 +324,8 @@ class MapPageState extends State<MapPage> {
                               TextButton(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('hide_road_closures');
+                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(false);
                                   updateRoadClosurePolygonVisibility(false);
                                   Navigator.pop(context);
                                 },
@@ -945,6 +948,7 @@ class MapPageState extends State<MapPage> {
                         preferredRoadClosurePolygonVisible = value!;
                       });
                       updateRoadClosurePolygonVisibility(value!);
+                      widget.analyticsService.logRoadClosurePolygonPreferenceSet(value);
                     },
                   ),
                   Row(
