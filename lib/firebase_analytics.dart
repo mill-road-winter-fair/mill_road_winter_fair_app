@@ -36,6 +36,17 @@ class FirebaseAnalyticsService implements AnalyticsService {
       },
     );
   }
+
+  @override
+  Future<void> logMapOrientationPreferenceSet(String mapOrientation) async {
+    debugPrint('[FIREBASE] Logging mapOrientation preference set to $mapOrientation');
+    await analytics.logEvent(
+      name: 'mapOrientation_preference_set',
+      parameters: {
+        'mapOrientation': mapOrientation,
+      },
+    );
+  }
 }
 
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
@@ -43,6 +54,7 @@ abstract class AnalyticsService {
   Future<void> setCurrentScreen(String screenName);
   Future<void> logButtonTapped(String buttonName);
   Future<void> logMapTypePreferenceSet(String mapType);
+  Future<void> logMapOrientationPreferenceSet(String mapOrientation);
 }
 
 // A fake implementation of AnalyticsService for testing purposes
@@ -57,6 +69,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logMapTypePreferenceSet(String mapType) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logMapOrientationPreferenceSet(String mapOrientation) async {
     // Do nothing
   }
 }

@@ -1686,13 +1686,19 @@ class MapPageState extends State<MapPage> {
                           mini: true,
                           onPressed: () {
                             HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('map_orientation_toggle');
                             setState(() {
-                              preferredMapOrientation =
-                                  (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
-                              _saveSettings();
+                              if (preferredMapOrientation == MapOrientation.adaptive) {
+                                preferredMapOrientation = MapOrientation.alwaysNorth;
+                                _saveSettings();
+                                widget.analyticsService.logMapOrientationPreferenceSet('alwaysNorth');
+                              } else {
+                                preferredMapOrientation = MapOrientation.adaptive;
+                                _saveSettings();
+                                widget.analyticsService.logMapOrientationPreferenceSet('adaptive');
+                              }
                             });
                             _setMapCameraToFitMapMarkers();
-                            widget.analyticsService.logButtonTapped('map_orientation_toggle');
                           },
                           child: const Icon(Icons.assistant_navigation),
                         ),
