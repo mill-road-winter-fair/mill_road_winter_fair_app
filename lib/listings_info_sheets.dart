@@ -281,9 +281,15 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             children: [
               IconButton(
                 onPressed: () {
-                  widget.onFavouriteTapped;
+                  HapticFeedback.lightImpact();
                   widget.analyticsService.logButtonTapped('save_listing');
-                  },
+                  widget.onFavouriteTapped?.call();
+                  if (!widget.listingFavourited) {
+                    widget.analyticsService.logListingSaved(widget.title);
+                  } else {
+                    widget.analyticsService.logListingUnsaved(widget.title);
+                  }
+                },
                 padding: const EdgeInsets.all(0),
                 style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 icon:FaIcon(

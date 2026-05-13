@@ -91,6 +91,28 @@ class FirebaseAnalyticsService implements AnalyticsService {
       },
     );
   }
+
+  @override
+  Future<void> logListingSaved(String listingName) async {
+    debugPrint('[FIREBASE] Logging listing saved: $listingName');
+    await analytics.logEvent(
+      name: 'listing_saved',
+      parameters: {
+        'listingName': listingName,
+      },
+    );
+  }
+
+  @override
+  Future<void> logListingUnsaved(String listingName) async {
+    debugPrint('[FIREBASE] Logging listing unsaved: $listingName');
+    await analytics.logEvent(
+      name: 'listing_unsaved',
+      parameters: {
+        'listingName': listingName,
+      },
+    );
+  }
 }
 
 // An abstract class to define the interface for analytics services, allowing for easy mocking in tests
@@ -103,6 +125,8 @@ abstract class AnalyticsService {
   Future<void> logRoadClosurePolygonPreferenceSet(bool visible);
   Future<void> logDistanceUnitPreferenceSet(String distanceUnit);
   Future<void> logThemePreferenceSet(String theme);
+  Future<void> logListingSaved(String listingName);
+  Future<void> logListingUnsaved(String listingName);
 }
 
 // A fake implementation of AnalyticsService for testing purposes
@@ -137,6 +161,14 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logThemePreferenceSet(String theme) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logListingSaved(String listingName) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logListingUnsaved(String listingName) async {
     // Do nothing
   }
 }
