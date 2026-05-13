@@ -1192,7 +1192,7 @@ class MapPageState extends State<MapPage> {
       List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
 
       setState(() {
-        // Get distace in meters. NB can also get route.durationMinutes which may be useful
+        // Get distance in meters. NB can also get route.durationMinutes which may be useful
         final distanceMetres = route.distanceMeters ?? 0;
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
         final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
@@ -1204,7 +1204,7 @@ class MapPageState extends State<MapPage> {
             points: polylineCoordinates,
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
+            patterns: Platform.isIOS ? [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)] : <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
           ),
         );
 
@@ -1559,124 +1559,143 @@ class MapPageState extends State<MapPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (navigationInProgress == true)
-                      FloatingActionButton(
-                        heroTag: 'cancelBtn',
-                        shape: const CircleBorder(),
-                        mini: true,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          cancelNavigation();
-                        },
-                        child: Icon(
-                          Icons.cancel,
-                          size: 24,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          shadows: [
-                            Shadow(
-                              color: Theme.of(context).shadowColor,
-                              offset: const Offset(1, 3),
-                              blurRadius: 5,
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (navigationInProgress == false)
-                      FloatingActionButton(
-                        heroTag: 'homeBtn',
-                        shape: const CircleBorder(),
+                      Material(
                         elevation: 3,
-                        mini: true,
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          // Home button resets the filters if they're all toggled off
-                          if (filterSettings['Food'] == false &&
-                              filterSettings['Stalls'] == false &&
-                              filterSettings['Music'] == false &&
-                              filterSettings['Events'] == false &&
-                              filterSettings['Places'] == false &&
-                              filterSettings['Other'] == false) {
-                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds;
-                            setState(() {
-                              filterSettings['Food'] = true;
-                              filterSettings['Stalls'] = true;
-                              filterSettings['Music'] = true;
-                              filterSettings['Events'] = true;
-                              filterSettings['Places'] = true;
-                              filterSettings['Other'] = true;
-                              updateMarkerVisibility(idList, true);
-                            });
-                          }
-                          _setMapCameraToFitMapMarkers();
-                        },
-                        child: Icon(
-                          Icons.home,
-                          size: 24,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                    FloatingActionButton(
-                      heroTag: 'mapTypeBtn',
-                      shape: const CircleBorder(),
-                      elevation: 3,
-                      mini: true,
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        setState(() {
-                          if (mapType == MapType.normal) {
-                            mapType = MapType.hybrid;
-                            _layersIcon = Icons.map;
-                            preferredMapStyleType = MapStyleType.hybrid;
-                            _saveSettings();
-                          } else {
-                            mapType = MapType.normal;
-                            _layersIcon = Icons.satellite_alt;
-                            preferredMapStyleType = MapStyleType.normal;
-                            _saveSettings();
-                          }
-                        });
-                      },
-                      child: Icon(
-                        _layersIcon,
-                        size: 24,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                    ),
-                    if (navigationInProgress == false)
-                      AnimatedRotation(
-                        turns: _compassBearing / 360.0,
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeOut,
+                        shape: const CircleBorder(),
+                        color: Colors.transparent,
                         child: FloatingActionButton(
-                          heroTag: 'mapBearingBtn',
+                          heroTag: 'cancelBtn',
                           shape: const CircleBorder(),
-                          elevation: 3,
+                          elevation: 0,
                           mini: true,
                           onPressed: () {
                             HapticFeedback.lightImpact();
-                            setState(() {
-                              preferredMapOrientation =
-                                  (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
-                              _saveSettings();
-                            });
+                            cancelNavigation();
+                          },
+                          child: Icon(
+                            Icons.cancel,
+                            size: 24,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                    if (navigationInProgress == false)
+                      Material(
+                        elevation: 3,
+                        shape: const CircleBorder(),
+                        color: Colors.transparent,
+                        child: FloatingActionButton(
+                          heroTag: 'homeBtn',
+                          elevation: 0,
+                          shape: const CircleBorder(),
+                          mini: true,
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            // Home button resets the filters if they're all toggled off
+                            if (filterSettings['Food'] == false &&
+                                filterSettings['Stalls'] == false &&
+                                filterSettings['Music'] == false &&
+                                filterSettings['Events'] == false &&
+                                filterSettings['Places'] == false &&
+                                filterSettings['Other'] == false) {
+                              final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds;
+                              setState(() {
+                                filterSettings['Food'] = true;
+                                filterSettings['Stalls'] = true;
+                                filterSettings['Music'] = true;
+                                filterSettings['Events'] = true;
+                                filterSettings['Places'] = true;
+                                filterSettings['Other'] = true;
+                                updateMarkerVisibility(idList, true);
+                              });
+                            }
                             _setMapCameraToFitMapMarkers();
                           },
-                          child: const Icon(Icons.assistant_navigation),
+                          child: Icon(
+                            Icons.home,
+                            size: 24,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                    Material(
+                      elevation: 3,
+                      shape: const CircleBorder(),
+                      color: Colors.transparent,
+                      child: FloatingActionButton(
+                        heroTag: 'mapTypeBtn',
+                        shape: const CircleBorder(),
+                        elevation: 0,
+                        mini: true,
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          setState(() {
+                            if (mapType == MapType.normal) {
+                              mapType = MapType.hybrid;
+                              _layersIcon = Icons.map;
+                              preferredMapStyleType = MapStyleType.hybrid;
+                              _saveSettings();
+                            } else {
+                              mapType = MapType.normal;
+                              _layersIcon = Icons.satellite_alt;
+                              preferredMapStyleType = MapStyleType.normal;
+                              _saveSettings();
+                            }
+                          });
+                        },
+                        child: Icon(
+                          _layersIcon,
+                          size: 24,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                    if (navigationInProgress == false)
+                      Material(
+                        elevation: 3,
+                        shape: const CircleBorder(),
+                        color: Colors.transparent,
+                        child: AnimatedRotation(
+                          turns: _compassBearing / 360.0,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          child: FloatingActionButton(
+                            heroTag: 'mapBearingBtn',
+                            shape: const CircleBorder(),
+                            elevation: 0,
+                            mini: true,
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              setState(() {
+                                preferredMapOrientation =
+                                    (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                                _saveSettings();
+                              });
+                              _setMapCameraToFitMapMarkers();
+                            },
+                            child: const Icon(Icons.assistant_navigation),
+                          ),
                         ),
                       ),
                     if (navigationInProgress == false)
                       Row(
                         children: [
                           if (navigationInProgress == false)
-                            FloatingActionButton(
-                              heroTag: 'filterBtn',
-                              shape: const CircleBorder(),
+                            Material(
                               elevation: 3,
-                              mini: true,
-                              onPressed: () {
-                                showFilterMenu();
-                                setMarkerLists();
-                              },
-                              child: const Icon(Icons.filter_alt),
+                              shape: const CircleBorder(),
+                              color: Colors.transparent,
+                              child: FloatingActionButton(
+                                heroTag: 'filterBtn',
+                                shape: const CircleBorder(),
+                                elevation: 0,
+                                mini: true,
+                                onPressed: () {
+                                  showFilterMenu();
+                                  setMarkerLists();
+                                },
+                                child: const Icon(Icons.filter_alt),
+                              ),
                             ),
                         ],
                       ),
