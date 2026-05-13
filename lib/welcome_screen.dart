@@ -125,6 +125,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             onPressed: () {
               HapticFeedback.heavyImpact();
               _onIntroEnd(context);
+              widget.analyticsService.logButtonTapped('skip_WelcomeScreen');
             },
           ),
         ),
@@ -506,6 +507,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
                                       Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
+                                      widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
                                     },
                                 ),
                                 TextSpan(text: "\nabout the Fair", style: bodyStyle),
@@ -531,6 +533,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
                                       launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                                      widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
                                     },
                                 ),
                               ],
@@ -555,6 +558,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                                       HapticFeedback.lightImpact();
                                       launchUrl(Uri.parse(
                                           'https://www.millroadwinterfair.org/app-feedback-form/'));
+                                      widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
                                     },
                                 ),
                               ],
