@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -120,13 +121,14 @@ void showDirectionsTo(BuildContext context, String id, LatLng theDest) async {
 }
 
 class AboutTheFairPage extends StatefulWidget {
-  const AboutTheFairPage({super.key});
+  final AnalyticsService analyticsService;
+  const AboutTheFairPage({super.key, required this.analyticsService});
 
   @override
   State<AboutTheFairPage> createState() => _AboutTheFairPageState();
 }
 
-class _AboutTheFairPageState extends State<AboutTheFairPage> {
+class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
   late ScrollController _aboutPageScrollController;
 
   // Define sponsors and placeholder URLs - user will fill these in
@@ -158,7 +160,28 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
     for (var r in _recognizers.values) {
       r.dispose();
     }
+    routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    widget.analyticsService.setCurrentScreen('AboutPage');
+  }
+
+  @override
+  void didPopNext() {
+    widget.analyticsService.setCurrentScreen('AboutPage');
   }
 
   void _onSponsorTap(String name) {
@@ -308,6 +331,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202488, 0.131207));
+                                              widget.analyticsService.logButtonTapped('eastRoad_hyperlink');
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -317,6 +341,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.198682, 0.141051));
+                                              widget.analyticsService.logButtonTapped('theBridge_hyperlink');
                                             }),
                                     ],
                                   ),
@@ -332,6 +357,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.200389, 0.136465));
+                                              widget.analyticsService.logButtonTapped('ditchburnGardens_hyperlink');
                                             }),
                                     ],
                                   ),
@@ -347,6 +373,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.1970778, 0.1472252));
+                                              widget.analyticsService.logButtonTapped('salisburyClub_hyperlink');
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -356,6 +383,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
+                                              widget.analyticsService.logButtonTapped('petersfield_hyperlink_1');
                                             }),
                                     ],
                                   ),
@@ -371,6 +399,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.199627, 0.138407));
+                                              widget.analyticsService.logButtonTapped('gwydirStreet_hyperlink');
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -380,6 +409,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
+                                              widget.analyticsService.logButtonTapped('petersfield_hyperlink_2');
                                             }),
                                     ],
                                   ),

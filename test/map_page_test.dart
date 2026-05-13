@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -68,7 +69,7 @@ void main() {
   // Set up mocks
   late MapPageState mapPageState;
   setUp(() {
-    mapPageState = MapPage(listings: listings).createState();
+    mapPageState = MapPage(listings: listings, analyticsService: FakeAnalyticsService()).createState();
   });
 
   group('MapPage', () {
@@ -77,7 +78,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
           ),
         ),
       );
@@ -104,7 +105,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
           ),
         ),
       );
@@ -147,7 +148,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
           ),
         ),
       );
@@ -184,7 +185,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
           ),
         ),
       );
@@ -292,7 +293,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
           ),
         ),
       );
@@ -481,7 +482,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
           ),
         ),
       );
