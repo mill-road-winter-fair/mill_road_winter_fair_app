@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -35,7 +36,8 @@ void main() {
         await tester.pump(); // allow disposal to complete
       });
 
-      await tester.pumpWidget(MaterialApp(home: WelcomeScreen(analyticsService: FakeAnalyticsService())));
+      // Start the app with firstExecution true to show the welcome screen
+      await tester.pumpWidget(MyApp(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // The footer button text should be present
       expect(find.text('Take me straight to the app!'), findsOneWidget);
@@ -51,6 +53,9 @@ void main() {
       // Check that shared prefs have been updated
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('firstExecution'), isFalse);
+
+      // Check that we're now on the Map page
+      expect(find.byType(MapPage), findsOneWidget);
     });
   });
 }
