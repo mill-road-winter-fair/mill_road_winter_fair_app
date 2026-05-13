@@ -51,7 +51,7 @@ When submitting a Pull Request, please include:
 
 * A summary of the change
 * The issue number it relates to (if applicable)
-* Details of how the change was tested
+* Details of how the change was tested, including on which platform(s)
 * Any screenshots for UI-related changes
 * Information about any new dependencies introduced
 
