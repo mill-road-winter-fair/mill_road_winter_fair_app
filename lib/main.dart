@@ -328,6 +328,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://theberridge.com'));
+            widget.analyticsService.logButtonTapped('aboutAlex_hyperlink');
           },
         ),
         ListTile(
@@ -342,6 +343,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://mattwhiting.com'));
+            widget.analyticsService.logButtonTapped('aboutMatt_hyperlink');
           },
         ),
         ListTile(
@@ -357,6 +359,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+            widget.analyticsService.logButtonTapped('aboutClare_hyperlink');
           },
         ),
         ListTile(
@@ -371,6 +374,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+            widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
           },
         ),
       ],
