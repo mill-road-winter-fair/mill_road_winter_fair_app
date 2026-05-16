@@ -24,17 +24,22 @@ void main() {
     testWidgets('displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'category': 'Food',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -54,17 +59,22 @@ void main() {
     testWidgets('drawer displays expected widgets', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'category': 'Food',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -88,17 +98,22 @@ void main() {
     testWidgets('navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'category': 'Food',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -116,17 +131,22 @@ void main() {
     testWidgets('navigates to ImportantInfoPage when Important information in drawer is tapped', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'category': 'Food',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -144,17 +164,22 @@ void main() {
     testWidgets('navigates to SettingsPage when Settings in drawer is tapped', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'category': 'Food',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -172,17 +197,22 @@ void main() {
     testWidgets('BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'category': 'Food',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 

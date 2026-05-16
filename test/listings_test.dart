@@ -32,7 +32,11 @@ void main() {
         final invalidResponse = {};
 
         when(mockClient.get(any)).thenAnswer(
-          (_) async => http.Response(jsonEncode(invalidResponse), 500),
+              (_) async => http.Response.bytes(
+            utf8.encode(jsonEncode(invalidResponse)),
+            500,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          ),
         );
 
         final result = await fetchExistingListings(mockClient);
@@ -44,26 +48,34 @@ void main() {
       test('returns a list of listings when response is valid', () async {
         final mockResponse = {
           "values": [
-            ["displayName", "email", "endTime", "id", "latLng", "name", "phone", "primaryType", "secondaryType", "startTime", "tertiaryType", "website"],
+            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
             [
-              "Glazed and Confused",
-              "admin@glazedandconfued.com",
-              "16:30",
               "1",
-              "52.199687,0.138813",
-              "glazedandconfused",
-              "01223 111111",
-              "Food",
-              "Food",
-              "10:30",
+              "TRUE",
+              "FALSE",
+              "🍩",
+              "Glazed and Confused",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "",
+              "Food",
+              "Gwydir St Car Park",
+              "Nice buns",
+              "",
+              "https://www.glazedandconfused.com",
+              "01223 111111",
+              "52.199687,0.138813",
+              "10:30",
+              "16:30",
             ]
           ]
         };
 
         when(mockClient.get(any)).thenAnswer(
-          (_) async => http.Response(jsonEncode(mockResponse), 200),
+              (_) async => http.Response.bytes(
+            utf8.encode(jsonEncode(mockResponse)),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          ),
         );
 
         final result = await fetchListings(mockClient);
@@ -71,18 +83,22 @@ void main() {
         expect(result.length, 1);
         expect(result, [
           {
-            'displayName': 'Glazed and Confused',
-            'email': 'admin@glazedandconfued.com',
-            'endTime': '16:30',
             'id': '1',
-            'latLng': '52.199687,0.138813',
-            'name': 'glazedandconfused',
+            'visibleOnMap': 'TRUE',
+            'cancelled': 'FALSE',
+            'emoji': '🍩',
+            'title': 'Glazed and Confused',
+            'subtitle': 'Doughnuts',
+            'groupID': '',
+            'category': 'Food',
+            'location': 'Gwydir St Car Park',
+            'description': 'Nice buns',
+            'email': '',
+            'website': 'https://www.glazedandconfused.com',
             'phone': '01223 111111',
-            'primaryType': 'Food',
-            'secondaryType': 'Food',
+            'latLng': '52.199687,0.138813',
             'startTime': '10:30',
-            'tertiaryType': 'Doughnuts',
-            'website': 'https://www.glazedandconfused.com'
+            'endTime': '16:30',
           }
         ]);
       });
@@ -96,18 +112,22 @@ void main() {
 
         expect(result, [
           {
-            'displayName': 'Glazed and Confused',
-            'email': 'admin@glazedandconfued.com',
-            'endTime': '16:30',
             'id': '1',
-            'latLng': '52.199687,0.138813',
-            'name': 'glazedandconfused',
+            'visibleOnMap': 'TRUE',
+            'cancelled': 'FALSE',
+            'emoji': '🍩',
+            'title': 'Glazed and Confused',
+            'subtitle': 'Doughnuts',
+            'groupID': '',
+            'category': 'Food',
+            'location': 'Gwydir St Car Park',
+            'description': 'Nice buns',
+            'email': '',
+            'website': 'https://www.glazedandconfused.com',
             'phone': '01223 111111',
-            'primaryType': 'Food',
-            'secondaryType': 'Food',
+            'latLng': '52.199687,0.138813',
             'startTime': '10:30',
-            'tertiaryType': 'Doughnuts',
-            'website': 'https://www.glazedandconfused.com'
+            'endTime': '16:30',
           }
         ]);
       });
@@ -133,59 +153,75 @@ void main() {
       test('handles rows with missing cells by padding to headers', () async {
         final mockResponse = {
           "values": [
-            ["displayName", "email", "endTime", "id", "latLng", "name", "phone", "primaryType", "secondaryType", "startTime", "tertiaryType", "website"],
+            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
             [
-              "Glazed and Confused",
-              "admin@glazedandconfued.com",
-              "", // endTime is blank (cleared cell)
               "1",
-              "52.199687,0.138813",
-              "glazedandconfused",
-              "01223 111111",
-              "Food",
-              "Food",
-              "10:30",
+              "TRUE",
+              "FALSE",
+              "🍩",
+              "Glazed and Confused",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "",
+              "Food",
+              "Gwydir St Car Park",
+              "Nice buns",
+              "",
+              "https://www.glazedandconfused.com",
+              "01223 111111",
+              "52.199687,0.138813",
+              "10:30",
+              "", // endTime is blank (cleared cell)
             ]
           ]
         };
 
         when(mockClient.get(any)).thenAnswer(
-          (_) async => http.Response(jsonEncode(mockResponse), 200),
+              (_) async => http.Response.bytes(
+            utf8.encode(jsonEncode(mockResponse)),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          ),
         );
 
         final result = await fetchListings(mockClient);
 
         expect(result.length, 1);
         expect(result.first['endTime'], '');
-        expect(result.first['displayName'], 'Glazed and Confused');
+        expect(result.first['title'], 'Glazed and Confused');
         expect(result.first['id'], '1');
       });
 
       test('handles explicit null cells by converting them to empty strings', () async {
         final mockResponse = {
           "values": [
-            ["displayName", "email", "endTime", "id", "latLng", "name", "phone", "primaryType", "secondaryType", "startTime", "tertiaryType", "website"],
+            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
             [
-              "Glazed and Confused",
-              "admin@glazedandconfued.com",
-              null,
               "1",
-              "52.199687,0.138813",
-              "glazedandconfused",
-              "01223 111111",
-              "Food",
-              "Food",
-              "10:30",
+              "TRUE",
+              "FALSE",
+              "🍩",
+              "Glazed and Confused",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "",
+              "Food",
+              "Gwydir St Car Park",
+              "Nice buns",
+              "",
+              "https://www.glazedandconfused.com",
+              "01223 111111",
+              "52.199687,0.138813",
+              "10:30",
+              null,
             ]
           ]
         };
 
         when(mockClient.get(any)).thenAnswer(
-          (_) async => http.Response(jsonEncode(mockResponse), 200),
+              (_) async => http.Response.bytes(
+            utf8.encode(jsonEncode(mockResponse)),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          ),
         );
 
         final result = await fetchListings(mockClient);
@@ -201,56 +237,68 @@ void main() {
 
         final mockResponse = {
           "values": [
-            ["displayName", "email", "endTime", "id", "latLng", "name", "phone", "primaryType", "secondaryType", "startTime", "tertiaryType", "website"],
+            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
             [
-              "Glazed and Confused",
-              "admin@glazedandconfued.com",
-              "16:30",
               "1",
-              "52.199687,0.138813",
-              "glazedandconfused",
-              "01223 111111",
-              "Food",
-              "Food",
-              "10:30",
+              "TRUE",
+              "FALSE",
+              "🍩",
+              "Glazed and Confused",
               "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "",
+              "Food",
+              "Gwydir St Car Park",
+              "Nice buns",
+              "",
+              "https://www.glazedandconfused.com",
+              "01223 111111",
+              "52.199687,0.138813",
+              "10:30",
+              "16:30",
             ]
           ]
         };
 
         when(mockClient.get(any)).thenAnswer(
-          (_) async => http.Response(jsonEncode(mockResponse), 200),
+              (_) async => http.Response.bytes(
+            utf8.encode(jsonEncode(mockResponse)),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          ),
         );
 
         final result = await fetchExistingListings(mockClient);
 
         expect(result.length, 1);
-        expect(result.first["name"], "glazedandconfused");
+        expect(result.first["title"], "Glazed and Confused");
       });
 
       test('returns existing listings if already populated', () async {
         listings = [
           {
-            "displayName": "Glazed and Confused",
-            "email": "admin@glazedandconfued.com",
-            "endTime": "16:30",
-            "id": "1",
-            "name": "glazedandconfused",
-            "phone": "01223 111111",
-            "latLng": "52.199687,0.138813",
-            "primaryType": "Food",
-            "secondaryType": "Food",
-            "startTime": "10:30",
-            "tertiaryType": "Doughnuts",
-            "website": "https://www.glazedandconfused.com"
+            'id': '1',
+            'visibleOnMap': 'TRUE',
+            'cancelled': 'FALSE',
+            'emoji': '🍩',
+            'title': 'Glazed and Confused',
+            'subtitle': 'Doughnuts',
+            'groupID': '',
+            'category': 'Food',
+            'location': 'Gwydir St Car Park',
+            'description': 'Nice buns',
+            'email': '',
+            'website': 'https://www.glazedandconfused.com',
+            'phone': '01223 111111',
+            'latLng': '52.199687,0.138813',
+            'startTime': '10:30',
+            'endTime': '16:30',
           }
         ];
 
         final result = await fetchExistingListings(mockClient);
 
         expect(result.length, 1);
-        expect(result.first["name"], "glazedandconfused");
+        expect(result.first["title"], "Glazed and Confused");
       });
     });
   });
