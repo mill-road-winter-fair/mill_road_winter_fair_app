@@ -4,10 +4,11 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 
-@GenerateMocks([http.Client])
+@GenerateMocks([http.Client, SharedPreferences])
 import 'listings_test.mocks.dart';
 
 void main() {
@@ -251,6 +252,84 @@ void main() {
 
         expect(result.length, 1);
         expect(result.first["name"], "glazedandconfused");
+      });
+
+      test('retains cached listings data when app is restarted with API failure', () async {
+        // Simulate first app launch: successfully fetch listings from API
+        final initialMockResponse = {
+          "values": [
+            ["displayName", "email", "endTime", "id", "latLng", "name", "phone", "primaryType", "secondaryType", "startTime", "tertiaryType", "website"],
+            [
+              "Glazed and Confused",
+              "admin@glazedandconfued.com",
+              "16:30",
+              "1",
+              "52.199687,0.138813",
+              "glazedandconfused",
+              "01223 111111",
+              "Food",
+              "Food",
+              "10:30",
+              "Doughnuts",
+              "https://www.glazedandconfused.com"
+            ],
+            [
+              "Sushi Squad",
+              "info@sushisquad.com",
+              "16:40",
+              "2",
+              "52.200063,0.139313",
+              "sushisquad",
+              "01223 222222",
+              "Food",
+              "Food",
+              "12:00",
+              "Sushi",
+              "https://www.sushisquad.com"
+            ]
+          ]
+        };
+
+        listings = [];
+
+        when(mockClient.get(any)).thenAnswer(
+          (_) async => http.Response(jsonEncode(initialMockResponse), 200),
+        );
+
+        // First app launch: fetch and cache listings
+        final firstLaunchResult = await fetchListings(mockClient);
+
+        expect(firstLaunchResult.length, 2);
+        expect(listings.length, 2);
+        expect(listings.first["name"], "glazedandconfused");
+        expect(listings[1]["name"], "sushisquad");
+
+        // Simulate app restart: call fetchExistingListings while API is down
+        when(mockClient.get(any)).thenAnswer(
+          (_) async => http.Response('Internal Server Error', 500),
+        );
+
+        // Second app launch: API fails but cached listings should still be available
+        final secondLaunchResult = await fetchExistingListings(mockClient);
+
+        // Should return the cached listings from the first launch
+        expect(secondLaunchResult.length, 2);
+        expect(secondLaunchResult.first["name"], "glazedandconfused");
+        expect(secondLaunchResult[1]["name"], "sushisquad");
+      });
+
+      test('fetchExistingListings with empty cache returns empty list on API failure', () async {
+        // Simulate fresh app install with API down
+        listings = [];
+
+        when(mockClient.get(any)).thenAnswer(
+          (_) async => http.Response('Internal Server Error', 500),
+        );
+
+        final result = await fetchExistingListings(mockClient);
+
+        expect(result, []);
+        verify(mockClient.get(any)).called(equals(10)); // Verifies retries happened
       });
     });
   });
