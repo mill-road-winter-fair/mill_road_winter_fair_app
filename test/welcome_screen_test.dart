@@ -207,9 +207,21 @@ void main() {
       expect(prefs.getBool('firstExecution'), isFalse);
     });
 
-    testWidgets('Take me straight to the app button navigates correctly', (WidgetTester tester) async {
+    testWidgets('Take me straight to the app button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
-      firstExecution = true;
+
+      // Since flutter's default test screen size is for desktop i.e. 800x600, set a sensible minimum mobile screen size
+      // 375x667 is the smallest size tracked at https://gs.statcounter.com/screen-resolution-stats/mobile/united-kingdom as of Nov 2025
+      tester.view.physicalSize = const Size(375, 667);
+      tester.view.devicePixelRatio = 1.0;
+
+      // Unmount widgets in teardown; do NOT call Fluttertoast.cancel() (causes MissingPluginException in tests)
+      addTearDown(() async {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+        await tester.pumpWidget(Container());
+        await tester.pump(); // allow disposal to complete
+      });
 
       // Provide a dummy listing to avoid triggering API fetch/retries and timers
       listings = [
@@ -230,45 +242,9 @@ void main() {
         }
       ];
 
-      // Set a realistic window size to avoid layout overflow in the test
-      tester.view.physicalSize = const Size(1080, 2400);
-      addTearDown(tester.view.resetPhysicalSize);
-
       // Pump the RootWidget
+      firstExecution = true;
       await tester.pumpWidget(const RootWidget());
-
-      // Verify the footer button is present and tap it
-      expect(find.text('Take me straight to the app!'), findsOneWidget);
-      await tester.tap(find.text('Take me straight to the app!'));
-      await tester.pumpAndSettle();
-
-      // Verify that MyApp is now displayed
-      expect(find.byType(MyApp), findsOneWidget);
-
-      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
-      await tester.pump(const Duration(seconds: 21));
-      await tester.pumpAndSettle();
-
-      // Check that shared prefs have been updated
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getBool('firstExecution'), isFalse);
-    });
-
-    testWidgets('footer button saves settings and navigates', (WidgetTester tester) async {
-      SharedPreferences.setMockInitialValues({});
-
-      // Since flutter's default test screen size is for desktop i.e. 800x600, set a sensible minimum mobile screen size
-      // 375x667 is the smallest size tracked at https://gs.statcounter.com/screen-resolution-stats/mobile/united-kingdom as of Nov 2025
-      TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.physicalSize = const Size(375, 667);
-      TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.devicePixelRatio = 1.0;
-
-      // Unmount widgets in teardown; do NOT call Fluttertoast.cancel() (causes MissingPluginException in tests)
-      addTearDown(() async {
-        await tester.pumpWidget(Container());
-        await tester.pump(); // allow disposal to complete
-      });
-
-      await tester.pumpWidget(const MaterialApp(home: WelcomeScreen()));
 
       // The footer button text should be present
       expect(find.text('Take me straight to the app!'), findsOneWidget);
@@ -276,6 +252,9 @@ void main() {
       // Tap the footer button
       await tester.tap(find.text('Take me straight to the app!'));
       await tester.pumpAndSettle();
+
+      // Verify that MyApp is now displayed
+      expect(find.byType(MyApp), findsOneWidget);
 
       // Let the 20s toast timer complete to avoid "Timer still pending" when test disposes widgets
       await tester.pump(const Duration(seconds: 21));
