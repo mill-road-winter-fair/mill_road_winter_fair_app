@@ -221,13 +221,13 @@ class HomePageState extends State<HomePage> {
   
   late final _pages = [
     MapPage(listings: listings, key: mapPageKey),
-    FilteredListingsPage(filterPrimaryType: "Food", listings: listings, key: _listingsKeyFood),
-    FilteredListingsPage(filterPrimaryType: "Stalls", listings: listings, key: _listingsKeyShopping),
-    FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
-    FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
-    FilteredListingsPage(filterPrimaryType: "Place", listings: listings, key: _listingsKeyPlace),
-    FilteredListingsPage(filterPrimaryType: "Other", listings: listings, key: _listingsKeyService),
-    FilteredListingsPage(filterPrimaryType: "Saved", listings: listings),
+    FilteredListingsPage(filterCategory: "Food", listings: listings, key: _listingsKeyFood),
+    FilteredListingsPage(filterCategory: "Stalls", listings: listings, key: _listingsKeyShopping),
+    FilteredListingsPage(filterCategory: "Music", listings: listings, key: _listingsKeyMusic),
+    FilteredListingsPage(filterCategory: "Event", listings: listings, key: _listingsKeyEvent),
+    FilteredListingsPage(filterCategory: "Place", listings: listings, key: _listingsKeyPlace),
+    FilteredListingsPage(filterCategory: "Other", listings: listings, key: _listingsKeyService),
+    FilteredListingsPage(filterCategory: "Saved", listings: listings),
   ];
 
   void aboutDialog() {
@@ -420,7 +420,7 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", listings: listings)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterCategory: "Saved", listings: listings)));
                   },
                 ),
               ),

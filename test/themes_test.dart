@@ -63,7 +63,7 @@ void main() {
       expect(getCategoryColor('not-a-theme', 'anything'), const Color.fromRGBO(255, 0, 0, 1.0));
     });
 
-    testWidgets('getColoredMarker exercises multiple primaryType branches', (WidgetTester tester) async {
+    testWidgets('getColoredMarker exercises multiple category branches', (WidgetTester tester) async {
       TestWidgetsFlutterBinding.ensureInitialized();
       final types = [
         'Group-Food',
@@ -89,7 +89,7 @@ void main() {
       }
     });
 
-    testWidgets('getColoredMarker returns default for unknown primaryType', (WidgetTester tester) async {
+    testWidgets('getColoredMarker returns default for unknown category', (WidgetTester tester) async {
       TestWidgetsFlutterBinding.ensureInitialized();
       final m = await getColoredMarker('Not-A-Real-Type', Colors.blue);
       expect(m, isNotNull);

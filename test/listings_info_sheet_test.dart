@@ -13,35 +13,40 @@ void main() {
 
   // Build widget tree
   Widget createWidgetUnderTest({
+    required bool cancelled,
+    required String emoji,
     required String title,
-    required String location,
     required String subtitle,
+    required String location,
+    required String description,
+    required String email,
+    required String website,
+    required String phoneNumber,
     required String startTime,
     required String endTime,
     required String approxDistance,
-    required String phoneNumber,
-    required String website,
-    required String email,
-    required String description,
-    required Function onGetDirections,
     required bool detailsVisible,
     required bool listingFavourited,
+    required Function onGetDirections,
+
   }) {
     return MaterialApp(
       home: Scaffold(
         body: SpecificListingInfoSheet(
+          cancelled: cancelled,
+          emoji: emoji,
           title: title,
-          location: location,
           subtitle: subtitle,
+          location: location,
+          description: description,
+          email: email,
+          website: website,
+          phoneNumber: phoneNumber,
           startTime: startTime,
           endTime: endTime,
           approxDistance: approxDistance,
-          phoneNumber: phoneNumber,
-          website: website,
-          email: email,
-          description: description,
-          onGetDirections: onGetDirections,
           detailsVisible: detailsVisible,
+          onGetDirections: onGetDirections,
           listingFavourited: listingFavourited,
         ),
       ),
@@ -51,22 +56,24 @@ void main() {
   group('ListingsInfoSheet', () {
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        emoji: '🍩',
         title: 'Glazed and Confused',
-        location: 'Gwydir St Car Park',
         subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
         startTime: '10:30',
         endTime: '16:30',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        phoneNumber: '01223 111111',
-        website: 'https://www.glazedandconfused.com',
-        email: 'sales@glazedandconfused.com',
-        description: 'Nice buns',
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
       ));
 
-      expect(find.text('Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
@@ -75,22 +82,24 @@ void main() {
 
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        emoji: '🍩',
         title: 'Glazed and Confused',
-        location: 'Gwydir St Car Park',
         subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: '',
+        phoneNumber: '01223 111111',
         startTime: '10:30',
         endTime: '16:30',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        phoneNumber: '01223 111111',
-        website: '',
-        email: 'sales@glazedandconfused.com',
-        description: 'Nice buns',
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
       ));
 
-      expect(find.text('Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
@@ -104,16 +113,18 @@ void main() {
       bool directionsCalled = false;
 
       await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        emoji: '🍩',
         title: 'Glazed and Confused',
-        location: 'Gwydir St Car Park',
         subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
         startTime: '10:30',
         endTime: '16:30',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        phoneNumber: '01223 111111',
-        website: 'https://www.glazedandconfused.com',
-        email: 'sales@glazedandconfused.com',
-        description: 'Nice buns',
         detailsVisible: false,
         onGetDirections: () {
           directionsCalled = true;

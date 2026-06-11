@@ -23,11 +23,6 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Function for determining if the event has been marked as cancelled
-bool hasEventBeenCancelled(String? description) {
-  return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
-}
-
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
 
@@ -381,18 +376,18 @@ class MapPageState extends State<MapPage> {
     final allListings = listings as List;
     for (var listing in allListings) {
       // Assign markerIds to maps for filtering
-      if ((listing['primaryType'] == "Food" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Food") {
+      if ((listing['category'] == "Food" && listing['cancelled'] == 'FALSE') || listing['category'] == "Group-Food") {
         _foodMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'] == "Shopping" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Shopping") {
+      } else if ((listing['category'] == "Shopping" && listing['cancelled'] == 'FALSE') || listing['category'] == "Group-Shopping") {
         _stallsMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'] == "Music" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Music") {
+      } else if ((listing['category'] == "Music" && listing['cancelled'] == 'FALSE') || listing['category'] == "Group-Music") {
         _musicMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'] == "Event" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Event") {
+      } else if ((listing['category'] == "Event" && listing['cancelled'] == 'FALSE') || listing['category'] == "Group-Event") {
         _eventMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'] == "Place" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Place") {
+      } else if ((listing['category'] == "Place" && listing['cancelled'] == 'FALSE') || listing['category'] == "Group-Place") {
         _placeMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'].startsWith("Service") && !hasEventBeenCancelled(listing['description'])) ||
-          listing['primaryType'] == "Group-Service") {
+      } else if ((listing['category'].startsWith("Service") && listing['cancelled'] == 'FALSE') ||
+          listing['category'] == "Group-Service") {
         _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
       }
     }
@@ -412,11 +407,11 @@ class MapPageState extends State<MapPage> {
     for (var listing in listings) {
       if (listing['visibleOnMap'] == 'TRUE') {
         // Add Group markers
-        if (listing['primaryType'].startsWith('Group-')) {
+        if (listing['category'].startsWith('Group-')) {
           addGroupMarker(listing);
         }
         // Add Specific markers
-        if (!listing['primaryType'].startsWith('Group-') && !hasEventBeenCancelled(listing['description'])) {
+        if (!listing['category'].startsWith('Group-') && listing['cancelled'] == 'FALSE') {
           addSpecificMarker(listing);
         }
       }
@@ -455,15 +450,15 @@ class MapPageState extends State<MapPage> {
     return favouriteListingKeys.contains(listingID);
   }
 
-  void addGroupMarker(Map<String, dynamic> listing) async {
+  void addGroupMarker(Map<String, dynamic> parentListing) async {
     // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
-    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-    MarkerId markerId = MarkerId(listing['id'].toString());
-    Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
+    LatLng destinationLatLng = stringToLatLng(parentListing['latLng']);
+    MarkerId markerId = MarkerId(parentListing['id'].toString());
+    Color color = getCategoryColor(selectedThemeKey, parentListing['category']);
     late BitmapDescriptor customMarker;
 
     if (onTest == false) {
-      customMarker = bitmapDescriptors[listing['primaryType']]!;
+      customMarker = bitmapDescriptors[parentListing['category']]!;
     } else {
       double hue = HSVColor.fromColor(color).hue;
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
@@ -479,29 +474,23 @@ class MapPageState extends State<MapPage> {
         // Update the current location, do not await as this causes issues with using the context across async gaps
         establishLocation();
 
-        // Helper to normalise primaryType by stripping "Group-" prefix if present
-        String normalisePrimaryType(String type) {
-          return type.startsWith("Group-") ? type.substring(6) : type;
-        }
-
-        // Filter listings where both normalised primaryType and secondaryType match,
-        // but exclude any listing whose primaryType starts with `Group-`.
+        // Filter listings where groupID matches the parent listing's groupID,
+        // but exclude any listing whose category starts with `Group-`.
         List<Map<String, dynamic>> relatedListings = listings.where((l) {
-          if ((l['primaryType'] ?? '').toString().startsWith('Group-')) return false;
+          // Filter out the parent listing itself, as we only want the child listings in the relatedListings list
+          if ((l['category'] ?? '').toString().startsWith('Group-')) return false;
 
-          final listingPrimary = normalisePrimaryType(l['primaryType'] ?? '');
-          final targetPrimary = normalisePrimaryType(listing['primaryType'] ?? '');
-          final listingSecondary = l['secondaryType'] ?? '';
-          final targetSecondary = listing['secondaryType'] ?? '';
+          final listingGroupID = l['groupID'] ?? '';
+          final targetGroupID = parentListing['groupID'] ?? '';
 
-          return listingPrimary == targetPrimary && listingSecondary == targetSecondary;
+          return listingGroupID == targetGroupID;
         }).toList();
 
-        // Sort listings: startTime → displayName
+        // Sort listings: startTime → title
         relatedListings.sort((a, b) {
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           if (timeCompare != 0) return timeCompare;
-          return a['name'].compareTo(b['name']);
+          return a['title'].compareTo(b['title']);
         });
 
         final groupSheetModalScrollController = ScrollController();
@@ -546,7 +535,7 @@ class MapPageState extends State<MapPage> {
                       if (currentLatLng != null) {
                         int approximateDistanceMetres = asTheCrowFlies(
                           currentLatLng!,
-                          stringToLatLng(listing['latLng']),
+                          stringToLatLng(parentListing['latLng']),
                         );
                         distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
                       }
@@ -562,10 +551,10 @@ class MapPageState extends State<MapPage> {
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                               child: GroupListingInfoSheet(
-                                title: listing['displayName'],
-                                categories: "${listing['tertiaryType']}",
-                                startTime: "${listing['startTime']}",
-                                endTime: "${listing['endTime']}",
+                                title: parentListing['title'],
+                                categories: "${parentListing['subtitle']}",
+                                startTime: "${parentListing['startTime']}",
+                                endTime: "${parentListing['endTime']}",
                                 approxDistance: distanceMessage,
                               ),
                             ),
@@ -588,16 +577,18 @@ class MapPageState extends State<MapPage> {
                                       return Column(
                                         children: [
                                           SpecificListingInfoSheet(
-                                            title: rel['displayName'],
-                                            location: '',
-                                            subtitle: rel['tertiaryType'],
-                                            startTime: rel['startTime'],
-                                            endTime: rel['endTime'],
+                                            cancelled: rel['cancelled'] == 'TRUE' ? true : false,
+                                            emoji: rel['emoji'] ?? '',
+                                            title: rel['title'],
+                                            subtitle: rel['subtitle'],
+                                            location: rel['location'],
+                                            description: rel['description'] ?? '',
+                                            email: rel['email'] ?? '',
+                                            website: rel['website'] ?? '',
+                                            phoneNumber: rel['phone'] ?? '',
+                                            startTime: "${rel['startTime']}",
+                                            endTime: "${rel['endTime']}",
                                             approxDistance: '',
-                                            phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                            website: (rel['website'] != null) ? rel['website'] : '',
-                                            email: (rel['email'] != null) ? rel['email'] : '',
-                                            description: (rel['description'] != null) ? rel['description'] : '',
                                             detailsVisible: detailsVisibilityList[index],
                                             onDetailsTapped: () => toggleDetailsRow(index),
                                             listingFavourited: isListingFavourited(rel['id']),
@@ -635,10 +626,10 @@ class MapPageState extends State<MapPage> {
     debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
-    Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
+    Color color = getCategoryColor(selectedThemeKey, listing['category']);
     late BitmapDescriptor customMarker;
     if (onTest == false) {
-      customMarker = bitmapDescriptors[listing['primaryType']]!;
+      customMarker = bitmapDescriptors[listing['category']]!;
     } else {
       double hue = HSVColor.fromColor(color).hue;
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
@@ -661,7 +652,7 @@ class MapPageState extends State<MapPage> {
               currentLatLng!,
               destinationLatLng,
             );
-            distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+            distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
           }
 
           // Show bottom sheet with listing information
@@ -706,16 +697,18 @@ class MapPageState extends State<MapPage> {
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
                             child: SpecificListingInfoSheet(
-                              title: listing['displayName'],
-                              location: listing['secondaryType'],
-                              subtitle: listing['tertiaryType'],
+                              cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                              emoji: listing['emoji'] ?? '',
+                              title: listing['title'],
+                              subtitle: listing['subtitle'],
+                              location: listing['location'],
+                              description: listing['description'],
+                              email: listing['email'] ?? '',
+                              website: listing['website'] ?? '',
+                              phoneNumber: listing['phone'] ?? '',
                               startTime: "${listing['startTime']}",
                               endTime: "${listing['endTime']}",
                               approxDistance: distanceMessage,
-                              phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                              website: (listing['website'] != null) ? listing['website'] : '',
-                              email: (listing['email'] != null) ? listing['email'] : '',
-                              description: (listing['description'] != null) ? listing['description'] : '',
                               detailsVisible: true,
                               listingFavourited: isListingFavourited(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
@@ -736,13 +729,13 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  void addSimpleMarker(String primaryType, destinationLatLng) async {
-    debugPrint('addSimpleMarker called for primary type: $primaryType');
+  void addSimpleMarker(String category, destinationLatLng) async {
+    debugPrint('addSimpleMarker called for category: $category');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
-    Color color = getCategoryColor(selectedThemeKey, primaryType);
+    Color color = getCategoryColor(selectedThemeKey, category);
     late BitmapDescriptor customMarker;
     if (onTest == false) {
-      customMarker = bitmapDescriptors[primaryType]!;
+      customMarker = bitmapDescriptors[category]!;
     } else {
       double hue = HSVColor.fromColor(color).hue;
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
@@ -774,7 +767,7 @@ class MapPageState extends State<MapPage> {
         );
         if (listing.isEmpty) return oldMarker;
 
-        final type = listing['primaryType'];
+        final type = listing['category'];
         final newIcon = bitmapDescriptors[type] ?? oldMarker.icon;
 
         return oldMarker.copyWith(iconParam: newIcon);
@@ -1079,7 +1072,7 @@ class MapPageState extends State<MapPage> {
         (l) => l['id'].toString() == marker.markerId.value,
         orElse: () => {},
       );
-      if (listing.isEmpty || listing['visibleOnMap'] != 'TRUE') {
+      if (listing.isEmpty || listing['visibleOnMap'] == 'TRUE') {
         markers.remove(marker.markerId);
       }
     }

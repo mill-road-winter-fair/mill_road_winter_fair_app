@@ -21,47 +21,59 @@ void main() {
 
     listings = [
       {
-        'name': 'foodgroup',
-        'displayName': 'Food Group',
-        'endTime': '16:30',
         'id': '1',
-        'latLng': '52.199838,0.139016',  // 199m
-        'phone': '',
-        'primaryType': 'Group-Food',
-        'secondaryType': 'Fake Street',
-        'startTime': '10:30',
-        'tertiaryType': 'Food',
         'visibleOnMap': 'TRUE',
+        'cancelled': 'FALSE',
+        'emoji': '',
+        'title': 'Food Group',
+        'subtitle': 'Food',
+        'groupID': '1',
+        'category': 'Group-Food',
+        'location': 'Fake Street',
+        'description': '',
+        'email': '',
         'website': '',
-      },
-      {
-        'name': 'glazedandconfused',
-        'displayName': 'Glazed and Confused',
-        'endTime': '15:00',
-        'id': '2',
-        'latLng': '52.199687,0.138813',  // 535m
-        'phone': '01223 111111',
-        'primaryType': 'Food',
-        'secondaryType': 'Fake Street',
-        'startTime': '11:00',
-        'tertiaryType': 'Doughnuts',
-        'visibleOnMap': 'FALSE',
-        'website': 'https://www.glazedandconfused.com',
-      },
-      {
-        'displayName': 'Sushi Squad',
+        'phone': '',
+        'latLng': '52.199838,0.139016',  // 199m
+        'startTime': '10:30',
         'endTime': '16:30',
+      },
+      {
+        'id': '2',
+        'visibleOnMap': 'FALSE',
+        'cancelled': 'FALSE',
+        'emoji': '🍩',
+        'title': 'Glazed and Confused',
+        'subtitle': 'Doughnuts',
+        'groupID': '1',
+        'category': 'Food',
+        'location': 'Fake Street',
+        'description': 'Nice buns',
+        'email': '',
+        'website': 'https://www.glazedandconfused.com',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813',  // 535m
+        'startTime': '11:00',
+        'endTime': '15:00',
+      },
+      {
         'id': '3',
-        'name': 'sushisquad',
-        'latLng': '52.199188,0.139437',  // 135m
-        'phone': '01223 222222',
-        'primaryType': 'Food',
-        'secondaryType': 'Implausible Avenue',
-        'startTime': '12:00',
-        'tertiaryType': 'Sushi',
         'visibleOnMap': 'TRUE',
+        'cancelled': 'FALSE',
+        'emoji': '🍣',
+        'title': 'Sushi Squad',
+        'subtitle': 'Sushi',
+        'groupID': '',
+        'category': 'Food',
+        'location': 'Implausible Avenue',
+        'description': 'Cold rice',
+        'email': '',
         'website': 'https://www.sushisquad.com',
-      }
+        'phone': '01223 222222',
+        'latLng': '52.199188,0.139437',  // 135m
+        'startTime': '12:00',
+        'endTime': '16:30',
+      },
     ];
   });
 
@@ -170,8 +182,9 @@ void main() {
       expect(find.text('Food'), findsOneWidget);
       expect(find.text('approx. 199 m'), findsOneWidget);
       // Specific marker content
-      expect(find.text('Glazed and Confused'), findsOneWidget);
-      expect(find.text('Doughnuts\n11:00—15:00'), findsOneWidget);
+      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('Doughnuts'), findsOneWidget);
+      expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
     });
@@ -201,7 +214,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check the text content in the bottom sheet
-      expect(find.text('Sushi Squad'), findsOneWidget);
+      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
@@ -212,79 +225,94 @@ void main() {
     testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
       listings = [
         {
-          "displayName": "Glazed and Confused",
-          "email": "admin@glazedandconfued.com",
-          "endTime": "16:30",
           "id": "1",
-          "name": "glazedandconfused",
+          "visibleOnMap": "TRUE",
+          "cancelled": "FALSE",
+          "emoji": "🍩",
+          "title": "Glazed and Confused",
+          "subtitle": "Doughnuts",
+          "groupID": "",
+          "category": "Food",
+          "location": "Gwydir St Car Park",
+          "description": "Nice buns",
+          "email": "",
+          "website": "https://www.glazedandconfused.com",
           "phone": "01223 111111",
           "latLng": "52.199687,0.138813",
-          "primaryType": "Food",
-          "secondaryType": "Food",
           "startTime": "10:30",
-          "tertiaryType": "Doughnuts",
-          "visibleOnMap": "TRUE",
-          "website": "https://www.glazedandconfused.com"
+          "endTime": "16:30",
         },
         {
-          "displayName": "The Crafty Canvas",
-          "email": "contact@craftycanvas.com",
-          "endTime": "16:30",
           "id": "2",
-          "name": "thecraftycanvas",
+          "visibleOnMap": "TRUE",
+          'cancelled': 'FALSE',
+          "emoji": "🎨",
+          "title": "The Crafty Canvas",
+          "subtitle": "Crafts",
+          "groupID": "",
+          "category": "Shopping",
+          "location": "Donkey Common",
+          "description": "Artistic crafts for all ages",
+          "email": "contact@craftycanvas.com",
+          "website": "https://www.craftycanvas.com",
           "phone": "01223 222222",
           "latLng": "52.201913,0.131984",
-          "primaryType": "Shopping",
-          "secondaryType": "Retail",
           "startTime": "10:30",
-          "tertiaryType": "Crafts",
-          "visibleOnMap": "TRUE",
-          "website": "https://www.craftycanvas.com"
+          "endTime": "16:30",
         },
         {
-          "displayName": "The Jazz Junction",
-          "email": "contact@jazzjunction.com",
-          "endTime": "16:30",
           "id": "3",
-          "name": "thejazzjunction",
+          "visibleOnMap": "TRUE",
+          "cancelled": "FALSE",
+          "emoji": "🎷",
+          "title": "The Jazz Junction",
+          "subtitle": "Jazz",
+          "groupID": "",
+          "category": "Music",
+          "location": "Donkey Common",
+          "description": "Smooth jazz performances all day",
+          "email": "contact@jazzjunction.com",
+          "website": "https://www.jazzjunction.com",
           "phone": "01223 333333",
           "latLng": "52.202188,0.131312",
-          "primaryType": "Music",
-          "secondaryType": "Music",
           "startTime": "10:30",
-          "tertiaryType": "Jazz",
-          "visibleOnMap": "TRUE",
-          "website": "https://www.jazzjunction.com"
+          "endTime": "16:30",
         },
         {
-          "displayName": "Santa",
-          "email": "",
-          "endTime": "16:30",
           "id": "4",
-          "name": "santa1",
+          "visibleOnMap": "TRUE",
+          "cancelled": "FALSE",
+          "emoji": "🎅",
+          "title": "Santa",
+          "subtitle": "Kindly Elf",
+          "groupID": "",
+          "category": "Event",
+          "location": "Zion Baptist Church",
+          "description": "Santa will be available all day",
+          "email": "",
+          "website": "",
           "phone": "",
           "latLng": "52.203563,0.132437",
-          "primaryType": "Event",
-          "secondaryType": "Performance",
           "startTime": "10:30",
-          "tertiaryType": "Kindly Elf",
-          "visibleOnMap": "TRUE",
-          "website": ""
+          "endTime": "16:30",
         },
         {
-          "displayName": "Information Point",
-          "email": "info@millroadwinterfair.org",
-          "endTime": "16:30",
           "id": "5",
-          "name": "informationpoint1",
+          "visibleOnMap": "TRUE",
+          "cancelled": "FALSE",
+          "emoji": "ℹ️",
+          "title": "Information Point",
+          "subtitle": "Help Point",
+          "groupID": "",
+          "category": "Service",
+          "location": "Ditchburn Gardens",
+          "description": "Visit us for any questions or assistance",
+          "email": "info@millroadwinterfair.org",
+          "website": "",
           "phone": "",
           "latLng": "52.200187,0.137313",
-          "primaryType": "Service",
-          "secondaryType": "Information",
           "startTime": "10:30",
-          "tertiaryType": "Help Point",
-          "visibleOnMap": "TRUE",
-          "website": ""
+          "endTime": "16:30",
         }
       ];
 
@@ -462,18 +490,22 @@ void main() {
     testWidgets('hideAllMarkers clears all markers', (tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'category': 'Food',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'visibleOnMap': 'TRUE',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
