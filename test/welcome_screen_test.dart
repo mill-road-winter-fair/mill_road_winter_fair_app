@@ -128,6 +128,31 @@ void main() {
       expect(prefs.getBool('firstExecution'), isFalse);
     });
 
+    testWidgets('next button advances onboarding slides', (WidgetTester tester) async {
+      firstExecution = true;
+
+      // Set a realistic window size to avoid layout overflow in the test
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      // Pump the RootWidget
+      await tester.pumpWidget(const RootWidget());
+
+      // Verify we are on the first page
+      expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
+      expect(find.text('What do the pins mean?'), findsNothing);
+
+      // Find and tap the 'Next' button (the arrow forward icon)
+      final nextButton = find.byIcon(Icons.arrow_forward);
+      expect(nextButton, findsOneWidget);
+      await tester.tap(nextButton);
+      await tester.pumpAndSettle();
+
+      // Verify we have advanced to the second page
+      expect(find.text('What do the pins mean?'), findsOneWidget);
+      expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsNothing);
+    });
+
     testWidgets('footer button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
