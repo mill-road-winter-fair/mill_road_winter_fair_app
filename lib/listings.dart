@@ -3,9 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-
-// Initialise global variable to hold listings
-List<Map<String, dynamic>> listings = [];
+import 'package:mill_road_winter_fair_app/globals.dart';
 
 // Fetch listings from Heroku caching layer
 Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
