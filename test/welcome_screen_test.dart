@@ -207,6 +207,53 @@ void main() {
       expect(prefs.getBool('firstExecution'), isFalse);
     });
 
+    testWidgets('Take me straight to the app button navigates correctly', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({});
+      firstExecution = true;
+
+      // Provide a dummy listing to avoid triggering API fetch/retries and timers
+      listings = [
+        {
+          'displayName': 'Glazed and Confused',
+          'endTime': '16:30',
+          'id': '1',
+          'name': 'glazedandconfused',
+          'phone': '01223 111111',
+          'latLng': '52.200662,0.135547',
+          'primaryType': 'Food',
+          'secondaryType': 'Food',
+          'startTime': '10:30',
+          'tertiaryType': 'Doughnuts',
+          'description': 'Nice buns',
+          'visibleOnMap': true,
+          'website': 'https://www.glazedandconfused.com',
+        }
+      ];
+
+      // Set a realistic window size to avoid layout overflow in the test
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      // Pump the RootWidget
+      await tester.pumpWidget(const RootWidget());
+
+      // Verify the footer button is present and tap it
+      expect(find.text('Take me straight to the app!'), findsOneWidget);
+      await tester.tap(find.text('Take me straight to the app!'));
+      await tester.pumpAndSettle();
+
+      // Verify that MyApp is now displayed
+      expect(find.byType(MyApp), findsOneWidget);
+
+      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
+      await tester.pump(const Duration(seconds: 21));
+      await tester.pumpAndSettle();
+
+      // Check that shared prefs have been updated
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('firstExecution'), isFalse);
+    });
+
     testWidgets('footer button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
