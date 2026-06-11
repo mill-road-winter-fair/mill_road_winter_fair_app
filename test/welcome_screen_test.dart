@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide RootWidget;
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -20,6 +21,66 @@ void main() {
   });
 
   group('WelcomeScreen', () {
+    testWidgets('displays welcome screen on first app execution', (WidgetTester tester) async {
+      // Set firstExecution to true to simulate first time app launch
+      firstExecution = true;
+
+      // Set a realistic window size to avoid layout overflow in the test
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      // Pump the RootWidget to test that the app correctly chooses the WelcomeScreen
+      await tester.pumpWidget(const RootWidget());
+
+      // Verify that the WelcomeScreen is displayed
+      expect(find.byType(WelcomeScreen), findsOneWidget);
+
+      // Verify that OnBoardingPage is rendered within the WelcomeScreen
+      expect(find.byType(OnBoardingPage), findsOneWidget);
+
+      // Verify the main action button is visible
+      // This confirms the welcome screen UI is properly initialized
+      expect(find.text('Take me straight to the app!'), findsOneWidget);
+    });
+
+    testWidgets('displays MyApp when not first app execution', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate subsequent app launch
+      firstExecution = false;
+
+      // Mock user settings and provide a dummy listing to avoid triggering API fetch/retries and timers
+      await loadSettings();
+      listings = [
+        {
+          'displayName': 'Glazed and Confused',
+          'endTime': '16:30',
+          'id': '1',
+          'name': 'glazedandconfused',
+          'phone': '01223 111111',
+          'latLng': '52.200662,0.135547', // 535m
+          'primaryType': 'Food',
+          'secondaryType': 'Food',
+          'startTime': '10:30',
+          'tertiaryType': 'Doughnuts',
+          'description': 'Nice buns',
+          'visibleOnMap': true,
+          'website': 'https://www.glazedandconfused.com',
+        }
+      ];
+
+      // Pump the RootWidget
+      await tester.pumpWidget(const RootWidget());
+
+      // Verify that WelcomeScreen is NOT displayed
+      expect(find.byType(WelcomeScreen), findsNothing);
+
+      // Verify that MyApp is displayed
+      expect(find.byType(MyApp), findsOneWidget);
+
+      // Handle the potential toast timer from ListingUpdateNotifier.maybeShowNotice
+      // Use a long pump to ensure any 20s toast timer completes
+      await tester.pump(const Duration(seconds: 21));
+    });
+
     testWidgets('footer button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
