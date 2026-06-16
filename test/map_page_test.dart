@@ -190,6 +190,39 @@ void main() {
       expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.25);
     });
 
+    testWidgets('tapping Road Closure legend opens road closures dialog', (WidgetTester tester) async {
+      // Ensure we start in a known state
+      preferredRoadClosurePolygonVisible = true;
+
+      // Build the MapPage widget
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find the "Road closures" legend at the bottom left
+      // There are two "Road closures" texts potentially (legend and dialog title),
+      // but only the legend is present initially.
+      final legendFinder = find.text('Road closures');
+      expect(legendFinder, findsOneWidget);
+
+      // Tap the legend
+      await tester.tap(legendFinder);
+      await tester.pumpAndSettle();
+
+      // Verify the dialog is opened
+      // The dialog has a title "Road closures" and specific body text.
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.text('Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'), findsOneWidget);
+
+      // Verify "Close" button exists to dismiss the dialog
+      expect(find.text('Close'), findsOneWidget);
+    });
+
     testWidgets('Road Closure filter toggles polygon visibility', (WidgetTester tester) async {
       // Ensure we start in a known state
       preferredRoadClosurePolygonVisible = true;
