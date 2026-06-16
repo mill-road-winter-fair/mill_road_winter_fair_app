@@ -151,6 +151,45 @@ void main() {
       expect(mapPageState.mapType, MapType.normal);
     });
 
+    testWidgets('Compass button toggles map orientation between Adaptive and North-up', (WidgetTester tester) async {
+      // Ensure we start in a known state before pumping the widget
+      preferredMapOrientation = MapOrientation.adaptive;
+
+      // Build the MapPage widget
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find the compass button by its icon
+      final compassButtonFinder = find.byIcon(Icons.assistant_navigation);
+      expect(compassButtonFinder, findsOneWidget);
+
+      // Verify initial rotation (Adaptive is 90 degrees/0.25 turns)
+      final animatedRotationFinder = find.byType(AnimatedRotation);
+      expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.25);
+
+      // Tap the button to toggle to North-up
+      await tester.tap(compassButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Verify state and rotation updated (North-up is 0 degrees/0.0 turns)
+      expect(preferredMapOrientation, MapOrientation.alwaysNorth);
+      expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.0);
+
+      // Tap again to toggle back to Adaptive
+      await tester.tap(compassButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Verify we returned to the original state
+      expect(preferredMapOrientation, MapOrientation.adaptive);
+      expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.25);
+    });
+
     testWidgets('addMarker filters and adds marker based on filter settings', (tester) async {
       // Build the MapPage widget
       await tester.pumpWidget(
