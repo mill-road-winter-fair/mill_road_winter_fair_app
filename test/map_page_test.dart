@@ -223,6 +223,49 @@ void main() {
       expect(find.text('Close'), findsOneWidget);
     });
 
+    testWidgets('tapping the Hide road closures text in the dialog hides the Road Closure polygon', (WidgetTester tester) async {
+      // Set a realistic window size to avoid the dialog contents being off-screen
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      // Ensure we start in a known state
+      preferredRoadClosurePolygonVisible = true;
+
+      // Build the MapPage widget
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find the "Road closures" legend at the bottom left
+      // There are two "Road closures" texts potentially (legend and dialog title),
+      // but only the legend is present initially.
+      final legendFinder = find.text('Road closures');
+      expect(legendFinder, findsOneWidget);
+
+      // Tap the legend
+      await tester.tap(legendFinder);
+      await tester.pumpAndSettle();
+
+      // Tap the "Hide road closures" text in the dialog
+      final hideRoadClosuresFinder = find.text('Hide road closures');
+      expect(hideRoadClosuresFinder, findsOneWidget);
+      await tester.tap(hideRoadClosuresFinder);
+      await tester.pumpAndSettle();
+
+      // Verify state update and polygon removal
+      expect(preferredRoadClosurePolygonVisible, isFalse);
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isFalse);
+    });
+
     testWidgets('Road Closure filter toggles polygon visibility', (WidgetTester tester) async {
       // Ensure we start in a known state
       preferredRoadClosurePolygonVisible = true;
