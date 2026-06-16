@@ -190,6 +190,47 @@ void main() {
       expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.25);
     });
 
+    testWidgets('Road Closure filter toggles polygon visibility', (WidgetTester tester) async {
+      // Ensure we start in a known state
+      preferredRoadClosurePolygonVisible = true;
+
+      // Build the MapPage widget
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify initial state: polygon should be present
+      // We check the GoogleMap widget directly as _polygons is private
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isTrue);
+
+      // Open the filter menu
+      await tester.tap(find.byIcon(Icons.filter_alt));
+      await tester.pumpAndSettle();
+
+      // Find and tap the "Shade road closures" checkbox
+      final roadClosureCheckbox = find.text("Shade road closures");
+      expect(roadClosureCheckbox, findsOneWidget);
+      await tester.tap(roadClosureCheckbox);
+      await tester.pumpAndSettle();
+
+      // Verify state update and polygon removal
+      expect(preferredRoadClosurePolygonVisible, isFalse);
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isFalse);
+
+      // Toggle it back on
+      await tester.tap(roadClosureCheckbox);
+      await tester.pumpAndSettle();
+
+      // Verify state is true and polygon is back
+      expect(preferredRoadClosurePolygonVisible, isTrue);
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isTrue);
+    });
+
     testWidgets('addMarker filters and adds marker based on filter settings', (tester) async {
       // Build the MapPage widget
       await tester.pumpWidget(
