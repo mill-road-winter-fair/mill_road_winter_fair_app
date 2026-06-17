@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -111,6 +112,35 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AboutTheFairPage), findsOneWidget);
+    });
+
+    testWidgets('navigates to SavedListings when Saved listings in drawer is tapped', (WidgetTester tester) async {
+      listings = [
+        {
+          'displayName': 'Glazed and Confused',
+          'endTime': '16:30',
+          'id': '1',
+          'name': 'glazedandconfused',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'primaryType': 'Food',
+          'secondaryType': 'Food',
+          'startTime': '10:30',
+          'tertiaryType': 'Doughnuts',
+          'website': 'https://www.glazedandconfused.com',
+        }
+      ];
+
+      await tester.pumpWidget(const MyApp());
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Saved listings'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(FilteredListingsPage), findsOneWidget);
+      expect(find.text('Saved listings'), findsOneWidget);
     });
 
     testWidgets('navigates to ImportantInfoPage when Important information in drawer is tapped', (WidgetTester tester) async {
