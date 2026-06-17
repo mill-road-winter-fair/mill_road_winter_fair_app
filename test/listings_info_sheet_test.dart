@@ -26,6 +26,7 @@ void main() {
     required Function onGetDirections,
     required bool detailsVisible,
     required bool listingFavourited,
+    VoidCallback? onDetailsTapped,
     VoidCallback? onFavouriteTapped,
   }) {
     return MaterialApp(
@@ -44,6 +45,7 @@ void main() {
           onGetDirections: onGetDirections,
           detailsVisible: detailsVisible,
           listingFavourited: listingFavourited,
+          onDetailsTapped: onDetailsTapped,
           onFavouriteTapped: onFavouriteTapped,
         ),
       ),
@@ -133,6 +135,64 @@ void main() {
 
       // Check if the onFavouriteTapped callback was triggered
       expect(favouriteCalled, true);
+    });
+
+    testWidgets('tapping Details button toggles visibility of extra information', (WidgetTester tester) async {
+      bool detailsToggled = false;
+
+      // Initial state: details NOT visible
+      await tester.pumpWidget(createWidgetUnderTest(
+        title: 'Glazed and Confused',
+        location: 'Gwydir St Car Park',
+        subtitle: 'Food • Doughnuts',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        phoneNumber: '01223 111111',
+        website: 'https://www.glazedandconfused.com',
+        email: 'sales@glazedandconfused.com',
+        description: 'Nice buns',
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: false,
+        onDetailsTapped: () {
+          detailsToggled = true;
+        },
+      ));
+
+      // Extra info should not be present
+      expect(find.text('Nice buns'), findsNothing);
+
+      // Tap the Details button
+      final detailsButton = find.text('Details');
+      expect(detailsButton, findsOneWidget);
+      await tester.tap(detailsButton);
+      await tester.pumpAndSettle();
+
+      // Verify the callback was triggered
+      expect(detailsToggled, true);
+
+      // Now pump with detailsVisible = true to simulate the state change
+      await tester.pumpWidget(createWidgetUnderTest(
+        title: 'Glazed and Confused',
+        location: 'Gwydir St Car Park',
+        subtitle: 'Food • Doughnuts',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        phoneNumber: '01223 111111',
+        website: 'https://www.glazedandconfused.com',
+        email: 'sales@glazedandconfused.com',
+        description: 'Nice buns',
+        detailsVisible: true,
+        onGetDirections: () {},
+        listingFavourited: false,
+        onDetailsTapped: () {},
+      ));
+
+      // Extra info should now be present
+      expect(find.text('Nice buns'), findsOneWidget);
+      expect(find.text('Website: https://www.glazedandconfused.com'), findsOneWidget);
     });
 
     testWidgets('calls onGetDirections when Get Directions button is pressed', (WidgetTester tester) async {
