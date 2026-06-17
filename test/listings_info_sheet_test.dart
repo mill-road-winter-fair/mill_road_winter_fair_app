@@ -255,5 +255,38 @@ void main() {
         expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
       }
     });
+
+    testWidgets('formatted with line-through and red text when listing is cancelled', (WidgetTester tester) async {
+      await tester.pumpWidget(createWidgetUnderTest(
+        title: 'Glazed and Confused',
+        location: 'Gwydir St Car Park',
+        subtitle: 'Food • Doughnuts',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: '100m',
+        phoneNumber: '01223 111111',
+        website: 'https://www.glazedandconfused.com',
+        email: 'sales@glazedandconfused.com',
+        description: '${cancelIdentifier}Nice buns',
+        detailsVisible: true,
+        onGetDirections: () {},
+        listingFavourited: false,
+      ));
+
+      // Title should have line-through
+      final titleFinder = find.text('Glazed and Confused');
+      expect(titleFinder, findsOneWidget);
+      final Text titleWidget = tester.widget(titleFinder);
+      expect(titleWidget.style?.decoration, TextDecoration.lineThrough);
+
+      // Times should be replaced by CANCELLED and be red
+      final cancelledTextFinder = find.text(cancelIdentifier);
+      expect(cancelledTextFinder, findsWidgets); // Might be more than one if both subtitle and body use it
+      final Text cancelledTextWidget = tester.widget(cancelledTextFinder.first);
+      expect(cancelledTextWidget.style?.color, Colors.red);
+
+      // Description should have prefix removed
+      expect(find.text('Nice buns'), findsOneWidget);
+    });
   });
 }
