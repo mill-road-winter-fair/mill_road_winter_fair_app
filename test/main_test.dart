@@ -236,6 +236,35 @@ void main() {
       expect(find.byType(OnBoardingPage), findsOneWidget);
     });
 
+    testWidgets('show aboutDialog when About the app in drawer is tapped', (WidgetTester tester) async {
+      listings = [
+        {
+          'displayName': 'Glazed and Confused',
+          'endTime': '16:30',
+          'id': '1',
+          'name': 'glazedandconfused',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'primaryType': 'Food',
+          'secondaryType': 'Food',
+          'startTime': '10:30',
+          'tertiaryType': 'Doughnuts',
+          'website': 'https://www.glazedandconfused.com',
+        }
+      ];
+
+      await tester.pumpWidget(const MyApp());
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('About the app'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Android app by Alexander Berridge'), findsOneWidget);
+      expect(find.text('iPhone version by Matt Whiting'), findsOneWidget);
+    });
+
     testWidgets('BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
       listings = [
         {
