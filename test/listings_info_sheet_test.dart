@@ -26,6 +26,7 @@ void main() {
     required Function onGetDirections,
     required bool detailsVisible,
     required bool listingFavourited,
+    VoidCallback? onFavouriteTapped,
   }) {
     return MaterialApp(
       home: Scaffold(
@@ -43,6 +44,7 @@ void main() {
           onGetDirections: onGetDirections,
           detailsVisible: detailsVisible,
           listingFavourited: listingFavourited,
+          onFavouriteTapped: onFavouriteTapped,
         ),
       ),
     );
@@ -99,6 +101,39 @@ void main() {
 
     // TODO: Add test for tapping on phone numbers (will need to find a way of mocking launchUrl)
     // TODO: Add test for tapping on "Open Website" button (will need to find a way of mocking launchUrl)
+
+    testWidgets('calls onFavouriteTapped when heart button is pressed', (WidgetTester tester) async {
+      bool favouriteCalled = false;
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        title: 'Glazed and Confused',
+        location: 'Gwydir St Car Park',
+        subtitle: 'Food • Doughnuts',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        phoneNumber: '01223 111111',
+        website: 'https://www.glazedandconfused.com',
+        email: 'sales@glazedandconfused.com',
+        description: 'Nice buns',
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: false,
+        onFavouriteTapped: () {
+          favouriteCalled = true;
+        },
+      ));
+
+      // Find the heart icon button. It's an IconButton containing a FaIcon.
+      final heartButton = find.byType(IconButton).first;
+      expect(heartButton, findsOneWidget);
+
+      await tester.tap(heartButton);
+      await tester.pumpAndSettle();
+
+      // Check if the onFavouriteTapped callback was triggered
+      expect(favouriteCalled, true);
+    });
 
     testWidgets('calls onGetDirections when Get Directions button is pressed', (WidgetTester tester) async {
       bool directionsCalled = false;
