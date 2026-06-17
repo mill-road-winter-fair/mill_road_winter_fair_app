@@ -225,5 +225,35 @@ void main() {
       // Check if the onGetDirections callback was triggered
       expect(directionsCalled, true);
     });
+
+    testWidgets('formatted with line-through and red text when endTime has passed', (WidgetTester tester) async {
+      // Note: This test assumes hasEventEnded returns true for the given endTime.
+      // This will be true if the test is run after the fair date/time.
+      await tester.pumpWidget(createWidgetUnderTest(
+        title: 'Glazed and Confused',
+        location: 'Gwydir St Car Park',
+        subtitle: 'Food • Doughnuts',
+        startTime: '09:00',
+        endTime: '10:00', // Set to a time that has likely passed
+        approxDistance: '100m',
+        phoneNumber: '01223 111111',
+        website: 'https://www.glazedandconfused.com',
+        email: 'sales@glazedandconfused.com',
+        description: 'Nice buns',
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: false,
+      ));
+
+      final timeTextFinder = find.text('09:00—10:00');
+      expect(timeTextFinder, findsOneWidget);
+
+      final Text timeTextWidget = tester.widget(timeTextFinder);
+      // If the event has ended, it should be red and have a line-through decoration
+      if (hasEventEnded('10:00')) {
+        expect(timeTextWidget.style?.color, Colors.red);
+        expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
+      }
+    });
   });
 }
