@@ -115,17 +115,17 @@ flutter build appbundle --release --dart-define-from-file=.env
     NB the build number has to have increased from the last one uploaded to Apple. 
 
 6. Run
-    flutter build ios --config-only --release
+    flutter build ios --release
     
-7. To get screen shots without 'DEBUG' (which Apple will reject) add this line to main.dart within MaterialApp() debugShowCheckedModeBanner:false
+7. In Xcode, go to Product -> Archive, and you will eventually see a new build in the Organiser window
+
+8. Click Distribute App, choose App Store Connect then click Distribute
+
+9. In App Store Connect on the web, go to the app, then Distribution and click the + under iOS app
+
+10. To get screen shots without 'DEBUG' (which Apple will reject) add this line to main.dart within MaterialApp() debugShowCheckedModeBanner:false
    Get screen shots at the largest iPhone and iPad sizes (latest 6.9" Pro Max and 13" Pro), then remove the above.
    
-8. In Xcode, go to Product -> Archive, and you will eventually see a new build in the Organiser window
-
-9. Click Distribute App, choose App Store Connect then click Distribute
-
-10. In App Store Connect on the web, go to the app, then Distribution and click the + under iOS app
-
 11. Fill in the version, add the screen shots, what's new etc., add the build, Save, then hit Add for Review, and wait for up to 48 hours
 
 12. Back in Xcode organiser, right-click on the new build, click Show in Finder, and upload this file to the Github release
