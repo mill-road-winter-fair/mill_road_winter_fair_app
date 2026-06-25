@@ -1521,7 +1521,7 @@ class MapPageState extends State<MapPage> {
                       rotateGesturesEnabled: false,
                       compassEnabled: false,
                       myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
+                      myLocationButtonEnabled: false,
                       mapToolbarEnabled: false,
                       onMapCreated: (GoogleMapController controller) {
                         _controller = controller;
