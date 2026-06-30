@@ -14,9 +14,6 @@ final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 // Remember the previously selected bottom navigation index (used for back navigation).
 int previousIndex = 0;
 
-// App bar title shown on the HomePage.
-String appBarTitle = 'Mill Road Winter Fair 2025';
-
 // Flag set by tests (when true the app reduces/delays animation and timers).
 bool onTest = false;
 
@@ -89,4 +86,12 @@ LatLng? currentLatLng;
 
 // --- Miscellaneous ---
 // Cutoff date used by the listing-update notifier.
-final DateTime cutoffDate = DateTime(2025, 12, 6);
+final DateTime cutoffDate = DateTime(2025, 12, 5);
+
+// Fair date (and times) for this year (keeping this different to above as use may differ)
+final fairDate = DateTime(2026, 12, 5);
+const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
+
+// Title used for appbar
+const fairName = 'Mill Road Winter Fair 2026';
+String appBarTitle = fairName; // this may be changed in main, filtered_listings etc.
