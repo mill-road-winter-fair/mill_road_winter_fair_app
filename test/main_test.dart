@@ -41,7 +41,7 @@ void main() {
 
       await tester.pumpWidget(const MyApp());
 
-      expect(find.text('Mill Road Winter Fair 2025'), findsOneWidget);
+      expect(find.text('Mill Road Winter Fair 2026'), findsOneWidget);
 
       expect(find.text('Map'), findsOneWidget);
       expect(find.text('Food'), findsOneWidget);
@@ -119,7 +119,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DrawerHeader), findsOneWidget);
-      expect(find.text('Mill Road Winter Fair 2025'), findsOneWidget);
+      expect(find.text('Mill Road Winter Fair 2026'), findsOneWidget);
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
