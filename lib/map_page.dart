@@ -1215,7 +1215,7 @@ class MapPageState extends State<MapPage> {
       _handlePolylineError("Network connection issue. Please try again.");
     } on HttpException catch (e) {
       debugPrint("HTTP error while fetching route: $e");
-      _handlePolylineError("Server error retrieving route data.");
+      _handlePolylineError("Error retrieving route data. Please check your connection and try again.");
     } on FormatException catch (e) {
       debugPrint("Data format error: $e");
       _handlePolylineError("Unexpected data format from directions API.");
