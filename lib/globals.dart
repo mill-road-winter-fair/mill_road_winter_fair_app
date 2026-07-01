@@ -84,11 +84,8 @@ int promptedUserToEnableLocationServices = 0;
 // Cached user location used by the map and listings pages.
 LatLng? currentLatLng;
 
-// --- Miscellaneous ---
-// Cutoff date used by the listing-update notifier.
-final DateTime cutoffDate = DateTime(2025, 12, 5);
-
-// Fair date (and times) for this year (keeping this different to above as use may differ)
+// Fair date (and times) for this year
+// Also used by the listing-update notifier.
 final fairDate = DateTime(2026, 12, 5);
 const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
 
