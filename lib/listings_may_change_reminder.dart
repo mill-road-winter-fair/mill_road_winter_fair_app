@@ -30,7 +30,7 @@ class ListingUpdateNotifier {
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
 
-    if (DateUtils.isSameDay(cutoffDate, DateTime.now())) {
+    if (DateUtils.isSameDay(fairDate, DateTime.now())) {
       debugPrint('Current date is Fair date; showing special notice');
       showIntervalDays = 0.3; // 8 hours, so should show once on the day
       theMessageDuration = 20; // longer message
@@ -44,7 +44,7 @@ class ListingUpdateNotifier {
         "so you can easily see what’s on "
         "when and where.\n\n"
         "Have a wonderful day!";
-    } else if (now.isAfter(cutoffDate)) {
+    } else if (now.isAfter(fairDate)) {
       showIntervalDays = 3;
       theMessageDuration = 20;
       theMessage = 
