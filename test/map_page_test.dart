@@ -26,7 +26,7 @@ void main() {
         'displayName': 'Food Group',
         'endTime': '16:30',
         'id': '1',
-        'latLng': '52.199838,0.139016',  // 199m
+        'latLng': '52.199838,0.139016', // 199m
         'phone': '',
         'primaryType': 'Group-Food',
         'secondaryType': 'Fake Street',
@@ -40,7 +40,7 @@ void main() {
         'displayName': 'Glazed and Confused',
         'endTime': '15:00',
         'id': '2',
-        'latLng': '52.199687,0.138813',  // 535m
+        'latLng': '52.199687,0.138813', // 535m
         'phone': '01223 111111',
         'primaryType': 'Food',
         'secondaryType': 'Fake Street',
@@ -54,7 +54,7 @@ void main() {
         'endTime': '16:30',
         'id': '3',
         'name': 'sushisquad',
-        'latLng': '52.199188,0.139437',  // 135m
+        'latLng': '52.199188,0.139437', // 135m
         'phone': '01223 222222',
         'primaryType': 'Food',
         'secondaryType': 'Implausible Avenue',
@@ -73,12 +73,35 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('all map buttons are present', (WidgetTester tester) async {
+      // Build the MapPage widget
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Check the map buttons
+      expect(find.byType(FloatingActionButton), findsExactly(5));
+      expect(find.byIcon(Icons.home), findsOneWidget);
+      expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
+      expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
+      expect(find.byIcon(Icons.filter_alt), findsOneWidget);
+      expect(find.byIcon(Icons.my_location), findsOneWidget);
+
+      // Check road closure button
+      expect(find.text('Road closures'), findsOneWidget);
+    });
+
     testWidgets('Home button centres the map and resets filters if all were off', (WidgetTester tester) async {
       // Mock the MethodChannel for Google Maps to capture camera movements
       final List<MethodCall> methodCalls = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         const MethodChannel('plugins.flutter.io/google_maps_0'),
-            (MethodCall methodCall) async {
+        (MethodCall methodCall) async {
           methodCalls.add(methodCall);
           return null;
         },
@@ -123,7 +146,7 @@ void main() {
         expect(cameraUpdateCalls.any((call) => call.arguments.toString().contains('cameraUpdate')), true);
       }
     });
-    
+
     testWidgets('map type button changes map type', (WidgetTester tester) async {
       // Build the MapPage widget
       await tester.pumpWidget(
@@ -217,7 +240,10 @@ void main() {
       // Verify the dialog is opened
       // The dialog has a title "Road closures" and specific body text.
       expect(find.byType(Dialog), findsOneWidget);
-      expect(find.text('Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'), findsOneWidget);
+      expect(
+          find.text(
+              'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
+          findsOneWidget);
 
       // Verify "Close" button exists to dismiss the dialog
       expect(find.text('Close'), findsOneWidget);

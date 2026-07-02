@@ -1521,7 +1521,7 @@ class MapPageState extends State<MapPage> {
                       rotateGesturesEnabled: false,
                       compassEnabled: false,
                       myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
+                      myLocationButtonEnabled: false,
                       mapToolbarEnabled: false,
                       onMapCreated: (GoogleMapController controller) {
                         _controller = controller;
@@ -1579,41 +1579,86 @@ class MapPageState extends State<MapPage> {
                       ),
                     if (navigationInProgress == false)
                       FloatingActionButton(
-                      heroTag: 'homeBtn',
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        // Home button resets the filters if they're all toggled off
-                        if (filterSettings['Food'] == false &&
-                            filterSettings['Stalls'] == false &&
-                            filterSettings['Music'] == false &&
-                            filterSettings['Events'] == false &&
-                            filterSettings['Places'] == false &&
-                            filterSettings['Other'] == false) {
-                          final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds;
-                          setState(() {
-                            filterSettings['Food'] = true;
-                            filterSettings['Stalls'] = true;
-                            filterSettings['Music'] = true;
-                            filterSettings['Events'] = true;
-                            filterSettings['Places'] = true;
-                            filterSettings['Other'] = true;
-                            updateMarkerVisibility(idList, true);
-                          });
-                        }
-                        _setMapCameraToFitMapMarkers();
-                      },
-                      backgroundColor: Colors.transparent,
-                      mini: true,
-                      child: Container(
-                        width: 40, height: 40,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
+                        heroTag: 'homeBtn',
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          // Home button resets the filters if they're all toggled off
+                          if (filterSettings['Food'] == false &&
+                              filterSettings['Stalls'] == false &&
+                              filterSettings['Music'] == false &&
+                              filterSettings['Events'] == false &&
+                              filterSettings['Places'] == false &&
+                              filterSettings['Other'] == false) {
+                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds;
+                            setState(() {
+                              filterSettings['Food'] = true;
+                              filterSettings['Stalls'] = true;
+                              filterSettings['Music'] = true;
+                              filterSettings['Events'] = true;
+                              filterSettings['Places'] = true;
+                              filterSettings['Other'] = true;
+                              updateMarkerVisibility(idList, true);
+                            });
+                          }
+                          _setMapCameraToFitMapMarkers();
+                        },
+                        backgroundColor: Colors.transparent,
+                        mini: true,
+                        child: Container(
+                          width: 40, height: 40,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
+                          ),
+                          child: const Icon(Icons.home),
                         ),
-                        child: const Icon(Icons.home),
                       ),
-                    ),
+                    // Centre-on-user button (only shown when location services are enabled and permission has been granted)
+                    if (locationServicesEnabled == true && (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
+                      FloatingActionButton(
+                        heroTag: 'centreOnUserBtn',
+                        onPressed: () async {
+                          HapticFeedback.lightImpact();
+                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
+                          try {
+                            if (currentLatLng == null) {
+                              final pos = await getCurrentPosition();
+                              currentLatLng = LatLng(pos.latitude, pos.longitude);
+                            }
+                            if (currentLatLng != null) {
+                              // Move camera to the user's location with a sensible zoom and bearing
+                              double currentZoom = await _controller!.getZoomLevel();
+                              _controller?.animateCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('Centre-on-user failed: $e');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  content: Text('Unable to determine your location'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        backgroundColor: Colors.transparent,
+                        mini: true,
+                        child: Container(
+                          width: 40, height: 40,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
+                          ),
+                          child: const Icon(Icons.my_location),
+                        ),
+                      ),
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
                       onPressed: () {
@@ -1631,7 +1676,7 @@ class MapPageState extends State<MapPage> {
                             _saveSettings();
                           }
                         });
-                        },
+                      },
                       backgroundColor: Colors.transparent,
                       mini: true,
                       child: Container(

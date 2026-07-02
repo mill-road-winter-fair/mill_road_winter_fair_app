@@ -4,9 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Hardcoded fair date for 2025; change this today's date for testing
-final fairDate = DateTime(2025, 12, 6);
-
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime) {
   try {
