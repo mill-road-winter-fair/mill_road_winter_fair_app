@@ -17,8 +17,6 @@ import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'android_nav_bar_detector.dart';
-
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
   final List<Map<String, dynamic>> listings;
@@ -131,7 +129,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         }).toList();
       }
 
-      if ((preferredSortingMethod == SortingMethod.values[2] && !(widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved'))) {
+      if ((preferredSortingMethod == SortingMethod.values[2] && !(widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite'))) {
         // User prefers time sorting but this isn't allowed; use fallback (a-z) sorting but don't change their saved preferences
         // NB separate to the above test since we can still add the distances
         useFallbackSorting = true;
@@ -290,22 +288,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called');
-    if (widget.filterPrimaryType == 'Saved') {
-      return Scaffold(
-        appBar: AppBar(
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text('Saved listings'),
-          ),
-        ),
-        body: generateListingsList(),
-      );
-    } else {
-      return generateListingsList();
-    }
-  }
-
-  Widget generateListingsList() {
     final homePageState = context.findAncestorStateOfType<HomePageState>();
     // Show error if there are no listings
     if (listings.isEmpty) {
@@ -333,9 +315,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
     List<Map<String, dynamic>> primaryFiltered = [];
-    if (widget.filterPrimaryType == 'Other') {
+    if (widget.filterPrimaryType == 'All') {
+      primaryFiltered = listings.toList();
+    } else  if (widget.filterPrimaryType == 'Other') {
       primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
-    } else if (widget.filterPrimaryType == 'Saved') {
+    } else if (widget.filterPrimaryType == 'Favourite') {
       primaryFiltered = listings.where((listing) => favouriteListingKeys.contains(listing['id'])).toList();
     } else if (widget.filterPrimaryType == 'Stalls') {
       // special case to prevent the rename breaking existing data
@@ -370,7 +354,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       top: false,
       left: false,
       right: false,
-      bottom: widget.filterPrimaryType == 'Saved' && Platform.isAndroid && isNavBarVisible(context),
+      bottom: false,
       child: Column(
         children: [
           Container(
@@ -395,13 +379,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             autoFocus: true,
                             elevation: const WidgetStatePropertyAll(0),
                             hintText: switch (widget.filterPrimaryType) {
+                              'All' => 'Search all listings...',
                               'Food' => 'Search food & drink vendors...',
                               'Stalls' => 'Search market stalls...',
                               'Music' => 'Search musical performances...',
                               'Event' => 'Search events...',
                               'Place' => 'Search venues and places...',
                               'Other' => 'Search other services...',
-                              'Saved' => 'Search saved listings...',
+                              'Favourite' => 'Search favourite listings...',
                               _ => 'Search listings...',
                             },
                             leading: const Icon(Icons.search),
@@ -432,8 +417,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Expanded(child: _buildSortingDropdown(context)),
-                        // only show the Scroll To Now button on Music/Events/Saved
-                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        // only show the Scroll To Now button on Music/Events/Favourite
+                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite') ?
                           SizedBox(
                             height: 36,
                             width: 36,
@@ -486,10 +471,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               child: const Icon(Icons.update),
                             ),
                           ) : const SizedBox.shrink(),
-                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite') ?
                           const SizedBox(width: 4) : const SizedBox.shrink(),
-                        // only show the Hide Past Listings button on Music/Events/Saved
-                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        // only show the Hide Past Listings button on Music/Events/Favourite
+                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite') ?
                           SizedBox(
                             height: 36,
                             width: 36,
@@ -512,7 +497,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               child: const Icon(Icons.event_busy),
                             ),
                           ) : const SizedBox.shrink(),
-                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved') ?
+                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite') ?
                           const SizedBox(width: 4) : const SizedBox.shrink(),
                         SizedBox(
                           height: 36,
@@ -722,7 +707,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   label: "Name (a-z)",
                   leadingIcon: const Icon(Icons.sort_by_alpha),
                 ),
-                if (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Saved')
+                if (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite')
                   DropdownMenuEntry(
                     value: SortingMethod.values[2],
                     label: "Time",

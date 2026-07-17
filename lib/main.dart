@@ -12,13 +12,14 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/timetable_page.dart';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -221,22 +222,15 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  final _listingsKeyFood = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyShopping = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyMusic = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyEvent = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyPlace = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
+  final _allListingsKey = GlobalKey<FilteredListingsPageState>();
+  final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
+    ChooserPage(),
     MapPage(listings: listings, key: mapPageKey),
-    FilteredListingsPage(filterPrimaryType: "Food", listings: listings, key: _listingsKeyFood),
-    FilteredListingsPage(filterPrimaryType: "Stalls", listings: listings, key: _listingsKeyShopping),
-    FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
-    FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
-    FilteredListingsPage(filterPrimaryType: "Place", listings: listings, key: _listingsKeyPlace),
-    FilteredListingsPage(filterPrimaryType: "Other", listings: listings, key: _listingsKeyService),
-    FilteredListingsPage(filterPrimaryType: "Saved", listings: listings),
+    FilteredListingsPage(filterPrimaryType: "All", listings: listings, key: _allListingsKey),
+    TimetablePage(),
+    FilteredListingsPage(filterPrimaryType: "Favourite", listings: listings, key: _savedListingsKey),
   ];
 
   void aboutDialog() {
@@ -353,29 +347,23 @@ class HomePageState extends State<HomePage> {
             iconSize: 30,
             onTap: (selectedIndex) {
               HapticFeedback.selectionClick();
-              // Update the user's location
-              establishLocation();
               switch (selectedIndex) {
                 case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
-                case 1 : _listingsKeyFood.currentState?.onTabVisible();
-                case 2 : _listingsKeyShopping.currentState?.onTabVisible();
-                case 3 : _listingsKeyMusic.currentState?.onTabVisible();
-                case 4 : _listingsKeyEvent.currentState?.onTabVisible();
-                case 5 : _listingsKeyPlace.currentState?.onTabVisible();
-                case 6 : _listingsKeyService.currentState?.onTabVisible();
+                case 1 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
+                case 2 : _allListingsKey.currentState?.onTabVisible();
+                case 3 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
+                case 4 : _savedListingsKey.currentState?.onTabVisible();
               }
               setState(() {
                 index = selectedIndex;
               });
             },
             items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
               BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-              BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-              BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-              BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-              BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
-              BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
+              BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
+              BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
+              BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
             ],
           ),
         drawer: Drawer(
@@ -418,18 +406,6 @@ class HomePageState extends State<HomePage> {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const FaIcon(FontAwesomeIcons.solidHeart),
-                  title: const Text('Saved listings', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", listings: listings)));
                   },
                 ),
               ),
