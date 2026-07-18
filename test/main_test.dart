@@ -25,17 +25,29 @@ void main() {
     testWidgets('displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -45,28 +57,40 @@ void main() {
 
       expect(find.text('Map'), findsOneWidget);
       expect(find.text('Food'), findsOneWidget);
-      expect(find.text('Stalls'), findsOneWidget);
-      expect(find.text('Music'), findsOneWidget);
-      expect(find.text('Events'), findsOneWidget);
-      expect(find.text('Places'), findsOneWidget);
-      expect(find.text('Other'), findsOneWidget);
+      expect(find.text('Shopping'), findsOneWidget);
+      expect(find.text('Performances'), findsOneWidget);
+      expect(find.text('Community'), findsOneWidget);
+      expect(find.text('Visits'), findsOneWidget);
+      expect(find.text('Services'), findsOneWidget);
     });
 
     testWidgets('Snowflake button in AppBar navigates to About the Fair page', (WidgetTester tester) async {
       // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -99,17 +123,29 @@ void main() {
     testWidgets('drawer displays expected widgets', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -133,17 +169,29 @@ void main() {
     testWidgets('navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -161,17 +209,29 @@ void main() {
     testWidgets('navigates to ImportantInfoPage when Important information in drawer is tapped', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -189,17 +249,29 @@ void main() {
     testWidgets('navigates to SettingsPage when Settings in drawer is tapped', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -217,17 +289,29 @@ void main() {
     testWidgets('BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -240,27 +324,27 @@ void main() {
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
       expect(homePageState.index, 1);
 
-      await tester.tap(find.text('Stalls'));
+      await tester.tap(find.text('Shopping'));
       await tester.pumpAndSettle();
 
       expect(homePageState.index, 2);
 
-      await tester.tap(find.text('Music'));
+      await tester.tap(find.text('Performances'));
       await tester.pumpAndSettle();
 
       expect(homePageState.index, 3);
 
-      await tester.tap(find.text('Events'));
+      await tester.tap(find.text('Community'));
       await tester.pumpAndSettle();
 
       expect(homePageState.index, 4);
 
-      await tester.tap(find.text('Places'));
+      await tester.tap(find.text('Visits'));
       await tester.pumpAndSettle();
 
       expect(homePageState.index, 5);
 
-      await tester.tap(find.text('Other'));
+      await tester.tap(find.text('Services'));
       await tester.pumpAndSettle();
 
       expect(homePageState.index, 6);

@@ -223,20 +223,20 @@ class HomePageState extends State<HomePage> {
 
   final _listingsKeyFood = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyShopping = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyMusic = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyEvent = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyPlace = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyCharityCommunityInfo = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyPerformance = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyVisitExperience = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
     MapPage(listings: listings, key: mapPageKey),
-    FilteredListingsPage(filterPrimaryType: "Food", listings: listings, key: _listingsKeyFood),
-    FilteredListingsPage(filterPrimaryType: "Stalls", listings: listings, key: _listingsKeyShopping),
-    FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
-    FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
-    FilteredListingsPage(filterPrimaryType: "Place", listings: listings, key: _listingsKeyPlace),
-    FilteredListingsPage(filterPrimaryType: "Other", listings: listings, key: _listingsKeyService),
-    FilteredListingsPage(filterPrimaryType: "Saved", listings: listings),
+    FilteredListingsPage(filterCategory: "Food", listings: listings, key: _listingsKeyFood),
+    FilteredListingsPage(filterCategory: "Shopping", listings: listings, key: _listingsKeyShopping),
+    FilteredListingsPage(filterCategory: "Performance", listings: listings, key: _listingsKeyPerformance),
+    FilteredListingsPage(filterCategory: "Charity/Community/Info", listings: listings, key: _listingsKeyCharityCommunityInfo),
+    FilteredListingsPage(filterCategory: "Visits/Experiences", listings: listings, key: _listingsKeyVisitExperience),
+    FilteredListingsPage(filterCategory: "Services", listings: listings, key: _listingsKeyService),
+    FilteredListingsPage(filterCategory: "Saved", listings: listings),
   ];
 
   void aboutDialog() {
@@ -359,9 +359,9 @@ class HomePageState extends State<HomePage> {
                 case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
                 case 1 : _listingsKeyFood.currentState?.onTabVisible();
                 case 2 : _listingsKeyShopping.currentState?.onTabVisible();
-                case 3 : _listingsKeyMusic.currentState?.onTabVisible();
-                case 4 : _listingsKeyEvent.currentState?.onTabVisible();
-                case 5 : _listingsKeyPlace.currentState?.onTabVisible();
+                case 3 : _listingsKeyPerformance.currentState?.onTabVisible();
+                case 4 : _listingsKeyCharityCommunityInfo.currentState?.onTabVisible();
+                case 5 : _listingsKeyVisitExperience.currentState?.onTabVisible();
                 case 6 : _listingsKeyService.currentState?.onTabVisible();
               }
               setState(() {
@@ -371,11 +371,11 @@ class HomePageState extends State<HomePage> {
             items: const [
               BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
               BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-              BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-              BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-              BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
-              BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
+              BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Shopping"),
+              BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Performances"),
+              BottomNavigationBarItem(icon: Icon(Icons.event), label: "Community"),
+              BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Visits"),
+              BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
             ],
           ),
         drawer: Drawer(
@@ -429,7 +429,7 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", listings: listings)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterCategory: "Saved", listings: listings)));
                   },
                 ),
               ),
