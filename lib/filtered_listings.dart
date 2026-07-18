@@ -46,11 +46,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   List<bool> detailsVisibilityList = List<bool>.filled(500, false); // start with plenty enough to load all listings
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
+  late String filterPrimaryType;
 
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
+    filterPrimaryType = widget.filterPrimaryType;
     // whenever visible positions change, show the thumb and ensure rebuild
   }
 
@@ -129,7 +131,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         }).toList();
       }
 
-      if ((preferredSortingMethod == SortingMethod.values[2] && !(widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite'))) {
+      if ((preferredSortingMethod == SortingMethod.values[2] && !(filterPrimaryType == 'Music' || filterPrimaryType == 'Event' || filterPrimaryType == 'Favourite'))) {
         // User prefers time sorting but this isn't allowed; use fallback (a-z) sorting but don't change their saved preferences
         // NB separate to the above test since we can still add the distances
         useFallbackSorting = true;
@@ -237,6 +239,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
   }
 
+  void filteringDropdownCallback(String? selectedValue) {
+    HapticFeedback.selectionClick();
+    if (selectedValue is String) {
+      filterPrimaryType = selectedValue;
+      setState(() { });
+    }
+  }
+
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
@@ -315,17 +325,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 1: Filter by primaryType (e.g. "Food", "Music", etc.)
     List<Map<String, dynamic>> primaryFiltered = [];
-    if (widget.filterPrimaryType == 'All') {
+    if (filterPrimaryType == 'All') {
       primaryFiltered = listings.toList();
-    } else  if (widget.filterPrimaryType == 'Other') {
+    } else  if (filterPrimaryType == 'Other') {
       primaryFiltered = listings.where((listing) => listing['primaryType'].startsWith('Service')).toList();
-    } else if (widget.filterPrimaryType == 'Favourite') {
+    } else if (filterPrimaryType == 'Favourite') {
       primaryFiltered = listings.where((listing) => favouriteListingKeys.contains(listing['id'])).toList();
-    } else if (widget.filterPrimaryType == 'Stalls') {
+    } else if (filterPrimaryType == 'Stalls') {
       // special case to prevent the rename breaking existing data
-      primaryFiltered = listings.where((listing) => (listing['primaryType'] == 'Shopping' || listing['primaryType'] == widget.filterPrimaryType)).toList();
+      primaryFiltered = listings.where((listing) => (listing['primaryType'] == 'Shopping' || listing['primaryType'] == filterPrimaryType)).toList();
     } else {
-      primaryFiltered = listings.where((listing) => listing['primaryType'] == widget.filterPrimaryType).toList();
+      primaryFiltered = listings.where((listing) => listing['primaryType'] == filterPrimaryType).toList();
     }
 
     // Step 2: Sort the filtered listings
@@ -357,6 +367,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       bottom: false,
       child: Column(
         children: [
+          _buildFilteringDropdown(context),
           Container(
             height: 52,
             decoration: BoxDecoration(
@@ -378,7 +389,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           child: SearchBar(
                             autoFocus: true,
                             elevation: const WidgetStatePropertyAll(0),
-                            hintText: switch (widget.filterPrimaryType) {
+                            hintText: switch (filterPrimaryType) {
                               'All' => 'Search all listings...',
                               'Food' => 'Search food & drink vendors...',
                               'Stalls' => 'Search market stalls...',
@@ -418,13 +429,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       children: [
                         Expanded(child: _buildSortingDropdown(context)),
                         // only show the Scroll To Now button on Music/Events/Favourite
-                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite') ?
+                        if (filterPrimaryType == 'Music' || filterPrimaryType == 'Event' || filterPrimaryType == 'Favourite')
                           SizedBox(
                             height: 36,
                             width: 36,
                             child: FloatingActionButton(
                               key: const ValueKey('nowFab'),
-                              heroTag: 'nowFab_${widget.filterPrimaryType}_page',
+                              heroTag: 'nowFab_${filterPrimaryType}_page',
                               backgroundColor: Theme.of(context).colorScheme.secondary,
                               foregroundColor: (isItEventDay()) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
                               elevation: 0,
@@ -470,17 +481,17 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               },
                               child: const Icon(Icons.update),
                             ),
-                          ) : const SizedBox.shrink(),
-                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite') ?
-                          const SizedBox(width: 4) : const SizedBox.shrink(),
+                          ),
+                        if (filterPrimaryType == 'Music' || filterPrimaryType == 'Event' || filterPrimaryType == 'Favourite')
+                          const SizedBox(width: 4),
                         // only show the Hide Past Listings button on Music/Events/Favourite
-                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite') ?
+                        if (filterPrimaryType == 'Music' || filterPrimaryType == 'Event' || filterPrimaryType == 'Favourite')
                           SizedBox(
                             height: 36,
                             width: 36,
                             child: FloatingActionButton(
                               key: const ValueKey('hidePastListingsFab'),
-                              heroTag: 'hidePastListingsFab_${widget.filterPrimaryType}_page',
+                              heroTag: 'hidePastListingsFab_${filterPrimaryType}_page',
                               backgroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary) : Theme.of(context).colorScheme.secondary,
                               foregroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.surfaceDim,
                               elevation: 0,
@@ -496,15 +507,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               },
                               child: const Icon(Icons.event_busy),
                             ),
-                          ) : const SizedBox.shrink(),
-                        (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite') ?
-                          const SizedBox(width: 4) : const SizedBox.shrink(),
+                          ),
+                        if (filterPrimaryType == 'Music' || filterPrimaryType == 'Event' || filterPrimaryType == 'Favourite')
+                          const SizedBox(width: 4),
                         SizedBox(
                           height: 36,
                           width: 36,
                           child: FloatingActionButton(
                             key: const ValueKey('searchFab'),
-                            heroTag: 'searchFab_${widget.filterPrimaryType}_page',
+                            heroTag: 'searchFab_${filterPrimaryType}_page',
                             backgroundColor: Theme.of(context).colorScheme.secondary,
                             foregroundColor: Theme.of(context).colorScheme.onSecondary,
                             elevation: 0,
@@ -674,7 +685,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: DropdownMenu(
               initialSelection: preferredSortingMethod,
-              width: MediaQuery.of(context).size.width * 0.25 + 40,
+              width: MediaQuery.of(context).size.width * 0.5 + 40,
               label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
               leadingIcon: const Icon(Icons.sort),
               textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
@@ -707,7 +718,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   label: "Name (a-z)",
                   leadingIcon: const Icon(Icons.sort_by_alpha),
                 ),
-                if (widget.filterPrimaryType == 'Music' || widget.filterPrimaryType == 'Event' || widget.filterPrimaryType == 'Favourite')
+                if (filterPrimaryType == 'Music' || filterPrimaryType == 'Event' || filterPrimaryType == 'Favourite')
                   DropdownMenuEntry(
                     value: SortingMethod.values[2],
                     label: "Time",
@@ -734,8 +745,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: DropdownMenu(
-              initialSelection: preferredSortingMethod,
-              width: MediaQuery.of(context).size.width * 0.25 + 40,
+              initialSelection: filterPrimaryType,
+              width: MediaQuery.of(context).size.width - 4,
               label: const Text("Show", style: TextStyle(fontWeight: FontWeight.bold)),
               leadingIcon: const Icon(Icons.filter),
               textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
@@ -753,37 +764,47 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               ),
               dropdownMenuEntries: [
                 DropdownMenuEntry(
-                  value: SortingMethod.values[1],
-                  label: "Performance & Music",
-                  leadingIcon: const Icon(Icons.directions_walk),
+                  value: 'All',
+                  label: "All",
+                  leadingIcon: const Icon(Icons.all_inclusive),
                 ),
                 DropdownMenuEntry(
-                  value: SortingMethod.values[1],
+                  value: 'Music',
+                  label: "Music",
+                  leadingIcon: const Icon(Icons.piano),
+                ),
+                DropdownMenuEntry(
+                  value: 'Event',
+                  label: "Performance",
+                  leadingIcon: const Icon(Icons.theater_comedy),
+                ),
+                DropdownMenuEntry(
+                  value: 'Visit',
                   label: "Visit & Experience",
-                  leadingIcon: const Icon(Icons.directions_walk),
+                  leadingIcon: const Icon(Icons.tour),
                 ),
                 DropdownMenuEntry(
-                  value: SortingMethod.values[1],
+                  value: 'Food',
                   label: "Food & Drink",
-                  leadingIcon: const Icon(Icons.directions_walk),
+                  leadingIcon: const Icon(Icons.fastfood),
                 ),
                 DropdownMenuEntry(
-                  value: SortingMethod.values[3],
+                  value: 'Stalls',
                   label: "Shopping & Stalls",
-                  leadingIcon: const Icon(Icons.signpost),
+                  leadingIcon: const Icon(Icons.local_offer),
                 ),
                 DropdownMenuEntry(
-                  value: SortingMethod.values[0],
+                  value: 'Info',
                   label: "Community & Info",
-                  leadingIcon: const Icon(Icons.sort_by_alpha),
+                  leadingIcon: const Icon(Icons.volunteer_activism),
                 ),
                 DropdownMenuEntry(
-                  value: SortingMethod.values[0],
+                  value: 'Other',
                   label: "Service",
-                  leadingIcon: const Icon(Icons.sort_by_alpha),
+                  leadingIcon: const Icon(Icons.family_restroom),
                 ),
               ],
-              onSelected: sortingDropdownCallback,
+              onSelected: filteringDropdownCallback,
             ),
           ),
         ],
