@@ -25,18 +25,24 @@ void main() {
         'id': '1',
         'visibleOnMap': 'TRUE',
         'cancelled': 'FALSE',
+        'groupParent': 'TRUE',
         'brickAndMortar': 'FALSE',
         'emoji': '',
         'title': 'Food Group',
         'subtitle': 'Food',
         'groupID': '1',
-        'category': 'Group-Food',
+        'food': 'TRUE',
+        'shopping': 'FALSE',
+        'charityCommunityInfo': 'FALSE',
+        'performance': 'FALSE',
+        'visitExperience': 'FALSE',
+        'service': 'FALSE',
         'location': 'Fake Street',
         'description': '',
         'email': '',
         'website': '',
         'phone': '',
-        'latLng': '52.199838,0.139016',  // 199m
+        'latLng': '52.199838,0.139016', // 199m
         'imageURL': '',
         'startTime': '10:30',
         'endTime': '16:30',
@@ -45,18 +51,24 @@ void main() {
         'id': '2',
         'visibleOnMap': 'FALSE',
         'cancelled': 'FALSE',
+        'groupParent': 'FALSE',
         'brickAndMortar': 'FALSE',
         'emoji': '🍩',
         'title': 'Glazed and Confused',
         'subtitle': 'Doughnuts',
         'groupID': '1',
-        'category': 'Food',
+        'food': 'TRUE',
+        'shopping': 'FALSE',
+        'charityCommunityInfo': 'FALSE',
+        'performance': 'FALSE',
+        'visitExperience': 'FALSE',
+        'service': 'FALSE',
         'location': 'Fake Street',
         'description': 'Nice buns',
         'email': '',
         'website': 'https://www.glazedandconfused.com',
         'phone': '01223 111111',
-        'latLng': '52.199687,0.138813',  // 535m
+        'latLng': '52.199687,0.138813', // 535m
         'imageURL': '',
         'startTime': '11:00',
         'endTime': '15:00',
@@ -65,18 +77,24 @@ void main() {
         'id': '3',
         'visibleOnMap': 'TRUE',
         'cancelled': 'FALSE',
+        'groupParent': 'FALSE',
         'brickAndMortar': 'FALSE',
         'emoji': '🍣',
         'title': 'Sushi Squad',
         'subtitle': 'Sushi',
         'groupID': '',
-        'category': 'Food',
+        'food': 'TRUE',
+        'shopping': 'FALSE',
+        'charityCommunityInfo': 'FALSE',
+        'performance': 'FALSE',
+        'visitExperience': 'FALSE',
+        'service': 'FALSE',
         'location': 'Implausible Avenue',
         'description': 'Cold rice',
         'email': '',
         'website': 'https://www.sushisquad.com',
         'phone': '01223 222222',
-        'latLng': '52.199188,0.139437',  // 135m
+        'latLng': '52.199188,0.139437', // 135m
         'imageURL': '',
         'startTime': '12:00',
         'endTime': '16:30',
@@ -378,16 +396,16 @@ void main() {
     test('getCategoryColor returns correct color for given types', () {
       final foodColor = getCategoryColor("light", "Food");
       final shoppingColor = getCategoryColor("light", "Shopping");
-      final musicColor = getCategoryColor("light", "Music");
-      final eventColor = getCategoryColor("light", "Event");
-      final placeColor = getCategoryColor("light", "Place");
+      final performanceColor = getCategoryColor("light", "Performance");
+      final charityCommunityInfoColor = getCategoryColor("light", "Charity/Community/Info");
+      final visitExperienceColor = getCategoryColor("light", "Visit/Experience");
       final serviceColor = getCategoryColor("light", "Service");
 
       expect(foodColor, const Color.fromRGBO(255, 156, 26, 1.0));
       expect(shoppingColor, const Color.fromRGBO(209, 81, 85, 1.0));
-      expect(musicColor, const Color.fromRGBO(190, 110, 230, 1.0));
-      expect(eventColor, const Color.fromRGBO(243, 190, 66, 1.0));
-      expect(placeColor, const Color.fromRGBO(79, 184, 75, 1.0));
+      expect(performanceColor, const Color.fromRGBO(190, 110, 230, 1.0));
+      expect(charityCommunityInfoColor, const Color.fromRGBO(243, 190, 66, 1.0));
+      expect(visitExperienceColor, const Color.fromRGBO(79, 184, 75, 1.0));
       expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
     });
 
@@ -468,12 +486,18 @@ void main() {
           "id": "1",
           "visibleOnMap": "TRUE",
           "cancelled": "FALSE",
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           "emoji": "🍩",
           "title": "Glazed and Confused",
           "subtitle": "Doughnuts",
           "groupID": "",
-          "category": "Food",
+          "food": "TRUE",
+          "shopping": "FALSE",
+          "charityCommunityInfo": "FALSE",
+          "performance": "FALSE",
+          "visitExperience": "FALSE",
+          "service": "FALSE",
           "location": "Gwydir St Car Park",
           "description": "Nice buns",
           "email": "",
@@ -488,12 +512,18 @@ void main() {
           "id": "2",
           "visibleOnMap": "TRUE",
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           "emoji": "🎨",
           "title": "The Crafty Canvas",
           "subtitle": "Crafts",
           "groupID": "",
-          "category": "Shopping",
+          "food": "FALSE",
+          "shopping": "TRUE",
+          "charityCommunityInfo": "FALSE",
+          "performance": "FALSE",
+          "visitExperience": "FALSE",
+          "service": "FALSE",
           "location": "Donkey Common",
           "description": "Artistic crafts for all ages",
           "email": "contact@craftycanvas.com",
@@ -508,12 +538,18 @@ void main() {
           "id": "3",
           "visibleOnMap": "TRUE",
           "cancelled": "FALSE",
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           "emoji": "🎷",
           "title": "The Jazz Junction",
           "subtitle": "Jazz",
           "groupID": "",
-          "category": "Music",
+          "food": "FALSE",
+          "shopping": "FALSE",
+          "charityCommunityInfo": "FALSE",
+          "performance": "TRUE",
+          "visitExperience": "FALSE",
+          "service": "FALSE",
           "location": "Donkey Common",
           "description": "Smooth jazz performances all day",
           "email": "contact@jazzjunction.com",
@@ -528,12 +564,18 @@ void main() {
           "id": "4",
           "visibleOnMap": "TRUE",
           "cancelled": "FALSE",
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           "emoji": "🎅",
           "title": "Santa",
           "subtitle": "Kindly Elf",
           "groupID": "",
-          "category": "Event",
+          "food": "FALSE",
+          "shopping": "FALSE",
+          "charityCommunityInfo": "TRUE",
+          "performance": "FALSE",
+          "visitExperience": "FALSE",
+          "service": "FALSE",
           "location": "Zion Baptist Church",
           "description": "Santa will be available all day",
           "email": "",
@@ -548,12 +590,18 @@ void main() {
           "id": "5",
           "visibleOnMap": "TRUE",
           "cancelled": "FALSE",
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           "emoji": "ℹ️",
           "title": "Information Point",
           "subtitle": "Help Point",
           "groupID": "",
-          "category": "Service",
+          "food": "FALSE",
+          "shopping": "FALSE",
+          "charityCommunityInfo": "FALSE",
+          "performance": "FALSE",
+          "visitExperience": "FALSE",
+          "service": "TRUE",
           "location": "Ditchburn Gardens",
           "description": "Visit us for any questions or assistance",
           "email": "info@millroadwinterfair.org",
@@ -598,11 +646,11 @@ void main() {
 
       // Verify all checkboxes are present
       expect(find.widgetWithText(CheckboxListTile, "Food"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Stalls"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Music"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Events"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Places"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Other"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Shopping"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Performances"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Charity/Community/Info"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Visits/Experiences"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
 
       // Test Food checkbox
       await tester.tap(find.widgetWithText(CheckboxListTile, "Food"));
@@ -625,7 +673,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Shopping checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Stalls"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -634,7 +682,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Stalls"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -645,7 +693,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Music checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Performances"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -654,7 +702,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Performances"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -665,7 +713,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Events checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Events"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity/Community/Info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -674,7 +722,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Events"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity/Community/Info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -685,7 +733,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Services checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Other"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -694,7 +742,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, false);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Other"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -743,12 +791,18 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
           'subtitle': 'Doughnuts',
           'groupID': '',
-          'category': 'Food',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',

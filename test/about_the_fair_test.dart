@@ -32,7 +32,12 @@ void main() {
           'title': 'Glazed and Confused',
           'subtitle': 'Doughnuts',
           'groupID': '',
-          'category': 'Food',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -70,7 +75,7 @@ void main() {
       expect(homePageState.index, 1);
 
       // 2) Select Stalls tab (index 2)
-      await tester.tap(find.text('Stalls'));
+      await tester.tap(find.text('Shopping'));
       await tester.pumpAndSettle();
       expect(homePageState.index, 2);
 

@@ -33,7 +33,7 @@ void main() {
         final invalidResponse = {};
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
-              (_) async => http.Response.bytes(
+          (_) async => http.Response.bytes(
             utf8.encode(jsonEncode(invalidResponse)),
             500,
             headers: {'content-type': 'application/json; charset=utf-8'},
@@ -49,16 +49,48 @@ void main() {
       test('returns a list of listings when response is valid', () async {
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "imageURL", "startTime", "endTime"],
+            [
+              "id",
+              "visibleOnMap",
+              "cancelled",
+              "groupParent",
+              "brickAndMortar",
+              "emoji",
+              "title",
+              "subtitle",
+              "groupID",
+              "food",
+              "shopping",
+              "charityCommunityInfo",
+              "performance",
+              "visitExperience",
+              "service",
+              "location",
+              "description",
+              "email",
+              "website",
+              "phone",
+              "latLng",
+              "imageURL",
+              "startTime",
+              "endTime"
+            ],
             [
               "1",
               "TRUE",
+              "FALSE",
+              "FALSE",
               "FALSE",
               "🍩",
               "Glazed and Confused",
               "Doughnuts",
               "",
-              "Food",
+              "TRUE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
               "Gwydir St Car Park",
               "Nice buns",
               "",
@@ -73,7 +105,7 @@ void main() {
         };
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
-              (_) async => http.Response.bytes(
+          (_) async => http.Response.bytes(
             utf8.encode(jsonEncode(mockResponse)),
             200,
             headers: {'content-type': 'application/json; charset=utf-8'},
@@ -88,11 +120,18 @@ void main() {
             'id': '1',
             'visibleOnMap': 'TRUE',
             'cancelled': 'FALSE',
+            'groupParent': 'FALSE',
+            'brickAndMortar': 'FALSE',
             'emoji': '🍩',
             'title': 'Glazed and Confused',
             'subtitle': 'Doughnuts',
             'groupID': '',
-            'category': 'Food',
+            'food': 'TRUE',
+            'shopping': 'FALSE',
+            'charityCommunityInfo': 'FALSE',
+            'performance': 'FALSE',
+            'visitExperience': 'FALSE',
+            'service': 'FALSE',
             'location': 'Gwydir St Car Park',
             'description': 'Nice buns',
             'email': '',
@@ -118,11 +157,18 @@ void main() {
             'id': '1',
             'visibleOnMap': 'TRUE',
             'cancelled': 'FALSE',
+            'groupParent': 'FALSE',
+            'brickAndMortar': 'FALSE',
             'emoji': '🍩',
             'title': 'Glazed and Confused',
             'subtitle': 'Doughnuts',
             'groupID': '',
-            'category': 'Food',
+            'food': 'TRUE',
+            'shopping': 'FALSE',
+            'charityCommunityInfo': 'FALSE',
+            'performance': 'FALSE',
+            'visitExperience': 'FALSE',
+            'service': 'FALSE',
             'location': 'Gwydir St Car Park',
             'description': 'Nice buns',
             'email': '',
@@ -158,16 +204,48 @@ void main() {
       test('handles rows with missing cells by padding to headers', () async {
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "imageURL", "startTime", "endTime"],
+            [
+              "id",
+              "visibleOnMap",
+              "cancelled",
+              "groupParent",
+              "brickAndMortar",
+              "emoji",
+              "title",
+              "subtitle",
+              "groupID",
+              "food",
+              "shopping",
+              "charityCommunityInfo",
+              "performance",
+              "visitExperience",
+              "service",
+              "location",
+              "description",
+              "email",
+              "website",
+              "phone",
+              "latLng",
+              "imageURL",
+              "startTime",
+              "endTime"
+            ],
             [
               "1",
               "TRUE",
+              "FALSE",
+              "FALSE",
               "FALSE",
               "🍩",
               "Glazed and Confused",
               "Doughnuts",
               "",
-              "Food",
+              "TRUE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
               "Gwydir St Car Park",
               "Nice buns",
               "",
@@ -182,7 +260,7 @@ void main() {
         };
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
-              (_) async => http.Response.bytes(
+          (_) async => http.Response.bytes(
             utf8.encode(jsonEncode(mockResponse)),
             200,
             headers: {'content-type': 'application/json; charset=utf-8'},
@@ -200,17 +278,48 @@ void main() {
       test('handles explicit null cells by converting them to empty strings', () async {
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "brickAndMortar", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "imageURL", "startTime", "endTime"],
+            [
+              "id",
+              "visibleOnMap",
+              "cancelled",
+              "groupParent",
+              "brickAndMortar",
+              "emoji",
+              "title",
+              "subtitle",
+              "groupID",
+              "food",
+              "shopping",
+              "charityCommunityInfo",
+              "performance",
+              "visitExperience",
+              "service",
+              "location",
+              "description",
+              "email",
+              "website",
+              "phone",
+              "latLng",
+              "imageURL",
+              "startTime",
+              "endTime"
+            ],
             [
               "1",
               "TRUE",
+              "FALSE",
               "FALSE",
               "FALSE",
               "🍩",
               "Glazed and Confused",
               "Doughnuts",
               "",
-              "Food",
+              "TRUE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
               "Gwydir St Car Park",
               "Nice buns",
               "",
@@ -225,7 +334,7 @@ void main() {
         };
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
-              (_) async => http.Response.bytes(
+          (_) async => http.Response.bytes(
             utf8.encode(jsonEncode(mockResponse)),
             200,
             headers: {'content-type': 'application/json; charset=utf-8'},
@@ -245,17 +354,48 @@ void main() {
 
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "brickAndMortar", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "imageURL", "startTime", "endTime"],
+            [
+              "id",
+              "visibleOnMap",
+              "cancelled",
+              "groupParent",
+              "brickAndMortar",
+              "emoji",
+              "title",
+              "subtitle",
+              "groupID",
+              "food",
+              "shopping",
+              "charityCommunityInfo",
+              "performance",
+              "visitExperience",
+              "service",
+              "location",
+              "description",
+              "email",
+              "website",
+              "phone",
+              "latLng",
+              "imageURL",
+              "startTime",
+              "endTime"
+            ],
             [
               "1",
               "TRUE",
+              "FALSE",
               "FALSE",
               "FALSE",
               "🍩",
               "Glazed and Confused",
               "Doughnuts",
               "",
-              "Food",
+              "TRUE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
               "Gwydir St Car Park",
               "Nice buns",
               "",
@@ -270,7 +410,7 @@ void main() {
         };
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
-              (_) async => http.Response.bytes(
+          (_) async => http.Response.bytes(
             utf8.encode(jsonEncode(mockResponse)),
             200,
             headers: {'content-type': 'application/json; charset=utf-8'},
@@ -294,7 +434,12 @@ void main() {
             'title': 'Glazed and Confused',
             'subtitle': 'Doughnuts',
             'groupID': '',
-            'category': 'Food',
+            'food': 'TRUE',
+            'shopping': 'FALSE',
+            'charityCommunityInfo': 'FALSE',
+            'performance': 'FALSE',
+            'visitExperience': 'FALSE',
+            'service': 'FALSE',
             'location': 'Gwydir St Car Park',
             'description': 'Nice buns',
             'email': '',
