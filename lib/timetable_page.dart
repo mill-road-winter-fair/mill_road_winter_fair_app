@@ -300,7 +300,7 @@ class _TimetablePageState extends State<TimetablePage> {
               height: 1.1 * maxTimeFontSize,
               padding: EdgeInsets.symmetric(horizontal: 1),
               child: AutoSizeText(
-                '${pe.startTime.hour}:${pe.startTime.minute}–${pe.endTime.hour}:${pe.endTime.minute}',
+                '${pe.startTime.hour.toString().padLeft(2,'0')}:${pe.startTime.minute.toString().padLeft(2,'0')}–${pe.endTime.hour.toString().padLeft(2,'0')}:${pe.endTime.minute.toString().padLeft(2,'0')}',
                 style: TextStyle(height: 1.1, fontSize: maxTimeFontSize, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant),
                 maxLines: 1,
                 minFontSize: minTimeFontSize,
@@ -642,17 +642,13 @@ class _TimetablePageState extends State<TimetablePage> {
                                                         child: Container(
                                                           padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
                                                           decoration: BoxDecoration(
-                                                            color: (pe.favourited) ? colorScheme.primary.withAlpha(20) : colorScheme.onPrimary,
+                                                            color: (pe.favourited) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
                                                             borderRadius: BorderRadius.circular(4),
                                                             boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
                                                             border: Border.all(width: 0.2, color: colorScheme.onSecondary),
-/*                                                             image: (isAlerting)
-                                                              ? DecorationImage(image: AssetImage('assets/icons/alert.png'), scale: 3.0, alignment: (littleBox) ? AlignmentGeometry.center : AlignmentGeometry.topRight, opacity: (littleBox) ? 1.0 : 0.5) 
-                                                              : (eventType == 'film') 
-                                                                ? DecorationImage(image: AssetImage('assets/icons/filmEvent.png'), scale: 2.5, alignment: (littleBox) ? AlignmentGeometry.center : AlignmentGeometry.topRight, opacity: 0.5) 
-                                                                : (eventType == 'other') 
-                                                                ? DecorationImage(image: AssetImage('assets/icons/otherEvent.png'), scale: 2.5, alignment: (littleBox) ? AlignmentGeometry.center : AlignmentGeometry.topRight, opacity: 0.5) 
-                                                                : null, */
+                                                            image: (pe.favourited)
+                                                              ? DecorationImage(image: AssetImage('assets/icons/favorite_24dp_992F30.png'), scale: 1.5, alignment: AlignmentGeometry.topRight, opacity: 0.5) 
+                                                              : null,
                                                           ),
                                                           child: eventRect(pe, colorScheme, isLandscape, null)
                                                         ),
