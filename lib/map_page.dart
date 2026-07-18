@@ -350,8 +350,22 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
-    debugPrint('updateMarkerVisibility called');
+  void updateMarkerVisibilityIgnoringFilters(List<MarkerId> idList, bool visibleState) {
+    debugPrint('updateMarkerVisibilityIgnoringFilters called');
+    setState(() {
+      for (var id in idList) {
+        final currentMarker = markers[id];
+        if (currentMarker == null) continue;
+
+        markers[id] = currentMarker.copyWith(
+          visibleParam: visibleState,
+        );
+      }
+    });
+  }
+
+  void updateMarkerVisibilityRespectingFilters(List<MarkerId> idList, bool visibleState) {
+    debugPrint('updateMarkerVisibilityRespectingFilters called');
 
     // 1. Define category mapping to avoid repetition and hardcoded strings.
     const categoryMapping = {
@@ -819,24 +833,24 @@ class MapPageState extends State<MapPage> {
 
   void hideAllMarkers() {
     debugPrint('hideAllMarkers called');
-    updateMarkerVisibility(
+    updateMarkerVisibilityIgnoringFilters(
         _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, false);
   }
 
   void showAllMarkers() {
     debugPrint('showAllMarkers called');
-    updateMarkerVisibility(
+    updateMarkerVisibilityIgnoringFilters(
         _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, true);
   }
 
   void showFilteredMarkers() {
     debugPrint('showFilteredMarkers called');
-    updateMarkerVisibility(_foodMarkerIds, filterSettings['Food']!);
-    updateMarkerVisibility(_shoppingMarkerIds, filterSettings['Shopping']!);
-    updateMarkerVisibility(_charityCommunityInfoMarkerIds, filterSettings['Charity/Community/Info']!);
-    updateMarkerVisibility(_performanceMarkerIds, filterSettings['Performances']!);
-    updateMarkerVisibility(_visitExperienceMarkerIds, filterSettings['Visits/Experiences']!);
-    updateMarkerVisibility(_serviceMarkerIds, filterSettings['Services']!);
+    updateMarkerVisibilityIgnoringFilters(_foodMarkerIds, filterSettings['Food']!);
+    updateMarkerVisibilityIgnoringFilters(_shoppingMarkerIds, filterSettings['Shopping']!);
+    updateMarkerVisibilityIgnoringFilters(_charityCommunityInfoMarkerIds, filterSettings['Charity/Community/Info']!);
+    updateMarkerVisibilityIgnoringFilters(_performanceMarkerIds, filterSettings['Performances']!);
+    updateMarkerVisibilityIgnoringFilters(_visitExperienceMarkerIds, filterSettings['Visits/Experiences']!);
+    updateMarkerVisibilityIgnoringFilters(_serviceMarkerIds, filterSettings['Services']!);
   }
 
   void showFilterMenu() {
@@ -872,7 +886,7 @@ class MapPageState extends State<MapPage> {
                         filterSettings["Food"] = value!;
                       });
                       final idList = _foodMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
@@ -886,7 +900,7 @@ class MapPageState extends State<MapPage> {
                         filterSettings["Shopping"] = value!;
                       });
                       final idList = _shoppingMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
@@ -900,7 +914,7 @@ class MapPageState extends State<MapPage> {
                         filterSettings["Charity/Community/Info"] = value!;
                       });
                       final idList = _charityCommunityInfoMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
@@ -914,7 +928,7 @@ class MapPageState extends State<MapPage> {
                         filterSettings["Performances"] = value!;
                       });
                       final idList = _performanceMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
@@ -928,7 +942,7 @@ class MapPageState extends State<MapPage> {
                         filterSettings["Visits/Experiences"] = value!;
                       });
                       final idList = _visitExperienceMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
@@ -942,7 +956,7 @@ class MapPageState extends State<MapPage> {
                         filterSettings["Services"] = value!;
                       });
                       final idList = _serviceMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   Divider(color: Colors.grey[350]),
@@ -1110,7 +1124,7 @@ class MapPageState extends State<MapPage> {
         (l) => l['id'].toString() == marker.markerId.value,
         orElse: () => {},
       );
-      if (listing.isEmpty || listing['visibleOnMap'] == 'TRUE') {
+      if (listing.isEmpty || listing['visibleOnMap'] == 'FALSE') {
         markers.remove(marker.markerId);
       }
     }
@@ -1640,7 +1654,7 @@ class MapPageState extends State<MapPage> {
                               filterSettings['Events'] = true;
                               filterSettings['Places'] = true;
                               filterSettings['Other'] = true;
-                              updateMarkerVisibility(idList, true);
+                              updateMarkerVisibilityIgnoringFilters(idList, true);
                             });
                           }
                           _setMapCameraToFitMapMarkers();
