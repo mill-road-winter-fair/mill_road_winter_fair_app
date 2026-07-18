@@ -664,7 +664,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   Widget _buildSortingDropdown(BuildContext context) {
     return Container(
-      key: const ValueKey('dropdown'),
+      key: const ValueKey('sortingdropdown'),
       height: 36,
       color: Theme.of(context).colorScheme.surfaceDim,
       child: Row(
@@ -674,7 +674,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: DropdownMenu(
               initialSelection: preferredSortingMethod,
-              width: MediaQuery.of(context).size.width * 0.45 + 40,
+              width: MediaQuery.of(context).size.width * 0.25 + 40,
               label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
               leadingIcon: const Icon(Icons.sort),
               textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
@@ -721,4 +721,74 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       ),
     );
   }
+
+
+  Widget _buildFilteringDropdown(BuildContext context) {
+    return Container(
+      key: const ValueKey('filteringdropdown'),
+      height: 36,
+      color: Theme.of(context).colorScheme.surfaceDim,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: DropdownMenu(
+              initialSelection: preferredSortingMethod,
+              width: MediaQuery.of(context).size.width * 0.25 + 40,
+              label: const Text("Show", style: TextStyle(fontWeight: FontWeight.bold)),
+              leadingIcon: const Icon(Icons.filter),
+              textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.secondary,
+                iconColor: Theme.of(context).colorScheme.onSecondary,
+                suffixIconColor: Theme.of(context).colorScheme.onSecondary,
+                prefixIconColor: Theme.of(context).colorScheme.onSecondary,
+                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                isDense: true,
+                visualDensity: const VisualDensity(horizontal: -4),
+                contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 6),
+                constraints: const BoxConstraints(maxHeight: 36),
+              ),
+              dropdownMenuEntries: [
+                DropdownMenuEntry(
+                  value: SortingMethod.values[1],
+                  label: "Performance & Music",
+                  leadingIcon: const Icon(Icons.directions_walk),
+                ),
+                DropdownMenuEntry(
+                  value: SortingMethod.values[1],
+                  label: "Visit & Experience",
+                  leadingIcon: const Icon(Icons.directions_walk),
+                ),
+                DropdownMenuEntry(
+                  value: SortingMethod.values[1],
+                  label: "Food & Drink",
+                  leadingIcon: const Icon(Icons.directions_walk),
+                ),
+                DropdownMenuEntry(
+                  value: SortingMethod.values[3],
+                  label: "Shopping & Stalls",
+                  leadingIcon: const Icon(Icons.signpost),
+                ),
+                DropdownMenuEntry(
+                  value: SortingMethod.values[0],
+                  label: "Community & Info",
+                  leadingIcon: const Icon(Icons.sort_by_alpha),
+                ),
+                DropdownMenuEntry(
+                  value: SortingMethod.values[0],
+                  label: "Service",
+                  leadingIcon: const Icon(Icons.sort_by_alpha),
+                ),
+              ],
+              onSelected: sortingDropdownCallback,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
