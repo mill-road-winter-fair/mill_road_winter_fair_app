@@ -1636,11 +1636,11 @@ class MapPageState extends State<MapPage> {
                           HapticFeedback.lightImpact();
                           // Home button resets the filters if they're all toggled off
                           if (filterSettings['Food'] == false &&
-                              filterSettings['Stalls'] == false &&
-                              filterSettings['Music'] == false &&
-                              filterSettings['Events'] == false &&
-                              filterSettings['Places'] == false &&
-                              filterSettings['Other'] == false) {
+                              filterSettings['Shopping'] == false &&
+                              filterSettings['Performances'] == false &&
+                              filterSettings['Charity/Community/Info'] == false &&
+                              filterSettings['Visits/Experiences'] == false &&
+                              filterSettings['Services'] == false) {
                             final idList = _foodMarkerIds +
                                 _shoppingMarkerIds +
                                 _charityCommunityInfoMarkerIds +
@@ -1649,11 +1649,11 @@ class MapPageState extends State<MapPage> {
                                 _serviceMarkerIds;
                             setState(() {
                               filterSettings['Food'] = true;
-                              filterSettings['Stalls'] = true;
-                              filterSettings['Music'] = true;
-                              filterSettings['Events'] = true;
-                              filterSettings['Places'] = true;
-                              filterSettings['Other'] = true;
+                              filterSettings['Shopping'] = true;
+                              filterSettings['Performances'] = true;
+                              filterSettings['Charity/Community/Info'] = true;
+                              filterSettings['Visits/Experiences'] = true;
+                              filterSettings['Services'] = true;
                               updateMarkerVisibilityIgnoringFilters(idList, true);
                             });
                           }
