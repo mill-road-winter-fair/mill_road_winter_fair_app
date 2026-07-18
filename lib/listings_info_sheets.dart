@@ -142,6 +142,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final String email;
   final String website;
   final String phoneNumber;
+  final String imageURL;
   final String startTime;
   final String endTime;
   // From the parent widget (calculated)
@@ -163,6 +164,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     required this.email,
     required this.website,
     required this.phoneNumber,
+    required this.imageURL,
     required this.startTime,
     required this.endTime,
     required this.approxDistance,

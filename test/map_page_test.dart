@@ -37,6 +37,7 @@ void main() {
         'website': '',
         'phone': '',
         'latLng': '52.199838,0.139016',  // 199m
+        'imageURL': '',
         'startTime': '10:30',
         'endTime': '16:30',
       },
@@ -56,6 +57,7 @@ void main() {
         'website': 'https://www.glazedandconfused.com',
         'phone': '01223 111111',
         'latLng': '52.199687,0.138813',  // 535m
+        'imageURL': '',
         'startTime': '11:00',
         'endTime': '15:00',
       },
@@ -75,6 +77,7 @@ void main() {
         'website': 'https://www.sushisquad.com',
         'phone': '01223 222222',
         'latLng': '52.199188,0.139437',  // 135m
+        'imageURL': '',
         'startTime': '12:00',
         'endTime': '16:30',
       },
@@ -477,6 +480,7 @@ void main() {
           "website": "https://www.glazedandconfused.com",
           "phone": "01223 111111",
           "latLng": "52.199687,0.138813",
+          'imageURL': '',
           "startTime": "10:30",
           "endTime": "16:30",
         },
@@ -496,6 +500,7 @@ void main() {
           "website": "https://www.craftycanvas.com",
           "phone": "01223 222222",
           "latLng": "52.201913,0.131984",
+          'imageURL': '',
           "startTime": "10:30",
           "endTime": "16:30",
         },
@@ -515,6 +520,7 @@ void main() {
           "website": "https://www.jazzjunction.com",
           "phone": "01223 333333",
           "latLng": "52.202188,0.131312",
+          'imageURL': '',
           "startTime": "10:30",
           "endTime": "16:30",
         },
@@ -534,6 +540,7 @@ void main() {
           "website": "",
           "phone": "",
           "latLng": "52.203563,0.132437",
+          'imageURL': '',
           "startTime": "10:30",
           "endTime": "16:30",
         },
@@ -553,6 +560,7 @@ void main() {
           "website": "",
           "phone": "",
           "latLng": "52.200187,0.137313",
+          'imageURL': '',
           "startTime": "10:30",
           "endTime": "16:30",
         }
@@ -747,6 +755,7 @@ void main() {
           'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
+          'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
         }

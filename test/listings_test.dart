@@ -49,7 +49,7 @@ void main() {
       test('returns a list of listings when response is valid', () async {
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
+            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "imageURL", "startTime", "endTime"],
             [
               "1",
               "TRUE",
@@ -65,6 +65,7 @@ void main() {
               "https://www.glazedandconfused.com",
               "01223 111111",
               "52.199687,0.138813",
+              '',
               "10:30",
               "16:30",
             ]
@@ -98,6 +99,7 @@ void main() {
             'website': 'https://www.glazedandconfused.com',
             'phone': '01223 111111',
             'latLng': '52.199687,0.138813',
+            'imageURL': '',
             'startTime': '10:30',
             'endTime': '16:30',
           }
@@ -127,6 +129,7 @@ void main() {
             'website': 'https://www.glazedandconfused.com',
             'phone': '01223 111111',
             'latLng': '52.199687,0.138813',
+            'imageURL': '',
             'startTime': '10:30',
             'endTime': '16:30',
           }
@@ -155,7 +158,7 @@ void main() {
       test('handles rows with missing cells by padding to headers', () async {
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
+            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "imageURL", "startTime", "endTime"],
             [
               "1",
               "TRUE",
@@ -171,6 +174,7 @@ void main() {
               "https://www.glazedandconfused.com",
               "01223 111111",
               "52.199687,0.138813",
+              "",
               "10:30",
               "", // endTime is blank (cleared cell)
             ]
@@ -196,7 +200,7 @@ void main() {
       test('handles explicit null cells by converting them to empty strings', () async {
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "brickAndMortar", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
+            ["id", "visibleOnMap", "cancelled", "brickAndMortar", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "imageURL", "startTime", "endTime"],
             [
               "1",
               "TRUE",
@@ -213,6 +217,7 @@ void main() {
               "https://www.glazedandconfused.com",
               "01223 111111",
               "52.199687,0.138813",
+              "",
               "10:30",
               null,
             ]
@@ -240,7 +245,7 @@ void main() {
 
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "brickAndMortar", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
+            ["id", "visibleOnMap", "cancelled", "brickAndMortar", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "imageURL", "startTime", "endTime"],
             [
               "1",
               "TRUE",
@@ -257,6 +262,7 @@ void main() {
               "https://www.glazedandconfused.com",
               "01223 111111",
               "52.199687,0.138813",
+              "",
               "10:30",
               "16:30",
             ]
@@ -295,6 +301,7 @@ void main() {
             'website': 'https://www.glazedandconfused.com',
             'phone': '01223 111111',
             'latLng': '52.199687,0.138813',
+            'imageURL': '',
             'startTime': '10:30',
             'endTime': '16:30',
           }

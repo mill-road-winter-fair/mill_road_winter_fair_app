@@ -578,6 +578,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 email: listing['email'] ?? '',
                                 website: listing['website'] ?? '',
                                 phoneNumber: listing['phone'] ?? '',
+                                imageURL: listing['imageURL'] ?? '',
                                 startTime: "${listing['startTime']}",
                                 endTime: "${listing['endTime']}",
                                 approxDistance: approximateDistance,

@@ -40,6 +40,7 @@ void main() {
           'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
+          'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
         }
@@ -77,6 +78,7 @@ void main() {
           'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
+          'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
         }
@@ -126,6 +128,7 @@ void main() {
           'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
+          'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
         }
@@ -166,6 +169,7 @@ void main() {
           'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
+          'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
         }
@@ -200,6 +204,7 @@ void main() {
           'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
+          'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
         }
@@ -234,6 +239,7 @@ void main() {
           'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
+          'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
         }
@@ -268,6 +274,7 @@ void main() {
           'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
+          'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
         }
