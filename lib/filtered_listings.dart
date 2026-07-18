@@ -568,7 +568,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           return Column(
                             children: [
                               (!_hidePastListings || !hasEventEnded(listing['endTime'])) ? SpecificListingInfoSheet(
-                                cancelled: listing['cancelled'] == 'TRUE',
+                                cancelled: listing['cancelled'] == 'TRUE' ? true : false,
                                 brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
                                 emoji: listing['emoji'] ?? '',
                                 title: listing['title'],
