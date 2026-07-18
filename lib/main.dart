@@ -39,7 +39,16 @@ Future<void> main() async {
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const RootWidget()));
+}
+
+class RootWidget extends StatelessWidget {
+  const RootWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return firstExecution ? const WelcomeScreen() : const MyApp();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -347,7 +356,7 @@ class HomePageState extends State<HomePage> {
               // Update the user's location
               establishLocation();
               switch (selectedIndex) {
-                case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
+                case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
                 case 1 : _listingsKeyFood.currentState?.onTabVisible();
                 case 2 : _listingsKeyShopping.currentState?.onTabVisible();
                 case 3 : _listingsKeyMusic.currentState?.onTabVisible();
@@ -391,7 +400,7 @@ class HomePageState extends State<HomePage> {
                         Expanded(flex: 2, child: Container()),
                         FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Text(' Saturday 6 December 2025 10:30—16:30',
+                          child: Text(' $fairDateTimes',
                               style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
                         ),
                         Expanded(flex: 2, child: Container())

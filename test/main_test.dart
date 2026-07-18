@@ -6,6 +6,7 @@ import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   // We're on test
@@ -45,7 +46,7 @@ void main() {
 
       await tester.pumpWidget(const MyApp());
 
-      expect(find.text('Mill Road Winter Fair 2025'), findsOneWidget);
+      expect(find.text(fairName), findsOneWidget);
 
       expect(find.text('Map'), findsOneWidget);
       expect(find.text('Food'), findsOneWidget);
@@ -54,6 +55,55 @@ void main() {
       expect(find.text('Events'), findsOneWidget);
       expect(find.text('Places'), findsOneWidget);
       expect(find.text('Other'), findsOneWidget);
+    });
+
+    testWidgets('Snowflake button in AppBar navigates to About the Fair page', (WidgetTester tester) async {
+      // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'category': 'Food',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        }
+      ];
+
+      // Provide initial mock values for shared preferences
+      SharedPreferences.setMockInitialValues({});
+      await loadSettings();
+
+      // Pump MyApp which contains the AppBar with the snowflake button
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
+      final snowflakeButton = find.byWidgetPredicate(
+            (widget) => widget is IconButton && widget.icon is ImageIcon,
+      );
+      expect(snowflakeButton, findsOneWidget);
+
+      // Tap the snowflake button
+      await tester.tap(snowflakeButton);
+      await tester.pumpAndSettle();
+
+      // Verify that AboutTheFairPage is now displayed
+      expect(find.byType(AboutTheFairPage), findsOneWidget);
+      expect(find.text('About Mill Road Winter Fair'), findsOneWidget);
+
+      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice (triggered in MapPage initState)
+      await tester.pump(const Duration(seconds: 21));
     });
 
     testWidgets('drawer displays expected widgets', (WidgetTester tester) async {
@@ -84,7 +134,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DrawerHeader), findsOneWidget);
-      expect(find.text('Mill Road Winter Fair 2025'), findsOneWidget);
+      expect(find.text(fairName), findsOneWidget);
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
