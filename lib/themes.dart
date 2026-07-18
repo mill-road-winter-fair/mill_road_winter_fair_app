@@ -201,17 +201,17 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
       assetPath = 'assets/mapMarkers/stallsGroupMarker.png';
     case 'Shopping':
       assetPath = 'assets/mapMarkers/stallsMarker.png';
-    case 'Group-Music':
+    case 'Group-Performance':
       assetPath = 'assets/mapMarkers/musicGroupMarker.png';
-    case 'Music':
+    case 'Performance':
       assetPath = 'assets/mapMarkers/musicMarker.png';
-    case 'Group-Event':
+    case 'Group-Charity/Community/Info':
       assetPath = 'assets/mapMarkers/eventsGroupMarker.png';
-    case 'Event':
+    case 'Charity/Community/Info':
       assetPath = 'assets/mapMarkers/eventsMarker.png';
-    case 'Group-Place':
+    case 'Group-Visit/Experience':
       assetPath = 'assets/mapMarkers/placesGroupMarker.png';
-    case 'Place':
+    case 'Visit/Experience':
       assetPath = 'assets/mapMarkers/placesMarker.png';
     case 'Group-Service':
       assetPath = 'assets/mapMarkers/servicesGroupMarker.png';
@@ -293,13 +293,13 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(209, 81, 85, 1.0);
       return color;
-    } else if (category == "Music" || category == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(190, 110, 230, 1.0);
       return color;
-    } else if (category == "Event" || category == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(243, 190, 66, 1.0);
       return color;
-    } else if (category == "Place" || category == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(79, 184, 75, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {
@@ -317,13 +317,13 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(204, 22, 22, 1.0);
       return color;
-    } else if (category == "Music" || category == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(183, 13, 204, 1.0);
       return color;
-    } else if (category == "Event" || category == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(255, 196, 0, 1.0);
       return color;
-    } else if (category == "Place" || category == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(7, 128, 0, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {
@@ -341,13 +341,13 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(200, 0, 10, 1);
       return color;
-    } else if (category == "Music" || category == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(175, 98, 214, 1.0);
       return color;
-    } else if (category == "Event" || category == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(204, 161, 51, 1.0);
       return color;
-    } else if (category == "Place" || category == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(0, 115, 37, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {
@@ -365,13 +365,13 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(255, 0, 0, 1.0);
       return color;
-    } else if (category == "Music" || category == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(228, 0, 255, 1.0);
       return color;
-    } else if (category == "Event" || category == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(237, 201, 0, 1.0);
       return color;
-    } else if (category == "Place" || category == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(28, 213, 0, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {
@@ -389,13 +389,13 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(230, 159, 0, 1.0);
       return color;
-    } else if (category == "Music" || category == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(204, 121, 167, 1.0);
       return color;
-    } else if (category == "Event" || category == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(240, 228, 66, 1.0);
       return color;
-    } else if (category == "Place" || category == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(0, 158, 115, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {

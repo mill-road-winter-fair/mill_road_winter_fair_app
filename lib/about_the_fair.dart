@@ -307,7 +307,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202488, 0.131207));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.202488, 0.131207));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -316,7 +316,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.198682, 0.141051));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.198682, 0.141051));
                                             }),
                                     ],
                                   ),
@@ -331,7 +331,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.200389, 0.136465));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.200389, 0.136465));
                                             }),
                                     ],
                                   ),
@@ -346,7 +346,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.1970778, 0.1472252));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.1970778, 0.1472252));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -355,7 +355,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
                                             }),
                                     ],
                                   ),
@@ -370,7 +370,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.199627, 0.138407));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.199627, 0.138407));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -379,7 +379,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
                                             }),
                                     ],
                                   ),

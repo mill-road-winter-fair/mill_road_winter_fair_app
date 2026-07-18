@@ -197,7 +197,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     try {
       listings = await fetchListings(http.Client());
-      mapPageKey.currentState?.setMarkerLists();
+      mapPageKey.currentState?.setVisibleMarkerLists();
       if (navigationInProgress == false) {
         mapPageKey.currentState?.addAllVisibleMarkers();
       }
@@ -333,15 +333,20 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 1: Filter by category (e.g. "Food", "Music", etc.)
     List<Map<String, dynamic>> categoryFiltered = [];
-    if (widget.filterCategory == 'Other') {
-      categoryFiltered = listings.where((listing) => listing['category'].startsWith('Service')).toList();
+    if (widget.filterCategory == 'Food') {
+      categoryFiltered = listings.where((listing) => listing['food'] == 'TRUE').toList();
+    } else if (widget.filterCategory == 'Shopping') {
+      categoryFiltered = listings.where((listing) => listing['shopping'] == 'TRUE').toList();
+    } else if (widget.filterCategory == 'Performance') {
+      categoryFiltered = listings.where((listing) => listing['performance'] == 'TRUE').toList();
+    } else if (widget.filterCategory == 'Charity/Community/Info') {
+      categoryFiltered = listings.where((listing) => listing['charityCommunityInfo'] == 'TRUE').toList();
+    } else if (widget.filterCategory == 'Visits/Experiences') {
+      categoryFiltered = listings.where((listing) => listing['visitExperience'] == 'TRUE').toList();
+    } else if (widget.filterCategory == 'Services') {
+      categoryFiltered = listings.where((listing) => listing['service'] == 'TRUE').toList();
     } else if (widget.filterCategory == 'Saved') {
       categoryFiltered = listings.where((listing) => favouriteListingKeys.contains(listing['id'])).toList();
-    } else if (widget.filterCategory == 'Stalls') {
-      // special case to prevent the rename breaking existing data
-      categoryFiltered = listings.where((listing) => (listing['category'] == 'Shopping' || listing['category'] == widget.filterCategory)).toList();
-    } else {
-      categoryFiltered = listings.where((listing) => listing['category'] == widget.filterCategory).toList();
     }
 
     // Step 2: Sort the filtered listings
