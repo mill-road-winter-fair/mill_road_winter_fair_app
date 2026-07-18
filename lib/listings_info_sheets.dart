@@ -133,6 +133,7 @@ class GroupListingInfoSheet extends StatelessWidget {
 class SpecificListingInfoSheet extends StatelessWidget {
   // From the db
   final bool cancelled;
+  final bool brickAndMortar;
   final String emoji;
   final String title;
   final String subtitle;
@@ -153,6 +154,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
 
   const SpecificListingInfoSheet({
     required this.cancelled,
+    required this.brickAndMortar,
     required this.emoji,
     required this.title,
     required this.subtitle,

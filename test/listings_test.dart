@@ -196,10 +196,11 @@ void main() {
       test('handles explicit null cells by converting them to empty strings', () async {
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
+            ["id", "visibleOnMap", "cancelled", "brickAndMortar", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
             [
               "1",
               "TRUE",
+              "FALSE",
               "FALSE",
               "🍩",
               "Glazed and Confused",
@@ -239,10 +240,11 @@ void main() {
 
         final mockResponse = {
           "values": [
-            ["id", "visibleOnMap", "cancelled", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
+            ["id", "visibleOnMap", "cancelled", "brickAndMortar", "emoji", "title", "subtitle", "groupID", "category", "location", "description", "email", "website", "phone", "latLng", "startTime", "endTime"],
             [
               "1",
               "TRUE",
+              "FALSE",
               "FALSE",
               "🍩",
               "Glazed and Confused",
@@ -281,6 +283,7 @@ void main() {
             'id': '1',
             'visibleOnMap': 'TRUE',
             'cancelled': 'FALSE',
+            'brickAndMortar': 'FALSE',
             'emoji': '🍩',
             'title': 'Glazed and Confused',
             'subtitle': 'Doughnuts',

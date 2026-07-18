@@ -14,6 +14,7 @@ void main() {
   // Build widget tree
   Widget createWidgetUnderTest({
     required bool cancelled,
+    required bool brickAndMortar,
     required String emoji,
     required String title,
     required String subtitle,
@@ -35,6 +36,7 @@ void main() {
       home: Scaffold(
         body: SpecificListingInfoSheet(
           cancelled: cancelled,
+          brickAndMortar: brickAndMortar,
           emoji: emoji,
           title: title,
           subtitle: subtitle,
@@ -60,6 +62,7 @@ void main() {
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
+        brickAndMortar: false,
         emoji: '🍩',
         title: 'Glazed and Confused',
         subtitle: 'Food • Doughnuts',
@@ -86,6 +89,7 @@ void main() {
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
+        brickAndMortar: false,
         emoji: '🍩',
         title: 'Glazed and Confused',
         subtitle: 'Food • Doughnuts',
@@ -117,6 +121,7 @@ void main() {
 
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
+        brickAndMortar: false,
         emoji: '🍩',
         title: 'Glazed and Confused',
         location: 'Gwydir St Car Park',
@@ -153,6 +158,7 @@ void main() {
       // Initial state: details NOT visible
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
+        brickAndMortar: false,
         emoji: '🍩',
         title: 'Glazed and Confused',
         location: 'Gwydir St Car Park',
@@ -187,6 +193,7 @@ void main() {
       // Now pump with detailsVisible = true to simulate the state change
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
+        brickAndMortar: false,
         emoji: '🍩',
         title: 'Glazed and Confused',
         location: 'Gwydir St Car Park',
@@ -214,6 +221,7 @@ void main() {
 
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
+        brickAndMortar: false,
         emoji: '🍩',
         title: 'Glazed and Confused',
         subtitle: 'Food • Doughnuts',
@@ -247,6 +255,7 @@ void main() {
       // This will be true if the test is run after the fair date/time.
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
+        brickAndMortar: false,
         emoji: '🍩',
         title: 'Glazed and Confused',
         location: 'Gwydir St Car Park',
@@ -277,6 +286,7 @@ void main() {
     testWidgets('formatted with line-through and red text when listing is cancelled', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: true,
+        brickAndMortar: false,
         emoji: '🍩',
         title: 'Glazed and Confused',
         location: 'Gwydir St Car Park',

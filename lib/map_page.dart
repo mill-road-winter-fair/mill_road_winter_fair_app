@@ -578,6 +578,7 @@ class MapPageState extends State<MapPage> {
                                         children: [
                                           SpecificListingInfoSheet(
                                             cancelled: rel['cancelled'] == 'TRUE' ? true : false,
+                                            brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
                                             emoji: rel['emoji'] ?? '',
                                             title: rel['title'],
                                             subtitle: rel['subtitle'],
@@ -698,6 +699,7 @@ class MapPageState extends State<MapPage> {
                             padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
                             child: SpecificListingInfoSheet(
                               cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                              brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
                               emoji: listing['emoji'] ?? '',
                               title: listing['title'],
                               subtitle: listing['subtitle'],

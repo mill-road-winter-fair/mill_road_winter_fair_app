@@ -27,6 +27,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
           'subtitle': 'Doughnuts',
