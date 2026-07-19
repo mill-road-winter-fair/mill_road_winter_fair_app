@@ -24,19 +24,29 @@ void main() {
       // Minimal listings so pages render correctly
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Gwydir St Car Park',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'description': 'Nice buns',
-          'visibleOnMap': true,
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -65,7 +75,7 @@ void main() {
       expect(homePageState.index, 1);
 
       // 2) Select Stalls tab (index 2)
-      await tester.tap(find.text('Stalls'));
+      await tester.tap(find.text('Shopping'));
       await tester.pumpAndSettle();
       expect(homePageState.index, 2);
 
