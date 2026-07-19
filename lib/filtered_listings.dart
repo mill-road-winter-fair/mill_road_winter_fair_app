@@ -774,12 +774,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   leadingIcon: const Icon(Icons.piano),
                 ),
                 DropdownMenuEntry(
-                  value: 'performance',
-                  label: "Performances",
+                  value: 'event',
+                  label: "Events",
                   leadingIcon: const Icon(Icons.theater_comedy),
                 ),
                 DropdownMenuEntry(
-                  value: 'visit',
+                  value: 'visitExperience',
                   label: "Visit & Experience",
                   leadingIcon: const Icon(Icons.tour),
                 ),
