@@ -5,7 +5,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 void main() {
@@ -29,8 +28,9 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: FilteredListingsPage(
-            filterCategory: category,
+            filterPrimaryType: category,
             listings: listings,
+            onChangeTitle: null,
           ),
         ),
       ),
@@ -44,7 +44,7 @@ void main() {
       // Define a test listing
       List<Map<String, dynamic>> listings = [];
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'food', listings);
 
       expect(find.text('Unable to retrieve listings'), findsOneWidget);
     });
@@ -107,7 +107,7 @@ void main() {
       ];
 
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'food', listings);
 
       expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
       expect(find.text('Doughnuts'), findsOneWidget);
@@ -213,7 +213,7 @@ void main() {
       // Mock sorting preference is alphabetical
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'food', listings);
       var filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
@@ -223,7 +223,7 @@ void main() {
       // Mock sorting preference is distance
       preferredSortingMethod = SortingMethod.values[1];
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'food', listings);
       filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Sushi Squad');
@@ -233,7 +233,7 @@ void main() {
       // Mock sorting preference is time - which for Food should sort by A-Z since time isn't allowed for sorting
       preferredSortingMethod = SortingMethod.values[2];
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'food', listings);
       filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
@@ -243,7 +243,7 @@ void main() {
 
     testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'Music', listings);
+      await pumpFilteredListingsPage(tester, 'music', listings);
 
       await tester.tap(find.byType(DropdownMenu<SortingMethod>));
       await tester.pumpAndSettle();
@@ -311,7 +311,7 @@ void main() {
       ];
 
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'food', listings);
 
       // Preferred sorting method should have been reset to 0 (alphabetical)
       expect(preferredSortingMethod, SortingMethod.values[0]);
@@ -358,7 +358,7 @@ void main() {
       // Mock location services are disabled
       locationServicesEnabled = false;
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'food', listings);
 
       // Obtain the state after mounting
       final filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
@@ -374,7 +374,7 @@ void main() {
       // Mock location is available
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'food', listings);
 
       // Fallback sorting should be disabled
       expect(filteredListingsPageState.useFallbackSorting, false);
@@ -385,7 +385,7 @@ void main() {
       // Mock location is now unavailable
       currentLatLng = null;
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'food', listings);
 
       // Fallback sorting should be enabled
       expect(filteredListingsPageState.useFallbackSorting, true);
@@ -426,14 +426,15 @@ void main() {
       await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle();
 
-      // Obtain the state after mounting
-      final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
-      final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
+      expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
+      expect(mapPageKey.currentState, isNotNull, reason: 'MapPage should be mounted');
+      final homePageState = homePageKey.currentState!;
+      final mapPageState = mapPageKey.currentState!;
       mapPageState.addAllVisibleMarkers();
 
-      await tester.tap(find.text('Food'));
+      await tester.tap(find.text('Listings'));
       await tester.pumpAndSettle();
-      expect(homePageState.index, 1);
+      expect(homePageState.index, 2);
 
       await tester.tap(find.text('Directions'));
       await tester.pumpAndSettle();
@@ -529,7 +530,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'Food', listings: sampleListings),
+            body: FilteredListingsPage(filterPrimaryType: 'food', listings: sampleListings, onChangeTitle: null)
           ),
         ),
       );

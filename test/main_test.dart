@@ -55,13 +55,11 @@ void main() {
 
       expect(find.text(fairName), findsOneWidget);
 
+      expect(find.text('Home'), findsOneWidget);
       expect(find.text('Map'), findsOneWidget);
-      expect(find.text('Food'), findsOneWidget);
-      expect(find.text('Shopping'), findsOneWidget);
-      expect(find.text('Performances'), findsOneWidget);
-      expect(find.text('Community'), findsOneWidget);
-      expect(find.text('Visits'), findsOneWidget);
-      expect(find.text('Services'), findsOneWidget);
+      expect(find.text('Listings'), findsOneWidget);
+      expect(find.text('Timetable'), findsOneWidget);
+      expect(find.text('Favourites'), findsOneWidget);
     });
 
     testWidgets('Snowflake button in AppBar navigates to About the Fair page', (WidgetTester tester) async {
@@ -317,42 +315,33 @@ void main() {
 
       await tester.pumpWidget(const MyApp());
 
-      await tester.tap(find.text('Food'));
+      await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
-      expect(homePageState.index, 1);
-
-      await tester.tap(find.text('Shopping'));
-      await tester.pumpAndSettle();
-
-      expect(homePageState.index, 2);
-
-      await tester.tap(find.text('Performances'));
-      await tester.pumpAndSettle();
-
-      expect(homePageState.index, 3);
-
-      await tester.tap(find.text('Community'));
-      await tester.pumpAndSettle();
-
-      expect(homePageState.index, 4);
-
-      await tester.tap(find.text('Visits'));
-      await tester.pumpAndSettle();
-
-      expect(homePageState.index, 5);
-
-      await tester.tap(find.text('Services'));
-      await tester.pumpAndSettle();
-
-      expect(homePageState.index, 6);
+      expect(homePageState.index, 0);
 
       await tester.tap(find.text('Map'));
       await tester.pumpAndSettle();
 
-      expect(homePageState.index, 0);
+      expect(homePageState.index, 1);
+
+      await tester.tap(find.text('Listings'));
+      await tester.pumpAndSettle();
+
+      expect(homePageState.index, 2);
+
+      await tester.tap(find.text('Timetable'));
+      await tester.pumpAndSettle();
+
+      expect(homePageState.index, 3);
+
+      await tester.tap(find.text('Favourites'));
+      await tester.pumpAndSettle();
+
+      expect(homePageState.index, 4);
+
     });
 
     testWidgets('emailDetailsDialog shows emails and close button', (WidgetTester tester) async {
