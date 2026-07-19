@@ -228,9 +228,9 @@ class HomePageState extends State<HomePage> {
   late final _pages = [
     ChooserPage(),
     MapPage(listings: listings, key: mapPageKey),
-    FilteredListingsPage(filterPrimaryType: "all", listings: listings, key: _allListingsKey),
+    FilteredListingsPage(filterPrimaryType: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
     TimetablePage(),
-    FilteredListingsPage(filterPrimaryType: "favourite", listings: listings, key: _savedListingsKey),
+    FilteredListingsPage(filterPrimaryType: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle),
   ];
 
   void aboutDialog() {
@@ -300,6 +300,12 @@ class HomePageState extends State<HomePage> {
       ],
     );
   }
+
+
+  void onChangeAppBarTitle(String newTitle) {
+    setState(() => appBarTitle = newTitle);
+  }
+
 
   @override
   Widget build(BuildContext context) {

@@ -20,10 +20,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class FilteredListingsPage extends StatefulWidget {
   final String filterPrimaryType;
   final List<Map<String, dynamic>> listings;
+  final void Function(String)? onChangeTitle;
 
   const FilteredListingsPage({
     required this.filterPrimaryType,
     required this.listings,
+    required this.onChangeTitle,
     super.key,
   });
 
@@ -62,7 +64,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       detailsVisibilityList = List<bool>.filled(500, false);
       _searchQuery = '';
       _isSearching = false;
-      appBarTitle = "${widget.filterPrimaryType == 'all' ? 'All' : 'Filtered'} listings";
+      appBarTitle = switch (filterPrimaryType) {
+        'all' => 'All listings',
+        'favourite' => 'Favourite listings',
+        _ => 'Filtered listings'
+      };
     });
     if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
   }
@@ -243,6 +249,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     HapticFeedback.selectionClick();
     if (selectedValue is String) {
       filterPrimaryType = selectedValue;
+      appBarTitle = switch (filterPrimaryType) {
+        'all' => 'All listings',
+        'favourite' => 'Favourite listings',
+        _ => 'Filtered listings'
+      };
+      widget.onChangeTitle?.call(appBarTitle);
       setState(() { });
     }
   }
