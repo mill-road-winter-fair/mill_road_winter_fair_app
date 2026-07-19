@@ -4,6 +4,43 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// SharedPreferences key for storing cached listings as JSON
+const String _listingsCacheKey = 'cached_listings_json';
+
+// Save listings to SharedPreferences
+Future<void> _saveListingsToCache(List<Map<String, dynamic>> listingsToCache) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = jsonEncode(listingsToCache);
+    await prefs.setString(_listingsCacheKey, jsonString);
+    debugPrint('Listings saved to SharedPreferences');
+  } catch (e) {
+    debugPrint('Error saving listings to cache: $e');
+  }
+}
+
+// Load listings from SharedPreferences
+Future<List<Map<String, dynamic>>> _loadListingsFromCache() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_listingsCacheKey);
+
+    if (jsonString == null || jsonString.isEmpty) {
+      debugPrint('No cached listings found in SharedPreferences');
+      return [];
+    }
+
+    final decoded = jsonDecode(jsonString) as List<dynamic>;
+    final result = decoded.cast<Map<String, dynamic>>();
+    debugPrint('Loaded ${result.length} listings from SharedPreferences');
+    return result;
+  } catch (e) {
+    debugPrint('Error loading listings from cache: $e');
+    return [];
+  }
+}
 
 // Fetch listings from Heroku caching layer
 Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
@@ -26,7 +63,11 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
         debugPrint('Retry ${i + 1} response status: ${retryResponse.statusCode}');
         if (retryResponse.statusCode == 200) {
           debugPrint('Listings fetched after retry');
-          return _parseListings(retryResponse.body);
+          final newListings = _parseListings(retryResponse.body);
+          listings = newListings;
+          // Save to persistent cache
+          await _saveListingsToCache(newListings);
+          return newListings;
         }
       }
       debugPrint('All retries failed');
@@ -37,19 +78,37 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     final newListings = _parseListings(response.body);
     listings = newListings;
     debugPrint('Listings successfully parsed and stored');
-    return listings;
+    // Save to persistent cache
+    await _saveListingsToCache(newListings);
+    return newListings;
   } on SocketException catch (_) {
-    debugPrint('\u26a0\ufe0f Network error: unable to reach server, using stale listings.');
+    debugPrint('\u26a0\ufe0f Network error: unable to reach server, trying cache.');
+    // Try to load from persistent cache
+    if (listings.isEmpty) {
+      listings = await _loadListingsFromCache();
+    }
     return listings.isNotEmpty ? listings : [];
   } on HttpException catch (e) {
     debugPrint('\u26a0\ufe0f Server responded with an error: $e');
+    // Try to load from persistent cache
+    if (listings.isEmpty) {
+      listings = await _loadListingsFromCache();
+    }
     return listings.isNotEmpty ? listings : [];
   } on FormatException catch (e) {
     debugPrint('\u26a0\ufe0f Bad response format: $e');
+    // Try to load from persistent cache
+    if (listings.isEmpty) {
+      listings = await _loadListingsFromCache();
+    }
     return listings.isNotEmpty ? listings : [];
   } catch (e, stack) {
     debugPrint('\u26a0\ufe0f Unexpected error fetching listings: $e');
     debugPrint(stack.toString());
+    // Try to load from persistent cache
+    if (listings.isEmpty) {
+      listings = await _loadListingsFromCache();
+    }
     return listings.isNotEmpty ? listings : [];
   }
 }
