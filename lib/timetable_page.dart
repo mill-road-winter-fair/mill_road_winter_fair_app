@@ -5,9 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 
 class TimetablePage extends StatefulWidget {
   final List<Map<String, dynamic>> theEvents;
@@ -51,11 +53,7 @@ class _TimetablePageState extends State<TimetablePage> {
     super.initState();
     _horizontalScrollController = ScrollController();
     _verticalScrollController = ScrollController();
-/*TODOif (isThisToday(widget.day.key) && widget.day.minStart.isBefore(DateTime.now()) && widget.day.maxEnd.isAfter(DateTime.now())) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        startClockUpdates(updateNowLine);
-      });
-    } */
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     thePreparedEvents = prepareEvents(widget.theEvents);
     loadScales();
   }
@@ -65,6 +63,7 @@ class _TimetablePageState extends State<TimetablePage> {
     _horizontalScrollController.dispose();
     _verticalScrollController.dispose();
     _nowLineTimer?.cancel();
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     super.dispose();
   }
 
@@ -76,7 +75,7 @@ class _TimetablePageState extends State<TimetablePage> {
     if (_deviceOrientationSaved !=null && currentOrientation != _deviceOrientationSaved) { // i.e. device has been rotated (or this is the first check)
       if (_deviceOrientationSaved != null) debugPrint('DayTimelineViewState didChangeDependencies: changed orientation, _deviceOrientation=$_deviceOrientationSaved currentOrientation=$currentOrientation');
       removeMiniPopup();
-      //TODOsafeRemoveRoute(context, sHRADDialogRoute);
+      safeRemoveRoute(context, listingDetailsDialogRoute);
       if (currentOrientation == Orientation.landscape) {
         _dayPixelsPerMinute = pixelsPerMinuteL; // the local version which may have changed from that in schedule
       } else {
@@ -173,7 +172,7 @@ class _TimetablePageState extends State<TimetablePage> {
           cancelled: (ev['cancelled'] == 'TRUE'),
           emoji: ev['emoji'],
           description: ev['description'],
-          latLng: ev['latLng'],
+          latLng: stringToLatLng(ev['latLng']),
           imageURL: ev['imageURL'],
           lane: 0, // will be computed later
           top: 0, // will be computed later
@@ -487,6 +486,7 @@ class _TimetablePageState extends State<TimetablePage> {
     //int alertNoticePeriod,
     void Function(VoidCallback) setStateFunction,
 //    final int? Function(PositionedEvent, int, int?) toggleAlertAction,
+    void Function(String, LatLng, bool) onGetDirections,
   ) async {
 
     debugPrint('showListingDetailsDialog called');
@@ -518,6 +518,7 @@ class _TimetablePageState extends State<TimetablePage> {
                 setStateFunction,
                 setStateDialog,
 //                toggleAlertAction,
+                onGetDirections,
               ),
             ),
           ),
@@ -537,7 +538,8 @@ class _TimetablePageState extends State<TimetablePage> {
     void Function(VoidCallback) setParentStateFunction, // calling page (if dialog) otherwise local page
     void Function(VoidCallback)? setLocalStateFunction, // dialog if we're in one
     //final int? Function(PositionedEvent, int, int?) toggleAlertAction,
-  )  {
+    void Function(String, LatLng, bool) onGetDirections,
+  ) {
 
     final eventNameTextKey = GlobalKey(); // for mini pop-ups
     final eventNameDescKey = GlobalKey(); // for mini pop-ups
@@ -546,19 +548,19 @@ class _TimetablePageState extends State<TimetablePage> {
     ButtonStyle buttonStyle = ButtonStyle(
       backgroundColor: WidgetStatePropertyAll(colorScheme.secondary), 
       foregroundColor: WidgetStatePropertyAll(colorScheme.onSurface),
-      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 2, vertical: 0)), 
+      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 8, vertical: 0)), 
       elevation: WidgetStatePropertyAll(3),
-      visualDensity: VisualDensity(horizontal: -3.0, vertical: -3),
+      visualDensity: VisualDensity(horizontal: 0, vertical: -3),
       shadowColor: WidgetStatePropertyAll(colorScheme.surfaceContainerLow),
-      textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 14.0)),
+      textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 15.0)),
     );
     final textStyle = TextStyle(fontSize: 16.0, height: 1.2);
-    final now = DateTime.now();
-    final pastEvent = (event.startTime.difference(now).inMinutes < 0);
-    final tooLongFutureEvent = (event.startTime.difference(now).inDays > 7);
+    //final now = DateTime.now();
+    //final pastEvent = (event.startTime.difference(now).inMinutes < 0);
+    //final tooLongFutureEvent = (event.startTime.difference(now).inDays > 7);
     //final theAlertsStore = theScheduleHomeState.alertsStore;
     //int? alertId = theAlertsStore.alertIdForEvent(event);
-    bool settingsOpened = false; // keeps track of permissions dialog being opened so we can re-check
+    //bool settingsOpened = false; // keeps track of permissions dialog being opened so we can re-check
 
     debugPrint('listingDetailsColumn called');
 
@@ -679,11 +681,20 @@ class _TimetablePageState extends State<TimetablePage> {
                 child: AutoSizeText(event.description, style: textStyle, maxLines: 5, minFontSize: 13, overflow: TextOverflow.ellipsis),
               )),
             ]),
-            Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+            Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 10, children: [
+              ElevatedButton.icon(
+                style: buttonStyle,
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  onGetDirections(event.id, event.latLng, true);
+                }, 
+                label: Text('Directions'),
+                icon: const Icon(Icons.directions_walk),                
+              ),
               ElevatedButton(
                 style: buttonStyle,
                 onPressed: () {
-                  HapticFeedback.mediumImpact();
+                  HapticFeedback.lightImpact();
                   safeRemoveRoute(context, listingDetailsDialogRoute); // doing this not pop as we may be in landscape itinerary view
                 }, 
                 child: Text('Close'),
@@ -708,6 +719,18 @@ class _TimetablePageState extends State<TimetablePage> {
 }
 
 
+  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, bool navigatorPop) async {
+    // Remember the previous index to allow returning back
+    previousIndex = homePageKey.currentState!.index;
+    // Switch to map tab on the home page
+    homePageKey.currentState?.setCurrentIndex(1);
+    // If we're asked to pop the previous page we also need to set the title
+    if (navigatorPop) appBarTitle = fairName;
+    // Request the map page to show directions
+    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -715,11 +738,20 @@ class _TimetablePageState extends State<TimetablePage> {
     if (loading) return Scaffold(body: Center(child: CircularProgressIndicator()));
 
     if (onlyNowOrSoon != _onlyNowOrSoonSaved) {
-      // refilter to whole day or just now or soon
+      // refilter to whole day or just now or soon; only do this if changed
       _onlyNowOrSoonSaved = onlyNowOrSoon;
       theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon);
     }
     calculateInitialScalesIfNeeded();
+    if (fairDate.difference(DateTime.now()).inDays == 0 
+        && timelineMinStart.isBefore(DateTime.now()) 
+        && timelineMaxEnd.isAfter(DateTime.now())
+        && _nowLineTimer == null
+    ) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        startClockUpdates(updateNowLine);
+      });
+    }
 
     if (spanMinutes == 0 || theFilteredEvents.isEmpty) {
       String theMessage = 'Nothing to show.';
@@ -791,13 +823,13 @@ class _TimetablePageState extends State<TimetablePage> {
         );
         while (t.isBefore(timelineMaxEnd.add(Duration(minutes: markInterval)))) {
           final top = max(0.0, t.difference(timelineMinStart).inMinutes * _dayPixelsPerMinute);
-          final timeLabel = '${t.hour}:${t.minute}';
+          final timeLabel = '${t.hour.toString().padLeft(2,'0')}:${t.minute.toString().padLeft(2,'0')}';
           markers.add(
             Positioned(
               top: top,
               left: 0,
               right: 0,
-              child: Container(height: 1, color: colorScheme.surfaceContainerLow),
+              child: Container(height: 1, color: colorScheme.surfaceDim),
             ),
           );
           markers.add(
@@ -808,7 +840,7 @@ class _TimetablePageState extends State<TimetablePage> {
                 timeLabel, 
                 style: TextStyle(
                   fontSize: 12.5, fontWeight: FontWeight.bold, 
-                  color: colorScheme.surfaceContainerHighest, 
+                  color: colorScheme.onSurfaceVariant, 
                   shadows: [Shadow(color: colorScheme.onPrimary, offset: Offset(0, 0), blurRadius: 2)],
                 ),
               ),
@@ -830,9 +862,7 @@ class _TimetablePageState extends State<TimetablePage> {
         final theContent = NotificationListener<ScrollNotification>(
           onNotification: (notification) {
             if (notification is ScrollStartNotification || notification is UserScrollNotification) {
-              //TODOremoveMiniHLsOverlay();
-              //TODOremoveMiniPopup();
-              //TODOremoveMiniMenuOverlay();
+              removeMiniPopup();
             }
             return false; // let scrolling continue
           },
@@ -928,6 +958,7 @@ class _TimetablePageState extends State<TimetablePage> {
                               // time markers lines and labels and swim lanes
                               ...swimlanes,
                               ...markers,
+                              // red 'now' line
                               if (timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now()))
                                 Positioned(
                                   key: nowLineKey,
@@ -980,51 +1011,26 @@ class _TimetablePageState extends State<TimetablePage> {
                                                       return GestureDetector(
                                                         onTap: () {
                                                           HapticFeedback.lightImpact();
-/*                                                           showHighlightsRatingsAndDetailsDialog(
+                                                          showListingDetailsDialog(
                                                             itemContext, 
-                                                            pe.event, 
-                                                            widget.parentState, 
-                                                            (MediaQuery.orientationOf(context) == Orientation.landscape),
-                                                            alertNoticePeriod,
-                                                            widget.parentState.setState,
-                                                            widget.showEventInDay,
-                                                            widget.rateAction,
-                                                            widget.toggleAlertAction,
-                                                          ); */
+                                                            pe, 
+                                                            //alertNoticePeriod,
+                                                            setState,
+                                                            navigateToMapAndGetDirections,
+                                                          );
                                                         },
-                                                        onLongPress: () {
-                                                          HapticFeedback.selectionClick;
-/*                                                           showMiniHLsOverlay(
-                                                            context, 
-                                                            itemContext, 
-                                                            pe.event, 
-                                                            widget.parentState, 
-                                                            widget.parentState.setState
-                                                          ); */
-                                                        },
-                                                        child: GestureDetector(
-                                                          onTap: () {
-                                                            HapticFeedback.lightImpact();
-                                                            showListingDetailsDialog(
-                                                              itemContext, 
-                                                              pe, 
-                                                              //alertNoticePeriod,
-                                                              setState,
-                                                            );
-                                                          },
-                                                          child: Container(
-                                                            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
-                                                            decoration: BoxDecoration(
-                                                              color: (isFavourited) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
-                                                              borderRadius: BorderRadius.circular(4),
-                                                              boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
-                                                              border: Border.all(width: 0.2, color: colorScheme.onSecondary),
-                                                              image: (isFavourited)
-                                                                ? DecorationImage(image: AssetImage('assets/icons/favorite_24dp_992F30.png'), scale: 1.5, alignment: AlignmentGeometry.topRight, opacity: 0.5) 
-                                                                : null,
-                                                            ),
-                                                            child: eventRect(pe, colorScheme, isLandscape, null),
+                                                        child: Container(
+                                                          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
+                                                          decoration: BoxDecoration(
+                                                            color: (isFavourited) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
+                                                            borderRadius: BorderRadius.circular(4),
+                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
+                                                            border: Border.all(width: 0.2, color: colorScheme.onSecondary),
+                                                            image: (isFavourited)
+                                                              ? DecorationImage(image: AssetImage('assets/icons/favorite_24dp_992F30.png'), scale: 1.5, alignment: AlignmentGeometry.topRight, opacity: 0.5) 
+                                                              : null,
                                                           ),
+                                                          child: eventRect(pe, colorScheme, isLandscape, null),
                                                         ),
                                                       );
                                                     }
@@ -1066,7 +1072,7 @@ class PositionedEvent {
   final bool cancelled;
   final String emoji;
   final String description;
-  final String latLng;
+  final LatLng latLng;
   final String imageURL;
   int lane;
   double top;
