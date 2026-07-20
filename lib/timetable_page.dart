@@ -40,8 +40,9 @@ class _TimetablePageState extends State<TimetablePage> {
   late Map<String, List<PositionedEvent>> thePreparedEvents; // read from the listings
   late Map<String, List<PositionedEvent>> theFilteredEvents; // filtered from the above based on onlyNowOrSoon
   bool loading = true; // so we don't try to build before we're ready
-  OverlayEntry? _miniPopupOverlayEntry;
+  OverlayEntry? _miniPopupOverlayEntry; // 
   Timer? _miniPopupTimer;
+  Route? listingDetailsDialogRoute; // to keep track of dialog so it can be closed if needed. This will move to main if we enter the app from an alert
 
   @override
   void initState() {
@@ -304,7 +305,7 @@ class _TimetablePageState extends State<TimetablePage> {
               height: 1.1 * maxTimeFontSize,
               padding: EdgeInsets.symmetric(horizontal: 1),
               child: AutoSizeText(
-                '${pe.startTime.hour.toString().padLeft(2,'0')}:${pe.startTime.minute.toString().padLeft(2,'0')}–${pe.endTime.hour.toString().padLeft(2,'0')}:${pe.endTime.minute.toString().padLeft(2,'0')}',
+                formatTimeRange(pe.startTime, pe.endTime),
                 style: TextStyle(height: 1.1, fontSize: maxTimeFontSize, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant),
                 maxLines: 1,
                 minFontSize: minTimeFontSize,
@@ -317,6 +318,12 @@ class _TimetablePageState extends State<TimetablePage> {
         ),
       );
     });
+  }
+
+
+  String formatTimeRange(DateTime startTime, DateTime endTime) {
+  return '${startTime.hour.toString().padLeft(2,'0')}:${startTime.minute.toString().padLeft(2,'0')}–'
+    '${endTime.hour.toString().padLeft(2,'0')}:${endTime.minute.toString().padLeft(2,'0')}';
   }
 
 
@@ -414,36 +421,239 @@ class _TimetablePageState extends State<TimetablePage> {
 
 
   void removeMiniPopup() {
-  _miniPopupTimer?.cancel();
-  _miniPopupTimer = null;
-  if (_miniPopupOverlayEntry != null) {
-    try {
-      _miniPopupOverlayEntry!.remove();
-    } catch (_) {}
-    _miniPopupOverlayEntry = null;
+    _miniPopupTimer?.cancel();
+    _miniPopupTimer = null;
+    if (_miniPopupOverlayEntry != null) {
+      try {
+        _miniPopupOverlayEntry!.remove();
+      } catch (_) {}
+      _miniPopupOverlayEntry = null;
+    }
   }
+
+
+  double estimateTextHeight({
+    required String text,
+    required TextStyle style,
+    required double maxWidth,
+    required BuildContext context,
+    int? maxLines,
+  }) {
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      maxLines: maxLines,
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+      strutStyle: StrutStyle.fromTextStyle(style)
+    )..layout(maxWidth: maxWidth);
+    return tp.size.height;
+  }
+
+
+  Future<void> showListingDetailsDialog(
+    BuildContext context, 
+    PositionedEvent event, 
+    //int alertNoticePeriod,
+    void Function(VoidCallback) setStateFunction,
+//    final int? Function(PositionedEvent, int, int?) toggleAlertAction,
+  ) async {
+
+    debugPrint('showListingDetailsDialog called');
+
+    removeMiniPopup(); // just in case one was opened
+
+    if (!context.mounted) return;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    listingDetailsDialogRoute = DialogRoute(context: context, barrierColor: Colors.black38, builder: (_) => StatefulBuilder(
+      builder: (ctx2, setStateDialog) {
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 16), // margin from screen edges
+          shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+          backgroundColor: colorScheme.surfaceContainerLowest,
+          shadowColor: colorScheme.surfaceContainerHighest,
+          elevation: 12,
+          child: SingleChildScrollView(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              width: 288,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              child: listingDetailsColumn(
+                context, 
+                event, 
+                //alertNoticePeriod,
+                setStateFunction,
+                setStateDialog,
+//                toggleAlertAction,
+              ),
+            ),
+          ),
+        );
+      },
+    ));
+    await Navigator.of(context).push(listingDetailsDialogRoute!);
+    removeMiniPopup(); // just in case one was opened
+
+  }
+
+
+  Widget listingDetailsColumn(
+    BuildContext context, 
+    PositionedEvent event, 
+    //int alertNoticePeriod,
+    void Function(VoidCallback) setParentStateFunction, // calling page (if dialog) otherwise local page
+    void Function(VoidCallback)? setLocalStateFunction, // dialog if we're in one
+    //final int? Function(PositionedEvent, int, int?) toggleAlertAction,
+  )  {
+
+    final eventNameTextKey = GlobalKey(); // for mini pop-ups
+    final notificationKey = GlobalKey(); // for mini pop-ups
+    final colorScheme = Theme.of(context).colorScheme;
+    ButtonStyle buttonStyle = ButtonStyle(
+      backgroundColor: WidgetStatePropertyAll(colorScheme.secondary), 
+      foregroundColor: WidgetStatePropertyAll(colorScheme.onSurface),
+      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 2, vertical: 0)), 
+      elevation: WidgetStatePropertyAll(3),
+      visualDensity: VisualDensity(horizontal: -3.0, vertical: -3),
+      shadowColor: WidgetStatePropertyAll(colorScheme.surfaceContainerLow),
+      textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 14.0)),
+    );
+    final now = DateTime.now();
+    final pastEvent = (event.startTime.difference(now).inMinutes < 0);
+    final tooLongFutureEvent = (event.startTime.difference(now).inDays > 7);
+    //final theAlertsStore = theScheduleHomeState.alertsStore;
+    //int? alertId = theAlertsStore.alertIdForEvent(event);
+    bool settingsOpened = false; // keeps track of permissions dialog being opened so we can re-check
+
+    debugPrint('listingDetailsColumn called');
+
+/*     void setTheAlert(StateSetter setStateDialog, [int? noticePeriod]) async {
+      removeMiniPopup();
+      if (settingsOpened) { // button previously tapped when alert permissions weren't given; maybe they are now
+        alertsPermissionGranted = await requestAlertPermissions();
+        settingsOpened = false;
+      }
+      if (alertsPermissionGranted) {
+        alertId = toggleAlertAction.call(event, noticePeriod ?? alertNoticePeriod, alertId);
+        setParentStateFunction.call(() => {});
+        setLocalStateFunction?.call(() => {});
+      } else {
+        alertsPermissionGranted = await requestAlertPermissions();
+        if (!alertsPermissionGranted) {
+          settingsOpened = true;
+          if (context.mounted) await showNoPermissionsDialog(context, colorScheme);
+        } else {
+          alertId = toggleAlertAction.call(event, noticePeriod ?? alertNoticePeriod, alertId);
+          if (context.mounted) setParentStateFunction.call(() => {});
+          if (context.mounted) setLocalStateFunction?.call(() => {});
+        }
+      }
+    } */
+
+/*     Map<String, void Function()> alertOptions = {};
+    if (event.start.difference(now).inMinutes > 60) alertOptions['60 minutes before'] = () => setTheAlert(setParentStateFunction, 60);
+    if (event.start.difference(now).inMinutes > 30) alertOptions['30 minutes before'] = () => setTheAlert(setParentStateFunction, 30);
+    if (event.start.difference(now).inMinutes > 15) alertOptions['15 minutes before'] = () => setTheAlert(setParentStateFunction, 15);
+    if (event.start.difference(now).inMinutes > 5) alertOptions['5 minutes before'] = () => setTheAlert(setParentStateFunction, 5);
+    if (event.start.difference(now).inMinutes > 0) alertOptions['At time of event'] = () => setTheAlert(setParentStateFunction, 0);
+ */
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 8.0,
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Expanded(child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return GestureDetector( // since field may be clipped
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      showMiniPopup(context, eventNameTextKey, event.name);
+                    },
+                    child: Text(
+                      event.name, 
+                      style: TextStyle(fontSize: 18.0, height: 1.2, fontWeight: FontWeight.bold), 
+                      maxLines: 2, 
+                      overflow: TextOverflow.ellipsis, 
+                      key: eventNameTextKey
+                    ),
+                  );
+                }
+              )),
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                },
+                child: const Icon(Icons.favorite),
+              ),
+              SizedBox(width: 2),
+            ],),
+            Row(spacing: 10, children: [
+              SizedBox(width: 28, height: 24, child: const Icon(Icons.access_time)),
+              Expanded(
+                child: AutoSizeText(formatTimeRange(event.startTime, event.endTime), style: TextStyle(fontSize: 14.0))
+              ),
+/*               SizedBox(width: 30, height: 30, child: ElevatedButton(
+                key: notificationKey,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  backgroundColor:  (alertId != null) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
+                  elevation: (alertId != null || pastEvent || tooLongFutureEvent) ? 0 : 4,
+                  shadowColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                onLongPress: pastEvent ? () => showMiniPopup(context, notificationKey, 'Can’t set an alert for something in the past!', Theme.of(context).colorScheme.error)
+                  : tooLongFutureEvent ? () => showMiniPopup(context, notificationKey, 'Alerts can only be set within the week before the event', Theme.of(context).colorScheme.error)
+                  : (alertOptions.isNotEmpty && alertId == null) ? () => showMiniMenuOverlay(context, null, notificationKey, alertOptions, true)
+                  : (alertId != null) ? () => showMiniPopup(context, notificationKey, 'Tap to cancel alert, then optionally long-press to choose a custom notice period')
+                  : null,
+                onPressed: pastEvent ? () => showMiniPopup(context, notificationKey, 'Can’t set an alert for something in the past!', Theme.of(context).colorScheme.error)
+                  : tooLongFutureEvent ? () => showMiniPopup(context, notificationKey, 'Alerts can only be set within the week before the event', Theme.of(context).colorScheme.error)
+                  : () async {
+                    HapticFeedback.lightImpact();
+                    setTheAlert(setParentStateFunction);
+                  },
+                child: (pastEvent || tooLongFutureEvent)
+                  ? SvgPicture.asset('assets/icons/alertOff.svg', width: 20)
+                  : SvgPicture.asset('assets/icons/alert.svg', width: 20),
+              )), */
+            ]),
+            Row(spacing: 10, children: [
+              SizedBox(width: 28, height: 24, child: const Icon(Icons.location_on)),
+              SizedBox(width: 218, child: AutoSizeText(event.location, style: TextStyle(height: 1.2, fontSize: 14.0), maxLines: 2)),
+            ]),
+            Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              ElevatedButton(
+                style: buttonStyle,
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  safeRemoveRoute(context, listingDetailsDialogRoute); // doing this not pop as we may be in landscape itinerary view
+                }, 
+                child: Text('Close'),
+              ),
+            ],),
+          ],
+        );
+      }
+    );
+  }
+
+
+  // Safe route removal with null/active checks
+  void safeRemoveRoute(BuildContext context, Route? route) {
+    if (route != null && route.isActive && route.navigator != null) {
+      try {
+        Navigator.of(context).removeRoute(route);
+      } catch (e) {
+        debugPrint('safeRemoveRoute: error removing route: $e');
+      }
+    }
 }
 
 
-double estimateTextHeight({
-  required String text,
-  required TextStyle style,
-  required double maxWidth,
-  required BuildContext context,
-  int? maxLines,
-}) {
-  final tp = TextPainter(
-    text: TextSpan(text: text, style: style),
-    maxLines: maxLines,
-    textDirection: TextDirection.ltr,
-    textScaler: MediaQuery.textScalerOf(context),
-    strutStyle: StrutStyle.fromTextStyle(style)
-  )..layout(maxWidth: maxWidth);
-  return tp.size.height;
-}
-
-
-@override
+  @override
   Widget build(BuildContext context) {
 
     debugPrint('_TimetablePageState build called with loading=$loading');
@@ -747,7 +957,18 @@ double estimateTextHeight({
                                                               ? DecorationImage(image: AssetImage('assets/icons/favorite_24dp_992F30.png'), scale: 1.5, alignment: AlignmentGeometry.topRight, opacity: 0.5) 
                                                               : null,
                                                           ),
-                                                          child: eventRect(pe, colorScheme, isLandscape, null)
+                                                          child: GestureDetector(
+                                                            onTap: () {
+                                                              HapticFeedback.lightImpact();
+                                                              showListingDetailsDialog(
+                                                                itemContext, 
+                                                                pe, 
+                                                                //alertNoticePeriod,
+                                                                setState,
+                                                              );
+                                                            },
+                                                            child: eventRect(pe, colorScheme, isLandscape, null),
+                                                          ),
                                                         ),
                                                       );
                                                     }
