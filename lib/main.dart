@@ -229,7 +229,7 @@ class HomePageState extends State<HomePage> {
     ChooserPage(),
     MapPage(listings: listings, key: mapPageKey),
     FilteredListingsPage(filterPrimaryType: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
-    TimetablePage(theEvents: listings),
+    TimetablePage(theEvents: listings, favouriteListingKeys: favouriteListingKeys),
     FilteredListingsPage(filterPrimaryType: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle),
   ];
 

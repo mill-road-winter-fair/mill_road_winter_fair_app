@@ -11,8 +11,10 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 
 class TimetablePage extends StatefulWidget {
   final List<Map<String, dynamic>> theEvents;
+  final Set<String> favouriteListingKeys;
   const TimetablePage({
     required this.theEvents,
+    required this.favouriteListingKeys,
     super.key,
   });
   @override
@@ -113,6 +115,12 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
 
+  Future<void> _saveFavourites() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
+  }
+
+
   void startClockUpdates(VoidCallback tick) {
     final now = DateTime.now();
     final delay = Duration(seconds: (60 / _dayPixelsPerMinute).toInt());
@@ -160,7 +168,7 @@ class _TimetablePageState extends State<TimetablePage> {
           endTime: endTime,
           location: ev['location'],
           name: ev['title'],
-          favourited: favouriteListingKeys.contains(ev['id']),
+          id: ev['id'],
           lane: 0, // will be computed later
           top: 0, // will be computed later
           height: 0, // will be computed later
@@ -235,7 +243,7 @@ class _TimetablePageState extends State<TimetablePage> {
         endTime: ev.endTime, 
         location: ev.location,
         name: ev.name,
-        favourited: ev.favourited,
+        id: ev.id,
         lane: lane,
         top: top + 2, 
         height: height,
@@ -498,6 +506,15 @@ class _TimetablePageState extends State<TimetablePage> {
 
   }
 
+  void favouriteOrNotListing(PositionedEvent theEvent) {
+    if (favouriteListingKeys.contains(theEvent.id)) {
+      favouriteListingKeys.remove(theEvent.id);
+    } else {
+      favouriteListingKeys.add(theEvent.id);
+    }
+    setState(() {});
+    _saveFavourites();
+  }
 
   Widget listingDetailsColumn(
     BuildContext context, 
@@ -560,7 +577,7 @@ class _TimetablePageState extends State<TimetablePage> {
     if (event.start.difference(now).inMinutes > 0) alertOptions['At time of event'] = () => setTheAlert(setParentStateFunction, 0);
  */
     return StatefulBuilder(
-      builder: (context, setState) {
+      builder: (context, setStateDialog) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           spacing: 8.0,
@@ -587,7 +604,19 @@ class _TimetablePageState extends State<TimetablePage> {
                 onTap: () {
                   HapticFeedback.lightImpact();
                 },
-                child: const Icon(Icons.favorite),
+                child: IconButton(
+                  onPressed: () {
+                    favouriteOrNotListing(event);
+                    setStateDialog(() {});
+                  },
+                  padding: const EdgeInsets.all(0),
+                  style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  icon:Icon(
+                    (favouriteListingKeys.contains(event.id)) ? Icons.favorite : Icons.favorite_border_outlined, 
+                    shadows: [Shadow( color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                    color: Theme.of(context).colorScheme.primary
+                  ),
+                ),
               ),
               SizedBox(width: 2),
             ],),
@@ -921,6 +950,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                   height: pe.height,
                                                   child: Builder(
                                                     builder: (itemContext) {
+                                                      final isFavourited = favouriteListingKeys.contains(pe.id);
                                                       return GestureDetector(
                                                         onTap: () {
                                                           HapticFeedback.lightImpact();
@@ -949,11 +979,11 @@ class _TimetablePageState extends State<TimetablePage> {
                                                         child: Container(
                                                           padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
                                                           decoration: BoxDecoration(
-                                                            color: (pe.favourited) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
+                                                            color: (isFavourited) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
                                                             borderRadius: BorderRadius.circular(4),
                                                             boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
                                                             border: Border.all(width: 0.2, color: colorScheme.onSecondary),
-                                                            image: (pe.favourited)
+                                                            image: (isFavourited)
                                                               ? DecorationImage(image: AssetImage('assets/icons/favorite_24dp_992F30.png'), scale: 1.5, alignment: AlignmentGeometry.topRight, opacity: 0.5) 
                                                               : null,
                                                           ),
@@ -1005,7 +1035,7 @@ class PositionedEvent {
   final DateTime endTime;
   final String location;
   final String name;
-  bool favourited;
+  String id;
   int lane;
   double top;
   double height;
@@ -1016,7 +1046,7 @@ class PositionedEvent {
     required this.endTime,
     required this.location,
     required this.name,
-    required this.favourited,
+    required this.id,
     required this.lane, 
     required this.top, 
     required this.height, 
