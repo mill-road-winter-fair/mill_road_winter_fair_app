@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 
@@ -29,7 +28,7 @@ class _ChooserPageState extends State<ChooserPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('ChooserPage build() called');
-    var bodyStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.tertiary);
+    var bodyStyle = TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.bold);
 
 
     return SafeArea(
@@ -38,7 +37,8 @@ class _ChooserPageState extends State<ChooserPage> {
       right: false,
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
-        body: Container(width: min(MediaQuery.of(context).size.width - 8, 500),
+        body: Container(width: double.infinity, height: double.infinity,
+          decoration: BoxDecoration(image: const DecorationImage(fit: BoxFit.fill, image: AssetImage('assets/chooserPage/chooserPage_background.png'))),
           padding: EdgeInsets.all(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
           child: Scrollbar(
             controller: _chooserPageScrollController,
@@ -52,7 +52,8 @@ class _ChooserPageState extends State<ChooserPage> {
                 primary: false,
                 child: Column(
                   children: [
-                    Text(style: bodyStyle, 'Nothing here yet'),
+                    SizedBox(height: 6),
+                    Image(image: AssetImage('assets/MRWF25_leaflet_banner.png'), width: 180),
                   ],
                 ), // Add event details here
               ),
