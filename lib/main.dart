@@ -286,6 +286,20 @@ class HomePageState extends State<HomePage> {
         ListTile(
           dense: true,
           contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.schedule),
+          title: const Text('Timetable based on Clashfinder Pal by permission of the author', maxLines: 2),
+          subtitle: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('https://linktr.ee/cfpal', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('https://linktr.ee/cfpal'));
+          },
+        ),
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.feedback),
           title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tell us if you like this app')),
           subtitle: FittedBox(
