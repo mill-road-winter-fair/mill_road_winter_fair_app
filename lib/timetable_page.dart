@@ -168,7 +168,13 @@ class _TimetablePageState extends State<TimetablePage> {
           endTime: endTime,
           location: ev['location'],
           name: ev['title'],
+          subtitle: ev['subtitle'],
           id: ev['id'],
+          cancelled: (ev['cancelled'] == 'TRUE'),
+          emoji: ev['emoji'],
+          description: ev['description'],
+          latLng: ev['latLng'],
+          imageURL: ev['imageURL'],
           lane: 0, // will be computed later
           top: 0, // will be computed later
           height: 0, // will be computed later
@@ -243,7 +249,13 @@ class _TimetablePageState extends State<TimetablePage> {
         endTime: ev.endTime, 
         location: ev.location,
         name: ev.name,
+        subtitle: ev.subtitle,
         id: ev.id,
+        cancelled: ev.cancelled,
+        emoji: ev.emoji,
+        description: ev.description,
+        latLng: ev.latLng,
+        imageURL: ev.imageURL,
         lane: lane,
         top: top + 2, 
         height: height,
@@ -458,6 +470,17 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
 
+  void favouriteOrNotListing(PositionedEvent theEvent) {
+    if (favouriteListingKeys.contains(theEvent.id)) {
+      favouriteListingKeys.remove(theEvent.id);
+    } else {
+      favouriteListingKeys.add(theEvent.id);
+    }
+    setState(() {});
+    _saveFavourites();
+  }
+
+
   Future<void> showListingDetailsDialog(
     BuildContext context, 
     PositionedEvent event, 
@@ -476,7 +499,7 @@ class _TimetablePageState extends State<TimetablePage> {
     listingDetailsDialogRoute = DialogRoute(context: context, barrierColor: Colors.black38, builder: (_) => StatefulBuilder(
       builder: (ctx2, setStateDialog) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(horizontal: 16), // margin from screen edges
+          insetPadding: EdgeInsets.symmetric(horizontal: 8), // margin from screen edges
           shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,
@@ -506,15 +529,6 @@ class _TimetablePageState extends State<TimetablePage> {
 
   }
 
-  void favouriteOrNotListing(PositionedEvent theEvent) {
-    if (favouriteListingKeys.contains(theEvent.id)) {
-      favouriteListingKeys.remove(theEvent.id);
-    } else {
-      favouriteListingKeys.add(theEvent.id);
-    }
-    setState(() {});
-    _saveFavourites();
-  }
 
   Widget listingDetailsColumn(
     BuildContext context, 
@@ -526,7 +540,8 @@ class _TimetablePageState extends State<TimetablePage> {
   )  {
 
     final eventNameTextKey = GlobalKey(); // for mini pop-ups
-    final notificationKey = GlobalKey(); // for mini pop-ups
+    final eventNameDescKey = GlobalKey(); // for mini pop-ups
+    //final notificationKey = GlobalKey(); // for mini pop-ups
     final colorScheme = Theme.of(context).colorScheme;
     ButtonStyle buttonStyle = ButtonStyle(
       backgroundColor: WidgetStatePropertyAll(colorScheme.secondary), 
@@ -537,6 +552,7 @@ class _TimetablePageState extends State<TimetablePage> {
       shadowColor: WidgetStatePropertyAll(colorScheme.surfaceContainerLow),
       textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 14.0)),
     );
+    final textStyle = TextStyle(fontSize: 16.0, height: 1.2);
     final now = DateTime.now();
     final pastEvent = (event.startTime.difference(now).inMinutes < 0);
     final tooLongFutureEvent = (event.startTime.difference(now).inDays > 7);
@@ -582,7 +598,8 @@ class _TimetablePageState extends State<TimetablePage> {
           mainAxisSize: MainAxisSize.min,
           spacing: 8.0,
           children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(spacing: 10, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [
+              SizedBox(width: 28, height: 28, child: Text(event.emoji, style: textStyle.copyWith(fontSize: 24, height: 1.2), textAlign: TextAlign.center)),
               Expanded(child: LayoutBuilder(
                 builder: (context, constraints) {
                   return GestureDetector( // since field may be clipped
@@ -600,30 +617,29 @@ class _TimetablePageState extends State<TimetablePage> {
                   );
                 }
               )),
-              GestureDetector(
-                onTap: () {
+              IconButton(
+                onPressed: () {
                   HapticFeedback.lightImpact();
+                  favouriteOrNotListing(event);
+                  setStateDialog(() {});
                 },
-                child: IconButton(
-                  onPressed: () {
-                    favouriteOrNotListing(event);
-                    setStateDialog(() {});
-                  },
-                  padding: const EdgeInsets.all(0),
-                  style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  icon:Icon(
-                    (favouriteListingKeys.contains(event.id)) ? Icons.favorite : Icons.favorite_border_outlined, 
-                    shadows: [Shadow( color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
-                    color: Theme.of(context).colorScheme.primary
-                  ),
+                padding: const EdgeInsets.all(0),
+                style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -4), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                icon:Icon(
+                  (favouriteListingKeys.contains(event.id)) ? Icons.favorite : Icons.favorite_border_outlined, 
+                  shadows: [Shadow( color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                  color: Theme.of(context).colorScheme.primary
                 ),
               ),
-              SizedBox(width: 2),
             ],),
+            if (event.subtitle != '') Row(spacing: 10, children: [
+              SizedBox(width: 28, height: 28, child: Icon(Icons.info_outline, color: colorScheme.onSurfaceVariant)),
+              SizedBox(width: 218, child: AutoSizeText(event.subtitle, style: textStyle, maxLines: 2)),
+            ]),
             Row(spacing: 10, children: [
-              SizedBox(width: 28, height: 24, child: const Icon(Icons.access_time)),
+              SizedBox(width: 28, height: 28, child: Icon(Icons.access_time, color: colorScheme.onSurfaceVariant)),
               Expanded(
-                child: AutoSizeText(formatTimeRange(event.startTime, event.endTime), style: TextStyle(fontSize: 14.0))
+                child: AutoSizeText(formatTimeRange(event.startTime, event.endTime), style: textStyle)
               ),
 /*               SizedBox(width: 30, height: 30, child: ElevatedButton(
                 key: notificationKey,
@@ -649,9 +665,19 @@ class _TimetablePageState extends State<TimetablePage> {
                   : SvgPicture.asset('assets/icons/alert.svg', width: 20),
               )), */
             ]),
-            Row(spacing: 10, children: [
-              SizedBox(width: 28, height: 24, child: const Icon(Icons.location_on)),
-              SizedBox(width: 218, child: AutoSizeText(event.location, style: TextStyle(height: 1.2, fontSize: 14.0), maxLines: 2)),
+            Row(spacing: 10, mainAxisAlignment: MainAxisAlignment.start, key: eventNameDescKey, children: [
+              SizedBox(width: 28, height: 28, child: Icon(Icons.location_on_outlined, size: 28, color: colorScheme.onSurfaceVariant)),
+              SizedBox(width: 218, child: AutoSizeText(event.location, style: textStyle, maxLines: 2)),
+            ]),
+            if (event.description != '') Row(spacing: 10, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              SizedBox(width: 28, height: 28, child: Icon(Icons.description_outlined, size: 28, color: colorScheme.onSurfaceVariant)),
+              SizedBox(width: 218, child: GestureDetector( // since field may be clipped
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  showMiniPopup(context, eventNameDescKey, event.description);
+                },
+                child: AutoSizeText(event.description, style: textStyle, maxLines: 5, minFontSize: 13, overflow: TextOverflow.ellipsis),
+              )),
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
               ElevatedButton(
@@ -976,27 +1002,27 @@ class _TimetablePageState extends State<TimetablePage> {
                                                             widget.parentState.setState
                                                           ); */
                                                         },
-                                                        child: Container(
-                                                          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
-                                                          decoration: BoxDecoration(
-                                                            color: (isFavourited) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
-                                                            borderRadius: BorderRadius.circular(4),
-                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
-                                                            border: Border.all(width: 0.2, color: colorScheme.onSecondary),
-                                                            image: (isFavourited)
-                                                              ? DecorationImage(image: AssetImage('assets/icons/favorite_24dp_992F30.png'), scale: 1.5, alignment: AlignmentGeometry.topRight, opacity: 0.5) 
-                                                              : null,
-                                                          ),
-                                                          child: GestureDetector(
-                                                            onTap: () {
-                                                              HapticFeedback.lightImpact();
-                                                              showListingDetailsDialog(
-                                                                itemContext, 
-                                                                pe, 
-                                                                //alertNoticePeriod,
-                                                                setState,
-                                                              );
-                                                            },
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            HapticFeedback.lightImpact();
+                                                            showListingDetailsDialog(
+                                                              itemContext, 
+                                                              pe, 
+                                                              //alertNoticePeriod,
+                                                              setState,
+                                                            );
+                                                          },
+                                                          child: Container(
+                                                            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
+                                                            decoration: BoxDecoration(
+                                                              color: (isFavourited) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
+                                                              borderRadius: BorderRadius.circular(4),
+                                                              boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
+                                                              border: Border.all(width: 0.2, color: colorScheme.onSecondary),
+                                                              image: (isFavourited)
+                                                                ? DecorationImage(image: AssetImage('assets/icons/favorite_24dp_992F30.png'), scale: 1.5, alignment: AlignmentGeometry.topRight, opacity: 0.5) 
+                                                                : null,
+                                                            ),
                                                             child: eventRect(pe, colorScheme, isLandscape, null),
                                                           ),
                                                         ),
@@ -1035,7 +1061,13 @@ class PositionedEvent {
   final DateTime endTime;
   final String location;
   final String name;
-  String id;
+  final String subtitle;
+  final String id;
+  final bool cancelled;
+  final String emoji;
+  final String description;
+  final String latLng;
+  final String imageURL;
   int lane;
   double top;
   double height;
@@ -1046,7 +1078,13 @@ class PositionedEvent {
     required this.endTime,
     required this.location,
     required this.name,
+    required this.subtitle,
     required this.id,
+    required this.cancelled,
+    required this.emoji,
+    required this.description,
+    required this.latLng,
+    required this.imageURL,
     required this.lane, 
     required this.top, 
     required this.height, 
