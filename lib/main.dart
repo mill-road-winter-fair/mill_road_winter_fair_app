@@ -53,10 +53,20 @@ Future<void> main() async {
 
   // Lock app in portrait rotation and run main app
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(RootWidget(firstExecution: firstExecution, analyticsService: analyticsService)));
+}
 
-  // Run the app
-  runApp(MyApp(firstExecution: firstExecution, analyticsService: analyticsService));
+class RootWidget extends StatelessWidget {
+  final bool firstExecution;
+  final AnalyticsService analyticsService;
+  const RootWidget({super.key, required this.firstExecution, required this.analyticsService});
+
+  @override
+  Widget build(BuildContext context) {
+    return firstExecution
+        ? WelcomeScreen(analyticsService: analyticsService)
+        : MyApp(firstExecution: firstExecution, analyticsService: analyticsService);
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -78,9 +88,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
-          home: firstExecution
-            ? WelcomeScreen(analyticsService: analyticsService)
-            : HomePage(key: homePageKey, analyticsService: analyticsService),
+          home: firstExecution ? WelcomeScreen(analyticsService: analyticsService) : HomePage(key: homePageKey, analyticsService: analyticsService),
           navigatorObservers: [routeObserver],
         );
       },
@@ -298,20 +306,21 @@ class HomePageState extends State<HomePage> with RouteAware {
 
   final _listingsKeyFood = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyShopping = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyMusic = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyEvent = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyPlace = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyCharityCommunityInfo = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyPerformance = GlobalKey<FilteredListingsPageState>();
+  final _listingsKeyVisitExperience = GlobalKey<FilteredListingsPageState>();
   final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
 
   late final _pages = [
     MapPage(listings: listings, analyticsService: widget.analyticsService, key: mapPageKey),
-    FilteredListingsPage(filterPrimaryType: "Food", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyFood),
-    FilteredListingsPage(filterPrimaryType: "Stalls", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyShopping),
-    FilteredListingsPage(filterPrimaryType: "Music", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyMusic),
-    FilteredListingsPage(filterPrimaryType: "Event", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyEvent),
-    FilteredListingsPage(filterPrimaryType: "Place", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyPlace),
-    FilteredListingsPage(filterPrimaryType: "Other", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyService),
-    FilteredListingsPage(filterPrimaryType: "Saved", analyticsService: widget.analyticsService, listings: listings),
+    FilteredListingsPage(filterCategory: "Food", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyFood),
+    FilteredListingsPage(filterCategory: "Shopping", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyShopping),
+    FilteredListingsPage(filterCategory: "Performance", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyPerformance),
+    FilteredListingsPage(
+        filterCategory: "Charity/Community/Info", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyCharityCommunityInfo),
+    FilteredListingsPage(filterCategory: "Visits/Experiences", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyVisitExperience),
+    FilteredListingsPage(filterCategory: "Services", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyService),
+    FilteredListingsPage(filterCategory: "Saved", analyticsService: widget.analyticsService, listings: listings),
   ];
 
   void aboutDialog() {
@@ -438,7 +447,7 @@ class HomePageState extends State<HomePage> with RouteAware {
             establishLocation();
             switch (selectedIndex) {
               case 0:
-                if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
+                if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
                 widget.analyticsService.logButtonTapped('map_navbar');
                 widget.analyticsService.setCurrentScreen('MapPage');
               case 1:
@@ -447,24 +456,24 @@ class HomePageState extends State<HomePage> with RouteAware {
                 widget.analyticsService.setCurrentScreen('FoodListingsPage');
               case 2:
                 _listingsKeyShopping.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('stalls_navbar');
-                widget.analyticsService.setCurrentScreen('StallsListingsPage');
+                widget.analyticsService.logButtonTapped('shopping_navbar');
+                widget.analyticsService.setCurrentScreen('ShoppingListingsPage');
               case 3:
-                _listingsKeyMusic.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('music_navbar');
-                widget.analyticsService.setCurrentScreen('MusicListingsPage');
+                _listingsKeyPerformance.currentState?.onTabVisible();
+                widget.analyticsService.logButtonTapped('performances_navbar');
+                widget.analyticsService.setCurrentScreen('PerformancesListingsPage');
               case 4:
-                _listingsKeyEvent.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('events_navbar');
-                widget.analyticsService.setCurrentScreen('EventsListingsPage');
+                _listingsKeyCharityCommunityInfo.currentState?.onTabVisible();
+                widget.analyticsService.logButtonTapped('charityCommunityInfo_navbar');
+                widget.analyticsService.setCurrentScreen('CharityCommunityInfoListingsPage');
               case 5:
-                _listingsKeyPlace.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('places_navbar');
-                widget.analyticsService.setCurrentScreen('PlacesListingsPage');
+                _listingsKeyVisitExperience.currentState?.onTabVisible();
+                widget.analyticsService.logButtonTapped('visitsExperiences_navbar');
+                widget.analyticsService.setCurrentScreen('VisitsExperiencesListingsPage');
               case 6:
                 _listingsKeyService.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('other_navbar');
-                widget.analyticsService.setCurrentScreen('OtherListingsPage');
+                widget.analyticsService.logButtonTapped('services_navbar');
+                widget.analyticsService.setCurrentScreen('ServicesListingsPage');
             }
             setState(() {
               index = selectedIndex;
@@ -473,11 +482,11 @@ class HomePageState extends State<HomePage> with RouteAware {
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
             BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
-            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
+            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Shopping"),
+            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Performances"),
+            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Community"),
+            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Visits"),
+            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
           ],
         ),
         drawer: Drawer(
@@ -502,7 +511,7 @@ class HomePageState extends State<HomePage> with RouteAware {
                         Expanded(flex: 2, child: Container()),
                         FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Text(' Saturday 6 December 2025 10:30—16:30',
+                          child: Text(' $fairDateTimes',
                               style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
                         ),
                         Expanded(flex: 2, child: Container())
@@ -532,7 +541,11 @@ class HomePageState extends State<HomePage> with RouteAware {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", analyticsService: widget.analyticsService, listings: listings)));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                FilteredListingsPage(filterCategory: "Saved", analyticsService: widget.analyticsService, listings: listings)));
                     widget.analyticsService.logButtonTapped('saved_listings');
                     widget.analyticsService.setCurrentScreen('SavedListingsPage');
                   },

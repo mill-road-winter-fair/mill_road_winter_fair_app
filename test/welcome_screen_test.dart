@@ -1,11 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide RootWidget;
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -22,22 +23,270 @@ void main() {
   });
 
   group('WelcomeScreen', () {
-    testWidgets('footer button saves settings and navigates', (WidgetTester tester) async {
+    testWidgets('displays welcome screen on first app execution', (WidgetTester tester) async {
+      // Set firstExecution to true to simulate first time app launch
+      firstExecution = true;
+
+      // Set a realistic window size to avoid layout overflow in the test
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      // Pump the RootWidget to test that the app correctly chooses the WelcomeScreen
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+
+      // Verify that the WelcomeScreen is displayed
+      expect(find.byType(WelcomeScreen), findsOneWidget);
+
+      // Verify that OnBoardingPage is rendered within the WelcomeScreen
+      expect(find.byType(OnBoardingPage), findsOneWidget);
+
+      // Verify the main action button is visible
+      // This confirms the welcome screen UI is properly initialized
+      expect(find.text('Take me straight to the app!'), findsOneWidget);
+    });
+
+    testWidgets('displays MyApp when not first app execution', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate subsequent app launch
+      firstExecution = false;
+
+      // Mock user settings and provide a dummy listing to avoid triggering API fetch/retries and timers
+      await loadSettings();
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        }
+      ];
+
+      // Pump the RootWidget
+      await tester.pumpWidget(RootWidget(firstExecution: false, analyticsService: FakeAnalyticsService()));
+
+      // Verify that WelcomeScreen is NOT displayed
+      expect(find.byType(WelcomeScreen), findsNothing);
+
+      // Verify that MyApp is displayed
+      expect(find.byType(MyApp), findsOneWidget);
+
+      // Handle the potential toast timer from ListingUpdateNotifier.maybeShowNotice
+      // Use a long pump to ensure any 20s toast timer completes
+      await tester.pump(const Duration(seconds: 21));
+    });
+
+    testWidgets('skip button saves settings and navigates', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({});
+      firstExecution = true;
+
+      // Provide a dummy listing to avoid triggering API fetch/retries and timers
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        }
+      ];
+
+      // Set a realistic window size to avoid layout overflow in the test
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      // Pump the RootWidget
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+
+      // Verify the 'Skip' button is present and tap it
+      expect(find.text('Skip'), findsOneWidget);
+      await tester.tap(find.text('Skip'));
+      await tester.pumpAndSettle();
+
+      // Verify that MyApp is now displayed
+      expect(find.byType(RootWidget), findsOneWidget);
+
+      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
+      await tester.pump(const Duration(seconds: 21));
+      await tester.pumpAndSettle();
+
+      // Check that shared prefs have been updated
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('firstExecution'), isFalse);
+    });
+
+    testWidgets('next button advances onboarding slides', (WidgetTester tester) async {
+      firstExecution = true;
+
+      // Set a realistic window size to avoid layout overflow in the test
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      // Pump the RootWidget
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+
+      // Verify we are on the first page
+      expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
+      expect(find.text('What do the pins mean?'), findsNothing);
+
+      // Find and tap the 'Next' button (the arrow forward icon)
+      final nextButton = find.byIcon(Icons.arrow_forward);
+      expect(nextButton, findsOneWidget);
+      await tester.tap(nextButton);
+      await tester.pumpAndSettle();
+
+      // Verify we have advanced to the second page
+      expect(find.text('What do the pins mean?'), findsOneWidget);
+      expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsNothing);
+    });
+
+    testWidgets('done button saves settings and navigates', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({});
+      firstExecution = true;
+
+      // Provide a dummy listing to avoid triggering API fetch/retries and timers
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        }
+      ];
+
+      // Set a realistic window size to avoid layout overflow in the test
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      // Pump the RootWidget
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+
+      // Advance through the onboarding slides to reach the last page
+      final nextButton = find.byIcon(Icons.arrow_forward);
+      for (int i = 0; i < 4; i++) {
+        await tester.tap(nextButton);
+        await tester.pumpAndSettle();
+      }
+
+      // Verify the 'Done' button is present and tap it
+      expect(find.text('Done'), findsOneWidget);
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+
+      // Verify that MyApp is now displayed
+      expect(find.byType(RootWidget), findsOneWidget);
+
+      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
+      await tester.pump(const Duration(seconds: 21));
+      await tester.pumpAndSettle();
+
+      // Check that shared prefs have been updated
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('firstExecution'), isFalse);
+    });
+
+    testWidgets('Take me straight to the app button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
       // Since flutter's default test screen size is for desktop i.e. 800x600, set a sensible minimum mobile screen size
       // 375x667 is the smallest size tracked at https://gs.statcounter.com/screen-resolution-stats/mobile/united-kingdom as of Nov 2025
-      TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.physicalSize = const Size(375, 667);
-      TestWidgetsFlutterBinding.instance.platformDispatcher.implicitView!.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(375, 667);
+      tester.view.devicePixelRatio = 1.0;
 
       // Unmount widgets in teardown; do NOT call Fluttertoast.cancel() (causes MissingPluginException in tests)
       addTearDown(() async {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
         await tester.pumpWidget(Container());
         await tester.pump(); // allow disposal to complete
       });
 
-      // Start the app with firstExecution true to show the welcome screen
-      await tester.pumpWidget(MyApp(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      // Provide a dummy listing to avoid triggering API fetch/retries and timers
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        }
+      ];
+
+      // Pump the RootWidget
+      firstExecution = true;
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // The footer button text should be present
       expect(find.text('Take me straight to the app!'), findsOneWidget);
@@ -45,6 +294,9 @@ void main() {
       // Tap the footer button
       await tester.tap(find.text('Take me straight to the app!'));
       await tester.pumpAndSettle();
+
+      // Verify that MyApp is now displayed
+      expect(find.byType(RootWidget), findsOneWidget);
 
       // Let the 20s toast timer complete to avoid "Timer still pending" when test disposes widgets
       await tester.pump(const Duration(seconds: 21));

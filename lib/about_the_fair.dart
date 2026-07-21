@@ -330,7 +330,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202488, 0.131207));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.202488, 0.131207));
                                               widget.analyticsService.logButtonTapped('eastRoad_hyperlink');
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
@@ -340,7 +340,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.198682, 0.141051));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.198682, 0.141051));
                                               widget.analyticsService.logButtonTapped('theBridge_hyperlink');
                                             }),
                                     ],
@@ -356,7 +356,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.200389, 0.136465));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.200389, 0.136465));
                                               widget.analyticsService.logButtonTapped('ditchburnGardens_hyperlink');
                                             }),
                                     ],
@@ -372,7 +372,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.1970778, 0.1472252));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.1970778, 0.1472252));
                                               widget.analyticsService.logButtonTapped('salisburyClub_hyperlink');
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
@@ -382,7 +382,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
                                               widget.analyticsService.logButtonTapped('petersfield_hyperlink_1');
                                             }),
                                     ],
@@ -398,7 +398,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.199627, 0.138407));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.199627, 0.138407));
                                               widget.analyticsService.logButtonTapped('gwydirStreet_hyperlink');
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
@@ -408,7 +408,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Event', const LatLng(52.202858, 0.132253));
+                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
                                               widget.analyticsService.logButtonTapped('petersfield_hyperlink_2');
                                             }),
                                     ],

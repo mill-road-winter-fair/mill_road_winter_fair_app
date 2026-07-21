@@ -5,9 +5,6 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Hardcoded fair date for 2025; change this today's date for testing
-final fairDate = DateTime(2025, 12, 6);
-
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime) {
   try {
@@ -32,11 +29,6 @@ bool hasEventEnded(String endTime) {
 // Function to determine if the event is today
 bool isItEventDay() {
   return DateUtils.isSameDay(fairDate, DateTime.now());
-}
-
-// Function for determining if the event has been marked as cancelled
-bool hasEventBeenCancelled(String? description) {
-  return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
 }
 
 class GroupListingInfoSheet extends StatelessWidget {
@@ -140,16 +132,22 @@ class GroupListingInfoSheet extends StatelessWidget {
 }
 
 class SpecificListingInfoSheet extends StatefulWidget {
+  // From the db
+  final bool cancelled;
+  final bool brickAndMortar;
+  final String emoji;
   final String title;
-  final String location;
   final String subtitle;
+  final String location;
+  final String description;
+  final String email;
+  final String website;
+  final String phoneNumber;
+  final String imageURL;
   final String startTime;
   final String endTime;
+  // From the parent widget (calculated)
   final String approxDistance;
-  final String phoneNumber;
-  final String website;
-  final String email;
-  final String description;
   final bool detailsVisible;
   final bool listingFavourited;
   final VoidCallback? onDetailsTapped;
@@ -158,16 +156,20 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final AnalyticsService analyticsService;
 
   const SpecificListingInfoSheet({
+    required this.cancelled,
+    required this.brickAndMortar,
+    required this.emoji,
     required this.title,
-    required this.location,
     required this.subtitle,
+    required this.location,
+    required this.description,
+    required this.email,
+    required this.website,
+    required this.phoneNumber,
+    required this.imageURL,
     required this.startTime,
     required this.endTime,
     required this.approxDistance,
-    required this.phoneNumber,
-    required this.website,
-    required this.email,
-    required this.description,
     required this.detailsVisible,
     required this.listingFavourited,
     this.onDetailsTapped,
@@ -185,20 +187,17 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
   @override
   Widget build(BuildContext context) {
     debugPrint('SpecificListingInfoSheet build() called');
-    String updatedDescription; // with cancel identifier removed if appropriate
     String updatedTimes; // replaced with CANCELLED if appropriate
     Widget subDetails; // calculated subtitle/details field
 
     // Determine if the event has been cancelled, update text style accordingly
-    final bool cancelled = hasEventBeenCancelled(widget.description);
     final titleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
       color: Theme.of(context).colorScheme.onSurface,
-      decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none,
+      decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
-    updatedDescription = cancelled ? widget.description.substring(cancelIdentifier.length) : widget.description;
-    updatedTimes = cancelled ? cancelIdentifier : "${widget.startTime}—${widget.endTime}";
+    updatedTimes = widget.cancelled ? 'CANCELLED' : "${widget.startTime}—${widget.endTime}";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
     final subSubStyle = subStyle.copyWith(fontWeight: FontWeight.normal);
@@ -206,7 +205,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(widget.endTime);
     final timeStyle = subSubStyle.copyWith(
-      color: ended || cancelled ? Colors.red : Theme.of(context).colorScheme.onSurface,
+      color: ended || widget.cancelled ? Colors.red : Theme.of(context).colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
@@ -239,7 +238,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               Expanded(
                 flex: 14,
                 child: Text(
-                  widget.title,
+                  // Prepend the emoji if we have one
+                  widget.emoji.isNotEmpty ? '${widget.emoji} ${widget.title}' : widget.title,
                   style: titleStyle,
                 ),
               ),
@@ -258,8 +258,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
                 TextSpan(children: [
                   TextSpan(style: subSubStyle, text: widget.location),
-                  TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' (${widget.approxDistance})'),
-                ], ),
+                  TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' ${widget.approxDistance}'),
+                ], ), 
               ), ),
               ),
               const Expanded(flex: 1, child: SizedBox(width: 2)),
@@ -312,7 +312,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 label: const FittedBox(child: Text('Directions')),
               ),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
-              if (widget.onDetailsTapped != null && (updatedDescription.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty)) const SizedBox(width: 6),
+              if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty)) const SizedBox(width: 6),
               // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
               if (widget.onDetailsTapped != null && widget.website.isNotEmpty && widget.email.isNotEmpty && widget.phoneNumber.isNotEmpty && MediaQuery.of(context).size.width <= 360)
                 ElevatedButton(
@@ -325,8 +325,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     widget.analyticsService.logButtonTapped('listing_details');
                     },
                   child: const Icon(Icons.info),
-              )
-              else if (widget.onDetailsTapped != null && (updatedDescription.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
+              ) 
+              else if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
                 ElevatedButton.icon(
                   style: widget.detailsVisible ?
                     ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
@@ -427,12 +427,12 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 0,
               children: [
-                if (updatedDescription.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (updatedDescription.isNotEmpty) const SizedBox(height: 8),
-                if (updatedDescription.isNotEmpty) Row(
+                if (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty) const SizedBox(height: 8),
+                if (widget.description.isNotEmpty) const SizedBox(height: 8),
+                if (widget.description.isNotEmpty) Row(
                   children: [
                     Flexible(
-                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), updatedDescription),
+                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), widget.description),
                     ),
                   ],
                 ),
