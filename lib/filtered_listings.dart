@@ -9,6 +9,7 @@ import 'dart:async';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
@@ -20,10 +21,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'android_nav_bar_detector.dart';
 
 class FilteredListingsPage extends StatefulWidget {
+  final AnalyticsService analyticsService;
   final String filterCategory;
   final List<Map<String, dynamic>> listings;
 
   const FilteredListingsPage({
+    required this.analyticsService,
     required this.filterCategory,
     required this.listings,
     super.key,
@@ -90,6 +93,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Request the map page to show directions
     await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
+
+    widget.analyticsService.setCurrentScreen('MapPage');
   }
 
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
@@ -211,6 +216,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void sortingDropdownCallback(SortingMethod? selectedValue) {
     HapticFeedback.selectionClick();
+    widget.analyticsService.logButtonTapped('sorting_dropdown_option');
     if (selectedValue is SortingMethod) {
       if (selectedValue == SortingMethod.values[1] && currentLatLng == null) {
         Fluttertoast.showToast(
@@ -420,6 +426,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     _isSearching = false;
                                     _searchQuery = '';
                                   });
+                                  widget.analyticsService.logButtonTapped('search_close');
                                 },
                               ),
                             ],
@@ -487,6 +494,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     );
                                   }
                                 }
+                                widget.analyticsService.logButtonTapped('scroll_to_now');
                               },
                               child: const Icon(Icons.update),
                             ),
@@ -513,6 +521,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     firstVisibleIndex = null;
                                   });
                                 }
+                                widget.analyticsService.logButtonTapped('hide_past_listings');
                               },
                               child: const Icon(Icons.event_busy),
                             ),
@@ -533,6 +542,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               setState(() {
                                 _isSearching = true;
                               });
+                              widget.analyticsService.logButtonTapped('search');
                             },
                             child: const Icon(Icons.search),
                           ),
@@ -599,6 +609,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     (homePageState == null)
                                   );
                                 },
+                                analyticsService: widget.analyticsService,
                               ) : const SizedBox.shrink(),
                               // separator except after last item
                               if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),

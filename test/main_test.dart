@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -51,7 +52,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       expect(find.text(fairName), findsOneWidget);
 
@@ -99,7 +100,7 @@ void main() {
       await loadSettings();
 
       // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await tester.pumpAndSettle();
 
       // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
@@ -149,7 +150,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -195,7 +196,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -235,7 +236,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -275,7 +276,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -315,7 +316,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.text('Food'));
       await tester.pumpAndSettle();
@@ -359,7 +360,7 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
 
       // show the dialog
-      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context));
+      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context, FakeAnalyticsService()));
       await tester.pumpAndSettle();
 
       // Check for some known email addresses

@@ -44,6 +44,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Android Studio will place lint reports here
+/android/build/reports/problems/problems-report.html
+
 # Environment variables file (Regardless of directory)
 **/.env
 **/APIkeys.xcconfig

@@ -12,8 +12,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
-import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/category_tools.dart';
+import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
@@ -26,8 +27,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
+  final AnalyticsService analyticsService;
 
-  const MapPage({required this.listings, super.key});
+  const MapPage({required this.listings, required this.analyticsService, super.key});
 
   @override
   MapPageState createState() => MapPageState();
@@ -303,6 +305,7 @@ class MapPageState extends State<MapPage> {
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
                                       launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                                      widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
                                     }),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
@@ -317,6 +320,8 @@ class MapPageState extends State<MapPage> {
                               TextButton(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('hide_road_closures');
+                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(false);
                                   updateRoadClosurePolygonVisibility(false);
                                   Navigator.pop(context);
                                 },
@@ -328,6 +333,7 @@ class MapPageState extends State<MapPage> {
                               TextButton(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('close_road_closures_dialog');
                                   Navigator.pop(context);
                                 },
                                 child: Text(
@@ -510,6 +516,9 @@ class MapPageState extends State<MapPage> {
       visible: true,
       onTap: () {
         HapticFeedback.lightImpact();
+        widget.analyticsService.logButtonTapped('group_map_marker');
+        widget.analyticsService.logMapMarkerTapped(parentListing['title']+' (Group)');
+
         // Update the current location, do not await as this causes issues with using the context across async gaps
         establishLocation();
 
@@ -635,6 +644,7 @@ class MapPageState extends State<MapPage> {
                                             listingFavourited: isListingFavourited(rel['id']),
                                             onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                             onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                            analyticsService: widget.analyticsService,
                                           ),
                                           if (index != relatedListings.length - 1)
                                             SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
@@ -690,6 +700,9 @@ class MapPageState extends State<MapPage> {
         visible: true,
         onTap: () {
           HapticFeedback.lightImpact();
+          widget.analyticsService.logButtonTapped('specific_map_marker');
+          widget.analyticsService.logMapMarkerTapped(listing['title']);
+
           // Update the current location, do not await as this causes issues with using the context across async gaps
           establishLocation();
 
@@ -763,6 +776,7 @@ class MapPageState extends State<MapPage> {
                               listingFavourited: isListingFavourited(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                              analyticsService: widget.analyticsService,
                             ),
                           ),
                         ),
@@ -882,11 +896,13 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Food"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('food_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Food"] = value!;
                       });
                       final idList = _foodMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('food', value);
                     },
                   ),
                   CheckboxListTile(
@@ -896,11 +912,13 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Shopping"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('stalls_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Shopping"] = value!;
                       });
                       final idList = _shoppingMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('shopping', value);
                     },
                   ),
                   CheckboxListTile(
@@ -910,11 +928,13 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Charity/Community/Info"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('music_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Charity/Community/Info"] = value!;
                       });
                       final idList = _charityCommunityInfoMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('charityCommunityInfo', value);
                     },
                   ),
                   CheckboxListTile(
@@ -924,11 +944,13 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Performances"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('events_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Performances"] = value!;
                       });
                       final idList = _performanceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('performances', value);
                     },
                   ),
                   CheckboxListTile(
@@ -938,11 +960,13 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Visits/Experiences"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('places_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Visits/Experiences"] = value!;
                       });
                       final idList = _visitExperienceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('visitsExperiences', value);
                     },
                   ),
                   CheckboxListTile(
@@ -952,11 +976,13 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Services"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('other_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Services"] = value!;
                       });
                       final idList = _serviceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('services', value);
                     },
                   ),
                   Divider(color: Colors.grey[350]),
@@ -967,10 +993,12 @@ class MapPageState extends State<MapPage> {
                     value: preferredRoadClosurePolygonVisible,
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('roadClosure_filter_toggle');
                       setState(() {
                         preferredRoadClosurePolygonVisible = value!;
                       });
                       updateRoadClosurePolygonVisibility(value!);
+                      widget.analyticsService.logRoadClosurePolygonPreferenceSet(value);
                     },
                   ),
                   Row(
@@ -983,12 +1011,14 @@ class MapPageState extends State<MapPage> {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('showAll_filter');
                                   setState(() {
                                     filterSettings.forEach((key, _) {
                                       filterSettings[key] = true;
                                     });
                                   });
                                   showAllMarkers();
+                                  widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
                                   updateRoadClosurePolygonVisibility(true);
                                 },
                                 icon: const Icon(Icons.filter_alt),
@@ -998,12 +1028,14 @@ class MapPageState extends State<MapPage> {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('hideAll_filter');
                                   setState(() {
                                     filterSettings.forEach((key, _) {
                                       filterSettings[key] = false;
                                     });
                                   });
                                   hideAllMarkers();
+                                  widget.analyticsService.logMapMarkerFilterPreferenceSet('all', false);
                                   updateRoadClosurePolygonVisibility(false);
                                 },
                                 icon: const Icon(Icons.filter_alt_off),
@@ -1013,6 +1045,7 @@ class MapPageState extends State<MapPage> {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('filter_done');
                                   Navigator.pop(context);
                                 },
                                 icon: const Icon(Icons.check_circle),
@@ -1142,8 +1175,27 @@ class MapPageState extends State<MapPage> {
     _setMapCameraToFitMapMarkers();
 
     // If we came from a page other than the map page, go back to that page
-    if (previousIndex != 0) {
-      homePageKey.currentState?.setCurrentIndex(previousIndex);
+    switch (previousIndex) {
+      case 0:
+        widget.analyticsService.setCurrentScreen('MapPage');
+      case 1:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        widget.analyticsService.setCurrentScreen('FoodListingsPage');
+      case 2:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        widget.analyticsService.setCurrentScreen('StallsListingsPage');
+      case 3:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        widget.analyticsService.setCurrentScreen('MusicListingsPage');
+      case 4:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        widget.analyticsService.setCurrentScreen('EventsListingsPage');
+      case 5:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        widget.analyticsService.setCurrentScreen('PlacesListingsPage');
+      case 6:
+        homePageKey.currentState?.setCurrentIndex(previousIndex);
+        widget.analyticsService.setCurrentScreen('OtherListingsPage');
     }
 
     setState(() {});
@@ -1524,7 +1576,10 @@ class MapPageState extends State<MapPage> {
                 isRefreshing
                     ? const CircularProgressIndicator()
                     : ElevatedButton.icon(
-                        onPressed: refreshListings,
+                        onPressed: () {
+                          refreshListings;
+                          widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                        },
                         icon: const Icon(Icons.refresh),
                         label: const Text('Refresh listings'),
                       ),
@@ -1609,6 +1664,7 @@ class MapPageState extends State<MapPage> {
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           cancelNavigation();
+                          widget.analyticsService.logButtonTapped('cancel_navigation');
                         },
                         backgroundColor: Colors.transparent,
                         mini: true,
@@ -1658,6 +1714,7 @@ class MapPageState extends State<MapPage> {
                             });
                           }
                           _setMapCameraToFitMapMarkers();
+                          widget.analyticsService.logButtonTapped('home');
                         },
                         backgroundColor: Colors.transparent,
                         mini: true,
@@ -1735,17 +1792,20 @@ class MapPageState extends State<MapPage> {
                       heroTag: 'mapTypeBtn',
                       onPressed: () {
                         HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('map_type_toggle');
                         setState(() {
                           if (mapType == MapType.normal) {
                             mapType = MapType.hybrid;
                             _layersIcon = Icons.map;
                             preferredMapStyleType = MapStyleType.hybrid;
                             _saveSettings();
+                            widget.analyticsService.logMapTypePreferenceSet('hybrid');
                           } else {
                             mapType = MapType.normal;
                             _layersIcon = Icons.satellite_alt;
                             preferredMapStyleType = MapStyleType.normal;
                             _saveSettings();
+                            widget.analyticsService.logMapTypePreferenceSet('normal');
                           }
                         });
                       },
@@ -1773,10 +1833,17 @@ class MapPageState extends State<MapPage> {
                         heroTag: 'mapBearingBtn',
                         onPressed: () {
                           HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('map_orientation_toggle');
                           setState(() {
-                            preferredMapOrientation =
-                                (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
-                            _saveSettings();
+                            if (preferredMapOrientation == MapOrientation.adaptive) {
+                              preferredMapOrientation = MapOrientation.alwaysNorth;
+                              _saveSettings();
+                              widget.analyticsService.logMapOrientationPreferenceSet('alwaysNorth');
+                            } else {
+                              preferredMapOrientation = MapOrientation.adaptive;
+                              _saveSettings();
+                              widget.analyticsService.logMapOrientationPreferenceSet('adaptive');
+                            }
                           });
                           _setMapCameraToFitMapMarkers();
                         },
@@ -1813,6 +1880,7 @@ class MapPageState extends State<MapPage> {
                               onPressed: () {
                                 showFilterMenu();
                                 setVisibleMarkerLists();
+                                widget.analyticsService.logButtonTapped('map_filter');
                               },
                               backgroundColor: Colors.transparent,
                               mini: true,
@@ -1854,6 +1922,7 @@ class MapPageState extends State<MapPage> {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
+                        widget.analyticsService.logButtonTapped('distance_to_destination');
                       },
                       icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
                       label: Text(
@@ -1881,6 +1950,7 @@ class MapPageState extends State<MapPage> {
                               return roadClosuresDialog();
                             },
                           );
+                          widget.analyticsService.logButtonTapped('road_closures_legend');
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
