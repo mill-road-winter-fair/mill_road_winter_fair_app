@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart'
 ///
 /// Example:
 /// ```dart
-/// import 'firebase_options_dev.dart';
+/// import 'firebase_options_prod.dart';
 /// // ...
 /// await Firebase.initializeApp(
 ///   options: DefaultFirebaseOptions.currentPlatform,
@@ -50,19 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCPem2d-nVXqWnmxn5Z4zIW2jj_dkMw1q8',
-    appId: '1:310633270045:android:c84000ecb3b9bba7d2eff4',
-    messagingSenderId: '310633270045',
-    projectId: 'mrwf-app-analytics',
-    storageBucket: 'mrwf-app-analytics.firebasestorage.app',
+    apiKey: 'AIzaSyDTyNnR9BkkIhf5kh7py_M2k1oyior0Hj8',
+    appId: '1:1023186335345:android:76c9864f318ba52fc78dd0',
+    messagingSenderId: '1023186335345',
+    projectId: 'mrwf-app-analytics-prod',
+    storageBucket: 'mrwf-app-analytics-prod.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyB83DHksDMWZ6D0rsquyDdh7oNZxUByEjc',
-    appId: '1:310633270045:ios:916f0001dc318618d2eff4',
-    messagingSenderId: '310633270045',
-    projectId: 'mrwf-app-analytics',
-    storageBucket: 'mrwf-app-analytics.firebasestorage.app',
+    apiKey: 'AIzaSyDfYQTBM1OEpsNKNPnissMEvL64iy7gXME',
+    appId: '1:1023186335345:ios:80f585ffeb3ed30ec78dd0',
+    messagingSenderId: '1023186335345',
+    projectId: 'mrwf-app-analytics-prod',
+    storageBucket: 'mrwf-app-analytics-prod.firebasestorage.app',
     iosBundleId: 'org.millroadwinterfair.MRWFapp',
   );
 }
