@@ -7,9 +7,12 @@ import 'package:flutter/rendering.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
+import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
+import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 
 class TimetablePage extends StatefulWidget {
   final List<Map<String, dynamic>> theEvents;
@@ -174,6 +177,10 @@ class _TimetablePageState extends State<TimetablePage> {
           description: ev['description'],
           latLng: stringToLatLng(ev['latLng']),
           imageURL: ev['imageURL'],
+          brickAndMortar: (ev['brickAndMortar'] == 'TRUE'),
+          email: ev['email'] ?? '',
+          website: ev['website'] ?? '',
+          phoneNumber: ev['phoneNumber'] ?? '',
           lane: 0, // will be computed later
           top: 0, // will be computed later
           height: 0, // will be computed later
@@ -255,6 +262,10 @@ class _TimetablePageState extends State<TimetablePage> {
         description: ev.description,
         latLng: ev.latLng,
         imageURL: ev.imageURL,
+        brickAndMortar: ev.brickAndMortar,
+        email: ev.email,
+        website: ev.website,
+        phoneNumber: ev.phoneNumber,
         lane: lane,
         top: top + 2, 
         height: height,
@@ -340,9 +351,13 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
 
+  String formatTime(DateTime theTime) {
+    return '${theTime.hour.toString().padLeft(2,'0')}:${theTime.minute.toString().padLeft(2,'0')}';
+  }
+
+
   String formatTimeRange(DateTime startTime, DateTime endTime) {
-  return '${startTime.hour.toString().padLeft(2,'0')}:${startTime.minute.toString().padLeft(2,'0')}–'
-    '${endTime.hour.toString().padLeft(2,'0')}:${endTime.minute.toString().padLeft(2,'0')}';
+    return '${formatTime(startTime)}–${formatTime(endTime)}';
   }
 
 
@@ -496,10 +511,19 @@ class _TimetablePageState extends State<TimetablePage> {
     if (!context.mounted) return;
     final colorScheme = Theme.of(context).colorScheme;
 
+    var distanceMessage = 'Distance unknown';
+    if (currentLatLng != null) {
+      int approximateDistanceMetres = asTheCrowFlies(
+        currentLatLng!,
+        event.latLng,
+      );
+      distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+    }
+
     listingDetailsDialogRoute = DialogRoute(context: context, barrierColor: Colors.black38, builder: (_) => StatefulBuilder(
       builder: (ctx2, setStateDialog) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(horizontal: 8), // margin from screen edges
+          insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
           shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,
@@ -509,16 +533,36 @@ class _TimetablePageState extends State<TimetablePage> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
               ),
-              width: 288,
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: listingDetailsColumn(
-                context, 
-                event, 
-                //alertNoticePeriod,
-                setStateFunction,
-                setStateDialog,
-//                toggleAlertAction,
-                onGetDirections,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: SpecificListingInfoSheet(
+                cancelled: event.cancelled,
+                brickAndMortar: event.brickAndMortar,
+                emoji: event.emoji,
+                title: event.name,
+                subtitle: event.subtitle,
+                location: event.location,
+                description: event.description,
+                email: event.email,
+                website: event.website,
+                phoneNumber: event.phoneNumber,
+                imageURL: event.imageURL,
+                startTime: formatTime(event.startTime),
+                endTime: formatTime(event.endTime),
+                approxDistance: distanceMessage,
+                detailsVisible: true,
+                listingFavourited: favouriteListingKeys.contains(event.id),
+                onFavouriteTapped: () {
+                  favouriteOrNotListing(event);
+                  setStateDialog(() {});
+                },
+                onGetDirections: () {
+                  navigateToMapAndGetDirections(
+                    event.id,
+                    event.latLng,
+                    true,
+                  );
+                },
+                inDialog: true,
               ),
             ),
           ),
@@ -1074,6 +1118,11 @@ class PositionedEvent {
   final String description;
   final LatLng latLng;
   final String imageURL;
+  final bool brickAndMortar;
+  final String email;
+  final String website;
+  final String phoneNumber;
+  final 
   int lane;
   double top;
   double height;
@@ -1091,6 +1140,10 @@ class PositionedEvent {
     required this.description,
     required this.latLng,
     required this.imageURL,
+    required this.brickAndMortar,
+    required this.email,
+    required this.website,
+    required this.phoneNumber,
     required this.lane, 
     required this.top, 
     required this.height, 
