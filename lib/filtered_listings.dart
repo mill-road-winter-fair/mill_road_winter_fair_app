@@ -400,8 +400,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               'all' => 'Search all listings...',
                               'food' => 'Search food & drink vendors...',
                               'shopping' => 'Search market stalls...',
-                              'music' => 'Search musical performances...',
-                              'event' => 'Search events...',
+                              'performance' => 'Search music and other events...',
                               'charityCommunityInfo' => 'Search charity, community & info...',
                               'visitExperience' => 'Search visits & experiences...',
                               'service' => 'Search services...',
@@ -437,7 +436,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       children: [
                         Expanded(child: _buildSortingDropdown(context)),
                         // only show the Scroll To Now button on Music/Events/Favourite
-                        if (filterCategory == 'music' || filterCategory == 'event' || filterCategory == 'favourite')
+                        if (filterCategory == 'performance' || filterCategory == 'favourite')
                           SizedBox(
                             height: 36,
                             width: 36,
@@ -490,10 +489,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               child: const Icon(Icons.update),
                             ),
                           ),
-                        if (filterCategory == 'music' || filterCategory == 'event' || filterCategory == 'favourite')
+                        if (filterCategory == 'performance' || filterCategory == 'favourite')
                           const SizedBox(width: 4),
                         // only show the Hide Past Listings button on Music/Events/Favourite
-                        if (filterCategory == 'music' || filterCategory == 'event' || filterCategory == 'favourite')
+                        if (filterCategory == 'performance' || filterCategory == 'favourite')
                           SizedBox(
                             height: 36,
                             width: 36,
@@ -516,7 +515,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               child: const Icon(Icons.event_busy),
                             ),
                           ),
-                        if (filterCategory == 'music' || filterCategory == 'event' || filterCategory == 'favourite')
+                        if (filterCategory == 'performance' || filterCategory == 'favourite')
                           const SizedBox(width: 4),
                         SizedBox(
                           height: 36,
@@ -730,7 +729,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   label: "Name (a-z)",
                   leadingIcon: const Icon(Icons.sort_by_alpha),
                 ),
-                  if (filterCategory == 'music' || filterCategory == 'event' || filterCategory == 'favourite')
+                  if (filterCategory == 'performance' || filterCategory == 'favourite')
                   DropdownMenuEntry(
                     value: SortingMethod.values[2],
                     label: "Time",
@@ -781,13 +780,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   leadingIcon: const Icon(Icons.all_inclusive),
                 ),
                 DropdownMenuEntry(
-                  value: 'music',
-                  label: "Music",
-                  leadingIcon: const Icon(Icons.piano),
-                ),
-                DropdownMenuEntry(
-                  value: 'event',
-                  label: "Events",
+                  value: 'performance',
+                  label: "Performances",
                   leadingIcon: const Icon(Icons.theater_comedy),
                 ),
                 DropdownMenuEntry(
