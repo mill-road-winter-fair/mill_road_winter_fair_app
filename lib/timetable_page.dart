@@ -210,9 +210,9 @@ class _TimetablePageState extends State<TimetablePage> {
       final theEventsAtThisLocation = location.value;
       for (int i=0; i<theEventsAtThisLocation.length; i++) {
         final ev = theEventsAtThisLocation[i];
-        if (!onlyNowOrSoon 
+        if (!ev.cancelled && (!onlyNowOrSoon 
             || (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -10) 
-            || (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 60))) {
+            || (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 60)))) {
           if (theFilteredEvents.keys.contains(location.key)) {
             theFilteredEvents[location.key]!.add(ev);
           } else {
