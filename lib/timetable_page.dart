@@ -1028,58 +1028,56 @@ class _TimetablePageState extends State<TimetablePage> {
                                           child: Stack(
                                             children: [
                                               // For each event in this location, place positioned containers
-                                              for (var pe in location.value)
+                                              for (var pe in location.value) ...[
                                                 (scaling)
-                                                ? Positioned(
-                                                  top: pe.top,
-                                                  left: pe.left,
-                                                  width: pe.width,
-                                                  height: pe.height,
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      color: colorScheme.secondary,
-                                                      borderRadius: BorderRadius.circular(4),
-                                                      boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
-                                                      border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
+                                                  ? Positioned(
+                                                    top: pe.top,
+                                                    left: pe.left,
+                                                    width: pe.width,
+                                                    height: pe.height,
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        color: colorScheme.secondary,
+                                                        borderRadius: BorderRadius.circular(4),
+                                                        boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
+                                                        border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
+                                                      )
                                                     )
                                                   )
-                                                )
-                                                : Positioned(
-                                                  top: pe.top,
-                                                  left: pe.left,
-                                                  width: pe.width,
-                                                  height: pe.height,
-                                                  child: Builder(
-                                                    builder: (itemContext) {
-                                                      final isFavourited = favouriteListingKeys.contains(pe.id);
-                                                      return GestureDetector(
-                                                        onTap: () {
-                                                          HapticFeedback.lightImpact();
-                                                          showListingDetailsDialog(
-                                                            itemContext, 
-                                                            pe, 
-                                                            //alertNoticePeriod,
-                                                            setState,
-                                                            navigateToMapAndGetDirections,
-                                                          );
-                                                        },
-                                                        child: Container(
-                                                          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
-                                                          decoration: BoxDecoration(
-                                                            color: (isFavourited) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
-                                                            borderRadius: BorderRadius.circular(4),
-                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
-                                                            border: Border.all(width: 0.2, color: colorScheme.onSecondary),
-                                                            image: (isFavourited)
-                                                              ? DecorationImage(image: AssetImage('assets/icons/favorite_24dp_992F30.png'), scale: 1.5, alignment: AlignmentGeometry.topRight, opacity: 0.5) 
-                                                              : null,
-                                                          ),
-                                                          child: eventRect(pe, colorScheme, isLandscape, null),
+                                                  : Positioned(
+                                                    top: pe.top,
+                                                    left: pe.left,
+                                                    width: pe.width,
+                                                    height: pe.height,
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        HapticFeedback.lightImpact();
+                                                        showListingDetailsDialog(
+                                                          context, 
+                                                          pe, 
+                                                          //alertNoticePeriod,
+                                                          setState,
+                                                          navigateToMapAndGetDirections,
+                                                        );
+                                                      },
+                                                      child: Container(
+                                                        padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
+                                                        decoration: BoxDecoration(
+                                                          color: (favouriteListingKeys.contains(pe.id)) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
+                                                          borderRadius: BorderRadius.circular(4),
+                                                          boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
+                                                          border: Border.all(width: 0.2, color: colorScheme.onSecondary),
                                                         ),
-                                                      );
-                                                    }
+                                                        child: eventRect(pe, colorScheme, isLandscape, null),
+                                                      ),
+                                                    ),
                                                   ),
+                                                if (!scaling && favouriteListingKeys.contains(pe.id)) Positioned(
+                                                  top: pe.top + 2,
+                                                  left: pe.left + pe.width - 18,
+                                                  child: Icon(Icons.favorite, size: 16, color: Colors.red.withAlpha(120)),
                                                 ),
+                                              ],
                                             ],
                                           ),
                                         ),
