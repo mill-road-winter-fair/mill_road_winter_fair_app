@@ -55,6 +55,7 @@ void main() {
           listingFavourited: listingFavourited,
           onDetailsTapped: onDetailsTapped,
           onFavouriteTapped: onFavouriteTapped,
+          inDialog: false,
         ),
       ),
     );
