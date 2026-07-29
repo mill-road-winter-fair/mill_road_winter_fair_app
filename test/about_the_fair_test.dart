@@ -24,19 +24,29 @@ void main() {
       // Minimal listings so pages render correctly
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Gwydir St Car Park',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'description': 'Nice buns',
-          'visibleOnMap': true,
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
@@ -47,9 +57,9 @@ void main() {
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
 
       // 1) Select Food tab (index 1)
-      await tester.tap(find.text('Food'));
+      await tester.tap(find.text('Listings'));
       await tester.pumpAndSettle();
-      expect(homePageState.index, 1);
+      expect(homePageState.index, 2);
 
       // Open drawer and navigate to About the Fair
       await tester.tap(find.byIcon(Icons.menu));
@@ -59,13 +69,13 @@ void main() {
 
       expect(find.byType(AboutTheFairPage), findsOneWidget);
 
-      // Tap the AppBar back button (leading) and verify we return to the Food tab
+      // Tap the AppBar back button (leading) and verify we return to the Listings tab
       await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
-      expect(homePageState.index, 1);
+      expect(homePageState.index, 2);
 
       // 2) Select Stalls tab (index 2)
-      await tester.tap(find.text('Stalls'));
+      await tester.tap(find.text('Listings'));
       await tester.pumpAndSettle();
       expect(homePageState.index, 2);
 

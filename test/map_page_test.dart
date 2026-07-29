@@ -22,47 +22,83 @@ void main() {
 
     listings = [
       {
-        'name': 'foodgroup',
-        'displayName': 'Food Group',
-        'endTime': '16:30',
         'id': '1',
-        'latLng': '52.199838,0.139016',  // 199m
-        'phone': '',
-        'primaryType': 'Group-Food',
-        'secondaryType': 'Fake Street',
-        'startTime': '10:30',
-        'tertiaryType': 'Food',
         'visibleOnMap': 'TRUE',
+        'cancelled': 'FALSE',
+        'groupParent': 'TRUE',
+        'brickAndMortar': 'FALSE',
+        'emoji': '',
+        'title': 'Food Group',
+        'subtitle': 'Food',
+        'groupID': '1',
+        'food': 'TRUE',
+        'shopping': 'FALSE',
+        'charityCommunityInfo': 'FALSE',
+        'performance': 'FALSE',
+        'visitExperience': 'FALSE',
+        'service': 'FALSE',
+        'location': 'Fake Street',
+        'description': '',
+        'email': '',
         'website': '',
-      },
-      {
-        'name': 'glazedandconfused',
-        'displayName': 'Glazed and Confused',
-        'endTime': '15:00',
-        'id': '2',
-        'latLng': '52.199687,0.138813',  // 535m
-        'phone': '01223 111111',
-        'primaryType': 'Food',
-        'secondaryType': 'Fake Street',
-        'startTime': '11:00',
-        'tertiaryType': 'Doughnuts',
-        'visibleOnMap': 'FALSE',
-        'website': 'https://www.glazedandconfused.com',
-      },
-      {
-        'displayName': 'Sushi Squad',
+        'phone': '',
+        'latLng': '52.199838,0.139016', // 199m
+        'imageURL': '',
+        'startTime': '10:30',
         'endTime': '16:30',
+      },
+      {
+        'id': '2',
+        'visibleOnMap': 'FALSE',
+        'cancelled': 'FALSE',
+        'groupParent': 'FALSE',
+        'brickAndMortar': 'FALSE',
+        'emoji': '🍩',
+        'title': 'Glazed and Confused',
+        'subtitle': 'Doughnuts',
+        'groupID': '1',
+        'food': 'TRUE',
+        'shopping': 'FALSE',
+        'charityCommunityInfo': 'FALSE',
+        'performance': 'FALSE',
+        'visitExperience': 'FALSE',
+        'service': 'FALSE',
+        'location': 'Fake Street',
+        'description': 'Nice buns',
+        'email': '',
+        'website': 'https://www.glazedandconfused.com',
+        'phone': '01223 111111',
+        'latLng': '52.199687,0.138813', // 535m
+        'imageURL': '',
+        'startTime': '11:00',
+        'endTime': '15:00',
+      },
+      {
         'id': '3',
-        'name': 'sushisquad',
-        'latLng': '52.199188,0.139437',  // 135m
-        'phone': '01223 222222',
-        'primaryType': 'Food',
-        'secondaryType': 'Implausible Avenue',
-        'startTime': '12:00',
-        'tertiaryType': 'Sushi',
         'visibleOnMap': 'TRUE',
+        'cancelled': 'FALSE',
+        'groupParent': 'FALSE',
+        'brickAndMortar': 'FALSE',
+        'emoji': '🍣',
+        'title': 'Sushi Squad',
+        'subtitle': 'Sushi',
+        'groupID': '',
+        'food': 'TRUE',
+        'shopping': 'FALSE',
+        'charityCommunityInfo': 'FALSE',
+        'performance': 'FALSE',
+        'visitExperience': 'FALSE',
+        'service': 'FALSE',
+        'location': 'Implausible Avenue',
+        'description': 'Cold rice',
+        'email': '',
         'website': 'https://www.sushisquad.com',
-      }
+        'phone': '01223 222222',
+        'latLng': '52.199188,0.139437', // 135m
+        'imageURL': '',
+        'startTime': '12:00',
+        'endTime': '16:30',
+      },
     ];
   });
 
@@ -73,12 +109,35 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('all map buttons are present', (WidgetTester tester) async {
+      // Build the MapPage widget
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Check the map buttons
+      expect(find.byType(FloatingActionButton), findsExactly(5));
+      expect(find.byIcon(Icons.home), findsOneWidget);
+      expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
+      expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
+      expect(find.byIcon(Icons.filter_alt), findsOneWidget);
+      expect(find.byIcon(Icons.my_location), findsOneWidget);
+
+      // Check road closure button
+      expect(find.text('Road closures'), findsOneWidget);
+    });
+
     testWidgets('Home button centres the map and resets filters if all were off', (WidgetTester tester) async {
       // Mock the MethodChannel for Google Maps to capture camera movements
       final List<MethodCall> methodCalls = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         const MethodChannel('plugins.flutter.io/google_maps_0'),
-            (MethodCall methodCall) async {
+        (MethodCall methodCall) async {
           methodCalls.add(methodCall);
           return null;
         },
@@ -123,7 +182,7 @@ void main() {
         expect(cameraUpdateCalls.any((call) => call.arguments.toString().contains('cameraUpdate')), true);
       }
     });
-    
+
     testWidgets('map type button changes map type', (WidgetTester tester) async {
       // Build the MapPage widget
       await tester.pumpWidget(
@@ -217,7 +276,10 @@ void main() {
       // Verify the dialog is opened
       // The dialog has a title "Road closures" and specific body text.
       expect(find.byType(Dialog), findsOneWidget);
-      expect(find.text('Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'), findsOneWidget);
+      expect(
+          find.text(
+              'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
+          findsOneWidget);
 
       // Verify "Close" button exists to dismiss the dialog
       expect(find.text('Close'), findsOneWidget);
@@ -334,16 +396,16 @@ void main() {
     test('getCategoryColor returns correct color for given types', () {
       final foodColor = getCategoryColor("light", "Food");
       final shoppingColor = getCategoryColor("light", "Shopping");
-      final musicColor = getCategoryColor("light", "Music");
-      final eventColor = getCategoryColor("light", "Event");
-      final placeColor = getCategoryColor("light", "Place");
+      final performanceColor = getCategoryColor("light", "Performance");
+      final charityCommunityInfoColor = getCategoryColor("light", "Charity/Community/Info");
+      final visitExperienceColor = getCategoryColor("light", "Visit/Experience");
       final serviceColor = getCategoryColor("light", "Service");
 
       expect(foodColor, const Color.fromRGBO(255, 156, 26, 1.0));
       expect(shoppingColor, const Color.fromRGBO(209, 81, 85, 1.0));
-      expect(musicColor, const Color.fromRGBO(190, 110, 230, 1.0));
-      expect(eventColor, const Color.fromRGBO(243, 190, 66, 1.0));
-      expect(placeColor, const Color.fromRGBO(79, 184, 75, 1.0));
+      expect(performanceColor, const Color.fromRGBO(190, 110, 230, 1.0));
+      expect(charityCommunityInfoColor, const Color.fromRGBO(243, 190, 66, 1.0));
+      expect(visitExperienceColor, const Color.fromRGBO(79, 184, 75, 1.0));
       expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
     });
 
@@ -378,8 +440,9 @@ void main() {
       expect(find.text('Food'), findsOneWidget);
       expect(find.text('approx. 199 m'), findsOneWidget);
       // Specific marker content
-      expect(find.text('Glazed and Confused'), findsOneWidget);
-      expect(find.text('Doughnuts\n11:00—15:00'), findsOneWidget);
+      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('Doughnuts'), findsOneWidget);
+      expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
     });
@@ -409,7 +472,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check the text content in the bottom sheet
-      expect(find.text('Sushi Squad'), findsOneWidget);
+      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
@@ -420,79 +483,134 @@ void main() {
     testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
       listings = [
         {
-          "displayName": "Glazed and Confused",
-          "email": "admin@glazedandconfued.com",
-          "endTime": "16:30",
           "id": "1",
-          "name": "glazedandconfused",
+          "visibleOnMap": "TRUE",
+          "cancelled": "FALSE",
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          "emoji": "🍩",
+          "title": "Glazed and Confused",
+          "subtitle": "Doughnuts",
+          "groupID": "",
+          "food": "TRUE",
+          "shopping": "FALSE",
+          "charityCommunityInfo": "FALSE",
+          "performance": "FALSE",
+          "visitExperience": "FALSE",
+          "service": "FALSE",
+          "location": "Gwydir St Car Park",
+          "description": "Nice buns",
+          "email": "",
+          "website": "https://www.glazedandconfused.com",
           "phone": "01223 111111",
           "latLng": "52.199687,0.138813",
-          "primaryType": "Food",
-          "secondaryType": "Food",
+          'imageURL': '',
           "startTime": "10:30",
-          "tertiaryType": "Doughnuts",
-          "visibleOnMap": "TRUE",
-          "website": "https://www.glazedandconfused.com"
+          "endTime": "16:30",
         },
         {
-          "displayName": "The Crafty Canvas",
-          "email": "contact@craftycanvas.com",
-          "endTime": "16:30",
           "id": "2",
-          "name": "thecraftycanvas",
+          "visibleOnMap": "TRUE",
+          'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          "emoji": "🎨",
+          "title": "The Crafty Canvas",
+          "subtitle": "Crafts",
+          "groupID": "",
+          "food": "FALSE",
+          "shopping": "TRUE",
+          "charityCommunityInfo": "FALSE",
+          "performance": "FALSE",
+          "visitExperience": "FALSE",
+          "service": "FALSE",
+          "location": "Donkey Common",
+          "description": "Artistic crafts for all ages",
+          "email": "contact@craftycanvas.com",
+          "website": "https://www.craftycanvas.com",
           "phone": "01223 222222",
           "latLng": "52.201913,0.131984",
-          "primaryType": "Shopping",
-          "secondaryType": "Retail",
+          'imageURL': '',
           "startTime": "10:30",
-          "tertiaryType": "Crafts",
-          "visibleOnMap": "TRUE",
-          "website": "https://www.craftycanvas.com"
+          "endTime": "16:30",
         },
         {
-          "displayName": "The Jazz Junction",
-          "email": "contact@jazzjunction.com",
-          "endTime": "16:30",
           "id": "3",
-          "name": "thejazzjunction",
+          "visibleOnMap": "TRUE",
+          "cancelled": "FALSE",
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          "emoji": "🎷",
+          "title": "The Jazz Junction",
+          "subtitle": "Jazz",
+          "groupID": "",
+          "food": "FALSE",
+          "shopping": "FALSE",
+          "charityCommunityInfo": "FALSE",
+          "performance": "TRUE",
+          "visitExperience": "FALSE",
+          "service": "FALSE",
+          "location": "Donkey Common",
+          "description": "Smooth jazz performances all day",
+          "email": "contact@jazzjunction.com",
+          "website": "https://www.jazzjunction.com",
           "phone": "01223 333333",
           "latLng": "52.202188,0.131312",
-          "primaryType": "Music",
-          "secondaryType": "Music",
+          'imageURL': '',
           "startTime": "10:30",
-          "tertiaryType": "Jazz",
-          "visibleOnMap": "TRUE",
-          "website": "https://www.jazzjunction.com"
+          "endTime": "16:30",
         },
         {
-          "displayName": "Santa",
-          "email": "",
-          "endTime": "16:30",
           "id": "4",
-          "name": "santa1",
+          "visibleOnMap": "TRUE",
+          "cancelled": "FALSE",
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          "emoji": "🎅",
+          "title": "Santa",
+          "subtitle": "Kindly Elf",
+          "groupID": "",
+          "food": "FALSE",
+          "shopping": "FALSE",
+          "charityCommunityInfo": "TRUE",
+          "performance": "FALSE",
+          "visitExperience": "FALSE",
+          "service": "FALSE",
+          "location": "Zion Baptist Church",
+          "description": "Santa will be available all day",
+          "email": "",
+          "website": "",
           "phone": "",
           "latLng": "52.203563,0.132437",
-          "primaryType": "Event",
-          "secondaryType": "Performance",
+          'imageURL': '',
           "startTime": "10:30",
-          "tertiaryType": "Kindly Elf",
-          "visibleOnMap": "TRUE",
-          "website": ""
+          "endTime": "16:30",
         },
         {
-          "displayName": "Information Point",
-          "email": "info@millroadwinterfair.org",
-          "endTime": "16:30",
           "id": "5",
-          "name": "informationpoint1",
+          "visibleOnMap": "TRUE",
+          "cancelled": "FALSE",
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          "emoji": "ℹ️",
+          "title": "Information Point",
+          "subtitle": "Help Point",
+          "groupID": "",
+          "food": "FALSE",
+          "shopping": "FALSE",
+          "charityCommunityInfo": "FALSE",
+          "performance": "FALSE",
+          "visitExperience": "FALSE",
+          "service": "TRUE",
+          "location": "Ditchburn Gardens",
+          "description": "Visit us for any questions or assistance",
+          "email": "info@millroadwinterfair.org",
+          "website": "",
           "phone": "",
           "latLng": "52.200187,0.137313",
-          "primaryType": "Service",
-          "secondaryType": "Information",
+          'imageURL': '',
           "startTime": "10:30",
-          "tertiaryType": "Help Point",
-          "visibleOnMap": "TRUE",
-          "website": ""
+          "endTime": "16:30",
         }
       ];
 
@@ -528,11 +646,11 @@ void main() {
 
       // Verify all checkboxes are present
       expect(find.widgetWithText(CheckboxListTile, "Food"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Stalls"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Music"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Events"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Places"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Other"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Shopping"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Performances"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Charity/Community/Info"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Visits/Experiences"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
 
       // Test Food checkbox
       await tester.tap(find.widgetWithText(CheckboxListTile, "Food"));
@@ -555,7 +673,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Shopping checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Stalls"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -564,7 +682,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Stalls"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -575,7 +693,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Music checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Performances"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -584,7 +702,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Performances"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -595,7 +713,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Events checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Events"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity/Community/Info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -604,7 +722,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Events"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity/Community/Info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -615,7 +733,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Services checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Other"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -624,7 +742,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, false);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Other"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Services"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -670,18 +788,30 @@ void main() {
     testWidgets('hideAllMarkers clears all markers', (tester) async {
       listings = [
         {
-          'displayName': 'Glazed and Confused',
-          'endTime': '16:30',
           'id': '1',
-          'name': 'glazedandconfused',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
           'phone': '01223 111111',
           'latLng': '52.199687,0.138813',
-          'primaryType': 'Food',
-          'secondaryType': 'Food',
+          'imageURL': '',
           'startTime': '10:30',
-          'tertiaryType': 'Doughnuts',
-          'visibleOnMap': 'TRUE',
-          'website': 'https://www.glazedandconfused.com',
+          'endTime': '16:30',
         }
       ];
 
