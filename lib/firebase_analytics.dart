@@ -87,7 +87,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
     await analytics.logEvent(
       name: 'preferredDistanceUnits_set',
       parameters: {
-        'visible': distanceUnit,
+        'distanceUnit': distanceUnit,
       },
     );
   }
