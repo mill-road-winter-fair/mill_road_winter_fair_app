@@ -16,6 +16,7 @@ class ChooserPage extends StatefulWidget {
 
 class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStateMixin {
   late ScrollController _chooserPageScrollController;
+  late final AnimationController _animationController;
   Timer? _idleTimer;
   final List<Hotspot> hotspots = [
     Hotspot(id: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152),
@@ -27,21 +28,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
     Hotspot(id: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118),
     Hotspot(id: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118),
   ];
-  int _activeHotspot = 0; // the hotspot that is currently glowing
-  String? _chosenHotspotID; // ID of the hotspot that the user tapped on
+  String? _chosenHotspotID; // ID of any hotspot that the user tapped on
   bool _idleMode = true; // kicks in when user hasn't done anything for a period
-  late final AnimationController _animationController;
-  final highlightedHotspots = <String>{
-    'Info',
-    'Music',
-    'Food & Drink',
-    'Events',
-    'Services',
-    'Nearby',
-    'Shopping',
-    'Children’s'
-  };
-
+  
 
   @override
   void initState() {
@@ -49,17 +38,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
     _chooserPageScrollController = ScrollController();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 3),
-    );
-    _animationController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        setState(() {
-          _activeHotspot = (_activeHotspot + 1) % hotspots.length;
-        });
-        _animationController.forward(from: 0);
-      }
-    });
-    _animationController.forward();
+      duration: Duration(seconds: hotspots.length * 2),
+    )..repeat();
+    _animationController.repeat();
     WidgetsBinding.instance.addPostFrameCallback((_) => widget.onChangeTitle?.call('Welcome!'));
   }
 
@@ -81,7 +62,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
       const Duration(seconds: 5),
       () {
         setState(() { _idleMode = true; });
-        _animationController.forward(from: 0);
+        _animationController.repeat();
       },
     );
   }
@@ -107,7 +88,8 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(style: titleStyle, 'Remember this choice?'),
-                          Text(style: textStyle, 'Would you like to save this choice so that $theChoice always appears when you open the app?'),
+                          Text(style: textStyle, 'You can save this choice so that $theChoice always appears when you open the app.'),
+                          Text(style: textStyle, 'You won’t be asked this again, but can always change this from app Settings.'),
                           Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
                             TextButton(
                               onPressed: () {
@@ -158,7 +140,6 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                       child: CustomPaint(
                         painter: HotspotPainter(
                           hotspots: hotspots,
-                          activeIndex: _activeHotspot,
                           idleMode: _idleMode,
                           animation: _animationController,
                         ),
@@ -226,35 +207,38 @@ class HotspotPainter extends CustomPainter {
 
   HotspotPainter({
     required this.hotspots,
-    required this.activeIndex,
     required this.idleMode,
     required this.animation,
   }) : super(repaint: animation);
 
   final List<Hotspot> hotspots;
-  final int activeIndex;
   final bool idleMode;
   final Animation<double> animation;
 
   @override
-  void paint(
-      Canvas canvas,
-      Size size,
-  ) {
+  void paint(Canvas canvas, Size size) {
     if (!idleMode) return;
-    final hotspot = hotspots[activeIndex];
-    final rect = hotspot.scaled(size);
-    final fade = sin(animation.value * pi);
-    _drawGlow(canvas, rect, fade);
-    _drawLabel(canvas, rect, hotspot.id, fade);
+    final count = hotspots.length;
+    final position = animation.value * count;
+    final current = position.floor() % count;
+    final next = (current + 1) % count;
+    final t = position - current;
+    final fadeOut = 1.0 - Curves.easeInOut.transform(t);
+    final fadeIn = Curves.easeInOut.transform(t);
+    _paintHotspot(canvas, size, hotspots[current], fadeOut);
+    _paintHotspot(canvas, size, hotspots[next], fadeIn);
   }
 
-  void _drawGlow(
-      Canvas canvas,
-      Rect rect,
-      double opacity,
-  ) {
 
+  void _paintHotspot(Canvas canvas, Size size, Hotspot hotspot, double opacity) {
+    if (opacity <= 0.001) return;
+    final rect = hotspot.scaled(size);
+    _drawGlow(canvas, rect, opacity);
+    _drawLabel(canvas, rect, hotspot.id, opacity);
+  }
+
+
+  void _drawGlow(Canvas canvas, Rect rect, double opacity) {
     final paint = Paint()
       ..shader = ui.Gradient.radial(
         Offset.zero,
@@ -274,15 +258,8 @@ class HotspotPainter extends CustomPainter {
   }
 
 
-
-  void _drawLabel(
-      Canvas canvas,
-      Rect rect,
-      String text,
-      double opacity,
-  ) {
-
-    double fontSize = rect.height;
+  void _drawLabel(Canvas canvas, Rect rect, String text, double opacity) {
+    double fontSize = min(rect.height, 32);
     TextPainter? painter;
     while (fontSize > 5) {
       painter = TextPainter(
@@ -310,12 +287,7 @@ class HotspotPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(
-      covariant HotspotPainter oldDelegate,
-  ) {
-
-    return oldDelegate.activeIndex != activeIndex ||
-        oldDelegate.idleMode != idleMode;
-
+  bool shouldRepaint(covariant HotspotPainter oldDelegate) {
+    return oldDelegate.idleMode != idleMode;
   }
 }
