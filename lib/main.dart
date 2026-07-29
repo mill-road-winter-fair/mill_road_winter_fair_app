@@ -226,7 +226,7 @@ class HomePageState extends State<HomePage> {
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
-    ChooserPage(),
+    ChooserPage(onChangeTitle: onChangeAppBarTitle),
     MapPage(listings: listings, key: mapPageKey),
     FilteredListingsPage(filterPrimaryType: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
     TimetablePage(),

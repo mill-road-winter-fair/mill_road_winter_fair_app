@@ -2,12 +2,14 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:math';
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 
 
 class ChooserPage extends StatefulWidget {
-  const ChooserPage({super.key});
+  const ChooserPage({required this.onChangeTitle, super.key});
+  final void Function(String)? onChangeTitle;
   @override
   State<ChooserPage> createState() => _ChooserPageState();
 }
@@ -25,8 +27,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
     Hotspot(id: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118),
     Hotspot(id: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118),
   ];
-  int _activeHotspot = 0;
-  bool _idleMode = true;
+  int _activeHotspot = 0; // the hotspot that is currently glowing
+  String? _chosenHotspotID; // ID of the hotspot that the user tapped on
+  bool _idleMode = true; // kicks in when user hasn't done anything for a period
   late final AnimationController _animationController;
   final highlightedHotspots = <String>{
     'Info',
@@ -39,6 +42,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
     'Children’s'
   };
 
+
   @override
   void initState() {
     super.initState();
@@ -47,25 +51,18 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
       vsync: this,
       duration: const Duration(seconds: 3),
     );
-
     _animationController.addStatusListener((status) {
-
       if (status == AnimationStatus.completed) {
-
         setState(() {
-
-          _activeHotspot =
-              (_activeHotspot + 1) % hotspots.length;
-
+          _activeHotspot = (_activeHotspot + 1) % hotspots.length;
         });
-
         _animationController.forward(from: 0);
       }
-
     });
-
     _animationController.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) => widget.onChangeTitle?.call('Welcome!'));
   }
+
 
   @override
   void dispose() {
@@ -78,20 +75,63 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
 
   void userInteraction() {
     _idleTimer?.cancel();
-    if (_idleMode) {
-      setState(() {
-        _idleMode = false;
-      });
-    }
+    if (_idleMode) setState(() { _idleMode = false; });
     _animationController.stop();
     _idleTimer = Timer(
       const Duration(seconds: 5),
       () {
-        setState(() {
-          _idleMode = true;
-        });
+        setState(() { _idleMode = true; });
         _animationController.forward(from: 0);
       },
+    );
+  }
+
+
+  void chooseDialog(BuildContext theBuildContext, String theChoice) {
+    const textStyle = TextStyle(fontSize: 18);
+    const titleStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 20);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: EdgeInsets.all(10.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
+              return ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                child: Padding(
+                  padding: EdgeInsets.all(16.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
+                  child: Column(spacing: 12,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(style: titleStyle, 'Remember this choice?'),
+                          Text(style: textStyle, 'Would you like to save this choice so that $theChoice always appears when you open the app?'),
+                          Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
+                            TextButton(
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.pop(context);
+                              },
+                              child: Text('Don’t save', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.pop(context);
+                              },
+                              child: Text('Save', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
+                            ),
+                          ]),
+                        ],
+                      ),
+                    ),            
+                  );
+            }
+          )
+        );
+      }
     );
   }
 
@@ -107,12 +147,12 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
       child: Scaffold(
         body: Listener(
           onPointerDown: (_) => userInteraction(),
-          onPointerMove: (_) => userInteraction(), //toto needed?
           child: RepaintBoundary(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return Stack(fit: StackFit.expand, children: [
                   Image.asset('assets/chooserPage/chooserPage_background.png', fit: BoxFit.fill),
+                  Positioned(left: 115, top: 22, child: Image(image: AssetImage('assets/MRWF25_leaflet_banner.png'), width: 180)),
                   Positioned.fill(
                     child: IgnorePointer(
                       child: CustomPaint(
@@ -134,8 +174,10 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
+                          _chosenHotspotID = hotspot.id;
                           userInteraction();
-                          debugPrint('Selected ${hotspot.id}');
+                          chooseDialog(context, _chosenHotspotID!);
+                          debugPrint('Selected $_chosenHotspotID');
                         },
                         child: const SizedBox.expand(),
                       ),
@@ -153,8 +195,8 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
 
 
 class Hotspot {
-  final String id;
 
+  final String id;
   // Coordinates are fractions of image size (0.0 - 1.0)
   final double left;
   final double top;
@@ -178,6 +220,7 @@ class Hotspot {
     );
   }
 }
+
 
 class HotspotPainter extends CustomPainter {
 
