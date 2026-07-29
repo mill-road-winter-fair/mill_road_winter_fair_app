@@ -188,11 +188,11 @@ String nightMap =
 String aubergineMap =
     '[{"elementType":"geometry","stylers":[{"color":"#1d2c4d"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#8ec3b9"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#1a3646"}]},{"featureType":"administrative.country","elementType":"geometry.stroke","stylers":[{"color":"#4b6878"}]},{"featureType":"administrative.land_parcel","elementType":"labels.text.fill","stylers":[{"color":"#64779e"}]},{"featureType":"administrative.province","elementType":"geometry.stroke","stylers":[{"color":"#4b6878"}]},{"featureType":"landscape.man_made","elementType":"geometry.stroke","stylers":[{"color":"#334e87"}]},{"featureType":"landscape.natural","elementType":"geometry","stylers":[{"color":"#023e58"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#283d6a"}]},{"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#6f9ba5"}]},{"featureType":"poi","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#023e58"}]},{"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#3C7680"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#304a7d"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#98a5be"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#2c6675"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#255763"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#b0d5ce"}]},{"featureType":"road.highway","elementType":"labels.text.stroke","stylers":[{"color":"#023e58"}]},{"featureType":"transit","elementType":"labels.text.fill","stylers":[{"color":"#98a5be"}]},{"featureType":"transit","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"transit.line","elementType":"geometry.fill","stylers":[{"color":"#283d6a"}]},{"featureType":"transit.station","elementType":"geometry","stylers":[{"color":"#3a4762"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#0e1626"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#4e6d70"}]},{"featureType":"transit.line","elementType":"geometry","stylers":[{"visibility":"on"}]}]';
 
-Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async {
+Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
   late String assetPath;
   final ByteData backdropData;
 
-  switch (primaryType) {
+  switch (category) {
     case 'Group-Food':
       assetPath = 'assets/mapMarkers/foodGroupMarker.png';
     case 'Food':
@@ -201,17 +201,17 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
       assetPath = 'assets/mapMarkers/stallsGroupMarker.png';
     case 'Shopping':
       assetPath = 'assets/mapMarkers/stallsMarker.png';
-    case 'Group-Music':
+    case 'Group-Performance':
       assetPath = 'assets/mapMarkers/musicGroupMarker.png';
-    case 'Music':
+    case 'Performance':
       assetPath = 'assets/mapMarkers/musicMarker.png';
-    case 'Group-Event':
+    case 'Group-Charity/Community/Info':
       assetPath = 'assets/mapMarkers/eventsGroupMarker.png';
-    case 'Event':
+    case 'Charity/Community/Info':
       assetPath = 'assets/mapMarkers/eventsMarker.png';
-    case 'Group-Place':
+    case 'Group-Visit/Experience':
       assetPath = 'assets/mapMarkers/placesGroupMarker.png';
-    case 'Place':
+    case 'Visit/Experience':
       assetPath = 'assets/mapMarkers/placesMarker.png';
     case 'Group-Service':
       assetPath = 'assets/mapMarkers/servicesGroupMarker.png';
@@ -226,7 +226,7 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
   }
 
   // Adjust the asset path if this is a group and load the relevant backdrop image (frame)
-  if (primaryType.contains('Group-')) {
+  if (category.contains('Group-')) {
     backdropData = await rootBundle.load("assets/mapMarkers/groupMarkerIconFrame.png");
   } else {
     backdropData = await rootBundle.load("assets/mapMarkers/markerIconFrame.png");
@@ -285,24 +285,24 @@ Future<BitmapDescriptor> getColoredMarker(String primaryType, Color color) async
   }
 }
 
-Color getCategoryColor(String selectedThemeKey, String primaryType) {
+Color getCategoryColor(String selectedThemeKey, String category) {
   if (selectedThemeKey == "light") {
-    if (primaryType == "Food" || primaryType == "Group-Food") {
+    if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(255, 156, 26, 1.0);
       return color;
-    } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
+    } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(209, 81, 85, 1.0);
       return color;
-    } else if (primaryType == "Music" || primaryType == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(190, 110, 230, 1.0);
       return color;
-    } else if (primaryType == "Event" || primaryType == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(243, 190, 66, 1.0);
       return color;
-    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(79, 184, 75, 1.0);
       return color;
-    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
+    } else if (category.startsWith("Service") || category == "Group-Service") {
       Color color = const Color.fromRGBO(84, 145, 245, 1.0);
       return color;
     }
@@ -311,22 +311,22 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     Color color = const Color.fromRGBO(0, 0, 0, 1.0);
     return color;
   } else if (selectedThemeKey == "dark") {
-    if (primaryType == "Food" || primaryType == "Group-Food") {
+    if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(241, 108, 0, 1.0);
       return color;
-    } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
+    } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(204, 22, 22, 1.0);
       return color;
-    } else if (primaryType == "Music" || primaryType == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(183, 13, 204, 1.0);
       return color;
-    } else if (primaryType == "Event" || primaryType == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(255, 196, 0, 1.0);
       return color;
-    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(7, 128, 0, 1.0);
       return color;
-    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
+    } else if (category.startsWith("Service") || category == "Group-Service") {
       Color color = const Color.fromRGBO(29, 112, 198, 1.0);
       return color;
     }
@@ -335,22 +335,22 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     Color color = const Color.fromRGBO(0, 0, 0, 1.0);
     return color;
   } else if (selectedThemeKey == "2024") {
-    if (primaryType == "Food" || primaryType == "Group-Food") {
+    if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(216, 114, 50, 1.0);
       return color;
-    } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
+    } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(200, 0, 10, 1);
       return color;
-    } else if (primaryType == "Music" || primaryType == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(175, 98, 214, 1.0);
       return color;
-    } else if (primaryType == "Event" || primaryType == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(204, 161, 51, 1.0);
       return color;
-    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(0, 115, 37, 1.0);
       return color;
-    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
+    } else if (category.startsWith("Service") || category == "Group-Service") {
       Color color = const Color.fromRGBO(37, 63, 128, 1.0);
       return color;
     }
@@ -359,22 +359,22 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     Color color = const Color.fromRGBO(0, 0, 0, 1.0);
     return color;
   } else if (selectedThemeKey == "highContrast") {
-    if (primaryType == "Food" || primaryType == "Group-Food") {
+    if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(255, 115, 0, 1.0);
       return color;
-    } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
+    } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(255, 0, 0, 1.0);
       return color;
-    } else if (primaryType == "Music" || primaryType == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(228, 0, 255, 1.0);
       return color;
-    } else if (primaryType == "Event" || primaryType == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(237, 201, 0, 1.0);
       return color;
-    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(28, 213, 0, 1.0);
       return color;
-    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
+    } else if (category.startsWith("Service") || category == "Group-Service") {
       Color color = const Color.fromRGBO(0, 187, 255, 1.0);
       return color;
     }
@@ -383,22 +383,22 @@ Color getCategoryColor(String selectedThemeKey, String primaryType) {
     Color color = const Color.fromRGBO(0, 0, 0, 1.0);
     return color;
   } else if (selectedThemeKey == "colourBlindFriendly") {
-    if (primaryType == "Food" || primaryType == "Group-Food") {
+    if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(213, 94, 0, 1.0);
       return color;
-    } else if (primaryType == "Shopping" || primaryType == "Group-Shopping") {
+    } else if (category == "Shopping" || category == "Group-Shopping") {
       Color color = const Color.fromRGBO(230, 159, 0, 1.0);
       return color;
-    } else if (primaryType == "Music" || primaryType == "Group-Music") {
+    } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(204, 121, 167, 1.0);
       return color;
-    } else if (primaryType == "Event" || primaryType == "Group-Event") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(240, 228, 66, 1.0);
       return color;
-    } else if (primaryType == "Place" || primaryType == "Group-Place") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(0, 158, 115, 1.0);
       return color;
-    } else if (primaryType.startsWith("Service") || primaryType == "Group-Service") {
+    } else if (category.startsWith("Service") || category == "Group-Service") {
       Color color = const Color.fromRGBO(0, 114, 178, 1.0);
       return color;
     }

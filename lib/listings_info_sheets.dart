@@ -30,11 +30,6 @@ bool isItEventDay() {
   return DateUtils.isSameDay(fairDate, DateTime.now());
 }
 
-// Function for determining if the event has been marked as cancelled
-bool hasEventBeenCancelled(String? description) {
-  return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
-}
-
 class GroupListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;
@@ -136,16 +131,22 @@ class GroupListingInfoSheet extends StatelessWidget {
 }
 
 class SpecificListingInfoSheet extends StatelessWidget {
+  // From the db
+  final bool cancelled;
+  final bool brickAndMortar;
+  final String emoji;
   final String title;
-  final String location;
   final String subtitle;
+  final String location;
+  final String description;
+  final String email;
+  final String website;
+  final String phoneNumber;
+  final String imageURL;
   final String startTime;
   final String endTime;
+  // From the parent widget (calculated)
   final String approxDistance;
-  final String phoneNumber;
-  final String website;
-  final String email;
-  final String description;
   final bool detailsVisible;
   final bool listingFavourited;
   final VoidCallback? onDetailsTapped;
@@ -153,16 +154,20 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final Function onGetDirections;
 
   const SpecificListingInfoSheet({
+    required this.cancelled,
+    required this.brickAndMortar,
+    required this.emoji,
     required this.title,
-    required this.location,
     required this.subtitle,
+    required this.location,
+    required this.description,
+    required this.email,
+    required this.website,
+    required this.phoneNumber,
+    required this.imageURL,
     required this.startTime,
     required this.endTime,
     required this.approxDistance,
-    required this.phoneNumber,
-    required this.website,
-    required this.email,
-    required this.description,
     required this.detailsVisible,
     required this.listingFavourited,
     this.onDetailsTapped,
@@ -174,20 +179,17 @@ class SpecificListingInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     debugPrint('SpecificListingInfoSheet build() called');
-    String updatedDescription; // with cancel identifier removed if appropriate
     String updatedTimes; // replaced with CANCELLED if appropriate
     Widget subDetails; // calculated subtitle/details field
 
     // Determine if the event has been cancelled, update text style accordingly
-    final bool cancelled = hasEventBeenCancelled(description);
     final titleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
       color: Theme.of(context).colorScheme.onSurface,
       decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
-    updatedDescription = cancelled ? description.substring(cancelIdentifier.length) : description;
-    updatedTimes = cancelled ? cancelIdentifier : "$startTime—$endTime";
+    updatedTimes = cancelled ? 'CANCELLED' : "$startTime—$endTime";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
     final subSubStyle = subStyle.copyWith(fontWeight: FontWeight.normal);
@@ -228,7 +230,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
               Expanded(
                 flex: 14,
                 child: Text(
-                  title,
+                  // Prepend the emoji if we have one
+                  emoji.isNotEmpty ? '$emoji $title' : title,
                   style: titleStyle,
                 ),
               ),
@@ -247,7 +250,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
                 TextSpan(children: [
                   TextSpan(style: subSubStyle, text: location),
-                  TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
+                  TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' $approxDistance'),
                 ], ), 
               ), ),
               ),
@@ -290,7 +293,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 label: const FittedBox(child: Text('Directions')),
               ),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
-              if (onDetailsTapped != null && (updatedDescription.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 6),
+              if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 6),
               // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
               if (onDetailsTapped != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width <= 360)
                 ElevatedButton(
@@ -301,7 +304,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   onPressed: onDetailsTapped,
                   child: const Icon(Icons.info),
               ) 
-              else if (onDetailsTapped != null && (updatedDescription.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
+              else if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
                 ElevatedButton.icon(
                   style: detailsVisible ?
                     ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
@@ -399,12 +402,12 @@ class SpecificListingInfoSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 0,
               children: [
-                if (updatedDescription.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (updatedDescription.isNotEmpty) const SizedBox(height: 8),
-                if (updatedDescription.isNotEmpty) Row(
+                if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
+                if (description.isNotEmpty) const SizedBox(height: 8),
+                if (description.isNotEmpty) Row(
                   children: [
                     Flexible(
-                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), updatedDescription),
+                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
                     ),
                   ],
                 ),
