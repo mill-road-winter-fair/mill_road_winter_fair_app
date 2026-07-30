@@ -19,8 +19,9 @@ class FirebaseAnalyticsService implements AnalyticsService {
   Future<void> logButtonTapped(String buttonName) async {
     debugPrint('[FIREBASE] Logging $buttonName button tapped on screen $currentScreen');
     await analytics.logEvent(
-      name: '${buttonName}_button_tapped',
+      name: 'button_tapped',
       parameters: {
+        'button': buttonName,
         'screen': currentScreen,
       },
     );
