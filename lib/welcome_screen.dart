@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,6 +30,9 @@ class WelcomeScreen extends StatelessWidget {
       title: 'Welcome screen',
       debugShowCheckedModeBanner: false,
       theme: appThemes[selectedThemeKey],
+      navigatorObservers: [
+        if (!onTest) FirebaseAnalyticsObserver(analytics: analytics)
+      ],
       home: OnBoardingPage(analyticsService: analyticsService,),
     );
   }
