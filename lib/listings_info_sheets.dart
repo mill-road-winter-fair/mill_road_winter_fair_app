@@ -224,18 +224,14 @@ class SpecificListingInfoSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 0,
         children: [
-          // if we're on a modal bottom sheet, add a bit of space to avoid radius at top of dialog
-          if (onDetailsTapped == null && location != '') const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Prepend the emoji if we have one
+              if (emoji.isNotEmpty) Text('$emoji ', style: titleStyle.copyWith(fontSize: 30)),
               Expanded(
                 flex: 14,
-                child: Text(
-                  // Prepend the emoji if we have one
-                  emoji.isNotEmpty ? '$emoji $title' : title,
-                  style: titleStyle,
-                ),
+                child: Text(title, style: titleStyle),
               ),
               const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
