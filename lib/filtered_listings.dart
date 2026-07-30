@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
@@ -15,17 +16,19 @@ import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final String filterCategory;
   final List<Map<String, dynamic>> listings;
   final void Function(String)? onChangeTitle;
+  final ValueChanged<int> onTabSelected;
 
   const FilteredListingsPage({
     required this.filterCategory,
     required this.listings,
     required this.onChangeTitle,
+    required this.onTabSelected,
     super.key,
   });
 
@@ -367,12 +370,22 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
     int? firstVisibleIndex; // will be used to store the first listing that is actually visible
 
-    return SafeArea(
-      top: false,
-      left: false,
-      right: false,
-      bottom: false,
-      child: Column(
+    return FairScaffold(
+      appBarTitle: switch (filterCategory) {'favourite' => 'Favourite listings', _ => 'All listings'},
+      currentTab: switch (filterCategory) {'favourite' => 4, _ => 3},
+      onTabSelected: widget.onTabSelected,
+      appBarActions: [
+        IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            setState(() {
+              _isSearching = true;
+            });
+          },
+        ),
+      ],
+      body: Column(
         children: [
           _buildFilteringDropdown(context),
           Container(
