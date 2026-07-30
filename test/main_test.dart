@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -457,6 +458,59 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('info@millroadwinterfair.org'), findsNothing);
+    });
+
+    testWidgets('Favourites button in NavBar navigates to Favourites page', (WidgetTester tester) async {
+      // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        }
+      ];
+
+      // Provide initial mock values for shared preferences
+      SharedPreferences.setMockInitialValues({});
+      await loadSettings();
+
+      // Pump MyApp which contains the AppBar with the snowflake button
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      // Set the mock listing as a favourite
+      favouriteListingKeys.add('1');
+
+      // Tap the Favourites button the NavBar
+      await tester.tap(find.byIcon(Icons.favorite));
+      await tester.pumpAndSettle();
+
+      // Verify that AboutTheFairPage is now displayed
+      expect(find.byType(FilteredListingsPage), findsOneWidget);
+      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+
+      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice (triggered in MapPage initState)
+      await tester.pump(const Duration(seconds: 21));
     });
   });
 }
