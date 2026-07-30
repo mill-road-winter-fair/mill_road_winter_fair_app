@@ -376,6 +376,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       onTabSelected: widget.onTabSelected,
       appBarActions: [
         IconButton(
+          icon: const Icon(Icons.event_busy),
+          onPressed: () {},
+        ),
+        IconButton(
           icon: const Icon(Icons.search),
           onPressed: () {
             HapticFeedback.lightImpact();

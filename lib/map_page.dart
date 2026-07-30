@@ -1568,12 +1568,6 @@ class MapPageState extends State<MapPage> {
               icon: const Icon(Icons.search),
               onPressed: () {},
             ),
-            IconButton(
-              icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-              },
-            ),
           ],
           body: Stack(
             children: [

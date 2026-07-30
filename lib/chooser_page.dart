@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 
@@ -40,13 +41,10 @@ class _ChooserPageState extends State<ChooserPage> {
       onTabSelected: widget.onTabSelected,
       appBarActions: [
         IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {},
-        ),
-        IconButton(
           icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
           onPressed: () {
             HapticFeedback.lightImpact();
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
           },
         ),
       ],

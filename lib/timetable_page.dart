@@ -40,14 +40,16 @@ class _TimetablePageState extends State<TimetablePage> {
       onTabSelected: widget.onTabSelected,
       appBarActions: [
         IconButton(
-          icon: const Icon(Icons.search),
+          icon: const Icon(Icons.update),
           onPressed: () {},
         ),
         IconButton(
-          icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-          },
+          icon: const Icon(Icons.event_busy),
+          onPressed: () {},
+        ),
+        IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () {},
         ),
       ],
       body: Scrollbar(
