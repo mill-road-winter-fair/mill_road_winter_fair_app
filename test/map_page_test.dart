@@ -440,7 +440,8 @@ void main() {
       expect(find.text('Food'), findsOneWidget);
       expect(find.text('approx. 199 m'), findsOneWidget);
       // Specific marker content
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
@@ -472,7 +473,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check the text content in the bottom sheet
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
+      expect(find.text('🍣 '), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
