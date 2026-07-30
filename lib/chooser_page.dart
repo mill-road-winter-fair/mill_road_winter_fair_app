@@ -19,17 +19,17 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   late final AnimationController _animationController;
   Timer? _idleTimer;
   final List<Hotspot> hotspots = [
-    Hotspot(id: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152),
-    Hotspot(id: 'Music', left: 0.548, top: 0.287, width: 0.451, height: 0.144),
-    Hotspot(id: 'Events', left: 0, top: 0.366, width: 0.455, height: 0.19),
-    Hotspot(id: 'Shopping', left: 0.583, top: 0.49, width: 0.416, height: 0.213),
-    Hotspot(id: 'Children’s', left: 0, top: 0.598, width: 0.437, height: 0.214),
-    Hotspot(id: 'Nearby', left: 0.666, top: 0.703, width: 0.333, height: 0.171),
-    Hotspot(id: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118),
-    Hotspot(id: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118),
+    Hotspot(label: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152),
+    Hotspot(label: 'Music', left: 0.548, top: 0.287, width: 0.451, height: 0.144),
+    Hotspot(label: 'Events', left: 0, top: 0.366, width: 0.455, height: 0.19),
+    Hotspot(label: 'Shopping', left: 0.583, top: 0.49, width: 0.416, height: 0.213),
+    Hotspot(label: 'Children’s', left: 0, top: 0.598, width: 0.437, height: 0.214),
+    Hotspot(label: 'Nearby', left: 0.666, top: 0.703, width: 0.333, height: 0.171),
+    Hotspot(label: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118),
+    Hotspot(label: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118),
   ];
-  String? _chosenHotspotID; // ID of any hotspot that the user tapped on
-  bool _idleMode = true; // kicks in when user hasn't done anything for a period
+  int? _chosenHotspotID; // hotspot that the user tapped on, if any
+  HighlightMode _highlightMode = HighlightMode.idle;
   
 
   @override
@@ -56,22 +56,23 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
 
   void userInteraction() {
     _idleTimer?.cancel();
-    if (_idleMode) setState(() { _idleMode = false; });
+    if (_highlightMode == HighlightMode.idle) setState(() { _highlightMode = HighlightMode.none; });
     _animationController.stop();
     _idleTimer = Timer(
       const Duration(seconds: 5),
       () {
-        setState(() { _idleMode = true; });
+        setState(() { _highlightMode == HighlightMode.idle; });
         _animationController.repeat();
       },
     );
   }
 
 
-  void chooseDialog(BuildContext theBuildContext, String theChoice) {
+  Future<bool> chooseDialog(BuildContext theBuildContext, String theChoice) async {
     const textStyle = TextStyle(fontSize: 18);
     const titleStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 20);
-    showDialog(
+    bool cancelled = false;
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
@@ -84,37 +85,50 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                 child: Padding(
                   padding: EdgeInsets.all(16.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
                   child: Column(spacing: 12,
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(style: titleStyle, 'Remember this choice?'),
-                          Text(style: textStyle, 'You can save this choice so that $theChoice always appears when you open the app.'),
-                          Text(style: textStyle, 'You won’t be asked this again, but can always change this from app Settings.'),
-                          Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
-                            TextButton(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                Navigator.pop(context);
-                              },
-                              child: Text('Don’t save', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                Navigator.pop(context);
-                              },
-                              child: Text('Save', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
-                            ),
-                          ]),
-                        ],
-                      ),
-                    ),            
-                  );
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(style: titleStyle, 'Save this choice?'),
+                      Text(style: textStyle, 'The app can remember this choice so that $theChoice always appears when you open it.'),
+                      Text(style: textStyle, 'You won’t be asked again, but can always change this from Settings.'),
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, spacing: 12, children: [
+                        TextButton(
+                          style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            cancelled = true;
+                            Navigator.pop(context);
+                          },
+                          child: Text('Cancel', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
+                        ),
+                        Spacer(),
+                        TextButton(
+                          style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.pop(context);
+                          },
+                          child: Text('Don’t save', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
+                        ),
+                        TextButton(
+                          style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.pop(context);
+                          },
+                          child: Text('Save', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
+                        ),
+                      ]),
+                    ],
+                  ),
+                ),
+              );
             }
           )
         );
       }
     );
+    return cancelled;
   }
 
 
@@ -134,31 +148,54 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
               builder: (context, constraints) {
                 return Stack(fit: StackFit.expand, children: [
                   Image.asset('assets/chooserPage/chooserPage_background.png', fit: BoxFit.fill),
-                  Positioned(left: 115, top: 22, child: Image(image: AssetImage('assets/MRWF25_leaflet_banner.png'), width: 180)),
+                  Positioned(
+                    left: 0.16 * constraints.maxWidth, 
+                    top: 0.03 * constraints.maxHeight, 
+                    width: 0.7 * constraints.maxWidth, 
+                    height: 0.105 * constraints.maxHeight, 
+                    child: Image(image: AssetImage('assets/MRWF25_leaflet_banner.png'), width: 180)),
                   Positioned.fill(
                     child: IgnorePointer(
                       child: CustomPaint(
                         painter: HotspotPainter(
                           hotspots: hotspots,
-                          idleMode: _idleMode,
+                          mode: _highlightMode,
+                          chosenHotspotID: _chosenHotspotID,
                           animation: _animationController,
                         ),
                       ),
                     ),
                   ),
-                  for (final hotspot in hotspots)
+                  for (int i=0; i<hotspots.length; i++)
                     Positioned(
-                      left: hotspot.left * constraints.maxWidth,
-                      top: hotspot.top * constraints.maxHeight,
-                      width: hotspot.width * constraints.maxWidth,
-                      height: hotspot.height * constraints.maxHeight,
+                      left: hotspots[i].left * constraints.maxWidth,
+                      top: hotspots[i].top * constraints.maxHeight,
+                      width: hotspots[i].width * constraints.maxWidth,
+                      height: hotspots[i].height * constraints.maxHeight,
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          _chosenHotspotID = hotspot.id;
-                          userInteraction();
-                          chooseDialog(context, _chosenHotspotID!);
-                          debugPrint('Selected $_chosenHotspotID');
+                        onTap: () async {
+                          debugPrint('Selected $i');
+                          _animationController.stop();
+                          setState(() {
+                            _highlightMode = HighlightMode.selected;
+                            _chosenHotspotID = i;
+                          });
+                          final cancelled = await chooseDialog(context, hotspots[i].label);
+                          debugPrint('cancelled=$cancelled');
+                          if (cancelled) {
+                            setState(() {
+                              _chosenHotspotID = null;
+                              _highlightMode = HighlightMode.none;
+                            });
+                            _idleTimer = Timer(const Duration(seconds: 2), () {
+                              setState(() {
+                                _chosenHotspotID = null;
+                                _highlightMode = HighlightMode.idle;
+                              });
+                              _animationController.repeat();
+                            });
+                          }
                         },
                         child: const SizedBox.expand(),
                       ),
@@ -175,9 +212,16 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
 }
 
 
+enum HighlightMode {
+  none,
+  idle,
+  selected,
+}
+
+
 class Hotspot {
 
-  final String id;
+  final String label;
   // Coordinates are fractions of image size (0.0 - 1.0)
   final double left;
   final double top;
@@ -185,7 +229,7 @@ class Hotspot {
   final double height;
 
   const Hotspot({
-    required this.id,
+    required this.label,
     required this.left,
     required this.top,
     required this.width,
@@ -207,17 +251,27 @@ class HotspotPainter extends CustomPainter {
 
   HotspotPainter({
     required this.hotspots,
-    required this.idleMode,
+    required this.mode,
+    required this.chosenHotspotID,
     required this.animation,
   }) : super(repaint: animation);
 
   final List<Hotspot> hotspots;
-  final bool idleMode;
+  final HighlightMode mode;
+  final int? chosenHotspotID;
   final Animation<double> animation;
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (!idleMode) return;
+    switch (mode) {
+      case HighlightMode.none:
+        return;
+      case HighlightMode.selected:
+        _paintHotspot(canvas, size, hotspots[chosenHotspotID!], 1.0);
+        return;
+      case HighlightMode.idle:
+        break;
+    }
     final count = hotspots.length;
     final position = animation.value * count;
     final current = position.floor() % count;
@@ -234,7 +288,7 @@ class HotspotPainter extends CustomPainter {
     if (opacity <= 0.001) return;
     final rect = hotspot.scaled(size);
     _drawGlow(canvas, rect, opacity);
-    _drawLabel(canvas, rect, hotspot.id, opacity);
+    _drawLabel(canvas, rect, hotspot.label, opacity);
   }
 
 
@@ -286,8 +340,8 @@ class HotspotPainter extends CustomPainter {
     painter.paint(canvas, Offset(rect.center.dx - painter.width / 2, rect.center.dy - painter.height / 2));
   }
 
-  @override
-  bool shouldRepaint(covariant HotspotPainter oldDelegate) {
-    return oldDelegate.idleMode != idleMode;
-  }
+@override
+bool shouldRepaint(covariant HotspotPainter oldDelegate) {
+  return oldDelegate.mode != mode || oldDelegate.chosenHotspotID != chosenHotspotID;
+}
 }
