@@ -38,17 +38,17 @@ Future<void> main() async {
         ? prod.DefaultFirebaseOptions.currentPlatform
         : dev.DefaultFirebaseOptions.currentPlatform,
   );
-  debugPrint('Firebase initialised');
-
-  // Explicitly enable analytics data collection
-  await analytics.setAnalyticsCollectionEnabled(true);
-  debugPrint('Analytics collection enabled');
-
-  // We're on production so use the real analytics service
-  final AnalyticsService analyticsService = FirebaseAnalyticsService();
+  debugPrint('[FIREBASE] Firebase initialised');
 
   await loadSettings();
   debugPrint('Settings loaded');
+
+  // Set analytics data collection based on user preference
+  await analytics.setAnalyticsCollectionEnabled(usageAnalyticsEnabled ?? false);
+  debugPrint('[FIREBASE] Analytics collection enabled: ${usageAnalyticsEnabled ?? false}');
+
+  // We're on production so use the real analytics service
+  final AnalyticsService analyticsService = FirebaseAnalyticsService();
 
   listings = await fetchListings(http.Client());
   debugPrint('Listings fetched: count = ${listings.length}');
@@ -98,7 +98,7 @@ class MyApp extends StatelessWidget {
           home: firstExecution ? WelcomeScreen(analyticsService: analyticsService) : HomePage(key: homePageKey, analyticsService: analyticsService),
           navigatorObservers: [
             routeObserver,
-            FirebaseAnalyticsObserver(analytics: analytics),
+            if (!onTest) FirebaseAnalyticsObserver(analytics: analytics),
           ],
         );
       },
@@ -241,6 +241,9 @@ class HomePageState extends State<HomePage> with RouteAware {
   void initState() {
     super.initState();
     _initPackageInfo();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.analyticsService.showAnalyticsConsentDialog(context);
+    });
   }
 
   @override

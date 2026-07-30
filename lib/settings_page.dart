@@ -14,6 +14,9 @@ Future<void> loadSettings() async {
     // Load settings from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
 
+    // Get analytics preference status
+    usageAnalyticsEnabled = prefs.getBool('usageAnalyticsEnabled');
+
     // Get first execution status, default to true
     firstExecution = prefs.getBool('firstExecution') ?? true;
 
@@ -153,6 +156,9 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
+    if (usageAnalyticsEnabled != null) {
+      await prefs.setBool('usageAnalyticsEnabled', usageAnalyticsEnabled!);
+    }
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
@@ -361,6 +367,18 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         ),
                       ],
                     ),
+                    SwitchListTile(
+                      title: const Text('Allow Analytics'),
+                      subtitle: const Text('Help us improve the app and the Fair by sharing anonymous usage data.'),
+                      value: usageAnalyticsEnabled ?? false,
+                      onChanged: (bool value) async {
+                        debugPrint('User set analytics gathering to $value');
+                        await analytics.setAnalyticsCollectionEnabled(value);
+                        setState(() => usageAnalyticsEnabled = value);
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('usageAnalyticsEnabled', value);
+                      },
+                    )
                   ],
                 ),
               ),
