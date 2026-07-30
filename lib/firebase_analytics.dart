@@ -61,12 +61,13 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
-  Future<void> logMapMarkerFilterPreferenceSet(String mapMarkerCategory, bool visible) async {
-    debugPrint('[FIREBASE] Logging map marker filter preference: $mapMarkerCategory set to $visible');
+  Future<void> logMapMarkerFilterPreferenceSet(String category, bool visible) async {
     await analytics.logEvent(
-      name: 'map_marker_filter_preference_set',
+      name: 'filter_changed',
       parameters: {
-        '${mapMarkerCategory}_map_markers_visible': visible,
+        'filter_type': 'map_marker',
+        'category': category,
+        'is_enabled': visible,
       },
     );
   }
