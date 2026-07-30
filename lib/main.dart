@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -95,7 +96,10 @@ class MyApp extends StatelessWidget {
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
           home: firstExecution ? WelcomeScreen(analyticsService: analyticsService) : HomePage(key: homePageKey, analyticsService: analyticsService),
-          navigatorObservers: [routeObserver],
+          navigatorObservers: [
+            routeObserver,
+            FirebaseAnalyticsObserver(analytics: analytics),
+          ],
         );
       },
     );
