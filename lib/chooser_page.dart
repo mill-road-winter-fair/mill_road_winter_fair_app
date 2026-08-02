@@ -79,7 +79,6 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                             value: savingchoice, 
                             visualDensity: VisualDensity(horizontal: -4, vertical: -4),
                             onChanged: (bool? newValue) {
-                              debugPrint('MW $savingchoice to $newValue');
                               savingchoice = newValue!;
                               setStateDialog(() { });
                             }
