@@ -228,9 +228,9 @@ class HomePageState extends State<HomePage> {
   late final _pages = [
     ChooserPage(onChangeTitle: onChangeAppBarTitle),
     MapPage(listings: listings, key: mapPageKey),
-    FilteredListingsPage(filterPrimaryType: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
+    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
     TimetablePage(),
-    FilteredListingsPage(filterPrimaryType: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle),
+    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle),
   ];
 
   void aboutDialog() {
