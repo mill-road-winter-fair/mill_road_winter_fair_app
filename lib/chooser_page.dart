@@ -30,7 +30,6 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   ];
   int? _chosenHotspotID; // hotspot that the user tapped on, if any
   HighlightMode _highlightMode = HighlightMode.idle;
-  
 
   @override
   void initState() {
@@ -38,12 +37,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
     _chooserPageScrollController = ScrollController();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: hotspots.length * 2),
+      duration: Duration(seconds: 10),
     )..repeat();
-    _animationController.repeat();
-    WidgetsBinding.instance.addPostFrameCallback((_) => widget.onChangeTitle?.call('Welcome!'));
   }
-
 
   @override
   void dispose() {
@@ -54,99 +50,91 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   }
 
 
-  void userInteraction() {
-    _idleTimer?.cancel();
-    if (_highlightMode == HighlightMode.idle) setState(() { _highlightMode = HighlightMode.none; });
-    _animationController.stop();
-    _idleTimer = Timer(
-      const Duration(seconds: 5),
-      () {
-        setState(() { _highlightMode == HighlightMode.idle; });
-        _animationController.repeat();
-      },
-    );
-  }
-
-
   Future<bool> chooseDialog(BuildContext theBuildContext, String theChoice) async {
     const textStyle = TextStyle(fontSize: 18);
     const titleStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 20);
     bool cancelled = false;
+    bool savingchoice = false;
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          insetPadding: EdgeInsets.all(10.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
-              return ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxWidth),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
-                  child: Column(spacing: 12,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(style: titleStyle, 'Save this choice?'),
-                      Text(style: textStyle, 'The app can remember this choice so that $theChoice always appears when you open it.'),
-                      Text(style: textStyle, 'You won’t be asked again, but can always change this from Settings.'),
-                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, spacing: 12, children: [
-                        TextButton(
-                          style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            cancelled = true;
-                            Navigator.pop(context);
-                          },
-                          child: Text('Cancel', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
-                        ),
-                        Spacer(),
-                        TextButton(
-                          style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                          },
-                          child: Text('Don’t save', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
-                        ),
-                        TextButton(
-                          style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                          },
-                          child: Text('Save', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
-                        ),
-                      ]),
-                    ],
+        return StatefulBuilder(
+          builder: (ctx2, setStateDialog) {
+            return Dialog(
+              insetPadding: EdgeInsets.all(10.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
+              child: LayoutBuilder(builder: (context, constraints) {
+                final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
+                return ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
+                    child: Column(
+                      spacing: 12,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(style: titleStyle, 'Save this choice?'),
+                        Row(spacing: 12, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Checkbox(
+                            value: savingchoice, 
+                            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
+                            onChanged: (bool? newValue) {
+                              debugPrint('MW $savingchoice to $newValue');
+                              savingchoice = newValue!;
+                              setStateDialog(() { });
+                            }
+                          ),
+                          Expanded(child: Text(style: textStyle, 'Remember this choice so that $theChoice always appears when you open the app. '
+                            'You can change this from Settings.')),
+                        ]),
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, spacing: 12, children: [
+                          TextButton(
+                            style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              cancelled = true;
+                              Navigator.pop(context);
+                            },
+                            child: Text('Cancel', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
+                          ),
+                          Spacer(),
+                          TextButton(
+                            style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.pop(context);
+                            },
+                            child: Text((savingchoice) ? 'Save and continue' : 'Continue', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
+                          ),
+                        ]),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }
-          )
+                );
+              }),
+            );
+          }
         );
       }
     );
     return cancelled;
   }
 
-
   @override
   Widget build(BuildContext context) {
-    debugPrint('ChooserPageState build() called');
+    WidgetsBinding.instance.addPostFrameCallback((_) => widget.onChangeTitle?.call('Welcome'));
     return SafeArea(
       top: false,
       left: false,
       right: false,
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
-        body: Listener(
-          onPointerDown: (_) => userInteraction(),
-          child: RepaintBoundary(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Stack(fit: StackFit.expand, children: [
+        body: RepaintBoundary(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                fit: StackFit.expand,
+                children: [
                   Image.asset('assets/chooserPage/chooserPage_background.png', fit: BoxFit.fill),
                   Positioned(
                     left: 0.16 * constraints.maxWidth, 
@@ -175,8 +163,8 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () async {
+                          _idleTimer?.cancel();
                           debugPrint('Selected $i');
-                          _animationController.stop();
                           setState(() {
                             _highlightMode = HighlightMode.selected;
                             _chosenHotspotID = i;
@@ -200,10 +188,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                         child: const SizedBox.expand(),
                       ),
                     ),
-                  ],
-                );
-              },
-            ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -219,10 +206,19 @@ enum HighlightMode {
 }
 
 
-class Hotspot {
+double hotspotOpacityForPhase(int index, double progress, {required int visibleCount}) {
+  if (visibleCount <= 1) return 1.0;
+  final slot = index % visibleCount;
+  final normalized = (progress + (slot / visibleCount)) % 1.0;
+  final wave = 0.5 + (0.5 * cos(2 * pi * normalized));
+  final opacity = 0.1 + (0.9 * wave);
+  return opacity.clamp(0.0, 1.0);
+}
 
+
+class Hotspot {
   final String label;
-  // Coordinates are fractions of image size (0.0 - 1.0)
+  // Coordinates are fractions of image size (0.0-1.0)
   final double left;
   final double top;
   final double width;
@@ -247,8 +243,19 @@ class Hotspot {
 }
 
 
-class HotspotPainter extends CustomPainter {
+class _HotspotVisual {
+  const _HotspotVisual({
+    required this.rect,
+    required this.glowPicture,
+    required this.labelPicture,
+  });
+  final Rect rect;
+  final ui.Picture glowPicture;
+  final ui.Picture labelPicture;
+}
 
+
+class HotspotPainter extends CustomPainter {
   HotspotPainter({
     required this.hotspots,
     required this.mode,
@@ -261,36 +268,67 @@ class HotspotPainter extends CustomPainter {
   final int? chosenHotspotID;
   final Animation<double> animation;
 
+  Size? _lastSize;
+  List<_HotspotVisual>? _cachedVisuals;
+
   @override
   void paint(Canvas canvas, Size size) {
     switch (mode) {
       case HighlightMode.none:
         return;
       case HighlightMode.selected:
-        _paintHotspot(canvas, size, hotspots[chosenHotspotID!], 1.0);
+        _ensureVisuals(size);
+        _paintHotspot(canvas, _cachedVisuals![chosenHotspotID!], 1.0);
         return;
       case HighlightMode.idle:
         break;
     }
-    final count = hotspots.length;
-    final position = animation.value * count;
-    final current = position.floor() % count;
-    final next = (current + 1) % count;
-    final t = position - current;
-    final fadeOut = 1.0 - Curves.easeInOut.transform(t);
-    final fadeIn = Curves.easeInOut.transform(t);
-    _paintHotspot(canvas, size, hotspots[current], fadeOut);
-    _paintHotspot(canvas, size, hotspots[next], fadeIn);
+    _ensureVisuals(size);
+    final visibleCount = min(4, hotspots.length);
+    for (var index = 0; index < _cachedVisuals!.length; index++) {
+      final opacity = hotspotOpacityForPhase(index, animation.value, visibleCount: visibleCount);
+      if (opacity <= 0.03) continue;
+      _paintHotspot(canvas, _cachedVisuals![index], opacity);
+    }
   }
 
+  void _ensureVisuals(Size size) {
+    if (_lastSize == size && _cachedVisuals != null && _cachedVisuals!.length == hotspots.length) return;
+    _lastSize = size;
+    _cachedVisuals = List<_HotspotVisual>.generate(
+      hotspots.length,
+      (index) => _buildVisual(size, hotspots[index]),
+      growable: false,
+    );
+  }
 
-  void _paintHotspot(Canvas canvas, Size size, Hotspot hotspot, double opacity) {
-    if (opacity <= 0.001) return;
+  _HotspotVisual _buildVisual(Size size, Hotspot hotspot) {
     final rect = hotspot.scaled(size);
-    _drawGlow(canvas, rect, opacity);
-    _drawLabel(canvas, rect, hotspot.label, opacity);
+    final localRect = Rect.fromLTWH(0, 0, rect.width, rect.height);
+    final glowRecorder = ui.PictureRecorder();
+    final glowCanvas = Canvas(glowRecorder);
+    _drawGlow(glowCanvas, localRect, 1.0);
+    final labelRecorder = ui.PictureRecorder();
+    final labelCanvas = Canvas(labelRecorder);
+    _drawLabel(labelCanvas, localRect, hotspot.label, 1.0);
+    return _HotspotVisual(
+      rect: rect,
+      glowPicture: glowRecorder.endRecording(),
+      labelPicture: labelRecorder.endRecording(),
+    );
   }
 
+  void _paintHotspot(Canvas canvas, _HotspotVisual visual, double opacity) {
+    if (opacity <= 0.001) return;
+    canvas.save();
+    canvas.translate(visual.rect.left, visual.rect.top);
+    final paint = Paint()..color = Colors.white.withValues(alpha: opacity);
+    canvas.saveLayer(Rect.fromLTWH(0, 0, visual.rect.width, visual.rect.height), paint);
+    canvas.drawPicture(visual.glowPicture);
+    canvas.drawPicture(visual.labelPicture);
+    canvas.restore();
+    canvas.restore();
+  }
 
   void _drawGlow(Canvas canvas, Rect rect, double opacity) {
     final paint = Paint()
@@ -298,11 +336,11 @@ class HotspotPainter extends CustomPainter {
         Offset.zero,
         rect.width / 2,
         [
-          Colors.red.withValues(alpha: opacity),
-          Colors.red.withValues(alpha: 0.25 * opacity),
+          Colors.yellow.withValues(alpha: opacity),
+          Colors.yellow.withValues(alpha: 0.25 * opacity),
           Colors.transparent,
         ],
-        [0, 0.8, 1.0],
+        [0, 0.6, 1.0],
       );
     canvas.save();
     canvas.translate(rect.center.dx, rect.center.dy);
@@ -310,7 +348,6 @@ class HotspotPainter extends CustomPainter {
     canvas.drawCircle(Offset.zero, rect.width / 2, paint);
     canvas.restore();
   }
-
 
   void _drawLabel(Canvas canvas, Rect rect, String text, double opacity) {
     double fontSize = min(rect.height, 32);
@@ -340,8 +377,8 @@ class HotspotPainter extends CustomPainter {
     painter.paint(canvas, Offset(rect.center.dx - painter.width / 2, rect.center.dy - painter.height / 2));
   }
 
-@override
-bool shouldRepaint(covariant HotspotPainter oldDelegate) {
-  return oldDelegate.mode != mode || oldDelegate.chosenHotspotID != chosenHotspotID;
-}
+  @override
+  bool shouldRepaint(covariant HotspotPainter oldDelegate) {
+    return oldDelegate.mode != mode || oldDelegate.chosenHotspotID != chosenHotspotID;
+  }
 }
