@@ -283,7 +283,7 @@ class HotspotPainter extends CustomPainter {
         break;
     }
     _ensureVisuals(size);
-    final visibleCount = min(4, hotspots.length);
+    final visibleCount = min(3, hotspots.length);
     for (var index = 0; index < _cachedVisuals!.length; index++) {
       final opacity = hotspotOpacityForPhase(index, animation.value, visibleCount: visibleCount);
       if (opacity <= 0.03) continue;
