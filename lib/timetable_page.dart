@@ -278,8 +278,17 @@ class _TimetablePageState extends State<TimetablePage> {
     final laneWidth = columnWidth / laneCount;
     final laneGap = (laneCount > 1) ? 4 : 8;
     for (var pe in out) {
-      pe.left = pe.lane * laneWidth + laneGap / 2;
-      pe.width = max(8, laneWidth - laneGap);
+      final overlaps = out.any((o) =>
+          o.id != pe.id &&
+          o.startTime.isBefore(pe.endTime) &&
+          o.endTime.isAfter(pe.startTime));
+      if (overlaps) {
+        pe.left = pe.lane * laneWidth + laneGap / 2;
+        pe.width = max(8, laneWidth - laneGap);
+      } else {
+        pe.left = laneGap / 2;
+        pe.width = columnWidth - laneGap;
+      }
     }
     return out;
   }
