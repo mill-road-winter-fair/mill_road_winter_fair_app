@@ -495,18 +495,18 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       await loadSettings();
 
+      // Set the mock listing as a favourite before the widget is built
+      favouriteListingKeys.add('1');
+
       // Pump MyApp which contains the AppBar with the snowflake button
       await tester.pumpWidget(const MyApp());
       await tester.pumpAndSettle();
-
-      // Set the mock listing as a favourite
-      favouriteListingKeys.add('1');
 
       // Tap the Favourites button the NavBar
       await tester.tap(find.byIcon(Icons.favorite));
       await tester.pumpAndSettle();
 
-      // Verify that AboutTheFairPage is now displayed
+      // Verify that the favourites page is displayed
       expect(find.byType(FilteredListingsPage), findsOneWidget);
       expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
 
