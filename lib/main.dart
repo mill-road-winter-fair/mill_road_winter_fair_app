@@ -226,7 +226,7 @@ class HomePageState extends State<HomePage> {
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
-    ChooserPage(),
+    ChooserPage(onChangeTitle: onChangeAppBarTitle),
     MapPage(listings: listings, key: mapPageKey),
     FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
     TimetablePage(),
@@ -354,10 +354,10 @@ class HomePageState extends State<HomePage> {
             onTap: (selectedIndex) {
               HapticFeedback.selectionClick();
               switch (selectedIndex) {
-                case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
-                case 1 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
+                case 0 : appBarTitle = 'Welcome';
+                case 1 : appBarTitle = 'Map';
                 case 2 : _allListingsKey.currentState?.onTabVisible();
-                case 3 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
+                case 3 : appBarTitle = 'Timetable';
                 case 4 : _savedListingsKey.currentState?.onTabVisible();
               }
               setState(() {
