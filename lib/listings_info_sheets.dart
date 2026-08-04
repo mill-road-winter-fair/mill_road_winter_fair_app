@@ -152,6 +152,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final VoidCallback? onDetailsTapped;
   final VoidCallback? onFavouriteTapped;
   final Function onGetDirections;
+  final bool inDialog;
 
   const SpecificListingInfoSheet({
     required this.cancelled,
@@ -173,12 +174,13 @@ class SpecificListingInfoSheet extends StatelessWidget {
     this.onDetailsTapped,
     this.onFavouriteTapped,
     required this.onGetDirections,
+    required this.inDialog,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('SpecificListingInfoSheet build() called');
+    //debugPrint('SpecificListingInfoSheet build() called');
     String updatedTimes; // replaced with CANCELLED if appropriate
     Widget subDetails; // calculated subtitle/details field
 
@@ -211,7 +213,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.fromLTRB(
+      padding: (inDialog) ? EdgeInsets.all(0) : EdgeInsets.fromLTRB(
         4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
         8,
         4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
@@ -222,18 +224,14 @@ class SpecificListingInfoSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 0,
         children: [
-          // if we're on a modal bottom sheet, add a bit of space to avoid radius at top of dialog
-          if (onDetailsTapped == null && location != '') const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Prepend the emoji if we have one
+              if (emoji.isNotEmpty) Text('$emoji ', style: titleStyle.copyWith(fontSize: 30)),
               Expanded(
                 flex: 14,
-                child: Text(
-                  // Prepend the emoji if we have one
-                  emoji.isNotEmpty ? '$emoji $title' : title,
-                  style: titleStyle,
-                ),
+                child: Text(title, style: titleStyle),
               ),
               const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
@@ -266,6 +264,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
+          if (detailsVisible && inDialog) detailsColumn(context),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -396,101 +395,104 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 ),
             ],
           ),
-          if (detailsVisible)
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 0,
-              children: [
-                if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (description.isNotEmpty) const SizedBox(height: 8),
-                if (description.isNotEmpty) Row(
-                  children: [
-                    Flexible(
-                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
-                    ),
-                  ],
-                ),
-                if (website.isNotEmpty) const SizedBox(height: 8),
-                if (website.isNotEmpty) GestureDetector(
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    launchUrl(Uri.parse(website));
-                  },
-                  child: Row(
-                    children: [
-                        Flexible(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
-                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
-                              ], 
-                            ),
-                          ), 
-                        ),
-                    ],
-                  ),
-                ),
-                if (email.isNotEmpty) const SizedBox(height: 8),
-                if (email.isNotEmpty) GestureDetector(
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    final Uri mailUri = Uri(scheme: 'mailto', path: email);
-                    if (await canLaunchUrl(mailUri)) {
-                      await launchUrl(mailUri);
-                    } else {
-                      throw Exception('Could not launch email client');
-                    }
-                  },
-                  child: Row(
-                    children: [
-                        Flexible(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
-                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
-                              ], 
-                            ),
-                          ), 
-                        ),
-                    ],
-                  ),
-                ),
-                if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (phoneNumber.isNotEmpty) GestureDetector(
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-                    if (await canLaunchUrl(phoneUri)) {
-                      await launchUrl(phoneUri);
-                    } else {
-                      throw Exception('Could not launch $phoneNumber');
-                    }
-                  },
-                  child: Row(
-                    children: [
-                        Flexible(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
-                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
-                              ], 
-                            ),
-                          ), 
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          if (detailsVisible && !inDialog) detailsColumn(context),
           // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
           if (onDetailsTapped == null && location != '') const SizedBox(height: 20),
           if (onDetailsTapped != null || location == '') const SizedBox(height: 4),
         ],
       ),
+    );
+  }
+
+  Column detailsColumn(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 0,
+      children: [
+        if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
+        if (description.isNotEmpty) const SizedBox(height: 8),
+        if (description.isNotEmpty) Row(
+          children: [
+            Flexible(
+              child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
+            ),
+          ],
+        ),
+        if (website.isNotEmpty) const SizedBox(height: 8),
+        if (website.isNotEmpty) GestureDetector(
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse(website));
+          },
+          child: Row(
+            children: [
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                        TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
+                      ], 
+                    ),
+                  ), 
+                ),
+            ],
+          ),
+        ),
+        if (email.isNotEmpty) const SizedBox(height: 8),
+        if (email.isNotEmpty) GestureDetector(
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            final Uri mailUri = Uri(scheme: 'mailto', path: email);
+            if (await canLaunchUrl(mailUri)) {
+              await launchUrl(mailUri);
+            } else {
+              throw Exception('Could not launch email client');
+            }
+          },
+          child: Row(
+            children: [
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                        TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
+                      ], 
+                    ),
+                  ), 
+                ),
+            ],
+          ),
+        ),
+        if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
+        if (phoneNumber.isNotEmpty) GestureDetector(
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+            if (await canLaunchUrl(phoneUri)) {
+              await launchUrl(phoneUri);
+            } else {
+              throw Exception('Could not launch $phoneNumber');
+            }
+          },
+          child: Row(
+            children: [
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                        TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
+                      ], 
+                    ),
+                  ), 
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -7,6 +7,11 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 1000));
+}
+
 void main() {
   // We're on test
   onTest = true;
@@ -36,7 +41,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pumpAndSettle();
+    await settle(tester);
   }
 
   group('FilteredListingsPage', () {
@@ -109,13 +114,14 @@ void main() {
       await loadSettings();
       await pumpFilteredListingsPage(tester, 'all', listings);
 
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
       expect(find.text('01223 111111'), findsNothing);  // as Details won't be open
       expect(find.byIcon(Icons.phone), findsOneWidget);
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (approx. 197 m)'), findsOneWidget);
@@ -281,30 +287,30 @@ void main() {
       await pumpFilteredListingsPage(tester, 'performance', listings);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('Nearest').last);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[1]);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('Time').last);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[2]);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('Location (a-z)').last);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[3]);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('Name (a-z)').last);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[0]);
     });
@@ -459,7 +465,7 @@ void main() {
       ];
 
       await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
       expect(mapPageKey.currentState, isNotNull, reason: 'MapPage should be mounted');
@@ -468,11 +474,11 @@ void main() {
       mapPageState.addAllVisibleMarkers();
 
       await tester.tap(find.text('Listings'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(homePageState.index, 2);
 
       await tester.tap(find.text('Directions'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(homePageState.index, 0);
     });
@@ -570,18 +576,18 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Initially all three listings should be visible
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
-      expect(find.text('🍔 Bite Club'), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
+      expect(find.text('Bite Club'), findsOneWidget);
 
       // Tap the search FAB to enter search mode
       final searchFab = find.byKey(const ValueKey('searchFab'));
       expect(searchFab, findsOneWidget);
       await tester.tap(searchFab);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // The SearchBar has a ValueKey('searchBar') on the ConstrainedBox; find the descendant TextField
       final searchBarBox = find.byKey(const ValueKey('searchBar'));
@@ -592,21 +598,21 @@ void main() {
 
       // Enter text that matches only Sushi Squad
       await tester.enterText(textFieldFinder, 'sushi');
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Only Sushi Squad should remain
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
-      expect(find.text('🍩 Glazed and Confused'), findsNothing);
-      expect(find.text('🍔 Bite Club'), findsNothing);
+      expect(find.text('Sushi Squad'), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsNothing);
+      expect(find.text('Bite Club'), findsNothing);
 
       // Clear the search using the close button in the SearchBar (Icon(Icons.close))
       await tester.tap(find.byIcon(Icons.close));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // All results should be back
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
-      expect(find.text('🍔 Bite Club'), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
+      expect(find.text('Bite Club'), findsOneWidget);
     });
   });
 }

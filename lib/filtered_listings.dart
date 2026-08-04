@@ -570,7 +570,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
                           return Column(
                             children: [
-                              (!_hidePastListings || !hasEventEnded(listing['endTime'])) ? SpecificListingInfoSheet(
+                              if (!_hidePastListings || !hasEventEnded(listing['endTime'])) SpecificListingInfoSheet(
                                 cancelled: listing['cancelled'] == 'TRUE' ? true : false,
                                 brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
                                 emoji: listing['emoji'] ?? '',
@@ -597,7 +597,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     (homePageState == null)
                                   );
                                 },
-                              ) : const SizedBox.shrink(),
+                                inDialog: false,
+                              ),
                               // separator except after last item
                               if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                             ],

@@ -635,6 +635,7 @@ class MapPageState extends State<MapPage> {
                                             listingFavourited: isListingFavourited(rel['id']),
                                             onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                             onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                            inDialog: false,
                                           ),
                                           if (index != relatedListings.length - 1)
                                             SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
@@ -664,7 +665,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addSpecificMarker(Map<String, dynamic> listing) async {
-    debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
+    //debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, getCategory(listing));
@@ -763,6 +764,7 @@ class MapPageState extends State<MapPage> {
                               listingFavourited: isListingFavourited(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                              inDialog: false,
                             ),
                           ),
                         ),

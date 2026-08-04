@@ -229,7 +229,7 @@ class HomePageState extends State<HomePage> {
     ChooserPage(),
     MapPage(listings: listings, key: mapPageKey),
     FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
-    TimetablePage(),
+    TimetablePage(theEvents: listings, favouriteListingKeys: favouriteListingKeys),
     FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle),
   ];
 
@@ -281,6 +281,20 @@ class HomePageState extends State<HomePage> {
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+          },
+        ),
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.schedule),
+          title: const Text('Timetable based on Clashfinder Pal by permission of the author', maxLines: 2),
+          subtitle: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('https://linktr.ee/cfpal', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('https://linktr.ee/cfpal'));
           },
         ),
         ListTile(
