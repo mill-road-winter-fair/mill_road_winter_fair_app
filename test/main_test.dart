@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 
 void main() {
   // We're on test
@@ -54,7 +55,7 @@ void main() {
 
       await tester.pumpWidget(const MyApp());
 
-      expect(find.text(fairName), findsOneWidget);
+      expect(find.text('Welcome'), findsOneWidget);
 
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Map'), findsOneWidget);
@@ -154,7 +155,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DrawerHeader), findsOneWidget);
-      expect(find.text(fairName), findsOneWidget);
+      expect(find.text('Welcome'), findsOneWidget);
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
@@ -420,12 +421,12 @@ void main() {
       await tester.tap(find.text('Listings'));
       await tester.pumpAndSettle();
 
-      expect(homePageState.index, 2);
+      expect(homePageState.index, 3);
 
       await tester.tap(find.text('Timetable'));
       await tester.pumpAndSettle();
 
-      expect(homePageState.index, 3);
+      expect(homePageState.index, 2);
 
       await tester.tap(find.text('Favourites'));
       await tester.pumpAndSettle();
