@@ -970,33 +970,39 @@ class _TimetablePageState extends State<TimetablePage> {
                   SizedBox(
                     height: constraints.maxHeight - 34,
                     child: GestureDetector(
-                      onScaleStart: (_) {
+                      onScaleStart: (details) {
+                        if (onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
                         scaling = true;
                         startPixelsPerMinute = _dayPixelsPerMinute;
                       },
                       onScaleUpdate: (details) {
                         if (onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
                         final dampenedScale = 1 + (details.scale - 1) * 0.5;
-                        setState(() {
-                          _dayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
-                        });
+                        final newdayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                        if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
+                          setState(() {
+                            _dayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                          });
+                        }
                       },
                       onScaleEnd: (_) async {
-                        scaling = false;
-                        if (!onlyNowOrSoon) { // don't save special 'now' scale
-                          if (MediaQuery.orientationOf(context) == Orientation.landscape) {
-                             if (_dayPixelsPerMinute != pixelsPerMinuteL) { // only saved if genuinely changed
-                              pixelsPerMinuteL = _dayPixelsPerMinute;
-                              saveScales();
-                            }
-                          } else {
-                            if (_dayPixelsPerMinute != pixelsPerMinuteP) { // only saved if genuinely changed
-                              pixelsPerMinuteP = _dayPixelsPerMinute;
-                              saveScales();
+                        if (scaling) {
+                          scaling = false;
+                          if (!onlyNowOrSoon) { // don't save special 'now' scale
+                            if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+                              if (_dayPixelsPerMinute != pixelsPerMinuteL) { // only saved if genuinely changed
+                                pixelsPerMinuteL = _dayPixelsPerMinute;
+                                saveScales();
+                              }
+                            } else {
+                              if (_dayPixelsPerMinute != pixelsPerMinuteP) { // only saved if genuinely changed
+                                pixelsPerMinuteP = _dayPixelsPerMinute;
+                                saveScales();
+                              }
                             }
                           }
+                          setState(() { });
                         }
-                        setState(() { });
                       },
                       child: SingleChildScrollView(
                         controller: _verticalScrollController,
@@ -1010,7 +1016,6 @@ class _TimetablePageState extends State<TimetablePage> {
                             children: [
                               // time markers lines and labels and swim lanes
                               ...swimlanes,
-                              ...markers,
                               // red 'now' line
                               if (timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now()))
                                 Positioned(
@@ -1020,6 +1025,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                   right: 0,
                                   child: Container(height: 3, color: Colors.red),
                                 ),
+                              ...markers,
                               // Event stacks per column
                               Positioned(
                                 top: 0,
