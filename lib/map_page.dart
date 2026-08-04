@@ -1560,14 +1560,10 @@ class MapPageState extends State<MapPage> {
         }
 
         return FairScaffold(
-          appBarTitle: "Map of the Fair",
+          appBarTitle: "Map",
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {},
-            ),
           ],
           body: Stack(
             children: [

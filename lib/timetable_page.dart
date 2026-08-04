@@ -39,18 +39,6 @@ class _TimetablePageState extends State<TimetablePage> {
       currentTab: 2,
       onTabSelected: widget.onTabSelected,
       appBarActions: [
-        IconButton(
-          icon: const Icon(Icons.update),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.event_busy),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {},
-        ),
       ],
       body: Scrollbar(
         controller: _timetablePageScrollController,

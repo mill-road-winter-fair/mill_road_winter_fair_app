@@ -375,19 +375,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       currentTab: switch (filterCategory) {'favourite' => 4, _ => 3},
       onTabSelected: widget.onTabSelected,
       appBarActions: [
-        IconButton(
-          icon: const Icon(Icons.event_busy),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            setState(() {
-              _isSearching = true;
-            });
-          },
-        ),
       ],
       body: Column(
         children: [
