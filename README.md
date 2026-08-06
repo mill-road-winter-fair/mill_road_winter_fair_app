@@ -1,10 +1,23 @@
 # Mill Road Winter Fair App (2024)
-An Android & iOS app for use by attendees of the 2024 Mill Road Winter Fair in Cambridge.
+An Android & iOS app for use by attendees of the annual Mill Road Winter Fair in Cambridge.
+
+## License
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ## Purpose
-The app itself is a Flutter project which connects to a Google Sheet via an API. The API is a simple caching system which calls the Google Sheets API and caches the response, this API is managed in another repository. You can find the relevant links at the bottom of this document.
+The app itself is a Flutter project which connects to a Google Sheet via an intermediary API. The API is a simple caching system which calls the Google Sheets API and caches the response, this API is managed in another repository. You can find the relevant links at the bottom of this document.
 
-Currently the aim is for the app to provides listings of the various stalls, musical performances, events and services. The app also provides directions to each of these. 
+Currently, the aim for the app is to: 
+* Provide listings of the various stalls, musical performances, events and services.
+* Provide a map of the fair, with the locations of the various listings.
+* Provide directions to the listings.
+* Provide basic information about the fair, such as the date, time and location.
+* Provide health and safety information, such as the planned road closure times.
+* Provide a contact form for users to get in touch with the organisers.
+
+### Status
+* ![build](https://github.com/mill-road-winter-fair/mill_road_winter_fair_app/actions/workflows/dart.yml/badge.svg)
+* ![coverage](https://github.com/mill-road-winter-fair/mill_road_winter_fair_app/blob/main/coverage_badge.svg)
 
 ### Developers
 * Alexander Berridge (Android)
@@ -103,17 +116,17 @@ flutter build appbundle --release --dart-define-from-file=.env
     NB the build number has to have increased from the last one uploaded to Apple. 
 
 6. Run
-    flutter build ios --config-only --release
+    flutter build ios --release
     
-7. To get screen shots without 'DEBUG' (which Apple will reject) add this line to main.dart within MaterialApp() debugShowCheckedModeBanner:false
+7. In Xcode, go to Product -> Archive, and you will eventually see a new build in the Organiser window
+
+8. Click Distribute App, choose App Store Connect then click Distribute
+
+9. In App Store Connect on the web, go to the app, then Distribution and click the + under iOS app
+
+10. To get screen shots without 'DEBUG' (which Apple will reject) add this line to main.dart within MaterialApp() debugShowCheckedModeBanner:false
    Get screen shots at the largest iPhone and iPad sizes (latest 6.9" Pro Max and 13" Pro), then remove the above.
    
-8. In Xcode, go to Product -> Archive, and you will eventually see a new build in the Organiser window
-
-9. Click Distribute App, choose App Store Connect then click Distribute
-
-10. In App Store Connect on the web, go to the app, then Distribution and click the + under iOS app
-
 11. Fill in the version, add the screen shots, what's new etc., add the build, Save, then hit Add for Review, and wait for up to 48 hours
 
 12. Back in Xcode organiser, right-click on the new build, click Show in Finder, and upload this file to the Github release
