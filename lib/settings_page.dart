@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -368,8 +370,35 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                       ],
                     ),
                     SwitchListTile(
+                      activeColor: Theme.of(context).colorScheme.tertiary,
                       title: const Text('Allow Analytics'),
-                      subtitle: const Text('Help us improve the app and the Fair by sharing anonymous usage data.'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Help us improve the app and the Fair by sharing anonymous usage data.'),
+                          const SizedBox(height: 4),
+                          RichText(
+                            text: TextSpan(
+                              text: 'What does this mean?',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.tertiary,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  HapticFeedback.lightImpact();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
+                                    ),
+                                  );
+                                  widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                                },
+                            ),
+                          ),
+                        ],
+                      ),
                       value: usageAnalyticsEnabled ?? false,
                       onChanged: (bool value) async {
                         debugPrint('User set analytics gathering to $value');

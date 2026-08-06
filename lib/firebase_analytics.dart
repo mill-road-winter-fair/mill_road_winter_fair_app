@@ -1,4 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -199,9 +202,36 @@ class FirebaseAnalyticsService implements AnalyticsService {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Share anonymous usage data?'),
-        content: const Text(
-          'We would like to collect anonymous usage data to help us improve the app and the Fair. '
-          'No personal information is collected.',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'We would like to collect anonymous usage data to help us improve the app and the Fair. '
+              'No personal information is collected.',
+            ),
+            const SizedBox(height: 12),
+            RichText(
+              text: TextSpan(
+                text: 'What does this mean?',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.tertiary,
+                  decoration: TextDecoration.underline,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    HapticFeedback.lightImpact();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AnalyticsExplanationPage(analyticsService: this),
+                      ),
+                    );
+                    logButtonTapped('analytics_explanation_consent_dialog');
+                  },
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
