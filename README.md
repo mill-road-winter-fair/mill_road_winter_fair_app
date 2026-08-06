@@ -61,7 +61,9 @@ KEY_ALIAS=upload
 KEY_PASSWORD=\\The password you set when generating the keystore
 ```
 
-12. You should now have everything you need to run the app locally.
+12. Create `android/app/google-services.json` by copying `android/app/google-services-dev.json`. This ensures that the production releases of the app will sned their analytics to the development Firebase tenancy.
+
+13. You should now have everything you need to run the app locally.
 
 ## Google Cloud Platform
 The app currently uses the the Google Maps Platform within GCP in order to access the following API(s):
@@ -78,9 +80,11 @@ The app currently uses the the Google Maps Platform within GCP in order to acces
 
 4. Merge the MR into `main`.
 
-5. Create a release titled with the version number, detail all of the changes made. 
+5. Create a GitHub release titled with the version number, detail all of the changes made. 
 
-6. Set environment variables for the signing key store.
+6. Ensure that the contents of `android/app/google-services.json` match `android/app/google-services-prod.json`. This ensures that the production releases of the app will sned their analytics to the production Firebase tenancy.
+
+7. Set environment variables for the signing key store.
 ```shell
 $env:KEYSTORE_FILE='C:\Users\alexb\Development\google_play_keystore\upload-keystore.jks'
 $env:KEYSTORE_PASSWORD=REDACTED
@@ -88,14 +92,14 @@ $env:KEY_ALIAS='upload'
 $env:KEY_PASSWORD=REDACTED
 ```
 
-7. Run the following command in the terminal:
+8. Run the following command in the terminal:
 ```shell
 flutter build appbundle --release --dart-define-from-file=.env
 ```
 
-8. Upload the following file to the Google Play Console as a new release: `/build/app/outputs/bundle/release/app-release.aab`
+9. Upload the following file to the Google Play Console as a new release: `/build/app/outputs/bundle/release/app-release.aab`
 
-9. If required, add the following folder to a `.zip` file and upload it to the Release as a Debug Symbols artifact: `build/app/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib/x86_64`
+10. If required, add the following folder to a `.zip` file and upload it to the Release as a Debug Symbols artifact: `build/app/intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib/x86_64`
 
 ## iOS Release Steps
 
