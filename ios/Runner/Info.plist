@@ -68,6 +68,8 @@
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
+	<key>GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED</key>
+    <false/>
 	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>

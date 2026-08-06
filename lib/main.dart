@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -33,11 +34,26 @@ Future<void> main() async {
 
   await dotenv.load(fileName: ".env");
   final env = dotenv.env['ENV'];
+
+  // Initialize Firebase with the appropriate options based on the environment
   await Firebase.initializeApp(
     options: env == 'prod'
         ? prod.DefaultFirebaseOptions.currentPlatform
         : dev.DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Set consent for analytics and ad storage
+  await FirebaseAnalytics.instance.setConsent(
+    analyticsStorageConsentGranted: true,
+    adStorageConsentGranted: false,
+  );
+
+  // Set user property to indicate that personalized ads are not allowed
+  await FirebaseAnalytics.instance.setUserProperty(
+    name: 'allow_personalized_ads',
+    value: 'NO',
+  );
+
   debugPrint('[FIREBASE] Firebase initialised');
 
   await loadSettings();
