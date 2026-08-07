@@ -6,7 +6,6 @@ import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 void main() {
@@ -32,6 +31,7 @@ void main() {
           body: FilteredListingsPage(
             filterCategory: category,
             listings: listings,
+            onChangeTitle: null,
             analyticsService: FakeAnalyticsService(),
           ),
         ),
@@ -46,7 +46,7 @@ void main() {
       // Define a test listing
       List<Map<String, dynamic>> listings = [];
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings);
 
       expect(find.text('Unable to retrieve listings'), findsOneWidget);
     });
@@ -109,13 +109,13 @@ void main() {
       ];
 
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings);
 
       expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
-      expect(find.text('01223 111111'), findsNothing); // as Details won't be open
+      expect(find.text('01223 111111'), findsNothing);  // as Details won't be open
       expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('🍣 Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
@@ -215,7 +215,7 @@ void main() {
       // Mock sorting preference is alphabetical
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings);
       var filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
@@ -225,7 +225,7 @@ void main() {
       // Mock sorting preference is distance
       preferredSortingMethod = SortingMethod.values[1];
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings);
       filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Sushi Squad');
@@ -235,7 +235,7 @@ void main() {
       // Mock sorting preference is time - which for Food should sort by A-Z since time isn't allowed for sorting
       preferredSortingMethod = SortingMethod.values[2];
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings);
       filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
@@ -245,30 +245,65 @@ void main() {
 
     testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'Music', listings);
 
-      await tester.tap(find.byType(DropdownMenu<SortingMethod>));
+      // Provide a listing so the page renders the sorting controls.
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'TRUE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        },
+      ];
+
+      // Ensure the nearest sorting option is available in the menu
+      locationPermission = LocationPermission.always;
+      currentLatLng = const LatLng(52.199174, 0.140929);
+      preferredSortingMethod = SortingMethod.values[0];
+
+      await pumpFilteredListingsPage(tester, 'performance', listings);
+
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Nearest').last);
       await tester.pumpAndSettle();
 
       expect(preferredSortingMethod, SortingMethod.values[1]);
 
-      await tester.tap(find.byType(DropdownMenu<SortingMethod>));
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Time').last);
       await tester.pumpAndSettle();
 
       expect(preferredSortingMethod, SortingMethod.values[2]);
 
-      await tester.tap(find.byType(DropdownMenu<SortingMethod>));
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Location (a-z)').last);
       await tester.pumpAndSettle();
 
       expect(preferredSortingMethod, SortingMethod.values[3]);
 
-      await tester.tap(find.byType(DropdownMenu<SortingMethod>));
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Name (a-z)').last);
       await tester.pumpAndSettle();
@@ -313,7 +348,7 @@ void main() {
       ];
 
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings);
 
       // Preferred sorting method should have been reset to 0 (alphabetical)
       expect(preferredSortingMethod, SortingMethod.values[0]);
@@ -360,7 +395,7 @@ void main() {
       // Mock location services are disabled
       locationServicesEnabled = false;
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings);
 
       // Obtain the state after mounting
       final filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
@@ -376,7 +411,7 @@ void main() {
       // Mock location is available
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings);
 
       // Fallback sorting should be disabled
       expect(filteredListingsPageState.useFallbackSorting, false);
@@ -387,7 +422,7 @@ void main() {
       // Mock location is now unavailable
       currentLatLng = null;
 
-      await pumpFilteredListingsPage(tester, 'Food', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings);
 
       // Fallback sorting should be enabled
       expect(filteredListingsPageState.useFallbackSorting, true);
@@ -428,14 +463,15 @@ void main() {
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await tester.pumpAndSettle();
 
-      // Obtain the state after mounting
-      final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
-      final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
+      expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
+      expect(mapPageKey.currentState, isNotNull, reason: 'MapPage should be mounted');
+      final homePageState = homePageKey.currentState!;
+      final mapPageState = mapPageKey.currentState!;
       mapPageState.addAllVisibleMarkers();
 
-      await tester.tap(find.text('Food'));
+      await tester.tap(find.text('Listings'));
       await tester.pumpAndSettle();
-      expect(homePageState.index, 1);
+      expect(homePageState.index, 2);
 
       await tester.tap(find.text('Directions'));
       await tester.pumpAndSettle();
@@ -531,7 +567,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'Food', analyticsService: FakeAnalyticsService(), listings: sampleListings),
+            body: FilteredListingsPage(filterCategory: 'all', analyticsService: FakeAnalyticsService(), listings: sampleListings, onChangeTitle: null),
           ),
         ),
       );

@@ -307,7 +307,7 @@ void main() {
       expect(prefs.getBool('firstExecution'), isFalse);
 
       // Check that we're now on the Map page
-      expect(find.byType(MapPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
     });
   });
 }

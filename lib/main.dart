@@ -18,13 +18,14 @@ import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
 import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
-import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/timetable_page.dart';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -282,19 +283,15 @@ class HomePageState extends State<HomePage> with RouteAware {
   void didPush() {
     switch (index) {
       case 0:
-        widget.analyticsService.setCurrentScreen('MapPage');
+        widget.analyticsService.setCurrentScreen('HomePage');
       case 1:
-        widget.analyticsService.setCurrentScreen('FoodListingsPage');
+        widget.analyticsService.setCurrentScreen('MapPage');
       case 2:
-        widget.analyticsService.setCurrentScreen('StallsListingsPage');
+        widget.analyticsService.setCurrentScreen('ListingsPage');
       case 3:
-        widget.analyticsService.setCurrentScreen('MusicListingsPage');
+        widget.analyticsService.setCurrentScreen('TimetablePage');
       case 4:
-        widget.analyticsService.setCurrentScreen('EventsListingsPage');
-      case 5:
-        widget.analyticsService.setCurrentScreen('PlacesListingsPage');
-      case 6:
-        widget.analyticsService.setCurrentScreen('OtherListingsPage');
+        widget.analyticsService.setCurrentScreen('FavouritesPage');
     }
   }
 
@@ -302,19 +299,15 @@ class HomePageState extends State<HomePage> with RouteAware {
   void didPopNext() {
     switch (index) {
       case 0:
-        widget.analyticsService.setCurrentScreen('MapPage');
+        widget.analyticsService.setCurrentScreen('HomePage');
       case 1:
-        widget.analyticsService.setCurrentScreen('FoodListingsPage');
+        widget.analyticsService.setCurrentScreen('MapPage');
       case 2:
-        widget.analyticsService.setCurrentScreen('StallsListingsPage');
+        widget.analyticsService.setCurrentScreen('ListingsPage');
       case 3:
-        widget.analyticsService.setCurrentScreen('MusicListingsPage');
+        widget.analyticsService.setCurrentScreen('TimetablePage');
       case 4:
-        widget.analyticsService.setCurrentScreen('EventsListingsPage');
-      case 5:
-        widget.analyticsService.setCurrentScreen('PlacesListingsPage');
-      case 6:
-        widget.analyticsService.setCurrentScreen('OtherListingsPage');
+        widget.analyticsService.setCurrentScreen('FavouritesPage');
     }
   }
 
@@ -332,23 +325,15 @@ class HomePageState extends State<HomePage> with RouteAware {
     });
   }
 
-  final _listingsKeyFood = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyShopping = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyCharityCommunityInfo = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyPerformance = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyVisitExperience = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
-
+  final _allListingsKey = GlobalKey<FilteredListingsPageState>();
+  final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
+  
   late final _pages = [
-    MapPage(listings: listings, analyticsService: widget.analyticsService, key: mapPageKey),
-    FilteredListingsPage(filterCategory: "Food", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyFood),
-    FilteredListingsPage(filterCategory: "Shopping", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyShopping),
-    FilteredListingsPage(filterCategory: "Performance", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyPerformance),
-    FilteredListingsPage(
-        filterCategory: "Charity/Community/Info", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyCharityCommunityInfo),
-    FilteredListingsPage(filterCategory: "Visits/Experiences", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyVisitExperience),
-    FilteredListingsPage(filterCategory: "Services", analyticsService: widget.analyticsService, listings: listings, key: _listingsKeyService),
-    FilteredListingsPage(filterCategory: "Saved", analyticsService: widget.analyticsService, listings: listings),
+    ChooserPage(),
+    MapPage(listings: listings, key: mapPageKey, analyticsService: widget.analyticsService),
+    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle, analyticsService: widget.analyticsService),
+    TimetablePage(),
+    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle, analyticsService: widget.analyticsService),
   ];
 
   void aboutDialog() {
@@ -423,6 +408,11 @@ class HomePageState extends State<HomePage> with RouteAware {
     );
   }
 
+
+  void onChangeAppBarTitle(String newTitle) {
+    setState(() => appBarTitle = newTitle);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -462,61 +452,49 @@ class HomePageState extends State<HomePage> with RouteAware {
           children: _pages,
         ),
         bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          showUnselectedLabels: true,
-          elevation: 0,
-          currentIndex: index,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          iconSize: 30,
-          onTap: (selectedIndex) {
-            HapticFeedback.selectionClick();
-            // Update the user's location
-            establishLocation();
-            switch (selectedIndex) {
-              case 0:
-                if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
-                widget.analyticsService.logButtonTapped('map_navbar');
-                widget.analyticsService.setCurrentScreen('MapPage');
-              case 1:
-                _listingsKeyFood.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('food_navbar');
-                widget.analyticsService.setCurrentScreen('FoodListingsPage');
-              case 2:
-                _listingsKeyShopping.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('shopping_navbar');
-                widget.analyticsService.setCurrentScreen('ShoppingListingsPage');
-              case 3:
-                _listingsKeyPerformance.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('performances_navbar');
-                widget.analyticsService.setCurrentScreen('PerformancesListingsPage');
-              case 4:
-                _listingsKeyCharityCommunityInfo.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('charityCommunityInfo_navbar');
-                widget.analyticsService.setCurrentScreen('CharityCommunityInfoListingsPage');
-              case 5:
-                _listingsKeyVisitExperience.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('visitsExperiences_navbar');
-                widget.analyticsService.setCurrentScreen('VisitsExperiencesListingsPage');
-              case 6:
-                _listingsKeyService.currentState?.onTabVisible();
-                widget.analyticsService.logButtonTapped('services_navbar');
-                widget.analyticsService.setCurrentScreen('ServicesListingsPage');
-            }
-            setState(() {
-              index = selectedIndex;
-            });
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-            BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Shopping"),
-            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Performances"),
-            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Community"),
-            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Visits"),
-            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Services"),
-          ],
-        ),
+            type: BottomNavigationBarType.fixed,
+            showUnselectedLabels: true,
+            elevation: 0,
+            currentIndex: index,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            iconSize: 30,
+            onTap: (selectedIndex) {
+              HapticFeedback.selectionClick();
+              switch (selectedIndex) {
+                case 0 :
+                  if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
+                  widget.analyticsService.logButtonTapped('home_navbar');
+                  widget.analyticsService.setCurrentScreen('HomePage');
+                case 1 :
+                  if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
+                  widget.analyticsService.logButtonTapped('map_navbar');
+                  widget.analyticsService.setCurrentScreen('MapPage');
+                case 2 :
+                  _allListingsKey.currentState?.onTabVisible();
+                  widget.analyticsService.logButtonTapped('listings_navbar');
+                  widget.analyticsService.setCurrentScreen('ListingsPage');
+                case 3 :
+                  if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
+                  widget.analyticsService.logButtonTapped('timetable_navbar');
+                  widget.analyticsService.setCurrentScreen('TimetablePage');
+                case 4 :
+                  _savedListingsKey.currentState?.onTabVisible();
+                  widget.analyticsService.logButtonTapped('favourites_navbar');
+                  widget.analyticsService.setCurrentScreen('FavouritesPage');
+              }
+              setState(() {
+                index = selectedIndex;
+              });
+            },
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+              BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+              BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
+              BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
+              BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
+            ],
+          ),
         drawer: Drawer(
           child: Column(
             spacing: 0,
@@ -558,24 +536,6 @@ class HomePageState extends State<HomePage> with RouteAware {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
                     widget.analyticsService.logButtonTapped('about_the_fair');
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const FaIcon(FontAwesomeIcons.solidHeart),
-                  title: const Text('Saved listings', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                FilteredListingsPage(filterCategory: "Saved", analyticsService: widget.analyticsService, listings: listings)));
-                    widget.analyticsService.logButtonTapped('saved_listings');
-                    widget.analyticsService.setCurrentScreen('SavedListingsPage');
                   },
                 ),
               ),
