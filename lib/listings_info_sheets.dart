@@ -441,6 +441,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   onTap: () async {
                     HapticFeedback.lightImpact();
                     launchUrl(Uri.parse(widget.website));
+                    widget.analyticsService.logButtonTapped('visit_listing_website');
                   },
                   child: Row(
                     children: [
@@ -467,6 +468,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     } else {
                       throw Exception('Could not launch email client');
                     }
+                    widget.analyticsService.logButtonTapped('email_listing');
                   },
                   child: Row(
                     children: [
@@ -493,6 +495,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     } else {
                       throw Exception('Could not launch ${widget.phoneNumber}');
                     }
+                    widget.analyticsService.logButtonTapped('phone_listing');
                   },
                   child: Row(
                     children: [
