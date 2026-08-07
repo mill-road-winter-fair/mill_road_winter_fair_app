@@ -86,7 +86,7 @@ class MapPageState extends State<MapPage> {
     establishLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
-      ListingUpdateNotifier.maybeShowNotice(context);
+      ListingUpdateNotifier.maybeShowNotice(context, widget.analyticsService);
     });
     super.initState();
   }
