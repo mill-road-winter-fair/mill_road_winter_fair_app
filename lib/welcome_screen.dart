@@ -592,10 +592,12 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       onDone: () {
         HapticFeedback.lightImpact();
         _onIntroEnd(context);
+        widget.analyticsService.logButtonTapped('done_WelcomeScreen');
       },
       onSkip: () {
         HapticFeedback.lightImpact();
         _onIntroEnd(context);
+        widget.analyticsService.logButtonTapped('skip_text_WelcomeScreen');
       },
       showSkipButton: true,
       skipOrBackFlex: 0,
