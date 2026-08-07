@@ -2,10 +2,12 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 
 
 class TimetablePage extends StatefulWidget {
-  const TimetablePage({super.key});
+  final AnalyticsService analyticsService;
+  const TimetablePage({super.key, required this.analyticsService});
 
   @override
   State<TimetablePage> createState() => _TimetablePageState();

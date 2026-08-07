@@ -179,6 +179,7 @@ Widget contactUsDialog(BuildContext theBuildContext, AnalyticsService analyticsS
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
                                     if (await canLaunchUrl(phoneUri)) {
                                       await launchUrl(phoneUri);
+                                      analyticsService.logButtonTapped('contactUs_phone');
                                     } else {
                                       throw Exception('Could not dial 07303 142689');
                                     }
@@ -329,10 +330,10 @@ class HomePageState extends State<HomePage> with RouteAware {
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
-    ChooserPage(),
+    ChooserPage(analyticsService: widget.analyticsService),
     MapPage(listings: listings, key: mapPageKey, analyticsService: widget.analyticsService),
     FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle, analyticsService: widget.analyticsService),
-    TimetablePage(),
+    TimetablePage(analyticsService: widget.analyticsService),
     FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle, analyticsService: widget.analyticsService),
   ];
 
