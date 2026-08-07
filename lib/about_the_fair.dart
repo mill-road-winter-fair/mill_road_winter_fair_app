@@ -192,6 +192,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
     }
     HapticFeedback.lightImpact();
     launchUrl(Uri.parse(url));
+    widget.analyticsService.logButtonTapped('sponsor_${name.replaceAll(' ', '_')}_hyperlink');
   }
 
   @override
