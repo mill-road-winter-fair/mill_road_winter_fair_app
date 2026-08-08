@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AnalyticsExplanationPage extends StatelessWidget {
   final AnalyticsService analyticsService;
@@ -24,18 +26,38 @@ class AnalyticsExplanationPage extends StatelessWidget {
             child: Text('Analytics Information'),
           ),
         ),
-        body: SingleChildScrollView(
+        body: Container(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'What is Firebase Analytics?',
+                'What is Firebase?',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Firebase Analytics is a tool provided by Google that helps app developers understand how people use their apps. It collects anonymous data such as which screens are visited, which buttons are tapped, and which features are most popular.',
+              Text.rich(
+                TextSpan(
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  children: [
+                    TextSpan(
+                      text: 'Firebase',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.tertiary,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launchUrl(Uri.parse('https://firebase.google.com/'));
+                          analyticsService.logButtonTapped('firebase_info_link');
+                        },
+                    ),
+                    const TextSpan(
+                      text:
+                          ' is a platform provided by Google that helps app developers build, improve, and grow their apps. Firebase Analytics is a specific part of this platform that helps us understand how people use our app by collecting anonymous data such as which screens are visited and which features are most popular.',
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
               Text(
@@ -61,8 +83,51 @@ class AnalyticsExplanationPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+              Text(
+                'How does Google use this data?',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text.rich(
+                TextSpan(
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  children: [
+                    const TextSpan(
+                      text:
+                          'Google uses the data collected through Firebase to provide and improve its services. This includes troubleshooting, data analysis, and ensuring the security of the platform. You can find more detailed information on how Google uses information from sites or apps that use their services ',
+                    ),
+                    TextSpan(
+                      text: 'here',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.tertiary,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launchUrl(Uri.parse('https://policies.google.com/technologies/partner-sites'));
+                          analyticsService.logButtonTapped('google_partner_sites_link');
+                        },
+                    ),
+                    const TextSpan(text: ' and in the '),
+                    TextSpan(
+                      text: 'Firebase Privacy and Security documentation',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.tertiary,
+                        decoration: TextDecoration.underline,
+                      ),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launchUrl(Uri.parse('https://firebase.google.com/support/privacy'));
+                          analyticsService.logButtonTapped('firebase_privacy_link');
+                        },
+                    ),
+                    const TextSpan(text: '.'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
               const Text(
-                'Crucially, no personal information is collected. We cannot identify you personally from this data; we don\'t collect names, email addresses, or your exact location.',
+                'Crucially, no personal information is collected by us or shared with Google through this app. We cannot identify you personally from this data; we don\'t collect names, email addresses, or your exact location.',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
