@@ -1,9 +1,12 @@
 import 'dart:ui';
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
@@ -12,6 +15,9 @@ Future<void> loadSettings() async {
   if (onTest == false) {
     // Load settings from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
+
+    // Get analytics preference status
+    usageAnalyticsEnabled = prefs.getBool('usageAnalyticsEnabled');
 
     // Get first execution status, default to true
     firstExecution = prefs.getBool('firstExecution') ?? true;
@@ -103,13 +109,15 @@ Future<void> loadSettings() async {
 }
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final AnalyticsService analyticsService;
+
+  const SettingsPage({super.key, required this.analyticsService});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage> with RouteAware {
   // Scroll controller for the page's scrollable content so we can attach a visible scrollbar
   late ScrollController _settingsPageScrollController;
 
@@ -122,13 +130,37 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void dispose() {
     _settingsPageScrollController.dispose();
+    routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    widget.analyticsService.setCurrentScreen('SettingsPage');
+  }
+
+  @override
+  void didPopNext() {
+    widget.analyticsService.setCurrentScreen('SettingsPage');
   }
 
 // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
+    if (usageAnalyticsEnabled != null) {
+      await prefs.setBool('usageAnalyticsEnabled', usageAnalyticsEnabled!);
+    }
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
@@ -178,9 +210,12 @@ class _SettingsPageState extends State<SettingsPage> {
                           onChanged: (DistanceUnits? value) {
                             setState(() {
                               HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
+                              widget.analyticsService.logDistanceUnitPreferenceSet(value.toString().split('.').last);
                               preferredDistanceUnits = value!;
                             });
                             _saveSettings();
+
                           },
                           child: Column(
                             children: [
@@ -236,6 +271,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           groupValue: themeNotifier.value,
                           onChanged: (value) {
                             HapticFeedback.selectionClick();
+                            widget.analyticsService.logButtonTapped('theme_preference_option');
                             selectedThemeKey = value!;
                             setState(() {
                               _changeTheme(value);
@@ -259,6 +295,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             });
                             _saveSettings();
                             mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
+                            widget.analyticsService.logThemePreferenceSet(value);
                           },
                           child: Column(
                             children: [
@@ -332,6 +369,45 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ],
                     ),
+                    SwitchListTile(
+                      activeThumbColor: Theme.of(context).colorScheme.tertiary,
+                      title: const Text('Allow Analytics'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Help us improve the app and the Fair by sharing anonymous usage data.'),
+                          const SizedBox(height: 4),
+                          RichText(
+                            text: TextSpan(
+                              text: 'What does this mean?',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.tertiary,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  HapticFeedback.lightImpact();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
+                                    ),
+                                  );
+                                  widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                                },
+                            ),
+                          ),
+                        ],
+                      ),
+                      value: usageAnalyticsEnabled ?? false,
+                      onChanged: (bool value) async {
+                        debugPrint('User set analytics gathering to $value');
+                        await analytics.setAnalyticsCollectionEnabled(value);
+                        setState(() => usageAnalyticsEnabled = value);
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('usageAnalyticsEnabled', value);
+                      },
+                    )
                   ],
                 ),
               ),

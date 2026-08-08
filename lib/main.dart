@@ -1,17 +1,23 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
+import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
@@ -26,8 +32,39 @@ Future<void> main() async {
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: ".env");
+  final env = dotenv.env['ENV'];
+
+  // Initialize Firebase with the appropriate options based on the environment
+  await Firebase.initializeApp(
+    options: env == 'prod'
+        ? prod.DefaultFirebaseOptions.currentPlatform
+        : dev.DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Set consent for analytics and ad storage
+  await FirebaseAnalytics.instance.setConsent(
+    analyticsStorageConsentGranted: usageAnalyticsEnabled,
+    adStorageConsentGranted: false,
+  );
+
+  // Set user property to indicate that personalized ads are not allowed
+  await FirebaseAnalytics.instance.setUserProperty(
+    name: 'allow_personalized_ads',
+    value: 'NO',
+  );
+
+  debugPrint('[FIREBASE] Firebase initialised');
+
   await loadSettings();
   debugPrint('Settings loaded');
+
+  // Set analytics data collection based on user preference
+  await analytics.setAnalyticsCollectionEnabled(usageAnalyticsEnabled ?? false);
+  debugPrint('[FIREBASE] Analytics collection enabled: ${usageAnalyticsEnabled ?? false}');
+
+  // We're on production so use the real analytics service
+  final AnalyticsService analyticsService = FirebaseAnalyticsService();
 
   listings = await fetchListings(http.Client());
   debugPrint('Listings fetched: count = ${listings.length}');
@@ -38,22 +75,31 @@ Future<void> main() async {
   debugPrint('Location services enabled: $locationServicesEnabled, permission: $locationPermission');
 
   // Lock app in portrait rotation and run main app
-  // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const RootWidget()));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(RootWidget(firstExecution: firstExecution, analyticsService: analyticsService)));
 }
 
 class RootWidget extends StatelessWidget {
-  const RootWidget({super.key});
+  final bool firstExecution;
+  final AnalyticsService analyticsService;
+  const RootWidget({super.key, required this.firstExecution, required this.analyticsService});
 
   @override
   Widget build(BuildContext context) {
-    return firstExecution ? const WelcomeScreen() : const MyApp();
+    return firstExecution
+        ? WelcomeScreen(analyticsService: analyticsService)
+        : MyApp(firstExecution: firstExecution, analyticsService: analyticsService);
   }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool firstExecution;
+  final AnalyticsService analyticsService;
+  const MyApp({
+    super.key,
+    required this.firstExecution,
+    required this.analyticsService,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,14 +111,18 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Mill Road Winter Fair',
           theme: appThemes[selectedThemeKey],
-          home: HomePage(key: homePageKey),
+          home: firstExecution ? WelcomeScreen(analyticsService: analyticsService) : HomePage(key: homePageKey, analyticsService: analyticsService),
+          navigatorObservers: [
+            routeObserver,
+            if (!onTest) FirebaseAnalyticsObserver(analytics: analytics),
+          ],
         );
       },
     );
   }
 }
 
-Widget contactUsDialog(BuildContext theBuildContext) {
+Widget contactUsDialog(BuildContext theBuildContext, AnalyticsService analyticsService) {
   final ScrollController emailDetailsDialogScrollController = ScrollController();
 
   return Dialog(
@@ -99,22 +149,22 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('info@millroadwinterfair.org'),
+                      _buildEmailLink('info@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('volunteers@millroadwinterfair.org'),
+                      _buildEmailLink('volunteers@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('events@millroadwinterfair.org'),
+                      _buildEmailLink('events@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('stalls@millroadwinterfair.org'),
+                      _buildEmailLink('stalls@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('it@millroadwinterfair.org'),
+                      _buildEmailLink('it@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('app@millroadwinterfair.org'),
+                      _buildEmailLink('app@millroadwinterfair.org', analyticsService),
                       const SizedBox(height: 15),
                       Text.rich(
                         TextSpan(
@@ -129,6 +179,7 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
                                     if (await canLaunchUrl(phoneUri)) {
                                       await launchUrl(phoneUri);
+                                      analyticsService.logButtonTapped('contactUs_phone');
                                     } else {
                                       throw Exception('Could not dial 07303 142689');
                                     }
@@ -144,6 +195,7 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                           onPressed: () {
                             HapticFeedback.lightImpact();
                             Navigator.pop(context);
+                            analyticsService.logButtonTapped('contactUs_close');
                           },
                           child: Text(
                             'Close',
@@ -163,7 +215,7 @@ Widget contactUsDialog(BuildContext theBuildContext) {
   );
 }
 
-Widget _buildEmailLink(String email) {
+Widget _buildEmailLink(String email, AnalyticsService analyticsService) {
   return InkWell(
     onTap: () async {
       HapticFeedback.lightImpact();
@@ -173,24 +225,24 @@ Widget _buildEmailLink(String email) {
       } else {
         throw Exception('Could not launch email client');
       }
+      analyticsService.logButtonTapped('${email}_contactUs_hyperlink');
     },
     child: Text(
       email,
-      style: const TextStyle(
-        decoration: TextDecoration.underline
-      ),
+      style: const TextStyle(decoration: TextDecoration.underline),
     ),
   );
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final AnalyticsService analyticsService;
+  const HomePage({super.key, required this.analyticsService});
 
   @override
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> with RouteAware {
   int index = 0;
 
   PackageInfo _packageInfo = PackageInfo(
@@ -206,6 +258,58 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _initPackageInfo();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.analyticsService.showAnalyticsConsentDialog(context);
+    });
+  }
+
+  @override
+  void dispose() {
+    debugPrint('HomePageState dispose() called');
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    switch (index) {
+      case 0:
+        widget.analyticsService.setCurrentScreen('HomePage');
+      case 1:
+        widget.analyticsService.setCurrentScreen('MapPage');
+      case 2:
+        widget.analyticsService.setCurrentScreen('ListingsPage');
+      case 3:
+        widget.analyticsService.setCurrentScreen('TimetablePage');
+      case 4:
+        widget.analyticsService.setCurrentScreen('FavouritesPage');
+    }
+  }
+
+  @override
+  void didPopNext() {
+    switch (index) {
+      case 0:
+        widget.analyticsService.setCurrentScreen('HomePage');
+      case 1:
+        widget.analyticsService.setCurrentScreen('MapPage');
+      case 2:
+        widget.analyticsService.setCurrentScreen('ListingsPage');
+      case 3:
+        widget.analyticsService.setCurrentScreen('TimetablePage');
+      case 4:
+        widget.analyticsService.setCurrentScreen('FavouritesPage');
+    }
   }
 
   void setCurrentIndex(int newIndex) {
@@ -226,11 +330,11 @@ class HomePageState extends State<HomePage> {
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
-    ChooserPage(),
-    MapPage(listings: listings, key: mapPageKey),
-    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
-    TimetablePage(),
-    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle),
+    ChooserPage(analyticsService: widget.analyticsService),
+    MapPage(listings: listings, key: mapPageKey, analyticsService: widget.analyticsService),
+    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle, analyticsService: widget.analyticsService),
+    TimetablePage(analyticsService: widget.analyticsService),
+    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle, analyticsService: widget.analyticsService),
   ];
 
   void aboutDialog() {
@@ -252,6 +356,7 @@ class HomePageState extends State<HomePage> {
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://theberridge.com'));
+            widget.analyticsService.logButtonTapped('aboutAlex_hyperlink');
           },
         ),
         ListTile(
@@ -266,6 +371,7 @@ class HomePageState extends State<HomePage> {
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://mattwhiting.com'));
+            widget.analyticsService.logButtonTapped('aboutMatt_hyperlink');
           },
         ),
         ListTile(
@@ -281,6 +387,7 @@ class HomePageState extends State<HomePage> {
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+            widget.analyticsService.logButtonTapped('aboutClare_hyperlink');
           },
         ),
         ListTile(
@@ -295,6 +402,7 @@ class HomePageState extends State<HomePage> {
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+            widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
           },
         ),
       ],
@@ -305,7 +413,6 @@ class HomePageState extends State<HomePage> {
   void onChangeAppBarTitle(String newTitle) {
     setState(() => appBarTitle = newTitle);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -319,9 +426,10 @@ class HomePageState extends State<HomePage> {
           leading: Builder(
             builder: (context) => IconButton(
               icon: const Icon(Icons.menu),
-              onPressed: () {
+              onPressed: () async {
                 HapticFeedback.lightImpact();
                 Scaffold.of(context).openDrawer();
+                widget.analyticsService.logButtonTapped('menu');
               },
             ),
           ),
@@ -334,7 +442,8 @@ class HomePageState extends State<HomePage> {
               icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
               onPressed: () {
                 HapticFeedback.lightImpact();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
+                widget.analyticsService.logButtonTapped('snowflake');
               },
             ),
           ],
@@ -354,11 +463,26 @@ class HomePageState extends State<HomePage> {
             onTap: (selectedIndex) {
               HapticFeedback.selectionClick();
               switch (selectedIndex) {
-                case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
-                case 1 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
-                case 2 : _allListingsKey.currentState?.onTabVisible();
-                case 3 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
-                case 4 : _savedListingsKey.currentState?.onTabVisible();
+                case 0 :
+                  if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
+                  widget.analyticsService.logButtonTapped('home_navbar');
+                  widget.analyticsService.setCurrentScreen('HomePage');
+                case 1 :
+                  if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
+                  widget.analyticsService.logButtonTapped('map_navbar');
+                  widget.analyticsService.setCurrentScreen('MapPage');
+                case 2 :
+                  _allListingsKey.currentState?.onTabVisible();
+                  widget.analyticsService.logButtonTapped('listings_navbar');
+                  widget.analyticsService.setCurrentScreen('ListingsPage');
+                case 3 :
+                  if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
+                  widget.analyticsService.logButtonTapped('timetable_navbar');
+                  widget.analyticsService.setCurrentScreen('TimetablePage');
+                case 4 :
+                  _savedListingsKey.currentState?.onTabVisible();
+                  widget.analyticsService.logButtonTapped('favourites_navbar');
+                  widget.analyticsService.setCurrentScreen('FavouritesPage');
               }
               setState(() {
                 index = selectedIndex;
@@ -411,7 +535,8 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
+                    widget.analyticsService.logButtonTapped('about_the_fair');
                   },
                 ),
               ),
@@ -423,7 +548,8 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
+                    widget.analyticsService.logButtonTapped('important_information');
                   },
                 ),
               ),
@@ -435,6 +561,7 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                    widget.analyticsService.logButtonTapped('visit_our_website');
                   },
                 ),
               ),
@@ -448,9 +575,10 @@ class HomePageState extends State<HomePage> {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return contactUsDialog(context);
+                        return contactUsDialog(context, widget.analyticsService);
                       },
                     );
+                    widget.analyticsService.logButtonTapped('contact_us');
                   },
                 ),
               ),
@@ -469,6 +597,7 @@ class HomePageState extends State<HomePage> {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                        widget.analyticsService.logButtonTapped('facebook_social');
                       },
                       constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                       padding: EdgeInsets.zero,
@@ -478,6 +607,7 @@ class HomePageState extends State<HomePage> {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://x.com/millroadfair'));
+                        widget.analyticsService.logButtonTapped('x_social');
                       },
                       constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                       padding: EdgeInsets.zero,
@@ -487,6 +617,7 @@ class HomePageState extends State<HomePage> {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
+                        widget.analyticsService.logButtonTapped('instagram_social');
                       },
                       constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                       padding: EdgeInsets.zero,
@@ -496,6 +627,7 @@ class HomePageState extends State<HomePage> {
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
+                        widget.analyticsService.logButtonTapped('flickr_social');
                       },
                       constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                       padding: EdgeInsets.zero,
@@ -520,7 +652,8 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(analyticsService: widget.analyticsService)));
+                    widget.analyticsService.logButtonTapped('settings');
                   },
                 ),
               ),
@@ -532,7 +665,8 @@ class HomePageState extends State<HomePage> {
                   onTap: () {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => WelcomeScreen(analyticsService: widget.analyticsService)));
+                    widget.analyticsService.logButtonTapped('app_guide');
                   },
                 ),
               ),
@@ -545,6 +679,7 @@ class HomePageState extends State<HomePage> {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     aboutDialog();
+                    widget.analyticsService.logButtonTapped('about_the_app');
                   },
                 ),
               ),

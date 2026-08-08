@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,11 +15,21 @@ class ListingUpdateNotifier {
   //   debugPrint('Listing update notice timer reset.');
   // }
 
-  static Future<void> maybeShowNotice(BuildContext context) async {
+  static Future maybeShowNotice(
+    BuildContext context,
+    AnalyticsService analyticsService,
+  ) async {
     debugPrint('maybeShowNotice called');
+
+    if (firstExecution) {
+      debugPrint('First execution; not showing notice');
+      return;
+    }
+
     late double showIntervalDays;
     late String theMessage;
     late int theMessageDuration;
+
     // Capture the theme colours and initialise Toast before async gaps
     final theme = Theme.of(context);
     final backgroundColor = theme.colorScheme.primary;
@@ -86,7 +97,10 @@ class ListingUpdateNotifier {
 
     // --- Custom FToast with longer duration ---
     final toast = InkWell( 
-      onTap:() => fToast.removeCustomToast(),
+      onTap:() {
+        fToast.removeCustomToast();
+        analyticsService.logButtonTapped('listing_notice_dismiss');
+      },
         child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
         margin: const EdgeInsets.symmetric(horizontal: 20.0),

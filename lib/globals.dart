@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -89,3 +90,13 @@ const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
 // Title used for appbar
 const fairName = 'Mill Road Winter Fair 2026';
 String appBarTitle = fairName; // this may be changed in main, filtered_listings etc.
+
+// Initialize user's analytics preference (null means they haven't been asked yet)
+bool? usageAnalyticsEnabled;
+
+// --- Firebase Analytics globals (moved from firebase_analytics.dart) ---
+// Initialize Firebase Analytics instance
+FirebaseAnalytics get analytics => FirebaseAnalytics.instance;
+
+// A RouteObserver to track navigation events for analytics purposes
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();

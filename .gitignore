@@ -44,6 +44,15 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Android Studio will place lint reports here
+/android/build/reports/problems/problems-report.html
+
+# The google-services.json and GoogleService-Info.plist files are different for production and development builds, so they should not be checked in
+# When running in dev, make a copy like so: cp android/app/google-services-dev.json android/app/google-services.json
+# When doing a release build, make a copy like so: cp android/app/google-services-prod.json android/app/google-services.json
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+
 # Environment variables file (Regardless of directory)
 **/.env
 **/APIkeys.xcconfig

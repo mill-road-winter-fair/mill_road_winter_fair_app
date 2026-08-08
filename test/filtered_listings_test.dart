@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -31,6 +32,7 @@ void main() {
             filterCategory: category,
             listings: listings,
             onChangeTitle: null,
+            analyticsService: FakeAnalyticsService(),
           ),
         ),
       ),
@@ -430,6 +432,9 @@ void main() {
     });
 
     testWidgets('FilteredListingsPage navigateToMapAndGetDirections function changes to MapPage', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -458,7 +463,7 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await tester.pumpAndSettle();
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
@@ -565,7 +570,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onChangeTitle: null)
+            body: FilteredListingsPage(filterCategory: 'all', analyticsService: FakeAnalyticsService(), listings: sampleListings, onChangeTitle: null),
           ),
         ),
       );
