@@ -14,7 +14,7 @@ void main() {
     mockClient = MockClient((request) async => http.Response('[]', 200));
     dotenv.loadFromString(envString: '''
     HEROKU_API=MOCK_API
-    ''');
+    ''',);
   });
 
   group('ListingsErrorBranches', () {
@@ -22,7 +22,7 @@ void main() {
       // Populate cached listings
       listings = [
         {'name': 'cached'}
-      ];
+      ,];
 
       // Make the client throw a SocketException
       mockClient = MockClient((request) async {
@@ -38,7 +38,7 @@ void main() {
     test('fetchListings handles bad format (FormatException) and returns cached listings', () async {
       listings = [
         {'name': 'cached2'}
-      ];
+      ,];
 
       // Return an invalid JSON body that will cause json.decode to throw
       mockClient = MockClient((request) async => http.Response('not a json', 200));

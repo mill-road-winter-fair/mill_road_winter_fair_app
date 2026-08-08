@@ -120,7 +120,7 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                         TextSpan(
                           children: [
                             const TextSpan(
-                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
+                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone ',),
                             TextSpan(
                                 text: '07303\u{00A0}142689',
                                 style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
@@ -132,7 +132,7 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                                     } else {
                                       throw Exception('Could not dial 07303 142689');
                                     }
-                                  }),
+                                  },),
                             const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
                           ],
                         ),
@@ -246,7 +246,7 @@ class HomePageState extends State<HomePage> {
           subtitle: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+              child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://theberridge.com'));
@@ -260,7 +260,7 @@ class HomePageState extends State<HomePage> {
           subtitle: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+              child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://mattwhiting.com'));
@@ -275,7 +275,7 @@ class HomePageState extends State<HomePage> {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child:
-                  Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+                  Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
@@ -289,7 +289,7 @@ class HomePageState extends State<HomePage> {
           subtitle: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+              child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
@@ -396,10 +396,10 @@ class HomePageState extends State<HomePage> {
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(' $fairDateTimes',
-                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold),),
                         ),
                         Expanded(flex: 2, child: Container())
-                      ],
+                     , ],
                     ),
                   ),
                 ),

@@ -232,7 +232,7 @@ class MapPageState extends State<MapPage> {
         points: roadClosurePolygonPoints,
         strokeWidth: 3,
         strokeColor: Theme.of(context).colorScheme.tertiary,
-        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
+        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50),);
   }
 
   void updateRoadClosurePolygonVisibility(bool visibleState) {
@@ -277,17 +277,17 @@ class MapPageState extends State<MapPage> {
                         const SizedBox(height: 10),
                         const Text(
                             style: TextStyle(height: 1.25),
-                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
+                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',),
                         const SizedBox(height: 10),
                         const Text('Pedestrians should exercise particular care before the road is fully closed.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),),
                         const SizedBox(height: 10),
                         const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),),
                         const SizedBox(height: 10),
                         const Text(
                             style: TextStyle(height: 1.25),
-                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.',),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
@@ -295,7 +295,7 @@ class MapPageState extends State<MapPage> {
                               const TextSpan(
                                   style: TextStyle(height: 1.25),
                                   text:
-                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
+                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at ',),
                               TextSpan(
                                   text: 'www.millroadwinterfair.org',
                                   style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
@@ -303,7 +303,7 @@ class MapPageState extends State<MapPage> {
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
                                       launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                                    }),
+                                    },),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
                           ),
@@ -768,12 +768,12 @@ class MapPageState extends State<MapPage> {
                         ),
                       ),
                     );
-                  });
-                }),
+                  },);
+                },),
               );
             },
           );
-        });
+        },);
     setState(() {
       markers[markerId] = newMarker;
     });
@@ -834,13 +834,13 @@ class MapPageState extends State<MapPage> {
   void hideAllMarkers() {
     debugPrint('hideAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
-        _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, false);
+        _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, false,);
   }
 
   void showAllMarkers() {
     debugPrint('showAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
-        _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, true);
+        _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, true,);
   }
 
   void showFilteredMarkers() {
@@ -873,8 +873,8 @@ class MapPageState extends State<MapPage> {
                       "Filter map layers",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.left,
-                    )
-                  ]),
+                    ),
+                  ],),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Food'),
@@ -1370,7 +1370,7 @@ class MapPageState extends State<MapPage> {
     }
 
     _moveCameraToBoundsWithRotation(
-        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
+        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing,);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -1594,7 +1594,7 @@ class MapPageState extends State<MapPage> {
                       },
                       polygons: _polygons,
                       markers: markers.values.toSet(),
-                      polylines: polylines);
+                      polylines: polylines,);
                 },
               ),
               Positioned(
@@ -1623,7 +1623,7 @@ class MapPageState extends State<MapPage> {
                                   color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: const Offset(2, 2))
+                                  offset: const Offset(2, 2),),
                             ],
                           ),
                           child: const Icon(Icons.cancel),
@@ -1672,7 +1672,7 @@ class MapPageState extends State<MapPage> {
                                   color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: const Offset(2, 2))
+                                  offset: const Offset(2, 2),),
                             ],
                           ),
                           child: const Icon(Icons.home),
@@ -1725,8 +1725,8 @@ class MapPageState extends State<MapPage> {
                                   color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
+                                  offset: const Offset(2, 2),)
+                            ,],
                           ),
                           child: const Icon(Icons.my_location),
                         ),
@@ -1762,8 +1762,8 @@ class MapPageState extends State<MapPage> {
                                 color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
                                 spreadRadius: 1,
                                 blurRadius: 3,
-                                offset: const Offset(2, 2))
-                          ],
+                                offset: const Offset(2, 2),)
+                          ,],
                         ),
                         child: Icon(_layersIcon),
                       ),
@@ -1793,8 +1793,8 @@ class MapPageState extends State<MapPage> {
                                   color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
+                                  offset: const Offset(2, 2),)
+                            ,],
                           ),
                           child: AnimatedRotation(
                             turns: _compassBearing / 360.0,
@@ -1827,12 +1827,12 @@ class MapPageState extends State<MapPage> {
                                         color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
                                         spreadRadius: 1,
                                         blurRadius: 3,
-                                        offset: const Offset(2, 2))
+                                        offset: const Offset(2, 2),),
                                   ],
                                 ),
                                 child: const Icon(Icons.filter_alt),
                               ),
-                            )
+                            ),
                         ],
                       ),
                   ],
@@ -1850,7 +1850,7 @@ class MapPageState extends State<MapPage> {
                           visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
                           padding: const EdgeInsets.all(0),
                           elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
@@ -1918,7 +1918,7 @@ class MapPageState extends State<MapPage> {
                       ),
                     ),
                   ),
-                )
+                ),
             ],
           ),
         );

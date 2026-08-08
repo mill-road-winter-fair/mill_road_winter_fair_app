@@ -80,7 +80,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
-      ));
+      ),);
 
       expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
@@ -108,7 +108,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
-      ));
+      ),);
 
       expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
@@ -144,7 +144,7 @@ void main() {
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
-      ));
+      ),);
 
       // Find the heart icon button. It's an IconButton containing a FaIcon.
       final heartButton = find.byType(IconButton).first;
@@ -182,7 +182,7 @@ void main() {
         onDetailsTapped: () {
           detailsToggled = true;
         },
-      ));
+      ),);
 
       // Extra info should not be present
       expect(find.text('Nice buns'), findsNothing);
@@ -216,7 +216,7 @@ void main() {
         onGetDirections: () {},
         listingFavourited: false,
         onDetailsTapped: () {},
-      ));
+      ),);
 
       // Extra info should now be present
       expect(find.text('Nice buns'), findsOneWidget);
@@ -246,7 +246,7 @@ void main() {
           directionsCalled = true;
         },
         listingFavourited: false,
-      ));
+      ),);
 
       final getDirectionsButton = find.text('Directions');
       expect(getDirectionsButton, findsOneWidget);
@@ -279,7 +279,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
-      ));
+      ),);
 
       final timeTextFinder = find.text('09:00—10:00');
       expect(timeTextFinder, findsOneWidget);
@@ -311,7 +311,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
-      ));
+      ),);
 
       // Title should have line-through
       final titleFinder = find.text('🍩 Glazed and Confused');

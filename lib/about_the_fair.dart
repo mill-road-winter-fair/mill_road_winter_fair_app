@@ -45,14 +45,14 @@ class TextImageRow extends StatelessWidget {
                       width: constraints.maxWidth * textWidthProportion,
                       child: Text.rich(
                         textSpan,
-                      )),
+                      ),),
                 ]
               : [
                   SizedBox(
                       width: constraints.maxWidth * textWidthProportion,
                       child: Text.rich(
                         textSpan,
-                      )),
+                      ),),
                   const Expanded(child: SizedBox()),
                   SizedBox(
                     height: textHeight,
@@ -272,7 +272,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           padding: const EdgeInsets.only(left: 4),
                                           child: Text('Key events',
                                               style: TextStyle(
-                                                  fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
+                                                  fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0,),),
                                         ),
                                       ),
                                       TableCell(
@@ -307,7 +307,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.202488, 0.131207));
-                                            }),
+                                            },),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
                                           text: 'the bridge',
@@ -316,7 +316,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.198682, 0.141051));
-                                            }),
+                                            },),
                                     ],
                                   ),
                                   eventRow(
@@ -331,7 +331,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.200389, 0.136465));
-                                            }),
+                                            },),
                                     ],
                                   ),
                                   eventRow(
@@ -346,7 +346,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.1970778, 0.1472252));
-                                            }),
+                                            },),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
                                           text: 'Petersfield',
@@ -355,7 +355,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
-                                            }),
+                                            },),
                                     ],
                                   ),
                                   eventRow(
@@ -370,7 +370,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.199627, 0.138407));
-                                            }),
+                                            },),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
                                           text: 'Petersfield',
@@ -379,7 +379,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
-                                            }),
+                                            },),
                                     ],
                                   ),
                                   eventRow(context, '16:15', 'All trading ends'),
@@ -410,7 +410,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                           ...sponsorSpans,
                           const TextSpan(
                               text:
-                                  'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
+                                  'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.',),
                         ],
                       ),
                       imagePath: "assets/aboutPage/MRWF25_people_juggle.png",

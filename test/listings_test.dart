@@ -24,7 +24,7 @@ void main() {
     IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     SIGNING_KEY=MOCK_CERT
     IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
+    ''',);
   });
 
   group('Listings', () {
@@ -73,7 +73,7 @@ void main() {
               "latLng",
               "imageURL",
               "startTime",
-              "endTime"
+              "endTime",
             ],
             [
               "1",
@@ -101,7 +101,7 @@ void main() {
               "10:30",
               "16:30",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
@@ -198,7 +198,7 @@ void main() {
     IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     SIGNING_KEY=MOCK_CERT
     IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
+    ''',);
       });
 
       test('handles rows with missing cells by padding to headers', () async {
@@ -228,7 +228,7 @@ void main() {
               "latLng",
               "imageURL",
               "startTime",
-              "endTime"
+              "endTime",
             ],
             [
               "1",
@@ -256,7 +256,7 @@ void main() {
               "10:30",
               "", // endTime is blank (cleared cell)
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
@@ -302,7 +302,7 @@ void main() {
               "latLng",
               "imageURL",
               "startTime",
-              "endTime"
+              "endTime",
             ],
             [
               "1",
@@ -330,7 +330,7 @@ void main() {
               "10:30",
               null,
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
@@ -378,7 +378,7 @@ void main() {
               "latLng",
               "imageURL",
               "startTime",
-              "endTime"
+              "endTime",
             ],
             [
               "1",
@@ -406,7 +406,7 @@ void main() {
               "10:30",
               "16:30",
             ]
-          ]
+          ],
         };
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(

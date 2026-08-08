@@ -669,12 +669,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           ),
                         )
                       : const SizedBox.shrink(),
-                ]);
-              }),
+                ],);
+              },),
             ),
           ),
         ),
-      ]),
+      ],),
     );
   }
 
