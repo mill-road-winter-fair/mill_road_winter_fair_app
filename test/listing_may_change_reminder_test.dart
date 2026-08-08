@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 
@@ -9,6 +10,9 @@ void main() {
 
   group('ListingMayChangeReminder', () {
     testWidgets('maybeShowNotice shows toast and sets prefs when allowed', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Ensure no previous prefs — mock empty
       SharedPreferences.setMockInitialValues({});
 

@@ -26,6 +26,9 @@ void main() {
 
   group('HomePage', () {
     testWidgets('displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -66,6 +69,9 @@ void main() {
     });
 
     testWidgets('Snowflake button in AppBar navigates to About the Fair page', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
       listings = [
         {
@@ -122,6 +128,9 @@ void main() {
     });
 
     testWidgets('drawer displays expected widgets', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -168,6 +177,9 @@ void main() {
     });
 
     testWidgets('navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -208,6 +220,9 @@ void main() {
     });
 
     testWidgets('navigates to ImportantInfoPage when Important information in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -248,6 +263,9 @@ void main() {
     });
 
     testWidgets('navigates to SettingsPage when Settings in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -288,6 +306,9 @@ void main() {
     });
 
     testWidgets('navigates to WelcomeScreen/OnBoardingPage when App guide in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Set a realistic window size to avoid layout overflow in the test
       tester.view.physicalSize = const Size(1080, 2400);
       addTearDown(tester.view.resetPhysicalSize);
@@ -336,6 +357,9 @@ void main() {
     });
 
     testWidgets('show aboutDialog when About the app in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -377,6 +401,9 @@ void main() {
     });
 
     testWidgets('BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -462,6 +489,9 @@ void main() {
     });
 
     testWidgets('Favourites button in NavBar navigates to Favourites page', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
       listings = [
         {

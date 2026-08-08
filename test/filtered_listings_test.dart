@@ -432,6 +432,9 @@ void main() {
     });
 
     testWidgets('FilteredListingsPage navigateToMapAndGetDirections function changes to MapPage', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',

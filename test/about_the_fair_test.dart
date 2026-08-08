@@ -22,6 +22,9 @@ void main() {
 
   group('AboutTheFairPage', () {
     testWidgets('back button and back gesture return to the last selected HomePage tab', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Minimal listings so pages render correctly
       listings = [
         {
