@@ -15,11 +15,21 @@ class ListingUpdateNotifier {
   //   debugPrint('Listing update notice timer reset.');
   // }
 
-  static Future<void> maybeShowNotice(BuildContext context, AnalyticsService analyticsService) async {
+  static Future maybeShowNotice(
+    BuildContext context,
+    AnalyticsService analyticsService,
+  ) async {
     debugPrint('maybeShowNotice called');
+
+    if (firstExecution) {
+      debugPrint('First execution; not showing notice');
+      return;
+    }
+
     late double showIntervalDays;
     late String theMessage;
     late int theMessageDuration;
+
     // Capture the theme colours and initialise Toast before async gaps
     final theme = Theme.of(context);
     final backgroundColor = theme.colorScheme.primary;
