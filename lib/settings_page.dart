@@ -28,7 +28,7 @@ Future<void> loadSettings() async {
 
     // Set default road closure polygon as visible
     preferredRoadClosurePolygonVisible = prefs.getBool('preferredRoadClosurePolygonVisible') ?? true;
-    
+
     // Set default sorting method as nearest (1 in the index)
     int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 1;
     // Load preferred sorting method from shared preferences
@@ -98,7 +98,6 @@ Future<void> loadSettings() async {
 
     mapStyle = standardMap;
     favouriteListingKeys = {};
-
   }
 }
 
@@ -225,7 +224,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                             ],
                           ),
-                        )
+                        ),
                       ],
                     ),
                     Column(
@@ -305,12 +304,12 @@ class _SettingsPageState extends State<SettingsPage> {
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('High contrast'),
                                 subtitle: Text(
-                                    'For users with visual accessibility needs',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                    ),
+                                  'For users with visual accessibility needs',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
+                                ),
                                 visualDensity: VisualDensity.compact,
                                 value: 'highContrast',
                               ),
