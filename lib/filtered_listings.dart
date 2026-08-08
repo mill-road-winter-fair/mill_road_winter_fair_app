@@ -64,11 +64,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       detailsVisibilityList = List<bool>.filled(500, false);
       _searchQuery = '';
       _isSearching = false;
-      appBarTitle = switch (filterCategory) {
-        'all' => 'All listings',
-        'favourite' => 'Favourite listings',
-        _ => 'Filtered listings'
-      };
+      appBarTitle = switch (filterCategory) { 'all' => 'All listings', 'favourite' => 'Favourite listings', _ => 'Filtered listings' };
     });
     if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
   }
@@ -84,7 +80,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client, bool navigatorPop) async {
-
     // Remember the previous index to allow returning back
     previousIndex = homePageKey.currentState!.index;
 
@@ -153,8 +148,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       } else if (preferredSortingMethod == SortingMethod.values[1]) {
         // Sort by distance to user (nearest first); if the distance is the same sort by start time
         allListings.sort((a, b) {
-            final distanceCompare = a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']);
-            return distanceCompare != 0 ? distanceCompare : a['startTime'].compareTo(b['startTime']);
+          final distanceCompare = a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']);
+          return distanceCompare != 0 ? distanceCompare : a['startTime'].compareTo(b['startTime']);
         });
       } else if (preferredSortingMethod == SortingMethod.values[2]) {
         if (currentLatLng != null) {
@@ -249,13 +244,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     HapticFeedback.selectionClick();
     if (selectedValue is String) {
       filterCategory = selectedValue;
-      appBarTitle = switch (filterCategory) {
-        'all' => 'All listings',
-        'favourite' => 'Favourite listings',
-        _ => 'Filtered listings'
-      };
+      appBarTitle = switch (filterCategory) { 'all' => 'All listings', 'favourite' => 'Favourite listings', _ => 'Filtered listings' };
       widget.onChangeTitle?.call(appBarTitle);
-      setState(() { });
+      setState(() {});
     }
   }
 
@@ -372,315 +363,318 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       left: false,
       right: false,
       bottom: false,
-      child: Column(
-        children: [
-          _buildFilteringDropdown(context),
-          Container(
-            height: 52,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceDim,
-            ),
-            child: Stack(
-              alignment: Alignment.centerRight,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: _isSearching ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ConstrainedBox(
-                          key: const ValueKey('searchBar'),
-                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
-                          child: SearchBar(
-                            autoFocus: true,
-                            elevation: const WidgetStatePropertyAll(0),
-                            hintText: switch (filterCategory) {
-                              'all' => 'Search all listings...',
-                              'food' => 'Search food & drink vendors...',
-                              'shopping' => 'Search market stalls...',
-                              'performance' => 'Search music and other events...',
-                              'charityCommunityInfo' => 'Search charity, community & info...',
-                              'visitExperience' => 'Search visits & experiences...',
-                              'service' => 'Search services...',
-                              'favourite' => 'Search favourite listings...',
-                              _ => 'Search listings...',
-                            },
-                            leading: const Icon(Icons.search),
-                            trailing: [
-                              IconButton(
-                                iconSize: 20,
-                                icon: const Icon(Icons.close),
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  setState(() {
-                                    _isSearching = false;
-                                    _searchQuery = '';
-                                  });
+      child: Column(children: [
+        _buildFilteringDropdown(context),
+        Container(
+          height: 52,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceDim,
+          ),
+          child: Stack(
+            alignment: Alignment.centerRight,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _isSearching
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ConstrainedBox(
+                              key: const ValueKey('searchBar'),
+                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
+                              child: SearchBar(
+                                autoFocus: true,
+                                elevation: const WidgetStatePropertyAll(0),
+                                hintText: switch (filterCategory) {
+                                  'all' => 'Search all listings...',
+                                  'food' => 'Search food & drink vendors...',
+                                  'shopping' => 'Search market stalls...',
+                                  'performance' => 'Search music and other events...',
+                                  'charityCommunityInfo' => 'Search charity, community & info...',
+                                  'visitExperience' => 'Search visits & experiences...',
+                                  'service' => 'Search services...',
+                                  'favourite' => 'Search favourite listings...',
+                                  _ => 'Search listings...',
                                 },
-                              ),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                _searchQuery = value.toLowerCase();
-                                numberOfVisibleListings = -1;
-                                firstVisibleIndex = null;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
-                    ) : Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Expanded(child: _buildSortingDropdown(context)),
-                        // only show the Scroll To Now button on Music/Events/Favourite
-                        if (filterCategory == 'performance' || filterCategory == 'favourite')
-                          SizedBox(
-                            height: 36,
-                            width: 36,
-                            child: FloatingActionButton(
-                              key: const ValueKey('nowFab'),
-                              heroTag: 'nowFab_${filterCategory}_page',
-                              backgroundColor: Theme.of(context).colorScheme.secondary,
-                              foregroundColor: (isItEventDay()) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
-                              elevation: 0,
-                              onPressed: () {
-                                if (isItEventDay()) {
-                                  HapticFeedback.lightImpact();
-                                  if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
-                                    SortingMethod savedSortingMethod = preferredSortingMethod;
-                                    preferredSortingMethod = SortingMethod.values[2];
-                                    List<Map<String, dynamic>> sortedListingsTemp = _applySorting(categoryFiltered);
-                                    List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
-                                    firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
-                                    if (firstNextListingIndex < 0) {
-                                      preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to
-                                    } else {
-                                      filteredListings = filteredListingsTemp;
-                                      if (_hidePastListings) {
-                                        numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
-                                      } else {
-                                        numberOfVisibleListings = filteredListings.length;
-                                      }
+                                leading: const Icon(Icons.search),
+                                trailing: [
+                                  IconButton(
+                                    iconSize: 20,
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () {
+                                      HapticFeedback.lightImpact();
                                       setState(() {
-                                        preferredSortingMethod = SortingMethod.values[2];
+                                        _isSearching = false;
+                                        _searchQuery = '';
                                       });
-                                    }
-                                  }
-                                  if (firstNextListingIndex >= 0) {
-                                    itemScrollController.scrollTo(
-                                      curve: Curves.linear,
-                                      index: firstNextListingIndex,
-                                      duration: const Duration(milliseconds: 300),
-                                      alignment: 0,
-                                    );
-                                  } else {
-                                    itemScrollController.scrollTo(
-                                      curve: Curves.linear,
-                                      index: filteredListings.length - 1,
-                                      duration: const Duration(milliseconds: 300),
-                                      alignment: 0,
-                                    );
-                                  }
-                                }
-                              },
-                              child: const Icon(Icons.update),
-                            ),
-                          ),
-                        if (filterCategory == 'performance' || filterCategory == 'favourite')
-                          const SizedBox(width: 4),
-                        // only show the Hide Past Listings button on Music/Events/Favourite
-                        if (filterCategory == 'performance' || filterCategory == 'favourite')
-                          SizedBox(
-                            height: 36,
-                            width: 36,
-                            child: FloatingActionButton(
-                              key: const ValueKey('hidePastListingsFab'),
-                              heroTag: 'hidePastListingsFab_${filterCategory}_page',
-                              backgroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary) : Theme.of(context).colorScheme.secondary,
-                              foregroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.surfaceDim,
-                              elevation: 0,
-                              onPressed: () {
-                                if (isItEventDay()) {
-                                  HapticFeedback.lightImpact();
+                                    },
+                                  ),
+                                ],
+                                onChanged: (value) {
                                   setState(() {
-                                    _hidePastListings = !_hidePastListings;
+                                    _searchQuery = value.toLowerCase();
                                     numberOfVisibleListings = -1;
                                     firstVisibleIndex = null;
                                   });
-                                }
-                              },
-                              child: const Icon(Icons.event_busy),
-                            ),
-                          ),
-                        if (filterCategory == 'performance' || filterCategory == 'favourite')
-                          const SizedBox(width: 4),
-                        SizedBox(
-                          height: 36,
-                          width: 36,
-                          child: FloatingActionButton(
-                            key: const ValueKey('searchFab'),
-                            heroTag: 'searchFab_${filterCategory}_page',
-                            backgroundColor: Theme.of(context).colorScheme.secondary,
-                            foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                            elevation: 0,
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              setState(() {
-                                _isSearching = true;
-                              });
-                            },
-                            child: const Icon(Icons.search),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: refreshListings,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              color: Theme.of(context).colorScheme.onPrimary,
-              child: SizedBox.expand(// ensure the Stack has a defined height
-                  child: LayoutBuilder(builder: (context, constraints) {
-                  final trackHeight = constraints.maxHeight;
-                  return Stack(children: [
-                    NotificationListener<ScrollNotification>(
-                      onNotification: (notification) {
-                        if (notification is UserScrollNotification || notification is ScrollUpdateNotification) {
-                          _showThumb();
-                        }
-                        return false;
-                      },
-                      child: ScrollablePositionedList.builder(
-                        itemCount: filteredListings.length,
-                        itemScrollController: itemScrollController,
-                        itemPositionsListener: itemPositionsListener,
-                        itemBuilder: (context, index) {
-                          final listing = filteredListings[index]; // since index=0 is the sort/search bar
-                          final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                          final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
-                          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                          if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
-                          return Column(
-                            children: [
-                              (!_hidePastListings || !hasEventEnded(listing['endTime'])) ? SpecificListingInfoSheet(
-                                cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                                brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                                emoji: listing['emoji'] ?? '',
-                                title: listing['title'] ?? '',
-                                subtitle: listing['subtitle'] ?? '',
-                                location: listing['location'],
-                                description: listing['description'] ?? '',
-                                email: listing['email'] ?? '',
-                                website: listing['website'] ?? '',
-                                phoneNumber: listing['phone'] ?? '',
-                                imageURL: listing['imageURL'] ?? '',
-                                startTime: "${listing['startTime']}",
-                                endTime: "${listing['endTime']}",
-                                approxDistance: approximateDistance,
-                                detailsVisible: detailsVisibilityList[index],
-                                listingFavourited: isListingFavourited(listing['id']),
-                                onDetailsTapped: () => toggleDetailsRow(index),
-                                onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                onGetDirections: () {
-                                  navigateToMapAndGetDirections(
-                                    listing['id'],
-                                    destinationLatLng,
-                                    http.Client(),
-                                    (homePageState == null)
-                                  );
                                 },
-                              ) : const SizedBox.shrink(),
-                              // separator except after last item
-                              if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    ValueListenableBuilder<Iterable<ItemPosition>>(
-                      valueListenable: itemPositionsListener.itemPositions,
-                      builder: (context, positions, _) {
-                        if (positions.isEmpty || firstVisibleIndex == null || numberOfVisibleListings == 0) {
-                          return const SizedBox.shrink();
-                        }
-                        final visiblePositions = positions.where((p) {
-                          return p.index >= firstVisibleIndex! && p.index < firstVisibleIndex! + numberOfVisibleListings;
-                        });
-                        if (visiblePositions.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        final indices = visiblePositions.map((p) => p.index);
-                        final minIndex = indices.reduce((a, b) => a < b ? a : b);
-                        final maxIndex = indices.reduce((a, b) => a > b ? a : b);
-                        final minIndexRelative = minIndex - firstVisibleIndex!;
-                        final visibleFraction = ((maxIndex - minIndex + 1) / numberOfVisibleListings).clamp(0.02, 1.0);
-                        final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
-                        final thumbTop = (minIndexRelative / numberOfVisibleListings) * trackHeight;
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: thumbVisible,
-                          builder: (context, visible, _) {
-                            return Positioned(
-                              right: 3,
-                              top: thumbTop,
-                              width: 4,
-                              height: thumbHeight,
-                              child: AnimatedOpacity(
-                                opacity: visible ? 1.0 : 0.0,
-                                duration: const Duration(milliseconds: 250),
-                                curve: Curves.easeOut,
-                                child: GestureDetector(
-                                  onVerticalDragStart: (_) => _showThumb(),
-                                  onVerticalDragUpdate: (details) {
-                                    _showThumb();
-                                    final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
-                                    final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
-                                    final targetIndex = (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
-                                    itemScrollController.scrollTo(
-                                      index: targetIndex,
-                                      duration: const Duration(milliseconds: 120),
-                                    );
+                              ),
+                            ),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Expanded(child: _buildSortingDropdown(context)),
+                            // only show the Scroll To Now button on Music/Events/Favourite
+                            if (filterCategory == 'performance' || filterCategory == 'favourite')
+                              SizedBox(
+                                height: 36,
+                                width: 36,
+                                child: FloatingActionButton(
+                                  key: const ValueKey('nowFab'),
+                                  heroTag: 'nowFab_${filterCategory}_page',
+                                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (isItEventDay()) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
+                                  elevation: 0,
+                                  onPressed: () {
+                                    if (isItEventDay()) {
+                                      HapticFeedback.lightImpact();
+                                      if (firstNextListingIndex < 0) {
+                                        // we may not be on Sort by Time, or the Fair may have recently started
+                                        SortingMethod savedSortingMethod = preferredSortingMethod;
+                                        preferredSortingMethod = SortingMethod.values[2];
+                                        List<Map<String, dynamic>> sortedListingsTemp = _applySorting(categoryFiltered);
+                                        List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
+                                        firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
+                                        if (firstNextListingIndex < 0) {
+                                          preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to
+                                        } else {
+                                          filteredListings = filteredListingsTemp;
+                                          if (_hidePastListings) {
+                                            numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+                                          } else {
+                                            numberOfVisibleListings = filteredListings.length;
+                                          }
+                                          setState(() {
+                                            preferredSortingMethod = SortingMethod.values[2];
+                                          });
+                                        }
+                                      }
+                                      if (firstNextListingIndex >= 0) {
+                                        itemScrollController.scrollTo(
+                                          curve: Curves.linear,
+                                          index: firstNextListingIndex,
+                                          duration: const Duration(milliseconds: 300),
+                                          alignment: 0,
+                                        );
+                                      } else {
+                                        itemScrollController.scrollTo(
+                                          curve: Curves.linear,
+                                          index: filteredListings.length - 1,
+                                          duration: const Duration(milliseconds: 300),
+                                          alignment: 0,
+                                        );
+                                      }
+                                    }
                                   },
-                                  child: Container(
-                                    width: 2,
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                  ),
+                                  child: const Icon(Icons.update),
                                 ),
                               ),
-                            );
-                          },
+                            if (filterCategory == 'performance' || filterCategory == 'favourite') const SizedBox(width: 4),
+                            // only show the Hide Past Listings button on Music/Events/Favourite
+                            if (filterCategory == 'performance' || filterCategory == 'favourite')
+                              SizedBox(
+                                height: 36,
+                                width: 36,
+                                child: FloatingActionButton(
+                                  key: const ValueKey('hidePastListingsFab'),
+                                  heroTag: 'hidePastListingsFab_${filterCategory}_page',
+                                  backgroundColor: (isItEventDay())
+                                      ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary)
+                                      : Theme.of(context).colorScheme.secondary,
+                                  foregroundColor: (isItEventDay())
+                                      ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary)
+                                      : Theme.of(context).colorScheme.surfaceDim,
+                                  elevation: 0,
+                                  onPressed: () {
+                                    if (isItEventDay()) {
+                                      HapticFeedback.lightImpact();
+                                      setState(() {
+                                        _hidePastListings = !_hidePastListings;
+                                        numberOfVisibleListings = -1;
+                                        firstVisibleIndex = null;
+                                      });
+                                    }
+                                  },
+                                  child: const Icon(Icons.event_busy),
+                                ),
+                              ),
+                            if (filterCategory == 'performance' || filterCategory == 'favourite') const SizedBox(width: 4),
+                            SizedBox(
+                              height: 36,
+                              width: 36,
+                              child: FloatingActionButton(
+                                key: const ValueKey('searchFab'),
+                                heroTag: 'searchFab_${filterCategory}_page',
+                                backgroundColor: Theme.of(context).colorScheme.secondary,
+                                foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                                elevation: 0,
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  setState(() {
+                                    _isSearching = true;
+                                  });
+                                },
+                                child: const Icon(Icons.search),
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: refreshListings,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            color: Theme.of(context).colorScheme.onPrimary,
+            child: SizedBox.expand(
+              // ensure the Stack has a defined height
+              child: LayoutBuilder(builder: (context, constraints) {
+                final trackHeight = constraints.maxHeight;
+                return Stack(children: [
+                  NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is UserScrollNotification || notification is ScrollUpdateNotification) {
+                        _showThumb();
+                      }
+                      return false;
+                    },
+                    child: ScrollablePositionedList.builder(
+                      itemCount: filteredListings.length,
+                      itemScrollController: itemScrollController,
+                      itemPositionsListener: itemPositionsListener,
+                      itemBuilder: (context, index) {
+                        final listing = filteredListings[index]; // since index=0 is the sort/search bar
+                        final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                        final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+                        LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                        if (!_hidePastListings || !hasEventEnded(listing['endTime']))
+                          firstVisibleIndex ??= index; // if this is the first visible item, capture its index
+                        return Column(
+                          children: [
+                            (!_hidePastListings || !hasEventEnded(listing['endTime']))
+                                ? SpecificListingInfoSheet(
+                                    cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                                    brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
+                                    emoji: listing['emoji'] ?? '',
+                                    title: listing['title'] ?? '',
+                                    subtitle: listing['subtitle'] ?? '',
+                                    location: listing['location'],
+                                    description: listing['description'] ?? '',
+                                    email: listing['email'] ?? '',
+                                    website: listing['website'] ?? '',
+                                    phoneNumber: listing['phone'] ?? '',
+                                    imageURL: listing['imageURL'] ?? '',
+                                    startTime: "${listing['startTime']}",
+                                    endTime: "${listing['endTime']}",
+                                    approxDistance: approximateDistance,
+                                    detailsVisible: detailsVisibilityList[index],
+                                    listingFavourited: isListingFavourited(listing['id']),
+                                    onDetailsTapped: () => toggleDetailsRow(index),
+                                    onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                    onGetDirections: () {
+                                      navigateToMapAndGetDirections(listing['id'], destinationLatLng, http.Client(), (homePageState == null));
+                                    },
+                                  )
+                                : const SizedBox.shrink(),
+                            // separator except after last item
+                            if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime'])))
+                              SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                          ],
                         );
                       },
                     ),
-                    (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    )
-                    : const SizedBox.shrink(),
-                  ]);
-                }
-              ),
-              ),
+                  ),
+                  ValueListenableBuilder<Iterable<ItemPosition>>(
+                    valueListenable: itemPositionsListener.itemPositions,
+                    builder: (context, positions, _) {
+                      if (positions.isEmpty || firstVisibleIndex == null || numberOfVisibleListings == 0) {
+                        return const SizedBox.shrink();
+                      }
+                      final visiblePositions = positions.where((p) {
+                        return p.index >= firstVisibleIndex! && p.index < firstVisibleIndex! + numberOfVisibleListings;
+                      });
+                      if (visiblePositions.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      final indices = visiblePositions.map((p) => p.index);
+                      final minIndex = indices.reduce((a, b) => a < b ? a : b);
+                      final maxIndex = indices.reduce((a, b) => a > b ? a : b);
+                      final minIndexRelative = minIndex - firstVisibleIndex!;
+                      final visibleFraction = ((maxIndex - minIndex + 1) / numberOfVisibleListings).clamp(0.02, 1.0);
+                      final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
+                      final thumbTop = (minIndexRelative / numberOfVisibleListings) * trackHeight;
+                      return ValueListenableBuilder<bool>(
+                        valueListenable: thumbVisible,
+                        builder: (context, visible, _) {
+                          return Positioned(
+                            right: 3,
+                            top: thumbTop,
+                            width: 4,
+                            height: thumbHeight,
+                            child: AnimatedOpacity(
+                              opacity: visible ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeOut,
+                              child: GestureDetector(
+                                onVerticalDragStart: (_) => _showThumb(),
+                                onVerticalDragUpdate: (details) {
+                                  _showThumb();
+                                  final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
+                                  final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
+                                  final targetIndex = (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
+                                  itemScrollController.scrollTo(
+                                    index: targetIndex,
+                                    duration: const Duration(milliseconds: 120),
+                                  );
+                                },
+                                child: Container(
+                                  width: 2,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.4),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0))
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ]);
+              }),
             ),
           ),
-        ]
-      ),
+        ),
+      ]),
     );
   }
 
@@ -729,7 +723,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   label: "Name (a-z)",
                   leadingIcon: const Icon(Icons.sort_by_alpha),
                 ),
-                  if (filterCategory == 'performance' || filterCategory == 'favourite')
+                if (filterCategory == 'performance' || filterCategory == 'favourite')
                   DropdownMenuEntry(
                     value: SortingMethod.values[2],
                     label: "Time",
@@ -743,7 +737,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       ),
     );
   }
-
 
   Widget _buildFilteringDropdown(BuildContext context) {
     return Container(
@@ -817,5 +810,4 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       ),
     );
   }
-
 }

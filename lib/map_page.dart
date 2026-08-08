@@ -391,7 +391,7 @@ class MapPageState extends State<MapPage> {
         // 3. Simplified visibility logic:
         // A marker should be visible if ANY of its categories match an enabled filter.
         final shouldBeVisible = categoryMapping.entries.any((entry) {
-          final filterKey = entry.key;   // e.g., 'Food'
+          final filterKey = entry.key; // e.g., 'Food'
           final listingKey = entry.value; // e.g., 'food'
           return filterSettings[filterKey] == true && listing[listingKey] == 'TRUE';
         });

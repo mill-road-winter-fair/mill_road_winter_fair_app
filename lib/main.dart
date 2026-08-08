@@ -176,9 +176,7 @@ Widget _buildEmailLink(String email) {
     },
     child: Text(
       email,
-      style: const TextStyle(
-        decoration: TextDecoration.underline
-      ),
+      style: const TextStyle(decoration: TextDecoration.underline),
     ),
   );
 }
@@ -224,7 +222,7 @@ class HomePageState extends State<HomePage> {
 
   final _allListingsKey = GlobalKey<FilteredListingsPageState>();
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
-  
+
   late final _pages = [
     ChooserPage(),
     MapPage(listings: listings, key: mapPageKey),
@@ -301,11 +299,9 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-
   void onChangeAppBarTitle(String newTitle) {
     setState(() => appBarTitle = newTitle);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -344,34 +340,39 @@ class HomePageState extends State<HomePage> {
           children: _pages,
         ),
         bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            showUnselectedLabels: true,
-            elevation: 0,
-            currentIndex: index,
-            selectedFontSize: 12,
-            unselectedFontSize: 12,
-            iconSize: 30,
-            onTap: (selectedIndex) {
-              HapticFeedback.selectionClick();
-              switch (selectedIndex) {
-                case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
-                case 1 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
-                case 2 : _allListingsKey.currentState?.onTabVisible();
-                case 3 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
-                case 4 : _savedListingsKey.currentState?.onTabVisible();
-              }
-              setState(() {
-                index = selectedIndex;
-              });
-            },
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-              BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-              BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
-              BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
-              BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
-            ],
-          ),
+          type: BottomNavigationBarType.fixed,
+          showUnselectedLabels: true,
+          elevation: 0,
+          currentIndex: index,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
+          iconSize: 30,
+          onTap: (selectedIndex) {
+            HapticFeedback.selectionClick();
+            switch (selectedIndex) {
+              case 0:
+                if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
+              case 1:
+                if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
+              case 2:
+                _allListingsKey.currentState?.onTabVisible();
+              case 3:
+                if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
+              case 4:
+                _savedListingsKey.currentState?.onTabVisible();
+            }
+            setState(() {
+              index = selectedIndex;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+            BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
+            BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
+            BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
+          ],
+        ),
         drawer: Drawer(
           child: Column(
             spacing: 0,

@@ -104,7 +104,7 @@ void main() {
 
       // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
       final snowflakeButton = find.byWidgetPredicate(
-            (widget) => widget is IconButton && widget.icon is ImageIcon,
+        (widget) => widget is IconButton && widget.icon is ImageIcon,
       );
       expect(snowflakeButton, findsOneWidget);
 
@@ -432,7 +432,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(homePageState.index, 4);
-
     });
 
     testWidgets('emailDetailsDialog shows emails and close button', (WidgetTester tester) async {

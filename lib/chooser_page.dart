@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 
-
 class ChooserPage extends StatefulWidget {
   const ChooserPage({super.key});
 
@@ -31,14 +30,14 @@ class _ChooserPageState extends State<ChooserPage> {
     debugPrint('ChooserPage build() called');
     var bodyStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.tertiary);
 
-
     return SafeArea(
       top: false,
       left: false,
       right: false,
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
-        body: Container(width: min(MediaQuery.of(context).size.width - 8, 500),
+        body: Container(
+          width: min(MediaQuery.of(context).size.width - 8, 500),
           padding: EdgeInsets.all(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
           child: Scrollbar(
             controller: _chooserPageScrollController,
