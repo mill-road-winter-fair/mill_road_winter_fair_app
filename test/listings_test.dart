@@ -15,7 +15,8 @@ void main() {
 
   setUp(() async {
     mockClient = MockClient();
-    dotenv.loadFromString(envString: '''
+    dotenv.loadFromString(
+      envString: '''
     HEROKU_API=MOCK_API
     HEROKU_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
@@ -24,7 +25,8 @@ void main() {
     IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     SIGNING_KEY=MOCK_CERT
     IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''',);
+    ''',
+    );
   });
 
   group('Listings', () {
@@ -189,7 +191,8 @@ void main() {
       setUp(() async {
         mockClient = MockClient();
         listings = [];
-        dotenv.loadFromString(envString: '''
+        dotenv.loadFromString(
+          envString: '''
     HEROKU_API=MOCK_API
     HEROKU_API_KEY=MOCK_KEY
     ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
@@ -198,7 +201,8 @@ void main() {
     IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
     SIGNING_KEY=MOCK_CERT
     IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''',);
+    ''',
+        );
       });
 
       test('handles rows with missing cells by padding to headers', () async {

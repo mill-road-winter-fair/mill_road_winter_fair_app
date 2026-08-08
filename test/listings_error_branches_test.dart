@@ -12,17 +12,19 @@ void main() {
   setUp(() async {
     // default noop client
     mockClient = MockClient((request) async => http.Response('[]', 200));
-    dotenv.loadFromString(envString: '''
+    dotenv.loadFromString(
+      envString: '''
     HEROKU_API=MOCK_API
-    ''',);
+    ''',
+    );
   });
 
   group('ListingsErrorBranches', () {
     test('fetchListings returns cached listings on SocketException', () async {
       // Populate cached listings
       listings = [
-        {'name': 'cached'}
-      ,];
+        {'name': 'cached'},
+      ];
 
       // Make the client throw a SocketException
       mockClient = MockClient((request) async {
@@ -37,8 +39,8 @@ void main() {
 
     test('fetchListings handles bad format (FormatException) and returns cached listings', () async {
       listings = [
-        {'name': 'cached2'}
-      ,];
+        {'name': 'cached2'},
+      ];
 
       // Return an invalid JSON body that will cause json.decode to throw
       mockClient = MockClient((request) async => http.Response('not a json', 200));

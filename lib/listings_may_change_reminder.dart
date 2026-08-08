@@ -95,8 +95,8 @@ class ListingUpdateNotifier {
               color: Colors.black26,
               blurRadius: 6,
               offset: Offset(0, 3),
-            )
-          ,],
+            ),
+          ],
         ),
         child: Text(
           theMessage,

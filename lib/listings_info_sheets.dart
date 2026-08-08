@@ -204,18 +204,25 @@ class SpecificListingInfoSheet extends StatelessWidget {
     if (location == '') {
       // this SpecificListingInfoSheet must be within a Group modal, so display differently
       subDetails = Text.rich(
-          textAlign: TextAlign.right,
-          TextSpan(children: [
+        textAlign: TextAlign.right,
+        TextSpan(
+          children: [
             TextSpan(text: "$subtitle\n", style: subSubStyle),
             TextSpan(text: updatedTimes, style: timeStyle),
-          ],),);
+          ],
+        ),
+      );
     } else {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: subtitle, style: timeStyle));
     }
 
     return Container(
-      padding: EdgeInsets.fromLTRB(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 8,
-          4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 12,),
+      padding: EdgeInsets.fromLTRB(
+        4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
+        8,
+        4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
+        12,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,9 +293,10 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 onPressed: onFavouriteTapped,
                 padding: const EdgeInsets.all(0),
                 style: ElevatedButton.styleFrom(
-                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                    padding: const EdgeInsets.all(0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,),
+                  visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                  padding: const EdgeInsets.all(0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
                 icon: FaIcon(
                   shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                   (listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
@@ -300,11 +308,12 @@ class SpecificListingInfoSheet extends StatelessWidget {
               const SizedBox(width: 6),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                    iconSize: 24,
-                    visualDensity: const VisualDensity(horizontal: 2, vertical: -2),
-                    padding: const EdgeInsets.all(0),
-                    elevation: 3,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,),
+                  iconSize: 24,
+                  visualDensity: const VisualDensity(horizontal: 2, vertical: -2),
+                  padding: const EdgeInsets.all(0),
+                  elevation: 3,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   onGetDirections();
@@ -326,13 +335,15 @@ class SpecificListingInfoSheet extends StatelessWidget {
                           visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                           padding: const EdgeInsets.all(0),
                           elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,)
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        )
                       : ElevatedButton.styleFrom(
                           iconSize: 24,
                           visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                           padding: const EdgeInsets.all(0),
                           elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
                   onPressed: onDetailsTapped,
                   child: const Icon(Icons.info),
                 )
@@ -346,13 +357,15 @@ class SpecificListingInfoSheet extends StatelessWidget {
                           visualDensity: const VisualDensity(horizontal: 2, vertical: -2),
                           padding: const EdgeInsets.all(0),
                           elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,)
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        )
                       : ElevatedButton.styleFrom(
                           iconSize: 24,
                           visualDensity: const VisualDensity(horizontal: 2, vertical: -2),
                           padding: const EdgeInsets.all(0),
                           elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
                   onPressed: onDetailsTapped,
                   icon: const Icon(Icons.info),
                   label: const FittedBox(child: Text('Details')),
@@ -469,8 +482,9 @@ class SpecificListingInfoSheet extends StatelessWidget {
                             TextSpan(
                               children: [
                                 TextSpan(
-                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                                    text: 'Website: ',),
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                                  text: 'Website: ',
+                                ),
                                 TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
                               ],
                             ),
@@ -498,7 +512,9 @@ class SpecificListingInfoSheet extends StatelessWidget {
                             TextSpan(
                               children: [
                                 TextSpan(
-                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: ',),
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                                  text: 'Email: ',
+                                ),
                                 TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
                               ],
                             ),
@@ -526,8 +542,9 @@ class SpecificListingInfoSheet extends StatelessWidget {
                             TextSpan(
                               children: [
                                 TextSpan(
-                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                                    text: 'Telephone: ',),
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                                  text: 'Telephone: ',
+                                ),
                                 TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
                               ],
                             ),

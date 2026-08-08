@@ -42,17 +42,19 @@ class TextImageRow extends StatelessWidget {
                   ),
                   const Expanded(child: SizedBox()),
                   SizedBox(
-                      width: constraints.maxWidth * textWidthProportion,
-                      child: Text.rich(
-                        textSpan,
-                      ),),
+                    width: constraints.maxWidth * textWidthProportion,
+                    child: Text.rich(
+                      textSpan,
+                    ),
+                  ),
                 ]
               : [
                   SizedBox(
-                      width: constraints.maxWidth * textWidthProportion,
-                      child: Text.rich(
-                        textSpan,
-                      ),),
+                    width: constraints.maxWidth * textWidthProportion,
+                    child: Text.rich(
+                      textSpan,
+                    ),
+                  ),
                   const Expanded(child: SizedBox()),
                   SizedBox(
                     height: textHeight,
@@ -270,9 +272,15 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                         verticalAlignment: TableCellVerticalAlignment.middle,
                                         child: Container(
                                           padding: const EdgeInsets.only(left: 4),
-                                          child: Text('Key events',
-                                              style: TextStyle(
-                                                  fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0,),),
+                                          child: Text(
+                                            'Key events',
+                                            style: TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context).colorScheme.onPrimary,
+                                              height: 1.0,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       TableCell(
@@ -301,22 +309,24 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                     'Fire engine pull\n',
                                     [
                                       TextSpan(
-                                          text: 'East Road',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.202488, 0.131207));
-                                            },),
+                                        text: 'East Road',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.202488, 0.131207));
+                                          },
+                                      ),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
-                                          text: 'the bridge',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.198682, 0.141051));
-                                            },),
+                                        text: 'the bridge',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.198682, 0.141051));
+                                          },
+                                      ),
                                     ],
                                   ),
                                   eventRow(
@@ -325,13 +335,14 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                     'Opening ceremony\n',
                                     [
                                       TextSpan(
-                                          text: 'Ditchburn Gardens',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.200389, 0.136465));
-                                            },),
+                                        text: 'Ditchburn Gardens',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.200389, 0.136465));
+                                          },
+                                      ),
                                     ],
                                   ),
                                   eventRow(
@@ -340,22 +351,24 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                     'Parade\n',
                                     [
                                       TextSpan(
-                                          text: 'Salisbury Club',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.1970778, 0.1472252));
-                                            },),
+                                        text: 'Salisbury Club',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.1970778, 0.1472252));
+                                          },
+                                      ),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
-                                          text: 'Petersfield',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
-                                            },),
+                                        text: 'Petersfield',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
+                                          },
+                                      ),
                                     ],
                                   ),
                                   eventRow(
@@ -364,22 +377,24 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                     'Final parade\n',
                                     [
                                       TextSpan(
-                                          text: 'Gwydir Street',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.199627, 0.138407));
-                                            },),
+                                        text: 'Gwydir Street',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.199627, 0.138407));
+                                          },
+                                      ),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
-                                          text: 'Petersfield',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
-                                            },),
+                                        text: 'Petersfield',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
+                                          },
+                                      ),
                                     ],
                                   ),
                                   eventRow(context, '16:15', 'All trading ends'),
@@ -409,8 +424,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                           // Build sponsor spans with separators
                           ...sponsorSpans,
                           const TextSpan(
-                              text:
-                                  'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.',),
+                            text: 'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.',
+                          ),
                         ],
                       ),
                       imagePath: "assets/aboutPage/MRWF25_people_juggle.png",
