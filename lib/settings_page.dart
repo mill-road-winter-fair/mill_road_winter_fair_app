@@ -4,49 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
-
-// Define variable for first execution status
-late bool firstExecution;
-
-// Define available bearing of map display
-enum MapOrientation { adaptive, alwaysNorth }
-
-// Set default bearing of map display
-late MapOrientation preferredMapOrientation;
-
-// Define available map types
-enum MapStyleType { normal, hybrid }
-
-// Set default bearing of map display
-late MapStyleType preferredMapStyleType;
-
-// Define available sorting methods
-enum SortingMethod { alphabetical, nearest, startTime, location }
-
-// Define variable for sorting method
-late SortingMethod preferredSortingMethod;
-
-// Define available distance units
-enum DistanceUnits { metric, imperial, cambridge }
-
-// Set default distance units
-late DistanceUnits preferredDistanceUnits;
-
-// Initialise theme variables
-late String selectedThemeKey;
-late ValueNotifier<String> themeNotifier;
-
-// Initialise map style variable to store map styling json
-late String mapStyle;
-
-// Initialise setting for whether the road closure polygon is shown
-late bool preferredRoadClosurePolygonVisible;
-
-// Initialise the list of favourited listings
-late Set<String> favouriteListingKeys;
 
 Future<void> loadSettings() async {
   debugPrint('loadSettings called, onTest=$onTest');

@@ -3,9 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-
-// Initialise global variable to hold listings
-List<Map<String, dynamic>> listings = [];
+import 'package:mill_road_winter_fair_app/globals.dart';
 
 // Fetch listings from Heroku caching layer
 Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
@@ -14,9 +12,10 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     // Load environment variables
     await dotenv.load(fileName: ".env");
     String herokuApi = dotenv.env['HEROKU_API'] ?? '';
+    String herokuApiKey = dotenv.env['HEROKU_API_KEY'] ?? '';
     final uri = Uri.parse(herokuApi);
 
-    final response = await client.get(uri);
+    final response = await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
     debugPrint('API response status: ${response.statusCode}');
 
     // Retry up to 10 times for transient failures

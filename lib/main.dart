@@ -12,19 +12,14 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-
-// Define a GlobalKey for HomePageState to allow access from other parts of the app:
-final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
-
-// Define a global variable for routing back to a previous index
-int previousIndex = 0;
-String appBarTitle = 'Mill Road Winter Fair 2025';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/timetable_page.dart';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -45,11 +40,17 @@ Future<void> main() async {
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(firstExecution ? const WelcomeScreen() : const MyApp()));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const RootWidget()));
 }
 
-// Define global variable as to whether we are onTest or not
-bool onTest = false;
+class RootWidget extends StatelessWidget {
+  const RootWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return firstExecution ? const WelcomeScreen() : const MyApp();
+  }
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -119,22 +120,19 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                         TextSpan(
                           children: [
                             const TextSpan(
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                              text: 'For any important enquiries on the day of the Fair please phone ',
-                            ),
+                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
                             TextSpan(
-                              text: '07303\u{00A0}142689',
-                              style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () async {
-                                  final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                  if (await canLaunchUrl(phoneUri)) {
-                                    await launchUrl(phoneUri);
-                                  } else {
-                                    throw Exception('Could not dial 07303 142689');
-                                  }
-                                },
-                            ),
+                                text: '07303\u{00A0}142689',
+                                style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                    if (await canLaunchUrl(phoneUri)) {
+                                      await launchUrl(phoneUri);
+                                    } else {
+                                      throw Exception('Could not dial 07303 142689');
+                                    }
+                                  }),
                             const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
                           ],
                         ),
@@ -178,7 +176,9 @@ Widget _buildEmailLink(String email) {
     },
     child: Text(
       email,
-      style: const TextStyle(decoration: TextDecoration.underline),
+      style: const TextStyle(
+        decoration: TextDecoration.underline
+      ),
     ),
   );
 }
@@ -222,22 +222,15 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  final _listingsKeyFood = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyShopping = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyMusic = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyEvent = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyPlace = GlobalKey<FilteredListingsPageState>();
-  final _listingsKeyService = GlobalKey<FilteredListingsPageState>();
-
+  final _allListingsKey = GlobalKey<FilteredListingsPageState>();
+  final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
+  
   late final _pages = [
+    ChooserPage(),
     MapPage(listings: listings, key: mapPageKey),
-    FilteredListingsPage(filterPrimaryType: "Food", listings: listings, key: _listingsKeyFood),
-    FilteredListingsPage(filterPrimaryType: "Stalls", listings: listings, key: _listingsKeyShopping),
-    FilteredListingsPage(filterPrimaryType: "Music", listings: listings, key: _listingsKeyMusic),
-    FilteredListingsPage(filterPrimaryType: "Event", listings: listings, key: _listingsKeyEvent),
-    FilteredListingsPage(filterPrimaryType: "Place", listings: listings, key: _listingsKeyPlace),
-    FilteredListingsPage(filterPrimaryType: "Other", listings: listings, key: _listingsKeyService),
-    FilteredListingsPage(filterPrimaryType: "Saved", listings: listings),
+    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
+    TimetablePage(),
+    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle),
   ];
 
   void aboutDialog() {
@@ -253,10 +246,9 @@ class HomePageState extends State<HomePage> {
           leading: const Icon(Icons.phone_android),
           title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Android app by Alexander Berridge')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://theberridge.com'));
@@ -268,10 +260,9 @@ class HomePageState extends State<HomePage> {
           leading: const Icon(Icons.phone_iphone),
           title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('iPhone version by Matt Whiting')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('http://mattwhiting.com'));
@@ -283,10 +274,10 @@ class HomePageState extends State<HomePage> {
           leading: const Icon(Icons.palette),
           title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Illustrations by Clare McEwan')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child:
+                  Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
@@ -298,10 +289,9 @@ class HomePageState extends State<HomePage> {
           leading: const Icon(Icons.feedback),
           title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tell us if you like this app')),
           subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
-          ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
@@ -310,6 +300,12 @@ class HomePageState extends State<HomePage> {
       ],
     );
   }
+
+
+  void onChangeAppBarTitle(String newTitle) {
+    setState(() => appBarTitle = newTitle);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -348,47 +344,34 @@ class HomePageState extends State<HomePage> {
           children: _pages,
         ),
         bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          showUnselectedLabels: true,
-          elevation: 0,
-          currentIndex: index,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          iconSize: 30,
-          onTap: (selectedIndex) {
-            HapticFeedback.selectionClick();
-            // Update the user's location
-            establishLocation();
-            switch (selectedIndex) {
-              case 0:
-                if (homePageKey.currentState!.index != 0) appBarTitle = "Mill Road Winter Fair 2025";
-              case 1:
-                _listingsKeyFood.currentState?.onTabVisible();
-              case 2:
-                _listingsKeyShopping.currentState?.onTabVisible();
-              case 3:
-                _listingsKeyMusic.currentState?.onTabVisible();
-              case 4:
-                _listingsKeyEvent.currentState?.onTabVisible();
-              case 5:
-                _listingsKeyPlace.currentState?.onTabVisible();
-              case 6:
-                _listingsKeyService.currentState?.onTabVisible();
-            }
-            setState(() {
-              index = selectedIndex;
-            });
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-            BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: "Food"),
-            BottomNavigationBarItem(icon: Icon(Icons.storefront), label: "Stalls"),
-            BottomNavigationBarItem(icon: Icon(Icons.music_note), label: "Music"),
-            BottomNavigationBarItem(icon: Icon(Icons.event), label: "Events"),
-            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: "Places"),
-            BottomNavigationBarItem(icon: Icon(Icons.wheelchair_pickup), label: "Other"),
-          ],
-        ),
+            type: BottomNavigationBarType.fixed,
+            showUnselectedLabels: true,
+            elevation: 0,
+            currentIndex: index,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            iconSize: 30,
+            onTap: (selectedIndex) {
+              HapticFeedback.selectionClick();
+              switch (selectedIndex) {
+                case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
+                case 1 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
+                case 2 : _allListingsKey.currentState?.onTabVisible();
+                case 3 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
+                case 4 : _savedListingsKey.currentState?.onTabVisible();
+              }
+              setState(() {
+                index = selectedIndex;
+              });
+            },
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+              BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
+              BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
+              BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
+              BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
+            ],
+          ),
         drawer: Drawer(
           child: Column(
             spacing: 0,
@@ -411,12 +394,10 @@ class HomePageState extends State<HomePage> {
                         Expanded(flex: 2, child: Container()),
                         FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Text(
-                            ' Saturday 6 December 2025 10:30—16:30',
-                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold),
-                          ),
+                          child: Text(' $fairDateTimes',
+                              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
                         ),
-                        Expanded(flex: 2, child: Container()),
+                        Expanded(flex: 2, child: Container())
                       ],
                     ),
                   ),
@@ -431,18 +412,6 @@ class HomePageState extends State<HomePage> {
                     HapticFeedback.lightImpact();
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const FaIcon(FontAwesomeIcons.solidHeart),
-                  title: const Text('Saved listings', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilteredListingsPage(filterPrimaryType: "Saved", listings: listings)));
                   },
                 ),
               ),

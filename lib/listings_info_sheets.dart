@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// Hardcoded fair date for 2025; change this today's date for testing
-final fairDate = DateTime(2025, 12, 6);
 
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime) {
@@ -31,12 +28,6 @@ bool hasEventEnded(String endTime) {
 // Function to determine if the event is today
 bool isItEventDay() {
   return DateUtils.isSameDay(fairDate, DateTime.now());
-}
-
-// Identifier and function for determining if the event has been marked as cancelled
-const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
-bool hasEventBeenCancelled(String? description) {
-  return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
 }
 
 class GroupListingInfoSheet extends StatelessWidget {
@@ -112,14 +103,14 @@ class GroupListingInfoSheet extends StatelessWidget {
             children: [
               Expanded(
                 flex: 10,
-                child: FittedBox(
-                  alignment: Alignment.centerLeft,
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    categories,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                  child: FittedBox(
+                    alignment: Alignment.centerLeft,
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      categories,
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                    ),
                   ),
-                ),
               ),
               const Expanded(flex: 1, child: SizedBox(width: 2)),
               if (currentLatLng != null)
@@ -140,16 +131,22 @@ class GroupListingInfoSheet extends StatelessWidget {
 }
 
 class SpecificListingInfoSheet extends StatelessWidget {
+  // From the db
+  final bool cancelled;
+  final bool brickAndMortar;
+  final String emoji;
   final String title;
-  final String location;
   final String subtitle;
+  final String location;
+  final String description;
+  final String email;
+  final String website;
+  final String phoneNumber;
+  final String imageURL;
   final String startTime;
   final String endTime;
+  // From the parent widget (calculated)
   final String approxDistance;
-  final String phoneNumber;
-  final String website;
-  final String email;
-  final String description;
   final bool detailsVisible;
   final bool listingFavourited;
   final VoidCallback? onDetailsTapped;
@@ -157,16 +154,20 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final Function onGetDirections;
 
   const SpecificListingInfoSheet({
+    required this.cancelled,
+    required this.brickAndMortar,
+    required this.emoji,
     required this.title,
-    required this.location,
     required this.subtitle,
+    required this.location,
+    required this.description,
+    required this.email,
+    required this.website,
+    required this.phoneNumber,
+    required this.imageURL,
     required this.startTime,
     required this.endTime,
     required this.approxDistance,
-    required this.phoneNumber,
-    required this.website,
-    required this.email,
-    required this.description,
     required this.detailsVisible,
     required this.listingFavourited,
     this.onDetailsTapped,
@@ -178,20 +179,17 @@ class SpecificListingInfoSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     debugPrint('SpecificListingInfoSheet build() called');
-    String updatedDescription; // with cancel identifier removed if appropriate
     String updatedTimes; // replaced with CANCELLED if appropriate
     Widget subDetails; // calculated subtitle/details field
 
     // Determine if the event has been cancelled, update text style accordingly
-    final bool cancelled = hasEventBeenCancelled(description);
     final titleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
       color: Theme.of(context).colorScheme.onSurface,
       decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
-    updatedDescription = cancelled ? description.substring(cancelIdentifier.length) : description;
-    updatedTimes = cancelled ? cancelIdentifier : "$startTime—$endTime";
+    updatedTimes = cancelled ? 'CANCELLED' : "$startTime—$endTime";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
     final subSubStyle = subStyle.copyWith(fontWeight: FontWeight.normal);
@@ -203,17 +201,11 @@ class SpecificListingInfoSheet extends StatelessWidget {
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
-    if (location == '') {
-      // this SpecificListingInfoSheet must be within a Group modal, so display differently
-      subDetails = Text.rich(
-        textAlign: TextAlign.right,
-        TextSpan(
-          children: [
-            TextSpan(text: "$subtitle\n", style: subSubStyle),
-            TextSpan(text: updatedTimes, style: timeStyle),
-          ],
-        ),
-      );
+    if (location == '') { // this SpecificListingInfoSheet must be within a Group modal, so display differently
+       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(children: [
+        TextSpan(text: "$subtitle\n", style: subSubStyle),
+        TextSpan(text: updatedTimes, style: timeStyle),
+        ]));
     } else {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: subtitle, style: timeStyle));
     }
@@ -223,7 +215,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
         4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
         8,
         4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
-        12,
+        12
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -238,7 +230,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
               Expanded(
                 flex: 14,
                 child: Text(
-                  title,
+                  // Prepend the emoji if we have one
+                  emoji.isNotEmpty ? '$emoji $title' : title,
                   style: titleStyle,
                 ),
               ),
@@ -251,40 +244,28 @@ class SpecificListingInfoSheet extends StatelessWidget {
           ),
           // add location (and space before) unless it's blank (which means it's a bottom modal group list)
           if (location != '') const SizedBox(height: 8),
-          if (location != '')
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  flex: 14,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(style: subSubStyle, text: location),
-                          TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' ($approxDistance)'),
-                        ],
-                      ),
-                    ),
-                  ),
+          if (location != '') Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
+                TextSpan(children: [
+                  TextSpan(style: subSubStyle, text: location),
+                  TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' $approxDistance'),
+                ], ), 
+              ), ),
+              ),
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
+              Expanded(
+                flex: 6,
+                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: Text(
+                  updatedTimes,
+                  style: timeStyle,
+                  textAlign: TextAlign.end,
                 ),
-                const Expanded(flex: 1, child: SizedBox(width: 2)),
-                Expanded(
-                  flex: 6,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      updatedTimes,
-                      style: timeStyle,
-                      textAlign: TextAlign.end,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -293,28 +274,17 @@ class SpecificListingInfoSheet extends StatelessWidget {
               IconButton(
                 onPressed: onFavouriteTapped,
                 padding: const EdgeInsets.all(0),
-                style: ElevatedButton.styleFrom(
-                  visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                  padding: const EdgeInsets.all(0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                icon: FaIcon(
-                  shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                icon:FaIcon(
+                  shadows: [Shadow( color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                   (listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                  size: 22,
-                  color: Theme.of(context).colorScheme.primary,
+                  size: 22, color: Theme.of(context).colorScheme.primary,
                 ),
               ),
 
               const SizedBox(width: 6),
               ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  iconSize: 24,
-                  visualDensity: const VisualDensity(horizontal: 2, vertical: -2),
-                  padding: const EdgeInsets.all(0),
-                  elevation: 3,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
+                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   onGetDirections();
@@ -323,50 +293,23 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 label: const FittedBox(child: Text('Directions')),
               ),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
-              if (onDetailsTapped != null && (updatedDescription.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
-                const SizedBox(width: 6),
+              if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 6),
               // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
               if (onDetailsTapped != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width <= 360)
                 ElevatedButton(
-                  style: detailsVisible
-                      ? ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        )
-                      : ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
+                  style: detailsVisible ?
+                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                  :
+                    ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: onDetailsTapped,
                   child: const Icon(Icons.info),
-                )
-              else if (onDetailsTapped != null && (updatedDescription.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
+              ) 
+              else if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
                 ElevatedButton.icon(
-                  style: detailsVisible
-                      ? ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: 2, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        )
-                      : ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          visualDensity: const VisualDensity(horizontal: 2, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
+                  style: detailsVisible ?
+                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                  :
+                    ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: onDetailsTapped,
                   icon: const Icon(Icons.info),
                   label: const FittedBox(child: Text('Details')),
@@ -385,7 +328,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     },
                     customBorder: const CircleBorder(),
                     radius: 8,
-                    child: Padding(
+                    child:  Padding(
                       padding: const EdgeInsets.all(3),
                       child: Icon(
                         Icons.public,
@@ -413,7 +356,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     },
                     customBorder: const CircleBorder(),
                     radius: 8,
-                    child: Padding(
+                    child:  Padding(
                       padding: const EdgeInsets.all(3),
                       child: Icon(
                         Icons.email,
@@ -423,7 +366,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-              if (phoneNumber.isNotEmpty) const SizedBox(width: 6),
+              if (phoneNumber.isNotEmpty) const SizedBox(width: 6),           
               if (phoneNumber.isNotEmpty)
                 Material(
                   shape: const CircleBorder(),
@@ -441,7 +384,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     },
                     customBorder: const CircleBorder(),
                     radius: 8,
-                    child: Padding(
+                    child:  Padding(
                       padding: const EdgeInsets.all(3),
                       child: Icon(
                         Icons.phone,
@@ -459,101 +402,88 @@ class SpecificListingInfoSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 0,
               children: [
-                if (updatedDescription.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (updatedDescription.isNotEmpty) const SizedBox(height: 8),
-                if (updatedDescription.isNotEmpty)
-                  Row(
+                if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
+                if (description.isNotEmpty) const SizedBox(height: 8),
+                if (description.isNotEmpty) Row(
+                  children: [
+                    Flexible(
+                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
+                    ),
+                  ],
+                ),
+                if (website.isNotEmpty) const SizedBox(height: 8),
+                if (website.isNotEmpty) GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    launchUrl(Uri.parse(website));
+                  },
+                  child: Row(
                     children: [
-                      Flexible(
-                        child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), updatedDescription),
-                      ),
+                        Flexible(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
+                              ], 
+                            ),
+                          ), 
+                        ),
                     ],
                   ),
-                if (website.isNotEmpty) const SizedBox(height: 8),
-                if (website.isNotEmpty)
-                  GestureDetector(
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse(website));
-                    },
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                                  text: 'Website: ',
-                                ),
-                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                ),
                 if (email.isNotEmpty) const SizedBox(height: 8),
-                if (email.isNotEmpty)
-                  GestureDetector(
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      final Uri mailUri = Uri(scheme: 'mailto', path: email);
-                      if (await canLaunchUrl(mailUri)) {
-                        await launchUrl(mailUri);
-                      } else {
-                        throw Exception('Could not launch email client');
-                      }
-                    },
-                    child: Row(
-                      children: [
+                if (email.isNotEmpty) GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    final Uri mailUri = Uri(scheme: 'mailto', path: email);
+                    if (await canLaunchUrl(mailUri)) {
+                      await launchUrl(mailUri);
+                    } else {
+                      throw Exception('Could not launch email client');
+                    }
+                  },
+                  child: Row(
+                    children: [
                         Flexible(
                           child: Text.rich(
                             TextSpan(
                               children: [
-                                TextSpan(
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                                  text: 'Email: ',
-                                ),
+                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
                                 TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
-                              ],
+                              ], 
                             ),
-                          ),
+                          ), 
                         ),
-                      ],
-                    ),
+                    ],
                   ),
+                ),
                 if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (phoneNumber.isNotEmpty)
-                  GestureDetector(
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-                      if (await canLaunchUrl(phoneUri)) {
-                        await launchUrl(phoneUri);
-                      } else {
-                        throw Exception('Could not launch $phoneNumber');
-                      }
-                    },
-                    child: Row(
-                      children: [
+                if (phoneNumber.isNotEmpty) GestureDetector(
+                  onTap: () async {
+                    HapticFeedback.lightImpact();
+                    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+                    if (await canLaunchUrl(phoneUri)) {
+                      await launchUrl(phoneUri);
+                    } else {
+                      throw Exception('Could not launch $phoneNumber');
+                    }
+                  },
+                  child: Row(
+                    children: [
                         Flexible(
                           child: Text.rich(
                             TextSpan(
                               children: [
-                                TextSpan(
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                                  text: 'Telephone: ',
-                                ),
+                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
                                 TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
-                              ],
+                              ], 
                             ),
-                          ),
+                          ), 
                         ),
-                      ],
-                    ),
+                    ],
                   ),
+                ),
               ],
             ),
           // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings

@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/gestures.dart';
@@ -13,31 +13,16 @@ import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
+import 'package:mill_road_winter_fair_app/category_tools.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// Define a GlobalKey for MapPageState:
-final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
-
-// Define whether navigation is in progress as a global variable
-bool navigationInProgress = false;
-
-// Indicator for a simple map marker
-const String aSimpleMarkerId = 'SIMPLE';
-
-// Identifier and function for determining if the event has been marked as cancelled
-const cancelIdentifier = 'CANCELLED'; // must be at the very start of the description; anything else can follow
-bool hasEventBeenCancelled(String? description) {
-  return (description != null && description.length >= cancelIdentifier.length && description.substring(0, cancelIdentifier.length) == cancelIdentifier);
-}
 
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
@@ -51,15 +36,15 @@ class MapPage extends StatefulWidget {
 class MapPageState extends State<MapPage> {
   late Future<List<Map<String, dynamic>>> _fetchListings;
   late List<MarkerId> _foodMarkerIds;
-  late List<MarkerId> _stallsMarkerIds;
-  late List<MarkerId> _musicMarkerIds;
-  late List<MarkerId> _eventMarkerIds;
-  late List<MarkerId> _placeMarkerIds;
+  late List<MarkerId> _shoppingMarkerIds;
+  late List<MarkerId> _charityCommunityInfoMarkerIds;
+  late List<MarkerId> _performanceMarkerIds;
+  late List<MarkerId> _visitExperienceMarkerIds;
   late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Set<Polygon> _polygons = {}; // For displaying the road closure polygon
   final Set<Polyline> polylines = {}; // For displaying the route polyline
-  late PolylinePoints _polylinePoints; // For decoding points
+  late pl.PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   late double _mapBearing;
   late MapType mapType;
@@ -76,20 +61,25 @@ class MapPageState extends State<MapPage> {
   // Declare default filters
   final Map<String, bool> filterSettings = {
     'Food': true,
-    'Stalls': true,
-    'Music': true,
-    'Events': true,
-    'Places': true,
-    'Other': true,
+    'Shopping': true,
+    'Charity/Community/Info': true,
+    'Performances': true,
+    'Visits/Experiences': true,
+    'Services': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
 
   @override
   void initState() {
     debugPrint('MapPageState initState() called');
-    _polylinePoints = PolylinePoints();
+    if (Platform.isAndroid) {
+      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+    } else if (Platform.isIOS) {
+      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+    }
+    _polylinePoints = pl.PolylinePoints(apiKey: googleMapsDirectionsApiKey);
     _fetchListings = fetchExistingListings(http.Client());
-    setMarkerLists();
+    setVisibleMarkerLists();
     addAllVisibleMarkers();
     establishLocation();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -238,12 +228,11 @@ class MapPageState extends State<MapPage> {
     roadClosurePolygonPoints.add(const LatLng(52.20235281420999, 0.1310619082596975));
 
     return Polygon(
-      polygonId: const PolygonId('roadClosure'),
-      points: roadClosurePolygonPoints,
-      strokeWidth: 3,
-      strokeColor: Theme.of(context).colorScheme.tertiary,
-      fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50),
-    );
+        polygonId: const PolygonId('roadClosure'),
+        points: roadClosurePolygonPoints,
+        strokeWidth: 3,
+        strokeColor: Theme.of(context).colorScheme.tertiary,
+        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
   }
 
   void updateRoadClosurePolygonVisibility(bool visibleState) {
@@ -287,42 +276,34 @@ class MapPageState extends State<MapPage> {
                         const Text('Road closures', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                         const SizedBox(height: 10),
                         const Text(
-                          style: TextStyle(height: 1.25),
-                          'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',
-                        ),
+                            style: TextStyle(height: 1.25),
+                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
+                        const SizedBox(height: 10),
+                        const Text('Pedestrians should exercise particular care before the road is fully closed.',
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                        const SizedBox(height: 10),
+                        const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
                         const SizedBox(height: 10),
                         const Text(
-                          'Pedestrians should exercise particular care before the road is fully closed.',
-                          style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
-                          style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          style: TextStyle(height: 1.25),
-                          'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.',
-                        ),
+                            style: TextStyle(height: 1.25),
+                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
                             children: [
                               const TextSpan(
-                                style: TextStyle(height: 1.25),
-                                text:
-                                    'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at ',
-                              ),
+                                  style: TextStyle(height: 1.25),
+                                  text:
+                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                               TextSpan(
-                                text: 'www.millroadwinterfair.org',
-                                style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    HapticFeedback.lightImpact();
-                                    launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                                  },
-                              ),
+                                  text: 'www.millroadwinterfair.org',
+                                  style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      HapticFeedback.lightImpact();
+                                      launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                                    }),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
                           ),
@@ -369,8 +350,8 @@ class MapPageState extends State<MapPage> {
     );
   }
 
-  void updateMarkerVisibility(List<MarkerId> idList, bool visibleState) {
-    debugPrint('updateMarkerVisibility called');
+  void updateMarkerVisibilityIgnoringFilters(List<MarkerId> idList, bool visibleState) {
+    debugPrint('updateMarkerVisibilityIgnoringFilters called');
     setState(() {
       for (var id in idList) {
         final currentMarker = markers[id];
@@ -383,33 +364,65 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  void setMarkerLists() {
-    debugPrint('setMarkerLists called');
+  void updateMarkerVisibilityRespectingFilters(List<MarkerId> idList, bool visibleState) {
+    debugPrint('updateMarkerVisibilityRespectingFilters called');
+
+    // 1. Define category mapping to avoid repetition and hardcoded strings.
+    const categoryMapping = {
+      'Food': 'food',
+      'Shopping': 'shopping',
+      'Charity/Community/Info': 'charityCommunityInfo',
+      'Performances': 'performance',
+      'Visits/Experiences': 'visitExperience',
+      'Services': 'service',
+    };
+
+    // 2. Performance: Create a lookup map to avoid O(N) searches inside the loop.
+    final listingsById = {for (var l in listings) l['id'].toString(): l};
+
+    setState(() {
+      for (final id in idList) {
+        final currentMarker = markers[id];
+        if (currentMarker == null) continue;
+
+        final listing = listingsById[id.value];
+        if (listing == null) continue;
+
+        // 3. Simplified visibility logic:
+        // A marker should be visible if ANY of its categories match an enabled filter.
+        final shouldBeVisible = categoryMapping.entries.any((entry) {
+          final filterKey = entry.key;   // e.g., 'Food'
+          final listingKey = entry.value; // e.g., 'food'
+          return filterSettings[filterKey] == true && listing[listingKey] == 'TRUE';
+        });
+
+        // 4. Update the marker if its visibility state actually changed.
+        if (currentMarker.visible != shouldBeVisible) {
+          markers[id] = currentMarker.copyWith(visibleParam: shouldBeVisible);
+        }
+      }
+    });
+  }
+
+  void setVisibleMarkerLists() {
+    debugPrint('setVisibleMarkerLists called');
     // Reset marker lists
     _foodMarkerIds = [];
-    _stallsMarkerIds = [];
-    _musicMarkerIds = [];
-    _placeMarkerIds = [];
-    _eventMarkerIds = [];
+    _shoppingMarkerIds = [];
+    _charityCommunityInfoMarkerIds = [];
+    _performanceMarkerIds = [];
+    _visitExperienceMarkerIds = [];
     _serviceMarkerIds = [];
 
     final allListings = listings as List;
     for (var listing in allListings) {
       // Assign markerIds to maps for filtering
-      if ((listing['primaryType'] == "Food" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Food") {
-        _foodMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'] == "Shopping" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Shopping") {
-        _stallsMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'] == "Music" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Music") {
-        _musicMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'] == "Event" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Event") {
-        _eventMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'] == "Place" && !hasEventBeenCancelled(listing['description'])) || listing['primaryType'] == "Group-Place") {
-        _placeMarkerIds.add(MarkerId(listing['id'].toString()));
-      } else if ((listing['primaryType'].startsWith("Service") && !hasEventBeenCancelled(listing['description'])) ||
-          listing['primaryType'] == "Group-Service") {
-        _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
-      }
+      if (listing['food'] == "TRUE") _foodMarkerIds.add(MarkerId(listing['id'].toString()));
+      if (listing['shopping'] == "TRUE") _shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
+      if (listing['charityCommunityInfo'] == "TRUE") _charityCommunityInfoMarkerIds.add(MarkerId(listing['id'].toString()));
+      if (listing['performance'] == "TRUE") _performanceMarkerIds.add(MarkerId(listing['id'].toString()));
+      if (listing['visitExperience'] == "TRUE") _visitExperienceMarkerIds.add(MarkerId(listing['id'].toString()));
+      if (listing['service'] == "TRUE") _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
     }
   }
 
@@ -427,11 +440,11 @@ class MapPageState extends State<MapPage> {
     for (var listing in listings) {
       if (listing['visibleOnMap'] == 'TRUE') {
         // Add Group markers
-        if (listing['primaryType'].startsWith('Group-')) {
+        if (listing['groupParent'] == 'TRUE' && listing['cancelled'] == 'FALSE') {
           addGroupMarker(listing);
         }
         // Add Specific markers
-        if (!listing['primaryType'].startsWith('Group-') && !hasEventBeenCancelled(listing['description'])) {
+        if (listing['groupParent'] == 'FALSE' && listing['cancelled'] == 'FALSE') {
           addSpecificMarker(listing);
         }
       }
@@ -441,7 +454,7 @@ class MapPageState extends State<MapPage> {
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('createAllMarkerBitmaps called');
     for (var listingType
-        in 'Food, Shopping, Music, Event, Place, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Music, Group-Event, Group-Place, Group-Service'
+        in 'Food, Shopping, Charity/Community/Info, Performance, Visit/Experience, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Charity/Community/Info, Group-Performance, Group-Visit/Experience, Group-Service'
             .split(', ')) {
       BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
       bitmapDescriptors[listingType] = newBitmapDescriptor;
@@ -466,19 +479,25 @@ class MapPageState extends State<MapPage> {
   }
 
   // Function to determine if a listing has been added to favourites
-  bool isListingFavourited(listingID) {
+  bool isListingFavourited(String listingID) {
     return favouriteListingKeys.contains(listingID);
   }
 
-  void addGroupMarker(listing) async {
+  void addGroupMarker(Map<String, dynamic> parentListing) async {
     // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
-    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-    MarkerId markerId = MarkerId(listing['id'].toString());
-    Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
+    LatLng destinationLatLng = stringToLatLng(parentListing['latLng']);
+    MarkerId markerId = MarkerId(parentListing['id'].toString());
+    Color color = getCategoryColor(selectedThemeKey, getCategory(parentListing));
     late BitmapDescriptor customMarker;
 
     if (onTest == false) {
-      customMarker = bitmapDescriptors[listing['primaryType']]!;
+      if ((countCategories(parentListing) != 1) || (isGroupSingleCategory(parentListing['groupID'], listings) == false)) {
+        // If the group has multiple categories, or none, or its contents are mixed, use the default marker (this is to be updated later with a "mixed" marker)
+        customMarker = BitmapDescriptor.defaultMarker;
+      } else {
+        // If the group has only one category, use the specific category marker
+        customMarker = bitmapDescriptors['Group-${getCategory(parentListing)}']!;
+      }
     } else {
       double hue = HSVColor.fromColor(color).hue;
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
@@ -494,33 +513,23 @@ class MapPageState extends State<MapPage> {
         // Update the current location, do not await as this causes issues with using the context across async gaps
         establishLocation();
 
-        // Helper to normalise primaryType by stripping "Group-" prefix if present
-        String normalisePrimaryType(String type) {
-          return type.startsWith("Group-") ? type.substring(6) : type;
-        }
-
-        // Filter listings where both normalised primaryType and secondaryType match
+        // Filter listings where groupID matches the parent listing's groupID,
+        // but exclude any listing whose category starts with `Group-`.
         List<Map<String, dynamic>> relatedListings = listings.where((l) {
-          final listingPrimary = normalisePrimaryType(l['primaryType'] ?? '');
-          final targetPrimary = normalisePrimaryType(listing['primaryType'] ?? '');
-          final listingSecondary = l['secondaryType'] ?? '';
-          final targetSecondary = listing['secondaryType'] ?? '';
+          // Filter out the parent listing itself, as we only want the child listings in the relatedListings list
+          if (l['groupParent'] == 'TRUE') return false;
 
-          return listingPrimary == targetPrimary && listingSecondary == targetSecondary;
+          final listingGroupID = l['groupID'] ?? '';
+          final targetGroupID = parentListing['groupID'] ?? '';
+
+          return listingGroupID == targetGroupID;
         }).toList();
 
-        // Sort listings: Group first → startTime → displayName
+        // Sort listings: startTime → title
         relatedListings.sort((a, b) {
-          if (a['primaryType'].startsWith("Group") && !b['primaryType'].startsWith("Group")) {
-            return -1;
-          } else if (b['primaryType'].startsWith("Group") && !a['primaryType'].startsWith("Group")) {
-            return 1;
-          }
-
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           if (timeCompare != 0) return timeCompare;
-
-          return a['name'].compareTo(b['name']);
+          return a['title'].compareTo(b['title']);
         });
 
         final groupSheetModalScrollController = ScrollController();
@@ -560,70 +569,83 @@ class MapPageState extends State<MapPage> {
                   bottom: Platform.isAndroid && isNavBarVisible(context),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
+                      // Calculate distance if current location is known
+                      var distanceMessage = 'Distance unknown';
+                      if (currentLatLng != null) {
+                        int approximateDistanceMetres = asTheCrowFlies(
+                          currentLatLng!,
+                          stringToLatLng(parentListing['latLng']),
+                        );
+                        distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                      }
+
                       return ConstrainedBox(
                         constraints: BoxConstraints(
                           maxHeight: constraints.maxHeight * 0.90,
                         ),
-                        child: Scrollbar(
-                          controller: groupSheetModalScrollController,
-                          thumbVisibility: Platform.isIOS ? false : true,
-                          thickness: 4,
-                          radius: const Radius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
-                            child: ListView.builder(
-                              itemCount: relatedListings.length,
-                              shrinkWrap: true,
-                              controller: groupSheetModalScrollController,
-                              itemBuilder: (context, index) {
-                                final rel = relatedListings[index];
-
-                                // Calculate distance if current location is known
-                                var distanceMessage = 'Distance unknown';
-                                if (currentLatLng != null) {
-                                  int approximateDistanceMetres = asTheCrowFlies(
-                                    currentLatLng!,
-                                    stringToLatLng(rel['latLng']),
-                                  );
-                                  distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-                                }
-
-                                if (rel['primaryType'].startsWith("Group")) {
-                                  return GroupListingInfoSheet(
-                                    title: rel['displayName'],
-                                    categories: "${rel['tertiaryType']}",
-                                    startTime: "${listing['startTime']}",
-                                    endTime: "${listing['endTime']}",
-                                    approxDistance: distanceMessage,
-                                  );
-                                } else {
-                                  return Column(
-                                    children: [
-                                      SpecificListingInfoSheet(
-                                        title: rel['displayName'],
-                                        location: '',
-                                        subtitle: rel['tertiaryType'],
-                                        startTime: rel['startTime'],
-                                        endTime: rel['endTime'],
-                                        approxDistance: '',
-                                        phoneNumber: (rel['phone'] != null) ? rel['phone'] : '',
-                                        website: (rel['website'] != null) ? rel['website'] : '',
-                                        email: (rel['email'] != null) ? rel['email'] : '',
-                                        description: (rel['description'] != null) ? rel['description'] : '',
-                                        detailsVisible: detailsVisibilityList[index],
-                                        onDetailsTapped: () => toggleDetailsRow(index),
-                                        listingFavourited: isListingFavourited(rel['id']),
-                                        onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                        onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                      ),
-                                      if (index != relatedListings.length - 1)
-                                        SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                                    ],
-                                  );
-                                }
-                              },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                              child: GroupListingInfoSheet(
+                                title: parentListing['title'],
+                                categories: "${parentListing['subtitle']}",
+                                startTime: "${parentListing['startTime']}",
+                                endTime: "${parentListing['endTime']}",
+                                approxDistance: distanceMessage,
+                              ),
                             ),
-                          ),
+                            Flexible(
+                              fit: FlexFit.loose,
+                              child: Scrollbar(
+                                controller: groupSheetModalScrollController,
+                                thumbVisibility: Platform.isIOS ? false : true,
+                                thickness: 4,
+                                radius: const Radius.circular(8),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                                  child: ListView.builder(
+                                    itemCount: relatedListings.length,
+                                    shrinkWrap: true,
+                                    controller: groupSheetModalScrollController,
+                                    itemBuilder: (context, index) {
+                                      final rel = relatedListings[index];
+
+                                      return Column(
+                                        children: [
+                                          SpecificListingInfoSheet(
+                                            cancelled: rel['cancelled'] == 'TRUE' ? true : false,
+                                            brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
+                                            emoji: rel['emoji'] ?? '',
+                                            title: rel['title'],
+                                            subtitle: rel['subtitle'],
+                                            location: rel['location'],
+                                            description: rel['description'] ?? '',
+                                            email: rel['email'] ?? '',
+                                            website: rel['website'] ?? '',
+                                            phoneNumber: rel['phone'] ?? '',
+                                            imageURL: rel['imageURL'] ?? '',
+                                            startTime: "${rel['startTime']}",
+                                            endTime: "${rel['endTime']}",
+                                            approxDistance: '',
+                                            detailsVisible: detailsVisibilityList[index],
+                                            onDetailsTapped: () => toggleDetailsRow(index),
+                                            listingFavourited: isListingFavourited(rel['id']),
+                                            onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                            onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                          ),
+                                          if (index != relatedListings.length - 1)
+                                            SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -641,123 +663,129 @@ class MapPageState extends State<MapPage> {
     });
   }
 
-  void addSpecificMarker(listing) async {
+  void addSpecificMarker(Map<String, dynamic> listing) async {
     debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
-    Color color = getCategoryColor(selectedThemeKey, listing['primaryType']);
+    Color color = getCategoryColor(selectedThemeKey, getCategory(listing));
     late BitmapDescriptor customMarker;
+
     if (onTest == false) {
-      customMarker = bitmapDescriptors[listing['primaryType']]!;
+      if (countCategories(listing) == 1) {
+        // If the listing has only one category, use the specific category marker
+        customMarker = bitmapDescriptors[getCategory(listing)]!;
+      } else {
+        // If the listing has multiple categories, or none, use the default marker (this is to be updated later with a "mixed" marker)
+        customMarker = BitmapDescriptor.defaultMarker;
+      }
     } else {
       double hue = HSVColor.fromColor(color).hue;
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
     Marker newMarker = Marker(
-      markerId: markerId,
-      position: destinationLatLng,
-      icon: customMarker,
-      visible: true,
-      onTap: () {
-        HapticFeedback.lightImpact();
-        // Update the current location, do not await as this causes issues with using the context across async gaps
-        establishLocation();
+        markerId: markerId,
+        position: destinationLatLng,
+        icon: customMarker,
+        visible: true,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          // Update the current location, do not await as this causes issues with using the context across async gaps
+          establishLocation();
 
-        // Calculate distance if current location is known
-        var distanceMessage = 'Distance unknown';
-        if (currentLatLng != null) {
-          int approximateDistanceMetres = asTheCrowFlies(
-            currentLatLng!,
-            destinationLatLng,
-          );
-          distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
-        }
+          // Calculate distance if current location is known
+          var distanceMessage = 'Distance unknown';
+          if (currentLatLng != null) {
+            int approximateDistanceMetres = asTheCrowFlies(
+              currentLatLng!,
+              destinationLatLng,
+            );
+            distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+          }
 
-        // Show bottom sheet with listing information
-        showModalBottomSheet(
-          context: context,
-          showDragHandle: false,
-          enableDrag: false,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
-          isScrollControlled: true,
-          useSafeArea: true,
-          builder: (context) {
-            return SafeArea(
-              top: false,
-              left: false,
-              right: false,
-              bottom: Platform.isAndroid && isNavBarVisible(context),
-              child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
+          // Show bottom sheet with listing information
+          showModalBottomSheet(
+            context: context,
+            showDragHandle: false,
+            enableDrag: false,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
+            isScrollControlled: true,
+            useSafeArea: true,
+            builder: (context) {
+              return SafeArea(
+                top: false,
+                left: false,
+                right: false,
+                bottom: Platform.isAndroid && isNavBarVisible(context),
+                child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                   final specificSheetModalScrollController = ScrollController();
-                  return StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setModalState) {
-                      void favouriteOrNotListing(String listingID) {
-                        setModalState(() {
-                          if (favouriteListingKeys.contains(listingID)) {
-                            favouriteListingKeys.remove(listingID);
-                          } else {
-                            favouriteListingKeys.add(listingID);
-                          }
-                          _saveSettings();
-                        });
-                      }
+                  return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
+                    void favouriteOrNotListing(String listingID) {
+                      setModalState(() {
+                        if (favouriteListingKeys.contains(listingID)) {
+                          favouriteListingKeys.remove(listingID);
+                        } else {
+                          favouriteListingKeys.add(listingID);
+                        }
+                        _saveSettings();
+                      });
+                    }
 
-                      return ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: constraints.maxHeight * 0.90,
-                        ),
-                        child: Scrollbar(
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: constraints.maxHeight * 0.90,
+                      ),
+                      child: Scrollbar(
+                        controller: specificSheetModalScrollController,
+                        thumbVisibility: Platform.isIOS ? false : true,
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: SingleChildScrollView(
                           controller: specificSheetModalScrollController,
-                          thumbVisibility: Platform.isIOS ? false : true,
-                          thickness: 4,
-                          radius: const Radius.circular(8),
-                          child: SingleChildScrollView(
-                            controller: specificSheetModalScrollController,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                              child: SpecificListingInfoSheet(
-                                title: listing['displayName'],
-                                location: listing['secondaryType'],
-                                subtitle: listing['tertiaryType'],
-                                startTime: "${listing['startTime']}",
-                                endTime: "${listing['endTime']}",
-                                approxDistance: distanceMessage,
-                                phoneNumber: (listing['phone'] != null) ? listing['phone'] : '',
-                                website: (listing['website'] != null) ? listing['website'] : '',
-                                email: (listing['email'] != null) ? listing['email'] : '',
-                                description: (listing['description'] != null) ? listing['description'] : '',
-                                detailsVisible: true,
-                                listingFavourited: isListingFavourited(listing['id']),
-                                onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
-                              ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                            child: SpecificListingInfoSheet(
+                              cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                              brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
+                              emoji: listing['emoji'] ?? '',
+                              title: listing['title'],
+                              subtitle: listing['subtitle'],
+                              location: listing['location'],
+                              description: listing['description'],
+                              email: listing['email'] ?? '',
+                              website: listing['website'] ?? '',
+                              phoneNumber: listing['phone'] ?? '',
+                              imageURL: listing['imageURL'] ?? '',
+                              startTime: "${listing['startTime']}",
+                              endTime: "${listing['endTime']}",
+                              approxDistance: distanceMessage,
+                              detailsVisible: true,
+                              listingFavourited: isListingFavourited(listing['id']),
+                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
                             ),
                           ),
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
-            );
-          },
-        );
-      },
-    );
+                      ),
+                    );
+                  });
+                }),
+              );
+            },
+          );
+        });
     setState(() {
       markers[markerId] = newMarker;
     });
   }
 
-  void addSimpleMarker(primaryType, destinationLatLng) async {
-    debugPrint('addSimpleMarker called for primary type: $primaryType');
+  void addSimpleMarker(String category, destinationLatLng) async {
+    debugPrint('addSimpleMarker called for category: $category');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
-    Color color = getCategoryColor(selectedThemeKey, primaryType);
+    Color color = getCategoryColor(selectedThemeKey, category);
     late BitmapDescriptor customMarker;
     if (onTest == false) {
-      customMarker = bitmapDescriptors[primaryType]!;
+      customMarker = bitmapDescriptors[category]!;
     } else {
       double hue = HSVColor.fromColor(color).hue;
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
@@ -789,7 +817,7 @@ class MapPageState extends State<MapPage> {
         );
         if (listing.isEmpty) return oldMarker;
 
-        final type = listing['primaryType'];
+        final type = listing['category'];
         final newIcon = bitmapDescriptors[type] ?? oldMarker.icon;
 
         return oldMarker.copyWith(iconParam: newIcon);
@@ -805,22 +833,24 @@ class MapPageState extends State<MapPage> {
 
   void hideAllMarkers() {
     debugPrint('hideAllMarkers called');
-    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds, false);
+    updateMarkerVisibilityIgnoringFilters(
+        _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, false);
   }
 
   void showAllMarkers() {
     debugPrint('showAllMarkers called');
-    updateMarkerVisibility(_foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds, true);
+    updateMarkerVisibilityIgnoringFilters(
+        _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, true);
   }
 
   void showFilteredMarkers() {
     debugPrint('showFilteredMarkers called');
-    updateMarkerVisibility(_foodMarkerIds, filterSettings['Food']!);
-    updateMarkerVisibility(_stallsMarkerIds, filterSettings['Stalls']!);
-    updateMarkerVisibility(_musicMarkerIds, filterSettings['Music']!);
-    updateMarkerVisibility(_eventMarkerIds, filterSettings['Events']!);
-    updateMarkerVisibility(_placeMarkerIds, filterSettings['Places']!);
-    updateMarkerVisibility(_serviceMarkerIds, filterSettings['Other']!);
+    updateMarkerVisibilityIgnoringFilters(_foodMarkerIds, filterSettings['Food']!);
+    updateMarkerVisibilityIgnoringFilters(_shoppingMarkerIds, filterSettings['Shopping']!);
+    updateMarkerVisibilityIgnoringFilters(_charityCommunityInfoMarkerIds, filterSettings['Charity/Community/Info']!);
+    updateMarkerVisibilityIgnoringFilters(_performanceMarkerIds, filterSettings['Performances']!);
+    updateMarkerVisibilityIgnoringFilters(_visitExperienceMarkerIds, filterSettings['Visits/Experiences']!);
+    updateMarkerVisibilityIgnoringFilters(_serviceMarkerIds, filterSettings['Services']!);
   }
 
   void showFilterMenu() {
@@ -838,16 +868,13 @@ class MapPageState extends State<MapPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Filter map layers",
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.left,
-                      ),
-                    ],
-                  ),
+                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text(
+                      "Filter map layers",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.left,
+                    )
+                  ]),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Food'),
@@ -859,77 +886,77 @@ class MapPageState extends State<MapPage> {
                         filterSettings["Food"] = value!;
                       });
                       final idList = _foodMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
-                    title: const Text("Stalls"),
-                    value: filterSettings["Stalls"],
+                    title: const Text("Shopping"),
+                    value: filterSettings["Shopping"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        filterSettings["Stalls"] = value!;
+                        filterSettings["Shopping"] = value!;
                       });
-                      final idList = _stallsMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      final idList = _shoppingMarkerIds;
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4),
-                    activeColor: getCategoryColor(selectedThemeKey, 'Music'),
-                    title: const Text("Music"),
-                    value: filterSettings["Music"],
+                    activeColor: getCategoryColor(selectedThemeKey, 'Charity/Community/Info'),
+                    title: const Text("Charity/Community/Info"),
+                    value: filterSettings["Charity/Community/Info"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        filterSettings["Music"] = value!;
+                        filterSettings["Charity/Community/Info"] = value!;
                       });
-                      final idList = _musicMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      final idList = _charityCommunityInfoMarkerIds;
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4),
-                    activeColor: getCategoryColor(selectedThemeKey, 'Event'),
-                    title: const Text("Events"),
-                    value: filterSettings["Events"],
+                    activeColor: getCategoryColor(selectedThemeKey, 'Performance'),
+                    title: const Text("Performances"),
+                    value: filterSettings["Performances"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        filterSettings["Events"] = value!;
+                        filterSettings["Performances"] = value!;
                       });
-                      final idList = _eventMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      final idList = _performanceMarkerIds;
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4),
-                    activeColor: getCategoryColor(selectedThemeKey, 'Place'),
-                    title: const Text("Places"),
-                    value: filterSettings["Places"],
+                    activeColor: getCategoryColor(selectedThemeKey, 'Visit/Experience'),
+                    title: const Text("Visits/Experiences"),
+                    value: filterSettings["Visits/Experiences"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        filterSettings["Places"] = value!;
+                        filterSettings["Visits/Experiences"] = value!;
                       });
-                      final idList = _placeMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      final idList = _visitExperienceMarkerIds;
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Service'),
-                    title: const Text("Other"),
-                    value: filterSettings["Other"],
+                    title: const Text("Services"),
+                    value: filterSettings["Services"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        filterSettings["Other"] = value!;
+                        filterSettings["Services"] = value!;
                       });
                       final idList = _serviceMarkerIds;
-                      updateMarkerVisibility(idList, value!);
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
                     },
                   ),
                   Divider(color: Colors.grey[350]),
@@ -1097,7 +1124,7 @@ class MapPageState extends State<MapPage> {
         (l) => l['id'].toString() == marker.markerId.value,
         orElse: () => {},
       );
-      if (listing.isEmpty || listing['visibleOnMap'] != 'TRUE') {
+      if (listing.isEmpty || listing['visibleOnMap'] == 'FALSE') {
         markers.remove(marker.markerId);
       }
     }
@@ -1182,23 +1209,36 @@ class MapPageState extends State<MapPage> {
         throw Exception("Google Maps Directions API key is missing.");
       }
 
-      // Fetch new directions from the Google Directions API
-      final result = await _polylinePoints.getRouteBetweenCoordinates(
-        googleApiKey: googleMapsDirectionsApiKey,
-        request: PolylineRequest(
-          headers: headers,
-          origin: PointLatLng(origin.latitude, origin.longitude),
-          destination: PointLatLng(destination.latitude, destination.longitude),
-          mode: TravelMode.walking,
-        ),
+      // Set up request for fetching new directions from the Google Routes API
+      pl.RoutesApiRequest request = pl.RoutesApiRequest(
+        origin: pl.PointLatLng(origin.latitude, origin.longitude),
+        destination: pl.PointLatLng(destination.latitude, destination.longitude),
+        travelMode: pl.TravelMode.walking,
+        routingPreference: pl.RoutingPreference.unspecified,
+        headers: headers,
       );
 
-      if (result.points.isEmpty) {
-        throw Exception("No route points returned from Google Directions API.");
+      // Get route using Routes API
+      pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(
+        request: request,
+      );
+
+      if (response.routes.isEmpty) {
+        throw Exception("No route points returned from Google Routes API. ");
       }
 
+      // Let's not complicate things and just choose the first
+      pl.Route route = response.routes.first;
+
+      // Get polyline points
+      List<pl.PointLatLng> points = route.polylinePoints ?? [];
+
+      // Convert to LatLng for Google Maps
+      List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
+
       setState(() {
-        final distanceMetres = result.totalDistanceValue ?? 0;
+        // Get distance in meters. NB can also get route.durationMinutes which may be useful
+        final distanceMetres = route.distanceMeters ?? 0;
         // empirical formula, since dashes don't space as if measured in pixels as per google's docs
         final dashSpace = pow((distanceMetres > 0 ? distanceMetres : 500), 0.9) / 27;
 
@@ -1206,10 +1246,10 @@ class MapPageState extends State<MapPage> {
         polylines.add(
           Polyline(
             polylineId: const PolylineId('route'),
-            points: result.points.map((point) => LatLng(point.latitude, point.longitude)).toList(),
+            points: polylineCoordinates,
             color: Theme.of(context).colorScheme.tertiary,
             width: 5,
-            patterns: [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace * 0.75)],
+            patterns: Platform.isIOS ? [PatternItem.dash(dashSpace), PatternItem.gap(dashSpace)] : <PatternItem>[PatternItem.dot, PatternItem.gap(10)],
           ),
         );
 
@@ -1220,7 +1260,7 @@ class MapPageState extends State<MapPage> {
       _handlePolylineError("Network connection issue. Please try again.");
     } on HttpException catch (e) {
       debugPrint("HTTP error while fetching route: $e");
-      _handlePolylineError("Server error retrieving route data.");
+      _handlePolylineError("Error retrieving route data. Please check your connection and try again.");
     } on FormatException catch (e) {
       debugPrint("Data format error: $e");
       _handlePolylineError("Unexpected data format from directions API.");
@@ -1330,11 +1370,7 @@ class MapPageState extends State<MapPage> {
     }
 
     _moveCameraToBoundsWithRotation(
-      LatLng(polylineMinLat, polylineMinLong),
-      LatLng(polylineMaxLat, polylineMaxLong),
-      padding * (1 + extraPaddingForShortTrips),
-      bearing,
-    );
+        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -1441,7 +1477,7 @@ class MapPageState extends State<MapPage> {
 
     try {
       listings = await fetchListings(http.Client());
-      setMarkerLists();
+      setVisibleMarkerLists();
       addAllVisibleMarkers();
       establishLocation();
     } finally {
@@ -1525,42 +1561,40 @@ class MapPageState extends State<MapPage> {
                   mapWidth = constraints.maxWidth;
                   mapHeight = constraints.maxHeight;
                   return GoogleMap(
-                    // TODO: Possible deprecation of styles in March 2025 (See: https://www.atlist.com/blog/json-map-styles-will-stop-working-march-2025)
-                    style: mapStyle,
-                    mapType: mapType,
-                    rotateGesturesEnabled: false,
-                    compassEnabled: false,
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
-                    mapToolbarEnabled: false,
-                    onMapCreated: (GoogleMapController controller) {
-                      _controller = controller;
-                      if (listings.isNotEmpty) {
-                        // We should have listings by this point so set the camera to their bounds
-                        _setMapCameraToFitMapMarkers();
-                      }
-                    },
-                    initialCameraPosition: CameraPosition(
-                      target: const LatLng(52.199174, 0.140929),
-                      zoom: 14.1,
-                      bearing: _mapBearing,
-                    ),
-                    onCameraMove: (CameraPosition position) {
-                      setState(() {
-                        switch (preferredMapOrientation) {
-                          case MapOrientation.adaptive:
-                            _compassBearing = 90;
-                            break;
-                          case MapOrientation.alwaysNorth:
-                            _compassBearing = 0;
-                            break;
+                      style: mapStyle,
+                      mapType: mapType,
+                      rotateGesturesEnabled: false,
+                      compassEnabled: false,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: false,
+                      mapToolbarEnabled: false,
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller = controller;
+                        if (listings.isNotEmpty) {
+                          // We should have listings by this point so set the camera to their bounds
+                          _setMapCameraToFitMapMarkers();
                         }
-                      });
-                    },
-                    polygons: _polygons,
-                    markers: markers.values.toSet(),
-                    polylines: polylines,
-                  );
+                      },
+                      initialCameraPosition: CameraPosition(
+                        target: const LatLng(52.199174, 0.140929),
+                        zoom: 14.1,
+                        bearing: _mapBearing,
+                      ),
+                      onCameraMove: (CameraPosition position) {
+                        setState(() {
+                          switch (preferredMapOrientation) {
+                            case MapOrientation.adaptive:
+                              _compassBearing = 90;
+                              break;
+                            case MapOrientation.alwaysNorth:
+                              _compassBearing = 0;
+                              break;
+                          }
+                        });
+                      },
+                      polygons: _polygons,
+                      markers: markers.values.toSet(),
+                      polylines: polylines);
                 },
               ),
               Positioned(
@@ -1572,64 +1606,133 @@ class MapPageState extends State<MapPage> {
                     if (navigationInProgress == true)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
-                        shape: const CircleBorder(),
-                        mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           cancelNavigation();
                         },
-                        child: Icon(
-                          Icons.cancel,
-                          size: 24,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          shadows: [
-                            Shadow(
-                              color: Theme.of(context).shadowColor,
-                              offset: const Offset(1, 3),
-                              blurRadius: 5,
-                            ),
-                          ],
+                        backgroundColor: Colors.transparent,
+                        mini: true,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
+                          ),
+                          child: const Icon(Icons.cancel),
                         ),
                       ),
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'homeBtn',
-                        shape: const CircleBorder(),
-                        elevation: 3,
-                        mini: true,
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           // Home button resets the filters if they're all toggled off
                           if (filterSettings['Food'] == false &&
-                              filterSettings['Stalls'] == false &&
-                              filterSettings['Music'] == false &&
-                              filterSettings['Events'] == false &&
-                              filterSettings['Places'] == false &&
-                              filterSettings['Other'] == false) {
-                            final idList = _foodMarkerIds + _stallsMarkerIds + _musicMarkerIds + _eventMarkerIds + _placeMarkerIds + _serviceMarkerIds;
+                              filterSettings['Shopping'] == false &&
+                              filterSettings['Performances'] == false &&
+                              filterSettings['Charity/Community/Info'] == false &&
+                              filterSettings['Visits/Experiences'] == false &&
+                              filterSettings['Services'] == false) {
+                            final idList = _foodMarkerIds +
+                                _shoppingMarkerIds +
+                                _charityCommunityInfoMarkerIds +
+                                _performanceMarkerIds +
+                                _visitExperienceMarkerIds +
+                                _serviceMarkerIds;
                             setState(() {
                               filterSettings['Food'] = true;
-                              filterSettings['Stalls'] = true;
-                              filterSettings['Music'] = true;
-                              filterSettings['Events'] = true;
-                              filterSettings['Places'] = true;
-                              filterSettings['Other'] = true;
-                              updateMarkerVisibility(idList, true);
+                              filterSettings['Shopping'] = true;
+                              filterSettings['Performances'] = true;
+                              filterSettings['Charity/Community/Info'] = true;
+                              filterSettings['Visits/Experiences'] = true;
+                              filterSettings['Services'] = true;
+                              updateMarkerVisibilityIgnoringFilters(idList, true);
                             });
                           }
                           _setMapCameraToFitMapMarkers();
                         },
-                        child: Icon(
-                          Icons.home,
-                          size: 24,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: Colors.transparent,
+                        mini: true,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
+                          ),
+                          child: const Icon(Icons.home),
+                        ),
+                      ),
+                    // Centre-on-user button (only shown when location services are enabled and permission has been granted)
+                    if (locationServicesEnabled == true &&
+                        (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
+                      FloatingActionButton(
+                        heroTag: 'centreOnUserBtn',
+                        onPressed: () async {
+                          HapticFeedback.lightImpact();
+                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
+                          try {
+                            if (currentLatLng == null) {
+                              final pos = await getCurrentPosition();
+                              currentLatLng = LatLng(pos.latitude, pos.longitude);
+                            }
+                            if (currentLatLng != null) {
+                              // Move camera to the user's location with a sensible zoom and bearing
+                              double currentZoom = await _controller!.getZoomLevel();
+                              _controller?.animateCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('Centre-on-user failed: $e');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  content: Text('Unable to determine your location'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        backgroundColor: Colors.transparent,
+                        mini: true,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
+                          ),
+                          child: const Icon(Icons.my_location),
                         ),
                       ),
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
-                      shape: const CircleBorder(),
-                      elevation: 3,
-                      mini: true,
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         setState(() {
@@ -1646,32 +1749,59 @@ class MapPageState extends State<MapPage> {
                           }
                         });
                       },
-                      child: Icon(
-                        _layersIcon,
-                        size: 24,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                      backgroundColor: Colors.transparent,
+                      mini: true,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                                offset: const Offset(2, 2))
+                          ],
+                        ),
+                        child: Icon(_layersIcon),
                       ),
                     ),
                     if (navigationInProgress == false)
-                      AnimatedRotation(
-                        turns: _compassBearing / 360.0,
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeOut,
-                        child: FloatingActionButton(
-                          heroTag: 'mapBearingBtn',
-                          shape: const CircleBorder(),
-                          elevation: 3,
-                          mini: true,
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            setState(() {
-                              preferredMapOrientation =
-                                  (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
-                              _saveSettings();
-                            });
-                            _setMapCameraToFitMapMarkers();
-                          },
-                          child: const Icon(Icons.assistant_navigation),
+                      FloatingActionButton(
+                        heroTag: 'mapBearingBtn',
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          setState(() {
+                            preferredMapOrientation =
+                                (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                            _saveSettings();
+                          });
+                          _setMapCameraToFitMapMarkers();
+                        },
+                        backgroundColor: Colors.transparent,
+                        mini: true,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
+                          ),
+                          child: AnimatedRotation(
+                            turns: _compassBearing / 360.0,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOut,
+                            child: Icon(Icons.assistant_navigation),
+                          ),
                         ),
                       ),
                     if (navigationInProgress == false)
@@ -1680,15 +1810,29 @@ class MapPageState extends State<MapPage> {
                           if (navigationInProgress == false)
                             FloatingActionButton(
                               heroTag: 'filterBtn',
-                              shape: const CircleBorder(),
-                              elevation: 3,
-                              mini: true,
                               onPressed: () {
                                 showFilterMenu();
-                                setMarkerLists();
+                                setVisibleMarkerLists();
                               },
-                              child: const Icon(Icons.filter_alt),
-                            ),
+                              backgroundColor: Colors.transparent,
+                              mini: true,
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: const Offset(2, 2))
+                                  ],
+                                ),
+                                child: const Icon(Icons.filter_alt),
+                              ),
+                            )
                         ],
                       ),
                   ],
@@ -1701,13 +1845,12 @@ class MapPageState extends State<MapPage> {
                     padding: const EdgeInsets.only(top: 8),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        iconSize: 30,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
-                        padding: const EdgeInsets.all(0),
-                        elevation: 3,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
+                          iconSize: 30,
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
+                          padding: const EdgeInsets.all(0),
+                          elevation: 3,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
@@ -1775,7 +1918,7 @@ class MapPageState extends State<MapPage> {
                       ),
                     ),
                   ),
-                ),
+                )
             ],
           ),
         );
