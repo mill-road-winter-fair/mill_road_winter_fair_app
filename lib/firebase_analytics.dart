@@ -22,7 +22,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logButtonTapped(String buttonName) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -38,7 +38,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logMapMarkerTapped(String listingName) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -53,7 +53,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logMapTypePreferenceSet(String mapType) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -68,7 +68,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logMapOrientationPreferenceSet(String mapOrientation) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -83,7 +83,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logMapMarkerFilterPreferenceSet(String category, bool visible) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -100,7 +100,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logRoadClosurePolygonPreferenceSet(bool visible) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -116,7 +116,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logDistanceUnitPreferenceSet(String distanceUnit) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -133,7 +133,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logThemePreferenceSet(String theme) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -150,7 +150,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logListingSaved(String listingName) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -165,7 +165,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logListingUnsaved(String listingName) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
@@ -180,7 +180,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
   @override
   Future<void> logDirectionsToListingRequested(String listingName) async {
-    if (usageAnalyticsEnabled == false) {
+    if (usageAnalyticsEnabled != true) {
       return;
     }
 
