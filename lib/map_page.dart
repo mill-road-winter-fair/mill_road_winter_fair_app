@@ -1706,7 +1706,7 @@ class MapPageState extends State<MapPage> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   backgroundColor: Theme.of(context).colorScheme.primary,
-                                  content: Text('Unable to determine your location'),
+                                  content: const Text('Unable to determine your location'),
                                 ),
                               );
                             }
@@ -1800,7 +1800,7 @@ class MapPageState extends State<MapPage> {
                             turns: _compassBearing / 360.0,
                             duration: const Duration(milliseconds: 200),
                             curve: Curves.easeOut,
-                            child: Icon(Icons.assistant_navigation),
+                            child: const Icon(Icons.assistant_navigation),
                           ),
                         ),
                       ),

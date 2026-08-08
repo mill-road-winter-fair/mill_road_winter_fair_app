@@ -768,40 +768,40 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 constraints: const BoxConstraints(maxHeight: 36),
               ),
               dropdownMenuEntries: [
-                DropdownMenuEntry(
+                const DropdownMenuEntry(
                   value: 'all',
                   label: "All",
-                  leadingIcon: const Icon(Icons.all_inclusive),
+                  leadingIcon: Icon(Icons.all_inclusive),
                 ),
-                DropdownMenuEntry(
+                const DropdownMenuEntry(
                   value: 'performance',
                   label: "Performances",
-                  leadingIcon: const Icon(Icons.theater_comedy),
+                  leadingIcon: Icon(Icons.theater_comedy),
                 ),
-                DropdownMenuEntry(
+                const DropdownMenuEntry(
                   value: 'visitExperience',
                   label: "Visit & Experience",
-                  leadingIcon: const Icon(Icons.tour),
+                  leadingIcon: Icon(Icons.tour),
                 ),
-                DropdownMenuEntry(
+                const DropdownMenuEntry(
                   value: 'food',
                   label: "Food & Drink",
-                  leadingIcon: const Icon(Icons.fastfood),
+                  leadingIcon: Icon(Icons.fastfood),
                 ),
-                DropdownMenuEntry(
+                const DropdownMenuEntry(
                   value: 'shopping',
                   label: "Shopping & Stalls",
-                  leadingIcon: const Icon(Icons.local_offer),
+                  leadingIcon: Icon(Icons.local_offer),
                 ),
-                DropdownMenuEntry(
+                const DropdownMenuEntry(
                   value: 'charityCommunityInfo',
                   label: "Charity, Community & Info",
-                  leadingIcon: const Icon(Icons.volunteer_activism),
+                  leadingIcon: Icon(Icons.volunteer_activism),
                 ),
-                DropdownMenuEntry(
+                const DropdownMenuEntry(
                   value: 'service',
                   label: "Services",
-                  leadingIcon: const Icon(Icons.family_restroom),
+                  leadingIcon: Icon(Icons.family_restroom),
                 ),
               ],
               onSelected: filteringDropdownCallback,
