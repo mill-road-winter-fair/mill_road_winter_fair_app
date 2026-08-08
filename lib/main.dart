@@ -44,7 +44,7 @@ Future<void> main() async {
 
   // Set consent for analytics and ad storage
   await FirebaseAnalytics.instance.setConsent(
-    analyticsStorageConsentGranted: true,
+    analyticsStorageConsentGranted: usageAnalyticsEnabled,
     adStorageConsentGranted: false,
   );
 
