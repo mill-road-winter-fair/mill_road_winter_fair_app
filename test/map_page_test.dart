@@ -105,7 +105,7 @@ void main() {
   // Set up mocks
   late MapPageState mapPageState;
   setUp(() {
-    mapPageState = MapPage(listings: listings).createState();
+    mapPageState = MapPage(listings: listings, onTabSelected: (_) {}).createState();
   });
 
   group('MapPage', () {
@@ -114,7 +114,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -122,7 +122,7 @@ void main() {
 
       // Check the map buttons
       expect(find.byType(FloatingActionButton), findsExactly(5));
-      expect(find.byIcon(Icons.home), findsOneWidget);
+      expect(find.byIcon(Icons.home), findsExactly(2));
       expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
       expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
       expect(find.byIcon(Icons.filter_alt), findsOneWidget);
@@ -147,7 +147,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -168,7 +168,7 @@ void main() {
       methodCalls.clear();
 
       // Tap the Home button to trigger centering and filter reset logic
-      await tester.tap(find.byIcon(Icons.home));
+      await tester.tap(find.byIcon(Icons.home).first);
       await tester.pumpAndSettle();
 
       // Verify that filters were reset to true
@@ -188,7 +188,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -205,7 +205,7 @@ void main() {
       expect(mapPageState.mapType, MapType.hybrid);
 
       // Switch the map type back
-      await tester.tap(find.byIcon(Icons.map));
+      await tester.tap(find.byIcon(Icons.map).first);
       await tester.pumpAndSettle();
       expect(mapPageState.mapType, MapType.normal);
     });
@@ -218,7 +218,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -257,7 +257,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -301,7 +301,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -336,7 +336,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -374,7 +374,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -417,7 +417,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -455,7 +455,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -618,7 +618,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
@@ -819,7 +819,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ),
       );
