@@ -162,7 +162,12 @@ class _TimetablePageState extends State<TimetablePage> {
     for (var ev in theEvents) {
       final startTime = combineDateAndTime(ev['startTime'], fairDate);
       final endTime = combineDateAndTime(ev['endTime'], fairDate);
-      if (((ev['performance'] != null && ev['performance'] == 'TRUE') || (ev['music'] != null && ev['music'] == 'TRUE') || (ev['event'] != null && ev['event'] == 'TRUE'))
+      if ((
+          (ev['performanceMusic'] != null && ev['performanceMusic'] == 'TRUE') 
+          || (ev['performanceChildrens'] != null && ev['performanceChildrens'] == 'TRUE') 
+          || (ev['performanceDance'] != null && ev['performanceDance'] == 'TRUE')
+          || (ev['performanceOther'] != null && ev['performanceOther'] == 'TRUE')
+        )
         && endTime.difference(startTime).inMinutes < 120 
       ) {
         final eventLocation = ev['location'];
@@ -174,10 +179,10 @@ class _TimetablePageState extends State<TimetablePage> {
           subtitle: ev['subtitle'],
           id: ev['id'],
           cancelled: (ev['cancelled'] == 'TRUE'),
-          emoji: ev['emoji'],
-          description: ev['description'],
+          emoji: ev['emoji'] ?? '',
+          description: ev['description'] ?? '',
           latLng: stringToLatLng(ev['latLng']),
-          imageURL: ev['imageURL'],
+          imageURL: ev['imageURL'] ?? '',
           brickAndMortar: (ev['brickAndMortar'] == 'TRUE'),
           email: ev['email'] ?? '',
           website: ev['website'] ?? '',
