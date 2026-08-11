@@ -28,6 +28,12 @@ Future<void> loadSettings() async {
 
     // Set default road closure polygon as visible
     preferredRoadClosurePolygonVisible = prefs.getBool('preferredRoadClosurePolygonVisible') ?? true;
+
+    // Keep the listings-change notice enabled by default for each fair year.
+    listingUpdateNoticeEnabled = prefs.getBool(
+          'listing_update_notice_enabled_${fairDate.year}',
+        ) ??
+        true;
     
     // Set default sorting method as nearest (1 in the index)
     int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 1;
@@ -91,6 +97,7 @@ Future<void> loadSettings() async {
     int savedMapStyleTypeIndex = 0;
     preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
     preferredRoadClosurePolygonVisible = true;
+    listingUpdateNoticeEnabled = true;
 
     selectedThemeKey = 'light';
     // Create a ValueNotifier to hold the current theme
@@ -132,6 +139,10 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
+    await prefs.setBool(
+      'listing_update_notice_enabled_${fairDate.year}',
+      listingUpdateNoticeEnabled,
+    );
     await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
   }
 
@@ -331,6 +342,24 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text(
+                        'Listings may change reminder',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: const Text(
+                        'Show a reminder that event details may change.',
+                      ),
+                      value: listingUpdateNoticeEnabled,
+                      onChanged: (value) {
+                        setState(() {
+                          listingUpdateNoticeEnabled = value;
+                        });
+                        _saveSettings();
+                      },
                     ),
                   ],
                 ),
