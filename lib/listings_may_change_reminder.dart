@@ -3,8 +3,31 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListingUpdateNotifier {
-  static String get preferenceKey =>
-      'listing_update_notice_enabled_${fairDate.year}';
+  static String get preferenceKey => 'listing_update_notice_enabled_${fairDate.year}';
+
+  static String messageFor(DateTime now) {
+    if (DateUtils.isSameDay(fairDate, now)) {
+      debugPrint('Current date is Fair date; showing special notice');
+      return "It’s the day of the Fair!\n"
+          'The fun starts at 10.30, and we’re looking forward to seeing '
+          'you there.\n\n'
+          'This app contains all the latest listings, updated if they '
+          'change, so you can easily see what’s on when and where.\n\n'
+          'Have a wonderful day!';
+    }
+
+    if (now.isAfter(fairDate)) {
+      return 'Thank you to everyone who came to the 2025 Fair and made it '
+          'such a huge success.\n\n'
+          'We‘ll be back on December 5th 2026 and will be updating the app '
+          'as that date approaches.\n\n'
+          'Check back later in the year for the 2026 listings.';
+    }
+
+    return 'Event details may change as the Fair approaches, but this app '
+        'will always show the most up-to-date information.\n\n'
+        'Check back for the latest listings.';
+  }
 
   static Future<void> maybeShowNotice(BuildContext context) async {
     if (onTest || !listingUpdateNoticeEnabled) {
@@ -21,11 +44,7 @@ class ListingUpdateNotifier {
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Listings may change'),
-        content: const Text(
-          'Event details may change as the Fair approaches, but this app '
-          'will always show the most up-to-date information.\n\n'
-          'Check back for the latest listings.',
-        ),
+        content: Text(messageFor(DateTime.now())),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
