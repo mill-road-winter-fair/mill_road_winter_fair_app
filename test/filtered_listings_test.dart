@@ -36,6 +36,7 @@ void main() {
             filterCategory: category,
             listings: listings,
             onChangeTitle: null,
+            onTabSelected: (_) {},
           ),
         ),
       ),
@@ -475,7 +476,7 @@ void main() {
 
       await tester.tap(find.text('Listings'));
       await settle(tester);
-      expect(homePageState.index, 2);
+      expect(homePageState.index, 3);
 
       await tester.tap(find.text('Directions'));
       await settle(tester);
@@ -571,7 +572,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onChangeTitle: null)
+            body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onChangeTitle: null, onTabSelected: (_) {}),
           ),
         ),
       );

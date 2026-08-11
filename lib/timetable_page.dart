@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:async';
 import 'package:flutter/services.dart';
@@ -9,17 +8,19 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
-import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class TimetablePage extends StatefulWidget {
   final List<Map<String, dynamic>> theEvents;
   final Set<String> favouriteListingKeys;
+  final ValueChanged<int> onTabSelected;
   const TimetablePage({
     required this.theEvents,
     required this.favouriteListingKeys,
+    required this.onTabSelected,
     super.key,
   });
   @override
@@ -822,12 +823,13 @@ class _TimetablePageState extends State<TimetablePage> {
     final List<Widget> markers = [];
     final List<Widget> swimlanes = [];
 
-    return SafeArea(
-      top: false,
-      left: false,
-      right: false,
-      bottom: Platform.isAndroid && isNavBarVisible(context),
-      child: LayoutBuilder(
+    return FairScaffold(
+      appBarTitle: "Timetable",
+      currentTab: 2,
+      onTabSelected: widget.onTabSelected,
+      appBarActions: [
+      ],
+      body: LayoutBuilder(
       builder: (context, constraints) {
 
       totalWidth = max(MediaQuery.sizeOf(context).width, thePreparedEvents.length * 100.0 + leftColumnWidth) - 2.0; // empirically the min size to fit whole times
