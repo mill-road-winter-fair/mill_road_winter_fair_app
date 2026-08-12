@@ -77,15 +77,7 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     iconSize: 30,
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
-/*       switch (selectedIndex) {
-        case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
-        case 1 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
-        case 2 : _allListingsKey.currentState?.onTabVisible();
-        case 3 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
-        case 4 : _savedListingsKey.currentState?.onTabVisible();
-      }
-        index = selectedIndex;*/
-        onTabSelected.call(selectedIndex);
+      onTabSelected.call(selectedIndex);
     },
     items: const [
       BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
