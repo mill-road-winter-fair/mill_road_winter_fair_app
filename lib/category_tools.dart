@@ -15,7 +15,16 @@ int countCategories(Map<String, dynamic> listing) {
   if (listing['charityCommunityInfo'] == 'TRUE') {
     count++;
   }
-  if (listing['performance'] == 'TRUE') {
+  if (listing['performanceMusic'] == 'TRUE') {
+    count++;
+  }
+  if (listing['performanceChildrens'] == 'TRUE') {
+    count++;
+  }
+  if (listing['performanceDance'] == 'TRUE') {
+    count++;
+  }
+  if (listing['performanceOther'] == 'TRUE') {
     count++;
   }
   if (listing['visitExperience'] == 'TRUE') {
@@ -56,10 +65,11 @@ String getCategory(Map<String, dynamic> listing) {
     if (listing['charityCommunityInfo'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
       return 'Group-Charity/Community/Info';
     }
-    if (listing['performance'] == 'TRUE') {
+    if (listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') {
       return 'Performance';
     }
-    if (listing['performance'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
+    if ((listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') 
+        && listing['groupParent'] == 'TRUE') {
       return 'Group-Performance';
     }
     if (listing['visitExperience'] == 'TRUE') {
