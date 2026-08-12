@@ -780,7 +780,14 @@ class _TimetablePageState extends State<TimetablePage> {
   Widget build(BuildContext context) {
 
     debugPrint('_TimetablePageState build called with loading=$loading');
-    if (loading) return Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (loading) {
+      return FairScaffold(
+        appBarTitle: 'Timetable',
+        currentTab: 2,
+        onTabSelected: widget.onTabSelected,
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     if (onlyNowOrSoon != _onlyNowOrSoonSaved) {
       // refilter to whole day or just now or soon; only do this if changed
@@ -801,8 +808,14 @@ class _TimetablePageState extends State<TimetablePage> {
     if (spanMinutes == 0 || theFilteredEvents.isEmpty) {
       String theMessage = 'Nothing to show.';
       if (onlyNowOrSoon) theMessage += '\n\nUnselect ‘now or soon’\nto see the whole day.';
-      return Align(alignment: AlignmentGeometry.center, 
-        child: Text(theMessage, style: TextStyle(fontSize: 16), textAlign: TextAlign.center)
+      return FairScaffold(
+        appBarTitle: 'Timetable',
+        currentTab: 2,
+        onTabSelected: widget.onTabSelected,
+        body: Align(
+          alignment: Alignment.center,
+          child: Text(theMessage, style: const TextStyle(fontSize: 16), textAlign: TextAlign.center),
+        ),
       );
     }
 

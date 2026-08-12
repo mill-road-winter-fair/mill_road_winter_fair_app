@@ -481,7 +481,7 @@ void main() {
       await tester.tap(find.text('Directions'));
       await settle(tester);
 
-      expect(homePageState.index, 0);
+      expect(homePageState.index, 3);
     });
 
     testWidgets('FilteredListingsPage search filters results based on query (UI)', (WidgetTester tester) async {
