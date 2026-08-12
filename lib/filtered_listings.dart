@@ -14,7 +14,6 @@ import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -299,7 +298,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called');
-    final homePageState = context.findAncestorStateOfType<HomePageState>();
     // Show error if there are no listings
     if (listings.isEmpty) {
       return Center(
