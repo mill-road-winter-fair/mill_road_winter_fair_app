@@ -264,7 +264,7 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'TRUE',
+          'performanceMusic': 'TRUE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
           'location': 'Gwydir St Car Park',
@@ -284,7 +284,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'performanceMusic', listings);
+      await pumpFilteredListingsPage(tester, 'favourite', listings);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
