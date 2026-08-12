@@ -11,9 +11,6 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
-// Remember the previously selected bottom navigation index (used for back navigation).
-int previousIndex = 0;
-
 // Flag set by tests (when true the app reduces/delays animation and timers).
 bool onTest = false;
 

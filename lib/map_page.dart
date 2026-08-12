@@ -28,11 +28,15 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
+  final String? destinationId; // optional if we'll be showing directions to somewhere
+  final LatLng? destinationLatLng; // optional if we'll be showing directions to somewhere
 
   const MapPage({
     super.key,
     required this.listings, 
     required this.onTabSelected,
+    this.destinationId,
+    this.destinationLatLng
   });
 
   @override
@@ -74,6 +78,7 @@ class MapPageState extends State<MapPage> {
     'Services': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
+  bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
 
   @override
   void initState() {
@@ -88,9 +93,14 @@ class MapPageState extends State<MapPage> {
     setVisibleMarkerLists();
     addAllVisibleMarkers();
     establishLocation();
+    if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
       ListingUpdateNotifier.maybeShowNotice(context);
+      if (doingAPushNavigation ?? false) {
+        doingAPushNavigation = false;
+        doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
+      }
     });
     super.initState();
   }
@@ -1064,8 +1074,13 @@ class MapPageState extends State<MapPage> {
     if (navigatorPop == true) {
       Navigator.pop(context);
       // The navigator is only popped when called from the map page, so if this is true set the previousIndex to 0
-      previousIndex = 0;
+      //previousIndex = 0;
     }
+    
+    doTheNavigation(id, destination, navigatorPop);
+  }
+
+  Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
 
     // If user has location tracking enabled
     if (currentLatLng != null) {
@@ -1110,6 +1125,7 @@ class MapPageState extends State<MapPage> {
     });
   }
 
+
   void cancelNavigation() {
     debugPrint('cancelNavigation called');
     // Halt the location subscription
@@ -1148,11 +1164,6 @@ class MapPageState extends State<MapPage> {
 
     // Reset the camera position
     _setMapCameraToFitMapMarkers();
-
-    // If we came from a page other than the map page, go back to that page
-    if (previousIndex != 0) {
-      homePageKey.currentState?.setCurrentIndex(previousIndex);
-    }
 
     setState(() {});
   }
@@ -1498,6 +1509,7 @@ class MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('MapPageState build() called');
+
     return FutureBuilder(
       future: _fetchListings,
       builder: (context, snapshot) {
@@ -1567,6 +1579,7 @@ class MapPageState extends State<MapPage> {
           onTabSelected: widget.onTabSelected,
           appBarActions: [
           ],
+          allowBack: (doingAPushNavigation != null),
           body: Stack(
             children: [
               LayoutBuilder(
@@ -1616,7 +1629,7 @@ class MapPageState extends State<MapPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (navigationInProgress == true)
+                    if (navigationInProgress == true && doingAPushNavigation == null)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
                         onPressed: () {

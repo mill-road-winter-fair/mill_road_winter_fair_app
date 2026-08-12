@@ -16,6 +16,7 @@ import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class FilteredListingsPage extends StatefulWidget {
@@ -84,21 +85,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     thumbVisible.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client, bool navigatorPop) async {
-
-    // Remember the previous index to allow returning back
-    previousIndex = homePageKey.currentState!.index;
-
-    // Switch to map tab on the home page
-    homePageKey.currentState?.setCurrentIndex(0);
-
-    // If we're asked to pop the previous page we also need to set the title
-    if (navigatorPop) appBarTitle = fairName;
-
-    // Request the map page to show directions
-    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
   }
 
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
@@ -594,12 +580,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 onDetailsTapped: () => toggleDetailsRow(index),
                                 onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                                 onGetDirections: () {
-                                  navigateToMapAndGetDirections(
-                                    listing['id'],
-                                    destinationLatLng,
-                                    http.Client(),
-                                    (homePageState == null)
-                                  );
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                    listings: listings, 
+                                    onTabSelected: (_) => {}, 
+                                    destinationId: listing['id'],
+                                    destinationLatLng: destinationLatLng
+                                  )));
                                 },
                                 inDialog: false,
                               ),

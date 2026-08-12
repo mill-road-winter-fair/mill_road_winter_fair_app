@@ -11,6 +11,7 @@ import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class TimetablePage extends StatefulWidget {
@@ -516,7 +517,7 @@ class _TimetablePageState extends State<TimetablePage> {
     //int alertNoticePeriod,
     void Function(VoidCallback) setStateFunction,
 //    final int? Function(PositionedEvent, int, int?) toggleAlertAction,
-    void Function(String, LatLng, bool) onGetDirections,
+    Future<dynamic> Function() onGetDirections,
   ) async {
 
     debugPrint('showListingDetailsDialog called');
@@ -570,12 +571,9 @@ class _TimetablePageState extends State<TimetablePage> {
                   favouriteOrNotListing(event);
                   setStateDialog(() {});
                 },
-                onGetDirections: () {
-                  navigateToMapAndGetDirections(
-                    event.id,
-                    event.latLng,
-                    true,
-                  );
+                onGetDirections: () async {
+                  safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                  onGetDirections.call();
                 },
                 inDialog: true,
               ),
@@ -775,18 +773,6 @@ class _TimetablePageState extends State<TimetablePage> {
         debugPrint('safeRemoveRoute: error removing route: $e');
       }
     }
-}
-
-
-  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, bool navigatorPop) async {
-    // Remember the previous index to allow returning back
-    previousIndex = homePageKey.currentState!.index;
-    // Switch to map tab on the home page
-    homePageKey.currentState?.setCurrentIndex(1);
-    // If we're asked to pop the previous page we also need to set the title
-    if (navigatorPop) appBarTitle = fairName;
-    // Request the map page to show directions
-    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
   }
 
 
@@ -1079,7 +1065,12 @@ class _TimetablePageState extends State<TimetablePage> {
                                                           pe, 
                                                           //alertNoticePeriod,
                                                           setState,
-                                                          navigateToMapAndGetDirections,
+                                                          () => Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                                            listings: listings, 
+                                                            onTabSelected: (_) => {}, 
+                                                            destinationId: pe.id,
+                                                            destinationLatLng: pe.latLng,
+                                                          ))),
                                                         );
                                                       },
                                                       child: Container(

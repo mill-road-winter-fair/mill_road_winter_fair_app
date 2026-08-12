@@ -22,12 +22,14 @@ class FairScaffold extends StatelessWidget {
     this.appBarActions = const [],
     required this.currentTab,
     required this.onTabSelected,
+    this.allowBack,
   });
   final String appBarTitle;
   final Widget body;
   final List<Widget> appBarActions;
   final int currentTab;
   final ValueChanged<int> onTabSelected;
+  final bool? allowBack;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,7 @@ class FairScaffold extends StatelessWidget {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Builder(
+          leading: (allowBack ?? false) ? const BackButton() : Builder(
             builder: (context) => IconButton(
               icon: const Icon(Icons.menu),
               onPressed: () {
@@ -56,7 +58,7 @@ class FairScaffold extends StatelessWidget {
         ),
         body: body,
         drawer: fairDrawer(context),
-        bottomNavigationBar: fairBottomNavigationBar(currentTab, onTabSelected),
+        bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected),
       )
     );
   }
