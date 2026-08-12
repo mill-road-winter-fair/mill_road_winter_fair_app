@@ -40,6 +40,8 @@ class FairScaffold extends StatelessWidget {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
+          titleSpacing: 0,
+          leadingWidth: 44,
           leading: (allowBack ?? false) ? const BackButton() : Builder(
             builder: (context) => IconButton(
               icon: const Icon(Icons.menu),
@@ -54,7 +56,8 @@ class FairScaffold extends StatelessWidget {
             child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           ),
           centerTitle: false,
-          actions: appBarActions,
+          actions: appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
+          actionsPadding: EdgeInsets.only(right: 4),
         ),
         body: body,
         drawer: fairDrawer(context),
