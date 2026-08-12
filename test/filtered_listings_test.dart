@@ -35,7 +35,6 @@ void main() {
           body: FilteredListingsPage(
             filterCategory: category,
             listings: listings,
-            onChangeTitle: null,
             onTabSelected: (_) {},
           ),
         ),
@@ -285,7 +284,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'performance', listings);
+      await pumpFilteredListingsPage(tester, 'performanceMusic', listings);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
@@ -572,7 +571,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onChangeTitle: null, onTabSelected: (_) {}),
+            body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onTabSelected: (_) {}),
           ),
         ),
       );
