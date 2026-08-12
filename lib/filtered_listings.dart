@@ -364,14 +364,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
     int? firstVisibleIndex; // will be used to store the first listing that is actually visible
 
-    final isPerformance = (filterCategory.length > 11 && filterCategory.substring(0,11) == 'performance');
+    bool isShowingJustPerformance = (subFilterCategory.length > 11 && subFilterCategory.substring(0,11) == 'performance');
 
     return FairScaffold(
       appBarTitle: appBarTitle,
       currentTab: switch (filterCategory) {'favourite' => 4, _ => 3},
       onTabSelected: widget.onTabSelected,
       appBarActions: [
-        if (filterCategory == 'favourite' || isPerformance)
+        if (filterCategory == 'favourite' || isShowingJustPerformance)
           IconButton(
             key: const ValueKey('nowFab'),
             onPressed: () {
@@ -419,7 +419,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               color: (isItEventDay()) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-        if (isPerformance || filterCategory == 'favourite')
+        if (isShowingJustPerformance || filterCategory == 'favourite')
           IconButton(
             key: const ValueKey('hidePastListingsFab'),
             onPressed: (isItEventDay()) ? () {
@@ -516,7 +516,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     ),
                     ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.4, maxHeight: 48),
-                      child: _buildSortingDropdown(context, isPerformance),
+                      child: _buildSortingDropdown(context, isShowingJustPerformance),
                     ),
                   ],
                 ),
