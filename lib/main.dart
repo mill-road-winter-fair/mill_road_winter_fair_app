@@ -92,14 +92,9 @@ class HomePageState extends State<HomePage> {
     ChooserPage(onTabSelected: setCurrentIndex),
     MapPage(listings: listings, key: mapPageKey, onTabSelected: setCurrentIndex),
     TimetablePage(theEvents: listings, favouriteListingKeys: favouriteListingKeys, onTabSelected: setCurrentIndex),
-    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle, onTabSelected: setCurrentIndex),
-    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle, onTabSelected: setCurrentIndex),
+    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex),
+    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex),
   ];
-
-
-  void onChangeAppBarTitle(String newTitle) {
-    setState(() => appBarTitle = newTitle);
-  }
 
 
   @override
