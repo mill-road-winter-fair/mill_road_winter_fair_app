@@ -87,5 +87,5 @@ final fairDate = DateTime(2026, 12, 5);
 const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
 
 // Title used for appbar
-const fairName = 'Mill Road Winter Fair 2026';
+const fairName = 'Mill Road Winter Fair';
 String appBarTitle = fairName; // this may be changed in main, filtered_listings etc.
