@@ -339,6 +339,7 @@ void displayAppShareDialog(BuildContext itemContext) async {
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 TextButton(
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     Navigator.of(dialogContext).pop();
                     shareApp(itemContext, 'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
                   },
@@ -346,6 +347,7 @@ void displayAppShareDialog(BuildContext itemContext) async {
                 ),
                 TextButton(
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     Navigator.of(dialogContext).pop();
                   },
                   child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
@@ -400,71 +402,128 @@ void aboutDialog(BuildContext context) async {
     debugPrint('aboutDialog: couldn’t get PackageInfo.fromPlatform:\n$e');
   }
 
+  if (!context.mounted) return;
+
+  final inflater = (MediaQuery.of(context).size.height.toInt() - 600).clamp(0, 250) / 50;
+  final colorScheme = Theme.of(context).colorScheme;
+  final textStyle = TextStyle(fontSize: 13.0 + inflater / 3);
+  final linkStyle = TextStyle(fontSize: 12.5 + inflater / 3, decoration: TextDecoration.underline, decorationColor: colorScheme.tertiary, color: colorScheme.tertiary);
+  final ScrollController aboutDialogScrollController = ScrollController();
+
   if (context.mounted) {
-    return showAboutDialog(
+    await showDialog(
       context: context,
-      applicationName: 'Mill Road\nWinter Fair',
-      applicationVersion: packageInfo.version,
-      applicationIcon: const MyAppIcon(),
-      children: [
-        ListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.phone_android),
-          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Android app by Alexander Berridge')),
-          subtitle: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('https://theberridge.com'));
-          },
-        ),
-        ListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.phone_iphone),
-          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('iPhone version by Matt Whiting')),
-          subtitle: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('http://mattwhiting.com'));
-          },
-        ),
-        ListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.palette),
-          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Illustrations by Clare McEwan')),
-          subtitle: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child:
-                  Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
-          },
-        ),
-        ListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.feedback),
-          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tell us if you like this app')),
-          subtitle: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
-          },
-        ),
-      ],
+      builder: (dialogContext) {
+        return Dialog(
+          insetPadding: EdgeInsets.all(4.0 + inflater * 2),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth.clamp(350.0, 400.0);
+              return Container(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                padding: EdgeInsets.fromLTRB(16.0 + inflater * 2, 20, 10, 6),
+                child: Scrollbar(
+                  controller: aboutDialogScrollController,
+                  thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
+                  thickness: 4,
+                  radius: const Radius.circular(8),
+                  child: SingleChildScrollView(
+                    controller: aboutDialogScrollController,
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity(horizontal: -4 + inflater, vertical: -4),
+                        contentPadding: EdgeInsets.zero,
+                        leading: ClipRRect(borderRadius: BorderRadius.circular(6.0), child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain)),
+                        title: Text(fairName, style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold)),
+                        subtitle: Text('v${packageInfo.version}', style: textStyle),
+                      ),
+                      ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.phone_android, size: 28),
+                        title: Text('Android app by Alexander Berridge', style: textStyle),
+                        subtitle: Text('https://theberridge.com', style: linkStyle),
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          launchUrl(Uri.parse('https://theberridge.com'));
+                        },
+                      ),
+                      ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.phone_iphone, size: 28),
+                        title: Text('iPhone version by Matt Whiting', style: textStyle),
+                        subtitle: Text('http://mattwhiting.com', style: linkStyle),
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          launchUrl(Uri.parse('http://mattwhiting.com'));
+                        },
+                      ),
+                      ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.schedule, size: 28),
+                        title: Text('Timetable view based on Clashfinder Pal by permission of the author', style: textStyle),
+                        subtitle: Text('https://linktr.ee/cfpal', style: linkStyle),
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          launchUrl(Uri.parse('https://linktr.ee/cfpal'));
+                        },
+                      ),
+                      ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.palette_outlined, size: 26),
+                        title: Text('Illustrations by Clare McEwan', style: textStyle),
+                        subtitle: Text('https://www.claremcewan.co.uk', style: linkStyle),
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+                        },
+                      ),
+                      ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.feedback_outlined, size: 26),
+                        title: Text('Tell us if you like this app', style: textStyle),
+                        subtitle: Text('Open a feedback form', style: linkStyle),
+                        onTap: () async {
+                          HapticFeedback.lightImpact();
+                          launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                        },
+                      ),
+                      Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 10, children: [
+                        TextButton(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.of(dialogContext).pop();
+                            showLicensePage(context: context);
+                          },
+                          child: Text('View licences', style: TextStyle(color: colorScheme.tertiary)),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.of(dialogContext).pop();
+                          },
+                          child: Text('Close', style: TextStyle(color: colorScheme.tertiary)),
+                        ),
+                      ]),
+                    ]
+                    ),
+                  )
+                )
+              );
+            }
+          )
+        );
+      }
     );
   }
 }
@@ -523,6 +582,7 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                                 style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () async {
+                                    HapticFeedback.lightImpact();
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
                                     if (await canLaunchUrl(phoneUri)) {
                                       await launchUrl(phoneUri);
