@@ -137,8 +137,9 @@ Drawer fairDrawer(BuildContext context) {
             title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+              Navigator.push(navigatorContext, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
             },
           ),
         ),
@@ -149,8 +150,9 @@ Drawer fairDrawer(BuildContext context) {
             title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+              Navigator.push(navigatorContext, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
             },
           ),
         ),
@@ -161,6 +163,7 @@ Drawer fairDrawer(BuildContext context) {
             title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              Navigator.pop(context);
               launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
             },
           ),
@@ -172,8 +175,10 @@ Drawer fairDrawer(BuildContext context) {
             title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
+              Navigator.pop(context);
               showDialog(
-                context: context,
+                context: navigatorContext,
                 builder: (BuildContext context) {
                   return contactUsDialog(context);
                 },
@@ -195,6 +200,7 @@ Drawer fairDrawer(BuildContext context) {
               IconButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  Navigator.pop(context);
                   launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -204,6 +210,7 @@ Drawer fairDrawer(BuildContext context) {
               IconButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  Navigator.pop(context);
                   launchUrl(Uri.parse('https://x.com/millroadfair'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -213,6 +220,7 @@ Drawer fairDrawer(BuildContext context) {
               IconButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  Navigator.pop(context);
                   launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -222,6 +230,7 @@ Drawer fairDrawer(BuildContext context) {
               IconButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  Navigator.pop(context);
                   launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -246,8 +255,9 @@ Drawer fairDrawer(BuildContext context) {
             title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
+              Navigator.push(navigatorContext, MaterialPageRoute(builder: (context) => const SettingsPage()));
             },
           ),
         ),
@@ -258,8 +268,9 @@ Drawer fairDrawer(BuildContext context) {
             title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+              Navigator.pushReplacement(navigatorContext, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
             },
           ),
         ),
@@ -270,8 +281,9 @@ Drawer fairDrawer(BuildContext context) {
             title: const Text('Share this app', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              displayAppShareDialog(context);
+              displayAppShareDialog(navigatorContext);
             },
           ),
         ),
