@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -264,8 +266,20 @@ Drawer fairDrawer(BuildContext context) {
         Expanded(
           flex: 4,
           child: ListTile(
+            leading: Icon((Platform.isIOS) ? Icons.ios_share : Icons.share),
+            title: const Text('Share this app', style: TextStyle(fontWeight: FontWeight.bold)),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.pop(context);
+              displayAppShareDialog(context);
+            },
+          ),
+        ),
+        Expanded(
+          flex: 4,
+          child: ListTile(
             leading: const Icon(Icons.info),
-            title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
+            title: const Text('About this app', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
               Navigator.pop(context);
@@ -280,6 +294,89 @@ Drawer fairDrawer(BuildContext context) {
       ],
     ),
   );
+}
+
+
+void displayAppShareDialog(BuildContext itemContext) async {
+
+  final colorScheme = Theme.of(itemContext).colorScheme;
+  ButtonStyle buttonStyle = ButtonStyle(
+    backgroundColor: WidgetStatePropertyAll(colorScheme.secondary), 
+    foregroundColor: WidgetStatePropertyAll(colorScheme.onSurface),
+    padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 8, vertical: 0)), 
+    elevation: WidgetStatePropertyAll(3),
+    visualDensity: VisualDensity(horizontal: 0, vertical: -3),
+    shadowColor: WidgetStatePropertyAll(colorScheme.surfaceContainerLow),
+    textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 14)),
+  );
+
+  await showDialog(
+    context: itemContext,
+    builder: (dialogContext) {
+      return Dialog(
+        insetPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
+        shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+        backgroundColor: colorScheme.surfaceContainerLowest,
+        shadowColor: colorScheme.surfaceDim,
+        elevation: 3,
+        child: IntrinsicHeight(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(mainAxisSize: MainAxisSize.min, spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
+              Text(style: TextStyle(fontSize: 14.0),
+                  'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
+              Text(style: TextStyle(fontSize: 14.0),
+                  'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
+              Align(alignment: AlignmentGeometry.center, child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150)),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    shareApp(itemContext, 'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
+                  },
+                  child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                  child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                ),
+              ]),
+            ]),
+          ),
+        ),
+      );
+    }
+  );
+
+}
+
+
+void shareApp(BuildContext context, String msgText) {
+  final params = ShareParams(
+    text: msgText,
+    title: 'Share the app',
+    //uri: Uri.parse('https://www.millroadwinterfair.org/mrwf-app/'), // can't have this and text
+  );
+  try {
+    SharePlus.instance.share(params);
+  } catch (e) {
+    debugPrint('shareApp error launching SharePlus::\n$e');
+    Fluttertoast.showToast(
+      msg: 'Couldn’t launch share sheet. Please try again later',
+      gravity: ToastGravity.CENTER,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      textColor: Theme.of(context).colorScheme.onPrimary,
+      fontSize: 16,
+      toastLength: Toast.LENGTH_LONG,
+      timeInSecForIosWeb: 4,
+    );
+  }
 }
 
 
