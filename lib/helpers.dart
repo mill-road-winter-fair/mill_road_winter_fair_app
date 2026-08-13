@@ -300,15 +300,6 @@ Drawer fairDrawer(BuildContext context) {
 void displayAppShareDialog(BuildContext itemContext) async {
 
   final colorScheme = Theme.of(itemContext).colorScheme;
-  ButtonStyle buttonStyle = ButtonStyle(
-    backgroundColor: WidgetStatePropertyAll(colorScheme.secondary), 
-    foregroundColor: WidgetStatePropertyAll(colorScheme.onSurface),
-    padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 8, vertical: 0)), 
-    elevation: WidgetStatePropertyAll(3),
-    visualDensity: VisualDensity(horizontal: 0, vertical: -3),
-    shadowColor: WidgetStatePropertyAll(colorScheme.surfaceContainerLow),
-    textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 14)),
-  );
 
   await showDialog(
     context: itemContext,
@@ -380,8 +371,9 @@ void shareApp(BuildContext context, String msgText) {
 }
 
 
-void aboutDialog(BuildContext context) {
-  PackageInfo packageInfo = PackageInfo(
+void aboutDialog(BuildContext context) async {
+
+  PackageInfo packageInfo = PackageInfo( // fallback
     appName: 'Unknown',
     packageName: 'Unknown',
     version: 'Unknown',
@@ -389,71 +381,75 @@ void aboutDialog(BuildContext context) {
     buildSignature: 'Unknown',
     installerStore: 'Unknown',
   );
-  return showAboutDialog(
-    context: context,
-    applicationName: 'Mill Road\nWinter Fair',
-    applicationVersion: packageInfo.version,
-    applicationIcon: const MyAppIcon(),
-    children: [
-      ListTile(
-        dense: true,
-        contentPadding: EdgeInsets.zero,
-        leading: const Icon(Icons.phone_android),
-        title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Android app by Alexander Berridge')),
-        subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
-        onTap: () async {
-          HapticFeedback.lightImpact();
-          launchUrl(Uri.parse('https://theberridge.com'));
-        },
-      ),
-      ListTile(
-        dense: true,
-        contentPadding: EdgeInsets.zero,
-        leading: const Icon(Icons.phone_iphone),
-        title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('iPhone version by Matt Whiting')),
-        subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
-        onTap: () async {
-          HapticFeedback.lightImpact();
-          launchUrl(Uri.parse('http://mattwhiting.com'));
-        },
-      ),
-      ListTile(
-        dense: true,
-        contentPadding: EdgeInsets.zero,
-        leading: const Icon(Icons.palette),
-        title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Illustrations by Clare McEwan')),
-        subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child:
-                Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
-        onTap: () async {
-          HapticFeedback.lightImpact();
-          launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
-        },
-      ),
-      ListTile(
-        dense: true,
-        contentPadding: EdgeInsets.zero,
-        leading: const Icon(Icons.feedback),
-        title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tell us if you like this app')),
-        subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
-        onTap: () async {
-          HapticFeedback.lightImpact();
-          launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
-        },
-      ),
-    ],
-  );
+  packageInfo = await PackageInfo.fromPlatform();
+
+  if (context.mounted) {
+    return showAboutDialog(
+      context: context,
+      applicationName: 'Mill Road\nWinter Fair',
+      applicationVersion: packageInfo.version,
+      applicationIcon: const MyAppIcon(),
+      children: [
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.phone_android),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Android app by Alexander Berridge')),
+          subtitle: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('https://theberridge.com'));
+          },
+        ),
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.phone_iphone),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('iPhone version by Matt Whiting')),
+          subtitle: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('http://mattwhiting.com'));
+          },
+        ),
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.palette),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Illustrations by Clare McEwan')),
+          subtitle: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child:
+                  Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+          },
+        ),
+        ListTile(
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.feedback),
+          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tell us if you like this app')),
+          subtitle: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+          },
+        ),
+      ],
+    );
+  }
 }
 
 
