@@ -282,8 +282,9 @@ Drawer fairDrawer(BuildContext context) {
             title: const Text('About this app', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              aboutDialog(context);
+              aboutDialog(navigatorContext);
             },
           ),
         ),
@@ -381,7 +382,11 @@ void aboutDialog(BuildContext context) async {
     buildSignature: 'Unknown',
     installerStore: 'Unknown',
   );
-  packageInfo = await PackageInfo.fromPlatform();
+  try {
+    packageInfo = await PackageInfo.fromPlatform().timeout(const Duration(milliseconds: 200), onTimeout: () => packageInfo);
+  } catch (e) {
+    debugPrint('aboutDialog: couldn’t get PackageInfo.fromPlatform:\n$e');
+  }
 
   if (context.mounted) {
     return showAboutDialog(
