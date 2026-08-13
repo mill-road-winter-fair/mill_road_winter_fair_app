@@ -429,6 +429,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 numberOfVisibleListings = -1;
                 firstVisibleIndex = null;
               });
+              Fluttertoast.showToast(
+                msg: (_hidePastListings) ? 'Hiding all listings that have passed' : 'Showing all listings',
+                gravity: ToastGravity.BOTTOM,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                textColor: Theme.of(context).colorScheme.onPrimary,
+                fontSize: 16,
+                toastLength: Toast.LENGTH_SHORT,
+                timeInSecForIosWeb: 2,
+              );
             } : null,
             icon: Icon(
               Icons.event_busy, 
