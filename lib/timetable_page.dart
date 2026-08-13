@@ -31,6 +31,7 @@ class TimetablePage extends StatefulWidget {
 class _TimetablePageState extends State<TimetablePage> {
   late ScrollController _horizontalScrollController;
   late ScrollController _verticalScrollController;
+  final TextEditingController _searchController = TextEditingController();
   Timer? _nowLineTimer;
   final nowLineKey = GlobalKey();
   late double _dayPixelsPerMinute; // scale for the current day view, whatever its orientation
@@ -39,6 +40,8 @@ class _TimetablePageState extends State<TimetablePage> {
   bool scaling = false; // tracks whether user is re-scaling the view
   bool onlyNowOrSoon = false; // whether to show what's on now or soon
   bool? _onlyNowOrSoonSaved; // to track if this has changed
+  String _searchQuery = '';
+  bool _isSearching = false; // true when the search bar is open (with/without text)
   static const leftColumnWidth = 44.0; // how much space to leave for the time labels
   late DateTime timelineMinStart; // the start of the timeline after filtering
   late DateTime timelineMaxEnd; // the end of the timeline after filtering
@@ -90,6 +93,7 @@ class _TimetablePageState extends State<TimetablePage> {
     }
     super.didChangeDependencies();
   }
+
 
   void loadScales() async {
     debugPrint('_TimetablePageState loadScales called');
@@ -208,7 +212,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
 
-  Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon) {
+  Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, String searchQuery) {
     timelineMinStart = DateTime(9999);
     timelineMaxEnd = DateTime(0);
     final now = DateTime.now();
@@ -217,9 +221,12 @@ class _TimetablePageState extends State<TimetablePage> {
       final theEventsAtThisLocation = location.value;
       for (int i=0; i<theEventsAtThisLocation.length; i++) {
         final ev = theEventsAtThisLocation[i];
-        if (!ev.cancelled && (!onlyNowOrSoon 
-            || (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -10) 
-            || (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 60)))) {
+        if (!ev.cancelled 
+              && (!onlyNowOrSoon 
+                || (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -10) 
+                || (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 60)))
+              && (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery))
+            ) {
           if (theFilteredEvents.keys.contains(location.key)) {
             theFilteredEvents[location.key]!.add(ev);
           } else {
@@ -792,7 +799,7 @@ class _TimetablePageState extends State<TimetablePage> {
     if (onlyNowOrSoon != _onlyNowOrSoonSaved) {
       // refilter to whole day or just now or soon; only do this if changed
       _onlyNowOrSoonSaved = onlyNowOrSoon;
-      theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon);
+      theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon, _searchQuery);
     }
     calculateInitialScalesIfNeeded();
     if (fairDate.difference(DateTime.now()).inDays == 0 
@@ -805,18 +812,11 @@ class _TimetablePageState extends State<TimetablePage> {
       });
     }
 
+    String theErrorMessage = '';
     if (spanMinutes == 0 || theFilteredEvents.isEmpty) {
-      String theMessage = 'Nothing to show.';
-      if (onlyNowOrSoon) theMessage += '\n\nUnselect ‘now or soon’\nto see the whole day.';
-      return FairScaffold(
-        appBarTitle: 'Timetable',
-        currentTab: 2,
-        onTabSelected: widget.onTabSelected,
-        body: Align(
-          alignment: Alignment.center,
-          child: Text(theMessage, style: const TextStyle(fontSize: 16), textAlign: TextAlign.center),
-        ),
-      );
+      theErrorMessage = 'Nothing to show.';
+      if (onlyNowOrSoon) theErrorMessage += '\n\nUnselect ‘now or soon’ to see the whole day.';
+      if (_searchQuery != '') theErrorMessage += '\n\nYou can clear your search by tapping the X icon in the search bar.';
     }
 
     final now = DateTime.now();
@@ -832,299 +832,356 @@ class _TimetablePageState extends State<TimetablePage> {
       currentTab: 2,
       onTabSelected: widget.onTabSelected,
       appBarActions: [
+        IconButton(
+          key: const ValueKey('searchFab'),
+          color: Theme.of(context).colorScheme.onSecondary,
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            setState(() {
+              _isSearching = !_isSearching;
+            });
+          },
+          icon: Icon(Icons.search, color: Theme.of(context).colorScheme.onPrimary),
+        ),
       ],
       body: LayoutBuilder(
-      builder: (context, constraints) {
+        builder: (context, constraints) {
 
-      totalWidth = max(MediaQuery.sizeOf(context).width, thePreparedEvents.length * 100.0 + leftColumnWidth) - 2.0; // empirically the min size to fit whole times
+          totalWidth = max(MediaQuery.sizeOf(context).width, theFilteredEvents.length * 100.0 + leftColumnWidth) - 2.0; // empirically the min size to fit whole times
 
-        if (!scaling) {
-          final currentOrientation = MediaQuery.orientationOf(context);
-          if (onlyNowOrSoon) {
-            _dayPixelsPerMinute = max(0.8, min(20, (constraints.maxHeight - 48) / max(spanMinutes, 30)));
-          } else {
-            if (currentOrientation == Orientation.landscape) {
-              _dayPixelsPerMinute = pixelsPerMinuteL; // the local version which may have changed from that in schedule
+          if (!scaling) {
+            final currentOrientation = MediaQuery.orientationOf(context);
+            if (onlyNowOrSoon) {
+              _dayPixelsPerMinute = max(0.8, min(20, (constraints.maxHeight - 48) / max(spanMinutes, 30)));
             } else {
-              _dayPixelsPerMinute = pixelsPerMinuteP; // the local version which may have changed from that in schedule
+              if (currentOrientation == Orientation.landscape) {
+                _dayPixelsPerMinute = pixelsPerMinuteL; // the local version which may have changed from that in schedule
+              } else {
+                _dayPixelsPerMinute = pixelsPerMinuteP; // the local version which may have changed from that in schedule
+              }
             }
           }
-        }
-        startPixelsPerMinute = _dayPixelsPerMinute;
-        final cols = theFilteredEvents.length;
-        // prepare lanes for each location
-        final Map<String, List<PositionedEvent>> positioned = {};
-        final columnWidth = (totalWidth - leftColumnWidth) / cols;
-        for (var loc in theFilteredEvents.keys) {
-          final evs = theFilteredEvents[loc];
-          positioned[loc] = computeLanes(evs!, timelineMinStart, _dayPixelsPerMinute, columnWidth);
-        }
+          startPixelsPerMinute = _dayPixelsPerMinute;
+          final cols = theFilteredEvents.length;
+          // prepare lanes for each location
+          final Map<String, List<PositionedEvent>> positioned = {};
+          final columnWidth = (totalWidth - leftColumnWidth) / cols;
+          for (var loc in theFilteredEvents.keys) {
+            final evs = theFilteredEvents[loc];
+            positioned[loc] = computeLanes(evs!, timelineMinStart, _dayPixelsPerMinute, columnWidth);
+          }
 
-        // Build the pale grey 'swim lanes'
-        for (int i = 0; i < cols; i++) {
-          swimlanes.add(
-            Positioned(
-              top: 0,
-              left: 12 + leftColumnWidth + i * (totalWidth - leftColumnWidth) / cols,
-              height: spanMinutes * _dayPixelsPerMinute + 8,
-              child: Container(color: colorScheme.primary.withAlpha(20), width: (totalWidth - leftColumnWidth) / cols - 22),
-            ),
-          );
-        }
+          // Build the pale grey 'swim lanes'
+          for (int i = 0; i < cols; i++) {
+            swimlanes.add(
+              Positioned(
+                top: 0,
+                left: 12 + leftColumnWidth + i * (totalWidth - leftColumnWidth) / cols,
+                height: spanMinutes * _dayPixelsPerMinute + 8,
+                child: Container(color: colorScheme.primary.withAlpha(20), width: (totalWidth - leftColumnWidth) / cols - 22),
+              ),
+            );
+          }
 
-        // Build time markers (every 30 or 60 minutes depending on span)
-        DateTime t = DateTime(
-          timelineMinStart.year, 
-          timelineMinStart.month, 
-          timelineMinStart.day, 
-          timelineMinStart.hour, 
-          (timelineMinStart.minute ~/ markInterval + 1) * markInterval
-        );
-        while (t.isBefore(timelineMaxEnd.add(Duration(minutes: markInterval)))) {
-          final top = max(0.0, t.difference(timelineMinStart).inMinutes * _dayPixelsPerMinute);
-          final timeLabel = '${t.hour.toString().padLeft(2,'0')}:${t.minute.toString().padLeft(2,'0')}';
-          markers.add(
-            Positioned(
-              top: top,
-              left: 0,
-              right: 0,
-              child: Container(height: 1, color: colorScheme.surfaceDim),
-            ),
+          // Build time markers (every 30 or 60 minutes depending on span)
+          DateTime t = DateTime(
+            timelineMinStart.year, 
+            timelineMinStart.month, 
+            timelineMinStart.day, 
+            timelineMinStart.hour, 
+            (timelineMinStart.minute ~/ markInterval + 1) * markInterval
           );
-          markers.add(
-            Positioned(
-              top: top - 8,
-              left: 6,
-              child: Text(
-                timeLabel, 
-                style: TextStyle(
-                  fontSize: 12.5, fontWeight: FontWeight.bold, 
-                  color: colorScheme.onSurfaceVariant, 
-                  shadows: [Shadow(color: colorScheme.onPrimary, offset: Offset(0, 0), blurRadius: 2)],
+          while (t.isBefore(timelineMaxEnd.add(Duration(minutes: markInterval)))) {
+            final top = max(0.0, t.difference(timelineMinStart).inMinutes * _dayPixelsPerMinute);
+            final timeLabel = '${t.hour.toString().padLeft(2,'0')}:${t.minute.toString().padLeft(2,'0')}';
+            markers.add(
+              Positioned(
+                top: top,
+                left: 0,
+                right: 0,
+                child: Container(height: 1, color: colorScheme.surfaceDim),
+              ),
+            );
+            markers.add(
+              Positioned(
+                top: top - 8,
+                left: 6,
+                child: Text(
+                  timeLabel, 
+                  style: TextStyle(
+                    fontSize: 12.5, fontWeight: FontWeight.bold, 
+                    color: colorScheme.onSurfaceVariant, 
+                    shadows: [Shadow(color: colorScheme.onPrimary, offset: Offset(0, 0), blurRadius: 2)],
+                  ),
                 ),
               ),
-            ),
-          );
-          t = t.add(Duration(minutes: markInterval));
-        }
+            );
+            t = t.add(Duration(minutes: markInterval));
+          }
 
-        final nowTop = max(0.0, (now.difference(timelineMinStart).inMinutes) * _dayPixelsPerMinute) - 1.5;
+          final nowTop = max(0.0, (now.difference(timelineMinStart).inMinutes) * _dayPixelsPerMinute) - 1.5;
 
-        if (!onlyNowOrSoon && _onlyNowOrSoonSaved!) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            scrollToKey(nowLineKey, 0.3);
-          });
-        }
-        _onlyNowOrSoonSaved = onlyNowOrSoon;
+          if (!onlyNowOrSoon && _onlyNowOrSoonSaved!) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              scrollToKey(nowLineKey, 0.3);
+            });
+          }
+          _onlyNowOrSoonSaved = onlyNowOrSoon;
 
-        final timelineHeight = max(constraints.maxHeight - 40, spanMinutes * _dayPixelsPerMinute + 4);
-        final theContent = NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollStartNotification || notification is UserScrollNotification) {
-              removeMiniPopup();
-            }
-            return false; // let scrolling continue
-          },
-          child: SingleChildScrollView(
-            controller: _horizontalScrollController,
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.only(right: 2), // stop it crashing into edge
-            child: SizedBox(
-              width: totalWidth,
-              child: Column(
+          final timelineHeight = max(constraints.maxHeight - 40, spanMinutes * _dayPixelsPerMinute + 4);
+          final theContent = Column(children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _isSearching ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Fixed header row
                   Container(
-                    color: colorScheme.surfaceContainerLowest,
-                    height: 34,
-                    child: Row(spacing: 4,
-                      children: [
-                        Container(width: leftColumnWidth - 2), 
-                        for (final location in positioned.entries)
-                          Builder(builder: (itemContext) {
-                            return GestureDetector(
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                showMiniPopup(itemContext, null, location.key);
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: colorScheme.onSurfaceVariant,
-                                  border: Border.all(width: 0.1),
-                                  borderRadius: BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
-                                ),
-                                width: (totalWidth - leftColumnWidth) / cols - 4,
-                                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                alignment: AlignmentGeometry.center,
-                                child: AutoSizeText(
-                                  location.key,
-                                  softWrap: true,
-                                  maxLines: 2,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.secondary),
-                                  minFontSize: 11,
-                                  maxFontSize: 15,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            );
-                          }),
-                      ],
-                    ),
-                  ),
-                  // Scrollable timeline content
-                  SizedBox(
-                    height: constraints.maxHeight - 34,
-                    child: GestureDetector(
-                      onScaleStart: (details) {
-                        if (onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
-                        scaling = true;
-                        startPixelsPerMinute = _dayPixelsPerMinute;
-                      },
-                      onScaleUpdate: (details) {
-                        if (onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
-                        final dampenedScale = 1 + (details.scale - 1) * 0.5;
-                        final newdayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
-                        if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
-                          setState(() {
-                            _dayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
-                          });
-                        }
-                      },
-                      onScaleEnd: (_) async {
-                        if (scaling) {
-                          scaling = false;
-                          if (!onlyNowOrSoon) { // don't save special 'now' scale
-                            if (MediaQuery.orientationOf(context) == Orientation.landscape) {
-                              if (_dayPixelsPerMinute != pixelsPerMinuteL) { // only saved if genuinely changed
-                                pixelsPerMinuteL = _dayPixelsPerMinute;
-                                saveScales();
-                              }
-                            } else {
-                              if (_dayPixelsPerMinute != pixelsPerMinuteP) { // only saved if genuinely changed
-                                pixelsPerMinuteP = _dayPixelsPerMinute;
-                                saveScales();
-                              }
-                            }
-                          }
-                          setState(() { });
-                        }
-                      },
-                      child: SingleChildScrollView(
-                        controller: _verticalScrollController,
-                        physics: const ClampingScrollPhysics(),
-                        scrollDirection: Axis.vertical,
-                        key: PageStorageKey('verticalList'),
-                        child: SizedBox(
-                          width: totalWidth,
-                          height: timelineHeight,
-                          child: Stack(
-                            children: [
-                              // time markers lines and labels and swim lanes
-                              ...swimlanes,
-                              // red 'now' line
-                              if (timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now()))
-                                Positioned(
-                                  key: nowLineKey,
-                                  top: nowTop,
-                                  left: 0,
-                                  right: 0,
-                                  child: Container(height: 3, color: Colors.red),
-                                ),
-                              ...markers,
-                              // Event stacks per column
-                              Positioned(
-                                top: 0,
-                                left: leftColumnWidth,
-                                right: 0,
-                                child: SizedBox(
-                                  height: timelineHeight,
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      for (final location in positioned.entries)
-                                        SizedBox(
-                                          width: (totalWidth - leftColumnWidth) / cols,
-                                          height: timelineHeight,
-                                          child: Stack(
-                                            children: [
-                                              // For each event in this location, place positioned containers
-                                              for (var pe in location.value) ...[
-                                                (scaling)
-                                                  ? Positioned(
-                                                    top: pe.top,
-                                                    left: pe.left,
-                                                    width: pe.width,
-                                                    height: pe.height,
-                                                    child: Container(
-                                                      decoration: BoxDecoration(
-                                                        color: colorScheme.secondary,
-                                                        borderRadius: BorderRadius.circular(4),
-                                                        boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
-                                                        border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
-                                                      )
-                                                    )
-                                                  )
-                                                  : Positioned(
-                                                    top: pe.top,
-                                                    left: pe.left,
-                                                    width: pe.width,
-                                                    height: pe.height,
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        HapticFeedback.lightImpact();
-                                                        showListingDetailsDialog(
-                                                          context, 
-                                                          pe, 
-                                                          //alertNoticePeriod,
-                                                          setState,
-                                                          () => Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
-                                                            listings: listings, 
-                                                            onTabSelected: (_) => {}, 
-                                                            destinationId: pe.id,
-                                                            destinationLatLng: pe.latLng,
-                                                          ))),
-                                                        );
-                                                      },
-                                                      child: Container(
-                                                        padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
-                                                        decoration: BoxDecoration(
-                                                          color: (favouriteListingKeys.contains(pe.id)) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
-                                                          borderRadius: BorderRadius.circular(4),
-                                                          boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
-                                                          border: Border.all(width: 0.2, color: colorScheme.onSecondary),
-                                                        ),
-                                                        child: eventRect(pe, colorScheme, isLandscape, null),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                if (!scaling && favouriteListingKeys.contains(pe.id)) Positioned(
-                                                  top: pe.top + 2,
-                                                  left: pe.left + pe.width - 18,
-                                                  child: Icon(Icons.favorite, size: 16, color: Colors.red.withAlpha(120)),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                    key: const ValueKey('searchBar'),
+                    color: Theme.of(context).colorScheme.surfaceDim,
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
+                    padding: EdgeInsets.all(8),
+                    child: SearchBar(
+                      autoFocus: true,
+                      controller: _searchController,
+                      elevation: const WidgetStatePropertyAll(0),
+                      hintText: 'Search all events...',
+                      leading: const Icon(Icons.search),
+                      trailing: [
+                        IconButton(
+                          iconSize: 20,
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
+                              _searchQuery = '';
+                              _searchController.clear();
+                              theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon, _searchQuery);
+                            });
+                          },
                         ),
-                      ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value.toLowerCase();
+                          theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon, _searchQuery);
+                        });
+                      },
                     ),
                   ),
                 ],
+              ) : SizedBox.shrink(),
+            ),
+            (theErrorMessage != '') 
+              ? Align(alignment: Alignment.center, child: Padding(padding: EdgeInsetsGeometry.all(60), child: Text(theErrorMessage, style: const TextStyle(fontSize: 16), textAlign: TextAlign.center)))
+              : NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is ScrollStartNotification || notification is UserScrollNotification) {
+                  removeMiniPopup();
+                }
+                return false; // let scrolling continue
+              },
+              child: SingleChildScrollView(
+                controller: _horizontalScrollController,
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.only(right: 2), // stop it crashing into edge
+                child: SizedBox(
+                  width: totalWidth,
+                  child: Column(
+                    children: [
+                      // Fixed header row
+                      Container(
+                        color: colorScheme.surfaceContainerLowest,
+                        height: 34,
+                        child: Row(spacing: 4,
+                          children: [
+                            Container(width: leftColumnWidth - 2), 
+                            for (final location in positioned.entries)
+                              Builder(builder: (itemContext) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    showMiniPopup(itemContext, null, location.key);
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.onSurfaceVariant,
+                                      border: Border.all(width: 0.1),
+                                      borderRadius: BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
+                                    ),
+                                    width: (totalWidth - leftColumnWidth) / cols - 4,
+                                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                    alignment: AlignmentGeometry.center,
+                                    child: AutoSizeText(
+                                      location.key,
+                                      softWrap: true,
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.secondary),
+                                      minFontSize: 11,
+                                      maxFontSize: 15,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                );
+                              }),
+                          ],
+                        ),
+                      ),
+                      // Scrollable timeline content
+                      SizedBox(
+                        height: constraints.maxHeight - 34 - (_isSearching ? 56 : 0),
+                        child: GestureDetector(
+                          onScaleStart: (details) {
+                            if (onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
+                            scaling = true;
+                            startPixelsPerMinute = _dayPixelsPerMinute;
+                          },
+                          onScaleUpdate: (details) {
+                            if (onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
+                            final dampenedScale = 1 + (details.scale - 1) * 0.5;
+                            final newdayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                            if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
+                              setState(() {
+                                _dayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                              });
+                            }
+                          },
+                          onScaleEnd: (_) async {
+                            if (scaling) {
+                              scaling = false;
+                              if (!onlyNowOrSoon) { // don't save special 'now' scale
+                                if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+                                  if (_dayPixelsPerMinute != pixelsPerMinuteL) { // only saved if genuinely changed
+                                    pixelsPerMinuteL = _dayPixelsPerMinute;
+                                    saveScales();
+                                  }
+                                } else {
+                                  if (_dayPixelsPerMinute != pixelsPerMinuteP) { // only saved if genuinely changed
+                                    pixelsPerMinuteP = _dayPixelsPerMinute;
+                                    saveScales();
+                                  }
+                                }
+                              }
+                              setState(() { });
+                            }
+                          },
+                          child: SingleChildScrollView(
+                            controller: _verticalScrollController,
+                            physics: const ClampingScrollPhysics(),
+                            scrollDirection: Axis.vertical,
+                            key: PageStorageKey('verticalList'),
+                            child: SizedBox(
+                              width: totalWidth,
+                              height: timelineHeight,
+                              child: Stack(
+                                children: [
+                                  // time markers lines and labels and swim lanes
+                                  ...swimlanes,
+                                  // red 'now' line
+                                  if (timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now()))
+                                    Positioned(
+                                      key: nowLineKey,
+                                      top: nowTop,
+                                      left: 0,
+                                      right: 0,
+                                      child: Container(height: 3, color: Colors.red),
+                                    ),
+                                  ...markers,
+                                  // Event stacks per column
+                                  Positioned(
+                                    top: 0,
+                                    left: leftColumnWidth,
+                                    right: 0,
+                                    child: SizedBox(
+                                      height: timelineHeight,
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          for (final location in positioned.entries)
+                                            SizedBox(
+                                              width: (totalWidth - leftColumnWidth) / cols,
+                                              height: timelineHeight,
+                                              child: Stack(
+                                                children: [
+                                                  // For each event in this location, place positioned containers
+                                                  for (var pe in location.value) ...[
+                                                    (scaling)
+                                                      ? Positioned(
+                                                        top: pe.top,
+                                                        left: pe.left,
+                                                        width: pe.width,
+                                                        height: pe.height,
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                            color: colorScheme.secondary,
+                                                            borderRadius: BorderRadius.circular(4),
+                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
+                                                            border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
+                                                          )
+                                                        )
+                                                      )
+                                                      : Positioned(
+                                                        top: pe.top,
+                                                        left: pe.left,
+                                                        width: pe.width,
+                                                        height: pe.height,
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            HapticFeedback.lightImpact();
+                                                            showListingDetailsDialog(
+                                                              context, 
+                                                              pe, 
+                                                              //alertNoticePeriod,
+                                                              setState,
+                                                              () => Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                                                listings: listings, 
+                                                                onTabSelected: (_) => {}, 
+                                                                destinationId: pe.id,
+                                                                destinationLatLng: pe.latLng,
+                                                              ))),
+                                                            );
+                                                          },
+                                                          child: Container(
+                                                            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
+                                                            decoration: BoxDecoration(
+                                                              color: (favouriteListingKeys.contains(pe.id)) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
+                                                              borderRadius: BorderRadius.circular(4),
+                                                              boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
+                                                              border: Border.all(width: 0.2, color: colorScheme.onSecondary),
+                                                            ),
+                                                            child: eventRect(pe, colorScheme, isLandscape, null),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    if (!scaling && favouriteListingKeys.contains(pe.id)) Positioned(
+                                                      top: pe.top + 2,
+                                                      left: pe.left + pe.width - 18,
+                                                      child: Icon(Icons.favorite, size: 16, color: Colors.red.withAlpha(120)),
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        );
-        return theContent;
-      }
-    )
+          ]);
+          return theContent;
+        }
+      )
     );
   }
 }
