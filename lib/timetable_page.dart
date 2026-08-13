@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -223,8 +224,8 @@ class _TimetablePageState extends State<TimetablePage> {
         final ev = theEventsAtThisLocation[i];
         if (!ev.cancelled 
               && (!onlyNowOrSoon 
-                || (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -10) 
-                || (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 60)))
+                || (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) 
+                || (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30)))
               && (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery))
             ) {
           if (theFilteredEvents.keys.contains(location.key)) {
@@ -595,182 +596,6 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
 
-  Widget listingDetailsColumn(
-    BuildContext context, 
-    PositionedEvent event, 
-    //int alertNoticePeriod,
-    void Function(VoidCallback) setParentStateFunction, // calling page (if dialog) otherwise local page
-    void Function(VoidCallback)? setLocalStateFunction, // dialog if we're in one
-    //final int? Function(PositionedEvent, int, int?) toggleAlertAction,
-    void Function(String, LatLng, bool) onGetDirections,
-  ) {
-
-    final eventNameTextKey = GlobalKey(); // for mini pop-ups
-    final eventNameDescKey = GlobalKey(); // for mini pop-ups
-    //final notificationKey = GlobalKey(); // for mini pop-ups
-    final colorScheme = Theme.of(context).colorScheme;
-    ButtonStyle buttonStyle = ButtonStyle(
-      backgroundColor: WidgetStatePropertyAll(colorScheme.secondary), 
-      foregroundColor: WidgetStatePropertyAll(colorScheme.onSurface),
-      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 8, vertical: 0)), 
-      elevation: WidgetStatePropertyAll(3),
-      visualDensity: VisualDensity(horizontal: 0, vertical: -3),
-      shadowColor: WidgetStatePropertyAll(colorScheme.surfaceContainerLow),
-      textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 15.0)),
-    );
-    final textStyle = TextStyle(fontSize: 16.0, height: 1.2);
-    //final now = DateTime.now();
-    //final pastEvent = (event.startTime.difference(now).inMinutes < 0);
-    //final tooLongFutureEvent = (event.startTime.difference(now).inDays > 7);
-    //final theAlertsStore = theScheduleHomeState.alertsStore;
-    //int? alertId = theAlertsStore.alertIdForEvent(event);
-    //bool settingsOpened = false; // keeps track of permissions dialog being opened so we can re-check
-
-    debugPrint('listingDetailsColumn called');
-
-/*     void setTheAlert(StateSetter setStateDialog, [int? noticePeriod]) async {
-      removeMiniPopup();
-      if (settingsOpened) { // button previously tapped when alert permissions weren't given; maybe they are now
-        alertsPermissionGranted = await requestAlertPermissions();
-        settingsOpened = false;
-      }
-      if (alertsPermissionGranted) {
-        alertId = toggleAlertAction.call(event, noticePeriod ?? alertNoticePeriod, alertId);
-        setParentStateFunction.call(() => {});
-        setLocalStateFunction?.call(() => {});
-      } else {
-        alertsPermissionGranted = await requestAlertPermissions();
-        if (!alertsPermissionGranted) {
-          settingsOpened = true;
-          if (context.mounted) await showNoPermissionsDialog(context, colorScheme);
-        } else {
-          alertId = toggleAlertAction.call(event, noticePeriod ?? alertNoticePeriod, alertId);
-          if (context.mounted) setParentStateFunction.call(() => {});
-          if (context.mounted) setLocalStateFunction?.call(() => {});
-        }
-      }
-    } */
-
-/*     Map<String, void Function()> alertOptions = {};
-    if (event.start.difference(now).inMinutes > 60) alertOptions['60 minutes before'] = () => setTheAlert(setParentStateFunction, 60);
-    if (event.start.difference(now).inMinutes > 30) alertOptions['30 minutes before'] = () => setTheAlert(setParentStateFunction, 30);
-    if (event.start.difference(now).inMinutes > 15) alertOptions['15 minutes before'] = () => setTheAlert(setParentStateFunction, 15);
-    if (event.start.difference(now).inMinutes > 5) alertOptions['5 minutes before'] = () => setTheAlert(setParentStateFunction, 5);
-    if (event.start.difference(now).inMinutes > 0) alertOptions['At time of event'] = () => setTheAlert(setParentStateFunction, 0);
- */
-    return StatefulBuilder(
-      builder: (context, setStateDialog) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 8.0,
-          children: [
-            Row(spacing: 10, mainAxisAlignment: MainAxisAlignment.spaceBetween, crossAxisAlignment: CrossAxisAlignment.center, children: [
-              SizedBox(width: 28, height: 28, child: Text(event.emoji, style: textStyle.copyWith(fontSize: 24, height: 1.2), textAlign: TextAlign.center)),
-              Expanded(child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return GestureDetector( // since field may be clipped
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      showMiniPopup(context, eventNameTextKey, event.name);
-                    },
-                    child: Text(
-                      event.name, 
-                      style: TextStyle(fontSize: 18.0, height: 1.2, fontWeight: FontWeight.bold), 
-                      maxLines: 2, 
-                      overflow: TextOverflow.ellipsis, 
-                      key: eventNameTextKey
-                    ),
-                  );
-                }
-              )),
-              IconButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  favouriteOrNotListing(event);
-                  setStateDialog(() {});
-                },
-                padding: const EdgeInsets.all(0),
-                style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -4), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                icon:Icon(
-                  (favouriteListingKeys.contains(event.id)) ? Icons.favorite : Icons.favorite_border_outlined, 
-                  shadows: [Shadow( color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
-                  color: Theme.of(context).colorScheme.primary
-                ),
-              ),
-            ],),
-            if (event.subtitle != '') Row(spacing: 10, children: [
-              SizedBox(width: 28, height: 28, child: Icon(Icons.info_outline, color: colorScheme.onSurfaceVariant)),
-              SizedBox(width: 218, child: AutoSizeText(event.subtitle, style: textStyle, maxLines: 2)),
-            ]),
-            Row(spacing: 10, children: [
-              SizedBox(width: 28, height: 28, child: Icon(Icons.access_time, color: colorScheme.onSurfaceVariant)),
-              Expanded(
-                child: AutoSizeText(formatTimeRange(event.startTime, event.endTime), style: textStyle)
-              ),
-/*               SizedBox(width: 30, height: 30, child: ElevatedButton(
-                key: notificationKey,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  backgroundColor:  (alertId != null) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
-                  elevation: (alertId != null || pastEvent || tooLongFutureEvent) ? 0 : 4,
-                  shadowColor: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                onLongPress: pastEvent ? () => showMiniPopup(context, notificationKey, 'Can’t set an alert for something in the past!', Theme.of(context).colorScheme.error)
-                  : tooLongFutureEvent ? () => showMiniPopup(context, notificationKey, 'Alerts can only be set within the week before the event', Theme.of(context).colorScheme.error)
-                  : (alertOptions.isNotEmpty && alertId == null) ? () => showMiniMenuOverlay(context, null, notificationKey, alertOptions, true)
-                  : (alertId != null) ? () => showMiniPopup(context, notificationKey, 'Tap to cancel alert, then optionally long-press to choose a custom notice period')
-                  : null,
-                onPressed: pastEvent ? () => showMiniPopup(context, notificationKey, 'Can’t set an alert for something in the past!', Theme.of(context).colorScheme.error)
-                  : tooLongFutureEvent ? () => showMiniPopup(context, notificationKey, 'Alerts can only be set within the week before the event', Theme.of(context).colorScheme.error)
-                  : () async {
-                    HapticFeedback.lightImpact();
-                    setTheAlert(setParentStateFunction);
-                  },
-                child: (pastEvent || tooLongFutureEvent)
-                  ? SvgPicture.asset('assets/icons/alertOff.svg', width: 20)
-                  : SvgPicture.asset('assets/icons/alert.svg', width: 20),
-              )), */
-            ]),
-            Row(spacing: 10, mainAxisAlignment: MainAxisAlignment.start, key: eventNameDescKey, children: [
-              SizedBox(width: 28, height: 28, child: Icon(Icons.location_on_outlined, size: 28, color: colorScheme.onSurfaceVariant)),
-              SizedBox(width: 218, child: AutoSizeText(event.location, style: textStyle, maxLines: 2)),
-            ]),
-            if (event.description != '') Row(spacing: 10, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              SizedBox(width: 28, height: 28, child: Icon(Icons.description_outlined, size: 28, color: colorScheme.onSurfaceVariant)),
-              SizedBox(width: 218, child: GestureDetector( // since field may be clipped
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  showMiniPopup(context, eventNameDescKey, event.description);
-                },
-                child: AutoSizeText(event.description, style: textStyle, maxLines: 5, minFontSize: 13, overflow: TextOverflow.ellipsis),
-              )),
-            ]),
-            Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 10, children: [
-              ElevatedButton.icon(
-                style: buttonStyle,
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  onGetDirections(event.id, event.latLng, true);
-                }, 
-                label: Text('Directions'),
-                icon: const Icon(Icons.directions_walk),                
-              ),
-              ElevatedButton(
-                style: buttonStyle,
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  safeRemoveRoute(context, listingDetailsDialogRoute); // doing this not pop as we may be in landscape itinerary view
-                }, 
-                child: Text('Close'),
-              ),
-            ],),
-          ],
-        );
-      }
-    );
-  }
-
-
   // Safe route removal with null/active checks
   void safeRemoveRoute(BuildContext context, Route? route) {
     if (route != null && route.isActive && route.navigator != null) {
@@ -780,6 +605,21 @@ class _TimetablePageState extends State<TimetablePage> {
         debugPrint('safeRemoveRoute: error removing route: $e');
       }
     }
+  }
+
+
+  void _toggleOnlyNowOrSoon(GlobalKey theKey) {
+    onlyNowOrSoon = !onlyNowOrSoon;
+    if (mounted) setState(() { });
+    Fluttertoast.showToast(
+      msg: (onlyNowOrSoon) ? 'Only showing what’s on now or starting soon' : 'Showing everything',
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      textColor: Theme.of(context).colorScheme.onPrimary,
+      fontSize: 16,
+      toastLength: Toast.LENGTH_SHORT,
+      timeInSecForIosWeb: 2,
+    );
   }
 
 
@@ -826,12 +666,24 @@ class _TimetablePageState extends State<TimetablePage> {
     final int markInterval = spanMinutes <= 6 * 60 ? 30 : 60;
     final List<Widget> markers = [];
     final List<Widget> swimlanes = [];
+    final nowOrSoonIconKey = GlobalKey();
 
     return FairScaffold(
       appBarTitle: "Timetable",
       currentTab: 2,
       onTabSelected: widget.onTabSelected,
       appBarActions: [
+        IconButton(
+          key: nowOrSoonIconKey,
+          onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon'),
+          onPressed: () => (isItEventDay())
+            ? _toggleOnlyNowOrSoon(nowOrSoonIconKey)
+            : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway', Theme.of(context).colorScheme.error),
+          icon: Icon(
+            Icons.schedule, 
+            color: (isItEventDay()) ? ((onlyNowOrSoon) ? Colors.yellow : Theme.of(context).colorScheme.onPrimary) : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
         IconButton(
           key: const ValueKey('searchFab'),
           color: Theme.of(context).colorScheme.onSecondary,
