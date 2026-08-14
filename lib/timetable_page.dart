@@ -216,7 +216,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
 
   Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, bool? filteredMusicOrNot, String searchQuery) {
-    debugPrint('_TimetablePageState scrollToKey called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery');
+    debugPrint('_TimetablePageState filterEventsAndComputeDefaults called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery');
     timelineMinStart = DateTime(9999);
     timelineMaxEnd = DateTime(0);
     final now = DateTime.now();
@@ -729,6 +729,11 @@ class _TimetablePageState extends State<TimetablePage> {
             HapticFeedback.lightImpact();
             setState(() {
               _isSearching = !_isSearching;
+              if (!_isSearching) {
+                _searchQuery = '';
+                _searchController.clear();
+                theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon, _filteredMusicOrNot, _searchQuery);
+              }
             });
           },
           icon: Icon(Icons.search),
