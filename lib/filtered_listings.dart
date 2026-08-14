@@ -520,11 +520,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.6, maxHeight: 48),
+                      constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.58, maxHeight: 48),
                       child: _buildFilteringDropdown(context),
                     ),
                     ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.4, maxHeight: 48),
+                      constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.42, maxHeight: 48),
                       child: _buildSortingDropdown(context, isShowingJustPerformance),
                     ),
                   ],
@@ -674,25 +674,25 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   Widget _buildSortingDropdown(BuildContext context, bool isPerformance) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final dropdownStyle = ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
     return Container(
       key: const ValueKey('sortingdropdown'),
-      height: 36,
-      color: Theme.of(context).colorScheme.surfaceDim,
+      color: colorScheme.surfaceDim,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
         child: DropdownMenu(
           initialSelection: preferredSortingMethod,
-          //width: (MediaQuery.of(context).size.width - 24) / 2,
-          label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
+          label: Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           leadingIcon: const Icon(Icons.sort),
-          textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
+          textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
-            fillColor: Theme.of(context).colorScheme.secondary,
-            iconColor: Theme.of(context).colorScheme.onSecondary,
-            suffixIconColor: Theme.of(context).colorScheme.onSecondary,
-            prefixIconColor: Theme.of(context).colorScheme.onSecondary,
-            labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+            fillColor: colorScheme.secondary,
+            iconColor: colorScheme.onSecondary,
+            suffixIconColor: colorScheme.onSecondary,
+            prefixIconColor: colorScheme.onSecondary,
+            labelStyle: TextStyle(color: colorScheme.onSecondary),
             isDense: true,
             visualDensity: const VisualDensity(horizontal: -4),
             contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
@@ -704,23 +704,27 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               DropdownMenuEntry(
                 value: SortingMethod.values[1],
                 label: "Nearest",
-                leadingIcon: const Icon(Icons.directions_walk),
+                style: dropdownStyle,
+                leadingIcon: const Icon(Icons.directions_walk, size: 20),
               ),
             DropdownMenuEntry(
               value: SortingMethod.values[3],
-              label: "Location (a-z)",
-              leadingIcon: const Icon(Icons.signpost),
+              label: "Location (a–z)",
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.signpost, size: 20),
             ),
             DropdownMenuEntry(
               value: SortingMethod.values[0],
-              label: "Name (a-z)",
-              leadingIcon: const Icon(Icons.sort_by_alpha),
+              label: "Name (a–z)",
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.sort_by_alpha, size: 20),
             ),
               if (isPerformance || filterCategory == 'favourite')
               DropdownMenuEntry(
                 value: SortingMethod.values[2],
                 label: "Time",
-                leadingIcon: const Icon(Icons.alarm),
+                style: dropdownStyle,
+                leadingIcon: const Icon(Icons.alarm, size: 20),
               ),
           ],
           onSelected: sortingDropdownCallback,
@@ -731,25 +735,26 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
 
   Widget _buildFilteringDropdown(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final dropdownStyle = ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
     return Container(
       key: const ValueKey('filteringdropdown'),
-      height: 36,
-      color: Theme.of(context).colorScheme.surfaceDim,
+      color: colorScheme.surfaceDim,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
         child: DropdownMenu(
-          initialSelection: filterCategory,
+          initialSelection: subFilterCategory,
           //width: (MediaQuery.of(context).size.width - 24) / 2,
-          label: const Text("Show", style: TextStyle(fontWeight: FontWeight.bold)),
-          leadingIcon: const Icon(Icons.filter),
-          textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
+          label: const Text("Show", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          leadingIcon: const Icon(Icons.sort),
+          textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
-            fillColor: Theme.of(context).colorScheme.secondary,
-            iconColor: Theme.of(context).colorScheme.onSecondary,
-            suffixIconColor: Theme.of(context).colorScheme.onSecondary,
-            prefixIconColor: Theme.of(context).colorScheme.onSecondary,
-            labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+            fillColor: colorScheme.secondary,
+            iconColor: colorScheme.onSecondary,
+            suffixIconColor: colorScheme.onSecondary,
+            prefixIconColor: colorScheme.onSecondary,
+            labelStyle: TextStyle(color: colorScheme.onSecondary),
             isDense: true,
             visualDensity: const VisualDensity(horizontal: -4),
             contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
@@ -760,52 +765,62 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             DropdownMenuEntry(
               value: 'all',
               label: "All",
-              leadingIcon: const Icon(Icons.all_inclusive),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.all_inclusive, size: 20),
             ),
             DropdownMenuEntry(
               value: 'performanceMusic',
               label: "Music",
-              leadingIcon: const Icon(Icons.music_note),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.music_note, size: 20),
             ),
             DropdownMenuEntry(
               value: 'performanceChildrens',
               label: "Children’s",
-              leadingIcon: const Icon(Icons.family_restroom),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.family_restroom, size: 20),
             ),
             DropdownMenuEntry(
               value: 'performanceDance',
               label: "Dance",
-              leadingIcon: const Icon(Icons.emoji_people),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.emoji_people, size: 20),
             ),
             DropdownMenuEntry(
               value: 'performanceOther',
               label: "Other performances",
-              leadingIcon: const Icon(Icons.theater_comedy),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.theater_comedy, size: 20),
             ),
             DropdownMenuEntry(
               value: 'visitExperience',
               label: "Visit & Experience",
-              leadingIcon: const Icon(Icons.tour),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.tour, size: 20),
             ),
             DropdownMenuEntry(
               value: 'food',
               label: "Food & Drink",
-              leadingIcon: const Icon(Icons.fastfood),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.fastfood, size: 20),
             ),
             DropdownMenuEntry(
               value: 'shopping',
               label: "Shopping & Stalls",
-              leadingIcon: const Icon(Icons.local_offer),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.local_offer, size: 20),
             ),
             DropdownMenuEntry(
               value: 'charityCommunityInfo',
               label: "Charity, Community, Info",
-              leadingIcon: const Icon(Icons.volunteer_activism),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.volunteer_activism, size: 20),
             ),
             DropdownMenuEntry(
               value: 'service',
               label: "Services",
-              leadingIcon: const Icon(Icons.family_restroom),
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.family_restroom, size: 20),
             ),
           ],
           onSelected: filteringDropdownCallback,
