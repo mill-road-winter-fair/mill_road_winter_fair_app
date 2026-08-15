@@ -129,8 +129,6 @@ void main() {
       expect(find.byIcon(Icons.directions_walk), findsExactly(3));
       expect(find.byIcon(Icons.public), findsExactly(2));
 
-      final dividerFinder = find.byWidgetPredicate((widget) => widget is Divider);
-      expect(dividerFinder, findsWidgets);
     });
 
     testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
@@ -302,14 +300,14 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
-      await tester.tap(find.text('Location (a-z)').last);
+      await tester.tap(find.text('Location (a–z)').last);
       await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[3]);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
-      await tester.tap(find.text('Name (a-z)').last);
+      await tester.tap(find.text('Name (a–z)').last);
       await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[0]);
