@@ -73,6 +73,8 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   
   int index = 0;
+  bool timetableOnlyNowOrSoon = false;
+  bool? timetableFilteredMusicOrNot;
 
   @override
   void initState() {
@@ -85,23 +87,37 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void openTimetable(bool onlyNowOrSoon, bool? filteredMusicOrNot) {
+    setState(() {
+      timetableFilteredMusicOrNot = filteredMusicOrNot;
+      timetableOnlyNowOrSoon = onlyNowOrSoon;
+      index = 2;
+    });
+  }
+
+  void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
+    debugPrint('HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
+    setState(() {
+      timetableFilteredMusicOrNot = newFilteredMusicOrNot;
+      timetableOnlyNowOrSoon = newOnlyNowOrSoon;
+    });
+  }
+
   final _allListingsKey = GlobalKey<FilteredListingsPageState>();
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
-  late final _pages = [
-    ChooserPage(onTabSelected: setCurrentIndex),
-    MapPage(listings: listings, key: mapPageKey, onTabSelected: setCurrentIndex),
-    TimetablePage(theEvents: listings, onTabSelected: setCurrentIndex),
-    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex),
-    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex),
-  ];
-
-
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable),
+      MapPage(listings: listings, key: mapPageKey, onTabSelected: setCurrentIndex),
+      TimetablePage(theEvents: listings, onTabSelected: setCurrentIndex, filteredMusicOrNot: timetableFilteredMusicOrNot, onlyNowOrSoon: timetableOnlyNowOrSoon, onFilterChange: timetableFilterChange),
+      FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex),
+      FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex),
+    ];
     return IndexedStack(
       index: index,
-      children: _pages,
+      children: pages,
     );
   }
 }

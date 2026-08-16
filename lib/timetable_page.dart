@@ -18,9 +18,17 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 class TimetablePage extends StatefulWidget {
   final List<Map<String, dynamic>> theEvents;
   final ValueChanged<int> onTabSelected;
+  final Function(bool, bool?) onFilterChange;
+  final String? listingToShow;
+  final bool onlyNowOrSoon;
+  final bool? filteredMusicOrNot;
   const TimetablePage({
     required this.theEvents,
     required this.onTabSelected,
+    required this.onFilterChange,
+    this.listingToShow,
+    required this.onlyNowOrSoon,
+    this.filteredMusicOrNot,
     super.key,
   });
   @override
@@ -37,11 +45,10 @@ class _TimetablePageState extends State<TimetablePage> {
   late double pixelsPerMinuteL, pixelsPerMinuteP; // orientation-specific scales
   Orientation? _deviceOrientationSaved; // to track if this has changed
   bool scaling = false; // tracks whether user is re-scaling the view
-  bool onlyNowOrSoon = false; // whether to show what's on now or soon
   bool? _onlyNowOrSoonSaved; // to track if this has changed
+  bool? _filteredMusicOrNotSaved; // to track if this has changed
   String _searchQuery = '';
   bool _isSearching = false; // true when the search bar is open (with/without text)
-  bool? _filteredMusicOrNot; // true = only music; false = all but music; null = all
   static const leftColumnWidth = 44.0; // how much space to leave for the time labels
   late DateTime timelineMinStart; // the start of the timeline after filtering
   late DateTime timelineMaxEnd; // the end of the timeline after filtering
@@ -52,8 +59,8 @@ class _TimetablePageState extends State<TimetablePage> {
   late Map<String, List<PositionedEvent>> thePreparedEvents; // read from the listings
   late Map<String, List<PositionedEvent>> theFilteredEvents; // filtered from the above based on onlyNowOrSoon
   bool loading = true; // so we don't try to build before we're ready
-  OverlayEntry? _miniPopupOverlayEntry; // 
-  Timer? _miniPopupTimer;
+  OverlayEntry? _miniPopupOverlayEntry; // widget that floats over a given widget as a 'tooltip'
+  Timer? _miniPopupTimer; // times how long the above stays on screen
   Route? listingDetailsDialogRoute; // to keep track of dialog so it can be closed if needed. This will move to main if we enter the app from an alert
 
   @override
@@ -612,10 +619,11 @@ class _TimetablePageState extends State<TimetablePage> {
 
 
   void _toggleOnlyNowOrSoon() {
-    onlyNowOrSoon = !onlyNowOrSoon;
+    final newonlyNowOrSoon = !widget.onlyNowOrSoon;
+    widget.onFilterChange.call(newonlyNowOrSoon, widget.filteredMusicOrNot);
     if (mounted) setState(() { });
     Fluttertoast.showToast(
-      msg: (onlyNowOrSoon) ? 'Only showing what’s on now or starting soon' : 'Showing everything',
+      msg: (newonlyNowOrSoon) ? 'Only showing what’s on now or starting soon' : 'Showing everything',
       gravity: ToastGravity.BOTTOM,
       backgroundColor: Theme.of(context).colorScheme.primary,
       textColor: Theme.of(context).colorScheme.onPrimary,
@@ -627,15 +635,16 @@ class _TimetablePageState extends State<TimetablePage> {
 
 
   void _toggleFilteredMusicOrNot() {
+    debugPrint('_TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
     bool? newFilteredMusicOrNot;
     String theMsg;
-    if (mounted) setState(() { });
-    (theMsg, newFilteredMusicOrNot) = switch(_filteredMusicOrNot) {
+    (theMsg, newFilteredMusicOrNot) = switch(widget.filteredMusicOrNot) {
       null => ('Showing only music performances', true),
       true => ('Showing all performances other than music', false),
       false => ('Showing all performances', null)
     };
-    _filteredMusicOrNot = newFilteredMusicOrNot;
+    if (mounted) setState(() { });
+    widget.onFilterChange.call(widget.onlyNowOrSoon, newFilteredMusicOrNot);
     Fluttertoast.showToast(
       msg: theMsg,
       gravity: ToastGravity.BOTTOM,
@@ -645,13 +654,14 @@ class _TimetablePageState extends State<TimetablePage> {
       toastLength: Toast.LENGTH_SHORT,
       timeInSecForIosWeb: 2,
     );
+    debugPrint('_TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
   }
 
 
   @override
   Widget build(BuildContext context) {
 
-    debugPrint('_TimetablePageState build called with loading=$loading');
+    debugPrint('_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
     if (loading) {
       return FairScaffold(
         appBarTitle: 'Timetable',
@@ -661,10 +671,11 @@ class _TimetablePageState extends State<TimetablePage> {
       );
     }
 
-    if (onlyNowOrSoon != _onlyNowOrSoonSaved) {
+    if (widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
       // refilter to whole day or just now or soon; only do this if changed
-      _onlyNowOrSoonSaved = onlyNowOrSoon;
-      theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon, _filteredMusicOrNot, _searchQuery);
+      _onlyNowOrSoonSaved = widget.onlyNowOrSoon;
+      _filteredMusicOrNotSaved = widget.filteredMusicOrNot;
+      theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
     }
     calculateInitialScalesIfNeeded();
     if (fairDate.difference(DateTime.now()).inDays == 0 
@@ -680,7 +691,7 @@ class _TimetablePageState extends State<TimetablePage> {
     String theErrorMessage = '';
     if (spanMinutes == 0 || theFilteredEvents.isEmpty) {
       theErrorMessage = 'Nothing to show.';
-      if (onlyNowOrSoon) theErrorMessage += '\n\nUnselect ‘now or soon’ to see the whole day.';
+      if (widget.onlyNowOrSoon) theErrorMessage += '\n\nUnselect ‘now or soon’ to see the whole day.';
       if (_searchQuery != '') theErrorMessage += '\n\nYou can clear your search by tapping the X icon in the search bar.';
     }
 
@@ -701,14 +712,14 @@ class _TimetablePageState extends State<TimetablePage> {
       appBarActions: [
         IconButton(
           key: subcategoryIconKey,
-          color: (_filteredMusicOrNot == null) ? Theme.of(context).colorScheme.onSecondary : Colors.yellow,
+          color: (widget.filteredMusicOrNot == null) ? Theme.of(context).colorScheme.onSecondary : Colors.yellow,
           onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing everything, just music, or everything but music'),
           onPressed: () {
             HapticFeedback.lightImpact();
             _toggleFilteredMusicOrNot();
-            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon, _filteredMusicOrNot, _searchQuery);
+            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
           },
-          icon: Icon((_filteredMusicOrNot == false) ? Icons.music_off : Icons.music_note),
+          icon: Icon((widget.filteredMusicOrNot == false) ? Icons.music_off : Icons.music_note),
         ),
         IconButton(
           key: nowOrSoonIconKey,
@@ -718,7 +729,7 @@ class _TimetablePageState extends State<TimetablePage> {
             : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway', Theme.of(context).colorScheme.error),
           icon: Icon(
             Icons.schedule, 
-            color: (isItEventDay()) ? ((onlyNowOrSoon) ? Colors.yellow : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.onSurfaceVariant,
+            color: (isItEventDay()) ? ((widget.onlyNowOrSoon) ? Colors.yellow : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         IconButton(
@@ -730,7 +741,7 @@ class _TimetablePageState extends State<TimetablePage> {
               if (!_isSearching) {
                 _searchQuery = '';
                 _searchController.clear();
-                theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon, _filteredMusicOrNot, _searchQuery);
+                theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
               }
             });
           },
@@ -747,7 +758,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
               if (!scaling) {
                 final currentOrientation = MediaQuery.orientationOf(context);
-                if (onlyNowOrSoon) {
+                if (widget.onlyNowOrSoon) {
                   _dayPixelsPerMinute = max(0.8, min(20, (constraints.maxHeight - 48) / max(spanMinutes, 30)));
                 } else {
                   if (currentOrientation == Orientation.landscape) {
@@ -817,12 +828,12 @@ class _TimetablePageState extends State<TimetablePage> {
 
               final nowTop = max(0.0, (now.difference(timelineMinStart).inMinutes) * _dayPixelsPerMinute) - 1.5;
 
-              if (!onlyNowOrSoon && _onlyNowOrSoonSaved!) {
+              if (!widget.onlyNowOrSoon && _onlyNowOrSoonSaved!) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   scrollToKey(nowLineKey, 0.3);
                 });
               }
-              _onlyNowOrSoonSaved = onlyNowOrSoon;
+              _onlyNowOrSoonSaved = widget.onlyNowOrSoon;
 
               final timelineHeight = max(constraints.maxHeight - 40, spanMinutes * _dayPixelsPerMinute + 4);
               final theContent = Column(children: [
@@ -852,7 +863,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                   if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
                                   _searchQuery = '';
                                   _searchController.clear();
-                                  theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon, _filteredMusicOrNot, _searchQuery);
+                                  theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
                                 });
                               },
                             ),
@@ -860,7 +871,7 @@ class _TimetablePageState extends State<TimetablePage> {
                           onChanged: (value) {
                             setState(() {
                               _searchQuery = value.toLowerCase();
-                              theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, onlyNowOrSoon,_filteredMusicOrNot, _searchQuery);
+                              theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon,widget.filteredMusicOrNot, _searchQuery);
                             });
                           },
                         ),
@@ -929,12 +940,12 @@ class _TimetablePageState extends State<TimetablePage> {
                             height: constraints.maxHeight - 34 - (_isSearching ? 56 : 0),
                             child: GestureDetector(
                               onScaleStart: (details) {
-                                if (onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
+                                if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
                                 scaling = true;
                                 startPixelsPerMinute = _dayPixelsPerMinute;
                               },
                               onScaleUpdate: (details) {
-                                if (onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
+                                if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
                                 final dampenedScale = 1 + (details.scale - 1) * 0.5;
                                 final newdayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
                                 if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
@@ -946,7 +957,7 @@ class _TimetablePageState extends State<TimetablePage> {
                               onScaleEnd: (_) async {
                                 if (scaling) {
                                   scaling = false;
-                                  if (!onlyNowOrSoon) { // don't save special 'now' scale
+                                  if (!widget.onlyNowOrSoon) { // don't save special 'now' scale
                                     if (MediaQuery.orientationOf(context) == Orientation.landscape) {
                                       if (_dayPixelsPerMinute != pixelsPerMinuteL) { // only saved if genuinely changed
                                         pixelsPerMinuteL = _dayPixelsPerMinute;

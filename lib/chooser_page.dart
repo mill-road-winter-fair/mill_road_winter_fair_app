@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
@@ -7,12 +8,16 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class ChooserPage extends StatefulWidget {
   const ChooserPage({
-    super.key,
+    required this.theEvents,
+    required this.onOpenTimetable,
     required this.onTabSelected,
+    super.key,
   });
 
   @override
   State<ChooserPage> createState() => _ChooserPageState();
+  final List<Map<String, dynamic>> theEvents;
+  final Function(bool, bool?) onOpenTimetable;
   final ValueChanged<int> onTabSelected;
 }
 
@@ -54,14 +59,17 @@ class _ChooserPageState extends State<ChooserPage> {
         thickness: 4,
         radius: const Radius.circular(8),
         child: Padding(
-          padding: const EdgeInsets.only(right: 8.0),
+          padding: const EdgeInsets.all(24),
           child: SingleChildScrollView(
             controller: _chooserPageScrollController,
             primary: false,
-            child: Column(
-              children: [
-                Text(style: bodyStyle, 'Nothing here yet'),
-              ],
+            child: Text.rich(TextSpan(children: [
+                TextSpan(style: bodyStyle, text: 'Test links for plumbing:\n\n'),
+                TextSpan(style: bodyStyle, text: '• Timetable (music only)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(false, true)),
+                TextSpan(style: bodyStyle, text: '• Timetable (all but music)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(false, false)),
+                TextSpan(style: bodyStyle, text: '• Timetable (music on now or soon)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(true, true)),
+                TextSpan(style: bodyStyle, text: '• Timetable (all but music on now or soon)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(true, false)),
+              ]),
             ), // Add event details here
           ),
         ),
