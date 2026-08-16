@@ -43,8 +43,37 @@ class RootWidget extends StatelessWidget {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+    if (selectedThemeKey == 'auto') {
+      final newMapStyle = getMapStyleForThemeKey(selectedThemeKey);
+      if (newMapStyle != mapStyle) {
+        mapStyle = newMapStyle;
+        mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
+        if (mounted) setState(() {});
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +81,20 @@ class MyApp extends StatelessWidget {
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
       builder: (context, selectedThemeKey, _) {
-        debugPrint('Theme changed: $selectedThemeKey');
+        debugPrint('MyApp build theme changed: $selectedThemeKey');
+        final bool isAuto = selectedThemeKey == 'auto';
+        final ThemeMode resolvedThemeMode = isAuto ? ThemeMode.system : switch (selectedThemeKey) {
+          'dark' || 'highContrast' => ThemeMode.dark,
+          _ => ThemeMode.light,
+        };
+        final ThemeData baseTheme = appThemes[getEffectiveThemeKey(selectedThemeKey)] ?? appThemes['light']!;
+        final ThemeData darkTheme = appThemes['dark'] ?? appThemes['light']!;
+        mapStyle = getMapStyleForThemeKey(selectedThemeKey);
         return MaterialApp(
-          title: 'Mill Road Winter Fair',
-          theme: appThemes[selectedThemeKey],
+          title: fairName,
+          themeMode: resolvedThemeMode,
+          theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? baseTheme,
+          darkTheme: isAuto ? appThemes['dark'] : darkTheme,
           home: HomePage(key: homePageKey),
         );
       },
