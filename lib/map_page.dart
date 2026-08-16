@@ -486,9 +486,9 @@ class MapPageState extends State<MapPage> {
   // Function to toggle a listing's presence in the list of favourites
   void favouriteOrNotListing(String listingID) {
     if (isListingFavourited(listingID)) {
-      favouriteListingKeys.remove(listingID);
+      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
     } else {
-      favouriteListingKeys.add(listingID);
+      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
     }
     setState(() {});
     _saveSettings();
@@ -496,7 +496,7 @@ class MapPageState extends State<MapPage> {
 
   // Function to determine if a listing has been added to favourites
   bool isListingFavourited(String listingID) {
-    return favouriteListingKeys.contains(listingID);
+    return favouriteListingKeys.value.contains(listingID);
   }
 
   void addGroupMarker(Map<String, dynamic> parentListing) async {
@@ -569,10 +569,10 @@ class MapPageState extends State<MapPage> {
 
                 void favouriteOrNotListing(String listingID) {
                   setModalState(() {
-                    if (favouriteListingKeys.contains(listingID)) {
-                      favouriteListingKeys.remove(listingID);
+                    if (isListingFavourited(listingID)) {
+                      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
                     } else {
-                      favouriteListingKeys.add(listingID);
+                      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
                     }
                     _saveSettings();
                   });
@@ -739,10 +739,10 @@ class MapPageState extends State<MapPage> {
                   return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
                     void favouriteOrNotListing(String listingID) {
                       setModalState(() {
-                        if (favouriteListingKeys.contains(listingID)) {
-                          favouriteListingKeys.remove(listingID);
+                        if (isListingFavourited(listingID)) {
+                          favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
                         } else {
-                          favouriteListingKeys.add(listingID);
+                          favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
                         }
                         _saveSettings();
                       });
@@ -1318,7 +1318,7 @@ class MapPageState extends State<MapPage> {
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
     await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
-    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
+    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
   void _setMapCameraToFitMapMarkers() {

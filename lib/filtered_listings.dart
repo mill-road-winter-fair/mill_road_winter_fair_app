@@ -253,7 +253,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
-    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
+    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
   void toggleDetailsRow(int index) {
@@ -275,9 +275,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   // Function to toggle the listing's presence in the list of favourites
   void favouriteOrNotListing(String listingID) {
     if (isListingFavourited(listingID)) {
-      favouriteListingKeys.remove(listingID);
+      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
     } else {
-      favouriteListingKeys.add(listingID);
+      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
     }
     setState(() {});
     _saveSettings();
@@ -285,7 +285,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   // Function to determine if the listing has been added to favourites
   bool isListingFavourited(String listingID) {
-    return favouriteListingKeys.contains(listingID);
+    return favouriteListingKeys.value.contains(listingID);
   }
 
   // Support for hiding the scroll thumb when not active, for iOS
@@ -329,7 +329,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     if (filterCategory == 'all' || filterCategory == '') {
       categoryFiltered = listings;
     } else if (filterCategory == 'favourite') {
-      categoryFiltered = listings.where((listing) => favouriteListingKeys.contains(listing['id'])).toList();
+      categoryFiltered = listings.where((listing) => favouriteListingKeys.value.contains(listing['id'])).toList();
     } else {
       categoryFiltered = listings.where((listing) => listing[filterCategory] == 'TRUE').toList();
     }
@@ -458,230 +458,235 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             icon: Icon(Icons.search, color: colorScheme.onPrimary),
           ),
       ],
-      body: Column(
-        children: [
-          Container(
-            height: 52,
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withAlpha(20),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _isSearching ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ConstrainedBox(
-                      key: const ValueKey('searchBar'),
-                      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
-                      child: SearchBar(
-                        autoFocus: true,
-                        controller: _searchController,
-                        elevation: const WidgetStatePropertyAll(0),
-                        hintText: switch (filterCategory) {
-                          'all' => 'Search all listings...',
-                          'food' => 'Search food & drink vendors...',
-                          'shopping' => 'Search market stalls...',
-                          'performanceMusic' => 'Search musical performances...',
-                          'performanceChildrens' => 'Search children’s activities...',
-                          'performanceDance' => 'Search dance performances...',
-                          'performanceOther' => 'Search other performances...',
-                          'charityCommunityInfo' => 'Search charity, community & info...',
-                          'visitExperience' => 'Search visits & experiences...',
-                          'service' => 'Search services...',
-                          'favourite' => 'Search favourite listings...',
-                          _ => 'Search listings...',
-                        },
-                        leading: const Icon(Icons.search),
-                        trailing: [
-                          IconButton(
-                            iconSize: 20,
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
+      body: ValueListenableBuilder<Set<String>>(
+        valueListenable: favouriteListingKeys,
+        builder: (context, name, child) {
+          return Column(
+            children: [
+              Container(
+                height: 52,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withAlpha(2),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _isSearching ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ConstrainedBox(
+                          key: const ValueKey('searchBar'),
+                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
+                          child: SearchBar(
+                            autoFocus: true,
+                            controller: _searchController,
+                            elevation: const WidgetStatePropertyAll(0),
+                            hintText: switch (filterCategory) {
+                              'all' => 'Search all listings...',
+                              'food' => 'Search food & drink vendors...',
+                              'shopping' => 'Search market stalls...',
+                              'performanceMusic' => 'Search musical performances...',
+                              'performanceChildrens' => 'Search children’s activities...',
+                              'performanceDance' => 'Search dance performances...',
+                              'performanceOther' => 'Search other performances...',
+                              'charityCommunityInfo' => 'Search charity, community & info...',
+                              'visitExperience' => 'Search visits & experiences...',
+                              'service' => 'Search services...',
+                              'favourite' => 'Search favourite listings...',
+                              _ => 'Search listings...',
+                            },
+                            leading: const Icon(Icons.search),
+                            trailing: [
+                              IconButton(
+                                iconSize: 20,
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  setState(() {
+                                    if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
+                                    _searchQuery = '';
+                                    _searchController.clear();
+                                  });
+                                },
+                              ),
+                            ],
+                            onChanged: (value) {
                               setState(() {
-                                if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
-                                _searchQuery = '';
-                                _searchController.clear();
+                                _searchQuery = value.toLowerCase();
+                                numberOfVisibleListings = -1;
+                                firstVisibleIndex = null;
                               });
                             },
                           ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value.toLowerCase();
-                            numberOfVisibleListings = -1;
-                            firstVisibleIndex = null;
-                          });
-                        },
-                      ),
+                        ),
+                      ],
+                    ) : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.58, maxHeight: 48),
+                          child: _buildFilteringDropdown(context),
+                        ),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.42, maxHeight: 48),
+                          child: _buildSortingDropdown(context, isShowingJustPerformance),
+                        ),
+                      ],
                     ),
-                  ],
-                ) : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.58, maxHeight: 48),
-                      child: _buildFilteringDropdown(context),
-                    ),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.42, maxHeight: 48),
-                      child: _buildSortingDropdown(context, isShowingJustPerformance),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: refreshListings,
-              backgroundColor: colorScheme.primary,
-              color: colorScheme.onPrimary,
-              child: Container(// ensure the Stack has a defined height
-                color: colorScheme.primary.withAlpha(20),
-                child: LayoutBuilder(builder: (context, constraints) {
-                  final trackHeight = constraints.maxHeight;
-                  return Stack(children: [
-                    NotificationListener<ScrollNotification>(
-                      onNotification: (notification) {
-                        if (notification is UserScrollNotification || notification is ScrollUpdateNotification) {
-                          _showThumb();
-                        }
-                        return false;
-                      },
-                      child: ScrollablePositionedList.builder(
-                        itemCount: filteredListings.length,
-                        itemScrollController: itemScrollController,
-                        itemPositionsListener: itemPositionsListener,
-                        itemBuilder: (context, index) {
-                          final listing = filteredListings[index]; // since index=0 is the sort/search bar
-                          final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                          final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
-                          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                          if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
-                          return Column(
-                            children: [
-                              if (!_hidePastListings || !hasEventEnded(listing['endTime'])) Container(
-                                width: constraints.maxWidth - 10,
-                                decoration: BoxDecoration(
-                                  color: colorScheme.onPrimary,
-                                  border: Border.all(color: colorScheme.primary, width: 0.5),
-                                  borderRadius: BorderRadius.circular(8),
-                                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
-                                ),
-                                child: SpecificListingInfoSheet(
-                                  cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                                  brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                                  emoji: listing['emoji'] ?? '',
-                                  title: listing['title'] ?? '',
-                                  subtitle: listing['subtitle'] ?? '',
-                                  location: listing['location'],
-                                  description: listing['description'] ?? '',
-                                  email: listing['email'] ?? '',
-                                  website: listing['website'] ?? '',
-                                  phoneNumber: listing['phone'] ?? '',
-                                  imageURL: listing['imageURL'] ?? '',
-                                  startTime: "${listing['startTime']}",
-                                  endTime: "${listing['endTime']}",
-                                  approxDistance: approximateDistance,
-                                  detailsVisible: detailsVisibilityList[index],
-                                  listingFavourited: isListingFavourited(listing['id']),
-                                  onDetailsTapped: () => toggleDetailsRow(index),
-                                  onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                  onGetDirections: () {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
-                                      listings: listings, 
-                                      onTabSelected: (_) => {}, 
-                                      destinationId: listing['id'],
-                                      destinationLatLng: destinationLatLng
-                                    )));
-                                  },
-                                  inDialog: false,
-                                )
-                              ),
-                              // separator except after last item
-                              if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 8),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    ValueListenableBuilder<Iterable<ItemPosition>>(
-                      valueListenable: itemPositionsListener.itemPositions,
-                      builder: (context, positions, _) {
-                        if (positions.isEmpty || firstVisibleIndex == null || numberOfVisibleListings == 0) {
-                          return const SizedBox.shrink();
-                        }
-                        final visiblePositions = positions.where((p) {
-                          return p.index >= firstVisibleIndex! && p.index < firstVisibleIndex! + numberOfVisibleListings;
-                        });
-                        if (visiblePositions.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        final indices = visiblePositions.map((p) => p.index);
-                        final minIndex = indices.reduce((a, b) => a < b ? a : b);
-                        final maxIndex = indices.reduce((a, b) => a > b ? a : b);
-                        final minIndexRelative = minIndex - firstVisibleIndex!;
-                        final visibleFraction = ((maxIndex - minIndex + 1) / numberOfVisibleListings).clamp(0.02, 1.0);
-                        final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
-                        final thumbTop = (minIndexRelative / numberOfVisibleListings) * trackHeight;
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: thumbVisible,
-                          builder: (context, visible, _) {
-                            return Positioned(
-                              right: 3,
-                              top: thumbTop,
-                              width: 4,
-                              height: thumbHeight,
-                              child: AnimatedOpacity(
-                                opacity: visible ? 1.0 : 0.0,
-                                duration: const Duration(milliseconds: 250),
-                                curve: Curves.easeOut,
-                                child: GestureDetector(
-                                  onVerticalDragStart: (_) => _showThumb(),
-                                  onVerticalDragUpdate: (details) {
-                                    _showThumb();
-                                    final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
-                                    final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
-                                    final targetIndex = (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
-                                    itemScrollController.scrollTo(
-                                      index: targetIndex,
-                                      duration: const Duration(milliseconds: 120),
-                                    );
-                                  },
-                                  child: Container(
-                                    width: 2,
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: refreshListings,
+                  backgroundColor: colorScheme.primary,
+                  color: colorScheme.onPrimary,
+                  child: Container(// ensure the Stack has a defined height
+                    color: colorScheme.primary.withAlpha(20),
+                    child: LayoutBuilder(builder: (context, constraints) {
+                      final trackHeight = constraints.maxHeight;
+                      return Stack(children: [
+                        NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            if (notification is UserScrollNotification || notification is ScrollUpdateNotification) {
+                              _showThumb();
+                            }
+                            return false;
+                          },
+                          child: ScrollablePositionedList.builder(
+                            itemCount: filteredListings.length,
+                            itemScrollController: itemScrollController,
+                            itemPositionsListener: itemPositionsListener,
+                            itemBuilder: (context, index) {
+                              final listing = filteredListings[index]; // since index=0 is the sort/search bar
+                              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                              final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+                              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                              if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
+                              return Column(
+                                children: [
+                                  if (!_hidePastListings || !hasEventEnded(listing['endTime'])) Container(
+                                    width: constraints.maxWidth - 10,
                                     decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(2),
+                                      color: colorScheme.onPrimary,
+                                      border: Border.all(color: colorScheme.primary, width: 0.5),
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
+                                    ),
+                                    child: SpecificListingInfoSheet(
+                                      cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                                      brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
+                                      emoji: listing['emoji'] ?? '',
+                                      title: listing['title'] ?? '',
+                                      subtitle: listing['subtitle'] ?? '',
+                                      location: listing['location'],
+                                      description: listing['description'] ?? '',
+                                      email: listing['email'] ?? '',
+                                      website: listing['website'] ?? '',
+                                      phoneNumber: listing['phone'] ?? '',
+                                      imageURL: listing['imageURL'] ?? '',
+                                      startTime: "${listing['startTime']}",
+                                      endTime: "${listing['endTime']}",
+                                      approxDistance: approximateDistance,
+                                      detailsVisible: detailsVisibilityList[index],
+                                      listingFavourited: isListingFavourited(listing['id']),
+                                      onDetailsTapped: () => toggleDetailsRow(index),
+                                      onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                      onGetDirections: () {
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                          listings: listings, 
+                                          onTabSelected: (_) => {}, 
+                                          destinationId: listing['id'],
+                                          destinationLatLng: destinationLatLng
+                                        )));
+                                      },
+                                      inDialog: false,
+                                    )
+                                  ),
+                                  // separator except after last item
+                                  if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 8),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                        ValueListenableBuilder<Iterable<ItemPosition>>(
+                          valueListenable: itemPositionsListener.itemPositions,
+                          builder: (context, positions, _) {
+                            if (positions.isEmpty || firstVisibleIndex == null || numberOfVisibleListings == 0) {
+                              return const SizedBox.shrink();
+                            }
+                            final visiblePositions = positions.where((p) {
+                              return p.index >= firstVisibleIndex! && p.index < firstVisibleIndex! + numberOfVisibleListings;
+                            });
+                            if (visiblePositions.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            final indices = visiblePositions.map((p) => p.index);
+                            final minIndex = indices.reduce((a, b) => a < b ? a : b);
+                            final maxIndex = indices.reduce((a, b) => a > b ? a : b);
+                            final minIndexRelative = minIndex - firstVisibleIndex!;
+                            final visibleFraction = ((maxIndex - minIndex + 1) / numberOfVisibleListings).clamp(0.02, 1.0);
+                            final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
+                            final thumbTop = (minIndexRelative / numberOfVisibleListings) * trackHeight;
+                            return ValueListenableBuilder<bool>(
+                              valueListenable: thumbVisible,
+                              builder: (context, visible, _) {
+                                return Positioned(
+                                  right: 3,
+                                  top: thumbTop,
+                                  width: 4,
+                                  height: thumbHeight,
+                                  child: AnimatedOpacity(
+                                    opacity: visible ? 1.0 : 0.0,
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeOut,
+                                    child: GestureDetector(
+                                      onVerticalDragStart: (_) => _showThumb(),
+                                      onVerticalDragUpdate: (details) {
+                                        _showThumb();
+                                        final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
+                                        final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
+                                        final targetIndex = (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
+                                        itemScrollController.scrollTo(
+                                          index: targetIndex,
+                                          duration: const Duration(milliseconds: 120),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 2,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(alpha: 0.4),
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                    ),
-                    (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(16.0), alignment: Alignment.center,
-                        child: Text(style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center,
-                            "No listings found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}${filterCategory == 'favourite' ? ' in your favourites' : ''}.",
                         ),
-                      ),
-                    )
-                    : const SizedBox.shrink(),
-                  ]);
-                }
+                        (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(16.0), alignment: Alignment.center,
+                            child: Text(style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center,
+                                "No listings found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}${filterCategory == 'favourite' ? ' in your favourites' : ''}.",
+                            ),
+                          ),
+                        )
+                        : const SizedBox.shrink(),
+                      ]);
+                    }
+                  ),
+                  ),
+                ),
               ),
-              ),
-            ),
-          ),
-        ]
-      ),
+            ]
+          );
+        }
+      )
     );
   }
 

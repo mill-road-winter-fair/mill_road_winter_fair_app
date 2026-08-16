@@ -91,7 +91,7 @@ class HomePageState extends State<HomePage> {
   late final _pages = [
     ChooserPage(onTabSelected: setCurrentIndex),
     MapPage(listings: listings, key: mapPageKey, onTabSelected: setCurrentIndex),
-    TimetablePage(theEvents: listings, favouriteListingKeys: favouriteListingKeys, onTabSelected: setCurrentIndex),
+    TimetablePage(theEvents: listings, onTabSelected: setCurrentIndex),
     FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex),
     FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex),
   ];

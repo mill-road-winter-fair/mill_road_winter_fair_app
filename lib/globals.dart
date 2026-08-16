@@ -64,8 +64,8 @@ late String mapStyle;
 // Initialise setting for whether the road closure polygon is shown
 late bool preferredRoadClosurePolygonVisible;
 
-// Initialise the list of favourited listings
-late Set<String> favouriteListingKeys;
+// Initialise the list of favourited listings (ValueNotifier as pages need to know when others change these)
+final ValueNotifier<Set<String>> favouriteListingKeys = ValueNotifier<Set<String>>({});
 
 // --- Location related globals (moved from get_current_location.dart) ---
 // Whether device location services are enabled and the permission status.

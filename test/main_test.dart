@@ -495,7 +495,7 @@ void main() {
       await loadSettings();
 
       // Set the mock listing as a favourite before the widget is built
-      favouriteListingKeys.add('1');
+      favouriteListingKeys.value = {...favouriteListingKeys.value, '1'};
 
       // Pump MyApp which contains the AppBar with the snowflake button
       await tester.pumpWidget(const MyApp());
