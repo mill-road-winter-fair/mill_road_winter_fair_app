@@ -84,7 +84,7 @@ final fairDate = DateTime(2026, 12, 5);
 const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
 
 // Title
-const fairName = 'Mill Road Winter Fair 2026';
+const fairName = 'Mill Road Winter Fair';
 
 // Listings subfilter keywords to labels and icons
 // This could be extended to cover colours, hint text, mapping etc etc
