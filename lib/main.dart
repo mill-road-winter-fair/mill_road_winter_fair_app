@@ -175,7 +175,7 @@ class HomePageState extends State<HomePage> {
 
   final _allListingsKey = GlobalKey<FilteredListingsPageState>();
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
-  
+
   @override
   Widget build(BuildContext context) {
     final pages = [
