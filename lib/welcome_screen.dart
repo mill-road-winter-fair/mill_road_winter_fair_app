@@ -23,10 +23,19 @@ class WelcomeScreen extends StatelessWidget {
       SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
     );
 
+    final bool isAuto = selectedThemeKey == 'auto';
+    final ThemeMode resolvedThemeMode = isAuto ? ThemeMode.system : switch (selectedThemeKey) {
+      'dark' || 'highContrast' => ThemeMode.dark,
+      _ => ThemeMode.light,
+    };
+    mapStyle = getMapStyleForThemeKey(selectedThemeKey);
+
     return MaterialApp(
       title: 'Welcome screen',
       debugShowCheckedModeBanner: false,
-      theme: appThemes[selectedThemeKey],
+      themeMode: resolvedThemeMode,
+      theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? appThemes['light']!,
+      darkTheme: isAuto ? appThemes['dark'] : appThemes['dark'],
       home: const OnBoardingPage(),
     );
   }
