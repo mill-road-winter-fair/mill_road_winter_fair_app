@@ -11,6 +11,7 @@ class ChooserPage extends StatefulWidget {
     required this.theEvents,
     required this.onOpenTimetable,
     required this.onOpenListings,
+    required this.onOpenMap,
     required this.onTabSelected,
     super.key,
   });
@@ -20,6 +21,7 @@ class ChooserPage extends StatefulWidget {
   final List<Map<String, dynamic>> theEvents;
   final Function(bool, bool?) onOpenTimetable;
   final Function(String, String?) onOpenListings;
+  final Function(int?) onOpenMap;
   final ValueChanged<int> onTabSelected;
 }
 
@@ -75,6 +77,7 @@ class _ChooserPageState extends State<ChooserPage> {
                 TextSpan(style: bodyStyle, text: '• Listings (other performances only)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('all', 'performanceOther')),
                 TextSpan(style: bodyStyle, text: '• Listings (children’s only)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('all', 'performanceChildrens')),
                 TextSpan(style: bodyStyle, text: '• Favourite listings (music only)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('favourite', 'performanceMusic')),
+                TextSpan(style: bodyStyle, text: '• Map (nearest 10 markers)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenMap(10)),
               ]),
             ), // Add event details here
           ),

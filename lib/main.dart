@@ -77,6 +77,7 @@ class HomePageState extends State<HomePage> {
   bool timetableOnlyNowOrSoon = false; // toggled on or off to show events now or in next hour
   bool? timetableFilteredMusicOrNot; // toggled on (just music), off (all but music), null (all)
   String? listingsSubfilterCategory; // all listings visible (null) or just the one category
+  int? mapNearestMarkerCount; // when opening the map, zoom in to this number nearby
 
   @override
   void initState() {
@@ -104,6 +105,20 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void openMap(int? nearestMarkerCount) {
+    setState(() {
+      mapNearestMarkerCount = nearestMarkerCount;
+      index = 1;
+    });
+  }
+
+  void cancelMapNearest() {
+    debugPrint('HomePageState cancelMapNearest called');
+    setState(() {
+      mapNearestMarkerCount = null;
+    });
+  }
+
   void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
     debugPrint('HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
     setState(() {
@@ -125,8 +140,8 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings),
-      MapPage(listings: listings, key: mapPageKey, onTabSelected: setCurrentIndex),
+      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings, onOpenMap: openMap),
+      MapPage(listings: listings, key: mapPageKey, nearestMarkerCount: mapNearestMarkerCount, onTabSelected: setCurrentIndex, onHomeTapped: cancelMapNearest),
       TimetablePage(theEvents: listings, onTabSelected: setCurrentIndex, filteredMusicOrNot: timetableFilteredMusicOrNot, onlyNowOrSoon: timetableOnlyNowOrSoon, onFilterChange: timetableFilterChange),
       FilteredListingsPage(filterCategory: "all", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
       FilteredListingsPage(filterCategory: "favourite", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
