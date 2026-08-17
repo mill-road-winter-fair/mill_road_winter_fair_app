@@ -73,8 +73,10 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   
   int index = 0;
-  bool timetableOnlyNowOrSoon = false;
-  bool? timetableFilteredMusicOrNot;
+  // the following need to be in HomePageState to allow deep linking to configured pages
+  bool timetableOnlyNowOrSoon = false; // toggled on or off to show events now or in next hour
+  bool? timetableFilteredMusicOrNot; // toggled on (just music), off (all but music), null (all)
+  String? listingsSubfilterCategory; // all listings visible (null) or just the one category
 
   @override
   void initState() {
@@ -95,11 +97,25 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void openListings(String filterCategory, String? subfilterCategory) {
+    setState(() {
+      listingsSubfilterCategory = subfilterCategory;
+      index = (filterCategory == 'favourite') ? 4 : 3;
+    });
+  }
+
   void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
     debugPrint('HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
     setState(() {
       timetableFilteredMusicOrNot = newFilteredMusicOrNot;
       timetableOnlyNowOrSoon = newOnlyNowOrSoon;
+    });
+  }
+
+  void listingsSubfilterChange(String? newSubfilterCategory) {
+    debugPrint('HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory');
+    setState(() {
+      listingsSubfilterCategory = newSubfilterCategory;
     });
   }
 
@@ -109,11 +125,11 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable),
+      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings),
       MapPage(listings: listings, key: mapPageKey, onTabSelected: setCurrentIndex),
       TimetablePage(theEvents: listings, onTabSelected: setCurrentIndex, filteredMusicOrNot: timetableFilteredMusicOrNot, onlyNowOrSoon: timetableOnlyNowOrSoon, onFilterChange: timetableFilterChange),
-      FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex),
-      FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex),
+      FilteredListingsPage(filterCategory: "all", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
+      FilteredListingsPage(filterCategory: "favourite", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
     ];
     return IndexedStack(
       index: index,

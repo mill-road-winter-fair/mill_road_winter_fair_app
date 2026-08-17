@@ -10,6 +10,7 @@ class ChooserPage extends StatefulWidget {
   const ChooserPage({
     required this.theEvents,
     required this.onOpenTimetable,
+    required this.onOpenListings,
     required this.onTabSelected,
     super.key,
   });
@@ -18,6 +19,7 @@ class ChooserPage extends StatefulWidget {
   State<ChooserPage> createState() => _ChooserPageState();
   final List<Map<String, dynamic>> theEvents;
   final Function(bool, bool?) onOpenTimetable;
+  final Function(String, String?) onOpenListings;
   final ValueChanged<int> onTabSelected;
 }
 
@@ -69,6 +71,10 @@ class _ChooserPageState extends State<ChooserPage> {
                 TextSpan(style: bodyStyle, text: '• Timetable (all but music)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(false, false)),
                 TextSpan(style: bodyStyle, text: '• Timetable (music on now or soon)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(true, true)),
                 TextSpan(style: bodyStyle, text: '• Timetable (all but music on now or soon)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(true, false)),
+                TextSpan(style: bodyStyle, text: '• Listings (music only)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('all', 'performanceMusic')),
+                TextSpan(style: bodyStyle, text: '• Listings (other performances only)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('all', 'performanceOther')),
+                TextSpan(style: bodyStyle, text: '• Listings (children’s only)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('all', 'performanceChildrens')),
+                TextSpan(style: bodyStyle, text: '• Favourite listings (music only)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('favourite', 'performanceMusic')),
               ]),
             ), // Add event details here
           ),

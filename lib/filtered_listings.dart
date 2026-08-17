@@ -20,11 +20,15 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final String filterCategory;
+  final String? subfilterCategory;
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
+  final Function(String?) onSubfilterChange;
 
   const FilteredListingsPage({
     required this.filterCategory,
+    this.subfilterCategory,
+    required this.onSubfilterChange,
     required this.listings,
     required this.onTabSelected,
     super.key,
@@ -50,8 +54,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
-  String subFilterCategory = 'all'; // changes when the user has chosen from 'Show' dropdown
-  late String appBarTitle; // will be set according to filterCategory and subFilterCategory
+  late String appBarTitle; // will be set according to filterCategory and subfilterCategory
 
   @override
   void initState() {
@@ -85,7 +88,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   String calculateAppBarTitle() {
     String appBarTitle = '';
-    if (subFilterCategory != 'all') appBarTitle += 'Filtered';
+    if (widget.subfilterCategory != 'all') appBarTitle += 'Filtered';
     if (filterCategory == 'favourite') appBarTitle += (appBarTitle.isEmpty) ? 'Favourite' : ''; // this did append favourite but it was too big
     if (appBarTitle.isEmpty) appBarTitle = 'All';
     appBarTitle += ' listings';
@@ -242,11 +245,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void filteringDropdownCallback(String? selectedValue) {
     HapticFeedback.selectionClick();
-    if (selectedValue is String) {
-      subFilterCategory = selectedValue;
-      appBarTitle = calculateAppBarTitle();
-      setState(() { });
-    }
+    widget.onSubfilterChange.call(selectedValue);
+    appBarTitle = calculateAppBarTitle();
+    setState(() { });
   }
 
   // Save settings to shared preferences
@@ -299,7 +300,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('FilteredListingsPageState build() called');
+    debugPrint('FilteredListingsPageState build() called with filterCategory=$filterCategory and subfilterCategory=${widget.subfilterCategory}');
     // Show error if there are no listings
     if (listings.isEmpty) {
       return Center(
@@ -336,10 +337,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 1b: Filter by subcategory (e.g. "Food", "Music", etc.)
     List<Map<String, dynamic>> subCategoryFiltered = [];
-    if (subFilterCategory == 'all' || filterCategory == '') {
+    if (widget.subfilterCategory == null) {
       subCategoryFiltered = categoryFiltered;
     } else {
-      subCategoryFiltered = categoryFiltered.where((listing) => listing[subFilterCategory] == 'TRUE').toList();
+      subCategoryFiltered = categoryFiltered.where((listing) => listing[widget.subfilterCategory] == 'TRUE').toList();
     }
 
     // Step 2: Sort the filtered listings
@@ -364,7 +365,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
     int? firstVisibleIndex; // will be used to store the first listing that is actually visible
 
-    bool isShowingJustPerformance = (subFilterCategory.length > 11 && subFilterCategory.substring(0,11) == 'performance');
+    bool isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0,11) == 'performance');
 
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -453,6 +454,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               HapticFeedback.lightImpact();
               setState(() {
                 _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchQuery = '';
+                  _searchController.text = '';
+                }
               });
             },
             icon: Icon(Icons.search, color: colorScheme.onPrimary),
@@ -466,7 +471,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               Container(
                 height: 52,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withAlpha(2),
+                  color: colorScheme.primary.withAlpha(20),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
@@ -670,9 +675,16 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         ),
                         (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
                           child: Container(
-                            padding: const EdgeInsets.all(16.0), alignment: Alignment.center,
+                            padding: const EdgeInsets.all(24.0), alignment: Alignment.center,
                             child: Text(style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center,
-                                "No listings found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}${filterCategory == 'favourite' ? ' in your favourites' : ''}.",
+                                'No'
+                                '${widget.subfilterCategory != null ? ' ${subfilterCategoryLabels[widget.subfilterCategory]!.label}' : ''}'
+                                ' listings'
+                                '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
+                                '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
+                                '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
+                                '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
+                                '${_searchQuery.isNotEmpty ? '\n\nTap the ‘X’ in the bar above to clear your search.' : ''}'
                             ),
                           ),
                         )
@@ -759,8 +771,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       color: colorScheme.surfaceDim,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: DropdownMenu(
-          initialSelection: subFilterCategory,
+        child: DropdownMenu<String?>(
+          initialSelection: widget.subfilterCategory,
           //width: (MediaQuery.of(context).size.width - 24) / 2,
           label: const Text("Show", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           leadingIcon: const Icon(Icons.sort),
@@ -780,65 +792,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           ),
           dropdownMenuEntries: [
             DropdownMenuEntry(
-              value: 'all',
+              value: null,
               label: "All",
               style: dropdownStyle,
               leadingIcon: const Icon(Icons.all_inclusive, size: 20),
             ),
-            DropdownMenuEntry(
-              value: 'performanceMusic',
-              label: "Music",
-              style: dropdownStyle,
-              leadingIcon: const Icon(Icons.music_note, size: 20),
-            ),
-            DropdownMenuEntry(
-              value: 'performanceChildrens',
-              label: "Children’s",
-              style: dropdownStyle,
-              leadingIcon: const Icon(Icons.family_restroom, size: 20),
-            ),
-            DropdownMenuEntry(
-              value: 'performanceDance',
-              label: "Dance",
-              style: dropdownStyle,
-              leadingIcon: const Icon(Icons.emoji_people, size: 20),
-            ),
-            DropdownMenuEntry(
-              value: 'performanceOther',
-              label: "Other performances",
-              style: dropdownStyle,
-              leadingIcon: const Icon(Icons.theater_comedy, size: 20),
-            ),
-            DropdownMenuEntry(
-              value: 'visitExperience',
-              label: "Visit & Experience",
-              style: dropdownStyle,
-              leadingIcon: const Icon(Icons.tour, size: 20),
-            ),
-            DropdownMenuEntry(
-              value: 'food',
-              label: "Food & Drink",
-              style: dropdownStyle,
-              leadingIcon: const Icon(Icons.fastfood, size: 20),
-            ),
-            DropdownMenuEntry(
-              value: 'shopping',
-              label: "Shopping & Stalls",
-              style: dropdownStyle,
-              leadingIcon: const Icon(Icons.local_offer, size: 20),
-            ),
-            DropdownMenuEntry(
-              value: 'charityCommunityInfo',
-              label: "Charity, Community, Info",
-              style: dropdownStyle,
-              leadingIcon: const Icon(Icons.volunteer_activism, size: 20),
-            ),
-            DropdownMenuEntry(
-              value: 'service',
-              label: "Services",
-              style: dropdownStyle,
-              leadingIcon: const Icon(Icons.family_restroom, size: 20),
-            ),
+            ...subfilterCategoryLabels.entries.map((e) {
+              return DropdownMenuEntry(
+                value: e.key,
+                label: e.value.label,
+                style: dropdownStyle,
+                leadingIcon: Icon(e.value.iconData, size: 20),
+              );
+            })
           ],
           onSelected: filteringDropdownCallback,
         ),
