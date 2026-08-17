@@ -120,7 +120,6 @@ class _TimetablePageState extends State<TimetablePage> {
 
 
   void calculateInitialScalesIfNeeded() async {
-    debugPrint('_TimetablePageState calculateInitialScalesIfNeeded called');
     if (pixelsPerMinuteP == 0 || pixelsPerMinuteL == 0) {
       debugPrint('_TimetablePageState calculateInitialScalesIfNeeded estimating initial scale');
       pixelsPerMinuteP = max(0.8, min(1.5, 1000 / max(240, spanMinutes)));
@@ -179,6 +178,7 @@ class _TimetablePageState extends State<TimetablePage> {
           || (ev['performanceChildrens'] != null && ev['performanceChildrens'] == 'TRUE') 
           || (ev['performanceDance'] != null && ev['performanceDance'] == 'TRUE')
           || (ev['performanceOther'] != null && ev['performanceOther'] == 'TRUE')
+          || (ev['visitExperience'] != null && ev['visitExperience'] == 'TRUE')
         )
         && endTime.difference(startTime).inMinutes < 120 
       ) {
@@ -640,7 +640,7 @@ class _TimetablePageState extends State<TimetablePage> {
     String theMsg;
     (theMsg, newFilteredMusicOrNot) = switch(widget.filteredMusicOrNot) {
       null => ('Showing only music performances', true),
-      true => ('Showing all performances other than music', false),
+      true => ('Showing everything but music performances', false),
       false => ('Showing all performances', null)
     };
     if (mounted) setState(() { });
@@ -661,7 +661,7 @@ class _TimetablePageState extends State<TimetablePage> {
   @override
   Widget build(BuildContext context) {
 
-    debugPrint('_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
+    if (!scaling) debugPrint('_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
     if (loading) {
       return FairScaffold(
         appBarTitle: 'Timetable',
