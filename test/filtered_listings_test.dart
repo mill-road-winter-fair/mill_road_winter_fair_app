@@ -36,6 +36,7 @@ void main() {
             filterCategory: category,
             listings: listings,
             onTabSelected: (_) {},
+            onSubfilterChange: (_) {},
           ),
         ),
       ),
@@ -569,7 +570,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onTabSelected: (_) {}),
+            body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
           ),
         ),
       );
