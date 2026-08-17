@@ -687,6 +687,9 @@ class _TimetablePageState extends State<TimetablePage> {
         startClockUpdates(updateNowLine);
       });
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_searchQuery != '') _verticalScrollController.animateTo(0, duration: Duration(milliseconds: 100), curve: Curves.easeIn);
+    });
 
     String theErrorMessage = '';
     if (spanMinutes == 0 || theFilteredEvents.isEmpty) {
