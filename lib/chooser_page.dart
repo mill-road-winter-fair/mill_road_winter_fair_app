@@ -21,7 +21,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   final List<Hotspot> hotspots = [
     Hotspot(label: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152),
     Hotspot(label: 'Music', left: 0.548, top: 0.287, width: 0.451, height: 0.144),
-    Hotspot(label: 'Events', left: 0, top: 0.366, width: 0.455, height: 0.19),
+    Hotspot(label: 'Events and\nPerformances', left: 0, top: 0.366, width: 0.455, height: 0.19),
     Hotspot(label: 'Shopping', left: 0.583, top: 0.49, width: 0.416, height: 0.213),
     Hotspot(label: 'Children’s', left: 0, top: 0.598, width: 0.437, height: 0.214),
     Hotspot(label: 'Nearby', left: 0.666, top: 0.703, width: 0.333, height: 0.171),
@@ -353,6 +353,7 @@ class HotspotPainter extends CustomPainter {
     TextPainter? painter;
     while (fontSize > 5) {
       painter = TextPainter(
+        textAlign: TextAlign.center,
         text: TextSpan(
           text: text,
           style: TextStyle(
@@ -365,7 +366,7 @@ class HotspotPainter extends CustomPainter {
             ],
           ),
         ),
-        maxLines: 1,
+        maxLines: 2,
         textDirection: TextDirection.ltr,
       );
       painter.layout();
