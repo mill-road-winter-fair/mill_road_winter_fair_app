@@ -1663,42 +1663,47 @@ class MapPageState extends State<MapPage> {
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
                   mapHeight = constraints.maxHeight;
-                  return GoogleMap(
-                    style: mapStyle,
-                    mapType: mapType,
-                    rotateGesturesEnabled: false,
-                    compassEnabled: false,
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: false,
-                    mapToolbarEnabled: false,
-                    onMapCreated: (GoogleMapController controller) {
-                      _controller = controller;
-                      if (listings.isNotEmpty) {
-                        // We should have listings by this point so set the camera to their bounds
-                        _setMapCameraToFitMapMarkers();
-                      }
+                  return PopScope(
+                    onPopInvokedWithResult: (didPop, result) {
+                      if (didPop && navigationInProgress) cancelNavigation();
                     },
-                    initialCameraPosition: CameraPosition(
-                      target: const LatLng(52.199174, 0.140929),
-                      zoom: 14.1,
-                      bearing: _mapBearing,
-                    ),
-                    onCameraMove: (CameraPosition position) {
-                      debugPrint('MapPageState onCameraMove called');
-                      setState(() {
-                        switch (preferredMapOrientation) {
-                          case MapOrientation.adaptive:
-                            _compassBearing = 90;
-                            break;
-                          case MapOrientation.alwaysNorth:
-                            _compassBearing = 0;
-                            break;
+                    child: GoogleMap(
+                      style: mapStyle,
+                      mapType: mapType,
+                      rotateGesturesEnabled: false,
+                      compassEnabled: false,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: false,
+                      mapToolbarEnabled: false,
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller = controller;
+                        if (listings.isNotEmpty) {
+                          // We should have listings by this point so set the camera to their bounds
+                          _setMapCameraToFitMapMarkers();
                         }
-                      });
-                    },
-                    polygons: _polygons,
-                    markers: markers.values.toSet(),
-                    polylines: polylines
+                      },
+                      initialCameraPosition: CameraPosition(
+                        target: const LatLng(52.199174, 0.140929),
+                        zoom: 14.1,
+                        bearing: _mapBearing,
+                      ),
+                      onCameraMove: (CameraPosition position) {
+                        debugPrint('MapPageState onCameraMove called');
+                        setState(() {
+                          switch (preferredMapOrientation) {
+                            case MapOrientation.adaptive:
+                              _compassBearing = 90;
+                              break;
+                            case MapOrientation.alwaysNorth:
+                              _compassBearing = 0;
+                              break;
+                          }
+                        });
+                      },
+                      polygons: _polygons,
+                      markers: markers.values.toSet(),
+                      polylines: polylines
+                    ),
                   );
                 },
               ),
