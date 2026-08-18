@@ -54,15 +54,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
-  late String appBarTitle; // will be set according to filterCategory and subfilterCategory
 
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
     filterCategory = widget.filterCategory;
-    appBarTitle = calculateAppBarTitle();
-    // whenever visible positions change, show the thumb and ensure rebuild
   }
 
   @override
@@ -81,7 +78,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       detailsVisibilityList = List<bool>.filled(500, false);
       _searchQuery = '';
       _isSearching = false;
-      appBarTitle = calculateAppBarTitle();
     });
     if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
   }
@@ -247,8 +243,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void filteringDropdownCallback(String? selectedValue) {
     HapticFeedback.selectionClick();
     widget.onSubfilterChange.call(selectedValue);
-    appBarTitle = calculateAppBarTitle();
-    setState(() { });
   }
 
   // Save settings to shared preferences
@@ -371,7 +365,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return FairScaffold(
-      appBarTitle: appBarTitle,
+      appBarTitle: calculateAppBarTitle(),
       currentTab: switch (filterCategory) {'favourite' => 4, _ => 3},
       onTabSelected: widget.onTabSelected,
       appBarActions: [
