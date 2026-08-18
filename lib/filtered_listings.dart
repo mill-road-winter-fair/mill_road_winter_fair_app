@@ -677,9 +677,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 ' listings'
                                 '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
                                 '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
+                                '${(widget.subfilterCategory != null && _isSearching) ? '\n\nTap the magnifying glass to close search, then ‘Show’ to change what type of listings are displayed.' : ''}'
                                 '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
                                 '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
-                                '${_searchQuery.isNotEmpty ? '\n\nTap the ‘X’ in the bar above to clear your search.' : ''}'
+                                '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}'
                             ),
                           ),
                         )
