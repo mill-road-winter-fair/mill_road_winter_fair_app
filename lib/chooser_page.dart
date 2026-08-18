@@ -30,18 +30,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   late ScrollController _chooserPageScrollController;
   late final AnimationController _animationController;
   Timer? _idleTimer;
-  final List<Hotspot> hotspots = [
-    Hotspot(label: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152),
-    Hotspot(label: 'Music', left: 0.548, top: 0.287, width: 0.451, height: 0.144),
-    Hotspot(label: 'Events', left: 0, top: 0.366, width: 0.455, height: 0.19),
-    Hotspot(label: 'Shopping', left: 0.583, top: 0.49, width: 0.416, height: 0.213),
-    Hotspot(label: 'Children’s', left: 0, top: 0.598, width: 0.437, height: 0.214),
-    Hotspot(label: 'Nearby', left: 0.666, top: 0.703, width: 0.333, height: 0.171),
-    Hotspot(label: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118),
-    Hotspot(label: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118),
-  ];
   int? _chosenHotspotID; // hotspot that the user tapped on, if any
   HighlightMode _highlightMode = HighlightMode.idle;
+  late final List<Hotspot> hotspots;
 
   @override
   void initState() {
@@ -131,9 +122,38 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
     return cancelled;
   }
 
+
+  void restartAnimation() {
+    //_chosenHotspotID = null;
+    //_highlightMode = HighlightMode.none;
+    _idleTimer = Timer(const Duration(seconds: 2), () {
+      debugPrint('MW restarting anim');
+      setState(() {
+        _chosenHotspotID = null;
+        _highlightMode = HighlightMode.idle;
+      });
+      _animationController.repeat();
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     debugPrint('ChooserPage build() called');
+
+    List<Hotspot> hotspots = [
+      Hotspot(label: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152, theTap: () => widget.onOpenListings('all', 'food')),
+      Hotspot(label: 'Music', left: 0.548, top: 0.287, width: 0.451, height: 0.144, theTap: () => widget.onOpenTimetable(false, true)),
+      Hotspot(label: 'Events and\nPerformances', left: 0, top: 0.366, width: 0.455, height: 0.19, theTap: () => widget.onOpenTimetable(false, false)),
+      Hotspot(label: 'Shopping', left: 0.583, top: 0.49, width: 0.416, height: 0.213, theTap: () => widget.onOpenListings('all', 'shopping')),
+      Hotspot(label: 'Children’s', left: 0, top: 0.598, width: 0.437, height: 0.214, theTap: () => widget.onOpenListings('all', 'performanceChildrens')),
+      Hotspot(label: 'Nearby', left: 0.666, top: 0.703, width: 0.333, height: 0.171, theTap: () => widget.onOpenMap(10)),
+      Hotspot(label: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118, theTap: () => widget.onOpenListings('all', 'service')),
+      Hotspot(label: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118, theTap: () => widget.onOpenListings('all', 'service')),
+    ];
+
+    if ((_idleTimer == null || !_idleTimer!.isActive) && !_animationController.isAnimating) restartAnimation();
+    
     return FairScaffold(
       appBarTitle: "Welcome",
       currentTab: 0,
@@ -201,6 +221,10 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                             });
                             _animationController.repeat();
                           });
+                        } else {
+                          _idleTimer?.cancel();
+                          _animationController.stop();
+                          hotspots[i].theTap();
                         }
                       },
                       child: const SizedBox.expand(),
@@ -240,6 +264,7 @@ class Hotspot {
   final double top;
   final double width;
   final double height;
+  final void Function() theTap;
 
   const Hotspot({
     required this.label,
@@ -247,6 +272,7 @@ class Hotspot {
     required this.top,
     required this.width,
     required this.height,
+    required this.theTap,
   });
 
   Rect scaled(Size size) {
@@ -371,6 +397,7 @@ class HotspotPainter extends CustomPainter {
     TextPainter? painter;
     while (fontSize > 5) {
       painter = TextPainter(
+        textAlign: TextAlign.center,
         text: TextSpan(
           text: text,
           style: TextStyle(
@@ -383,7 +410,7 @@ class HotspotPainter extends CustomPainter {
             ],
           ),
         ),
-        maxLines: 1,
+        maxLines: 2,
         textDirection: TextDirection.ltr,
       );
       painter.layout();
