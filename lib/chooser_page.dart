@@ -1,17 +1,21 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:math';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 
 
 class ChooserPage extends StatefulWidget {
-  const ChooserPage({required this.onChangeTitle, super.key});
-  final void Function(String)? onChangeTitle;
+  const ChooserPage({
+    super.key,
+    required this.onTabSelected,
+  });
+
   @override
   State<ChooserPage> createState() => _ChooserPageState();
+  final ValueChanged<int> onTabSelected;
 }
 
 class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStateMixin {
@@ -121,76 +125,82 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => widget.onChangeTitle?.call('Welcome'));
-    return SafeArea(
-      top: false,
-      left: false,
-      right: false,
-      bottom: Platform.isAndroid && isNavBarVisible(context),
-      child: Scaffold(
-        body: RepaintBoundary(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.asset('assets/chooserPage/chooserPage_background.png', fit: BoxFit.fill),
-                  Positioned(
-                    left: 0.16 * constraints.maxWidth, 
-                    top: 0.03 * constraints.maxHeight, 
-                    width: 0.7 * constraints.maxWidth, 
-                    height: 0.105 * constraints.maxHeight, 
-                    child: Image(image: AssetImage('assets/MRWF25_leaflet_banner.png'), width: 180)),
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      child: CustomPaint(
-                        painter: HotspotPainter(
-                          hotspots: hotspots,
-                          mode: _highlightMode,
-                          chosenHotspotID: _chosenHotspotID,
-                          animation: _animationController,
-                        ),
+    debugPrint('ChooserPage build() called');
+    return FairScaffold(
+      appBarTitle: "Welcome",
+      currentTab: 0,
+      onTabSelected: widget.onTabSelected,
+      appBarActions: [
+        IconButton(
+          icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+          },
+        ),
+      ],
+      body: RepaintBoundary(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset('assets/chooserPage/chooserPage_background.png', fit: BoxFit.fill),
+                Positioned(
+                  left: 0.16 * constraints.maxWidth, 
+                  top: 0.03 * constraints.maxHeight, 
+                  width: 0.7 * constraints.maxWidth, 
+                  height: 0.105 * constraints.maxHeight, 
+                  child: Image(image: AssetImage('assets/MRWF25_leaflet_banner.png'), width: 180)),
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: HotspotPainter(
+                        hotspots: hotspots,
+                        mode: _highlightMode,
+                        chosenHotspotID: _chosenHotspotID,
+                        animation: _animationController,
                       ),
                     ),
                   ),
-                  for (int i=0; i<hotspots.length; i++)
-                    Positioned(
-                      left: hotspots[i].left * constraints.maxWidth,
-                      top: hotspots[i].top * constraints.maxHeight,
-                      width: hotspots[i].width * constraints.maxWidth,
-                      height: hotspots[i].height * constraints.maxHeight,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          _idleTimer?.cancel();
-                          debugPrint('Selected $i');
+                ),
+                for (int i=0; i<hotspots.length; i++)
+                  Positioned(
+                    left: hotspots[i].left * constraints.maxWidth,
+                    top: hotspots[i].top * constraints.maxHeight,
+                    width: hotspots[i].width * constraints.maxWidth,
+                    height: hotspots[i].height * constraints.maxHeight,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () async {
+                        _idleTimer?.cancel();
+                        debugPrint('Selected $i');
+                        setState(() {
+                          _highlightMode = HighlightMode.selected;
+                          _chosenHotspotID = i;
+                        });
+                        final cancelled = await chooseDialog(context, hotspots[i].label);
+                        debugPrint('cancelled=$cancelled');
+                        if (cancelled) {
                           setState(() {
-                            _highlightMode = HighlightMode.selected;
-                            _chosenHotspotID = i;
+                            _chosenHotspotID = null;
+                            _highlightMode = HighlightMode.none;
                           });
-                          final cancelled = await chooseDialog(context, hotspots[i].label);
-                          debugPrint('cancelled=$cancelled');
-                          if (cancelled) {
+                          _idleTimer = Timer(const Duration(seconds: 2), () {
                             setState(() {
                               _chosenHotspotID = null;
-                              _highlightMode = HighlightMode.none;
+                              _highlightMode = HighlightMode.idle;
                             });
-                            _idleTimer = Timer(const Duration(seconds: 2), () {
-                              setState(() {
-                                _chosenHotspotID = null;
-                                _highlightMode = HighlightMode.idle;
-                              });
-                              _animationController.repeat();
-                            });
-                          }
-                        },
-                        child: const SizedBox.expand(),
-                      ),
+                            _animationController.repeat();
+                          });
+                        }
+                      },
+                      child: const SizedBox.expand(),
                     ),
-                ],
-              );
-            },
-          ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );

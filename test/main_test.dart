@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 
 void main() {
   // We're on test
@@ -53,7 +56,7 @@ void main() {
 
       await tester.pumpWidget(const MyApp());
 
-      expect(find.text(fairName), findsOneWidget);
+      expect(find.text('Welcome'), findsOneWidget);
 
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Map'), findsOneWidget);
@@ -153,7 +156,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DrawerHeader), findsOneWidget);
-      expect(find.text(fairName), findsOneWidget);
+      expect(find.text('Welcome'), findsOneWidget);
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
@@ -284,6 +287,95 @@ void main() {
       expect(find.byType(SettingsPage), findsOneWidget);
     });
 
+    testWidgets('navigates to WelcomeScreen/OnBoardingPage when App guide in drawer is tapped', (WidgetTester tester) async {
+      // Set a realistic window size to avoid layout overflow in the test
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.resetPhysicalSize);
+
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        }
+      ];
+
+      await tester.pumpWidget(const MyApp());
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('App guide'));
+      await tester.pumpAndSettle();
+
+      // Verify that the WelcomeScreen is displayed
+      expect(find.byType(WelcomeScreen), findsOneWidget);
+
+      // Verify that OnBoardingPage is rendered within the WelcomeScreen
+      expect(find.byType(OnBoardingPage), findsOneWidget);
+    });
+
+    testWidgets('show aboutDialog when About the app in drawer is tapped', (WidgetTester tester) async {
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        }
+      ];
+
+      await tester.pumpWidget(const MyApp());
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('About the app'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Android app by Alexander Berridge'), findsOneWidget);
+      expect(find.text('iPhone version by Matt Whiting'), findsOneWidget);
+    });
+
     testWidgets('BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
       listings = [
         {
@@ -330,12 +422,12 @@ void main() {
       await tester.tap(find.text('Listings'));
       await tester.pumpAndSettle();
 
-      expect(homePageState.index, 2);
+      expect(homePageState.index, 3);
 
       await tester.tap(find.text('Timetable'));
       await tester.pumpAndSettle();
 
-      expect(homePageState.index, 3);
+      expect(homePageState.index, 2);
 
       await tester.tap(find.text('Favourites'));
       await tester.pumpAndSettle();
@@ -367,6 +459,59 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('info@millroadwinterfair.org'), findsNothing);
+    });
+
+    testWidgets('Favourites button in NavBar navigates to Favourites page', (WidgetTester tester) async {
+      // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performance': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        }
+      ];
+
+      // Provide initial mock values for shared preferences
+      SharedPreferences.setMockInitialValues({});
+      await loadSettings();
+
+      // Set the mock listing as a favourite before the widget is built
+      favouriteListingKeys.add('1');
+
+      // Pump MyApp which contains the AppBar with the snowflake button
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      // Tap the Favourites button the NavBar
+      await tester.tap(find.byIcon(Icons.favorite));
+      await tester.pumpAndSettle();
+
+      // Verify that the favourites page is displayed
+      expect(find.byType(FilteredListingsPage), findsOneWidget);
+      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+
+      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice (triggered in MapPage initState)
+      await tester.pump(const Duration(seconds: 21));
     });
   });
 }
