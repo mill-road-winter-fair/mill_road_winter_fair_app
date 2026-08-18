@@ -246,8 +246,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void filteringDropdownCallback(String? selectedValue) {
     HapticFeedback.selectionClick();
     widget.onSubfilterChange.call(selectedValue);
-    appBarTitle = calculateAppBarTitle();
-    setState(() { });
   }
 
   // Save settings to shared preferences
@@ -370,7 +368,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return FairScaffold(
-      appBarTitle: appBarTitle,
+      appBarTitle: calculateAppBarTitle(),
       currentTab: switch (filterCategory) {'favourite' => 4, _ => 3},
       onTabSelected: widget.onTabSelected,
       appBarActions: [
