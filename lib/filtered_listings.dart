@@ -54,15 +54,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
-  late String appBarTitle; // will be set according to filterCategory and subfilterCategory
 
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
     filterCategory = widget.filterCategory;
-    appBarTitle = calculateAppBarTitle();
-    // whenever visible positions change, show the thumb and ensure rebuild
   }
 
   @override
@@ -81,7 +78,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       detailsVisibilityList = List<bool>.filled(500, false);
       _searchQuery = '';
       _isSearching = false;
-      appBarTitle = calculateAppBarTitle();
     });
     if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
   }
@@ -96,7 +92,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
     return appBarTitle;
   }
-
 
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
     if (_searchQuery.isEmpty) return allListings;
@@ -368,6 +363,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     bool isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0,11) == 'performance');
 
     final colorScheme = Theme.of(context).colorScheme;
+    final appBarTheme = Theme.of(context).appBarTheme;
+    final nowOrSoonIconKey = GlobalKey();
+    final hidePastIconKey = GlobalKey();
+    final searchIconKey = GlobalKey();
 
     return FairScaffold(
       appBarTitle: calculateAppBarTitle(),
@@ -376,10 +375,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       appBarActions: [
         if (filterCategory == 'favourite' || isShowingJustPerformance)
           IconButton(
-            key: const ValueKey('nowFab'),
+            key: nowOrSoonIconKey,
+            onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon'),
             onPressed: () {
+              HapticFeedback.lightImpact();
               if (isItEventDay()) {
-                HapticFeedback.lightImpact();
                 if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
                   SortingMethod savedSortingMethod = preferredSortingMethod;
                   preferredSortingMethod = SortingMethod.values[2];
@@ -415,41 +415,49 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     alignment: 0,
                   );
                 }
+              } else {
+                showMiniPopup(context, nowOrSoonIconKey, '‘Scroll to now’ is only available when the Fair is underway', colorScheme.error);
               }
             },
             icon: Icon(
               Icons.update,
-              color: (isItEventDay()) ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         if (isShowingJustPerformance || filterCategory == 'favourite')
           IconButton(
-            key: const ValueKey('hidePastListingsFab'),
-            onPressed: (isItEventDay()) ? () {
+            key: hidePastIconKey,
+            onLongPress: () => showMiniPopup(context, hidePastIconKey, (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed'),
+            onPressed: () {
               HapticFeedback.lightImpact();
-              setState(() {
-                _hidePastListings = !_hidePastListings;
-                numberOfVisibleListings = -1;
-                firstVisibleIndex = null;
-              });
-              Fluttertoast.showToast(
-                msg: (_hidePastListings) ? 'Hiding all listings that have passed' : 'Showing all listings',
-                gravity: ToastGravity.BOTTOM,
-                backgroundColor: colorScheme.primary,
-                textColor: colorScheme.onPrimary,
-                fontSize: 16,
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-              );
-            } : null,
+              if (isItEventDay()) {
+                setState(() {
+                  _hidePastListings = !_hidePastListings;
+                  numberOfVisibleListings = -1;
+                  firstVisibleIndex = null;
+                });
+                Fluttertoast.showToast(
+                  msg: (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances',
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: colorScheme.primary,
+                  textColor: colorScheme.onPrimary,
+                  fontSize: 16,
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                );
+              } else {
+                showMiniPopup(context, nowOrSoonIconKey, '‘Hide past listings’ is only available when the Fair is underway', colorScheme.error);
+              }
+            },
             icon: Icon(
-              Icons.event_busy, 
-              color: (isItEventDay()) ? ((_hidePastListings) ? Colors.yellow : colorScheme.onPrimary) : colorScheme.onSurfaceVariant,
+              (_hidePastListings) ? Icons.free_cancellation : Icons.event_busy, 
+              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
           IconButton(
-            key: const ValueKey('searchFab'),
+            key: searchIconKey,
             color: colorScheme.onSecondary,
+            onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
             onPressed: () {
               HapticFeedback.lightImpact();
               setState(() {
@@ -460,7 +468,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 }
               });
             },
-            icon: Icon(Icons.search, color: colorScheme.onPrimary),
+            icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
           ),
       ],
       body: ValueListenableBuilder<Set<String>>(
@@ -682,9 +690,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 ' listings'
                                 '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
                                 '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
+                                '${(widget.subfilterCategory != null && _isSearching) ? '\n\nTap the magnifying glass to close search, then ‘Show’ to change what type of listings are displayed.' : ''}'
                                 '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
                                 '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
-                                '${_searchQuery.isNotEmpty ? '\n\nTap the ‘X’ in the bar above to clear your search.' : ''}'
+                                '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}'
                             ),
                           ),
                         )

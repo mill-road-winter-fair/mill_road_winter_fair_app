@@ -59,8 +59,6 @@ class _TimetablePageState extends State<TimetablePage> {
   late Map<String, List<PositionedEvent>> thePreparedEvents; // read from the listings
   late Map<String, List<PositionedEvent>> theFilteredEvents; // filtered from the above based on onlyNowOrSoon
   bool loading = true; // so we don't try to build before we're ready
-  OverlayEntry? _miniPopupOverlayEntry; // widget that floats over a given widget as a 'tooltip'
-  Timer? _miniPopupTimer; // times how long the above stays on screen
   Route? listingDetailsDialogRoute; // to keep track of dialog so it can be closed if needed. This will move to main if we enter the app from an alert
 
   @override
@@ -421,103 +419,6 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
 
-  void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage, [Color? fgColour, Color? bgColour]) {
-
-    fgColour ??= Theme.of(itemContext).colorScheme.secondary;
-    bgColour ??= Theme.of(itemContext).colorScheme.onSecondary;
-
-    removeMiniPopup();
-
-    final overlay = Overlay.of(itemContext);
-    final RenderBox box;
-    if (theKey == null) {
-      box = itemContext.findRenderObject() as RenderBox;
-    } else {
-      box = theKey.currentContext?.findRenderObject() as RenderBox;
-    }
-    final itemTopLeft = box.localToGlobal(Offset.zero);
-    final itemSize = box.size;
-    final screenWidth = MediaQuery.sizeOf(itemContext).width;
-    final overlayW = min(max(theMessage.length / 0.25, 155.0), 230.0);
-    final theStyle = TextStyle(fontSize: 13.0, decoration: TextDecoration.none, fontWeight: FontWeight.normal, color: fgColour);
-    final overlayH = estimateTextHeight(text: theMessage, style:theStyle, maxWidth:overlayW, context: itemContext);
-    const gap = 4.0;
-    final theDuration = (theMessage.length / 25).toInt() + 2;
-
-    // Prefer placing the box above the item, otherwise below.
-    double desiredTop = itemTopLeft.dy - overlayH - gap - 8.0; // box padding
-    if (desiredTop < MediaQuery.paddingOf(itemContext).top + 4) {
-      desiredTop = itemTopLeft.dy + itemSize.height + gap;
-    }
-    // Horizontal: try to centre above the item
-    double desiredLeft = itemTopLeft.dx + itemSize.width / 2 - overlayW / 2;
-    if (desiredLeft < 4) desiredLeft = 4;
-    if (desiredLeft + overlayW > screenWidth - 4) desiredLeft = screenWidth - overlayW - 4;
-    _miniPopupOverlayEntry = OverlayEntry(
-      builder: (ctx) => Positioned(
-        left: desiredLeft,
-        top: desiredTop,
-        child: GestureDetector( // since field may be clipped
-          onTap: () {
-            HapticFeedback.lightImpact();
-            removeMiniPopup();
-          },
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: overlayW, // wrapping boundary
-            ),
-            child: Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: bgColour,
-                borderRadius: BorderRadius.circular(4),
-                boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
-              ),
-              child: Text(theMessage, softWrap: true,
-                style: theStyle),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    overlay.insert(_miniPopupOverlayEntry!);
-    _miniPopupTimer = Timer(Duration(seconds: theDuration), () => removeMiniPopup());
-
-  }
-
-
-  void removeMiniPopup() {
-    _miniPopupTimer?.cancel();
-    _miniPopupTimer = null;
-    if (_miniPopupOverlayEntry != null) {
-      try {
-        _miniPopupOverlayEntry!.remove();
-      } catch (_) {}
-      _miniPopupOverlayEntry = null;
-    }
-  }
-
-
-  double estimateTextHeight({
-    required String text,
-    required TextStyle style,
-    required double maxWidth,
-    required BuildContext context,
-    int? maxLines,
-  }) {
-    final tp = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: maxLines,
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
-      strutStyle: StrutStyle.fromTextStyle(style)
-    )..layout(maxWidth: maxWidth);
-    return tp.size.height;
-  }
-
-
   void favouriteOrNotListing(PositionedEvent theEvent) {
     if (favouriteListingKeys.value.contains(theEvent.id)) {
       favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(theEvent.id);
@@ -701,6 +602,7 @@ class _TimetablePageState extends State<TimetablePage> {
     final now = DateTime.now();
     final isLandscape = MediaQuery.orientationOf(context) == Orientation.landscape;
     final colorScheme = Theme.of(context).colorScheme;
+    final appBarTheme = Theme.of(context).appBarTheme;
     double startPixelsPerMinute; // for pinch scaling
     final int markInterval = pixelsPerMinuteP >= 1.4 ? 30 : 60;
     final List<Widget> markers = [];
@@ -715,28 +617,28 @@ class _TimetablePageState extends State<TimetablePage> {
       appBarActions: [
         IconButton(
           key: subcategoryIconKey,
-          color: (widget.filteredMusicOrNot == null) ? Theme.of(context).colorScheme.onSecondary : Colors.yellow,
-          onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing everything, just music, or everything but music'),
+          color: appBarTheme.foregroundColor,
+          onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing just music, everything but music, or everything'),
           onPressed: () {
             HapticFeedback.lightImpact();
             _toggleFilteredMusicOrNot();
             theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
           },
-          icon: Icon((widget.filteredMusicOrNot == false) ? Icons.music_off : Icons.music_note),
+          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter }, size: (widget.filteredMusicOrNot == null) ? 21 : 26),
         ),
         IconButton(
           key: nowOrSoonIconKey,
           onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon'),
           onPressed: () => (isItEventDay())
             ? _toggleOnlyNowOrSoon()
-            : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway', Theme.of(context).colorScheme.error),
+            : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway', colorScheme.error),
           icon: Icon(
-            Icons.schedule, 
-            color: (isItEventDay()) ? ((widget.onlyNowOrSoon) ? Colors.yellow : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.onSurfaceVariant,
+            (widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule, 
+            color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
           ),
         ),
         IconButton(
-          color: (_isSearching) ? Colors.yellow : Theme.of(context).colorScheme.onSecondary,
+          color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
           onPressed: () {
             HapticFeedback.lightImpact();
             setState(() {
@@ -748,7 +650,7 @@ class _TimetablePageState extends State<TimetablePage> {
               }
             });
           },
-          icon: Icon(Icons.search),
+          icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
         ),
       ],
       body: ValueListenableBuilder<Set<String>>(
@@ -847,7 +749,7 @@ class _TimetablePageState extends State<TimetablePage> {
                     children: [
                       Container(
                         key: const ValueKey('searchBar'),
-                        color: Theme.of(context).colorScheme.surfaceDim,
+                        color: colorScheme.surfaceDim,
                         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
                         padding: EdgeInsets.all(8),
                         child: SearchBar(
