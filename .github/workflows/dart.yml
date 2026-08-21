@@ -28,6 +28,7 @@ jobs:
         run: | 
           touch .env
           echo "HEROKU_API=fakeApi" >> .env
+          echo "HEROKU_API_KEY=fakeKey" >> .env
           echo "ANDROID_GOOGLE_MAPS_SDK_API_KEY=fakeKey" >> .env
           echo "ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=fakeKey" >> .env
           echo "IOS_GOOGLE_MAPS_SDK_API_KEY=fakeKey" >> .env

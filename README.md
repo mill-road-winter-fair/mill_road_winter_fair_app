@@ -32,6 +32,7 @@ Currently the aim is for the app to provides listings of the various stalls, mus
 7. Create a `.env` file containing the following:
 ```txt
 HEROKU_API=https://mrwf.theberridge.com/listings
+HEROKU_API_KEY=\\API Key for the Heroku-based caching API
 ANDROID_GOOGLE_MAPS_SDK_API_KEY=\\API Key for Google Maps SDK for Android
 ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=\\API Key for Google Maps Directions API for Android
 IOS_GOOGLE_MAPS_SDK_API_KEY=\\API Key for Google Maps SDK for iOS
