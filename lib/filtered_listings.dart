@@ -784,7 +784,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           initialSelection: widget.subfilterCategory,
           //width: (MediaQuery.of(context).size.width - 24) / 2,
           label: const Text("Show", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-          leadingIcon: const Icon(Icons.sort),
+          leadingIcon: const Icon(Icons.filter),
           textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,
