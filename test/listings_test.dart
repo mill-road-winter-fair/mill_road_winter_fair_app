@@ -463,42 +463,95 @@ void main() {
         // Simulate first app launch: successfully fetch listings from API
         final initialMockResponse = {
           "values": [
-            ["displayName", "email", "endTime", "id", "latLng", "name", "phone", "primaryType", "secondaryType", "startTime", "tertiaryType", "website"],
             [
-              "Glazed and Confused",
-              "admin@glazedandconfued.com",
-              "16:30",
-              "1",
-              "52.199687,0.138813",
-              "glazedandconfused",
-              "01223 111111",
-              "Food",
-              "Food",
-              "10:30",
-              "Doughnuts",
-              "https://www.glazedandconfused.com"
+              "id",
+              "visibleOnMap",
+              "cancelled",
+              "groupParent",
+              "brickAndMortar",
+              "emoji",
+              "title",
+              "subtitle",
+              "groupID",
+              "food",
+              "shopping",
+              "charityCommunityInfo",
+              "performance",
+              "visitExperience",
+              "service",
+              "location",
+              "description",
+              "email",
+              "website",
+              "phone",
+              "latLng",
+              "imageURL",
+              "startTime",
+              "endTime"
             ],
             [
-              "Sushi Squad",
-              "info@sushisquad.com",
-              "16:40",
+              "1",
+              "TRUE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "🍩",
+              "Glazed and Confused",
+              "Doughnuts",
+              "",
+              "TRUE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "Gwydir St Car Park",
+              "Nice buns",
+              "",
+              "https://www.glazedandconfused.com",
+              "01223 111111",
+              "52.199687,0.138813",
+              "",
+              "10:30",
+              "16:30",
+            ],
+            [
               "2",
-              "52.200063,0.139313",
-              "sushisquad",
-              "01223 222222",
-              "Food",
-              "Food",
-              "12:00",
+              "TRUE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "🍣",
+              "Sushi Squad",
               "Sushi",
-              "https://www.sushisquad.com"
+              "",
+              "TRUE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "FALSE",
+              "Sushi Bar",
+              "Delicious sushi",
+              "info@sushisquad.com",
+              "https://www.sushisquad.com",
+              "01223 222222",
+              "52.200063,0.139313",
+              "",
+              "12:00",
+              "16:40",
             ]
           ]
         };
 
         listings = [];
 
-        when(mockClient.get(any)).thenAnswer(
-          (_) async => http.Response(jsonEncode(initialMockResponse), 200),
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
+              (_) async => http.Response.bytes(
+            utf8.encode(jsonEncode(initialMockResponse)),
+            200,
+            headers: {'content-type': 'application/json; charset=utf-8'},
+          ),
         );
 
         // First app launch: fetch and cache listings
@@ -506,11 +559,11 @@ void main() {
 
         expect(firstLaunchResult.length, 2);
         expect(listings.length, 2);
-        expect(listings.first["name"], "glazedandconfused");
-        expect(listings[1]["name"], "sushisquad");
+        expect(listings.first["title"], "Glazed and Confused");
+        expect(listings[1]["title"], "Sushi Squad");
 
         // Simulate app restart: call fetchExistingListings while API is down
-        when(mockClient.get(any)).thenAnswer(
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response('Internal Server Error', 500),
         );
 
@@ -519,22 +572,22 @@ void main() {
 
         // Should return the cached listings from the first launch
         expect(secondLaunchResult.length, 2);
-        expect(secondLaunchResult.first["name"], "glazedandconfused");
-        expect(secondLaunchResult[1]["name"], "sushisquad");
+        expect(secondLaunchResult.first["title"], "Glazed and Confused");
+        expect(secondLaunchResult[1]["title"], "Sushi Squad");
       });
 
       test('fetchExistingListings with empty cache returns empty list on API failure', () async {
         // Simulate fresh app install with API down
         listings = [];
 
-        when(mockClient.get(any)).thenAnswer(
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response('Internal Server Error', 500),
         );
 
         final result = await fetchExistingListings(mockClient);
 
         expect(result, []);
-        verify(mockClient.get(any)).called(equals(10)); // Verifies retries happened
+        verify(mockClient.get(any, headers: anyNamed('headers'))).called(equals(10)); // Verifies retries happened
       });
     });
   });
