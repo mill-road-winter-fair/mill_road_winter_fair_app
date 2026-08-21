@@ -364,6 +364,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     final colorScheme = Theme.of(context).colorScheme;
     final appBarTheme = Theme.of(context).appBarTheme;
+    final nowOrSoonIconKey = GlobalKey();
+    final hidePastIconKey = GlobalKey();
+    final searchIconKey = GlobalKey();
 
     return FairScaffold(
       appBarTitle: calculateAppBarTitle(),
@@ -372,10 +375,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       appBarActions: [
         if (filterCategory == 'favourite' || isShowingJustPerformance)
           IconButton(
-            key: const ValueKey('nowFab'),
+            key: nowOrSoonIconKey,
+            onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon'),
             onPressed: () {
+              HapticFeedback.lightImpact();
               if (isItEventDay()) {
-                HapticFeedback.lightImpact();
                 if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
                   SortingMethod savedSortingMethod = preferredSortingMethod;
                   preferredSortingMethod = SortingMethod.values[2];
@@ -411,6 +415,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                     alignment: 0,
                   );
                 }
+              } else {
+                showMiniPopup(context, nowOrSoonIconKey, '‘Scroll to now’ is only available when the Fair is underway', colorScheme.error);
               }
             },
             icon: Icon(
@@ -420,32 +426,38 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           ),
         if (isShowingJustPerformance || filterCategory == 'favourite')
           IconButton(
-            key: const ValueKey('hidePastListingsFab'),
-            onPressed: (isItEventDay()) ? () {
+            key: hidePastIconKey,
+            onLongPress: () => showMiniPopup(context, hidePastIconKey, (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed'),
+            onPressed: () {
               HapticFeedback.lightImpact();
-              setState(() {
-                _hidePastListings = !_hidePastListings;
-                numberOfVisibleListings = -1;
-                firstVisibleIndex = null;
-              });
-              Fluttertoast.showToast(
-                msg: (_hidePastListings) ? 'Hiding all listings that have passed' : 'Showing all listings',
-                gravity: ToastGravity.BOTTOM,
-                backgroundColor: colorScheme.primary,
-                textColor: colorScheme.onPrimary,
-                fontSize: 16,
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-              );
-            } : null,
+              if (isItEventDay()) {
+                setState(() {
+                  _hidePastListings = !_hidePastListings;
+                  numberOfVisibleListings = -1;
+                  firstVisibleIndex = null;
+                });
+                Fluttertoast.showToast(
+                  msg: (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances',
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: colorScheme.primary,
+                  textColor: colorScheme.onPrimary,
+                  fontSize: 16,
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                );
+              } else {
+                showMiniPopup(context, nowOrSoonIconKey, '‘Hide past listings’ is only available when the Fair is underway', colorScheme.error);
+              }
+            },
             icon: Icon(
               (_hidePastListings) ? Icons.free_cancellation : Icons.event_busy, 
               color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
             ),
           ),
           IconButton(
-            key: const ValueKey('searchFab'),
+            key: searchIconKey,
             color: colorScheme.onSecondary,
+            onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
             onPressed: () {
               HapticFeedback.lightImpact();
               setState(() {
