@@ -421,7 +421,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               Icons.update,
-              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
+              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         if (isShowingJustPerformance || filterCategory == 'favourite')
@@ -451,7 +451,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               (_hidePastListings) ? Icons.free_cancellation : Icons.event_busy, 
-              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
+              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
           IconButton(

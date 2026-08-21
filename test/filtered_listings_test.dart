@@ -28,6 +28,7 @@ void main() {
     WidgetTester tester,
     String category,
     List<Map<String, dynamic>> listings,
+    List<String> favouriteListingKeys,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -50,7 +51,7 @@ void main() {
       // Define a test listing
       List<Map<String, dynamic>> listings = [];
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       expect(find.text('Unable to retrieve listings'), findsOneWidget);
     });
@@ -113,7 +114,7 @@ void main() {
       ];
 
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
@@ -218,7 +219,7 @@ void main() {
       // Mock sorting preference is alphabetical
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
       var filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
@@ -228,7 +229,7 @@ void main() {
       // Mock sorting preference is distance
       preferredSortingMethod = SortingMethod.values[1];
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
       filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Sushi Squad');
@@ -238,7 +239,7 @@ void main() {
       // Mock sorting preference is time - which for Food should sort by A-Z since time isn't allowed for sorting
       preferredSortingMethod = SortingMethod.values[2];
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
       filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
@@ -283,7 +284,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'favourite', listings);
+      await pumpFilteredListingsPage(tester, 'favourite', listings, ['1']);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
@@ -351,7 +352,7 @@ void main() {
       ];
 
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       // Preferred sorting method should have been reset to 0 (alphabetical)
       expect(preferredSortingMethod, SortingMethod.values[0]);
@@ -398,7 +399,7 @@ void main() {
       // Mock location services are disabled
       locationServicesEnabled = false;
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       // Obtain the state after mounting
       final filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
@@ -414,7 +415,7 @@ void main() {
       // Mock location is available
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       // Fallback sorting should be disabled
       expect(filteredListingsPageState.useFallbackSorting, false);
@@ -425,7 +426,7 @@ void main() {
       // Mock location is now unavailable
       currentLatLng = null;
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       // Fallback sorting should be enabled
       expect(filteredListingsPageState.useFallbackSorting, true);
@@ -583,7 +584,7 @@ void main() {
       expect(find.text('Bite Club'), findsOneWidget);
 
       // Tap the search FAB to enter search mode
-      final searchFab = find.byKey(const ValueKey('searchFab'));
+      final searchFab = find.byIcon(Icons.search);
       expect(searchFab, findsOneWidget);
       await tester.tap(searchFab);
       await settle(tester);
