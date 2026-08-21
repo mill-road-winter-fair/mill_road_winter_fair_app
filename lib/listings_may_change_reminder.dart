@@ -29,13 +29,28 @@ class ListingUpdateNotifier {
         'Check back for the latest listings.';
   }
 
-  static Future<void> maybeShowNotice(BuildContext context) async {
-    if (onTest || !listingUpdateNoticeEnabled) {
+  static bool isListingsMayChangeNotice(DateTime now) {
+    return !DateUtils.isSameDay(fairDate, now) && now.isBefore(fairDate);
+  }
+
+  static Future<void> maybeShowNotice(
+    BuildContext context, {
+    DateTime? now,
+  }) async {
+    if (onTest) {
       return;
     }
 
+    final noticeDate = now ?? DateTime.now();
+    final isListingsMayChange = isListingsMayChangeNotice(noticeDate);
+
+    // The dismissal preference applies only before the Fair. The notices on
+    // the day and afterwards must always remain available.
     final prefs = await SharedPreferences.getInstance();
-    if (!context.mounted || !(prefs.getBool(preferenceKey) ?? true)) {
+    if (!context.mounted ||
+        (isListingsMayChange &&
+            (!listingUpdateNoticeEnabled ||
+                !(prefs.getBool(preferenceKey) ?? true)))) {
       return;
     }
 
@@ -44,22 +59,23 @@ class ListingUpdateNotifier {
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Listings may change'),
-        content: Text(messageFor(DateTime.now())),
+        content: Text(messageFor(noticeDate)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Okay'),
           ),
-          FilledButton(
-            onPressed: () async {
-              listingUpdateNoticeEnabled = false;
-              await prefs.setBool(preferenceKey, false);
-              if (dialogContext.mounted) {
-                Navigator.of(dialogContext).pop();
-              }
-            },
-            child: const Text("Don't show this again"),
-          ),
+          if (isListingsMayChange)
+            FilledButton(
+              onPressed: () async {
+                listingUpdateNoticeEnabled = false;
+                await prefs.setBool(preferenceKey, false);
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+              child: const Text("Don't show this again"),
+            ),
         ],
       ),
     );
