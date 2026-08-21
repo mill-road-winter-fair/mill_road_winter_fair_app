@@ -10,6 +10,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
 import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
@@ -21,13 +23,17 @@ import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
+  final ValueChanged<int> onTabSelected;
 
-  const MapPage({required this.listings, super.key});
+  const MapPage({
+    super.key,
+    required this.listings, 
+    required this.onTabSelected,
+  });
 
   @override
   MapPageState createState() => MapPageState();
@@ -664,7 +670,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addSpecificMarker(Map<String, dynamic> listing) async {
-    debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
+    //debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, getCategory(listing));
@@ -1553,7 +1559,12 @@ class MapPageState extends State<MapPage> {
             break;
         }
 
-        return Scaffold(
+        return FairScaffold(
+          appBarTitle: "Map",
+          currentTab: 1,
+          onTabSelected: widget.onTabSelected,
+          appBarActions: [
+          ],
           body: Stack(
             children: [
               LayoutBuilder(
