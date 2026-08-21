@@ -1651,7 +1651,7 @@ class MapPageState extends State<MapPage> {
         });
 
         return FairScaffold(
-          appBarTitle: "Map",
+          appBarTitle: (doingAPushNavigation != null) ? 'Directions' : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
