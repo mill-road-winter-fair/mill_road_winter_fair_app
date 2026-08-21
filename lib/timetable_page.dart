@@ -701,6 +701,7 @@ class _TimetablePageState extends State<TimetablePage> {
     final now = DateTime.now();
     final isLandscape = MediaQuery.orientationOf(context) == Orientation.landscape;
     final colorScheme = Theme.of(context).colorScheme;
+    final appBarTheme = Theme.of(context).appBarTheme;
     double startPixelsPerMinute; // for pinch scaling
     final int markInterval = pixelsPerMinuteP >= 1.4 ? 30 : 60;
     final List<Widget> markers = [];
@@ -715,28 +716,28 @@ class _TimetablePageState extends State<TimetablePage> {
       appBarActions: [
         IconButton(
           key: subcategoryIconKey,
-          color: (widget.filteredMusicOrNot == null) ? Theme.of(context).colorScheme.onSecondary : Colors.yellow,
-          onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing everything, just music, or everything but music'),
+          color: appBarTheme.foregroundColor,
+          onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing just music, everything but music, or everything'),
           onPressed: () {
             HapticFeedback.lightImpact();
             _toggleFilteredMusicOrNot();
             theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
           },
-          icon: Icon((widget.filteredMusicOrNot == false) ? Icons.music_off : Icons.music_note),
+          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter }, size: (widget.filteredMusicOrNot == null) ? 21 : 26),
         ),
         IconButton(
           key: nowOrSoonIconKey,
           onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon'),
           onPressed: () => (isItEventDay())
             ? _toggleOnlyNowOrSoon()
-            : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway', Theme.of(context).colorScheme.error),
+            : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway', colorScheme.error),
           icon: Icon(
-            Icons.schedule, 
-            color: (isItEventDay()) ? ((widget.onlyNowOrSoon) ? Colors.yellow : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.onSurfaceVariant,
+            (widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule, 
+            color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
           ),
         ),
         IconButton(
-          color: (_isSearching) ? Colors.yellow : Theme.of(context).colorScheme.onSecondary,
+          color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
           onPressed: () {
             HapticFeedback.lightImpact();
             setState(() {
@@ -748,7 +749,7 @@ class _TimetablePageState extends State<TimetablePage> {
               }
             });
           },
-          icon: Icon(Icons.search),
+          icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
         ),
       ],
       body: ValueListenableBuilder<Set<String>>(
@@ -847,7 +848,7 @@ class _TimetablePageState extends State<TimetablePage> {
                     children: [
                       Container(
                         key: const ValueKey('searchBar'),
-                        color: Theme.of(context).colorScheme.surfaceDim,
+                        color: colorScheme.surfaceDim,
                         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
                         padding: EdgeInsets.all(8),
                         child: SearchBar(

@@ -363,6 +363,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     bool isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0,11) == 'performance');
 
     final colorScheme = Theme.of(context).colorScheme;
+    final appBarTheme = Theme.of(context).appBarTheme;
 
     return FairScaffold(
       appBarTitle: calculateAppBarTitle(),
@@ -414,7 +415,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               Icons.update,
-              color: (isItEventDay()) ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
             ),
           ),
         if (isShowingJustPerformance || filterCategory == 'favourite')
@@ -438,8 +439,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               );
             } : null,
             icon: Icon(
-              Icons.event_busy, 
-              color: (isItEventDay()) ? ((_hidePastListings) ? Colors.yellow : colorScheme.onPrimary) : colorScheme.onSurfaceVariant,
+              (_hidePastListings) ? Icons.free_cancellation : Icons.event_busy, 
+              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
             ),
           ),
           IconButton(
@@ -455,7 +456,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 }
               });
             },
-            icon: Icon(Icons.search, color: colorScheme.onPrimary),
+            icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
           ),
       ],
       body: ValueListenableBuilder<Set<String>>(
