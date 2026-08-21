@@ -84,7 +84,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         debugPrint('MyApp build theme changed: $selectedThemeKey');
         final bool isAuto = selectedThemeKey == 'auto';
         final ThemeMode resolvedThemeMode = isAuto ? ThemeMode.system : switch (selectedThemeKey) {
-          'dark' || 'highContrast' => ThemeMode.dark,
+          'dark' => ThemeMode.dark,
           _ => ThemeMode.light,
         };
         final ThemeData baseTheme = appThemes[getEffectiveThemeKey(selectedThemeKey)] ?? appThemes['light']!;
