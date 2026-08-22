@@ -446,7 +446,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   timeInSecForIosWeb: 2,
                 );
               } else {
-                showMiniPopup(context, nowOrSoonIconKey, '‘Hide past listings’ is only available when the Fair is underway', colorScheme.error);
+                showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', colorScheme.error);
               }
             },
             icon: Icon(
