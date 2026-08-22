@@ -67,6 +67,10 @@ late String mapStyle;
 // Initialise setting for whether the road closure polygon is shown
 late bool preferredRoadClosurePolygonVisible;
 
+// Whether the "listings may change" notice is shown. This preference is scoped to
+// the fair year so it is enabled again when next year's fair date is set.
+late bool listingUpdateNoticeEnabled;
+
 // Initialise the list of favourited listings
 late Set<String> favouriteListingKeys;
 
