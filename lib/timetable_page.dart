@@ -618,7 +618,7 @@ class _TimetablePageState extends State<TimetablePage> {
         IconButton(
           key: subcategoryIconKey,
           color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing just music, everything but music, or everything'),
+          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything'),
           onPressed: () {
             HapticFeedback.lightImpact();
             _toggleFilteredMusicOrNot();
