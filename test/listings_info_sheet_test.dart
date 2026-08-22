@@ -55,6 +55,7 @@ void main() {
           listingFavourited: listingFavourited,
           onDetailsTapped: onDetailsTapped,
           onFavouriteTapped: onFavouriteTapped,
+          inDialog: false,
         ),
       ),
     );
@@ -82,7 +83,8 @@ void main() {
         listingFavourited: false,
       ));
 
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
@@ -110,7 +112,8 @@ void main() {
         listingFavourited: false,
       ));
 
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
@@ -314,7 +317,9 @@ void main() {
       ));
 
       // Title should have line-through
-      final titleFinder = find.text('🍩 Glazed and Confused');
+      final emojiFinder = find.text('🍩 ');
+      expect(emojiFinder, findsOneWidget);
+      final titleFinder = find.text('Glazed and Confused');
       expect(titleFinder, findsOneWidget);
       final Text titleWidget = tester.widget(titleFinder);
       expect(titleWidget.style?.decoration, TextDecoration.lineThrough);

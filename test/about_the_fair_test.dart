@@ -6,6 +6,11 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750));
+}
+
 void main() {
   // Indicate tests are running
   onTest = true;
@@ -51,44 +56,44 @@ void main() {
       ];
 
       await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Obtain the HomePage state
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
 
       // 1) Select Food tab (index 1)
       await tester.tap(find.text('Listings'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(homePageState.index, 3);
 
       // Open drawer and navigate to About the Fair
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('About the Fair'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(find.byType(AboutTheFairPage), findsOneWidget);
 
       // Tap the AppBar back button (leading) and verify we return to the Listings tab
       await tester.tap(find.byTooltip('Back'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(homePageState.index, 3);
 
       // 2) Select Stalls tab (index 2)
       await tester.tap(find.text('Listings'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(homePageState.index, 3);
 
       // Open drawer and navigate to About the Fair again
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('About the Fair'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(find.byType(AboutTheFairPage), findsOneWidget);
 
       // Simulate system back / back gesture and verify we return to the Stalls tab
       await tester.pageBack();
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(homePageState.index, 3);
     });
   });

@@ -42,9 +42,9 @@ Future<void> loadSettings() async {
     // Get the list of favourited listings
     final favouriteListingStrings = prefs.getStringList('favouritesList');
     if (favouriteListingStrings != null) {
-      favouriteListingKeys = favouriteListingStrings.toSet();
+      favouriteListingKeys.value = favouriteListingStrings.toSet();
     } else {
-      favouriteListingKeys = {};
+      favouriteListingKeys.value = {};
     }
 
     // Detect system brightness
@@ -97,7 +97,7 @@ Future<void> loadSettings() async {
     themeNotifier = ValueNotifier(selectedThemeKey);
 
     mapStyle = standardMap;
-    favouriteListingKeys = {};
+    favouriteListingKeys.value = {};
 
   }
 }
@@ -132,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
-    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
+    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
   Future<void> _changeTheme(String themeKey) async {

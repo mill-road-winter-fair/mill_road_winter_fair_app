@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +14,8 @@ import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 
+OverlayEntry? _miniPopupOverlayEntry; // widget that floats over a given widget as a 'tooltip'
+Timer? _miniPopupTimer; // times how long the above stays on screen
 
 class FairScaffold extends StatelessWidget {
   const FairScaffold({
@@ -22,12 +25,14 @@ class FairScaffold extends StatelessWidget {
     this.appBarActions = const [],
     required this.currentTab,
     required this.onTabSelected,
+    this.allowBack,
   });
   final String appBarTitle;
   final Widget body;
   final List<Widget> appBarActions;
   final int currentTab;
   final ValueChanged<int> onTabSelected;
+  final bool? allowBack;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +43,9 @@ class FairScaffold extends StatelessWidget {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Builder(
+          titleSpacing: 0,
+          leadingWidth: 44,
+          leading: (allowBack ?? false) ? const BackButton() : Builder(
             builder: (context) => IconButton(
               icon: const Icon(Icons.menu),
               onPressed: () {
@@ -52,11 +59,12 @@ class FairScaffold extends StatelessWidget {
             child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           ),
           centerTitle: false,
-          actions: appBarActions,
+          actions: appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
+          actionsPadding: EdgeInsets.only(right: 4),
         ),
         body: body,
         drawer: fairDrawer(context),
-        bottomNavigationBar: fairBottomNavigationBar(currentTab, onTabSelected),
+        bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected),
       )
     );
   }
@@ -75,15 +83,7 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     iconSize: 30,
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
-/*       switch (selectedIndex) {
-        case 0 : if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
-        case 1 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
-        case 2 : _allListingsKey.currentState?.onTabVisible();
-        case 3 : if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
-        case 4 : _savedListingsKey.currentState?.onTabVisible();
-      }
-        index = selectedIndex;*/
-        onTabSelected.call(selectedIndex);
+      onTabSelected.call(selectedIndex);
     },
     items: const [
       BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
@@ -470,4 +470,102 @@ Widget _buildEmailLink(String email) {
     ),
   );
 }
+
+
+  void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage, [Color? fgColour, Color? bgColour]) {
+
+    fgColour ??= Theme.of(itemContext).colorScheme.secondary;
+    bgColour ??= Theme.of(itemContext).colorScheme.onSecondary;
+
+    removeMiniPopup();
+
+    final overlay = Overlay.of(itemContext);
+    final RenderBox box;
+    if (theKey == null) {
+      box = itemContext.findRenderObject() as RenderBox;
+    } else {
+      box = theKey.currentContext?.findRenderObject() as RenderBox;
+    }
+    final itemTopLeft = box.localToGlobal(Offset.zero);
+    final itemSize = box.size;
+    final screenWidth = MediaQuery.sizeOf(itemContext).width;
+    final overlayW = min(max(theMessage.length / 0.25, 155.0), 230.0);
+    final theStyle = TextStyle(fontSize: 13.0, decoration: TextDecoration.none, fontWeight: FontWeight.normal, color: fgColour);
+    final overlayH = estimateTextHeight(text: theMessage, style:theStyle, maxWidth:overlayW, context: itemContext);
+    const gap = 4.0;
+    final theDuration = (theMessage.length / 25).toInt() + 2;
+
+    // Prefer placing the box above the item, otherwise below.
+    double desiredTop = itemTopLeft.dy - overlayH - gap - 8.0; // box padding
+    if (desiredTop < MediaQuery.paddingOf(itemContext).top + 4) {
+      desiredTop = itemTopLeft.dy + itemSize.height + gap;
+    }
+    // Horizontal: try to centre above the item
+    double desiredLeft = itemTopLeft.dx + itemSize.width / 2 - overlayW / 2;
+    if (desiredLeft < 4) desiredLeft = 4;
+    if (desiredLeft + overlayW > screenWidth - 4) desiredLeft = screenWidth - overlayW - 4;
+    _miniPopupOverlayEntry = OverlayEntry(
+      builder: (ctx) => Positioned(
+        left: desiredLeft,
+        top: desiredTop,
+        child: GestureDetector( // since field may be clipped
+          onTap: () {
+            HapticFeedback.lightImpact();
+            removeMiniPopup();
+          },
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: overlayW, // wrapping boundary
+            ),
+            child: Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: bgColour,
+                borderRadius: BorderRadius.circular(4),
+                boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
+              ),
+              child: Text(theMessage, softWrap: true,
+                style: theStyle),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(_miniPopupOverlayEntry!);
+    _miniPopupTimer = Timer(Duration(seconds: theDuration), () => removeMiniPopup());
+
+  }
+
+
+  void removeMiniPopup() {
+    _miniPopupTimer?.cancel();
+    _miniPopupTimer = null;
+    if (_miniPopupOverlayEntry != null) {
+      try {
+        _miniPopupOverlayEntry!.remove();
+      } catch (_) {}
+      _miniPopupOverlayEntry = null;
+    }
+  }
+
+
+  double estimateTextHeight({
+    required String text,
+    required TextStyle style,
+    required double maxWidth,
+    required BuildContext context,
+    int? maxLines,
+  }) {
+    final tp = TextPainter(
+      text: TextSpan(text: text, style: style),
+      maxLines: maxLines,
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+      strutStyle: StrutStyle.fromTextStyle(style)
+    )..layout(maxWidth: maxWidth);
+    return tp.size.height;
+  }
+
 

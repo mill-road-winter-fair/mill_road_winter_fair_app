@@ -14,20 +14,22 @@ import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final String filterCategory;
+  final String? subfilterCategory;
   final List<Map<String, dynamic>> listings;
-  final void Function(String)? onChangeTitle;
   final ValueChanged<int> onTabSelected;
+  final Function(String?) onSubfilterChange;
 
   const FilteredListingsPage({
     required this.filterCategory,
+    this.subfilterCategory,
+    required this.onSubfilterChange,
     required this.listings,
-    required this.onChangeTitle,
     required this.onTabSelected,
     super.key,
   });
@@ -52,28 +54,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
+  bool isShowingJustPerformance = false; // when selected subcategory starts with 'Performance'
 
   @override
   void initState() {
     debugPrint('FilteredListingsPageState initState() called');
     super.initState();
     filterCategory = widget.filterCategory;
-    // whenever visible positions change, show the thumb and ensure rebuild
-  }
-
-  void onTabVisible() {
-    // This is called when user switches to this tab
-    setState(() {
-      detailsVisibilityList = List<bool>.filled(500, false);
-      _searchQuery = '';
-      _isSearching = false;
-      appBarTitle = switch (filterCategory) {
-        'all' => 'All listings',
-        'favourite' => 'Favourite listings',
-        _ => 'Filtered listings'
-      };
-    });
-    if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
   }
 
   @override
@@ -86,19 +73,25 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     super.dispose();
   }
 
-  Future<void> navigateToMapAndGetDirections(String id, LatLng destinationCoordinates, http.Client client, bool navigatorPop) async {
+  void onTabVisible() {
+    // This is called when user switches to this tab
+    setState(() {
+      detailsVisibilityList = List<bool>.filled(500, false);
+      _searchQuery = '';
+      _isSearching = false;
+    });
+    if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
+  }
 
-    // Remember the previous index to allow returning back
-    previousIndex = homePageKey.currentState!.index;
-
-    // Switch to map tab on the home page
-    homePageKey.currentState?.setCurrentIndex(0);
-
-    // If we're asked to pop the previous page we also need to set the title
-    if (navigatorPop) appBarTitle = fairName;
-
-    // Request the map page to show directions
-    await mapPageKey.currentState?.getDirections(id, destinationCoordinates, navigatorPop);
+  String calculateAppBarTitle() {
+    String appBarTitle = '';
+    if (widget.subfilterCategory != null) appBarTitle += 'Filtered';
+    if (filterCategory == 'favourite') {
+      appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites'; // 'filtered favourite listings' doesn't fit!
+    } else {
+      appBarTitle += (appBarTitle.isEmpty) ? 'All Listings' : ' listings';
+    }
+    return appBarTitle;
   }
 
   List<Map<String, dynamic>> _applySearchFilter(List<Map<String, dynamic>> allListings) {
@@ -116,12 +109,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       if (allListings.isEmpty) throw Exception("No listings exist");
 
       if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
-          preferredSortingMethod == SortingMethod.values[1]) {
+          preferredSortingMethod == SortingMethod.nearest) {
         // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
-        preferredSortingMethod = SortingMethod.values[0];
+        preferredSortingMethod = SortingMethod.alphabetical;
       }
 
-      if ((locationServicesEnabled == false || currentLatLng == null) && preferredSortingMethod == SortingMethod.values[1]) {
+      if ((locationServicesEnabled == false || currentLatLng == null) && preferredSortingMethod == SortingMethod.nearest) {
         // User prefers distance sorting but their location services are disabled or we cannot get the user's location, use fallback (a-z) sorting but don't change their saved preferences
         useFallbackSorting = true;
       } else {
@@ -140,26 +133,26 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         }).toList();
       }
 
-      if ((preferredSortingMethod == SortingMethod.values[2] && !(filterCategory == 'music' || filterCategory == 'event' || filterCategory == 'favourite'))) {
+      if ((preferredSortingMethod == SortingMethod.startTime && !(isShowingJustPerformance || filterCategory == 'favourite'))) {
         // User prefers time sorting but this isn't allowed; use fallback (a-z) sorting but don't change their saved preferences
         // NB separate to the above test since we can still add the distances
         useFallbackSorting = true;
       }
 
       // Sort based on preference
-      if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
+      if (preferredSortingMethod == SortingMethod.alphabetical || useFallbackSorting == true) {
         // Sort by name; if this is the same sort by end time
         allListings.sort((a, b) {
           final nameCompare = a['title'].compareTo(b['title']);
           return nameCompare != 0 ? nameCompare : a['endTime'].compareTo(b['endTime']);
         });
-      } else if (preferredSortingMethod == SortingMethod.values[1]) {
+      } else if (preferredSortingMethod == SortingMethod.nearest) {
         // Sort by distance to user (nearest first); if the distance is the same sort by start time
         allListings.sort((a, b) {
             final distanceCompare = a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']);
             return distanceCompare != 0 ? distanceCompare : a['startTime'].compareTo(b['startTime']);
         });
-      } else if (preferredSortingMethod == SortingMethod.values[2]) {
+      } else if (preferredSortingMethod == SortingMethod.startTime) {
         if (currentLatLng != null) {
           // Sort by end time; if this is the same sort by nearest
           allListings.sort((a, b) {
@@ -221,7 +214,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void sortingDropdownCallback(SortingMethod? selectedValue) {
     HapticFeedback.selectionClick();
     if (selectedValue is SortingMethod) {
-      if (selectedValue == SortingMethod.values[1] && currentLatLng == null) {
+      if (selectedValue == SortingMethod.nearest && currentLatLng == null) {
         Fluttertoast.showToast(
           msg: 'Location services and permissions are required to determine distances',
           gravity: ToastGravity.CENTER,
@@ -250,23 +243,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void filteringDropdownCallback(String? selectedValue) {
     HapticFeedback.selectionClick();
-    if (selectedValue is String) {
-      filterCategory = selectedValue;
-      appBarTitle = switch (filterCategory) {
-        'all' => 'All listings',
-        'favourite' => 'Favourite listings',
-        _ => 'Filtered listings'
-      };
-      widget.onChangeTitle?.call(appBarTitle);
-      setState(() { });
-    }
+    widget.onSubfilterChange.call(selectedValue);
   }
 
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
-    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
+    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
   void toggleDetailsRow(int index) {
@@ -288,9 +272,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   // Function to toggle the listing's presence in the list of favourites
   void favouriteOrNotListing(String listingID) {
     if (isListingFavourited(listingID)) {
-      favouriteListingKeys.remove(listingID);
+      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
     } else {
-      favouriteListingKeys.add(listingID);
+      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
     }
     setState(() {});
     _saveSettings();
@@ -298,7 +282,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   // Function to determine if the listing has been added to favourites
   bool isListingFavourited(String listingID) {
-    return favouriteListingKeys.contains(listingID);
+    return favouriteListingKeys.value.contains(listingID);
   }
 
   // Support for hiding the scroll thumb when not active, for iOS
@@ -312,8 +296,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('FilteredListingsPageState build() called');
-    final homePageState = context.findAncestorStateOfType<HomePageState>();
+    debugPrint('FilteredListingsPageState build() called with filterCategory=$filterCategory and subfilterCategory=${widget.subfilterCategory}');
     // Show error if there are no listings
     if (listings.isEmpty) {
       return Center(
@@ -338,25 +321,35 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       );
     }
 
-    // Step 1: Filter by category (e.g. "Food", "Music", etc.)
+    isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0,11) == 'performance');
+
+    // Step 1a: Filter by category
     List<Map<String, dynamic>> categoryFiltered = [];
     if (filterCategory == 'all' || filterCategory == '') {
       categoryFiltered = listings;
     } else if (filterCategory == 'favourite') {
-      categoryFiltered = listings.where((listing) => favouriteListingKeys.contains(listing['id'])).toList();
+      categoryFiltered = listings.where((listing) => favouriteListingKeys.value.contains(listing['id'])).toList();
     } else {
       categoryFiltered = listings.where((listing) => listing[filterCategory] == 'TRUE').toList();
     }
 
+    // Step 1b: Filter by subcategory (e.g. "Food", "Music", etc.)
+    List<Map<String, dynamic>> subCategoryFiltered = [];
+    if (widget.subfilterCategory == null) {
+      subCategoryFiltered = categoryFiltered;
+    } else {
+      subCategoryFiltered = categoryFiltered.where((listing) => listing[widget.subfilterCategory] == 'TRUE').toList();
+    }
+
     // Step 2: Sort the filtered listings
-    final sortedListings = _applySorting(categoryFiltered);
+    final sortedListings = _applySorting(subCategoryFiltered);
 
     // Step 3: Apply search filtering to that subset
     filteredListings = _applySearchFilter(sortedListings);
 
     // Step 4: If sorted by start time, find the first listing not to have ended
     firstNextListingIndex = -1;
-    if (preferredSortingMethod == SortingMethod.values[2]) {
+    if (preferredSortingMethod == SortingMethod.startTime) {
       if (filteredListings.isNotEmpty) {
         firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       }
@@ -370,25 +363,127 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
     int? firstVisibleIndex; // will be used to store the first listing that is actually visible
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final appBarTheme = Theme.of(context).appBarTheme;
+    final nowOrSoonIconKey = GlobalKey();
+    final hidePastIconKey = GlobalKey();
+    final searchIconKey = GlobalKey();
+
     return FairScaffold(
-      appBarTitle: switch (filterCategory) {'favourite' => 'Favourite listings', _ => 'All listings'},
+      appBarTitle: calculateAppBarTitle(),
       currentTab: switch (filterCategory) {'favourite' => 4, _ => 3},
       onTabSelected: widget.onTabSelected,
       appBarActions: [
-      ],
-      body: Column(
-        children: [
-          _buildFilteringDropdown(context),
-          Container(
-            height: 52,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceDim,
+        if (filterCategory == 'favourite' || isShowingJustPerformance)
+          IconButton(
+            key: nowOrSoonIconKey,
+            onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon'),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              if (isItEventDay()) {
+                if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
+                  SortingMethod savedSortingMethod = preferredSortingMethod;
+                  preferredSortingMethod = SortingMethod.startTime;
+                  List<Map<String, dynamic>> sortedListingsTemp = _applySorting(subCategoryFiltered);
+                  List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
+                  firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
+                  if (firstNextListingIndex < 0) {
+                    preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to
+                  } else {
+                    filteredListings = filteredListingsTemp;
+                    if (_hidePastListings) {
+                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+                    } else {
+                      numberOfVisibleListings = filteredListings.length;
+                    }
+                    setState(() {
+                      preferredSortingMethod = SortingMethod.startTime;
+                    });
+                  }
+                }
+                if (firstNextListingIndex >= 0) {
+                  itemScrollController.scrollTo(
+                    curve: Curves.linear,
+                    index: firstNextListingIndex,
+                    duration: const Duration(milliseconds: 300),
+                    alignment: 0,
+                  );
+                } else {
+                  itemScrollController.scrollTo(
+                    curve: Curves.linear,
+                    index: filteredListings.length - 1,
+                    duration: const Duration(milliseconds: 300),
+                    alignment: 0,
+                  );
+                }
+              } else {
+                showMiniPopup(context, nowOrSoonIconKey, '‘Scroll to now’ is only available when the Fair is underway', colorScheme.error);
+              }
+            },
+            icon: Icon(
+              Icons.update,
+              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
-            child: Stack(
-              alignment: Alignment.centerRight,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 0, 8, 0),
+          ),
+        if (isShowingJustPerformance || filterCategory == 'favourite')
+          IconButton(
+            key: hidePastIconKey,
+            onLongPress: () => showMiniPopup(context, hidePastIconKey, (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed'),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              if (isItEventDay()) {
+                setState(() {
+                  _hidePastListings = !_hidePastListings;
+                  numberOfVisibleListings = -1;
+                  firstVisibleIndex = null;
+                });
+                Fluttertoast.showToast(
+                  msg: (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances',
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: colorScheme.primary,
+                  textColor: colorScheme.onPrimary,
+                  fontSize: 16,
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                );
+              } else {
+                showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', colorScheme.error);
+              }
+            },
+            icon: Icon(
+              (_hidePastListings) ? Icons.free_cancellation : Icons.event_busy, 
+              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+            ),
+          ),
+          IconButton(
+            key: searchIconKey,
+            color: colorScheme.onSecondary,
+            onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchQuery = '';
+                  _searchController.text = '';
+                }
+              });
+            },
+            icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
+          ),
+      ],
+      body: ValueListenableBuilder<Set<String>>(
+        valueListenable: favouriteListingKeys,
+        builder: (context, name, child) {
+          return Column(
+            children: [
+              Container(
+                height: 52,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withAlpha(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: _isSearching ? Row(
@@ -399,12 +494,16 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
                           child: SearchBar(
                             autoFocus: true,
+                            controller: _searchController,
                             elevation: const WidgetStatePropertyAll(0),
                             hintText: switch (filterCategory) {
                               'all' => 'Search all listings...',
                               'food' => 'Search food & drink vendors...',
                               'shopping' => 'Search market stalls...',
-                              'performance' => 'Search music and other events...',
+                              'performanceMusic' => 'Search musical performances...',
+                              'performanceChildrens' => 'Search children’s activities...',
+                              'performanceDance' => 'Search dance performances...',
+                              'performanceOther' => 'Search other performances...',
                               'charityCommunityInfo' => 'Search charity, community & info...',
                               'visitExperience' => 'Search visits & experiences...',
                               'service' => 'Search services...',
@@ -419,8 +518,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
                                   setState(() {
-                                    _isSearching = false;
+                                    if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
                                     _searchQuery = '';
+                                    _searchController.clear();
                                   });
                                 },
                               ),
@@ -436,388 +536,288 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         ),
                       ],
                     ) : Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(child: _buildSortingDropdown(context)),
-                        // only show the Scroll To Now button on Music/Events/Favourite
-                        if (filterCategory == 'performance' || filterCategory == 'favourite')
-                          SizedBox(
-                            height: 36,
-                            width: 36,
-                            child: FloatingActionButton(
-                              key: const ValueKey('nowFab'),
-                              heroTag: 'nowFab_${filterCategory}_page',
-                              backgroundColor: Theme.of(context).colorScheme.secondary,
-                              foregroundColor: (isItEventDay()) ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.surfaceDim,
-                              elevation: 0,
-                              onPressed: () {
-                                if (isItEventDay()) {
-                                  HapticFeedback.lightImpact();
-                                  if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
-                                    SortingMethod savedSortingMethod = preferredSortingMethod;
-                                    preferredSortingMethod = SortingMethod.values[2];
-                                    List<Map<String, dynamic>> sortedListingsTemp = _applySorting(categoryFiltered);
-                                    List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
-                                    firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
-                                    if (firstNextListingIndex < 0) {
-                                      preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to
-                                    } else {
-                                      filteredListings = filteredListingsTemp;
-                                      if (_hidePastListings) {
-                                        numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
-                                      } else {
-                                        numberOfVisibleListings = filteredListings.length;
-                                      }
-                                      setState(() {
-                                        preferredSortingMethod = SortingMethod.values[2];
-                                      });
-                                    }
-                                  }
-                                  if (firstNextListingIndex >= 0) {
-                                    itemScrollController.scrollTo(
-                                      curve: Curves.linear,
-                                      index: firstNextListingIndex,
-                                      duration: const Duration(milliseconds: 300),
-                                      alignment: 0,
-                                    );
-                                  } else {
-                                    itemScrollController.scrollTo(
-                                      curve: Curves.linear,
-                                      index: filteredListings.length - 1,
-                                      duration: const Duration(milliseconds: 300),
-                                      alignment: 0,
-                                    );
-                                  }
-                                }
-                              },
-                              child: const Icon(Icons.update),
-                            ),
-                          ),
-                        if (filterCategory == 'performance' || filterCategory == 'favourite')
-                          const SizedBox(width: 4),
-                        // only show the Hide Past Listings button on Music/Events/Favourite
-                        if (filterCategory == 'performance' || filterCategory == 'favourite')
-                          SizedBox(
-                            height: 36,
-                            width: 36,
-                            child: FloatingActionButton(
-                              key: const ValueKey('hidePastListingsFab'),
-                              heroTag: 'hidePastListingsFab_${filterCategory}_page',
-                              backgroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary) : Theme.of(context).colorScheme.secondary,
-                              foregroundColor: (isItEventDay()) ? ((_hidePastListings) ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSecondary) : Theme.of(context).colorScheme.surfaceDim,
-                              elevation: 0,
-                              onPressed: () {
-                                if (isItEventDay()) {
-                                  HapticFeedback.lightImpact();
-                                  setState(() {
-                                    _hidePastListings = !_hidePastListings;
-                                    numberOfVisibleListings = -1;
-                                    firstVisibleIndex = null;
-                                  });
-                                }
-                              },
-                              child: const Icon(Icons.event_busy),
-                            ),
-                          ),
-                        if (filterCategory == 'performance' || filterCategory == 'favourite')
-                          const SizedBox(width: 4),
-                        SizedBox(
-                          height: 36,
-                          width: 36,
-                          child: FloatingActionButton(
-                            key: const ValueKey('searchFab'),
-                            heroTag: 'searchFab_${filterCategory}_page',
-                            backgroundColor: Theme.of(context).colorScheme.secondary,
-                            foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                            elevation: 0,
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              setState(() {
-                                _isSearching = true;
-                              });
-                            },
-                            child: const Icon(Icons.search),
-                          ),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.58, maxHeight: 48),
+                          child: _buildFilteringDropdown(context),
+                        ),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width - 12) * 0.42, maxHeight: 48),
+                          child: _buildSortingDropdown(context, isShowingJustPerformance),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: refreshListings,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              color: Theme.of(context).colorScheme.onPrimary,
-              child: SizedBox.expand(// ensure the Stack has a defined height
-                  child: LayoutBuilder(builder: (context, constraints) {
-                  final trackHeight = constraints.maxHeight;
-                  return Stack(children: [
-                    NotificationListener<ScrollNotification>(
-                      onNotification: (notification) {
-                        if (notification is UserScrollNotification || notification is ScrollUpdateNotification) {
-                          _showThumb();
-                        }
-                        return false;
-                      },
-                      child: ScrollablePositionedList.builder(
-                        itemCount: filteredListings.length,
-                        itemScrollController: itemScrollController,
-                        itemPositionsListener: itemPositionsListener,
-                        itemBuilder: (context, index) {
-                          final listing = filteredListings[index]; // since index=0 is the sort/search bar
-                          final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                          final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
-                          LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                          if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
-                          return Column(
-                            children: [
-                              (!_hidePastListings || !hasEventEnded(listing['endTime'])) ? SpecificListingInfoSheet(
-                                cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                                brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                                emoji: listing['emoji'] ?? '',
-                                title: listing['title'] ?? '',
-                                subtitle: listing['subtitle'] ?? '',
-                                location: listing['location'],
-                                description: listing['description'] ?? '',
-                                email: listing['email'] ?? '',
-                                website: listing['website'] ?? '',
-                                phoneNumber: listing['phone'] ?? '',
-                                imageURL: listing['imageURL'] ?? '',
-                                startTime: "${listing['startTime']}",
-                                endTime: "${listing['endTime']}",
-                                approxDistance: approximateDistance,
-                                detailsVisible: detailsVisibilityList[index],
-                                listingFavourited: isListingFavourited(listing['id']),
-                                onDetailsTapped: () => toggleDetailsRow(index),
-                                onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                onGetDirections: () {
-                                  navigateToMapAndGetDirections(
-                                    listing['id'],
-                                    destinationLatLng,
-                                    http.Client(),
-                                    (homePageState == null)
-                                  );
-                                },
-                              ) : const SizedBox.shrink(),
-                              // separator except after last item
-                              if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                    ValueListenableBuilder<Iterable<ItemPosition>>(
-                      valueListenable: itemPositionsListener.itemPositions,
-                      builder: (context, positions, _) {
-                        if (positions.isEmpty || firstVisibleIndex == null || numberOfVisibleListings == 0) {
-                          return const SizedBox.shrink();
-                        }
-                        final visiblePositions = positions.where((p) {
-                          return p.index >= firstVisibleIndex! && p.index < firstVisibleIndex! + numberOfVisibleListings;
-                        });
-                        if (visiblePositions.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        final indices = visiblePositions.map((p) => p.index);
-                        final minIndex = indices.reduce((a, b) => a < b ? a : b);
-                        final maxIndex = indices.reduce((a, b) => a > b ? a : b);
-                        final minIndexRelative = minIndex - firstVisibleIndex!;
-                        final visibleFraction = ((maxIndex - minIndex + 1) / numberOfVisibleListings).clamp(0.02, 1.0);
-                        final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
-                        final thumbTop = (minIndexRelative / numberOfVisibleListings) * trackHeight;
-                        return ValueListenableBuilder<bool>(
-                          valueListenable: thumbVisible,
-                          builder: (context, visible, _) {
-                            return Positioned(
-                              right: 3,
-                              top: thumbTop,
-                              width: 4,
-                              height: thumbHeight,
-                              child: AnimatedOpacity(
-                                opacity: visible ? 1.0 : 0.0,
-                                duration: const Duration(milliseconds: 250),
-                                curve: Curves.easeOut,
-                                child: GestureDetector(
-                                  onVerticalDragStart: (_) => _showThumb(),
-                                  onVerticalDragUpdate: (details) {
-                                    _showThumb();
-                                    final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
-                                    final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
-                                    final targetIndex = (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
-                                    itemScrollController.scrollTo(
-                                      index: targetIndex,
-                                      duration: const Duration(milliseconds: 120),
-                                    );
-                                  },
-                                  child: Container(
-                                    width: 2,
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: refreshListings,
+                  backgroundColor: colorScheme.primary,
+                  color: colorScheme.onPrimary,
+                  child: Container(// ensure the Stack has a defined height
+                    color: colorScheme.primary.withAlpha(20),
+                    child: LayoutBuilder(builder: (context, constraints) {
+                      final trackHeight = constraints.maxHeight;
+                      return Stack(children: [
+                        NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            if (notification is UserScrollNotification || notification is ScrollUpdateNotification) {
+                              _showThumb();
+                            }
+                            return false;
+                          },
+                          child: ScrollablePositionedList.builder(
+                            itemCount: filteredListings.length,
+                            itemScrollController: itemScrollController,
+                            itemPositionsListener: itemPositionsListener,
+                            itemBuilder: (context, index) {
+                              final listing = filteredListings[index]; // since index=0 is the sort/search bar
+                              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                              final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+                              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                              if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
+                              return Column(
+                                children: [
+                                  if (!_hidePastListings || !hasEventEnded(listing['endTime'])) Container(
+                                    width: constraints.maxWidth - 10,
                                     decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.4),
-                                      borderRadius: BorderRadius.circular(2),
+                                      color: colorScheme.onPrimary,
+                                      border: Border.all(color: colorScheme.primary, width: 0.5),
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
+                                    ),
+                                    child: SpecificListingInfoSheet(
+                                      cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                                      brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
+                                      emoji: listing['emoji'] ?? '',
+                                      title: listing['title'] ?? '',
+                                      subtitle: listing['subtitle'] ?? '',
+                                      location: listing['location'],
+                                      description: listing['description'] ?? '',
+                                      email: listing['email'] ?? '',
+                                      website: listing['website'] ?? '',
+                                      phoneNumber: listing['phone'] ?? '',
+                                      imageURL: listing['imageURL'] ?? '',
+                                      startTime: "${listing['startTime']}",
+                                      endTime: "${listing['endTime']}",
+                                      approxDistance: approximateDistance,
+                                      detailsVisible: detailsVisibilityList[index],
+                                      listingFavourited: isListingFavourited(listing['id']),
+                                      onDetailsTapped: () => toggleDetailsRow(index),
+                                      onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                      onGetDirections: () {
+                                        Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                          listings: listings, 
+                                          onTabSelected: (_) => {}, 
+                                          destinationId: listing['id'],
+                                          destinationLatLng: destinationLatLng
+                                        )));
+                                      },
+                                      inDialog: false,
+                                    )
+                                  ),
+                                  // separator except after last item
+                                  if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 8),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                        ValueListenableBuilder<Iterable<ItemPosition>>(
+                          valueListenable: itemPositionsListener.itemPositions,
+                          builder: (context, positions, _) {
+                            if (positions.isEmpty || firstVisibleIndex == null || numberOfVisibleListings == 0) {
+                              return const SizedBox.shrink();
+                            }
+                            final visiblePositions = positions.where((p) {
+                              return p.index >= firstVisibleIndex! && p.index < firstVisibleIndex! + numberOfVisibleListings;
+                            });
+                            if (visiblePositions.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            final indices = visiblePositions.map((p) => p.index);
+                            final minIndex = indices.reduce((a, b) => a < b ? a : b);
+                            final maxIndex = indices.reduce((a, b) => a > b ? a : b);
+                            final minIndexRelative = minIndex - firstVisibleIndex!;
+                            final visibleFraction = ((maxIndex - minIndex + 1) / numberOfVisibleListings).clamp(0.02, 1.0);
+                            final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
+                            final thumbTop = (minIndexRelative / numberOfVisibleListings) * trackHeight;
+                            return ValueListenableBuilder<bool>(
+                              valueListenable: thumbVisible,
+                              builder: (context, visible, _) {
+                                return Positioned(
+                                  right: 3,
+                                  top: thumbTop,
+                                  width: 4,
+                                  height: thumbHeight,
+                                  child: AnimatedOpacity(
+                                    opacity: visible ? 1.0 : 0.0,
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeOut,
+                                    child: GestureDetector(
+                                      onVerticalDragStart: (_) => _showThumb(),
+                                      onVerticalDragUpdate: (details) {
+                                        _showThumb();
+                                        final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
+                                        final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
+                                        final targetIndex = (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
+                                        itemScrollController.scrollTo(
+                                          index: targetIndex,
+                                          duration: const Duration(milliseconds: 120),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 2,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(alpha: 0.4),
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                    ),
-                    (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          "No results found${_searchQuery.isNotEmpty ? ' for "$_searchQuery"' : ''}.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                      ),
-                    )
-                    : const SizedBox.shrink(),
-                  ]);
-                }
+                        (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0)) ? Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(24.0), alignment: Alignment.center,
+                            child: Text(style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold), textAlign: TextAlign.center,
+                                'No'
+                                '${widget.subfilterCategory != null ? ' ${subfilterCategoryLabels[widget.subfilterCategory]!.label}' : ''}'
+                                ' listings'
+                                '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
+                                '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
+                                '${(widget.subfilterCategory != null && _isSearching) ? '\n\nTap the magnifying glass to close search, then ‘Show’ to change what type of listings are displayed.' : ''}'
+                                '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
+                                '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
+                                '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}'
+                            ),
+                          ),
+                        )
+                        : const SizedBox.shrink(),
+                      ]);
+                    }
+                  ),
+                  ),
+                ),
               ),
-              ),
-            ),
-          ),
-        ]
-      ),
+            ]
+          );
+        }
+      )
     );
   }
 
-  Widget _buildSortingDropdown(BuildContext context) {
+  Widget _buildSortingDropdown(BuildContext context, bool isPerformance) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final dropdownStyle = ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
     return Container(
       key: const ValueKey('sortingdropdown'),
-      height: 36,
-      color: Theme.of(context).colorScheme.surfaceDim,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: DropdownMenu(
-              initialSelection: preferredSortingMethod,
-              width: MediaQuery.of(context).size.width * 0.5 + 40,
-              label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold)),
-              leadingIcon: const Icon(Icons.sort),
-              textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
-              inputDecorationTheme: InputDecorationTheme(
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.secondary,
-                iconColor: Theme.of(context).colorScheme.onSecondary,
-                suffixIconColor: Theme.of(context).colorScheme.onSecondary,
-                prefixIconColor: Theme.of(context).colorScheme.onSecondary,
-                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
-                isDense: true,
-                visualDensity: const VisualDensity(horizontal: -4),
-                contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 6),
-                constraints: const BoxConstraints(maxHeight: 36),
-              ),
-              dropdownMenuEntries: [
-                if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
-                  DropdownMenuEntry(
-                    value: SortingMethod.values[1],
-                    label: "Nearest",
-                    leadingIcon: const Icon(Icons.directions_walk),
-                  ),
-                DropdownMenuEntry(
-                  value: SortingMethod.values[3],
-                  label: "Location (a-z)",
-                  leadingIcon: const Icon(Icons.signpost),
-                ),
-                DropdownMenuEntry(
-                  value: SortingMethod.values[0],
-                  label: "Name (a-z)",
-                  leadingIcon: const Icon(Icons.sort_by_alpha),
-                ),
-                  if (filterCategory == 'performance' || filterCategory == 'favourite')
-                  DropdownMenuEntry(
-                    value: SortingMethod.values[2],
-                    label: "Time",
-                    leadingIcon: const Icon(Icons.alarm),
-                  ),
-              ],
-              onSelected: sortingDropdownCallback,
-            ),
+      color: colorScheme.surfaceDim,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: DropdownMenu(
+          initialSelection: useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod,
+          label: Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          leadingIcon: const Icon(Icons.sort),
+          textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: colorScheme.secondary,
+            iconColor: colorScheme.onSecondary,
+            suffixIconColor: colorScheme.onSecondary,
+            prefixIconColor: colorScheme.onSecondary,
+            labelStyle: TextStyle(color: colorScheme.onSecondary),
+            isDense: true,
+            visualDensity: const VisualDensity(horizontal: -4),
+            contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+            constraints: BoxConstraints(maxHeight: 40),
+            suffixIconConstraints: BoxConstraints(minWidth: 30, maxWidth: 30),
           ),
-        ],
+          dropdownMenuEntries: [
+            if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
+              DropdownMenuEntry(
+                value: SortingMethod.nearest,
+                label: "Nearest",
+                style: dropdownStyle,
+                leadingIcon: const Icon(Icons.directions_walk, size: 20),
+              ),
+            DropdownMenuEntry(
+              value: SortingMethod.location,
+              label: "Location (a–z)",
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.signpost, size: 20),
+            ),
+            DropdownMenuEntry(
+              value: SortingMethod.alphabetical,
+              label: "Name (a–z)",
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.sort_by_alpha, size: 20),
+            ),
+              if (isPerformance || filterCategory == 'favourite')
+              DropdownMenuEntry(
+                value: SortingMethod.startTime,
+                label: "Time",
+                style: dropdownStyle,
+                leadingIcon: const Icon(Icons.alarm, size: 20),
+              ),
+          ],
+          onSelected: sortingDropdownCallback,
+        ),
       ),
     );
   }
 
 
   Widget _buildFilteringDropdown(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final dropdownStyle = ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
     return Container(
       key: const ValueKey('filteringdropdown'),
-      height: 36,
-      color: Theme.of(context).colorScheme.surfaceDim,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: DropdownMenu(
-              initialSelection: filterCategory,
-              width: MediaQuery.of(context).size.width - 4,
-              label: const Text("Show", style: TextStyle(fontWeight: FontWeight.bold)),
-              leadingIcon: const Icon(Icons.filter),
-              textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary, fontSize: 13, height: 1.0),
-              inputDecorationTheme: InputDecorationTheme(
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.secondary,
-                iconColor: Theme.of(context).colorScheme.onSecondary,
-                suffixIconColor: Theme.of(context).colorScheme.onSecondary,
-                prefixIconColor: Theme.of(context).colorScheme.onSecondary,
-                labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
-                isDense: true,
-                visualDensity: const VisualDensity(horizontal: -4),
-                contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 6),
-                constraints: const BoxConstraints(maxHeight: 36),
-              ),
-              dropdownMenuEntries: [
-                DropdownMenuEntry(
-                  value: 'all',
-                  label: "All",
-                  leadingIcon: const Icon(Icons.all_inclusive),
-                ),
-                DropdownMenuEntry(
-                  value: 'performance',
-                  label: "Performances",
-                  leadingIcon: const Icon(Icons.theater_comedy),
-                ),
-                DropdownMenuEntry(
-                  value: 'visitExperience',
-                  label: "Visit & Experience",
-                  leadingIcon: const Icon(Icons.tour),
-                ),
-                DropdownMenuEntry(
-                  value: 'food',
-                  label: "Food & Drink",
-                  leadingIcon: const Icon(Icons.fastfood),
-                ),
-                DropdownMenuEntry(
-                  value: 'shopping',
-                  label: "Shopping & Stalls",
-                  leadingIcon: const Icon(Icons.local_offer),
-                ),
-                DropdownMenuEntry(
-                  value: 'charityCommunityInfo',
-                  label: "Charity, Community & Info",
-                  leadingIcon: const Icon(Icons.volunteer_activism),
-                ),
-                DropdownMenuEntry(
-                  value: 'service',
-                  label: "Services",
-                  leadingIcon: const Icon(Icons.family_restroom),
-                ),
-              ],
-              onSelected: filteringDropdownCallback,
-            ),
+      color: colorScheme.surfaceDim,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: DropdownMenu<String?>(
+          initialSelection: widget.subfilterCategory,
+          //width: (MediaQuery.of(context).size.width - 24) / 2,
+          label: const Text("Show", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          leadingIcon: const Icon(Icons.filter),
+          textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: colorScheme.secondary,
+            iconColor: colorScheme.onSecondary,
+            suffixIconColor: colorScheme.onSecondary,
+            prefixIconColor: colorScheme.onSecondary,
+            labelStyle: TextStyle(color: colorScheme.onSecondary),
+            isDense: true,
+            visualDensity: const VisualDensity(horizontal: -4),
+            contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+            constraints: BoxConstraints(maxHeight: 40),
+            suffixIconConstraints: BoxConstraints(minWidth: 30, maxWidth: 30),
           ),
-        ],
+          dropdownMenuEntries: [
+            DropdownMenuEntry(
+              value: null,
+              label: "All",
+              style: dropdownStyle,
+              leadingIcon: const Icon(Icons.all_inclusive, size: 20),
+            ),
+            ...subfilterCategoryLabels.entries.map((e) {
+              return DropdownMenuEntry(
+                value: e.key,
+                label: e.value.label,
+                style: dropdownStyle,
+                leadingIcon: Icon(e.value.iconData, size: 20),
+              );
+            })
+          ],
+          onSelected: filteringDropdownCallback,
+        ),
       ),
     );
   }
