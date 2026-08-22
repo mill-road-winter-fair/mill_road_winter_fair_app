@@ -54,7 +54,7 @@ class ListingUpdateNotifier {
       return;
     }
 
-    bool dontShowAgain = false;
+    bool dontShowAgain = true;
 
     await showDialog<void>(
       context: context,
