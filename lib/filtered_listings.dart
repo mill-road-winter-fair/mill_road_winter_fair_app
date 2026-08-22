@@ -383,7 +383,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
                   SortingMethod savedSortingMethod = preferredSortingMethod;
                   preferredSortingMethod = SortingMethod.values[2];
-                  List<Map<String, dynamic>> sortedListingsTemp = _applySorting(categoryFiltered);
+                  List<Map<String, dynamic>> sortedListingsTemp = _applySorting(subCategoryFiltered);
                   List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
                   firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
                   if (firstNextListingIndex < 0) {
