@@ -343,24 +343,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text(
-                        'Listings may change reminder',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: const Text(
-                        'Show a reminder that event details may change.',
-                      ),
-                      value: listingUpdateNoticeEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          listingUpdateNoticeEnabled = value;
-                        });
-                        _saveSettings();
-                      },
-                    ),
                   ],
                 ),
               ),
