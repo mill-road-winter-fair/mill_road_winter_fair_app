@@ -54,6 +54,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
+  bool isShowingJustPerformance = false; // when selected subcategory starts with 'Performance'
 
   @override
   void initState() {
@@ -108,12 +109,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       if (allListings.isEmpty) throw Exception("No listings exist");
 
       if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
-          preferredSortingMethod == SortingMethod.values[1]) {
+          preferredSortingMethod == SortingMethod.nearest) {
         // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
-        preferredSortingMethod = SortingMethod.values[0];
+        preferredSortingMethod = SortingMethod.alphabetical;
       }
 
-      if ((locationServicesEnabled == false || currentLatLng == null) && preferredSortingMethod == SortingMethod.values[1]) {
+      if ((locationServicesEnabled == false || currentLatLng == null) && preferredSortingMethod == SortingMethod.nearest) {
         // User prefers distance sorting but their location services are disabled or we cannot get the user's location, use fallback (a-z) sorting but don't change their saved preferences
         useFallbackSorting = true;
       } else {
@@ -132,26 +133,26 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         }).toList();
       }
 
-      if ((preferredSortingMethod == SortingMethod.values[2] && !(filterCategory == 'music' || filterCategory == 'event' || filterCategory == 'favourite'))) {
+      if ((preferredSortingMethod == SortingMethod.startTime && !(isShowingJustPerformance || filterCategory == 'favourite'))) {
         // User prefers time sorting but this isn't allowed; use fallback (a-z) sorting but don't change their saved preferences
         // NB separate to the above test since we can still add the distances
         useFallbackSorting = true;
       }
 
       // Sort based on preference
-      if (preferredSortingMethod == SortingMethod.values[0] || useFallbackSorting == true) {
+      if (preferredSortingMethod == SortingMethod.alphabetical || useFallbackSorting == true) {
         // Sort by name; if this is the same sort by end time
         allListings.sort((a, b) {
           final nameCompare = a['title'].compareTo(b['title']);
           return nameCompare != 0 ? nameCompare : a['endTime'].compareTo(b['endTime']);
         });
-      } else if (preferredSortingMethod == SortingMethod.values[1]) {
+      } else if (preferredSortingMethod == SortingMethod.nearest) {
         // Sort by distance to user (nearest first); if the distance is the same sort by start time
         allListings.sort((a, b) {
             final distanceCompare = a['approximateDistanceMetres'].compareTo(b['approximateDistanceMetres']);
             return distanceCompare != 0 ? distanceCompare : a['startTime'].compareTo(b['startTime']);
         });
-      } else if (preferredSortingMethod == SortingMethod.values[2]) {
+      } else if (preferredSortingMethod == SortingMethod.startTime) {
         if (currentLatLng != null) {
           // Sort by end time; if this is the same sort by nearest
           allListings.sort((a, b) {
@@ -213,7 +214,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void sortingDropdownCallback(SortingMethod? selectedValue) {
     HapticFeedback.selectionClick();
     if (selectedValue is SortingMethod) {
-      if (selectedValue == SortingMethod.values[1] && currentLatLng == null) {
+      if (selectedValue == SortingMethod.nearest && currentLatLng == null) {
         Fluttertoast.showToast(
           msg: 'Location services and permissions are required to determine distances',
           gravity: ToastGravity.CENTER,
@@ -320,6 +321,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       );
     }
 
+    isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0,11) == 'performance');
+
     // Step 1a: Filter by category
     List<Map<String, dynamic>> categoryFiltered = [];
     if (filterCategory == 'all' || filterCategory == '') {
@@ -346,7 +349,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 4: If sorted by start time, find the first listing not to have ended
     firstNextListingIndex = -1;
-    if (preferredSortingMethod == SortingMethod.values[2]) {
+    if (preferredSortingMethod == SortingMethod.startTime) {
       if (filteredListings.isNotEmpty) {
         firstNextListingIndex = findFirstNextListingIndex(filteredListings);
       }
@@ -359,8 +362,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       numberOfVisibleListings = filteredListings.length;
     }
     int? firstVisibleIndex; // will be used to store the first listing that is actually visible
-
-    bool isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0,11) == 'performance');
 
     final colorScheme = Theme.of(context).colorScheme;
     final appBarTheme = Theme.of(context).appBarTheme;
@@ -382,8 +383,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               if (isItEventDay()) {
                 if (firstNextListingIndex < 0) {  // we may not be on Sort by Time, or the Fair may have recently started
                   SortingMethod savedSortingMethod = preferredSortingMethod;
-                  preferredSortingMethod = SortingMethod.values[2];
-                  List<Map<String, dynamic>> sortedListingsTemp = _applySorting(categoryFiltered);
+                  preferredSortingMethod = SortingMethod.startTime;
+                  List<Map<String, dynamic>> sortedListingsTemp = _applySorting(subCategoryFiltered);
                   List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
                   firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
                   if (firstNextListingIndex < 0) {
@@ -396,7 +397,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       numberOfVisibleListings = filteredListings.length;
                     }
                     setState(() {
-                      preferredSortingMethod = SortingMethod.values[2];
+                      preferredSortingMethod = SortingMethod.startTime;
                     });
                   }
                 }
@@ -446,7 +447,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   timeInSecForIosWeb: 2,
                 );
               } else {
-                showMiniPopup(context, nowOrSoonIconKey, '‘Hide past listings’ is only available when the Fair is underway', colorScheme.error);
+                showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', colorScheme.error);
               }
             },
             icon: Icon(
@@ -720,7 +721,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
         child: DropdownMenu(
-          initialSelection: preferredSortingMethod,
+          initialSelection: useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod,
           label: Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           leadingIcon: const Icon(Icons.sort),
           textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
@@ -740,26 +741,26 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           dropdownMenuEntries: [
             if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
               DropdownMenuEntry(
-                value: SortingMethod.values[1],
+                value: SortingMethod.nearest,
                 label: "Nearest",
                 style: dropdownStyle,
                 leadingIcon: const Icon(Icons.directions_walk, size: 20),
               ),
             DropdownMenuEntry(
-              value: SortingMethod.values[3],
+              value: SortingMethod.location,
               label: "Location (a–z)",
               style: dropdownStyle,
               leadingIcon: const Icon(Icons.signpost, size: 20),
             ),
             DropdownMenuEntry(
-              value: SortingMethod.values[0],
+              value: SortingMethod.alphabetical,
               label: "Name (a–z)",
               style: dropdownStyle,
               leadingIcon: const Icon(Icons.sort_by_alpha, size: 20),
             ),
               if (isPerformance || filterCategory == 'favourite')
               DropdownMenuEntry(
-                value: SortingMethod.values[2],
+                value: SortingMethod.startTime,
                 label: "Time",
                 style: dropdownStyle,
                 leadingIcon: const Icon(Icons.alarm, size: 20),

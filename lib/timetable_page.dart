@@ -579,18 +579,16 @@ class _TimetablePageState extends State<TimetablePage> {
       theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
     }
     calculateInitialScalesIfNeeded();
-    if (fairDate.difference(DateTime.now()).inDays == 0 
-        && timelineMinStart.isBefore(DateTime.now()) 
-        && timelineMaxEnd.isAfter(DateTime.now())
-        && _nowLineTimer == null
-    ) {
+    if (fairDate.difference(DateTime.now()).inDays == 0 && timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now())) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        startClockUpdates(updateNowLine);
+        if (_nowLineTimer == null) startClockUpdates(updateNowLine);
+        if (!widget.onlyNowOrSoon && _searchQuery.isEmpty) scrollToKey(nowLineKey, 0.3);
+      });
+    } else if (_searchQuery.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _verticalScrollController.animateTo(0, duration: Duration(milliseconds: 100), curve: Curves.easeIn);
       });
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_searchQuery != '') _verticalScrollController.animateTo(0, duration: Duration(milliseconds: 100), curve: Curves.easeIn);
-    });
 
     String theErrorMessage = '';
     if (spanMinutes == 0 || theFilteredEvents.isEmpty) {
@@ -618,7 +616,7 @@ class _TimetablePageState extends State<TimetablePage> {
         IconButton(
           key: subcategoryIconKey,
           color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing just music, everything but music, or everything'),
+          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything'),
           onPressed: () {
             HapticFeedback.lightImpact();
             _toggleFilteredMusicOrNot();
@@ -732,14 +730,6 @@ class _TimetablePageState extends State<TimetablePage> {
               }
 
               final nowTop = max(0.0, (now.difference(timelineMinStart).inMinutes) * _dayPixelsPerMinute) - 1.5;
-
-              if (!widget.onlyNowOrSoon && _onlyNowOrSoonSaved!) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  scrollToKey(nowLineKey, 0.3);
-                });
-              }
-              _onlyNowOrSoonSaved = widget.onlyNowOrSoon;
-
               final timelineHeight = max(constraints.maxHeight - 40, spanMinutes * _dayPixelsPerMinute + 4);
               final theContent = Column(children: [
                 AnimatedSwitcher(
