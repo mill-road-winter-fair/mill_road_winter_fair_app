@@ -63,7 +63,7 @@ class ListingUpdateNotifier {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Okay'),
+            child: const Text('Ok'),
           ),
           if (isListingsMayChange)
             FilledButton(
