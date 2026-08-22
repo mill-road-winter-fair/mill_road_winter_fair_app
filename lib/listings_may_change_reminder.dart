@@ -66,7 +66,7 @@ class ListingUpdateNotifier {
             child: const Text('Ok'),
           ),
           if (isListingsMayChange)
-            FilledButton(
+            TextButton(
               onPressed: () async {
                 listingUpdateNoticeEnabled = false;
                 await prefs.setBool(preferenceKey, false);
