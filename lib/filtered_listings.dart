@@ -54,6 +54,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
+  bool isShowingJustPerformance = false; // when selected subcategory starts with 'Performance'
 
   @override
   void initState() {
@@ -132,7 +133,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         }).toList();
       }
 
-      if ((preferredSortingMethod == SortingMethod.startTime && !(filterCategory == 'music' || filterCategory == 'event' || filterCategory == 'favourite'))) {
+      if ((preferredSortingMethod == SortingMethod.startTime && !(isShowingJustPerformance || filterCategory == 'favourite'))) {
         // User prefers time sorting but this isn't allowed; use fallback (a-z) sorting but don't change their saved preferences
         // NB separate to the above test since we can still add the distances
         useFallbackSorting = true;
@@ -320,6 +321,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       );
     }
 
+    isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0,11) == 'performance');
+
     // Step 1a: Filter by category
     List<Map<String, dynamic>> categoryFiltered = [];
     if (filterCategory == 'all' || filterCategory == '') {
@@ -359,8 +362,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       numberOfVisibleListings = filteredListings.length;
     }
     int? firstVisibleIndex; // will be used to store the first listing that is actually visible
-
-    bool isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0,11) == 'performance');
 
     final colorScheme = Theme.of(context).colorScheme;
     final appBarTheme = Theme.of(context).appBarTheme;
@@ -720,7 +721,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
         child: DropdownMenu(
-          initialSelection: preferredSortingMethod,
+          initialSelection: useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod,
           label: Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           leadingIcon: const Icon(Icons.sort),
           textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
