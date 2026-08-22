@@ -238,7 +238,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Light'),
                                 subtitle: Text(
-                                  'A light theme for daytime use',
+                                  'A bright theme using white pages',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -251,7 +251,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Dark'),
                                 subtitle: Text(
-                                  'A dark theme for use after nightfall',
+                                  'A subdued theme using black pages',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -262,7 +262,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('2024 colour scheme'),
+                                title: const Text('2024 light scheme'),
                                 subtitle: Text(
                                   'For the Fair that blew away',
                                   style: TextStyle(

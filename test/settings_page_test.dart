@@ -35,12 +35,12 @@ void main() {
       // Verify the Theme section
       expect(find.text('Theme'), findsOneWidget);
       expect(find.text('Light'), findsOneWidget);
-      expect(find.text('A light theme for daytime use'), findsOneWidget);
+      expect(find.text('A bright theme using white pages'), findsOneWidget);
       expect(find.text('Dark'), findsOneWidget);
-      expect(find.text('A dark theme for use after nightfall'), findsOneWidget);
+      expect(find.text('A subdued theme using black pages'), findsOneWidget);
       expect(find.text('Auto'), findsOneWidget);
       expect(find.text('Follow the device’s light/dark setting'), findsOneWidget);
-      expect(find.text('2024 colour scheme'), findsOneWidget);
+      expect(find.text('2024 light scheme'), findsOneWidget);
       expect(find.text('For the Fair that blew away'), findsOneWidget);
       expect(find.text('High contrast'), findsOneWidget);
       expect(find.text('For users with visual accessibility needs'), findsOneWidget);
