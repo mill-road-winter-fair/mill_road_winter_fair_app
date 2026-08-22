@@ -31,7 +31,7 @@ Future<void> loadSettings() async {
 
     // Keep the listings-change notice enabled by default for each fair year.
     listingUpdateNoticeEnabled = prefs.getBool(
-          'listing_update_notice_enabled_${fairDate.year}',
+          'listingUpdateNoticeEnabled${fairDate.year}',
         ) ??
         true;
     
@@ -140,7 +140,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
     await prefs.setBool(
-      'listing_update_notice_enabled_${fairDate.year}',
+      'listingUpdateNoticeEnabled${fairDate.year}',
       listingUpdateNoticeEnabled,
     );
     await prefs.setStringList('favouritesList', favouriteListingKeys.toList());

@@ -3,7 +3,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListingUpdateNotifier {
-  static String get preferenceKey => 'listing_update_notice_enabled_${fairDate.year}';
+  static String get preferenceKey => 'listingUpdateNoticeEnabled${fairDate.year}';
 
   static String messageFor(DateTime now) {
     if (DateUtils.isSameDay(fairDate, now)) {
