@@ -149,10 +149,17 @@ packages:
     dependency: transitive
     description:
       name: code_assets
+<<<<<<< HEAD
       sha256: bf394f466ba9205f1812a0433b392d6af280f155f56651eda7c18cc32ed493b8
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+=======
+      sha256: cfd4f5f575a49c5f10ca856e9846073f1e6c3ee94912377eea5f6cefc5272941
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+>>>>>>> Issue-397-Share-app-via-QR-code-and-share-sheet
   code_builder:
     dependency: transitive
     description:
@@ -436,10 +443,17 @@ packages:
     dependency: transitive
     description:
       name: geolocator_platform_interface
+<<<<<<< HEAD
       sha256: cdb082e4f048b69da244117b7914cc60d2a8897546ffaa4f2529c786ded7aee2
       url: "https://pub.dev"
     source: hosted
     version: "4.2.8"
+=======
+      sha256: "94db8255dc183d268765df682580440617ca35877fc82cacb5420ad03b86198d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.3.0"
+>>>>>>> Issue-397-Share-app-via-QR-code-and-share-sheet
   geolocator_web:
     dependency: transitive
     description:
@@ -540,10 +554,17 @@ packages:
     dependency: transitive
     description:
       name: hooks
+<<<<<<< HEAD
       sha256: "03a564c3704524ee0f7fc56fc621e8796cc2eb8c24d1f1a33b34979815b285c4"
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+=======
+      sha256: eaac480a35ec0814146c2c48d96aaa829e0e44a7662c88ae84c9edf4bc35651f
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
+>>>>>>> Issue-397-Share-app-via-QR-code-and-share-sheet
   html:
     dependency: transitive
     description:
@@ -684,10 +705,10 @@ packages:
     dependency: transitive
     description:
       name: material_color_utilities
-      sha256: "9c337007e82b1889149c82ed242ed1cb24a66044e30979c44912381e9be4c48b"
+      sha256: cda64b65529b9737e5c9bf7ef386c907f2a58707039a3033788030da927133d0
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.0"
+    version: "0.13.1"
   meta:
     dependency: transitive
     description:
@@ -716,10 +737,17 @@ packages:
     dependency: transitive
     description:
       name: objective_c
+<<<<<<< HEAD
       sha256: b7fb95a6d9a4f009edd63dc5ac69f07420b23a16161c6dd8660290b59c602e8e
       url: "https://pub.dev"
     source: hosted
     version: "9.5.0"
+=======
+      sha256: ad56fd53a78ff6b1472fa59ff2a4e8b8ccabafc586fc263a1dfad0b99b5553e3
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.6.0"
+>>>>>>> Issue-397-Share-app-via-QR-code-and-share-sheet
   package_config:
     dependency: transitive
     description:
@@ -860,10 +888,17 @@ packages:
     dependency: transitive
     description:
       name: record_use
+<<<<<<< HEAD
       sha256: "3b4ab682aff40175afca6ff090cc5aa7ce9dafe8dfbae1537a6c678e6678baee"
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+=======
+      sha256: "1cb8564af8d43b464294411db9217f5ec04891c6f22ee2c32d73ae05e88a6bd2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
+>>>>>>> Issue-397-Share-app-via-QR-code-and-share-sheet
   sanitize_html:
     dependency: transitive
     description:
@@ -1033,10 +1068,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "475610b2aa23c19687cce2961e44b0cc57cafe220f67c2b80201231b2a07fbe7"
+      sha256: "2a122cbe059f8b610d3a5415f42e255b6c17b1f21eee1d960f31080237fb4f11"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.13"
+    version: "0.7.12"
   typed_data:
     dependency: transitive
     description:

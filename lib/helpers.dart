@@ -363,25 +363,27 @@ void displayAppShareDialog(BuildContext itemContext) async {
 }
 
 
-void shareApp(BuildContext context, String msgText) {
+void shareApp(BuildContext context, String msgText) async {
   final params = ShareParams(
     text: msgText,
     title: 'Share the app',
     //uri: Uri.parse('https://www.millroadwinterfair.org/mrwf-app/'), // can't have this and text
   );
   try {
-    SharePlus.instance.share(params);
+    await SharePlus.instance.share(params);
   } catch (e) {
     debugPrint('shareApp error launching SharePlus::\n$e');
-    Fluttertoast.showToast(
-      msg: 'Couldn’t launch share sheet. Please try again later',
-      gravity: ToastGravity.CENTER,
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      textColor: Theme.of(context).colorScheme.onPrimary,
-      fontSize: 16,
-      toastLength: Toast.LENGTH_LONG,
-      timeInSecForIosWeb: 4,
-    );
+    if (context.mounted) {
+      Fluttertoast.showToast(
+        msg: 'Couldn’t launch share sheet. Please try again later',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
+      );
+    }
   }
 }
 
