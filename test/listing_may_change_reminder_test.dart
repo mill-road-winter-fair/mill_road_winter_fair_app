@@ -22,7 +22,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Listings may change'), findsOneWidget);
-      await tester.tap(find.text("Don't show this again"));
+      // CheckBox should be ticked by default
+      await tester.tap(find.text("Ok"));
       await tester.pumpAndSettle();
       await showNotice;
 
@@ -57,7 +58,7 @@ void main() {
           expect(find.text('Listings may change'), findsOneWidget);
           expect(find.text("Don't show this again"), findsNothing);
 
-          await tester.tap(find.text('Okay'));
+          await tester.tap(find.text('Ok'));
           await tester.pumpAndSettle();
           await showNotice;
         }
