@@ -54,29 +54,41 @@ class ListingUpdateNotifier {
       return;
     }
 
+    bool dontShowAgain = false;
+
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Listings may change'),
-        content: Text(messageFor(noticeDate)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Ok'),
-          ),
-          if (isListingsMayChange)
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Listings may change'),
+          content: Text(messageFor(noticeDate)),
+          actions: [
+            if (isListingsMayChange)
+              CheckboxListTile(
+                value: dontShowAgain,
+                onChanged: (value) {
+                  setState(() => dontShowAgain = value ?? false);
+                },
+                title: const Text("Don't show this again"),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
             TextButton(
               onPressed: () async {
-                listingUpdateNoticeEnabled = false;
-                await prefs.setBool(preferenceKey, false);
+                if (dontShowAgain) {
+                  listingUpdateNoticeEnabled = false;
+                  await prefs.setBool(preferenceKey, false);
+                }
                 if (dialogContext.mounted) {
                   Navigator.of(dialogContext).pop();
                 }
               },
-              child: const Text("Don't show this again"),
+              child: const Text('Ok'),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
