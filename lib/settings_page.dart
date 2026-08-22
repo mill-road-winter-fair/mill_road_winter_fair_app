@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -47,35 +46,11 @@ Future<void> loadSettings() async {
       favouriteListingKeys = {};
     }
 
-    // Detect system brightness
-    Brightness systemBrightness = PlatformDispatcher.instance.platformBrightness;
-
-    // Set initial theme and map style according to system brightness
-    String defaultTheme = systemBrightness == Brightness.light ? 'light' : 'dark';
-    String defaultMapStyle = systemBrightness == Brightness.dark ? darkMap : standardMap;
+    // Set initial theme and map style to change according to system brightness
+    String defaultTheme = 'auto';
     selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme;
-    mapStyle = prefs.getString('selectedMapStyle') ?? defaultMapStyle;
-
-    // We're currently storing the mapStyle as a string in SharedPreferences
-    // If we update the mapStyles at any point the user will not get the updated styles unless they change theme
-    // To get around this, whenever we load the settings we re-apply the map style
-    switch (selectedThemeKey) {
-      case 'light':
-        mapStyle = standardMap;
-        break;
-      case 'dark':
-        mapStyle = darkMap;
-        break;
-      case '2024':
-        mapStyle = retroMap;
-        break;
-      case 'highContrast':
-        mapStyle = darkMap;
-        break;
-      case 'colourBlindFriendly':
-        mapStyle = colourBlindMap;
-        break;
-    }
+    if (!appThemes.containsKey(selectedThemeKey) && selectedThemeKey != 'auto') selectedThemeKey = defaultTheme;
+    mapStyle = getMapStyleForThemeKey(selectedThemeKey);
 
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
@@ -239,23 +214,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             selectedThemeKey = value!;
                             setState(() {
                               _changeTheme(value);
-                              switch (value) {
-                                case 'light':
-                                  mapStyle = standardMap;
-                                  break;
-                                case 'dark':
-                                  mapStyle = darkMap;
-                                  break;
-                                case '2024':
-                                  mapStyle = retroMap;
-                                  break;
-                                case 'highContrast':
-                                  mapStyle = darkMap;
-                                  break;
-                                case 'colourBlindFriendly':
-                                  mapStyle = colourBlindMap;
-                                  break;
-                              }
+                              mapStyle = getMapStyleForThemeKey(value);
                             });
                             _saveSettings();
                             mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
@@ -264,9 +223,22 @@ class _SettingsPageState extends State<SettingsPage> {
                             children: [
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
+                                title: const Text('Auto'),
+                                subtitle: Text(
+                                  'Follow the device’s light/dark setting',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                visualDensity: VisualDensity.compact,
+                                value: 'auto',
+                              ),
+                              RadioListTile<String>(
+                                activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Light'),
                                 subtitle: Text(
-                                  'The default for devices set to light mode',
+                                  'A bright theme using white pages',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -279,7 +251,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Dark'),
                                 subtitle: Text(
-                                  'The default for devices set to dark mode',
+                                  'A subdued theme using black pages',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -290,7 +262,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('2024 colour scheme'),
+                                title: const Text('2024 light scheme'),
                                 subtitle: Text(
                                   'For the Fair that blew away',
                                   style: TextStyle(
