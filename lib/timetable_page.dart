@@ -486,6 +486,7 @@ class _TimetablePageState extends State<TimetablePage> {
     final List<Widget> swimlanes = [];
     final nowOrSoonIconKey = GlobalKey();
     final subcategoryIconKey = GlobalKey();
+    final searchIconKey = GlobalKey();
 
     return FairScaffold(
       appBarTitle: "Timetable",
@@ -515,7 +516,9 @@ class _TimetablePageState extends State<TimetablePage> {
           ),
         ),
         IconButton(
+          key: searchIconKey,
           color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
+          onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
           onPressed: () {
             HapticFeedback.lightImpact();
             setState(() {
