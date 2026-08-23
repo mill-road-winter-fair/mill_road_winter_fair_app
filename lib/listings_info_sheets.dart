@@ -187,12 +187,12 @@ class SpecificListingInfoSheet extends StatelessWidget {
     Widget subDetails; // calculated subtitle/details field
 
     // Determine if the event has been cancelled, update text style accordingly
-    final titleStyle = TextStyle(
+    final basicTitleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
       color: Theme.of(context).colorScheme.onSurface,
-      decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
+    final titleStyle = basicTitleStyle.copyWith(decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none);
     updatedTimes = cancelled ? 'CANCELLED' : "$startTime—$endTime";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
@@ -230,7 +230,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Prepend the emoji if we have one
-              if (emoji.isNotEmpty) Text('$emoji ', style: titleStyle.copyWith(fontSize: 30)),
+              if (emoji.isNotEmpty) Text('$emoji ', style: basicTitleStyle.copyWith(fontSize: 30)),
               Expanded(
                 flex: 14,
                 child: Text(title, style: titleStyle),
