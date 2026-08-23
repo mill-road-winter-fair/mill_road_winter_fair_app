@@ -86,7 +86,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     if (filterCategory == 'favourite') {
       appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites'; // 'filtered favourite listings' doesn't fit!
     } else {
-      appBarTitle += (appBarTitle.isEmpty) ? 'All Listings' : ' listings';
+      appBarTitle += (appBarTitle.isEmpty) ? 'All listings' : ' listings';
     }
     return appBarTitle;
   }
@@ -485,7 +485,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               Container(
                 height: 52,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withAlpha(20),
+                  color: colorScheme.surfaceDim,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
@@ -562,7 +562,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   backgroundColor: colorScheme.primary,
                   color: colorScheme.onPrimary,
                   child: Container(// ensure the Stack has a defined height
-                    color: colorScheme.primary.withAlpha(20),
+                    color: colorScheme.surfaceDim,
                     child: LayoutBuilder(builder: (context, constraints) {
                       final trackHeight = constraints.maxHeight;
                       return Stack(children: [
