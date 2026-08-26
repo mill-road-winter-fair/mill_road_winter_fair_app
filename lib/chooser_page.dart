@@ -53,81 +53,10 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   }
 
 
-  Future<bool> chooseDialog(BuildContext theBuildContext, String theChoice) async {
-    const textStyle = TextStyle(fontSize: 18);
-    const titleStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 20);
-    bool cancelled = false;
-    bool savingchoice = false;
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (ctx2, setStateDialog) {
-            return Dialog(
-              insetPadding: EdgeInsets.all(10.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
-              child: LayoutBuilder(builder: (context, constraints) {
-                final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
-                return ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
-                    child: Column(
-                      spacing: 12,
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(style: titleStyle, 'Save this choice?'),
-                        Row(spacing: 12, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Checkbox(
-                            value: savingchoice, 
-                            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                            onChanged: (bool? newValue) {
-                              savingchoice = newValue!;
-                              setStateDialog(() { });
-                            }
-                          ),
-                          Expanded(child: Text(style: textStyle, 'Remember this choice so that $theChoice always appears when you open the app. '
-                            'You can change this from Settings.')),
-                        ]),
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, spacing: 12, children: [
-                          TextButton(
-                            style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              cancelled = true;
-                              Navigator.pop(context);
-                            },
-                            child: Text('Cancel', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
-                          ),
-                          Spacer(),
-                          TextButton(
-                            style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.pop(context);
-                            },
-                            child: Text((savingchoice) ? 'Save and continue' : 'Continue', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
-                          ),
-                        ]),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-            );
-          }
-        );
-      }
-    );
-    return cancelled;
-  }
-
-
   void restartAnimation() {
     //_chosenHotspotID = null;
     //_highlightMode = HighlightMode.none;
     _idleTimer = Timer(const Duration(seconds: 2), () {
-      debugPrint('MW restarting anim');
       setState(() {
         _chosenHotspotID = null;
         _highlightMode = HighlightMode.idle;
@@ -207,25 +136,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                           _highlightMode = HighlightMode.selected;
                           _chosenHotspotID = i;
                         });
-                        final cancelled = await chooseDialog(context, hotspots[i].label);
-                        debugPrint('cancelled=$cancelled');
-                        if (cancelled) {
-                          setState(() {
-                            _chosenHotspotID = null;
-                            _highlightMode = HighlightMode.none;
-                          });
-                          _idleTimer = Timer(const Duration(seconds: 2), () {
-                            setState(() {
-                              _chosenHotspotID = null;
-                              _highlightMode = HighlightMode.idle;
-                            });
-                            _animationController.repeat();
-                          });
-                        } else {
-                          _idleTimer?.cancel();
-                          _animationController.stop();
-                          hotspots[i].theTap();
-                        }
+                        _idleTimer?.cancel();
+                        _animationController.stop();
+                        hotspots[i].theTap();
                       },
                       child: const SizedBox.expand(),
                     ),
