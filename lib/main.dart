@@ -177,8 +177,8 @@ class HomePageState extends State<HomePage> {
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
-      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings, onOpenMap: openMap),
-    MapPage(listings: listings, key: mapPageKey, onTabSelected: setCurrentIndex),
+    ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings, onOpenMap: openMap),
+    MapPage(listings: listings, key: mapPageKey, nearestMarkerCount: mapNearestMarkerCount, onTabSelected: setCurrentIndex, onHomeTapped: cancelMapNearest),
     TimetablePage(onTabSelected: setCurrentIndex),
     FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle, onTabSelected: setCurrentIndex),
     FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle, onTabSelected: setCurrentIndex),
@@ -192,6 +192,7 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('MW main index=$index and mapNearestMarkerCount=$mapNearestMarkerCount');
     return IndexedStack(
       index: index,
       children: _pages,

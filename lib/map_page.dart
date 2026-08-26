@@ -28,11 +28,19 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
+  final void Function()? onHomeTapped;
+  final String? destinationId; // optional if we'll be showing directions to somewhere
+  final LatLng? destinationLatLng; // optional if we'll be showing directions to somewhere
+  final int? nearestMarkerCount; // optional if we'll be zooming in to nearest X markers
 
   const MapPage({
     super.key,
     required this.listings, 
     required this.onTabSelected,
+    this.onHomeTapped,
+    this.destinationId,
+    this.destinationLatLng,
+    this.nearestMarkerCount,
   });
 
   @override
@@ -74,10 +82,11 @@ class MapPageState extends State<MapPage> {
     'Services': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
+  bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
 
   @override
   void initState() {
-    debugPrint('MapPageState initState() called');
+    debugPrint('MapPageState initState() called with destinationId=${widget.destinationId}');
     if (Platform.isAndroid) {
       googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
     } else if (Platform.isIOS) {
@@ -88,9 +97,14 @@ class MapPageState extends State<MapPage> {
     setVisibleMarkerLists();
     addAllVisibleMarkers();
     establishLocation();
+    if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
       ListingUpdateNotifier.maybeShowNotice(context);
+      if (doingAPushNavigation ?? false) {
+        doingAPushNavigation = false;
+        doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
+      }
     });
     super.initState();
   }
@@ -357,7 +371,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void updateMarkerVisibilityIgnoringFilters(List<MarkerId> idList, bool visibleState) {
-    debugPrint('updateMarkerVisibilityIgnoringFilters called');
+    debugPrint('MapPageState updateMarkerVisibilityIgnoringFilters called');
     setState(() {
       for (var id in idList) {
         final currentMarker = markers[id];
@@ -371,7 +385,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void updateMarkerVisibilityRespectingFilters(List<MarkerId> idList, bool visibleState) {
-    debugPrint('updateMarkerVisibilityRespectingFilters called');
+    debugPrint('MapPageState updateMarkerVisibilityRespectingFilters called');
 
     // 1. Define category mapping to avoid repetition and hardcoded strings.
     const categoryMapping = {
@@ -411,7 +425,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void setVisibleMarkerLists() {
-    debugPrint('setVisibleMarkerLists called');
+    debugPrint('MapPageState setVisibleMarkerLists called');
     // Reset marker lists
     _foodMarkerIds = [];
     _shoppingMarkerIds = [];
@@ -433,7 +447,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addAllVisibleMarkers() async {
-    debugPrint('addAllVisibleMarkers called');
+    debugPrint('MapPageState addAllVisibleMarkers called');
 
     // Create all marker bitmaps first, but only if not onTest
     if (onTest == false) {
@@ -458,7 +472,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<bool> createAllMarkerBitmaps() async {
-    debugPrint('createAllMarkerBitmaps called');
+    debugPrint('MapPageState createAllMarkerBitmaps called');
     for (var listingType
         in 'Food, Shopping, Charity/Community/Info, Performance, Visit/Experience, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Charity/Community/Info, Group-Performance, Group-Visit/Experience, Group-Service'
             .split(', ')) {
@@ -466,7 +480,7 @@ class MapPageState extends State<MapPage> {
       bitmapDescriptors[listingType] = newBitmapDescriptor;
     }
     if (bitmapDescriptors.isEmpty) {
-      debugPrint('Error: created zero bitmap descriptors');
+      debugPrint('MapPageState error: created zero bitmap descriptors');
       return false;
     } else {
       return true;
@@ -475,10 +489,11 @@ class MapPageState extends State<MapPage> {
 
   // Function to toggle a listing's presence in the list of favourites
   void favouriteOrNotListing(String listingID) {
+    debugPrint('MapPageState favouriteOrNotListing called');
     if (isListingFavourited(listingID)) {
-      favouriteListingKeys.remove(listingID);
+      favouriteListingKeys = {...favouriteListingKeys}..remove(listingID);
     } else {
-      favouriteListingKeys.add(listingID);
+      favouriteListingKeys = {...favouriteListingKeys, listingID};
     }
     setState(() {});
     _saveSettings();
@@ -490,7 +505,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addGroupMarker(Map<String, dynamic> parentListing) async {
-    // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
+    //debugPrint('MapPageState addGroupMarker called');
     LatLng destinationLatLng = stringToLatLng(parentListing['latLng']);
     MarkerId markerId = MarkerId(parentListing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, getCategory(parentListing));
@@ -559,10 +574,10 @@ class MapPageState extends State<MapPage> {
 
                 void favouriteOrNotListing(String listingID) {
                   setModalState(() {
-                    if (favouriteListingKeys.contains(listingID)) {
-                      favouriteListingKeys.remove(listingID);
+                    if (isListingFavourited(listingID)) {
+                      favouriteListingKeys = {...favouriteListingKeys}..remove(listingID);
                     } else {
-                      favouriteListingKeys.add(listingID);
+                      favouriteListingKeys = {...favouriteListingKeys, listingID};
                     }
                     _saveSettings();
                   });
@@ -664,13 +679,13 @@ class MapPageState extends State<MapPage> {
       },
     );
 
-    setState(() {
+    //setState(() {
       markers[markerId] = newMarker;
-    });
+    //});
   }
 
   void addSpecificMarker(Map<String, dynamic> listing) async {
-    //debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
+    //debugPrint('MapPageState addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, getCategory(listing));
@@ -728,10 +743,10 @@ class MapPageState extends State<MapPage> {
                   return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
                     void favouriteOrNotListing(String listingID) {
                       setModalState(() {
-                        if (favouriteListingKeys.contains(listingID)) {
-                          favouriteListingKeys.remove(listingID);
+                        if (isListingFavourited(listingID)) {
+                          favouriteListingKeys = {...favouriteListingKeys}..remove(listingID);
                         } else {
-                          favouriteListingKeys.add(listingID);
+                          favouriteListingKeys = {...favouriteListingKeys, listingID};
                         }
                         _saveSettings();
                       });
@@ -780,13 +795,13 @@ class MapPageState extends State<MapPage> {
             },
           );
         });
-    setState(() {
+    //setState(() {
       markers[markerId] = newMarker;
-    });
+    //});
   }
 
   void addSimpleMarker(String category, destinationLatLng) async {
-    debugPrint('addSimpleMarker called for category: $category');
+    //debugPrint('MapPageState addSimpleMarker called for category: $category');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
     Color color = getCategoryColor(selectedThemeKey, category);
     late BitmapDescriptor customMarker;
@@ -804,13 +819,13 @@ class MapPageState extends State<MapPage> {
       visible: true,
     );
 
-    setState(() {
+    //setState(() {
       markers[markerId] = newMarker;
-    });
+    //});
   }
 
   Future<void> updateMarkersAndPolygonsForTheme() async {
-    debugPrint('updateMarkersAndPolygonsForTheme called');
+    debugPrint('MapPageState updateMarkersAndPolygonsForTheme called');
     // Recreate marker bitmaps for the new theme colors
     await createAllMarkerBitmaps();
 
@@ -838,19 +853,19 @@ class MapPageState extends State<MapPage> {
   }
 
   void hideAllMarkers() {
-    debugPrint('hideAllMarkers called');
+    debugPrint('MapPageState hideAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
         _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, false);
   }
 
   void showAllMarkers() {
-    debugPrint('showAllMarkers called');
+    debugPrint('MapPageState showAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
         _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, true);
   }
 
   void showFilteredMarkers() {
-    debugPrint('showFilteredMarkers called');
+    debugPrint('MapPageState showFilteredMarkers called');
     updateMarkerVisibilityIgnoringFilters(_foodMarkerIds, filterSettings['Food']!);
     updateMarkerVisibilityIgnoringFilters(_shoppingMarkerIds, filterSettings['Shopping']!);
     updateMarkerVisibilityIgnoringFilters(_charityCommunityInfoMarkerIds, filterSettings['Charity/Community/Info']!);
@@ -860,7 +875,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void showFilterMenu() {
-    debugPrint('showFilterMenu called');
+    debugPrint('MapPageState showFilterMenu called');
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 0.85,
       context: context,
@@ -1057,13 +1072,18 @@ class MapPageState extends State<MapPage> {
     navigationInProgress = false;
     setState(() {});
 
-    debugPrint('getDirections called for listing ID: $id');
+    debugPrint('MapPageState getDirections called for listing ID: $id');
 
     if (navigatorPop == true) {
       Navigator.pop(context);
       // The navigator is only popped when called from the map page, so if this is true set the previousIndex to 0
-      previousIndex = 0;
+      //previousIndex = 0;
     }
+    
+    doTheNavigation(id, destination, navigatorPop);
+  }
+
+  Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
 
     // If user has location tracking enabled
     if (currentLatLng != null) {
@@ -1093,7 +1113,7 @@ class MapPageState extends State<MapPage> {
       if (id.length > (aSimpleMarkerIdLen + 1)) {
         addSimpleMarker(id.substring(aSimpleMarkerIdLen + 1), destination);
       } else {
-        debugPrint('Adding Event type simple marker as category was not specified: $id');
+        debugPrint('MapPageState doTheNavigation Adding Event type simple marker as category was not specified: $id');
         addSimpleMarker('Event', destination);
       }
     } else {
@@ -1108,8 +1128,9 @@ class MapPageState extends State<MapPage> {
     });
   }
 
+
   void cancelNavigation() {
-    debugPrint('cancelNavigation called');
+    debugPrint('MapPageState cancelNavigation called');
     // Halt the location subscription
     _positionStream?.cancel();
 
@@ -1147,11 +1168,6 @@ class MapPageState extends State<MapPage> {
     // Reset the camera position
     _setMapCameraToFitMapMarkers();
 
-    // If we came from a page other than the map page, go back to that page
-    if (previousIndex != 0) {
-      homePageKey.currentState?.setCurrentIndex(previousIndex);
-    }
-
     setState(() {});
   }
 
@@ -1164,7 +1180,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> startLocationUpdates(LatLng destination) async {
-    debugPrint('startLocationUpdates called');
+    debugPrint('MapPageState startLocationUpdates called');
     // Store the destination
     _destination = destination;
 
@@ -1186,7 +1202,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
-    debugPrint('updatePolyline called');
+    debugPrint('MapPageState updatePolyline called');
     try {
       // Load environment variables
       await dotenv.load(fileName: ".env");
@@ -1262,16 +1278,16 @@ class MapPageState extends State<MapPage> {
         _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
     } on SocketException catch (e) {
-      debugPrint("Network error while fetching route: $e");
+      debugPrint("MapPageState updatePolyline Network error while fetching route: $e");
       _handlePolylineError("Network connection issue. Please try again.");
     } on HttpException catch (e) {
-      debugPrint("HTTP error while fetching route: $e");
+      debugPrint("MapPageState updatePolyline HTTP error while fetching route: $e");
       _handlePolylineError("Error retrieving route data. Please check your connection and try again.");
     } on FormatException catch (e) {
-      debugPrint("Data format error: $e");
+      debugPrint("MapPageState updatePolyline Data format error: $e");
       _handlePolylineError("Unexpected data format from directions API.");
     } on Exception catch (e, stack) {
-      debugPrint("Unexpected error fetching directions: $e\n$stack");
+      debugPrint("MapPageState updatePolyline Unexpected error fetching directions: $e\n$stack");
       _handlePolylineError("Failed to get route directions.");
     }
   }
@@ -1285,7 +1301,7 @@ class MapPageState extends State<MapPage> {
       _setMapCameraToFitMapMarkers();
       navigationInProgress = false;
     });
-    debugPrint(message);
+    debugPrint('MapPageState _handlePolylineError error: $message');
     // Show a snackbar with the error
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1300,7 +1316,7 @@ class MapPageState extends State<MapPage> {
 
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
-    debugPrint('_saveSettings called');
+    debugPrint('MapPageState _saveSettings called');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
     await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
@@ -1308,8 +1324,74 @@ class MapPageState extends State<MapPage> {
     await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
   }
 
+
+  Future<void> focusMapOnNearestMarkers(int nearestMarkerCount) async {
+    debugPrint('MapPageState focusOnNearestMarkersFromCurrentLocation called');
+
+    establishLocation();
+    if (currentLatLng == null) {
+      Fluttertoast.showToast(
+        msg: 'Unable to determine your location',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
+      );
+      return;
+    }
+
+    final visibleMarkers = markers.values.where((marker) => marker.visible).toList();
+    if (visibleMarkers.isEmpty) return;
+    final nearestMarkers = visibleMarkers..sort((a, b) {
+      final aDistance = asTheCrowFlies(currentLatLng!, a.position);
+      final bDistance = asTheCrowFlies(currentLatLng!, b.position);
+      return aDistance.compareTo(bDistance);
+    });
+
+    if (nearestMarkers.isEmpty || asTheCrowFlies(currentLatLng!, nearestMarkers.first.position) > 500) {
+      Fluttertoast.showToast(
+        msg: 'Nearest venues are more than 500m away, so please try again when you’re at the Fair',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
+      );
+      return;
+    }
+
+    final nearbyPoints = [currentLatLng!, ...nearestMarkers.take(nearestMarkerCount).map((marker) => marker.position)];
+    final southWest = LatLng(
+      nearbyPoints.map((p) => p.latitude).reduce(min),
+      nearbyPoints.map((p) => p.longitude).reduce(min),
+    );
+    final northEast = LatLng(
+      nearbyPoints.map((p) => p.latitude).reduce(max),
+      nearbyPoints.map((p) => p.longitude).reduce(max),
+    );
+    final padding = preferredMapOrientation == MapOrientation.alwaysNorth ? (mapWidth ?? 800) * 0.12 : (mapHeight ?? 600) * 0.12;
+    final rotation = preferredMapOrientation == MapOrientation.alwaysNorth ? 0.0 : 290.0;
+    final fitZoom = zoomForBounds(southWest, northEast, Size(mapWidth ?? 800, mapHeight ?? 600), padding: padding, zoomMax: 21.0);
+    final targetZoom = fitZoom.clamp(0.0, 21.0);
+    final targetCenter = LatLng((southWest.latitude + northEast.latitude) / 2, (southWest.longitude + northEast.longitude) / 2);
+
+    _controller?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: targetCenter,
+          zoom: targetZoom,
+          bearing: rotation,
+        ),
+      ),
+    );
+  }
+
+
   void _setMapCameraToFitMapMarkers() {
-    debugPrint('_setMapCameraToFitMapMarkers called');
+    debugPrint('MapPageState _setMapCameraToFitMapMarkers called');
     // Set default LatLngs bounds
     // southwest
     double markerMinLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : 52.199174;
@@ -1343,7 +1425,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
-    debugPrint('_setMapCameraToFitPolyline called');
+    debugPrint('MapPageState _setMapCameraToFitPolyline called');
 
     double bearing; // the bearing to set the camera to, based on preference
     double padding; // extra space on the map around the polyline and source marker
@@ -1380,14 +1462,14 @@ class MapPageState extends State<MapPage> {
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
-    debugPrint('_moveCameraToBoundsWithRotation called');
+    debugPrint('MapPageState _moveCameraToBoundsWithRotation called');
     double theZoom;
 
     if (mapWidth != null && mapHeight != null) {
       theZoom = zoomForBounds(southwestMin, northeastMax, Size(mapWidth!, mapHeight!), padding: padding);
     } else {
       theZoom = 15;
-      debugPrint('No map areas size found so using default zoom of $theZoom');
+      debugPrint('MapPageState No map areas size found so using default zoom of $theZoom');
     }
 
     _controller?.animateCamera(
@@ -1415,10 +1497,10 @@ class MapPageState extends State<MapPage> {
     LatLng northeastMax,
     Size mapSize, {
     double padding = 0,
+    double zoomMax = 20.0, // bigger than this and mill road is half the screen width
   }) {
-    debugPrint('zoomForBounds called');
+    debugPrint('MapPageState zoomForBounds called with zoomMax=$zoomMax');
     const worldDIM = 256.0;
-    const zoomMax = 21.0;
 
     //Default bearing
     double bearing = 290;
@@ -1476,7 +1558,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> refreshListings() async {
-    debugPrint('refreshListings called');
+    debugPrint('MapPageState refreshListings called');
     setState(() {
       isRefreshing = true;
     });
@@ -1495,7 +1577,8 @@ class MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('MapPageState build() called');
+    debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}');
+
     return FutureBuilder(
       future: _fetchListings,
       builder: (context, snapshot) {
@@ -1559,8 +1642,14 @@ class MapPageState extends State<MapPage> {
             break;
         }
 
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (widget.nearestMarkerCount != null && !navigationInProgress) {
+            focusMapOnNearestMarkers(widget.nearestMarkerCount!);
+          }
+        });
+
         return FairScaffold(
-          appBarTitle: "Map",
+          appBarTitle: (doingAPushNavigation != null) ? 'Directions' : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
@@ -1571,7 +1660,11 @@ class MapPageState extends State<MapPage> {
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
                   mapHeight = constraints.maxHeight;
-                  return GoogleMap(
+                  return PopScope(
+                    onPopInvokedWithResult: (didPop, result) {
+                      if (didPop && navigationInProgress) cancelNavigation();
+                    },
+                    child: GoogleMap(
                       style: mapStyle,
                       mapType: mapType,
                       rotateGesturesEnabled: false,
@@ -1592,6 +1685,7 @@ class MapPageState extends State<MapPage> {
                         bearing: _mapBearing,
                       ),
                       onCameraMove: (CameraPosition position) {
+                        debugPrint('MapPageState onCameraMove called');
                         setState(() {
                           switch (preferredMapOrientation) {
                             case MapOrientation.adaptive:
@@ -1605,7 +1699,9 @@ class MapPageState extends State<MapPage> {
                       },
                       polygons: _polygons,
                       markers: markers.values.toSet(),
-                      polylines: polylines);
+                      polylines: polylines
+                    ),
+                  );
                 },
               ),
               Positioned(
@@ -1614,7 +1710,7 @@ class MapPageState extends State<MapPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (navigationInProgress == true)
+                    if (navigationInProgress == true && doingAPushNavigation == null)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
                         onPressed: () {
@@ -1645,6 +1741,7 @@ class MapPageState extends State<MapPage> {
                         heroTag: 'homeBtn',
                         onPressed: () {
                           HapticFeedback.lightImpact();
+                          widget.onHomeTapped?.call();
                           // Home button resets the filters if they're all toggled off
                           if (filterSettings['Food'] == false &&
                               filterSettings['Shopping'] == false &&

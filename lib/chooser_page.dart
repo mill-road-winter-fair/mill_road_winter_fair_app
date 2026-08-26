@@ -57,7 +57,6 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
     //_chosenHotspotID = null;
     //_highlightMode = HighlightMode.none;
     _idleTimer = Timer(const Duration(seconds: 2), () {
-      debugPrint('MW restarting anim');
       setState(() {
         _chosenHotspotID = null;
         _highlightMode = HighlightMode.idle;
