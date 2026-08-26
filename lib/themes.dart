@@ -5,6 +5,29 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 
+String getEffectiveThemeKey(String themeKey, [Brightness? brightness]) {
+  if (themeKey != 'auto') return themeKey;
+  final currentBrightness = brightness ?? ui.PlatformDispatcher.instance.platformBrightness;
+  return currentBrightness == Brightness.dark ? 'dark' : 'light';
+}
+
+String getMapStyleForThemeKey(String themeKey, [Brightness? brightness]) {
+  switch (getEffectiveThemeKey(themeKey, brightness)) {
+    case 'light':
+      return standardMap;
+    case 'dark':
+      return darkMap;
+    case '2024':
+      return retroMap;
+    case 'highContrast':
+      return darkMap;
+    case 'colourBlindFriendly':
+      return colourBlindMap;
+    default:
+      return standardMap;
+  }
+}
+
 final Map<String, ThemeData> appThemes = {
   'light': ThemeData(
     useMaterial3: true,
@@ -286,7 +309,9 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
 }
 
 Color getCategoryColor(String selectedThemeKey, String category) {
-  if (selectedThemeKey == "light") {
+  final effectiveThemeKey = getEffectiveThemeKey(selectedThemeKey);
+
+  if (effectiveThemeKey == "light") {
     if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(255, 156, 26, 1.0);
       return color;
@@ -310,7 +335,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     // Default colour for markers with no category
     Color color = const Color.fromRGBO(0, 0, 0, 1.0);
     return color;
-  } else if (selectedThemeKey == "dark") {
+  } else if (effectiveThemeKey == "dark") {
     if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(241, 108, 0, 1.0);
       return color;
@@ -334,7 +359,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     // Default colour for markers with no category
     Color color = const Color.fromRGBO(0, 0, 0, 1.0);
     return color;
-  } else if (selectedThemeKey == "2024") {
+  } else if (effectiveThemeKey == "2024") {
     if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(216, 114, 50, 1.0);
       return color;
@@ -358,7 +383,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     // Default colour for markers with no category
     Color color = const Color.fromRGBO(0, 0, 0, 1.0);
     return color;
-  } else if (selectedThemeKey == "highContrast") {
+  } else if (effectiveThemeKey == "highContrast") {
     if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(255, 115, 0, 1.0);
       return color;
@@ -382,7 +407,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     // Default colour for markers with no category
     Color color = const Color.fromRGBO(0, 0, 0, 1.0);
     return color;
-  } else if (selectedThemeKey == "colourBlindFriendly") {
+  } else if (effectiveThemeKey == "colourBlindFriendly") {
     if (category == "Food" || category == "Group-Food") {
       Color color = const Color.fromRGBO(213, 94, 0, 1.0);
       return color;
