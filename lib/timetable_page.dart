@@ -5,12 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
-import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -59,7 +55,6 @@ class _TimetablePageState extends State<TimetablePage> {
   late Map<String, List<PositionedEvent>> thePreparedEvents; // read from the listings
   late Map<String, List<PositionedEvent>> theFilteredEvents; // filtered from the above based on onlyNowOrSoon
   bool loading = true; // so we don't try to build before we're ready
-  Route? listingDetailsDialogRoute; // to keep track of dialog so it can be closed if needed. This will move to main if we enter the app from an alert
 
   @override
   void initState() {
@@ -124,12 +119,6 @@ class _TimetablePageState extends State<TimetablePage> {
       pixelsPerMinuteL = max(0.8, min(1.5, 600 / max(240, spanMinutes)));
       saveScales();
     }
-  }
-
-
-  Future<void> _saveFavourites() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
 
@@ -383,16 +372,6 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
 
-  String formatTime(DateTime theTime) {
-    return '${theTime.hour.toString().padLeft(2,'0')}:${theTime.minute.toString().padLeft(2,'0')}';
-  }
-
-
-  String formatTimeRange(DateTime startTime, DateTime endTime) {
-    return '${formatTime(startTime)}–${formatTime(endTime)}';
-  }
-
-
   void scrollToKey(GlobalKey theKey, double alignment) async {
     debugPrint('_TimetablePageState scrollToKey called with theKey=$theKey alignment=$alignment');
     final keyContext = theKey.currentContext;
@@ -415,106 +394,6 @@ class _TimetablePageState extends State<TimetablePage> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-    }
-  }
-
-
-  void favouriteOrNotListing(PositionedEvent theEvent) {
-    if (favouriteListingKeys.value.contains(theEvent.id)) {
-      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(theEvent.id);
-    } else {
-      favouriteListingKeys.value = {...favouriteListingKeys.value, theEvent.id};
-    }
-    setState(() {});
-    _saveFavourites();
-  }
-
-
-  Future<void> showListingDetailsDialog(
-    BuildContext context, 
-    PositionedEvent event, 
-    //int alertNoticePeriod,
-    void Function(VoidCallback) setStateFunction,
-//    final int? Function(PositionedEvent, int, int?) toggleAlertAction,
-    Future<dynamic> Function() onGetDirections,
-  ) async {
-
-    debugPrint('showListingDetailsDialog called');
-
-    removeMiniPopup(); // just in case one was opened
-
-    if (!context.mounted) return;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    var distanceMessage = 'Distance unknown';
-    if (currentLatLng != null) {
-      int approximateDistanceMetres = asTheCrowFlies(
-        currentLatLng!,
-        event.latLng,
-      );
-      distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
-    }
-
-    listingDetailsDialogRoute = DialogRoute(context: context, barrierColor: Colors.black38, builder: (_) => StatefulBuilder(
-      builder: (ctx2, setStateDialog) {
-        return Dialog(
-          insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
-          shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
-          backgroundColor: colorScheme.surfaceContainerLowest,
-          shadowColor: colorScheme.surfaceContainerHighest,
-          elevation: 12,
-          child: SingleChildScrollView(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-              child: SpecificListingInfoSheet(
-                cancelled: event.cancelled,
-                brickAndMortar: event.brickAndMortar,
-                emoji: event.emoji,
-                title: event.name,
-                subtitle: event.subtitle,
-                location: event.location,
-                description: event.description,
-                email: event.email,
-                website: event.website,
-                phoneNumber: event.phoneNumber,
-                imageURL: event.imageURL,
-                startTime: formatTime(event.startTime),
-                endTime: formatTime(event.endTime),
-                approxDistance: distanceMessage,
-                detailsVisible: true,
-                listingFavourited: favouriteListingKeys.value.contains(event.id),
-                onFavouriteTapped: () {
-                  favouriteOrNotListing(event);
-                  setStateDialog(() {});
-                },
-                onGetDirections: () async {
-                  safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
-                  onGetDirections.call();
-                },
-                inDialog: true,
-              ),
-            ),
-          ),
-        );
-      },
-    ));
-    await Navigator.of(context).push(listingDetailsDialogRoute!);
-    removeMiniPopup(); // just in case one was opened
-
-  }
-
-
-  // Safe route removal with null/active checks
-  void safeRemoveRoute(BuildContext context, Route? route) {
-    if (route != null && route.isActive && route.navigator != null) {
-      try {
-        Navigator.of(context).removeRoute(route);
-      } catch (e) {
-        debugPrint('safeRemoveRoute: error removing route: $e');
-      }
     }
   }
 
@@ -607,6 +486,7 @@ class _TimetablePageState extends State<TimetablePage> {
     final List<Widget> swimlanes = [];
     final nowOrSoonIconKey = GlobalKey();
     final subcategoryIconKey = GlobalKey();
+    final searchIconKey = GlobalKey();
 
     return FairScaffold(
       appBarTitle: "Timetable",
@@ -622,7 +502,7 @@ class _TimetablePageState extends State<TimetablePage> {
             _toggleFilteredMusicOrNot();
             theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
           },
-          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter }, size: (widget.filteredMusicOrNot == null) ? 21 : 26),
+          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
         ),
         IconButton(
           key: nowOrSoonIconKey,
@@ -636,7 +516,9 @@ class _TimetablePageState extends State<TimetablePage> {
           ),
         ),
         IconButton(
+          key: searchIconKey,
           color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
+          onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
           onPressed: () {
             HapticFeedback.lightImpact();
             setState(() {
@@ -688,7 +570,7 @@ class _TimetablePageState extends State<TimetablePage> {
                     top: 0,
                     left: 12 + leftColumnWidth + i * (totalWidth - leftColumnWidth) / cols,
                     height: spanMinutes * _dayPixelsPerMinute + 8,
-                    child: Container(color: colorScheme.primary.withAlpha(20), width: (totalWidth - leftColumnWidth) / cols - 22),
+                    child: Container(color: colorScheme.surfaceDim, width: (totalWidth - leftColumnWidth) / cols - 22),
                   ),
                 );
               }
@@ -991,50 +873,3 @@ class _TimetablePageState extends State<TimetablePage> {
 }
 
 
-class PositionedEvent {
-  final DateTime startTime;
-  final DateTime endTime;
-  final String location;
-  final String name;
-  final String subtitle;
-  final String id;
-  final bool cancelled;
-  final String emoji;
-  final String description;
-  final LatLng latLng;
-  final String imageURL;
-  final bool brickAndMortar;
-  final String email;
-  final String website;
-  final String phoneNumber;
-  final bool isMusic;
-  final 
-  int lane;
-  double top;
-  double height;
-  double left;
-  double width;
-  PositionedEvent({
-    required this.startTime,
-    required this.endTime,
-    required this.location,
-    required this.name,
-    required this.subtitle,
-    required this.id,
-    required this.cancelled,
-    required this.emoji,
-    required this.description,
-    required this.latLng,
-    required this.imageURL,
-    required this.brickAndMortar,
-    required this.email,
-    required this.website,
-    required this.phoneNumber,
-    required this.isMusic,
-    required this.lane, 
-    required this.top, 
-    required this.height, 
-    required this.left, 
-    required this.width,
-  });
-}

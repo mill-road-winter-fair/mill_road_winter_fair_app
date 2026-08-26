@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime) {
@@ -185,12 +187,12 @@ class SpecificListingInfoSheet extends StatelessWidget {
     Widget subDetails; // calculated subtitle/details field
 
     // Determine if the event has been cancelled, update text style accordingly
-    final titleStyle = TextStyle(
+    final basicTitleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
       color: Theme.of(context).colorScheme.onSurface,
-      decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
+    final titleStyle = basicTitleStyle.copyWith(decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none);
     updatedTimes = cancelled ? 'CANCELLED' : "$startTime—$endTime";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
@@ -228,7 +230,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Prepend the emoji if we have one
-              if (emoji.isNotEmpty) Text('$emoji ', style: titleStyle.copyWith(fontSize: 30)),
+              if (emoji.isNotEmpty) Text('$emoji ', style: basicTitleStyle.copyWith(fontSize: 30)),
               Expanded(
                 flex: 14,
                 child: Text(title, style: titleStyle),
@@ -496,3 +498,109 @@ class SpecificListingInfoSheet extends StatelessWidget {
     );
   }
 }
+
+  Future<void> showListingDetailsDialog(
+    BuildContext context, 
+    PositionedEvent event, 
+    //int alertNoticePeriod,
+    void Function(VoidCallback) setStateFunction,
+//    final int? Function(PositionedEvent, int, int?) toggleAlertAction,
+    Future<dynamic> Function() onGetDirections,
+  ) async {
+
+    debugPrint('showListingDetailsDialog called');
+
+    removeMiniPopup(); // just in case one was opened
+
+    if (!context.mounted) return;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    var distanceMessage = 'Distance unknown';
+    if (currentLatLng != null) {
+      int approximateDistanceMetres = asTheCrowFlies(
+        currentLatLng!,
+        event.latLng,
+      );
+      distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+    }
+
+    listingDetailsDialogRoute = DialogRoute(context: context, barrierColor: Colors.black38, builder: (_) => StatefulBuilder(
+      builder: (ctx2, setStateDialog) {
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
+          shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+          backgroundColor: colorScheme.surfaceContainerLowest,
+          shadowColor: colorScheme.surfaceContainerHighest,
+          elevation: 12,
+          child: SingleChildScrollView(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: SpecificListingInfoSheet(
+                cancelled: event.cancelled,
+                brickAndMortar: event.brickAndMortar,
+                emoji: event.emoji,
+                title: event.name,
+                subtitle: event.subtitle,
+                location: event.location,
+                description: event.description,
+                email: event.email,
+                website: event.website,
+                phoneNumber: event.phoneNumber,
+                imageURL: event.imageURL,
+                startTime: formatTime(event.startTime),
+                endTime: formatTime(event.endTime),
+                approxDistance: distanceMessage,
+                detailsVisible: true,
+                listingFavourited: favouriteListingKeys.value.contains(event.id),
+                onFavouriteTapped: () {
+                  favouriteOrNotListing(event);
+                  setStateFunction.call;
+                  setStateDialog(() {});
+                },
+                onGetDirections: () async {
+                  safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                  onGetDirections.call();
+                },
+                inDialog: true,
+              ),
+            ),
+          ),
+        );
+      },
+    ));
+    await Navigator.of(context).push(listingDetailsDialogRoute!);
+    removeMiniPopup(); // just in case one was opened
+
+  }
+
+
+  // Safe route removal with null/active checks
+  void safeRemoveRoute(BuildContext context, Route? route) {
+    if (route != null && route.isActive && route.navigator != null) {
+      try {
+        Navigator.of(context).removeRoute(route);
+      } catch (e) {
+        debugPrint('safeRemoveRoute: error removing route: $e');
+      }
+    }
+  }
+
+
+  void favouriteOrNotListing(PositionedEvent theEvent) {
+    if (favouriteListingKeys.value.contains(theEvent.id)) {
+      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(theEvent.id);
+    } else {
+      favouriteListingKeys.value = {...favouriteListingKeys.value, theEvent.id};
+    }
+    _saveFavourites();
+  }
+
+
+  Future<void> _saveFavourites() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
+  }
+

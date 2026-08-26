@@ -8,13 +8,10 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
-import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
-import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
@@ -89,7 +86,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     if (filterCategory == 'favourite') {
       appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites'; // 'filtered favourite listings' doesn't fit!
     } else {
-      appBarTitle += (appBarTitle.isEmpty) ? 'All Listings' : ' listings';
+      appBarTitle += (appBarTitle.isEmpty) ? 'All listings' : ' listings';
     }
     return appBarTitle;
   }
@@ -326,11 +323,19 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Step 1a: Filter by category
     List<Map<String, dynamic>> categoryFiltered = [];
     if (filterCategory == 'all' || filterCategory == '') {
-      categoryFiltered = listings;
+      categoryFiltered = listings.where((listing) => 
+        listing['groupParent'] == 'FALSE'
+      ).toList();
     } else if (filterCategory == 'favourite') {
-      categoryFiltered = listings.where((listing) => favouriteListingKeys.value.contains(listing['id'])).toList();
+      categoryFiltered = listings.where((listing) => 
+        listing['groupParent'] == 'FALSE'
+        && favouriteListingKeys.value.contains(listing['id'])
+      ).toList();
     } else {
-      categoryFiltered = listings.where((listing) => listing[filterCategory] == 'TRUE').toList();
+      categoryFiltered = listings.where((listing) => 
+        listing['groupParent'] == 'FALSE'
+        && listing[filterCategory] == 'TRUE'
+      ).toList();
     }
 
     // Step 1b: Filter by subcategory (e.g. "Food", "Music", etc.)
@@ -480,7 +485,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               Container(
                 height: 52,
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withAlpha(20),
+                  color: colorScheme.surfaceDim,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(4, 0, 4, 0),
@@ -557,7 +562,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   backgroundColor: colorScheme.primary,
                   color: colorScheme.onPrimary,
                   child: Container(// ensure the Stack has a defined height
-                    color: colorScheme.primary.withAlpha(20),
+                    color: colorScheme.surfaceDim,
                     child: LayoutBuilder(builder: (context, constraints) {
                       final trackHeight = constraints.maxHeight;
                       return Stack(children: [
@@ -785,7 +790,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           initialSelection: widget.subfilterCategory,
           //width: (MediaQuery.of(context).size.width - 24) / 2,
           label: const Text("Show", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-          leadingIcon: const Icon(Icons.filter),
+          leadingIcon: const Icon(Icons.filter_alt),
           textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
           inputDecorationTheme: InputDecorationTheme(
             filled: true,

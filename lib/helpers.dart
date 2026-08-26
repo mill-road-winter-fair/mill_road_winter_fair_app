@@ -9,6 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -18,6 +19,7 @@ import 'package:mill_road_winter_fair_app/important_info_page.dart';
 
 OverlayEntry? _miniPopupOverlayEntry; // widget that floats over a given widget as a 'tooltip'
 Timer? _miniPopupTimer; // times how long the above stays on screen
+Route? listingDetailsDialogRoute; // to keep track of dialog so it can be closed if needed. This will move to main if we enter the app from an alert
 
 class FairScaffold extends StatelessWidget {
   const FairScaffold({
@@ -644,100 +646,240 @@ Widget _buildEmailLink(String email) {
 }
 
 
-  void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage, [Color? fgColour, Color? bgColour]) {
+void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage, [Color? fgColour, Color? bgColour]) {
 
-    fgColour ??= Theme.of(itemContext).colorScheme.secondary;
-    bgColour ??= Theme.of(itemContext).colorScheme.onSecondary;
+  fgColour ??= Theme.of(itemContext).colorScheme.secondary;
+  bgColour ??= Theme.of(itemContext).colorScheme.onSecondary;
 
-    removeMiniPopup();
+  removeMiniPopup();
 
-    final overlay = Overlay.of(itemContext);
-    final RenderBox box;
-    if (theKey == null) {
-      box = itemContext.findRenderObject() as RenderBox;
-    } else {
-      box = theKey.currentContext?.findRenderObject() as RenderBox;
-    }
-    final itemTopLeft = box.localToGlobal(Offset.zero);
-    final itemSize = box.size;
-    final screenWidth = MediaQuery.sizeOf(itemContext).width;
-    final overlayW = min(max(theMessage.length / 0.25, 155.0), 230.0);
-    final theStyle = TextStyle(fontSize: 13.0, decoration: TextDecoration.none, fontWeight: FontWeight.normal, color: fgColour);
-    final overlayH = estimateTextHeight(text: theMessage, style:theStyle, maxWidth:overlayW, context: itemContext);
-    const gap = 4.0;
-    final theDuration = (theMessage.length / 25).toInt() + 2;
+  final overlay = Overlay.of(itemContext);
+  final RenderBox box;
+  if (theKey == null) {
+    box = itemContext.findRenderObject() as RenderBox;
+  } else {
+    box = theKey.currentContext?.findRenderObject() as RenderBox;
+  }
+  final itemTopLeft = box.localToGlobal(Offset.zero);
+  final itemSize = box.size;
+  final screenWidth = MediaQuery.sizeOf(itemContext).width;
+  final overlayW = min(max(theMessage.length / 0.25, 155.0), 230.0);
+  final theStyle = TextStyle(fontSize: 13.0, decoration: TextDecoration.none, fontWeight: FontWeight.normal, color: fgColour);
+  final overlayH = estimateTextHeight(text: theMessage, style:theStyle, maxWidth:overlayW, context: itemContext);
+  const gap = 4.0;
+  final theDuration = (theMessage.length / 25).toInt() + 2;
 
-    // Prefer placing the box above the item, otherwise below.
-    double desiredTop = itemTopLeft.dy - overlayH - gap - 8.0; // box padding
-    if (desiredTop < MediaQuery.paddingOf(itemContext).top + 4) {
-      desiredTop = itemTopLeft.dy + itemSize.height + gap;
-    }
-    // Horizontal: try to centre above the item
-    double desiredLeft = itemTopLeft.dx + itemSize.width / 2 - overlayW / 2;
-    if (desiredLeft < 4) desiredLeft = 4;
-    if (desiredLeft + overlayW > screenWidth - 4) desiredLeft = screenWidth - overlayW - 4;
-    _miniPopupOverlayEntry = OverlayEntry(
-      builder: (ctx) => Positioned(
-        left: desiredLeft,
-        top: desiredTop,
-        child: GestureDetector( // since field may be clipped
-          onTap: () {
-            HapticFeedback.lightImpact();
-            removeMiniPopup();
-          },
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: overlayW, // wrapping boundary
+  // Prefer placing the box above the item, otherwise below.
+  double desiredTop = itemTopLeft.dy - overlayH - gap - 8.0; // box padding
+  if (desiredTop < MediaQuery.paddingOf(itemContext).top + 4) {
+    desiredTop = itemTopLeft.dy + itemSize.height + gap;
+  }
+  // Horizontal: try to centre above the item
+  double desiredLeft = itemTopLeft.dx + itemSize.width / 2 - overlayW / 2;
+  if (desiredLeft < 4) desiredLeft = 4;
+  if (desiredLeft + overlayW > screenWidth - 4) desiredLeft = screenWidth - overlayW - 4;
+  _miniPopupOverlayEntry = OverlayEntry(
+    builder: (ctx) => Positioned(
+      left: desiredLeft,
+      top: desiredTop,
+      child: GestureDetector( // since field may be clipped
+        onTap: () {
+          HapticFeedback.lightImpact();
+          removeMiniPopup();
+        },
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: overlayW, // wrapping boundary
+          ),
+          child: Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: bgColour,
+              borderRadius: BorderRadius.circular(4),
+              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
             ),
-            child: Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: bgColour,
-                borderRadius: BorderRadius.circular(4),
-                boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
-              ),
-              child: Text(theMessage, softWrap: true,
-                style: theStyle),
-            ),
+            child: Text(theMessage, softWrap: true,
+              style: theStyle),
           ),
         ),
       ),
-    );
+    ),
+  );
 
-    overlay.insert(_miniPopupOverlayEntry!);
-    _miniPopupTimer = Timer(Duration(seconds: theDuration), () => removeMiniPopup());
+  overlay.insert(_miniPopupOverlayEntry!);
+  _miniPopupTimer = Timer(Duration(seconds: theDuration), () => removeMiniPopup());
 
+}
+
+
+void removeMiniPopup() {
+  _miniPopupTimer?.cancel();
+  _miniPopupTimer = null;
+  if (_miniPopupOverlayEntry != null) {
+    try {
+      _miniPopupOverlayEntry!.remove();
+    } catch (_) {}
+    _miniPopupOverlayEntry = null;
   }
+}
 
 
-  void removeMiniPopup() {
-    _miniPopupTimer?.cancel();
-    _miniPopupTimer = null;
-    if (_miniPopupOverlayEntry != null) {
-      try {
-        _miniPopupOverlayEntry!.remove();
-      } catch (_) {}
-      _miniPopupOverlayEntry = null;
+double estimateTextHeight({
+  required String text,
+  required TextStyle style,
+  required double maxWidth,
+  required BuildContext context,
+  int? maxLines,
+}) {
+  final tp = TextPainter(
+    text: TextSpan(text: text, style: style),
+    maxLines: maxLines,
+    textDirection: TextDirection.ltr,
+    textScaler: MediaQuery.textScalerOf(context),
+    strutStyle: StrutStyle.fromTextStyle(style)
+  )..layout(maxWidth: maxWidth);
+  return tp.size.height;
+}
+
+
+class PositionedEvent {
+  final DateTime startTime;
+  final DateTime endTime;
+  final String location;
+  final String name;
+  final String subtitle;
+  final String id;
+  final bool cancelled;
+  final String emoji;
+  final String description;
+  final LatLng latLng;
+  final String imageURL;
+  final bool brickAndMortar;
+  final String email;
+  final String website;
+  final String phoneNumber;
+  final bool isMusic;
+  final 
+  int lane;
+  double top;
+  double height;
+  double left;
+  double width;
+  PositionedEvent({
+    required this.startTime,
+    required this.endTime,
+    required this.location,
+    required this.name,
+    required this.subtitle,
+    required this.id,
+    required this.cancelled,
+    required this.emoji,
+    required this.description,
+    required this.latLng,
+    required this.imageURL,
+    required this.brickAndMortar,
+    required this.email,
+    required this.website,
+    required this.phoneNumber,
+    required this.isMusic,
+    required this.lane, 
+    required this.top, 
+    required this.height, 
+    required this.left, 
+    required this.width,
+  });
+}
+
+
+LatLng stringToLatLng(String input) {
+//  debugPrint('stringToLatLng called: input=$input');
+  try {
+    // Split the string into latitude and longitude
+    final parts = input.split(',');
+    if (parts.length != 2) {
+      throw const FormatException('Input string is not in "latitude,longitude" format');
     }
+
+    // Parse the latitude and longitude
+    final latitude = double.parse(parts[0].trim());
+    final longitude = double.parse(parts[1].trim());
+//    debugPrint('Parsed LatLng: lat=$latitude, lng=$longitude');
+
+    // Return the LatLng object
+    return LatLng(latitude, longitude);
+  } catch (e) {
+    debugPrint('Error parsing LatLng: $e');
+    throw Exception('Error parsing LatLng from string: $e');
+  }
+}
+
+
+int asTheCrowFlies(LatLng origin, LatLng destination) {
+//  debugPrint('asTheCrowFlies called: origin=$origin, destination=$destination');
+
+  // Constant value for converting degrees to radians (π/180)
+  const p = 0.017453292519943295;
+  // Alias for the cosine function for easier usage in the formula
+  const c = cos;
+
+  // Haversine formula for calculating the central angle between two points on a sphere
+  var a = 0.5 -
+      c((destination.latitude - origin.latitude) * p) / 2 +
+      c(origin.latitude * p) * c(destination.latitude * p) * (1 - c((destination.longitude - origin.longitude) * p)) / 2;
+
+  // Why have a fudge factor? It's a UX thing
+  // Estimating distances usings straight line routes means that the estimation is inevitably shorter than the actual walking route
+  // Tapping 'Get Directions' for a destination that is supposedly 600 metres away and then seeing that it's actually 900 meters away feels bad
+  // The fudge factor attempts to correct for these underestimations
+  const fudgeFactor = 1.33;
+
+  // Compute the great-circle distance in metres
+  // Earth's radius is approximately 6,371 km (or 12,742 km for the diameter)
+  // Multiply the central angle (in radians) by Earth's diameter and convert to metres
+  // Apply the fudge factor (See above)
+  // Round the figure to 0 decimal places
+  var distanceMetres = (((12742 * asin(sqrt(a))) * 1000) * fudgeFactor).round();
+//  debugPrint('Distance calculated: $distanceMetres metres');
+  return distanceMetres;
+}
+
+
+String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceUnits) {
+//  debugPrint('convertDistanceUnits called: distanceMetres=$distanceMetres, preferredDistanceUnits=$preferredDistanceUnits');
+  String distanceToDestination = "Distance conversion error";
+
+  if (preferredDistanceUnits == DistanceUnits.metric) {
+    if (distanceMetres <= 999) {
+      distanceToDestination = '$distanceMetres m';
+    } else {
+      final distanceKilometresRounded = (distanceMetres / 1000).toStringAsFixed(2);
+      distanceToDestination = '$distanceKilometresRounded km';
+    }
+  } else if (preferredDistanceUnits == DistanceUnits.imperial) {
+    if (distanceMetres <= 161) {
+      final distanceFeetRounded = (distanceMetres * 3.28084).toStringAsFixed(0);
+      distanceToDestination = '$distanceFeetRounded ft';
+    } else {
+      final distanceMilesRounded = (distanceMetres / 1609.34).toStringAsFixed(2);
+      distanceToDestination = '$distanceMilesRounded miles';
+    }
+  } else if (preferredDistanceUnits == DistanceUnits.cambridge) {
+    final puntLengths = (distanceMetres / 4).toStringAsFixed(0);
+    distanceToDestination = '$puntLengths punts';
   }
 
+//  debugPrint('Distance converted: $distanceToDestination');
+  return distanceToDestination;
+}
 
-  double estimateTextHeight({
-    required String text,
-    required TextStyle style,
-    required double maxWidth,
-    required BuildContext context,
-    int? maxLines,
-  }) {
-    final tp = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: maxLines,
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
-      strutStyle: StrutStyle.fromTextStyle(style)
-    )..layout(maxWidth: maxWidth);
-    return tp.size.height;
-  }
 
+String formatTime(DateTime theTime) {
+  return '${theTime.hour.toString().padLeft(2,'0')}:${theTime.minute.toString().padLeft(2,'0')}';
+}
+
+
+String formatTimeRange(DateTime startTime, DateTime endTime) {
+  return '${formatTime(startTime)}–${formatTime(endTime)}';
+}
 
