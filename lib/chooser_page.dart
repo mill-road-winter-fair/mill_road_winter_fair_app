@@ -9,12 +9,20 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class ChooserPage extends StatefulWidget {
   const ChooserPage({
-    super.key,
+    required this.theEvents,
+    required this.onOpenTimetable,
+    required this.onOpenListings,
+    required this.onOpenMap,
     required this.onTabSelected,
+    super.key,
   });
 
   @override
   State<ChooserPage> createState() => _ChooserPageState();
+  final List<Map<String, dynamic>> theEvents;
+  final Function(bool, bool?) onOpenTimetable;
+  final Function(String, String?) onOpenListings;
+  final Function(int?) onOpenMap;
   final ValueChanged<int> onTabSelected;
 }
 
@@ -22,18 +30,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   late ScrollController _chooserPageScrollController;
   late final AnimationController _animationController;
   Timer? _idleTimer;
-  final List<Hotspot> hotspots = [
-    Hotspot(label: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152),
-    Hotspot(label: 'Music', left: 0.548, top: 0.287, width: 0.451, height: 0.144),
-    Hotspot(label: 'Events and\nPerformances', left: 0, top: 0.366, width: 0.455, height: 0.19),
-    Hotspot(label: 'Shopping', left: 0.583, top: 0.49, width: 0.416, height: 0.213),
-    Hotspot(label: 'Children’s', left: 0, top: 0.598, width: 0.437, height: 0.214),
-    Hotspot(label: 'Nearby', left: 0.666, top: 0.703, width: 0.333, height: 0.171),
-    Hotspot(label: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118),
-    Hotspot(label: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118),
-  ];
   int? _chosenHotspotID; // hotspot that the user tapped on, if any
   HighlightMode _highlightMode = HighlightMode.idle;
+  late final List<Hotspot> hotspots;
 
   @override
   void initState() {
@@ -54,78 +53,37 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   }
 
 
-  Future<bool> chooseDialog(BuildContext theBuildContext, String theChoice) async {
-    const textStyle = TextStyle(fontSize: 18);
-    const titleStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 20);
-    bool cancelled = false;
-    bool savingchoice = false;
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (ctx2, setStateDialog) {
-            return Dialog(
-              insetPadding: EdgeInsets.all(10.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
-              child: LayoutBuilder(builder: (context, constraints) {
-                final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
-                return ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
-                    child: Column(
-                      spacing: 12,
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(style: titleStyle, 'Save this choice?'),
-                        Row(spacing: 12, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Checkbox(
-                            value: savingchoice, 
-                            visualDensity: VisualDensity(horizontal: -4, vertical: -4),
-                            onChanged: (bool? newValue) {
-                              savingchoice = newValue!;
-                              setStateDialog(() { });
-                            }
-                          ),
-                          Expanded(child: Text(style: textStyle, 'Remember this choice so that $theChoice always appears when you open the app. '
-                            'You can change this from Settings.')),
-                        ]),
-                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, spacing: 12, children: [
-                          TextButton(
-                            style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              cancelled = true;
-                              Navigator.pop(context);
-                            },
-                            child: Text('Cancel', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
-                          ),
-                          Spacer(),
-                          TextButton(
-                            style: ButtonStyle(padding: WidgetStatePropertyAll(EdgeInsetsGeometry.symmetric(horizontal: 0))),
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.pop(context);
-                            },
-                            child: Text((savingchoice) ? 'Save and continue' : 'Continue', style: textStyle.copyWith(color: Theme.of(context).colorScheme.tertiary)),
-                          ),
-                        ]),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-            );
-          }
-        );
-      }
-    );
-    return cancelled;
+  void restartAnimation() {
+    //_chosenHotspotID = null;
+    //_highlightMode = HighlightMode.none;
+    _idleTimer = Timer(const Duration(seconds: 2), () {
+      debugPrint('MW restarting anim');
+      setState(() {
+        _chosenHotspotID = null;
+        _highlightMode = HighlightMode.idle;
+      });
+      _animationController.repeat();
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
     debugPrint('ChooserPage build() called');
+
+    List<Hotspot> hotspots = [
+      Hotspot(label: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152, theTap: () => widget.onOpenListings('all', 'food')),
+      Hotspot(label: 'Music', left: 0.548, top: 0.287, width: 0.451, height: 0.144, theTap: () => widget.onOpenTimetable(false, true)),
+      Hotspot(label: 'Events and\nPerformances', left: 0, top: 0.366, width: 0.455, height: 0.19, theTap: () => widget.onOpenTimetable(false, false)),
+      Hotspot(label: 'Shopping', left: 0.583, top: 0.49, width: 0.416, height: 0.213, theTap: () => widget.onOpenListings('all', 'shopping')),
+      Hotspot(label: 'Children’s', left: 0, top: 0.598, width: 0.437, height: 0.214, theTap: () => widget.onOpenListings('all', 'performanceChildrens')),
+      Hotspot(label: 'Nearby', left: 0.666, top: 0.703, width: 0.333, height: 0.171, theTap: () => widget.onOpenMap(10)),
+      Hotspot(label: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118, theTap: () => widget.onOpenListings('all', 'service')),
+      Hotspot(label: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118, theTap: () => widget.onOpenListings('all', 'service')),
+    ];
+
+    if ((_idleTimer == null || !_idleTimer!.isActive) && !_animationController.isAnimating) restartAnimation();
+    
     return FairScaffold(
       appBarTitle: "Welcome",
       currentTab: 0,
@@ -179,21 +137,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                           _highlightMode = HighlightMode.selected;
                           _chosenHotspotID = i;
                         });
-                        final cancelled = await chooseDialog(context, hotspots[i].label);
-                        debugPrint('cancelled=$cancelled');
-                        if (cancelled) {
-                          setState(() {
-                            _chosenHotspotID = null;
-                            _highlightMode = HighlightMode.none;
-                          });
-                          _idleTimer = Timer(const Duration(seconds: 2), () {
-                            setState(() {
-                              _chosenHotspotID = null;
-                              _highlightMode = HighlightMode.idle;
-                            });
-                            _animationController.repeat();
-                          });
-                        }
+                        _idleTimer?.cancel();
+                        _animationController.stop();
+                        hotspots[i].theTap();
                       },
                       child: const SizedBox.expand(),
                     ),
@@ -232,6 +178,7 @@ class Hotspot {
   final double top;
   final double width;
   final double height;
+  final void Function() theTap;
 
   const Hotspot({
     required this.label,
@@ -239,6 +186,7 @@ class Hotspot {
     required this.top,
     required this.width,
     required this.height,
+    required this.theTap,
   });
 
   Rect scaled(Size size) {

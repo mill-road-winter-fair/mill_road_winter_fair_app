@@ -112,6 +112,11 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   
   int index = 0;
+  // the following need to be in HomePageState to allow deep linking to configured pages
+  bool timetableOnlyNowOrSoon = false; // toggled on or off to show events now or in next hour
+  bool? timetableFilteredMusicOrNot; // toggled on (just music), off (all but music), null (all)
+  String? listingsSubfilterCategory; // all listings visible (null) or just the one category
+  int? mapNearestMarkerCount; // when opening the map, zoom in to this number nearby
 
   @override
   void initState() {
@@ -124,11 +129,55 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void openTimetable(bool onlyNowOrSoon, bool? filteredMusicOrNot) {
+    setState(() {
+      timetableFilteredMusicOrNot = filteredMusicOrNot;
+      timetableOnlyNowOrSoon = onlyNowOrSoon;
+      index = 2;
+    });
+  }
+
+  void openListings(String filterCategory, String? subfilterCategory) {
+    setState(() {
+      listingsSubfilterCategory = subfilterCategory;
+      index = (filterCategory == 'favourite') ? 4 : 3;
+    });
+  }
+
+  void openMap(int? nearestMarkerCount) {
+    setState(() {
+      mapNearestMarkerCount = nearestMarkerCount;
+      index = 1;
+    });
+  }
+
+  void cancelMapNearest() {
+    debugPrint('HomePageState cancelMapNearest called');
+    setState(() {
+      mapNearestMarkerCount = null;
+    });
+  }
+
+  void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
+    debugPrint('HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
+    setState(() {
+      timetableFilteredMusicOrNot = newFilteredMusicOrNot;
+      timetableOnlyNowOrSoon = newOnlyNowOrSoon;
+    });
+  }
+
+  void listingsSubfilterChange(String? newSubfilterCategory) {
+    debugPrint('HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory');
+    setState(() {
+      listingsSubfilterCategory = newSubfilterCategory;
+    });
+  }
+
   final _allListingsKey = GlobalKey<FilteredListingsPageState>();
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
   late final _pages = [
-    ChooserPage(onTabSelected: setCurrentIndex),
+      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings, onOpenMap: openMap),
     MapPage(listings: listings, key: mapPageKey, onTabSelected: setCurrentIndex),
     TimetablePage(onTabSelected: setCurrentIndex),
     FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle, onTabSelected: setCurrentIndex),
