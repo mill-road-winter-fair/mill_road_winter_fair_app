@@ -99,8 +99,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.202009, 0.132201),
   const LatLng(52.201979, 0.132249),
   const LatLng(52.201942, 0.132229),
-  const LatLng(52.201211, 0.131636),
-  const LatLng(52.201173, 0.131767),
+  const LatLng(52.201211, 0.131636), // mortimer road
+  const LatLng(52.201173, 0.131767), // mortimer road
   const LatLng(52.201908, 0.132382),
   const LatLng(52.201918, 0.132403),
   const LatLng(52.201912, 0.132438),
@@ -114,8 +114,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.200166, 0.136762),
   const LatLng(52.200145, 0.136791),
   const LatLng(52.200122, 0.136778),
-  const LatLng(52.199983, 0.136680),
-  const LatLng(52.199951, 0.136812),
+  const LatLng(52.199594, 0.136389), // tenison road 
+  const LatLng(52.199565, 0.136507), // tenison road
   const LatLng(52.200071, 0.136895),
   const LatLng(52.200089, 0.136921),
   const LatLng(52.200079, 0.136962),
@@ -123,8 +123,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.199609, 0.138172),
   const LatLng(52.199587, 0.138195),
   const LatLng(52.199560, 0.138200),
-  const LatLng(52.199386, 0.138093),
-  const LatLng(52.199343, 0.138250),
+  const LatLng(52.198827, 0.137722), // st barnabas road
+  const LatLng(52.198801, 0.137865), // st barnabas road
   const LatLng(52.199502, 0.138348),
   const LatLng(52.199516, 0.138377),
   const LatLng(52.199511, 0.138414),
@@ -132,8 +132,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.199177, 0.139262),
   const LatLng(52.199166, 0.139283),
   const LatLng(52.199145, 0.139276),
-  const LatLng(52.198918, 0.139173),
-  const LatLng(52.198898, 0.139271),
+  const LatLng(52.198727, 0.139053), // devonshire road
+  const LatLng(52.198706, 0.139192), // devonshire road
   const LatLng(52.199115, 0.139372),
   const LatLng(52.199130, 0.139392),
   const LatLng(52.199131, 0.139438),
@@ -165,8 +165,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.197558, 0.145261),
   const LatLng(52.197579, 0.145217),
   const LatLng(52.197616, 0.145200),
-  const LatLng(52.197971, 0.145428),
-  const LatLng(52.198001, 0.145317),
+  const LatLng(52.197985, 0.145433), // catharine street
+  const LatLng(52.198007, 0.145310), // catharine street
   const LatLng(52.197646, 0.145094),
   const LatLng(52.197628, 0.145081),
   const LatLng(52.197625, 0.145054),
@@ -177,8 +177,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.198083, 0.143258),
   const LatLng(52.198104, 0.143208),
   const LatLng(52.198140, 0.143197),
-  const LatLng(52.198236, 0.143244),
-  const LatLng(52.198266, 0.143118),
+  const LatLng(52.198323, 0.143273), // cavendish road
+  const LatLng(52.198349, 0.143146), // cavendish road
   const LatLng(52.198177, 0.143080),
   const LatLng(52.198149, 0.143031),
   const LatLng(52.198138, 0.142983),
@@ -189,8 +189,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.198988, 0.140124),
   const LatLng(52.199095, 0.139858),
   const LatLng(52.199162, 0.139883),
-  const LatLng(52.199606, 0.140096),
-  const LatLng(52.199632, 0.139984),
+  const LatLng(52.199651, 0.140148), // headly street
+  const LatLng(52.199714, 0.140000), // headly street
   const LatLng(52.199209, 0.139779),
   const LatLng(52.199184, 0.139760),
   const LatLng(52.199179, 0.139726),
@@ -199,8 +199,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.199579, 0.138512),
   const LatLng(52.199598, 0.138483),
   const LatLng(52.199621, 0.138489),
-  const LatLng(52.199890, 0.138613),
-  const LatLng(52.199920, 0.138459),
+  const LatLng(52.200485, 0.138817), // gwydir street
+  const LatLng(52.200497, 0.138694), // gwydir street
   const LatLng(52.199704, 0.138368),
   const LatLng(52.199681, 0.138353),
   const LatLng(52.199688, 0.138300),
