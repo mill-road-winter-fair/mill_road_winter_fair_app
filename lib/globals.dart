@@ -114,8 +114,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.200166, 0.136762),
   const LatLng(52.200145, 0.136791),
   const LatLng(52.200122, 0.136778),
-  const LatLng(52.199594, 0.136389), // tenison road 
-  const LatLng(52.199565, 0.136507), // tenison road
+  const LatLng(52.199689, 0.136458), // tenison road 
+  const LatLng(52.199670, 0.136580), // tenison road
   const LatLng(52.200071, 0.136895),
   const LatLng(52.200089, 0.136921),
   const LatLng(52.200079, 0.136962),
@@ -132,8 +132,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.199177, 0.139262),
   const LatLng(52.199166, 0.139283),
   const LatLng(52.199145, 0.139276),
-  const LatLng(52.198727, 0.139053), // devonshire road
-  const LatLng(52.198706, 0.139192), // devonshire road
+  const LatLng(52.198902, 0.139144), // devonshire road
+  const LatLng(52.198883, 0.139260), // devonshire road
   const LatLng(52.199115, 0.139372),
   const LatLng(52.199130, 0.139392),
   const LatLng(52.199131, 0.139438),
@@ -177,8 +177,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.198083, 0.143258),
   const LatLng(52.198104, 0.143208),
   const LatLng(52.198140, 0.143197),
-  const LatLng(52.198323, 0.143273), // cavendish road
-  const LatLng(52.198349, 0.143146), // cavendish road
+  const LatLng(52.198236, 0.143244), // cavendish road
+  const LatLng(52.198266, 0.143118), // cavendish road
   const LatLng(52.198177, 0.143080),
   const LatLng(52.198149, 0.143031),
   const LatLng(52.198138, 0.142983),
@@ -199,8 +199,8 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.199579, 0.138512),
   const LatLng(52.199598, 0.138483),
   const LatLng(52.199621, 0.138489),
-  const LatLng(52.200485, 0.138817), // gwydir street
-  const LatLng(52.200497, 0.138694), // gwydir street
+  const LatLng(52.200052, 0.138617), // gwydir street
+  const LatLng(52.200067, 0.138517), // gwydir street
   const LatLng(52.199704, 0.138368),
   const LatLng(52.199681, 0.138353),
   const LatLng(52.199688, 0.138300),
