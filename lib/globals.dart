@@ -11,9 +11,6 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
-// Remember the previously selected bottom navigation index (used for back navigation).
-int previousIndex = 0;
-
 // Flag set by tests (when true the app reduces/delays animation and timers).
 bool onTest = false;
 
@@ -67,8 +64,8 @@ late String mapStyle;
 // Initialise setting for whether the road closure polygon is shown
 late bool preferredRoadClosurePolygonVisible;
 
-// Initialise the list of favourited listings
-late Set<String> favouriteListingKeys;
+// Initialise the list of favourited listings (ValueNotifier as pages need to know when others change these)
+final ValueNotifier<Set<String>> favouriteListingKeys = ValueNotifier<Set<String>>({});
 
 // --- Location related globals (moved from get_current_location.dart) ---
 // Whether device location services are enabled and the permission status.
@@ -86,6 +83,26 @@ LatLng? currentLatLng;
 final fairDate = DateTime(2026, 12, 5);
 const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
 
-// Title used for appbar
-const fairName = 'Mill Road Winter Fair';
+
+// Title
+const fairName = 'Mill Road Winter Fair 2026';
 String appBarTitle = fairName; // this may be changed in main, filtered_listings etc.
+
+// Listings subfilter keywords to labels and icons
+// This could be extended to cover colours, hint text, mapping etc etc
+class SubfilterLabel {
+  final String label;
+  final IconData iconData;
+  const SubfilterLabel(this.label, this.iconData);
+}
+const Map<String, SubfilterLabel> subfilterCategoryLabels = {
+  'performanceMusic': SubfilterLabel('Music', Icons.music_note),
+  'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free),
+  'performanceDance': SubfilterLabel('Dance', Icons.emoji_people),
+  'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy),
+  'visitExperience': SubfilterLabel('Visit & Experience', Icons.tour),
+  'food': SubfilterLabel('Food & Drink', Icons.fastfood),
+  'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer),
+  'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism),
+  'service': SubfilterLabel('Services', Icons.family_restroom)
+};
