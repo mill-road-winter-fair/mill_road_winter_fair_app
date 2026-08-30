@@ -482,7 +482,7 @@ void aboutDialog(BuildContext context) async {
                         dense: true,
                         visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.palette_outlined, size: 26),
+                        leading: const Icon(Icons.palette_outlined, size: 28),
                         title: Text('Illustrations by Clare McEwan', style: textStyle),
                         subtitle: Text('https://www.claremcewan.co.uk', style: linkStyle),
                         onTap: () async {
@@ -494,7 +494,7 @@ void aboutDialog(BuildContext context) async {
                         dense: true,
                         visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.feedback_outlined, size: 26),
+                        leading: const Icon(Icons.feedback_outlined, size: 28),
                         title: Text('Tell us if you like this app', style: textStyle),
                         subtitle: Text('Open a feedback form', style: linkStyle),
                         onTap: () async {
