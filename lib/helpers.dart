@@ -469,7 +469,7 @@ void aboutDialog(BuildContext context) async {
                         visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
                         contentPadding: EdgeInsets.zero,
                         leading: const Icon(Icons.schedule, size: 28),
-                        title: Text('Timetable view based on Clashfinder Pal by permission of the author', style: textStyle),
+                        title: Text('Timetable view based on Clashfinder Pal by Matt Whiting', style: textStyle),
                         subtitle: Text('https://linktr.ee/cfpal', style: linkStyle),
                         onTap: () async {
                           HapticFeedback.lightImpact();
