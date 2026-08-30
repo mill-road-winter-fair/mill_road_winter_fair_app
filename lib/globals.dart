@@ -11,9 +11,6 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
 final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
 
-// Remember the previously selected bottom navigation index (used for back navigation).
-int previousIndex = 0;
-
 // Flag set by tests (when true the app reduces/delays animation and timers).
 bool onTest = false;
 
@@ -67,8 +64,8 @@ late String mapStyle;
 // Initialise setting for whether the road closure polygon is shown
 late bool preferredRoadClosurePolygonVisible;
 
-// Initialise the list of favourited listings
-late Set<String> favouriteListingKeys;
+// Initialise the list of favourited listings (ValueNotifier as pages need to know when others change these)
+final ValueNotifier<Set<String>> favouriteListingKeys = ValueNotifier<Set<String>>({});
 
 // --- Location related globals (moved from get_current_location.dart) ---
 // Whether device location services are enabled and the permission status.
@@ -86,7 +83,7 @@ LatLng? currentLatLng;
 final fairDate = DateTime(2026, 12, 5);
 const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
 
-// Title used for appbar
+// Title
 const fairName = 'Mill Road Winter Fair 2026';
 String appBarTitle = fairName; // this may be changed in main, filtered_listings etc.
 

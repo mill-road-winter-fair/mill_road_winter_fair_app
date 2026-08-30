@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime) {
@@ -152,6 +154,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final VoidCallback? onDetailsTapped;
   final VoidCallback? onFavouriteTapped;
   final Function onGetDirections;
+  final bool inDialog;
 
   const SpecificListingInfoSheet({
     required this.cancelled,
@@ -173,6 +176,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     this.onDetailsTapped,
     this.onFavouriteTapped,
     required this.onGetDirections,
+    required this.inDialog,
     super.key,
   });
 
@@ -183,12 +187,12 @@ class SpecificListingInfoSheet extends StatelessWidget {
     Widget subDetails; // calculated subtitle/details field
 
     // Determine if the event has been cancelled, update text style accordingly
-    final titleStyle = TextStyle(
+    final basicTitleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
       color: Theme.of(context).colorScheme.onSurface,
-      decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
+    final titleStyle = basicTitleStyle.copyWith(decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none);
     updatedTimes = cancelled ? 'CANCELLED' : "$startTime—$endTime";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
@@ -211,7 +215,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.fromLTRB(
+      padding: (inDialog) ? EdgeInsets.all(0) : EdgeInsets.fromLTRB(
         4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
         8,
         4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(),
@@ -222,18 +226,14 @@ class SpecificListingInfoSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 0,
         children: [
-          // if we're on a modal bottom sheet, add a bit of space to avoid radius at top of dialog
-          if (onDetailsTapped == null && location != '') const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Prepend the emoji if we have one
+              if (emoji.isNotEmpty) Text('$emoji ', style: basicTitleStyle.copyWith(fontSize: 30)),
               Expanded(
                 flex: 14,
-                child: Text(
-                  // Prepend the emoji if we have one
-                  emoji.isNotEmpty ? '$emoji $title' : title,
-                  style: titleStyle,
-                ),
+                child: Text(title, style: titleStyle),
               ),
               const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
@@ -266,6 +266,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
+          if (detailsVisible && inDialog) detailsColumn(context),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -396,96 +397,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 ),
             ],
           ),
-          if (detailsVisible)
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 0,
-              children: [
-                if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (description.isNotEmpty) const SizedBox(height: 8),
-                if (description.isNotEmpty) Row(
-                  children: [
-                    Flexible(
-                      child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
-                    ),
-                  ],
-                ),
-                if (website.isNotEmpty) const SizedBox(height: 8),
-                if (website.isNotEmpty) GestureDetector(
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    launchUrl(Uri.parse(website));
-                  },
-                  child: Row(
-                    children: [
-                        Flexible(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
-                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
-                              ], 
-                            ),
-                          ), 
-                        ),
-                    ],
-                  ),
-                ),
-                if (email.isNotEmpty) const SizedBox(height: 8),
-                if (email.isNotEmpty) GestureDetector(
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    final Uri mailUri = Uri(scheme: 'mailto', path: email);
-                    if (await canLaunchUrl(mailUri)) {
-                      await launchUrl(mailUri);
-                    } else {
-                      throw Exception('Could not launch email client');
-                    }
-                  },
-                  child: Row(
-                    children: [
-                        Flexible(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
-                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
-                              ], 
-                            ),
-                          ), 
-                        ),
-                    ],
-                  ),
-                ),
-                if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
-                if (phoneNumber.isNotEmpty) GestureDetector(
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
-                    if (await canLaunchUrl(phoneUri)) {
-                      await launchUrl(phoneUri);
-                    } else {
-                      throw Exception('Could not launch $phoneNumber');
-                    }
-                  },
-                  child: Row(
-                    children: [
-                        Flexible(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
-                                TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
-                              ], 
-                            ),
-                          ), 
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          if (detailsVisible && !inDialog) detailsColumn(context),
           // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
           if (onDetailsTapped == null && location != '') const SizedBox(height: 20),
           if (onDetailsTapped != null || location == '') const SizedBox(height: 4),
@@ -493,4 +405,202 @@ class SpecificListingInfoSheet extends StatelessWidget {
       ),
     );
   }
+
+  Column detailsColumn(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 0,
+      children: [
+        if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
+        if (description.isNotEmpty) const SizedBox(height: 8),
+        if (description.isNotEmpty) Row(
+          children: [
+            Flexible(
+              child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
+            ),
+          ],
+        ),
+        if (website.isNotEmpty) const SizedBox(height: 8),
+        if (website.isNotEmpty) GestureDetector(
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            launchUrl(Uri.parse(website));
+          },
+          child: Row(
+            children: [
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                        TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
+                      ], 
+                    ),
+                  ), 
+                ),
+            ],
+          ),
+        ),
+        if (email.isNotEmpty) const SizedBox(height: 8),
+        if (email.isNotEmpty) GestureDetector(
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            final Uri mailUri = Uri(scheme: 'mailto', path: email);
+            if (await canLaunchUrl(mailUri)) {
+              await launchUrl(mailUri);
+            } else {
+              throw Exception('Could not launch email client');
+            }
+          },
+          child: Row(
+            children: [
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                        TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
+                      ], 
+                    ),
+                  ), 
+                ),
+            ],
+          ),
+        ),
+        if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
+        if (phoneNumber.isNotEmpty) GestureDetector(
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+            if (await canLaunchUrl(phoneUri)) {
+              await launchUrl(phoneUri);
+            } else {
+              throw Exception('Could not launch $phoneNumber');
+            }
+          },
+          child: Row(
+            children: [
+                Flexible(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                        TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
+                      ], 
+                    ),
+                  ), 
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+  Future<void> showListingDetailsDialog(
+    BuildContext context, 
+    PositionedEvent event, 
+    //int alertNoticePeriod,
+    void Function(VoidCallback) setStateFunction,
+//    final int? Function(PositionedEvent, int, int?) toggleAlertAction,
+    Future<dynamic> Function() onGetDirections,
+  ) async {
+
+    debugPrint('showListingDetailsDialog called');
+
+    removeMiniPopup(); // just in case one was opened
+
+    if (!context.mounted) return;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    var distanceMessage = 'Distance unknown';
+    if (currentLatLng != null) {
+      int approximateDistanceMetres = asTheCrowFlies(
+        currentLatLng!,
+        event.latLng,
+      );
+      distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+    }
+
+    listingDetailsDialogRoute = DialogRoute(context: context, barrierColor: Colors.black38, builder: (_) => StatefulBuilder(
+      builder: (ctx2, setStateDialog) {
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
+          shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+          backgroundColor: colorScheme.surfaceContainerLowest,
+          shadowColor: colorScheme.surfaceContainerHighest,
+          elevation: 12,
+          child: SingleChildScrollView(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: SpecificListingInfoSheet(
+                cancelled: event.cancelled,
+                brickAndMortar: event.brickAndMortar,
+                emoji: event.emoji,
+                title: event.name,
+                subtitle: event.subtitle,
+                location: event.location,
+                description: event.description,
+                email: event.email,
+                website: event.website,
+                phoneNumber: event.phoneNumber,
+                imageURL: event.imageURL,
+                startTime: formatTime(event.startTime),
+                endTime: formatTime(event.endTime),
+                approxDistance: distanceMessage,
+                detailsVisible: true,
+                listingFavourited: favouriteListingKeys.value.contains(event.id),
+                onFavouriteTapped: () {
+                  favouriteOrNotListing(event);
+                  setStateFunction.call;
+                  setStateDialog(() {});
+                },
+                onGetDirections: () async {
+                  safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                  onGetDirections.call();
+                },
+                inDialog: true,
+              ),
+            ),
+          ),
+        );
+      },
+    ));
+    await Navigator.of(context).push(listingDetailsDialogRoute!);
+    removeMiniPopup(); // just in case one was opened
+
+  }
+
+
+  // Safe route removal with null/active checks
+  void safeRemoveRoute(BuildContext context, Route? route) {
+    if (route != null && route.isActive && route.navigator != null) {
+      try {
+        Navigator.of(context).removeRoute(route);
+      } catch (e) {
+        debugPrint('safeRemoveRoute: error removing route: $e');
+      }
+    }
+  }
+
+
+  void favouriteOrNotListing(PositionedEvent theEvent) {
+    if (favouriteListingKeys.value.contains(theEvent.id)) {
+      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(theEvent.id);
+    } else {
+      favouriteListingKeys.value = {...favouriteListingKeys.value, theEvent.id};
+    }
+    _saveFavourites();
+  }
+
+
+  Future<void> _saveFavourites() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
+  }
+
