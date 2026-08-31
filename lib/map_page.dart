@@ -1576,7 +1576,7 @@ class MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}');
+    //debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}'); // noisy; uncomment if working on CameraPosition
 
     return FutureBuilder(
       future: _fetchListings,
@@ -1685,7 +1685,7 @@ class MapPageState extends State<MapPage> {
                         bearing: _mapBearing,
                       ),
                       onCameraMove: (CameraPosition position) {
-                        debugPrint('MapPageState onCameraMove called');
+                        //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
                         setState(() {
                           switch (preferredMapOrientation) {
                             case MapOrientation.adaptive:
