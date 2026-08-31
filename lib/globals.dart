@@ -91,16 +91,17 @@ const fairName = 'Mill Road Winter Fair 2026';
 class SubfilterLabel {
   final String label;
   final IconData iconData;
-  const SubfilterLabel(this.label, this.iconData);
+  final bool isPerformance;
+  const SubfilterLabel(this.label, this.iconData, this.isPerformance);
 }
 const Map<String, SubfilterLabel> subfilterCategoryLabels = {
-  'performanceMusic': SubfilterLabel('Music', Icons.music_note),
-  'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free),
-  'performanceDance': SubfilterLabel('Dance', Icons.emoji_people),
-  'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy),
-  'visitExperience': SubfilterLabel('Visit & Experience', Icons.tour),
-  'food': SubfilterLabel('Food & Drink', Icons.fastfood),
-  'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer),
-  'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism),
-  'service': SubfilterLabel('Services', Icons.family_restroom)
+  'performanceMusic': SubfilterLabel('Music', Icons.music_note, true),
+  'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free, true),
+  'performanceDance': SubfilterLabel('Dance', Icons.emoji_people, true),
+  'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy, true),
+  'visitExperience': SubfilterLabel('Visit & Experience', Icons.tour, false),
+  'food': SubfilterLabel('Food & Drink', Icons.fastfood, false),
+  'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer, false),
+  'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism, false),
+  'service': SubfilterLabel('Services', Icons.family_restroom, false)
 };

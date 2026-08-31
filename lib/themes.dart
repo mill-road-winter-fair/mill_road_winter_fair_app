@@ -224,18 +224,30 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
       assetPath = 'assets/mapMarkers/stallsGroupMarker.png';
     case 'Shopping':
       assetPath = 'assets/mapMarkers/stallsMarker.png';
-    case 'Group-Performance':
+    case 'Group-Music':
       assetPath = 'assets/mapMarkers/musicGroupMarker.png';
-    case 'Performance':
+    case 'Music':
       assetPath = 'assets/mapMarkers/musicMarker.png';
+    case 'Group-Childrens':
+      assetPath = 'assets/mapMarkers/childrensGroupMarker.png';
+    case 'Childrens':
+      assetPath = 'assets/mapMarkers/childrensMarker.png';
+    case 'Group-Dance':
+      assetPath = 'assets/mapMarkers/danceGroupMarker.png';
+    case 'Dance':
+      assetPath = 'assets/mapMarkers/danceMarker.png';
+    case 'Group-Other':
+      assetPath = 'assets/mapMarkers/otherGroupMarker.png';
+    case 'Other':
+      assetPath = 'assets/mapMarkers/otherMarker.png';
     case 'Group-Charity/Community/Info':
-      assetPath = 'assets/mapMarkers/eventsGroupMarker.png';
+      assetPath = 'assets/mapMarkers/charityCommunityInfoGroupMarker.png';
     case 'Charity/Community/Info':
-      assetPath = 'assets/mapMarkers/eventsMarker.png';
+      assetPath = 'assets/mapMarkers/charityCommunityInfoMarker.png';
     case 'Group-Visit/Experience':
-      assetPath = 'assets/mapMarkers/placesGroupMarker.png';
+      assetPath = 'assets/mapMarkers/visitExperienceGroupMarker.png';
     case 'Visit/Experience':
-      assetPath = 'assets/mapMarkers/placesMarker.png';
+      assetPath = 'assets/mapMarkers/visitExperienceMarker.png';
     case 'Group-Service':
       assetPath = 'assets/mapMarkers/servicesGroupMarker.png';
     case 'Service-Information':
@@ -246,6 +258,10 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
       assetPath = 'assets/mapMarkers/servicesToiletsMarker.png';
     case 'Service':
       assetPath = 'assets/mapMarkers/servicesMarker.png';
+    case 'Group-PerformanceEvent':
+      assetPath = 'assets/mapMarkers/performanceEventGroupMarker.png';
+    case 'Mixed':
+      assetPath = 'assets/mapMarkers/mixedMarker.png';
   }
 
   // Adjust the asset path if this is a group and load the relevant backdrop image (frame)
@@ -309,131 +325,30 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
 }
 
 Color getCategoryColor(String selectedThemeKey, String category) {
-  final effectiveThemeKey = getEffectiveThemeKey(selectedThemeKey);
-
-  if (effectiveThemeKey == "light") {
-    if (category == "Food" || category == "Group-Food") {
-      Color color = const Color.fromRGBO(255, 156, 26, 1.0);
-      return color;
-    } else if (category == "Shopping" || category == "Group-Shopping") {
-      Color color = const Color.fromRGBO(209, 81, 85, 1.0);
-      return color;
-    } else if (category == "Performance" || category == "Group-Performance") {
-      Color color = const Color.fromRGBO(190, 110, 230, 1.0);
-      return color;
-    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
-      Color color = const Color.fromRGBO(243, 190, 66, 1.0);
-      return color;
-    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
-      Color color = const Color.fromRGBO(79, 184, 75, 1.0);
-      return color;
-    } else if (category.startsWith("Service") || category == "Group-Service") {
-      Color color = const Color.fromRGBO(84, 145, 245, 1.0);
-      return color;
-    }
-
-    // Default colour for markers with no category
-    Color color = const Color.fromRGBO(0, 0, 0, 1.0);
-    return color;
-  } else if (effectiveThemeKey == "dark") {
-    if (category == "Food" || category == "Group-Food") {
-      Color color = const Color.fromRGBO(241, 108, 0, 1.0);
-      return color;
-    } else if (category == "Shopping" || category == "Group-Shopping") {
-      Color color = const Color.fromRGBO(204, 22, 22, 1.0);
-      return color;
-    } else if (category == "Performance" || category == "Group-Performance") {
-      Color color = const Color.fromRGBO(183, 13, 204, 1.0);
-      return color;
-    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
-      Color color = const Color.fromRGBO(255, 196, 0, 1.0);
-      return color;
-    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
-      Color color = const Color.fromRGBO(7, 128, 0, 1.0);
-      return color;
-    } else if (category.startsWith("Service") || category == "Group-Service") {
-      Color color = const Color.fromRGBO(29, 112, 198, 1.0);
-      return color;
-    }
-
-    // Default colour for markers with no category
-    Color color = const Color.fromRGBO(0, 0, 0, 1.0);
-    return color;
-  } else if (effectiveThemeKey == "2024") {
-    if (category == "Food" || category == "Group-Food") {
-      Color color = const Color.fromRGBO(216, 114, 50, 1.0);
-      return color;
-    } else if (category == "Shopping" || category == "Group-Shopping") {
-      Color color = const Color.fromRGBO(200, 0, 10, 1);
-      return color;
-    } else if (category == "Performance" || category == "Group-Performance") {
-      Color color = const Color.fromRGBO(175, 98, 214, 1.0);
-      return color;
-    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
-      Color color = const Color.fromRGBO(204, 161, 51, 1.0);
-      return color;
-    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
-      Color color = const Color.fromRGBO(0, 115, 37, 1.0);
-      return color;
-    } else if (category.startsWith("Service") || category == "Group-Service") {
-      Color color = const Color.fromRGBO(37, 63, 128, 1.0);
-      return color;
-    }
-
-    // Default colour for markers with no category
-    Color color = const Color.fromRGBO(0, 0, 0, 1.0);
-    return color;
-  } else if (effectiveThemeKey == "highContrast") {
-    if (category == "Food" || category == "Group-Food") {
-      Color color = const Color.fromRGBO(255, 115, 0, 1.0);
-      return color;
-    } else if (category == "Shopping" || category == "Group-Shopping") {
-      Color color = const Color.fromRGBO(255, 0, 0, 1.0);
-      return color;
-    } else if (category == "Performance" || category == "Group-Performance") {
-      Color color = const Color.fromRGBO(228, 0, 255, 1.0);
-      return color;
-    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
-      Color color = const Color.fromRGBO(237, 201, 0, 1.0);
-      return color;
-    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
-      Color color = const Color.fromRGBO(28, 213, 0, 1.0);
-      return color;
-    } else if (category.startsWith("Service") || category == "Group-Service") {
-      Color color = const Color.fromRGBO(0, 187, 255, 1.0);
-      return color;
-    }
-
-    // Default colour for markers with no category
-    Color color = const Color.fromRGBO(0, 0, 0, 1.0);
-    return color;
-  } else if (effectiveThemeKey == "colourBlindFriendly") {
-    if (category == "Food" || category == "Group-Food") {
-      Color color = const Color.fromRGBO(213, 94, 0, 1.0);
-      return color;
-    } else if (category == "Shopping" || category == "Group-Shopping") {
-      Color color = const Color.fromRGBO(230, 159, 0, 1.0);
-      return color;
-    } else if (category == "Performance" || category == "Group-Performance") {
-      Color color = const Color.fromRGBO(204, 121, 167, 1.0);
-      return color;
-    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
-      Color color = const Color.fromRGBO(240, 228, 66, 1.0);
-      return color;
-    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
-      Color color = const Color.fromRGBO(0, 158, 115, 1.0);
-      return color;
-    } else if (category.startsWith("Service") || category == "Group-Service") {
-      Color color = const Color.fromRGBO(0, 114, 178, 1.0);
-      return color;
-    }
-
-    // Default colour for markers with no category
-    Color color = const Color.fromRGBO(255, 0, 0, 1.0);
-    return color;
-  } else {
-    // Default colour for markers with no theme and no category
-    Color color = const Color.fromRGBO(255, 0, 0, 1.0);
-    return color;
+  final lightOrDarkThemeKey = ui.PlatformDispatcher.instance.platformBrightness;
+  Color color;
+  if (lightOrDarkThemeKey == Brightness.light) {
+    color = switch(category) {
+      "Food" || "Group-Food" => const Color.fromRGBO(255, 156, 26, 1.0),
+      "Shopping" || "Group-Shopping" => const Color.fromRGBO(209, 81, 85, 1.0),
+      "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(190, 110, 230, 1.0),
+      "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(190, 110, 230, 1.0),
+      "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(79, 184, 75, 1.0),
+      "Service" || "Group-Service" => const Color.fromRGBO(84, 145, 245, 1.0),
+      "Mixed" => const Color.fromRGBO(0, 100, 0, 1.0), // will become the Fair's colour for this year
+      _ => const Color.fromRGBO(150, 150, 150, 1.0),
+    };
+  } else { // can only be dark
+    color = switch(category) {
+      "Food" || "Group-Food" => const Color.fromRGBO(241, 108, 0, 1.0),
+      "Shopping" || "Group-Shopping" => const Color.fromRGBO(204, 22, 22, 1.0),
+      "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(183, 13, 204, 1.0),
+      "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(255, 196, 0, 1.0),
+      "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(7, 128, 0, 1.0),
+      "Service" || "Group-Service" => const Color.fromRGBO(29, 112, 198, 1.0),
+      "Mixed" => const Color.fromRGBO(0, 100, 0, 1.0), // will become the Fair's colour for this year
+      _ => const Color.fromRGBO(150, 150, 150, 1.0),
+    };
   }
+  return color;
 }
