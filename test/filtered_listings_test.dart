@@ -486,7 +486,7 @@ void main() {
       await settle(tester);
       expect(homePageState.index, 3);
 
-      await tester.tap(find.text('Directions'));
+      await tester.tap(find.byIcon(Icons.directions_walk).first);
       await settle(tester);
 
       expect(homePageState.index, 3);

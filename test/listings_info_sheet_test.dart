@@ -190,7 +190,7 @@ void main() {
       expect(find.text('Nice buns'), findsNothing);
 
       // Tap the Details button
-      final detailsButton = find.text('Details');
+      final detailsButton = find.byIcon(Icons.info);
       expect(detailsButton, findsOneWidget);
       await tester.tap(detailsButton);
       await tester.pumpAndSettle();
@@ -250,7 +250,7 @@ void main() {
         listingFavourited: false,
       ));
 
-      final getDirectionsButton = find.text('Directions');
+      final getDirectionsButton = find.byIcon(Icons.directions_walk);
       expect(getDirectionsButton, findsOneWidget);
 
       await tester.tap(getDirectionsButton);
