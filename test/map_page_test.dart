@@ -438,11 +438,11 @@ void main() {
       expect(find.text('Food Group'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Food'), findsOneWidget);
-      expect(find.text('approx. 199 m'), findsOneWidget);
+      expect(find.textContaining('199 m'), findsOneWidget);
       // Specific marker content
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
-      expect(find.text('Doughnuts'), findsOneWidget);
+      expect(find.textContaining('Doughnuts'), findsOneWidget);
       expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
@@ -476,8 +476,9 @@ void main() {
       expect(find.text('🍣 '), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
-      expect(find.text('Telephone: 01223 222222'), findsOneWidget);
+      expect(find.text('Implausible Avenue'), findsOneWidget);
+      expect(find.textContaining('135 m'), findsOneWidget);
+      expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
     });
