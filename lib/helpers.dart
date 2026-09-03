@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -881,5 +882,89 @@ String formatTime(DateTime theTime) {
 
 String formatTimeRange(DateTime startTime, DateTime endTime) {
   return '${formatTime(startTime)}–${formatTime(endTime)}';
+}
+
+
+void shareListing(String theTitle, String theLocation, String theStartTimeString, String theEndTimeString, BuildContext context) async {
+
+  debugPrint('shareEvent called with theEvent=$theTitle theLocation=$theLocation theStartTime=$theStartTimeString theEndTimeString=$theEndTimeString');
+  final startTime = combineDateAndTime(theStartTimeString, fairDate);
+  final endTime = combineDateAndTime(theEndTimeString, fairDate);
+  final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
+  final double whenEventStart = startTime.difference(DateTime.now()).inMinutes / (24 * 60); // inDays is too imprecise
+  final double whenEventEnd = endTime.difference(DateTime.now()).inMinutes / (24 * 60);
+  String msgText = '';
+
+  if (whenEventStart.abs() < 1) { // today
+    msgText += '';
+  } else {
+    msgText += 'On ${formatFullDate(startTime)}, ';
+  }
+
+  if (isItAnEvent && whenEventStart.abs() < 5) {
+    msgText += '${msgText=='' ? 'At' : 'at'} ${formatTime(startTime)}, ';
+  } 
+
+  if (whenEventStart < 0 && whenEventEnd <= 0) { // in the past and finished
+    msgText += 'I was ';
+  } else if (whenEventStart < 0 && whenEventEnd > 0) {
+    msgText += 'I am ';
+  } else {
+    if (msgText.isEmpty) msgText = 'Later today, '; // day of Fair but non-event listing not yet started
+    msgText += 'I’ll be ';
+  }
+
+  if (whenEventStart.abs() > 7) {
+    msgText += 'at $theTitle';
+  } else {
+    msgText += 'at $theTitle at $theLocation';
+  } 
+  msgText += ', $fairName\nhttps://www.millroadwinterfair.org/';
+  final params = ShareParams(
+    text: msgText,
+  );
+  try {
+    await SharePlus.instance.share(params);
+  } catch (e) {
+    debugPrint('shareEvent error launching SharePlus::\n$e');
+    if (context.mounted) {
+      Fluttertoast.showToast(
+        msg: 'Couldn’t launch share sheet. Please try again later',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
+      );
+    }
+  }
+
+}
+
+
+DateTime combineDateAndTime(String theTime, DateTime theDate) {
+  final parts = theTime.split(':');
+  final hour = int.parse(parts[0]);
+  final minute = int.parse(parts[1]);
+  final result = DateTime(
+    theDate.year,
+    theDate.month,
+    theDate.day,
+    hour,
+    minute,
+  );
+  return result;
+}
+
+
+String formatFullDate(DateTime date) {
+  final dayName = intl.DateFormat('EEEE').format(date);
+  final monthName = intl.DateFormat('MMMM').format(date);
+  final day = date.day;
+  final suffix = day >= 11 && day <= 13
+      ? 'th'
+      : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][day % 10];
+  return '$dayName $monthName $day$suffix';
 }
 
