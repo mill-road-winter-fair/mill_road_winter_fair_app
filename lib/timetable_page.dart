@@ -185,7 +185,7 @@ class _TimetablePageState extends State<TimetablePage> {
           brickAndMortar: ((ev['brickAndMortar'] ?? '') == 'TRUE'),
           email: ev['email'] ?? '',
           website: ev['website'] ?? '',
-          phoneNumber: ev['phoneNumber'] ?? '',
+          phoneNumber: ev['phone'] ?? '',
           isMusic: ((ev['performanceMusic'] ?? '') == 'TRUE'),
           lane: 0, // will be computed later
           top: 0, // will be computed later
@@ -815,7 +815,6 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                 HapticFeedback.lightImpact();
                                                                 showListingDetailsDialog(
                                                                   context, 
-                                                                  pe, 
                                                                   //alertNoticePeriod,
                                                                   setState,
                                                                   () => Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
@@ -824,6 +823,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                     destinationId: pe.id,
                                                                     destinationLatLng: pe.latLng,
                                                                   ))),
+                                                                  listings.firstWhere((l) => l['id'] == pe.id),
                                                                 );
                                                               },
                                                               child: Container(

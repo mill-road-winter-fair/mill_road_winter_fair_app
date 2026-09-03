@@ -594,7 +594,7 @@ class MapPageState extends State<MapPage> {
                           currentLatLng!,
                           stringToLatLng(parentListing['latLng']),
                         );
-                        distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                        distanceMessage = '${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away';
                       }
 
                       return ConstrainedBox(
@@ -634,25 +634,13 @@ class MapPageState extends State<MapPage> {
                                       return Column(
                                         children: [
                                           SpecificListingInfoSheet(
-                                            cancelled: rel['cancelled'] == 'TRUE' ? true : false,
-                                            brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
-                                            emoji: rel['emoji'] ?? '',
-                                            title: rel['title'],
-                                            subtitle: rel['subtitle'],
-                                            location: rel['location'],
-                                            description: rel['description'] ?? '',
-                                            email: rel['email'] ?? '',
-                                            website: rel['website'] ?? '',
-                                            phoneNumber: rel['phone'] ?? '',
-                                            imageURL: rel['imageURL'] ?? '',
-                                            startTime: "${rel['startTime']}",
-                                            endTime: "${rel['endTime']}",
+                                            theListing: parentListing,
                                             approxDistance: '',
-                                            detailsVisible: detailsVisibilityList[index],
                                             onDetailsTapped: () => toggleDetailsRow(index),
                                             listingFavourited: isListingFavourited(rel['id']),
                                             onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                             onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                            setStateFunction: setState,
                                             inDialog: false,
                                           ),
                                           if (index != relatedListings.length - 1)
@@ -719,7 +707,7 @@ class MapPageState extends State<MapPage> {
               currentLatLng!,
               destinationLatLng,
             );
-            distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+            distanceMessage = '(${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
           }
 
           // Show bottom sheet with listing information
@@ -764,25 +752,13 @@ class MapPageState extends State<MapPage> {
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
                             child: SpecificListingInfoSheet(
-                              cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                              brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                              emoji: listing['emoji'] ?? '',
-                              title: listing['title'],
-                              subtitle: listing['subtitle'],
-                              location: listing['location'],
-                              description: listing['description'],
-                              email: listing['email'] ?? '',
-                              website: listing['website'] ?? '',
-                              phoneNumber: listing['phone'] ?? '',
-                              imageURL: listing['imageURL'] ?? '',
-                              startTime: "${listing['startTime']}",
-                              endTime: "${listing['endTime']}",
+                              theListing: listing,
                               approxDistance: distanceMessage,
-                              detailsVisible: true,
                               listingFavourited: isListingFavourited(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
                               inDialog: false,
+                              setStateFunction: setState,
                             ),
                           ),
                         ),

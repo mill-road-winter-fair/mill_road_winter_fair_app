@@ -580,7 +580,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             itemBuilder: (context, index) {
                               final listing = filteredListings[index]; // since index=0 is the sort/search bar
                               final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                              final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+                              final approximateDistance = '(${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
                               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
                               if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
                               return Column(
@@ -594,21 +594,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
                                     ),
                                     child: SpecificListingInfoSheet(
-                                      cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                                      brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                                      emoji: listing['emoji'] ?? '',
-                                      title: listing['title'] ?? '',
-                                      subtitle: listing['subtitle'] ?? '',
-                                      location: listing['location'],
-                                      description: listing['description'] ?? '',
-                                      email: listing['email'] ?? '',
-                                      website: listing['website'] ?? '',
-                                      phoneNumber: listing['phone'] ?? '',
-                                      imageURL: listing['imageURL'] ?? '',
-                                      startTime: "${listing['startTime']}",
-                                      endTime: "${listing['endTime']}",
+                                      theListing: listing,
                                       approxDistance: approximateDistance,
-                                      detailsVisible: detailsVisibilityList[index],
                                       listingFavourited: isListingFavourited(listing['id']),
                                       onDetailsTapped: () => toggleDetailsRow(index),
                                       onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
@@ -620,6 +607,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           destinationLatLng: destinationLatLng
                                         )));
                                       },
+                                      setStateFunction: setState,
                                       inDialog: false,
                                     )
                                   ),
