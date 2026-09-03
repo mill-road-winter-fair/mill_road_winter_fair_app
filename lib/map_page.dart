@@ -894,7 +894,7 @@ class MapPageState extends State<MapPage> {
     updateMarkerVisibilityIgnoringFilters(_shoppingMarkerIds, filterSettings['Shopping']!);
     updateMarkerVisibilityIgnoringFilters(_charityCommunityInfoMarkerIds, filterSettings['Charity/Community/Info']!);
     updateMarkerVisibilityIgnoringFilters(_performanceMusicMarkerIds, filterSettings['Music']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceChildrensMarkerIds, filterSettings['Children’s']!);
+    updateMarkerVisibilityIgnoringFilters(_performanceChildrensMarkerIds, filterSettings['Childrens']!);
     updateMarkerVisibilityIgnoringFilters(_performanceDanceMarkerIds, filterSettings['Dance']!);
     updateMarkerVisibilityIgnoringFilters(_performanceOtherMarkerIds, filterSettings['Other performances']!);
     updateMarkerVisibilityIgnoringFilters(_visitExperienceMarkerIds, filterSettings['Visits/Experiences']!);
