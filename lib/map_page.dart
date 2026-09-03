@@ -631,10 +631,10 @@ class MapPageState extends State<MapPage> {
                                     itemBuilder: (context, index) {
                                       final rel = relatedListings[index];
 
-                                      return Column(
+                                          return Column(
                                         children: [
                                           SpecificListingInfoSheet(
-                                            theListing: parentListing,
+                                            theListing: rel,
                                             approxDistance: '',
                                             onDetailsTapped: () => toggleDetailsRow(index),
                                             listingFavourited: isListingFavourited(rel['id']),
