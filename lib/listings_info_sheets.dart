@@ -413,37 +413,37 @@ class SpecificListingInfoSheet extends StatelessWidget {
       spacing: 0,
       children: [
         if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
-        if (description.isNotEmpty) const SizedBox(height: 8),
-        if (description.isNotEmpty) Row(
-          children: [
-            Flexible(
-              child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description),
+        if (description.isNotEmpty) ...[const SizedBox(height: 8), Flexible(child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description))],
+        if (imageURL.isNotEmpty) ...[const SizedBox(height: 8), Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 150),
+            child: Image.network(
+              imageURL,
+              fit: BoxFit.scaleDown,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.broken_image);
+              },
             ),
-          ],
-        ),
-        if (website.isNotEmpty) const SizedBox(height: 8),
-        if (website.isNotEmpty) GestureDetector(
+          ),
+        )],
+        if (website.isNotEmpty) ...[const SizedBox(height: 8), GestureDetector(
           onTap: () async {
             HapticFeedback.lightImpact();
             launchUrl(Uri.parse(website));
           },
-          child: Row(
-            children: [
-                Flexible(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
-                        TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
-                      ], 
-                    ),
-                  ), 
-                ),
-            ],
+          child: Flexible(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                  TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website),
+                ], 
+              ),
+            ), 
           ),
-        ),
-        if (email.isNotEmpty) const SizedBox(height: 8),
-        if (email.isNotEmpty) GestureDetector(
+        )],
+        if (email.isNotEmpty) ...[const SizedBox(height: 8), GestureDetector(
           onTap: () async {
             HapticFeedback.lightImpact();
             final Uri mailUri = Uri(scheme: 'mailto', path: email);
@@ -453,23 +453,18 @@ class SpecificListingInfoSheet extends StatelessWidget {
               throw Exception('Could not launch email client');
             }
           },
-          child: Row(
-            children: [
-                Flexible(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
-                        TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
-                      ], 
-                    ),
-                  ), 
-                ),
-            ],
+          child: Flexible(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                  TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email),
+                ], 
+              ),
+            ), 
           ),
-        ),
-        if (phoneNumber.isNotEmpty) const SizedBox(height: 8),
-        if (phoneNumber.isNotEmpty) GestureDetector(
+        )],
+        if (phoneNumber.isNotEmpty) ...[const SizedBox(height: 8), GestureDetector(
           onTap: () async {
             HapticFeedback.lightImpact();
             final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
@@ -479,21 +474,17 @@ class SpecificListingInfoSheet extends StatelessWidget {
               throw Exception('Could not launch $phoneNumber');
             }
           },
-          child: Row(
-            children: [
-                Flexible(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
-                        TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
-                      ], 
-                    ),
-                  ), 
-                ),
-            ],
+          child: Flexible(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                  TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber),
+                ], 
+              ),
+            ), 
           ),
-        ),
+        )],
       ],
     );
   }
