@@ -1773,7 +1773,7 @@ class MapPageState extends State<MapPage> {
                 showFilterMenu();
                 setVisibleMarkerLists();
               },
-              icon: const Icon(Icons.filter_alt),
+              icon: const Icon(Icons.filter_alt, size: 26),
             ),
             if (doingAPushNavigation == null) IconButton(
               key: searchIconKey,
@@ -1885,7 +1885,10 @@ class MapPageState extends State<MapPage> {
                           // Home button resets the filters if they're all toggled off
                           if (filterSettings['Food'] == false &&
                               filterSettings['Shopping'] == false &&
-                              filterSettings['Performances'] == false &&
+                              filterSettings['Music'] == false &&
+                              filterSettings['Childrens'] == false &&
+                              filterSettings['Dance'] == false &&
+                              filterSettings['Other'] == false &&
                               filterSettings['Charity/Community/Info'] == false &&
                               filterSettings['Visits/Experiences'] == false &&
                               filterSettings['Services'] == false) {
@@ -1901,7 +1904,10 @@ class MapPageState extends State<MapPage> {
                             setState(() {
                               filterSettings['Food'] = true;
                               filterSettings['Shopping'] = true;
-                              filterSettings['Performances'] = true;
+                              filterSettings['Music'] = true;
+                              filterSettings['Childrens'] = true;
+                              filterSettings['Dance'] = true;
+                              filterSettings['Other'] = true;
                               filterSettings['Charity/Community/Info'] = true;
                               filterSettings['Visits/Experiences'] = true;
                               filterSettings['Services'] = true;
