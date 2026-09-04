@@ -59,7 +59,6 @@ class MapPageState extends State<MapPage> {
   final Set<Polygon> _polygons = {}; // For displaying the road closure polygon
   final Set<Polyline> polylines = {}; // For displaying the route polyline
   late pl.PolylinePoints _polylinePoints; // For decoding points
-  Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
   Map<String, Map<String, dynamic>> _listingLookup = <String, Map<String, dynamic>>{}; // cache of listings
   late double _mapBearing;
   late MapType mapType;
@@ -90,6 +89,8 @@ class MapPageState extends State<MapPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isSearching = false; // true when the search bar is open (with/without text)
+  CameraPosition? _currentCamera; // saves the camera position as it is moved by user or programmatically
+  CameraPosition? _cameraBeforeNavigation; // to be able to restore camera position after navigation
 
   @override
   void initState() {
@@ -112,22 +113,29 @@ class MapPageState extends State<MapPage> {
     super.initState();
   }
 
+  @override
+  void didUpdateWidget(covariant MapPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.nearestMarkerCount != null) focusMapOnNearestMarkers(widget.nearestMarkerCount!);
+  }
+
   Future<void> _ensureDirectionsConfigLoaded() async {
-    if (googleMapsDirectionsHeaders != null && googleMapsDirectionsHeaders!.isNotEmpty) return;
-    await dotenv.load(fileName: ".env");
-    if (Platform.isAndroid) {
-      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-      final androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
-      googleMapsDirectionsHeaders = {
-        "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
-        "X-Android-Cert": androidSigningKey,
-      };
-    } else if (Platform.isIOS) {
-      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-      final iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
-      googleMapsDirectionsHeaders = {
-        "X-Ios-Bundle-Identifier": iosBundleId,
-      };
+    if (googleMapsDirectionsHeaders == null || googleMapsDirectionsHeaders!.isEmpty) {
+      await dotenv.load(fileName: ".env");
+      if (Platform.isAndroid) {
+        googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+        final androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
+        googleMapsDirectionsHeaders = {
+          "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
+          "X-Android-Cert": androidSigningKey,
+        };
+      } else if (Platform.isIOS) {
+        googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+        final iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
+        googleMapsDirectionsHeaders = {
+          "X-Ios-Bundle-Identifier": iosBundleId,
+        };
+      }
     }
     _polylinePoints = pl.PolylinePoints(apiKey: googleMapsDirectionsApiKey);
   }
@@ -514,7 +522,7 @@ class MapPageState extends State<MapPage> {
 
     // Create all marker bitmaps first, but only if not onTest
     if (onTest == false) {
-      await createAllMarkerBitmaps();
+      if (bitmapDescriptors.isEmpty) await createAllMarkerBitmaps();
     }
 
     // Ensure the markers list is empty
@@ -1196,6 +1204,8 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    // Save the current view
+    _cameraBeforeNavigation = _currentCamera;
     // Cancelling of any previous navigation
     // Halt the location subscription
     _positionStream?.cancel();
@@ -1227,6 +1237,7 @@ class MapPageState extends State<MapPage> {
 
     // If user has location tracking enabled
     if (currentLatLng != null) {
+      hideAllMarkers();
       // Get the user's current location
       Position position = await getCurrentPosition();
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
@@ -1271,7 +1282,7 @@ class MapPageState extends State<MapPage> {
   }
 
 
-  void cancelNavigation() {
+  void cancelNavigation() async {
     debugPrint('MapPageState cancelNavigation called');
     // Halt the location subscription
     _positionStream?.cancel();
@@ -1305,7 +1316,11 @@ class MapPageState extends State<MapPage> {
     navigationInProgress = false;
 
     // Reset the camera position
-    _setMapCameraToFitMapMarkers();
+    if (_cameraBeforeNavigation == null) {
+      _setMapCameraToFitMapMarkers();
+    } else {
+      await _controller!.animateCamera(CameraUpdate.newCameraPosition(_cameraBeforeNavigation!));
+    }
 
     setState(() {});
   }
@@ -1497,7 +1512,7 @@ class MapPageState extends State<MapPage> {
     final targetZoom = fitZoom.clamp(0.0, 21.0);
     final targetCenter = LatLng((southWest.latitude + northEast.latitude) / 2, (southWest.longitude + northEast.longitude) / 2);
 
-    _controller?.animateCamera(
+    await _controller?.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: targetCenter,
@@ -1513,11 +1528,11 @@ class MapPageState extends State<MapPage> {
     debugPrint('MapPageState _setMapCameraToFitMapMarkers called');
     // Set default LatLngs bounds
     // southwest
-    double markerMinLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : 52.199174;
-    double markerMinLong = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).longitude : 0.140929;
+    double markerMinLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : centreOfFair.latitude;
+    double markerMinLong = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).longitude : centreOfFair.longitude;
     // northeast
-    double markerMaxLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : 52.199174;
-    double markerMaxLong = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).longitude : 0.140929;
+    double markerMaxLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : centreOfFair.latitude;
+    double markerMaxLong = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).longitude : centreOfFair.longitude;
 
     if (listings.isNotEmpty) {
       for (var listing in listings) {
@@ -1761,19 +1776,13 @@ class MapPageState extends State<MapPage> {
             break;
         }
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (widget.nearestMarkerCount != null && !navigationInProgress) {
-            focusMapOnNearestMarkers(widget.nearestMarkerCount!);
-          }
-        });
-
         final searchIconKey = GlobalKey();
         final filterIconKey = GlobalKey();
         final colorScheme = Theme.of(context).colorScheme;
         final appBarTheme = Theme.of(context).appBarTheme;
 
         return FairScaffold(
-          appBarTitle: (doingAPushNavigation != null) ? 'Directions' : 'Map',
+          appBarTitle: (navigationInProgress || doingAPushNavigation != null) ? 'Directions' : (widget.nearestMarkerCount != null) ? 'Nearby attractions' : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
@@ -1832,12 +1841,13 @@ class MapPageState extends State<MapPage> {
                         }
                       },
                       initialCameraPosition: CameraPosition(
-                        target: const LatLng(52.199174, 0.140929),
-                        zoom: 14.1,
+                        target: centreOfFair,
+                        zoom: mapInitialZoom,
                         bearing: _mapBearing,
                       ),
                       onCameraMove: (CameraPosition position) {
                         //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
+                        _currentCamera = position;
                         setState(() {
                           switch (preferredMapOrientation) {
                             case MapOrientation.adaptive:
