@@ -1257,9 +1257,11 @@ class MapPageState extends State<MapPage> {
         addSimpleMarker('Event', destination);
       }
     } else {
-      // Add destination map marker
-      Map<String, dynamic> destinationListing = listings.firstWhere((element) => element['id'] == id);
-      addSpecificMarker(destinationListing);
+      // Add destination map marker (efficient lookup)
+      final destinationListing = getListingById(id);
+      if (destinationListing != null && destinationListing.isNotEmpty) {
+        addSpecificMarker(destinationListing);
+      }
     }
 
     setState(() {
@@ -1285,13 +1287,10 @@ class MapPageState extends State<MapPage> {
     // Reset the distance to destination
     _distanceToDestination = null;
 
-    // Remove any markers which are not supposed to be shown from the markers list
+    // Remove any markers which are not supposed to be shown from the markers list (using efficient lookup)
     for (var marker in markers.values.toList()) {
-      final listing = listings.firstWhere(
-        (l) => l['id'].toString() == marker.markerId.value,
-        orElse: () => {},
-      );
-      if (listing.isEmpty || listing['visibleOnMap'] == 'FALSE') {
+      final listing = _listingLookup[marker.markerId.value];
+      if (listing == null || listing['visibleOnMap'] == 'FALSE') {
         markers.remove(marker.markerId);
       }
     }
