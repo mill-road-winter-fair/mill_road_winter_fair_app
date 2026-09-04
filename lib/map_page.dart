@@ -60,6 +60,7 @@ class MapPageState extends State<MapPage> {
   final Set<Polyline> polylines = {}; // For displaying the route polyline
   late pl.PolylinePoints _polylinePoints; // For decoding points
   Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // Cache of custom BitmapDescriptors to use as map markers
+  Map<String, Map<String, dynamic>> _listingLookup = <String, Map<String, dynamic>>{}; // cache of listings
   late double _mapBearing;
   late MapType mapType;
   late double _compassBearing;
@@ -100,6 +101,7 @@ class MapPageState extends State<MapPage> {
     }
     _polylinePoints = pl.PolylinePoints(apiKey: googleMapsDirectionsApiKey);
     _fetchListings = fetchExistingListings(http.Client());
+    _listingLookup = buildListingLookup(listings);
     setVisibleMarkerLists();
     addAllVisibleMarkers();
     establishLocation();
@@ -389,6 +391,23 @@ class MapPageState extends State<MapPage> {
     });
   }
 
+  Map<String, Map<String, dynamic>> buildListingLookup(List<Map<String, dynamic>> source) {
+    final lookup = <String, Map<String, dynamic>>{};
+    for (final listing in source) {
+      final id = listing['id']?.toString();
+      if (id == null || id.isEmpty) continue;
+      lookup[id] = listing;
+    }
+    return lookup;
+  }
+
+  Map<String, dynamic>? getListingById(String id) {
+    return _listingLookup[id] ?? listings.firstWhere(
+      (listing) => listing['id']?.toString() == id,
+      orElse: () => <String, dynamic>{},
+    );
+  }
+
   void filterMarkersIgnoringFilters(List<MarkerId> idList) {
     debugPrint('MapPageState filterMarkersIgnoringFilters called');
     final listingsById = {for (var l in listings) l['id'].toString(): l};
@@ -421,15 +440,13 @@ class MapPageState extends State<MapPage> {
       'Services': 'service',
     };
 
-    // 2. Performance: Create a lookup map to avoid O(N) searches inside the loop.
-    final listingsById = {for (var l in listings) l['id'].toString(): l};
-
     setState(() {
       for (final id in idList) {
         final currentMarker = markers[id];
         if (currentMarker == null) continue;
 
-        final listing = listingsById[id.value];
+        // 2. Performance: Use the pre-created lookup map to avoid O(N) searches inside the loop.
+        final listing = _listingLookup[id.value];
         if (listing == null) continue;
 
         // 3. Simplified visibility logic:
@@ -450,6 +467,7 @@ class MapPageState extends State<MapPage> {
 
   void setVisibleMarkerLists() {
     debugPrint('MapPageState setVisibleMarkerLists called');
+    _listingLookup = buildListingLookup(listings);
     // Reset marker lists
     _foodMarkerIds = [];
     _shoppingMarkerIds = [];
