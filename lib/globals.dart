@@ -23,8 +23,9 @@ bool navigationInProgress = false;
 // Identifier for a simple (non-group) marker.
 const String aSimpleMarkerId = 'SIMPLE';
 
-// API key for Google Maps Directions. Populated at runtime from dotenv.
+// API keys and headers for Google Maps Directions. Populated once at runtime from dotenv.
 String googleMapsDirectionsApiKey = "";
+Map<String, String>? googleMapsDirectionsHeaders;
 
 // --- Settings and preferences (moved from settings_page.dart) ---
 // Whether this is the first execution of the app (controls welcome screen flow).

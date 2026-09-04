@@ -94,12 +94,7 @@ class MapPageState extends State<MapPage> {
   @override
   void initState() {
     debugPrint('MapPageState initState() called with destinationId=${widget.destinationId}');
-    if (Platform.isAndroid) {
-      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-    } else if (Platform.isIOS) {
-      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-    }
-    _polylinePoints = pl.PolylinePoints(apiKey: googleMapsDirectionsApiKey);
+    _ensureDirectionsConfigLoaded();
     _fetchListings = fetchExistingListings(http.Client());
     _listingLookup = buildListingLookup(listings);
     setVisibleMarkerLists();
@@ -115,6 +110,26 @@ class MapPageState extends State<MapPage> {
       }
     });
     super.initState();
+  }
+
+  Future<void> _ensureDirectionsConfigLoaded() async {
+    if (googleMapsDirectionsHeaders != null && googleMapsDirectionsHeaders!.isNotEmpty) return;
+    await dotenv.load(fileName: ".env");
+    if (Platform.isAndroid) {
+      googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+      final androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
+      googleMapsDirectionsHeaders = {
+        "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
+        "X-Android-Cert": androidSigningKey,
+      };
+    } else if (Platform.isIOS) {
+      googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
+      final iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
+      googleMapsDirectionsHeaders = {
+        "X-Ios-Bundle-Identifier": iosBundleId,
+      };
+    }
+    _polylinePoints = pl.PolylinePoints(apiKey: googleMapsDirectionsApiKey);
   }
 
   Polygon roadClosurePolygon() {
@@ -1330,27 +1345,7 @@ class MapPageState extends State<MapPage> {
     debugPrint('MapPageState updatePolyline called');
     try {
       // Load environment variables
-      await dotenv.load(fileName: ".env");
-      String googleMapsDirectionsApiKey = "";
-      String androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
-      String iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
-
-      // Define headers based on platform
-      Map<String, String> headers;
-      if (Platform.isAndroid) {
-        googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        headers = {
-          "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
-          "X-Android-Cert": androidSigningKey,
-        };
-      } else if (Platform.isIOS) {
-        googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        headers = {
-          "X-Ios-Bundle-Identifier": iosBundleId,
-        };
-      } else {
-        headers = {};
-      }
+      await _ensureDirectionsConfigLoaded();
 
       if (googleMapsDirectionsApiKey.isEmpty) {
         throw Exception("Google Maps Directions API key is missing.");
@@ -1362,7 +1357,7 @@ class MapPageState extends State<MapPage> {
         destination: pl.PointLatLng(destination.latitude, destination.longitude),
         travelMode: pl.TravelMode.walking,
         routingPreference: pl.RoutingPreference.unspecified,
-        headers: headers,
+        headers: googleMapsDirectionsHeaders,
       );
 
       // Get route using Routes API
