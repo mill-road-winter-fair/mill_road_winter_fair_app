@@ -3,25 +3,30 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 
 // Some things in the app (mainly the map markers & filters) are currently dependent on the category of a listing. This file contains helper functions to determine the category of a listing based on its attributes.
 
-int countCategories(Map<String, dynamic> listing) {
-  // Start with a count of 0
+(int, int) countCategories(Map<String, dynamic> listing) {
+  // Start with counts of 0
   int count = 0;
+  int performanceCount = 0;
 
   subfilterCategoryLabels.forEach((s, l) {
-    if (listing[s] == 'TRUE') count++;
+    if (listing[s] == 'TRUE') {
+      count++;
+      if (subfilterCategoryLabels[s]!.isPerformance) performanceCount++;
+    }
   });
 
   if (count == 0) {
     debugPrint("No categories found for listing: ${listing['title']}");
   }
 
-  return count;
+  return (count, performanceCount);
 }
 
 String getCategory(Map<String, dynamic> listing) {
-  final catCount = countCategories(listing);
+  final (catCount, perfOrEventCount) = countCategories(listing);
 
   if (catCount > 1) {
+    if (catCount == perfOrEventCount) return 'Group-PerformanceEvent';
     return 'Mixed';
   } else {
     if (listing['food'] == 'TRUE') {
@@ -42,12 +47,29 @@ String getCategory(Map<String, dynamic> listing) {
     if (listing['charityCommunityInfo'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
       return 'Group-Charity/Community/Info';
     }
-    if (listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') {
-      return 'Performance';
+    if (listing['performanceMusic'] == 'TRUE') {
+      return 'Music';
     }
-    if ((listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') 
-        && listing['groupParent'] == 'TRUE') {
-      return 'Group-Performance';
+    if (listing['performanceChildrens'] == 'TRUE') {
+      return 'Childrens';
+    }
+    if (listing['performanceDance'] == 'TRUE') {
+      return 'Dance';
+    }
+    if (listing['performanceOther'] == 'TRUE') {
+      return 'Other';
+    }
+    if (listing['performanceMusic'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
+      return 'Group-Music';
+    }
+    if (listing['performanceChildrens'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
+      return 'Group-Childrens';
+    }
+    if (listing['performanceDance'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
+      return 'Group-Dance';
+    }
+    if (listing['performanceOther'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
+      return 'Group-Other';
     }
     if (listing['visitExperience'] == 'TRUE') {
       return 'Visit/Experience';

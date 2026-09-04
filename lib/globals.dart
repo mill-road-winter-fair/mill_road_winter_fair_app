@@ -23,8 +23,9 @@ bool navigationInProgress = false;
 // Identifier for a simple (non-group) marker.
 const String aSimpleMarkerId = 'SIMPLE';
 
-// API key for Google Maps Directions. Populated at runtime from dotenv.
+// API keys and headers for Google Maps Directions. Populated once at runtime from dotenv.
 String googleMapsDirectionsApiKey = "";
+Map<String, String>? googleMapsDirectionsHeaders;
 
 // --- Settings and preferences (moved from settings_page.dart) ---
 // Whether this is the first execution of the app (controls welcome screen flow).
@@ -86,21 +87,27 @@ const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
 // Title
 const fairName = 'Mill Road Winter Fair 2026';
 
+// Map defaults and markers
+const centreOfFair = LatLng(52.199174, 0.140929);
+const mapInitialZoom = 14.1;
+Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // single cache of custom BitmapDescriptors to use as map markers
+
 // Listings subfilter keywords to labels and icons
 // This could be extended to cover colours, hint text, mapping etc etc
 class SubfilterLabel {
   final String label;
   final IconData iconData;
-  const SubfilterLabel(this.label, this.iconData);
+  final bool isPerformance;
+  const SubfilterLabel(this.label, this.iconData, this.isPerformance);
 }
 const Map<String, SubfilterLabel> subfilterCategoryLabels = {
-  'performanceMusic': SubfilterLabel('Music', Icons.music_note),
-  'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free),
-  'performanceDance': SubfilterLabel('Dance', Icons.emoji_people),
-  'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy),
-  'visitExperience': SubfilterLabel('Visit & Experience', Icons.tour),
-  'food': SubfilterLabel('Food & Drink', Icons.fastfood),
-  'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer),
-  'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism),
-  'service': SubfilterLabel('Services', Icons.family_restroom)
+  'performanceMusic': SubfilterLabel('Music', Icons.music_note, true),
+  'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free, true),
+  'performanceDance': SubfilterLabel('Dance', Icons.emoji_people, true),
+  'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy, true),
+  'visitExperience': SubfilterLabel('Visit & Experience', Icons.tour, false),
+  'food': SubfilterLabel('Food & Drink', Icons.fastfood, false),
+  'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer, false),
+  'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism, false),
+  'service': SubfilterLabel('Services', Icons.family_restroom, false)
 };
