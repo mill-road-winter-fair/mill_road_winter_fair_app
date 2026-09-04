@@ -1756,6 +1756,7 @@ class MapPageState extends State<MapPage> {
         });
 
         final searchIconKey = GlobalKey();
+        final filterIconKey = GlobalKey();
         final colorScheme = Theme.of(context).colorScheme;
         final appBarTheme = Theme.of(context).appBarTheme;
 
@@ -1764,9 +1765,19 @@ class MapPageState extends State<MapPage> {
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
+            if (navigationInProgress == false) IconButton(
+              key: filterIconKey,
+              color: appBarTheme.foregroundColor,
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                showFilterMenu();
+                setVisibleMarkerLists();
+              },
+              icon: const Icon(Icons.filter_alt),
+            ),
             if (doingAPushNavigation == null) IconButton(
               key: searchIconKey,
-              color: colorScheme.onSecondary,
+              color: appBarTheme.foregroundColor,
               onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
               onPressed: () {
                 HapticFeedback.lightImpact();
@@ -1779,7 +1790,7 @@ class MapPageState extends State<MapPage> {
                   }
                 });
               },
-              icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
+              icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26),
             ),
           ],
           allowBack: (doingAPushNavigation != null),
@@ -2043,37 +2054,6 @@ class MapPageState extends State<MapPage> {
                             child: Icon(Icons.assistant_navigation),
                           ),
                         ),
-                      ),
-                    if (navigationInProgress == false)
-                      Row(
-                        children: [
-                          if (navigationInProgress == false)
-                            FloatingActionButton(
-                              heroTag: 'filterBtn',
-                              onPressed: () {
-                                showFilterMenu();
-                                setVisibleMarkerLists();
-                              },
-                              backgroundColor: Colors.transparent,
-                              mini: true,
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primary,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: colorScheme.onSurfaceVariant.withAlpha(127),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(2, 2))
-                                  ],
-                                ),
-                                child: const Icon(Icons.filter_alt),
-                              ),
-                            )
-                        ],
                       ),
                   ],
                 ),
