@@ -86,6 +86,9 @@ class MapPageState extends State<MapPage> {
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isSearching = false; // true when the search bar is open (with/without text)
 
   @override
   void initState() {
@@ -379,9 +382,24 @@ class MapPageState extends State<MapPage> {
       for (var id in idList) {
         final currentMarker = markers[id];
         if (currentMarker == null) continue;
-
         markers[id] = currentMarker.copyWith(
           visibleParam: visibleState,
+        );
+      }
+    });
+  }
+
+  void filterMarkersIgnoringFilters(List<MarkerId> idList) {
+    debugPrint('MapPageState filterMarkersIgnoringFilters called');
+    final listingsById = {for (var l in listings) l['id'].toString(): l};
+    setState(() {
+      for (var id in idList) {
+        final currentMarker = markers[id];
+        if (currentMarker == null) continue;
+        final listing = listingsById[id.value];
+        if (listing == null) continue;
+        markers[id] = currentMarker.copyWith(
+          visibleParam: (_searchQuery.isEmpty || listing['location'].toString().toLowerCase().contains(_searchQuery)),
         );
       }
     });
@@ -896,7 +914,7 @@ class MapPageState extends State<MapPage> {
     updateMarkerVisibilityIgnoringFilters(_performanceMusicMarkerIds, filterSettings['Music']!);
     updateMarkerVisibilityIgnoringFilters(_performanceChildrensMarkerIds, filterSettings['Childrens']!);
     updateMarkerVisibilityIgnoringFilters(_performanceDanceMarkerIds, filterSettings['Dance']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceOtherMarkerIds, filterSettings['Other performances']!);
+    updateMarkerVisibilityIgnoringFilters(_performanceOtherMarkerIds, filterSettings['Other']!);
     updateMarkerVisibilityIgnoringFilters(_visitExperienceMarkerIds, filterSettings['Visits/Experiences']!);
     updateMarkerVisibilityIgnoringFilters(_serviceMarkerIds, filterSettings['Services']!);
   }
@@ -1737,11 +1755,32 @@ class MapPageState extends State<MapPage> {
           }
         });
 
+        final searchIconKey = GlobalKey();
+        final colorScheme = Theme.of(context).colorScheme;
+        final appBarTheme = Theme.of(context).appBarTheme;
+
         return FairScaffold(
           appBarTitle: (doingAPushNavigation != null) ? 'Directions' : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
+            if (doingAPushNavigation == null) IconButton(
+              key: searchIconKey,
+              color: colorScheme.onSecondary,
+              onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                setState(() {
+                  _isSearching = !_isSearching;
+                  if (!_isSearching) {
+                    _searchQuery = '';
+                    _searchController.clear();
+                    showFilteredMarkers();
+                  }
+                });
+              },
+              icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
+            ),
           ],
           allowBack: (doingAPushNavigation != null),
           body: Stack(
@@ -1813,11 +1852,11 @@ class MapPageState extends State<MapPage> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: colorScheme.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
                                   offset: const Offset(2, 2))
@@ -1866,11 +1905,11 @@ class MapPageState extends State<MapPage> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: colorScheme.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
                                   offset: const Offset(2, 2))
@@ -1906,7 +1945,7 @@ class MapPageState extends State<MapPage> {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  backgroundColor: Theme.of(context).colorScheme.primary,
+                                  backgroundColor: colorScheme.primary,
                                   content: Text('Unable to determine your location'),
                                 ),
                               );
@@ -1919,11 +1958,11 @@ class MapPageState extends State<MapPage> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: colorScheme.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
                                   offset: const Offset(2, 2))
@@ -1956,11 +1995,11 @@ class MapPageState extends State<MapPage> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
+                          color: colorScheme.primary,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                color: colorScheme.onSurfaceVariant.withAlpha(127),
                                 spreadRadius: 1,
                                 blurRadius: 3,
                                 offset: const Offset(2, 2))
@@ -1987,11 +2026,11 @@ class MapPageState extends State<MapPage> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
+                            color: colorScheme.primary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
                                   offset: const Offset(2, 2))
@@ -2021,11 +2060,11 @@ class MapPageState extends State<MapPage> {
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary,
+                                  color: colorScheme.primary,
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                        color: colorScheme.onSurfaceVariant.withAlpha(127),
                                         spreadRadius: 1,
                                         blurRadius: 3,
                                         offset: const Offset(2, 2))
@@ -2047,7 +2086,7 @@ class MapPageState extends State<MapPage> {
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                           iconSize: 30,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          backgroundColor: colorScheme.primary,
                           visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
                           padding: const EdgeInsets.all(0),
                           elevation: 3,
@@ -2056,10 +2095,10 @@ class MapPageState extends State<MapPage> {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
                       },
-                      icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
+                      icon: Icon(Icons.directions, color: colorScheme.onPrimary),
                       label: Text(
                         _distanceToDestination!,
-                        style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
+                        style: TextStyle(fontSize: 18, color: colorScheme.onPrimary),
                       ),
                     ),
                   ),
@@ -2072,7 +2111,7 @@ class MapPageState extends State<MapPage> {
                     child: Material(
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
-                      color: Theme.of(context).colorScheme.surface,
+                      color: colorScheme.surface,
                       child: GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
@@ -2097,9 +2136,9 @@ class MapPageState extends State<MapPage> {
                                 decoration: BoxDecoration(
                                   color: selectedThemeKey == 'colourBlindFriendly'
                                       ? const Color.fromRGBO(224, 129, 87, 255)
-                                      : Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                      : colorScheme.tertiary.withAlpha(50),
                                   border: Border.all(
-                                    color: Theme.of(context).colorScheme.tertiary,
+                                    color: colorScheme.tertiary,
                                     width: 3,
                                   ),
                                 ),
@@ -2109,7 +2148,7 @@ class MapPageState extends State<MapPage> {
                                 'Road closures',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Theme.of(context).colorScheme.tertiary,
+                                  color: colorScheme.tertiary,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -2119,7 +2158,52 @@ class MapPageState extends State<MapPage> {
                       ),
                     ),
                   ),
-                )
+                ),
+                Positioned(top: 0, left: 0, child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _isSearching ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          key: const ValueKey('searchBar'),
+                          color: colorScheme.surfaceDim,
+                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
+                          padding: EdgeInsets.all(8),
+                          child: SearchBar(
+                            autoFocus: true,
+                            controller: _searchController,
+                            elevation: const WidgetStatePropertyAll(0),
+                            hintText: 'Search all locations...',
+                            leading: const Icon(Icons.search),
+                            trailing: [
+                              IconButton(
+                                iconSize: 20,
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  setState(() {
+                                    if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
+                                    _searchQuery = '';
+                                    _searchController.clear();
+                                    showFilteredMarkers();
+                                  });
+                                },
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value.toLowerCase();
+                                _isSearching = true;
+                                filterMarkersIgnoringFilters(_foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds 
+                                    + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds);
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ) : SizedBox.shrink(),
+                  ),
+                ),
             ],
           ),
         );
