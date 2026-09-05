@@ -382,7 +382,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ],
             ),
             // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
-            if (onDetailsTapped == null && location != '') const SizedBox(height: 20),
+            if (onDetailsTapped == null && location != '') const SizedBox(height: 10),
             if (onDetailsTapped != null || location == '') const SizedBox(height: 4),
           ],
         ),
