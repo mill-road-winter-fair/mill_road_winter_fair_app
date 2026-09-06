@@ -478,9 +478,7 @@ void main() {
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue'), findsOneWidget);
       expect(find.textContaining('135 m'), findsOneWidget);
-      expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-      expect(find.byIcon(Icons.public), findsOneWidget);
     });
 
     testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {

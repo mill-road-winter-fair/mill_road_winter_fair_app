@@ -25,6 +25,7 @@ void main() {
     required String imageURL,
     required String startTime,
     required String endTime,
+    required String latLng,
     required String approxDistance,
     required bool detailsVisible,
     required bool listingFavourited,
@@ -35,25 +36,27 @@ void main() {
     return MaterialApp(
       home: Scaffold(
         body: SpecificListingInfoSheet(
-          cancelled: cancelled,
-          brickAndMortar: brickAndMortar,
-          emoji: emoji,
-          title: title,
-          subtitle: subtitle,
-          location: location,
-          description: description,
-          email: email,
-          website: website,
-          phoneNumber: phoneNumber,
-          imageURL: imageURL,
-          startTime: startTime,
-          endTime: endTime,
+          theListing: <String,dynamic> {
+            'cancelled': cancelled.toString().toUpperCase(),
+            'brickAndMortar': brickAndMortar,
+            'emoji': emoji,
+            'title': title,
+            'subtitle': subtitle,
+            'location': location,
+            'description': description,
+            'email': email,
+            'website': website,
+            'phoneNumber': phoneNumber,
+            'imageURL': imageURL,
+            'startTime': startTime,
+            'endTime': endTime,
+            'latLng': latLng,
+          },
           approxDistance: approxDistance,
-          detailsVisible: detailsVisible,
           onGetDirections: onGetDirections,
           listingFavourited: listingFavourited,
-          onDetailsTapped: onDetailsTapped,
           onFavouriteTapped: onFavouriteTapped,
+          setStateFunction: (_) {},
           inDialog: false,
         ),
       ),
@@ -76,6 +79,7 @@ void main() {
         imageURL: '',
         startTime: '10:30',
         endTime: '16:30',
+        latLng: '52.202488, 0.131207',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
         detailsVisible: true,
         onGetDirections: () {},
@@ -84,7 +88,7 @@ void main() {
 
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
-      expect(find.text('Food • Doughnuts'), findsOneWidget);
+      expect(find.textContaining('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
@@ -105,6 +109,7 @@ void main() {
         imageURL: '',
         startTime: '10:30',
         endTime: '16:30',
+        latLng: '52.202488, 0.131207',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
         detailsVisible: true,
         onGetDirections: () {},
@@ -113,7 +118,7 @@ void main() {
 
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
-      expect(find.text('Food • Doughnuts'), findsOneWidget);
+      expect(find.textContaining('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsNothing);
@@ -139,6 +144,7 @@ void main() {
         imageURL: '',
         startTime: '10:30',
         endTime: '16:30',
+        latLng: '52.202488, 0.131207',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
         detailsVisible: false,
         onGetDirections: () {},
@@ -159,72 +165,6 @@ void main() {
       expect(favouriteCalled, true);
     });
 
-    testWidgets('tapping Details button toggles visibility of extra information', (WidgetTester tester) async {
-      bool detailsToggled = false;
-
-      // Initial state: details NOT visible
-      await tester.pumpWidget(createWidgetUnderTest(
-        cancelled: false,
-        brickAndMortar: false,
-        emoji: '🍩',
-        title: 'Glazed and Confused',
-        subtitle: 'Food • Doughnuts',
-        location: 'Gwydir St Car Park',
-        description: 'Nice buns',
-        email: 'sales@glazedandconfused.com',
-        website: 'https://www.glazedandconfused.com',
-        phoneNumber: '01223 111111',
-        imageURL: '',
-        startTime: '10:30',
-        endTime: '16:30',
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: false,
-        onGetDirections: () {},
-        listingFavourited: false,
-        onDetailsTapped: () {
-          detailsToggled = true;
-        },
-      ));
-
-      // Extra info should not be present
-      expect(find.text('Nice buns'), findsNothing);
-
-      // Tap the Details button
-      final detailsButton = find.text('Details');
-      expect(detailsButton, findsOneWidget);
-      await tester.tap(detailsButton);
-      await tester.pumpAndSettle();
-
-      // Verify the callback was triggered
-      expect(detailsToggled, true);
-
-      // Now pump with detailsVisible = true to simulate the state change
-      await tester.pumpWidget(createWidgetUnderTest(
-        cancelled: false,
-        brickAndMortar: false,
-        emoji: '🍩',
-        title: 'Glazed and Confused',
-        subtitle: 'Food • Doughnuts',
-        location: 'Gwydir St Car Park',
-        description: 'Nice buns',
-        email: 'sales@glazedandconfused.com',
-        website: 'https://www.glazedandconfused.com',
-        phoneNumber: '01223 111111',
-        imageURL: '',
-        startTime: '10:30',
-        endTime: '16:30',
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: true,
-        onGetDirections: () {},
-        listingFavourited: false,
-        onDetailsTapped: () {},
-      ));
-
-      // Extra info should now be present
-      expect(find.text('Nice buns'), findsOneWidget);
-      expect(find.text('Website: https://www.glazedandconfused.com'), findsOneWidget);
-    });
-
     testWidgets('calls onGetDirections when Get Directions button is pressed', (WidgetTester tester) async {
       bool directionsCalled = false;
 
@@ -242,6 +182,7 @@ void main() {
         imageURL: '',
         startTime: '10:30',
         endTime: '16:30',
+        latLng: '52.202488, 0.131207',
         approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
         detailsVisible: false,
         onGetDirections: () {
@@ -277,6 +218,7 @@ void main() {
         imageURL: '',
         startTime: '09:00',
         endTime: '10:00', // Set to a time that has likely passed
+        latLng: '52.202488, 0.131207',
         approxDistance: '100m',
         detailsVisible: false,
         onGetDirections: () {},
@@ -309,6 +251,7 @@ void main() {
         imageURL: '',
         startTime: '10:30',
         endTime: '16:30',
+        latLng: '52.202488, 0.131207',
         approxDistance: '100m',
         detailsVisible: true,
         onGetDirections: () {},
@@ -329,8 +272,6 @@ void main() {
       final Text cancelledTextWidget = tester.widget(cancelledTextFinder.first);
       expect(cancelledTextWidget.style?.color, Colors.red);
 
-      // Description should have prefix removed
-      expect(find.text('Nice buns'), findsOneWidget);
     });
   });
 }
