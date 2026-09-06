@@ -582,13 +582,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       color: colorScheme.onPrimary,
                                       border: Border.all(color: colorScheme.primary, width: 0.5),
                                       borderRadius: BorderRadius.circular(8),
-                                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
+                                      boxShadow: [BoxShadow(color: colorScheme.onSurface.withAlpha(70), blurRadius: 3, offset: Offset(1, 4))],
                                     ),
                                     child: SpecificListingInfoSheet(
                                       theListing: listing,
                                       approxDistance: approximateDistance,
                                       listingFavourited: isListingFavourited(listing['id']),
-                                      onDetailsTapped: null,
                                       onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                                       onGetDirections: () {
                                         Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(

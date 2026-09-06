@@ -141,7 +141,6 @@ class SpecificListingInfoSheet extends StatelessWidget {
   // From the parent widget (calculated)
   final String approxDistance;
   final bool listingFavourited;
-  final VoidCallback? onDetailsTapped;
   final VoidCallback? onFavouriteTapped;
   final Function onGetDirections;
   final void Function(VoidCallback) setStateFunction;
@@ -151,7 +150,6 @@ class SpecificListingInfoSheet extends StatelessWidget {
     required this.theListing,
     required this.approxDistance,
     required this.listingFavourited,
-    this.onDetailsTapped,
     this.onFavouriteTapped,
     required this.onGetDirections,
     required this.setStateFunction,
@@ -382,8 +380,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ],
             ),
             // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
-            if (onDetailsTapped == null && location != '') const SizedBox(height: 10),
-            if (onDetailsTapped != null || location == '') const SizedBox(height: 4),
+            SizedBox(height: (inDialog) ? 14 : 4),
           ],
         ),
       ),
