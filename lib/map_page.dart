@@ -1789,6 +1789,7 @@ class MapPageState extends State<MapPage> {
             if (navigationInProgress == false) IconButton(
               key: filterIconKey,
               color: appBarTheme.foregroundColor,
+              onLongPress: () => showMiniPopup(context, filterIconKey, 'Tap to choose which map markers to show or hide'),
               onPressed: () {
                 HapticFeedback.lightImpact();
                 showFilterMenu();
