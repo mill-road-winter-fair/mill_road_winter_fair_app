@@ -501,32 +501,36 @@ class SpecificListingInfoSheet extends StatelessWidget {
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,
           elevation: 12,
-          child: Scrollbar(
-            thumbVisibility: Platform.isIOS ? false : true,
-            thickness: 4,
-            radius: const Radius.circular(8),
-            child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                child: SpecificListingInfoSheet(
-                  theListing: listing,
-                  approxDistance: distanceMessage,
-                  listingFavourited: favouriteListingKeys.value.contains(listing['id']),
-                  onFavouriteTapped: () {
-                    favouriteOrNotListing(listing['id']);
-                    setStateFunction.call;
-                    setStateDialog(() {});
-                  },
-                  onGetDirections: () async {
-                    safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
-                    onGetDirections.call();
-                  },
-                  setStateFunction: setStateDialog,
-                  inDialog: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => Navigator.of(ctx2).pop(),
+            child: Scrollbar(
+              thumbVisibility: Platform.isIOS ? false : true,
+              thickness: 4,
+              radius: const Radius.circular(8),
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                  child: SpecificListingInfoSheet(
+                    theListing: listing,
+                    approxDistance: distanceMessage,
+                    listingFavourited: favouriteListingKeys.value.contains(listing['id']),
+                    onFavouriteTapped: () {
+                      favouriteOrNotListing(listing['id']);
+                      setStateFunction.call;
+                      setStateDialog(() {});
+                    },
+                    onGetDirections: () async {
+                      safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                      onGetDirections.call();
+                    },
+                    setStateFunction: setStateDialog,
+                    inDialog: true,
+                  ),
                 ),
               ),
             ),
