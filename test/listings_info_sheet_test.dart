@@ -58,6 +58,7 @@ void main() {
           onFavouriteTapped: onFavouriteTapped,
           setStateFunction: (_) {},
           inDialog: false,
+          colorScheme: ColorScheme.light(),
         ),
       ),
     );

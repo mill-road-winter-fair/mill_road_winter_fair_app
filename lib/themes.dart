@@ -37,6 +37,7 @@ final Map<String, ThemeData> appThemes = {
       onPrimary: Colors.white,
       secondary: Colors.white,
       onSecondary: Colors.black,
+      onSecondaryFixed: const Color.fromRGBO(255, 235, 235, 1), // favourites background
       tertiary: const Color.fromRGBO(166, 34, 43, 1),
       error: Colors.orange,
       onError: Colors.black,
@@ -66,6 +67,7 @@ final Map<String, ThemeData> appThemes = {
       onPrimary: Colors.black,
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
       onSecondary: Colors.white,
+      onSecondaryFixed: const Color.fromRGBO(35, 35, 10, 1), // favourites background
       tertiary: const Color.fromRGBO(255, 196, 0, 1.0),
       error: Colors.orange,
       onError: Colors.black,
@@ -101,6 +103,7 @@ final Map<String, ThemeData> appThemes = {
       onPrimary: Colors.white,
       secondary: Colors.white,
       onSecondary: Colors.black,
+      onSecondaryFixed: const Color.fromRGBO(235, 235, 255, 1), // favourites background
       tertiary: const Color.fromRGBO(37, 63, 128, 1.0),
       error: Colors.orange,
       onError: Colors.black,
@@ -130,6 +133,7 @@ final Map<String, ThemeData> appThemes = {
       onPrimary: Colors.black,
       secondary: Color.fromRGBO(255, 243, 0, 1.0),
       onSecondary: Colors.black,
+      onSecondaryFixed: const Color.fromRGBO(10, 35, 10, 1), // favourites background
       tertiary: Color.fromRGBO(8, 255, 0, 1.0),
       error: Colors.orange,
       onError: Colors.black,
@@ -168,6 +172,7 @@ final Map<String, ThemeData> appThemes = {
       onPrimary: Colors.white,
       secondary: const Color.fromRGBO(255, 196, 0, 1.0),
       onSecondary: Colors.black,
+      onSecondaryFixed: const Color.fromRGBO(245, 235, 255, 1), // favourites background
       tertiary: const Color.fromRGBO(102, 55, 133, 1.0),
       error: Colors.orange,
       onError: Colors.black,

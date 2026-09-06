@@ -606,6 +606,7 @@ class MapPageState extends State<MapPage> {
                                 startTime: "${parentListing['startTime']}",
                                 endTime: "${parentListing['endTime']}",
                                 approxDistance: distanceMessage,
+                                colorScheme: colorScheme,
                               ),
                             ),
                             Flexible(
@@ -623,12 +624,13 @@ class MapPageState extends State<MapPage> {
                                     controller: groupSheetModalScrollController,
                                     itemBuilder: (context, index) {
                                       final rel = relatedListings[index];
+                                      final isFavourited = isListingFavourited(rel['id']);
                                       return Column(
                                         children: [
                                           Container(
                                             width: constraints.maxWidth - 18,
                                             decoration: BoxDecoration(
-                                              color: colorScheme.onPrimary,
+                                              color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                               border: Border.all(color: colorScheme.primary, width: 0.5),
                                               borderRadius: BorderRadius.circular(8),
                                               boxShadow: [BoxShadow(color: colorScheme.onSurface.withAlpha(70), blurRadius: 3, offset: Offset(1, 4))],
@@ -636,11 +638,12 @@ class MapPageState extends State<MapPage> {
                                             child: SpecificListingInfoSheet(
                                               theListing: rel,
                                               approxDistance: '',
-                                              listingFavourited: isListingFavourited(rel['id']),
+                                              listingFavourited: isFavourited,
                                               onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                               onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
                                               setStateFunction: setState,
                                               inDialog: false,
+                                              colorScheme: colorScheme,
                                             )
                                           ),
                                           if (index != relatedListings.length - 1) SizedBox(height: 8),

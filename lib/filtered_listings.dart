@@ -572,6 +572,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               final listing = filteredListings[index]; // since index=0 is the sort/search bar
                               final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                               final approximateDistance = '(${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
+                              final isFavourited = isListingFavourited(listing['id']);
                               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
                               if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
                               return Column(
@@ -579,7 +580,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   if (!_hidePastListings || !hasEventEnded(listing['endTime'])) Container(
                                     width: constraints.maxWidth - 10,
                                     decoration: BoxDecoration(
-                                      color: colorScheme.onPrimary,
+                                      color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                       border: Border.all(color: colorScheme.primary, width: 0.5),
                                       borderRadius: BorderRadius.circular(8),
                                       boxShadow: [BoxShadow(color: colorScheme.onSurface.withAlpha(70), blurRadius: 3, offset: Offset(1, 4))],
@@ -587,7 +588,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     child: SpecificListingInfoSheet(
                                       theListing: listing,
                                       approxDistance: approximateDistance,
-                                      listingFavourited: isListingFavourited(listing['id']),
+                                      listingFavourited: isFavourited,
                                       onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                                       onGetDirections: () {
                                         Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
@@ -599,6 +600,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       },
                                       setStateFunction: setState,
                                       inDialog: false,
+                                      colorScheme: colorScheme,
                                     )
                                   ),
                                   // separator except after last item

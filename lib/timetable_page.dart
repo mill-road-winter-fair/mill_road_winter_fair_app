@@ -829,9 +829,9 @@ class _TimetablePageState extends State<TimetablePage> {
                                                               child: Container(
                                                                 padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
                                                                 decoration: BoxDecoration(
-                                                                  color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
+                                                                  color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                                                   borderRadius: BorderRadius.circular(4),
-                                                                  boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
+                                                                  boxShadow: [BoxShadow(color: colorScheme.surfaceDim, offset: Offset(2, 2), blurRadius: 3)],
                                                                   border: Border.all(width: 0.2, color: colorScheme.onSecondary),
                                                                 ),
                                                                 child: eventRect(pe, colorScheme, isLandscape, null),
@@ -840,8 +840,8 @@ class _TimetablePageState extends State<TimetablePage> {
                                                           ),
                                                         if (!scaling && favouriteListingKeys.value.contains(pe.id)) Positioned(
                                                           top: pe.top + 2,
-                                                          left: pe.left + pe.width - 18,
-                                                          child: Icon(Icons.favorite, size: 16, color: Colors.red.withAlpha(120)),
+                                                          left: pe.left + pe.width - 16,
+                                                          child: Icon(Icons.favorite, size: 14, color: colorScheme.primary),
                                                         ),
                                                       ],
                                                     ],

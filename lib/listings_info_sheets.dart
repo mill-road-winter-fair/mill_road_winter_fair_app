@@ -41,6 +41,7 @@ class GroupListingInfoSheet extends StatelessWidget {
   final String startTime;
   final String endTime;
   final String approxDistance;
+  final ColorScheme colorScheme;
 
   const GroupListingInfoSheet({
     required this.title,
@@ -48,6 +49,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     required this.startTime,
     required this.endTime,
     required this.approxDistance,
+    required this.colorScheme,
     super.key,
   });
 
@@ -59,15 +61,15 @@ class GroupListingInfoSheet extends StatelessWidget {
     final bool ended = hasEventEnded(endTime);
     final timeStyle = TextStyle(
       fontSize: 14,
-      color: Theme.of(context).colorScheme.onPrimary,
+      color: colorScheme.onPrimary,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        color: colorScheme.primary,
         borderRadius: BorderRadius.circular(12),
-        border: BoxBorder.all(width: 1, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        border: BoxBorder.all(width: 1, color: colorScheme.onSurfaceVariant),
       ),
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
       child: Column(
@@ -86,7 +88,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       title,
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
                     ),
                   ),
                 ),
@@ -102,7 +104,6 @@ class GroupListingInfoSheet extends StatelessWidget {
               ),
             ],
           ),
-//          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -113,7 +114,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       categories,
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
                     ),
                   ),
               ),
@@ -123,7 +124,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   flex: 10,
                   child: Text(
                     approxDistance,
-                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary),
+                    style: TextStyle(fontSize: 14, color: colorScheme.onPrimary),
                     textAlign: TextAlign.end,
                   ),
                 ),
@@ -145,6 +146,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
   final Function onGetDirections;
   final void Function(VoidCallback) setStateFunction;
   final bool inDialog;
+  final ColorScheme colorScheme;
 
   const SpecificListingInfoSheet({
     required this.theListing,
@@ -154,6 +156,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     required this.onGetDirections,
     required this.setStateFunction,
     required this.inDialog,
+    required this.colorScheme,
     super.key,
   });
 
@@ -182,7 +185,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     final basicTitleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
-      color: Theme.of(context).colorScheme.onSurface,
+      color: colorScheme.onSurface,
     );
     final titleStyle = basicTitleStyle.copyWith(decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none);
     updatedTimes = cancelled ? 'CANCELLED' : "$startTime—$endTime";
@@ -193,7 +196,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(endTime);
     final timeStyle = subSubStyle.copyWith(
-      color: ended || cancelled ? Colors.red : Theme.of(context).colorScheme.onSurface,
+      color: ended || cancelled ? Colors.red : colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
@@ -289,7 +292,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   icon:FaIcon(
                     shadows: [Shadow( color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                     (listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                    size: 22, color: Theme.of(context).colorScheme.primary,
+                    size: 22, color: colorScheme.primary,
                   ),
                 ),
                 if (inDialog) Spacer(flex: 99) else const SizedBox(width: 6),
@@ -307,7 +310,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 if (!inDialog && website.isNotEmpty) ...[const SizedBox(width: 6), Material(
                   shape: const CircleBorder(),
                   elevation: 3,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colorScheme.primary,
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
@@ -320,7 +323,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                       child: Icon(
                         Icons.public,
                         size: 22,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
                   ),
@@ -328,7 +331,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 if (!inDialog && email.isNotEmpty) ...[const SizedBox(width: 6), Material(
                   shape: const CircleBorder(),
                   elevation: 3,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colorScheme.primary,
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
@@ -346,7 +349,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                       child: Icon(
                         Icons.email,
                         size: 22,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
                   ),
@@ -354,7 +357,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 if (!inDialog && phoneNumber.isNotEmpty) ...[const SizedBox(width: 6), Material(
                   shape: const CircleBorder(),
                   elevation: 3,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colorScheme.primary,
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
@@ -372,7 +375,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                       child: Icon(
                         Icons.phone,
                         size: 22,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
                   ),
@@ -394,7 +397,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
       spacing: 0,
       children: [
         if (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty) const SizedBox(height: 8),
-        if (description.isNotEmpty) ...[const SizedBox(height: 8), Flexible(child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), description))],
+        if (description.isNotEmpty) ...[const SizedBox(height: 8), Flexible(child: Text(style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant), description))],
         if (imageURL.isNotEmpty) ...[const SizedBox(height: 8), Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
@@ -412,7 +415,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
           child: Text.rich(
             TextSpan(
               children: [
-                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: colorScheme.primary), text: 'Website: '),
                 TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: website, 
                     recognizer: TapGestureRecognizer()..onTap = () async {
                       HapticFeedback.lightImpact();
@@ -427,7 +430,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
           child: Text.rich(
             TextSpan(
               children: [
-                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: colorScheme.primary), text: 'Email: '),
                 TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: email,
                     recognizer: TapGestureRecognizer()..onTap = () async {
                       HapticFeedback.lightImpact();
@@ -447,7 +450,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
           child: Text.rich(
             TextSpan(
               children: [
-                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: colorScheme.primary), text: 'Telephone: '),
                 TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: phoneNumber,
                   recognizer: TapGestureRecognizer()..onTap = () async {
                     HapticFeedback.lightImpact();
@@ -530,6 +533,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     },
                     setStateFunction: setStateDialog,
                     inDialog: true,
+                    colorScheme: colorScheme,
                   ),
                 ),
               ),
