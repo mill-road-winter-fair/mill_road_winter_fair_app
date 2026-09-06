@@ -488,8 +488,14 @@ class _TimetablePageState extends State<TimetablePage> {
     final subcategoryIconKey = GlobalKey();
     final searchIconKey = GlobalKey();
 
+    String appBarTitle = switch(widget.filteredMusicOrNot) {
+      true => 'Timetable (music)',
+      false => 'Timetable (non-music)',
+      _ => 'Timetable'
+    };
+
     return FairScaffold(
-      appBarTitle: "Timetable",
+      appBarTitle: appBarTitle,
       currentTab: 2,
       onTabSelected: widget.onTabSelected,
       appBarActions: [
