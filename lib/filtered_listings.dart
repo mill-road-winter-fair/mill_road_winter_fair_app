@@ -47,7 +47,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool _hidePastListings = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  List<bool> detailsVisibilityList = List<bool>.filled(500, false); // start with plenty enough to load all listings
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
@@ -73,7 +72,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void onTabVisible() {
     // This is called when user switches to this tab
     setState(() {
-      detailsVisibilityList = List<bool>.filled(500, false);
       _searchQuery = '';
       _isSearching = false;
     });
@@ -248,13 +246,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
-  }
-
-  void toggleDetailsRow(int index) {
-    HapticFeedback.lightImpact();
-    setState(() {
-      detailsVisibilityList[index] = !detailsVisibilityList[index];
-    });
   }
 
   int findFirstNextListingIndex(List filteredListings) {
@@ -580,7 +571,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             itemBuilder: (context, index) {
                               final listing = filteredListings[index]; // since index=0 is the sort/search bar
                               final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                              final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+                              final approximateDistance = '(${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
+                              final isFavourited = isListingFavourited(listing['id']);
                               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
                               if (!_hidePastListings || !hasEventEnded(listing['endTime'])) firstVisibleIndex ??= index; // if this is the first visible item, capture its index
                               return Column(
@@ -588,29 +580,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   if (!_hidePastListings || !hasEventEnded(listing['endTime'])) Container(
                                     width: constraints.maxWidth - 10,
                                     decoration: BoxDecoration(
-                                      color: colorScheme.onPrimary,
+                                      color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                       border: Border.all(color: colorScheme.primary, width: 0.5),
                                       borderRadius: BorderRadius.circular(8),
-                                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
+                                      boxShadow: [BoxShadow(color: colorScheme.onSurface.withAlpha(70), blurRadius: 3, offset: Offset(1, 4))],
                                     ),
                                     child: SpecificListingInfoSheet(
-                                      cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                                      brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                                      emoji: listing['emoji'] ?? '',
-                                      title: listing['title'] ?? '',
-                                      subtitle: listing['subtitle'] ?? '',
-                                      location: listing['location'],
-                                      description: listing['description'] ?? '',
-                                      email: listing['email'] ?? '',
-                                      website: listing['website'] ?? '',
-                                      phoneNumber: listing['phone'] ?? '',
-                                      imageURL: listing['imageURL'] ?? '',
-                                      startTime: "${listing['startTime']}",
-                                      endTime: "${listing['endTime']}",
+                                      theListing: listing,
                                       approxDistance: approximateDistance,
-                                      detailsVisible: detailsVisibilityList[index],
-                                      listingFavourited: isListingFavourited(listing['id']),
-                                      onDetailsTapped: () => toggleDetailsRow(index),
+                                      listingFavourited: isFavourited,
                                       onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                                       onGetDirections: () {
                                         Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
@@ -620,7 +598,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           destinationLatLng: destinationLatLng
                                         )));
                                       },
+                                      setStateFunction: setState,
                                       inDialog: false,
+                                      colorScheme: colorScheme,
                                     )
                                   ),
                                   // separator except after last item

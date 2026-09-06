@@ -551,6 +551,7 @@ class MapPageState extends State<MapPage> {
         });
 
         final groupSheetModalScrollController = ScrollController();
+        final colorScheme = Theme.of(context).colorScheme;
         showModalBottomSheet(
           context: context,
           showDragHandle: false,
@@ -562,13 +563,6 @@ class MapPageState extends State<MapPage> {
             detailsVisibilityList = List<bool>.filled(relatedListings.length, false);
             return StatefulBuilder(
               builder: (context, setModalState) {
-                void toggleDetailsRow(int index) {
-                  HapticFeedback.lightImpact();
-                  setModalState(() {
-                    detailsVisibilityList[index] = !detailsVisibilityList[index];
-                  });
-                }
-
                 void favouriteOrNotListing(String listingID) {
                   setModalState(() {
                     if (isListingFavourited(listingID)) {
@@ -579,7 +573,6 @@ class MapPageState extends State<MapPage> {
                     _saveSettings();
                   });
                 }
-
                 return SafeArea(
                   top: false,
                   left: false,
@@ -594,7 +587,7 @@ class MapPageState extends State<MapPage> {
                           currentLatLng!,
                           stringToLatLng(parentListing['latLng']),
                         );
-                        distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                        distanceMessage = '${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away';
                       }
 
                       return ConstrainedBox(
@@ -606,13 +599,14 @@ class MapPageState extends State<MapPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                               child: GroupListingInfoSheet(
                                 title: parentListing['title'],
                                 categories: "${parentListing['subtitle']}",
                                 startTime: "${parentListing['startTime']}",
                                 endTime: "${parentListing['endTime']}",
                                 approxDistance: distanceMessage,
+                                colorScheme: colorScheme,
                               ),
                             ),
                             Flexible(
@@ -623,40 +617,36 @@ class MapPageState extends State<MapPage> {
                                 thickness: 4,
                                 radius: const Radius.circular(8),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
                                   child: ListView.builder(
                                     itemCount: relatedListings.length,
                                     shrinkWrap: true,
                                     controller: groupSheetModalScrollController,
                                     itemBuilder: (context, index) {
                                       final rel = relatedListings[index];
-
+                                      final isFavourited = isListingFavourited(rel['id']);
                                       return Column(
                                         children: [
-                                          SpecificListingInfoSheet(
-                                            cancelled: rel['cancelled'] == 'TRUE' ? true : false,
-                                            brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
-                                            emoji: rel['emoji'] ?? '',
-                                            title: rel['title'],
-                                            subtitle: rel['subtitle'],
-                                            location: rel['location'],
-                                            description: rel['description'] ?? '',
-                                            email: rel['email'] ?? '',
-                                            website: rel['website'] ?? '',
-                                            phoneNumber: rel['phone'] ?? '',
-                                            imageURL: rel['imageURL'] ?? '',
-                                            startTime: "${rel['startTime']}",
-                                            endTime: "${rel['endTime']}",
-                                            approxDistance: '',
-                                            detailsVisible: detailsVisibilityList[index],
-                                            onDetailsTapped: () => toggleDetailsRow(index),
-                                            listingFavourited: isListingFavourited(rel['id']),
-                                            onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                            onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                            inDialog: false,
+                                          Container(
+                                            width: constraints.maxWidth - 18,
+                                            decoration: BoxDecoration(
+                                              color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
+                                              border: Border.all(color: colorScheme.primary, width: 0.5),
+                                              borderRadius: BorderRadius.circular(8),
+                                              boxShadow: [BoxShadow(color: colorScheme.onSurface.withAlpha(70), blurRadius: 3, offset: Offset(1, 4))],
+                                            ),
+                                            child: SpecificListingInfoSheet(
+                                              theListing: rel,
+                                              approxDistance: '',
+                                              listingFavourited: isFavourited,
+                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                              onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                              setStateFunction: setState,
+                                              inDialog: false,
+                                              colorScheme: colorScheme,
+                                            )
                                           ),
-                                          if (index != relatedListings.length - 1)
-                                            SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                          if (index != relatedListings.length - 1) SizedBox(height: 8),
                                         ],
                                       );
                                     },
@@ -703,100 +693,18 @@ class MapPageState extends State<MapPage> {
     }
 
     Marker newMarker = Marker(
-        markerId: markerId,
-        position: destinationLatLng,
-        icon: customMarker,
-        visible: true,
-        onTap: () {
-          HapticFeedback.lightImpact();
-          // Update the current location, do not await as this causes issues with using the context across async gaps
-          establishLocation();
-
-          // Calculate distance if current location is known
-          var distanceMessage = 'Distance unknown';
-          if (currentLatLng != null) {
-            int approximateDistanceMetres = asTheCrowFlies(
-              currentLatLng!,
-              destinationLatLng,
-            );
-            distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
-          }
-
-          // Show bottom sheet with listing information
-          showModalBottomSheet(
-            context: context,
-            showDragHandle: false,
-            enableDrag: false,
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
-            isScrollControlled: true,
-            useSafeArea: true,
-            builder: (context) {
-              return SafeArea(
-                top: false,
-                left: false,
-                right: false,
-                bottom: Platform.isAndroid && isNavBarVisible(context),
-                child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-                  final specificSheetModalScrollController = ScrollController();
-                  return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
-                    void favouriteOrNotListing(String listingID) {
-                      setModalState(() {
-                        if (isListingFavourited(listingID)) {
-                          favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-                        } else {
-                          favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
-                        }
-                        _saveSettings();
-                      });
-                    }
-
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.90,
-                      ),
-                      child: Scrollbar(
-                        controller: specificSheetModalScrollController,
-                        thumbVisibility: Platform.isIOS ? false : true,
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: SingleChildScrollView(
-                          controller: specificSheetModalScrollController,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                            child: SpecificListingInfoSheet(
-                              cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                              brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                              emoji: listing['emoji'] ?? '',
-                              title: listing['title'],
-                              subtitle: listing['subtitle'],
-                              location: listing['location'],
-                              description: listing['description'],
-                              email: listing['email'] ?? '',
-                              website: listing['website'] ?? '',
-                              phoneNumber: listing['phone'] ?? '',
-                              imageURL: listing['imageURL'] ?? '',
-                              startTime: "${listing['startTime']}",
-                              endTime: "${listing['endTime']}",
-                              approxDistance: distanceMessage,
-                              detailsVisible: true,
-                              listingFavourited: isListingFavourited(listing['id']),
-                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
-                              inDialog: false,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  });
-                }),
-              );
-            },
-          );
-        });
-    //setState(() {
-      markers[markerId] = newMarker;
-    //});
+      markerId: markerId,
+      position: destinationLatLng,
+      icon: customMarker,
+      visible: true,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        // Update the current location, do not await as this causes issues with using the context across async gaps
+        establishLocation();
+        showListingDetailsDialog(context, setState, () => getDirections(listing['id'], destinationLatLng, false), listing);
+      }
+    );
+    markers[markerId] = newMarker;
   }
 
   void addSimpleMarker(String category, destinationLatLng) async {
