@@ -296,15 +296,22 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   ),
                 ),
                 if (inDialog) Spacer(flex: 99) else const SizedBox(width: 6),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), 
-                      padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     onGetDirections();
                   },
-                  icon: const Icon(Icons.directions_walk),
-                  label: Text('Directions'),
+                  child: const Icon(Icons.directions_walk),
+                ),
+                SizedBox(width: 6),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    shareListing(title, location, startTime, endTime, context);
+                  },
+                  child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
                 ),
                 Flexible(flex: 1, child: Container()),
                 if (!inDialog && website.isNotEmpty) ...[const SizedBox(width: 6), Material(
