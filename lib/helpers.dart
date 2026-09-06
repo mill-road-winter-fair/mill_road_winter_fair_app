@@ -888,21 +888,27 @@ String formatTimeRange(DateTime startTime, DateTime endTime) {
 void shareListing(String theTitle, String theLocation, String theStartTimeString, String theEndTimeString, BuildContext context) async {
 
   debugPrint('shareEvent called with theEvent=$theTitle theLocation=$theLocation theStartTime=$theStartTimeString theEndTimeString=$theEndTimeString');
+  final now = DateTime.now();
   final startTime = combineDateAndTime(theStartTimeString, fairDate);
   final endTime = combineDateAndTime(theEndTimeString, fairDate);
   final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
-  final double whenEventStart = startTime.difference(DateTime.now()).inMinutes / (24 * 60); // inDays is too imprecise
-  final double whenEventEnd = endTime.difference(DateTime.now()).inMinutes / (24 * 60);
+  final double whenEventStart = startTime.difference(now).inMinutes / (24 * 60); // inDays is too imprecise
+  final double whenEventEnd = endTime.difference(now).inMinutes / (24 * 60);
   String msgText = '';
 
-  if (whenEventStart.abs() < 1) { // today
-    msgText += '';
-  } else {
-    msgText += 'On ${formatFullDate(startTime)}, ';
+  if (whenEventStart.abs() >= 1) { // not today
+    msgText += 'On ';
+    if (whenEventStart.abs() > 6) {
+      msgText += '${formatFullDate(startTime)} ';
+    } else {
+      msgText += '${intl.DateFormat('EEEE').format(startTime)} ';
+    }
+  } else if (fairDate.difference(now).inMinutes > 0) {
+    msgText += 'Tomorrow ';
   }
 
-  if (isItAnEvent && whenEventStart.abs() < 5) {
-    msgText += '${msgText=='' ? 'At' : 'at'} ${formatTime(startTime)}, ';
+  if (isItAnEvent && whenEventStart.abs() < 6) {
+    msgText += '${msgText=='' ? 'At' : 'at'} ${formatTime(startTime)} ';
   } 
 
   if (whenEventStart < 0 && whenEventEnd <= 0) { // in the past and finished

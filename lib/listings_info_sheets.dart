@@ -209,6 +209,8 @@ class SpecificListingInfoSheet extends StatelessWidget {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: '$subtitle\n$approxDistance', style: timeStyle));
     }
 
+    final bricksAndMortarKey = GlobalKey();
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: (inDialog) ? null : () {
@@ -261,7 +263,13 @@ class SpecificListingInfoSheet extends StatelessWidget {
               children: [
                 Expanded(flex: 14, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text.rich(
                   TextSpan(children: [
-                    if (brickAndMortar) TextSpan(style: subSubStyle, text: '🏢 '),
+                    if (brickAndMortar) WidgetSpan(
+                      child: GestureDetector(
+                        key: bricksAndMortarKey, 
+                        onLongPress: () => showMiniPopup(context, bricksAndMortarKey, 'A permanent Mill Road organisation'),
+                        child: Text(style: subSubStyle.copyWith(fontSize: 16, height: 1.1), '🏢 '),
+                      ),
+                    ),
                     TextSpan(style: subSubStyle, text: location),
                   ], ), 
                 ), ),
