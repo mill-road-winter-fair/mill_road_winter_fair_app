@@ -1,9 +1,11 @@
 import 'dart:ui' as ui;
 import 'dart:math';
 import 'dart:async';
-import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 
@@ -32,7 +34,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   Timer? _idleTimer;
   int? _chosenHotspotID; // hotspot that the user tapped on, if any
   HighlightMode _highlightMode = HighlightMode.idle;
-  late final List<Hotspot> hotspots;
+  List<Hotspot> hotspots = [];
+  int _lastAnimationStep = -1;
+  final ValueNotifier<double> _paintPhase = ValueNotifier(0.0);
 
   @override
   void initState() {
@@ -40,23 +44,34 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
     _chooserPageScrollController = ScrollController();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 10),
+      duration: Duration(seconds: 6),
     )..repeat();
+    _animationController.addListener(_updatePaintPhase);
   }
 
   @override
   void dispose() {
     _chooserPageScrollController.dispose();
-    _animationController.dispose();
+    _animationController
+      ..dispose()
+      ..removeListener(_updatePaintPhase);
+    _paintPhase.dispose();
     _idleTimer?.cancel();
     super.dispose();
   }
 
 
+  void _updatePaintPhase() {
+    const animationSteps = 100; // higher = smoother but more expensive
+    final step = (_animationController.value * animationSteps).floor();
+    if (step == _lastAnimationStep) return;
+    _lastAnimationStep = step;
+    // Use 0.0, 0.1, ..., 0.9 as the displayed phase.
+    _paintPhase.value = step / animationSteps;
+}
+
   void restartAnimation() {
-    //_chosenHotspotID = null;
-    //_highlightMode = HighlightMode.none;
-    _idleTimer = Timer(const Duration(seconds: 2), () {
+    _idleTimer = Timer(const Duration(seconds: 3), () {
       setState(() {
         _chosenHotspotID = null;
         _highlightMode = HighlightMode.idle;
@@ -66,86 +81,98 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   }
 
 
+  void _pauseAnimationOnPointerDown(PointerDownEvent event) {
+    _animationController.stop(canceled: false);
+    if (!onTest) restartAnimation();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     debugPrint('ChooserPage build() called');
 
-    List<Hotspot> hotspots = [
-      Hotspot(label: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152, theTap: () => widget.onOpenListings('all', 'food')),
-      Hotspot(label: 'Music', left: 0.548, top: 0.287, width: 0.451, height: 0.144, theTap: () => widget.onOpenTimetable(false, true)),
-      Hotspot(label: 'Events and\nPerformances', left: 0, top: 0.366, width: 0.455, height: 0.19, theTap: () => widget.onOpenTimetable(false, false)),
-      Hotspot(label: 'Shopping', left: 0.583, top: 0.49, width: 0.416, height: 0.213, theTap: () => widget.onOpenListings('all', 'shopping')),
-      Hotspot(label: 'Children’s', left: 0, top: 0.598, width: 0.437, height: 0.214, theTap: () => widget.onOpenListings('all', 'performanceChildrens')),
-      Hotspot(label: 'Nearby', left: 0.666, top: 0.703, width: 0.333, height: 0.171, theTap: () => widget.onOpenMap(10)),
-      Hotspot(label: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118, theTap: () => widget.onOpenListings('all', 'service')),
-      Hotspot(label: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118, theTap: () => widget.onOpenListings('all', 'service')),
-    ];
+    if (hotspots.isEmpty) { // can only create these once we can access widget
+      hotspots = [
+        Hotspot(label: 'Food & Drink', left: 0, top: 0.197, width: 0.5, height: 0.152, theTap: () => widget.onOpenListings('all', 'food')),
+        Hotspot(label: 'Music', left: 0.548, top: 0.287, width: 0.451, height: 0.144, theTap: () => widget.onOpenTimetable(false, true)),
+        Hotspot(label: 'Events and\nPerformances', left: 0, top: 0.366, width: 0.455, height: 0.19, theTap: () => widget.onOpenTimetable(false, false)),
+        Hotspot(label: 'Shopping', left: 0.583, top: 0.49, width: 0.416, height: 0.213, theTap: () => widget.onOpenListings('all', 'shopping')),
+        Hotspot(label: 'Children’s', left: 0, top: 0.598, width: 0.437, height: 0.214, theTap: () => widget.onOpenListings('all', 'performanceChildrens')),
+        Hotspot(label: 'Nearby', left: 0.666, top: 0.703, width: 0.333, height: 0.171, theTap: () => widget.onOpenMap(10)),
+        Hotspot(label: 'Services', left: 0, top: 0.881, width: 0.409, height: 0.118, theTap: () => widget.onOpenListings('all', 'service')),
+        Hotspot(label: 'Info', left: 0.668, top: 0.881, width: 0.331, height: 0.118, theTap: () => widget.onOpenListings('all', 'service')),
+      ];
+    }
 
     if ((_idleTimer == null || !_idleTimer!.isActive) && !_animationController.isAnimating) restartAnimation();
     
-    return FairScaffold(
-      appBarTitle: "Welcome",
-      currentTab: 0,
-      onTabSelected: widget.onTabSelected,
-      appBarActions: [
-        IconButton(
-          icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-          },
-        ),
-      ],
-      body: RepaintBoundary(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset('assets/chooserPage/chooserPage_background.png', fit: BoxFit.fill),
-                Positioned(
-                  left: 0.16 * constraints.maxWidth, 
-                  top: 0.03 * constraints.maxHeight, 
-                  width: 0.7 * constraints.maxWidth, 
-                  height: 0.105 * constraints.maxHeight, 
-                  child: Image(image: AssetImage('assets/MRWF25_leaflet_banner.png'), width: 180)),
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: HotspotPainter(
-                        hotspots: hotspots,
-                        mode: _highlightMode,
-                        chosenHotspotID: _chosenHotspotID,
-                        animation: _animationController,
+    return Listener(
+      onPointerDown: _pauseAnimationOnPointerDown,
+      behavior: HitTestBehavior.translucent, 
+      child: FairScaffold(
+        appBarTitle: "Welcome",
+        currentTab: 0,
+        onTabSelected: widget.onTabSelected,
+        appBarActions: [
+          IconButton(
+            icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+            },
+          ),
+        ],
+        body: RepaintBoundary(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset('assets/chooserPage/chooserPage_background.png', fit: BoxFit.fill),
+                  Positioned(
+                    left: 0.16 * constraints.maxWidth, 
+                    top: 0.03 * constraints.maxHeight, 
+                    width: 0.7 * constraints.maxWidth, 
+                    height: 0.105 * constraints.maxHeight, 
+                    child: Image(image: AssetImage('assets/MRWF25_leaflet_banner.png'), width: 180)),
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: CustomPaint(
+                        painter: HotspotPainter(
+                          hotspots: hotspots,
+                          mode: _highlightMode,
+                          chosenHotspotID: _chosenHotspotID,
+                          animation: _paintPhase,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                for (int i=0; i<hotspots.length; i++)
-                  Positioned(
-                    left: hotspots[i].left * constraints.maxWidth,
-                    top: hotspots[i].top * constraints.maxHeight,
-                    width: hotspots[i].width * constraints.maxWidth,
-                    height: hotspots[i].height * constraints.maxHeight,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () async {
-                        _idleTimer?.cancel();
-                        debugPrint('Selected $i');
-                        setState(() {
-                          _highlightMode = HighlightMode.selected;
-                          _chosenHotspotID = i;
-                        });
-                        _idleTimer?.cancel();
-                        _animationController.stop();
-                        hotspots[i].theTap();
-                      },
-                      child: const SizedBox.expand(),
+                  for (int i=0; i<hotspots.length; i++)
+                    Positioned(
+                      left: hotspots[i].left * constraints.maxWidth,
+                      top: hotspots[i].top * constraints.maxHeight,
+                      width: hotspots[i].width * constraints.maxWidth,
+                      height: hotspots[i].height * constraints.maxHeight,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () async {
+                          _idleTimer?.cancel();
+                          debugPrint('Selected $i');
+                          setState(() {
+                            _highlightMode = HighlightMode.selected;
+                            _chosenHotspotID = i;
+                          });
+                          _idleTimer?.cancel();
+                          _animationController.stop(canceled: false);
+                          hotspots[i].theTap();
+                        },
+                        child: const SizedBox.expand(),
+                      ),
                     ),
-                  ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -222,7 +249,7 @@ class HotspotPainter extends CustomPainter {
   final List<Hotspot> hotspots;
   final HighlightMode mode;
   final int? chosenHotspotID;
-  final Animation<double> animation;
+  final ValueListenable<double> animation;
 
   Size? _lastSize;
   List<_HotspotVisual>? _cachedVisuals;
