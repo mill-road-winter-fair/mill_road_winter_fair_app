@@ -173,29 +173,66 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void openTimetable(bool onlyNowOrSoon, bool? filteredMusicOrNot) {
+    setState(() {
+      timetableFilteredMusicOrNot = filteredMusicOrNot;
+      timetableOnlyNowOrSoon = onlyNowOrSoon;
+      index = 2;
+    });
+  }
+
+  void openListings(String filterCategory, String? subfilterCategory) {
+    setState(() {
+      listingsSubfilterCategory = subfilterCategory;
+      index = (filterCategory == 'favourite') ? 4 : 3;
+    });
+  }
+
+  void openMap(int? nearestMarkerCount) {
+    setState(() {
+      mapNearestMarkerCount = nearestMarkerCount;
+      index = 1;
+    });
+  }
+
+  void cancelMapNearest() {
+    debugPrint('HomePageState cancelMapNearest called');
+    setState(() {
+      mapNearestMarkerCount = null;
+    });
+  }
+
+  void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
+    debugPrint('HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
+    setState(() {
+      timetableFilteredMusicOrNot = newFilteredMusicOrNot;
+      timetableOnlyNowOrSoon = newOnlyNowOrSoon;
+    });
+  }
+
+  void listingsSubfilterChange(String? newSubfilterCategory) {
+    debugPrint('HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory');
+    setState(() {
+      listingsSubfilterCategory = newSubfilterCategory;
+    });
+  }
+
   final _allListingsKey = GlobalKey<FilteredListingsPageState>();
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
-  late final _pages = [
-    ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings, onOpenMap: openMap),
-    MapPage(listings: listings, key: mapPageKey, nearestMarkerCount: mapNearestMarkerCount, onTabSelected: setCurrentIndex, onHomeTapped: cancelMapNearest),
-    TimetablePage(onTabSelected: setCurrentIndex),
-    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle, onTabSelected: setCurrentIndex),
-    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle, onTabSelected: setCurrentIndex),
-  ];
-
-
-  void onChangeAppBarTitle(String newTitle) {
-    setState(() => appBarTitle = newTitle);
-  }
-
-
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings, onOpenMap: openMap),
+      MapPage(listings: listings, key: mapPageKey, nearestMarkerCount: mapNearestMarkerCount, onTabSelected: setCurrentIndex, onHomeTapped: cancelMapNearest),
+      TimetablePage(theEvents: listings, onTabSelected: setCurrentIndex, filteredMusicOrNot: timetableFilteredMusicOrNot, onlyNowOrSoon: timetableOnlyNowOrSoon, onFilterChange: timetableFilterChange),
+      FilteredListingsPage(filterCategory: "all", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
+      FilteredListingsPage(filterCategory: "favourite", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
+    ];
     debugPrint('MW main index=$index and mapNearestMarkerCount=$mapNearestMarkerCount');
     return IndexedStack(
       index: index,
-      children: _pages,
+      children: pages,
     );
   }
 }

@@ -31,6 +31,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -72,6 +73,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -127,6 +129,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -173,6 +176,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -213,6 +217,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -253,6 +258,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -297,6 +303,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -341,6 +348,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -382,6 +390,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -414,24 +423,23 @@ void main() {
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
       expect(homePageState.index, 0);
 
-      await tester.tap(find.text('Map'));
+      await tester.tap(find.byIcon(Icons.map).first);
       await tester.pumpAndSettle();
-
       expect(homePageState.index, 1);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.text('Listings'));
+      await tester.tap(find.byIcon(Icons.list).first);
       await tester.pumpAndSettle();
-
       expect(homePageState.index, 3);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.text('Timetable'));
+      await tester.tap(find.byIcon(Icons.schedule).first);
       await tester.pumpAndSettle();
-
       expect(homePageState.index, 2);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.text('Favourites'));
+      await tester.tap(find.byIcon(Icons.favorite).first);
       await tester.pumpAndSettle();
-
       expect(homePageState.index, 4);
 
     });
@@ -468,6 +476,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -496,7 +505,7 @@ void main() {
       await loadSettings();
 
       // Set the mock listing as a favourite before the widget is built
-      favouriteListingKeys.add('1');
+      favouriteListingKeys.value = {...favouriteListingKeys.value, '1'};
 
       // Pump MyApp which contains the AppBar with the snowflake button
       await tester.pumpWidget(const MyApp());
@@ -508,7 +517,7 @@ void main() {
 
       // Verify that the favourites page is displayed
       expect(find.byType(FilteredListingsPage), findsOneWidget);
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice (triggered in MapPage initState)
       await tester.pump(const Duration(seconds: 21));

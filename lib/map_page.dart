@@ -13,15 +13,12 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
-import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
-import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/category_tools.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
-import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
@@ -491,9 +488,9 @@ class MapPageState extends State<MapPage> {
   void favouriteOrNotListing(String listingID) {
     debugPrint('MapPageState favouriteOrNotListing called');
     if (isListingFavourited(listingID)) {
-      favouriteListingKeys = {...favouriteListingKeys}..remove(listingID);
+      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
     } else {
-      favouriteListingKeys = {...favouriteListingKeys, listingID};
+      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
     }
     setState(() {});
     _saveSettings();
@@ -501,10 +498,11 @@ class MapPageState extends State<MapPage> {
 
   // Function to determine if a listing has been added to favourites
   bool isListingFavourited(String listingID) {
-    return favouriteListingKeys.contains(listingID);
+    return favouriteListingKeys.value.contains(listingID);
   }
 
   void addGroupMarker(Map<String, dynamic> parentListing) async {
+    //debugPrint('MapPageState addGroupMarker called');
     //debugPrint('MapPageState addGroupMarker called');
     LatLng destinationLatLng = stringToLatLng(parentListing['latLng']);
     MarkerId markerId = MarkerId(parentListing['id'].toString());
@@ -575,9 +573,9 @@ class MapPageState extends State<MapPage> {
                 void favouriteOrNotListing(String listingID) {
                   setModalState(() {
                     if (isListingFavourited(listingID)) {
-                      favouriteListingKeys = {...favouriteListingKeys}..remove(listingID);
+                      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
                     } else {
-                      favouriteListingKeys = {...favouriteListingKeys, listingID};
+                      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
                     }
                     _saveSettings();
                   });
@@ -656,6 +654,7 @@ class MapPageState extends State<MapPage> {
                                             listingFavourited: isListingFavourited(rel['id']),
                                             onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                             onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                            inDialog: false,
                                           ),
                                           if (index != relatedListings.length - 1)
                                             SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
@@ -744,9 +743,9 @@ class MapPageState extends State<MapPage> {
                     void favouriteOrNotListing(String listingID) {
                       setModalState(() {
                         if (isListingFavourited(listingID)) {
-                          favouriteListingKeys = {...favouriteListingKeys}..remove(listingID);
+                          favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
                         } else {
-                          favouriteListingKeys = {...favouriteListingKeys, listingID};
+                          favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
                         }
                         _saveSettings();
                       });
@@ -784,6 +783,7 @@ class MapPageState extends State<MapPage> {
                               listingFavourited: isListingFavourited(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                              inDialog: false,
                             ),
                           ),
                         ),
@@ -1321,7 +1321,7 @@ class MapPageState extends State<MapPage> {
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
     await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
-    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
+    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
 
@@ -1654,6 +1654,7 @@ class MapPageState extends State<MapPage> {
           onTabSelected: widget.onTabSelected,
           appBarActions: [
           ],
+          allowBack: (doingAPushNavigation != null),
           body: Stack(
             children: [
               LayoutBuilder(

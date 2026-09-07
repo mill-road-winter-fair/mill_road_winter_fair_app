@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 import 'dart:math';
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
