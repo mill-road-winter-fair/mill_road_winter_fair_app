@@ -103,7 +103,7 @@ void main() {
 
       // Pump MyApp which contains the AppBar with the snowflake button
       await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
       final snowflakeButton = find.byWidgetPredicate(
@@ -424,22 +424,22 @@ void main() {
       expect(homePageState.index, 0);
 
       await tester.tap(find.byIcon(Icons.map).first);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(homePageState.index, 1);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.list).first);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(homePageState.index, 3);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.schedule).first);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(homePageState.index, 2);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.favorite).first);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(homePageState.index, 4);
 
     });
@@ -509,7 +509,7 @@ void main() {
 
       // Pump MyApp which contains the AppBar with the snowflake button
       await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Tap the Favourites button the NavBar
       await tester.tap(find.byIcon(Icons.favorite));
