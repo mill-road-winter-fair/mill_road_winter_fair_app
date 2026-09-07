@@ -173,50 +173,6 @@ class HomePageState extends State<HomePage> {
     });
   }
 
-  void openTimetable(bool onlyNowOrSoon, bool? filteredMusicOrNot) {
-    setState(() {
-      timetableFilteredMusicOrNot = filteredMusicOrNot;
-      timetableOnlyNowOrSoon = onlyNowOrSoon;
-      index = 2;
-    });
-  }
-
-  void openListings(String filterCategory, String? subfilterCategory) {
-    setState(() {
-      listingsSubfilterCategory = subfilterCategory;
-      index = (filterCategory == 'favourite') ? 4 : 3;
-    });
-  }
-
-  void openMap(int? nearestMarkerCount) {
-    setState(() {
-      mapNearestMarkerCount = nearestMarkerCount;
-      index = 1;
-    });
-  }
-
-  void cancelMapNearest() {
-    debugPrint('HomePageState cancelMapNearest called');
-    setState(() {
-      mapNearestMarkerCount = null;
-    });
-  }
-
-  void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
-    debugPrint('HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
-    setState(() {
-      timetableFilteredMusicOrNot = newFilteredMusicOrNot;
-      timetableOnlyNowOrSoon = newOnlyNowOrSoon;
-    });
-  }
-
-  void listingsSubfilterChange(String? newSubfilterCategory) {
-    debugPrint('HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory');
-    setState(() {
-      listingsSubfilterCategory = newSubfilterCategory;
-    });
-  }
-
   final _allListingsKey = GlobalKey<FilteredListingsPageState>();
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
   
