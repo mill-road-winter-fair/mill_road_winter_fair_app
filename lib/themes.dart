@@ -133,7 +133,7 @@ final Map<String, ThemeData> appThemes = {
       onPrimary: Colors.black,
       secondary: Color.fromRGBO(255, 243, 0, 1.0),
       onSecondary: Colors.black,
-      onSecondaryFixed: const Color.fromRGBO(10, 35, 10, 1), // favourites background
+      onSecondaryFixed: Color.fromRGBO(10, 35, 10, 1), // favourites background
       tertiary: Color.fromRGBO(8, 255, 0, 1.0),
       error: Colors.orange,
       onError: Colors.black,
