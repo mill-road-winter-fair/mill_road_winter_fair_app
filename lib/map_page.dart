@@ -25,7 +25,7 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
-  final void Function()? onHomeTapped;
+  final void Function()? cancelMapNearest;
   final String? destinationId; // optional if we'll be showing directions to somewhere
   final LatLng? destinationLatLng; // optional if we'll be showing directions to somewhere
   final int? nearestMarkerCount; // optional if we'll be zooming in to nearest X markers
@@ -34,7 +34,7 @@ class MapPage extends StatefulWidget {
     super.key,
     required this.listings, 
     required this.onTabSelected,
-    this.onHomeTapped,
+    this.cancelMapNearest,
     this.destinationId,
     this.destinationLatLng,
     this.nearestMarkerCount,
@@ -1339,11 +1339,15 @@ class MapPageState extends State<MapPage> {
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
       );
+      widget.cancelMapNearest?.call();
       return;
     }
 
     final visibleMarkers = markers.values.where((marker) => marker.visible).toList();
-    if (visibleMarkers.isEmpty) return;
+    if (visibleMarkers.isEmpty) {
+      widget.cancelMapNearest?.call();
+      return;
+    }
     final nearestMarkers = visibleMarkers..sort((a, b) {
       final aDistance = asTheCrowFlies(currentLatLng!, a.position);
       final bDistance = asTheCrowFlies(currentLatLng!, b.position);
@@ -1352,7 +1356,7 @@ class MapPageState extends State<MapPage> {
 
     if (nearestMarkers.isEmpty || asTheCrowFlies(currentLatLng!, nearestMarkers.first.position) > 500) {
       Fluttertoast.showToast(
-        msg: 'Nearest venues are more than 500m away, so please try again when you’re at the Fair',
+        msg: 'Nearest attractions are more than 500m away, so please try again when you’re at the Fair.',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
         textColor: Theme.of(context).colorScheme.onPrimary,
@@ -1360,6 +1364,7 @@ class MapPageState extends State<MapPage> {
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
       );
+      widget.cancelMapNearest?.call();
       return;
     }
 
@@ -1742,7 +1747,7 @@ class MapPageState extends State<MapPage> {
                         heroTag: 'homeBtn',
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          widget.onHomeTapped?.call();
+                          widget.cancelMapNearest?.call();
                           // Home button resets the filters if they're all toggled off
                           if (filterSettings['Food'] == false &&
                               filterSettings['Shopping'] == false &&
