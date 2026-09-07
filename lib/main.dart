@@ -185,7 +185,6 @@ class HomePageState extends State<HomePage> {
       FilteredListingsPage(filterCategory: "all", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
       FilteredListingsPage(filterCategory: "favourite", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
     ];
-    debugPrint('MW main index=$index and mapNearestMarkerCount=$mapNearestMarkerCount');
     return IndexedStack(
       index: index,
       children: pages,
