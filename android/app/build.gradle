@@ -1,6 +1,5 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
     // The Google services Gradle plugin
@@ -32,13 +31,17 @@ def iosDartDefines = dartDefines.collect { k, v -> "${k}=${v}" }.join(",")
 project.ext.set("dart-defines-ios", iosDartDefines)
 
 android {
+    buildFeatures {
+        resValues true
+    }
+
     namespace = "com.theberridge.mill_road_winter_fair_app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
@@ -101,6 +104,12 @@ android {
             minifyEnabled true // Enable for optimization
             shrinkResources true // Remove unused resources
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

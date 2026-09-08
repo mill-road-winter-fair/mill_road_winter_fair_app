@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
@@ -9,7 +10,7 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 
 void main() {
   // We're on test
@@ -34,6 +35,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -59,7 +61,7 @@ void main() {
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
-      expect(find.text(fairName), findsOneWidget);
+      expect(find.text('Welcome'), findsOneWidget);
 
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Map'), findsOneWidget);
@@ -78,6 +80,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -136,6 +139,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -165,7 +169,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(DrawerHeader), findsOneWidget);
-      expect(find.text(fairName), findsOneWidget);
+      expect(find.text('Welcome'), findsOneWidget);
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
@@ -185,6 +189,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -228,6 +233,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -271,6 +277,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -318,6 +325,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -365,6 +373,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -409,6 +418,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -441,24 +451,23 @@ void main() {
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
       expect(homePageState.index, 0);
 
-      await tester.tap(find.text('Map'));
+      await tester.tap(find.byIcon(Icons.map).first);
       await tester.pumpAndSettle();
-
       expect(homePageState.index, 1);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.text('Listings'));
+      await tester.tap(find.byIcon(Icons.list).first);
       await tester.pumpAndSettle();
-
-      expect(homePageState.index, 2);
-
-      await tester.tap(find.text('Timetable'));
-      await tester.pumpAndSettle();
-
       expect(homePageState.index, 3);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.text('Favourites'));
+      await tester.tap(find.byIcon(Icons.schedule).first);
       await tester.pumpAndSettle();
+      expect(homePageState.index, 2);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
 
+      await tester.tap(find.byIcon(Icons.favorite).first);
+      await tester.pumpAndSettle();
       expect(homePageState.index, 4);
 
     });
@@ -498,6 +507,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -525,20 +535,20 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       await loadSettings();
 
+      // Set the mock listing as a favourite before the widget is built
+      favouriteListingKeys.value = {...favouriteListingKeys.value, '1'};
+
       // Pump MyApp which contains the AppBar with the snowflake button
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await tester.pumpAndSettle();
-
-      // Set the mock listing as a favourite
-      favouriteListingKeys.add('1');
 
       // Tap the Favourites button the NavBar
       await tester.tap(find.byIcon(Icons.favorite));
       await tester.pumpAndSettle();
 
-      // Verify that AboutTheFairPage is now displayed
+      // Verify that the favourites page is displayed
       expect(find.byType(FilteredListingsPage), findsOneWidget);
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice (triggered in MapPage initState)
       await tester.pump(const Duration(seconds: 21));

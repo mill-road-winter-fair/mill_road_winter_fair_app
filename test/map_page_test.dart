@@ -106,7 +106,7 @@ void main() {
   // Set up mocks
   late MapPageState mapPageState;
   setUp(() {
-    mapPageState = MapPage(listings: listings, analyticsService: FakeAnalyticsService()).createState();
+    mapPageState = MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}).createState();
   });
 
   group('MapPage', () {
@@ -118,7 +118,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -126,7 +126,7 @@ void main() {
 
       // Check the map buttons
       expect(find.byType(FloatingActionButton), findsExactly(5));
-      expect(find.byIcon(Icons.home), findsOneWidget);
+      expect(find.byIcon(Icons.home), findsExactly(2));
       expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
       expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
       expect(find.byIcon(Icons.filter_alt), findsOneWidget);
@@ -154,7 +154,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -175,7 +175,7 @@ void main() {
       methodCalls.clear();
 
       // Tap the Home button to trigger centering and filter reset logic
-      await tester.tap(find.byIcon(Icons.home));
+      await tester.tap(find.byIcon(Icons.home).first);
       await tester.pumpAndSettle();
 
       // Verify that filters were reset to true
@@ -198,7 +198,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -215,7 +215,7 @@ void main() {
       expect(mapPageState.mapType, MapType.hybrid);
 
       // Switch the map type back
-      await tester.tap(find.byIcon(Icons.map));
+      await tester.tap(find.byIcon(Icons.map).first);
       await tester.pumpAndSettle();
       expect(mapPageState.mapType, MapType.normal);
     });
@@ -231,7 +231,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -273,7 +273,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -320,7 +320,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -358,7 +358,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -399,7 +399,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -445,7 +445,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -468,7 +468,8 @@ void main() {
       expect(find.text('Food'), findsOneWidget);
       expect(find.text('approx. 199 m'), findsOneWidget);
       // Specific marker content
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
@@ -486,7 +487,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -503,7 +504,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check the text content in the bottom sheet
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
+      expect(find.text('🍣 '), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
@@ -652,7 +654,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -822,7 +824,7 @@ void main() {
     testWidgets('hideAllMarkers clears all markers', (tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
-      
+
       listings = [
         {
           'id': '1',
@@ -856,7 +858,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );

@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 
 class TextImageRow extends StatelessWidget {
   final TextSpan textSpan;
@@ -86,38 +87,19 @@ TableRow eventRow(BuildContext context, String eventTime, String eventTitle, [Li
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(4, 4, 2, 4), 
+          padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
           child: FittedBox(
-            fit: BoxFit.scaleDown, 
+            fit: BoxFit.scaleDown,
             child: Text(eventTime, style: eventsTimeStyle, textAlign: TextAlign.right),
           ),
         ),
       ),
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(2, 4, 2, 4), 
-          child: Text.rich(TextSpan(children: allTitleSpans))
-        ),
+        child: Container(padding: const EdgeInsets.fromLTRB(2, 4, 2, 4), child: Text.rich(TextSpan(children: allTitleSpans))),
       ),
     ],
   );
-}
-
-void showDirectionsTo(BuildContext context, String id, LatLng theDest) async {
-  debugPrint('showDirectionsTo build() called for id: $id');
-  // Set previousIndex to map page
-  previousIndex = 0;
-
-  // Switch to map tab on the home page
-  homePageKey.currentState?.setCurrentIndex(0);
-
-  // We only want to attempt this kind of navigation if we already have the listings
-  // Otherwise, the map page will handle it when the listings eventually load
-  if (listings.isNotEmpty) {
-    // Request the map page to show directions
-    await mapPageKey.currentState?.getDirections(id, theDest, true);
-  }
 }
 
 class AboutTheFairPage extends StatefulWidget {
@@ -238,7 +220,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
             child: Text('About Mill Road Winter Fair'),
           ),
         ),
-        body: Container(width: min(MediaQuery.of(context).size.width - 8, 500),
+        body: Container(
+          width: min(MediaQuery.of(context).size.width - 8, 500),
           padding: EdgeInsets.all(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt()),
           child: Scrollbar(
             controller: _aboutPageScrollController,
@@ -297,15 +280,16 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                         child: Container(
                                           padding: const EdgeInsets.only(left: 4),
                                           child: Text('Key events',
-                                              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
+                                              style: TextStyle(
+                                                  fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
                                         ),
                                       ),
                                       TableCell(
                                         verticalAlignment: TableCellVerticalAlignment.top,
                                         child: SizedBox(
-                                            width: 71,
-                                            child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft),
-                                          ),
+                                          width: 71,
+                                          child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -331,8 +315,17 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.202488, 0.131207));
                                               widget.analyticsService.logButtonTapped('eastRoad_hyperlink');
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MapPage(
+                                                            listings: listings,
+                                                            onTabSelected: (_) => {},
+                                                            destinationId: '$aSimpleMarkerId Visit/Experience',
+                                                            destinationLatLng: const LatLng(52.202488, 0.131207),
+                                                            analyticsService: widget.analyticsService,
+                                                          )));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -341,8 +334,17 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.198682, 0.141051));
                                               widget.analyticsService.logButtonTapped('theBridge_hyperlink');
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MapPage(
+                                                            listings: listings,
+                                                            onTabSelected: (_) => {},
+                                                            destinationId: '$aSimpleMarkerId Visit/Experience',
+                                                            destinationLatLng: const LatLng(52.198682, 0.141051),
+                                                            analyticsService: widget.analyticsService,
+                                                          )));
                                             }),
                                     ],
                                   ),
@@ -357,8 +359,17 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.200389, 0.136465));
                                               widget.analyticsService.logButtonTapped('ditchburnGardens_hyperlink');
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MapPage(
+                                                            listings: listings,
+                                                            onTabSelected: (_) => {},
+                                                            destinationId: '$aSimpleMarkerId Performance',
+                                                            destinationLatLng: const LatLng(52.200389, 0.136465),
+                                                            analyticsService: widget.analyticsService,
+                                                          )));
                                             }),
                                     ],
                                   ),
@@ -373,8 +384,17 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.1970778, 0.1472252));
                                               widget.analyticsService.logButtonTapped('salisburyClub_hyperlink');
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MapPage(
+                                                            listings: listings,
+                                                            onTabSelected: (_) => {},
+                                                            destinationId: '$aSimpleMarkerId Performance',
+                                                            destinationLatLng: const LatLng(52.1970778, 0.1472252),
+                                                            analyticsService: widget.analyticsService,
+                                                          )));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -383,8 +403,17 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
                                               widget.analyticsService.logButtonTapped('petersfield_hyperlink_1');
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MapPage(
+                                                            listings: listings,
+                                                            onTabSelected: (_) => {},
+                                                            destinationId: '$aSimpleMarkerId Performance',
+                                                            destinationLatLng: const LatLng(52.202858, 0.132253),
+                                                            analyticsService: widget.analyticsService,
+                                                          )));
                                             }),
                                     ],
                                   ),
@@ -399,8 +428,17 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.199627, 0.138407));
                                               widget.analyticsService.logButtonTapped('gwydirStreet_hyperlink');
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MapPage(
+                                                            listings: listings,
+                                                            onTabSelected: (_) => {},
+                                                            destinationId: '$aSimpleMarkerId Performance',
+                                                            destinationLatLng: const LatLng(52.199627, 0.138407),
+                                                            analyticsService: widget.analyticsService,
+                                                          )));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -409,8 +447,17 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
                                               widget.analyticsService.logButtonTapped('petersfield_hyperlink_2');
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MapPage(
+                                                            listings: listings,
+                                                            onTabSelected: (_) => {},
+                                                            destinationId: '$aSimpleMarkerId Performance',
+                                                            destinationLatLng: const LatLng(52.202858, 0.132253),
+                                                            analyticsService: widget.analyticsService,
+                                                          )));
                                             }),
                                     ],
                                   ),
@@ -441,7 +488,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                           // Build sponsor spans with separators
                           ...sponsorSpans,
                           const TextSpan(
-                              text: 'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
+                              text:
+                                  'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
                         ],
                       ),
                       imagePath: "assets/aboutPage/MRWF25_people_juggle.png",

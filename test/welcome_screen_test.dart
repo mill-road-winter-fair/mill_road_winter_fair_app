@@ -8,6 +8,11 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750));
+}
+
 void main() {
   // We're on test
   onTest = true;
@@ -135,14 +140,14 @@ void main() {
       // Verify the 'Skip' button is present and tap it
       expect(find.text('Skip'), findsOneWidget);
       await tester.tap(find.text('Skip'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Verify that MyApp is now displayed
       expect(find.byType(RootWidget), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
       await tester.pump(const Duration(seconds: 21));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Check that shared prefs have been updated
       final prefs = await SharedPreferences.getInstance();
@@ -167,7 +172,7 @@ void main() {
       final nextButton = find.byIcon(Icons.arrow_forward);
       expect(nextButton, findsOneWidget);
       await tester.tap(nextButton);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Verify we have advanced to the second page
       expect(find.text('What do the pins mean?'), findsOneWidget);
@@ -218,20 +223,20 @@ void main() {
       final nextButton = find.byIcon(Icons.arrow_forward);
       for (int i = 0; i < 4; i++) {
         await tester.tap(nextButton);
-        await tester.pumpAndSettle();
+        await settle(tester);
       }
 
       // Verify the 'Done' button is present and tap it
       expect(find.text('Done'), findsOneWidget);
       await tester.tap(find.text('Done'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Verify that MyApp is now displayed
       expect(find.byType(RootWidget), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
       await tester.pump(const Duration(seconds: 21));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Check that shared prefs have been updated
       final prefs = await SharedPreferences.getInstance();
@@ -292,14 +297,14 @@ void main() {
 
       // Tap the footer button
       await tester.tap(find.text('Take me straight to the app!'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Verify that MyApp is now displayed
       expect(find.byType(RootWidget), findsOneWidget);
 
       // Let the 20s toast timer complete to avoid "Timer still pending" when test disposes widgets
       await tester.pump(const Duration(seconds: 21));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Check that shared prefs have been updated
       final prefs = await SharedPreferences.getInstance();
