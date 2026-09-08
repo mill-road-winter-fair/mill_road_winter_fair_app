@@ -240,7 +240,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Prepend the emoji if we have one
-              if (widget.emoji.isNotEmpty) Text('$widget.emoji ', style: basicTitleStyle.copyWith(fontSize: 30)),
+              if (widget.emoji.isNotEmpty) Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
               Expanded(
                 flex: 14,
                 child: Text(widget.title, style: titleStyle),
