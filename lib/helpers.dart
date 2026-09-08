@@ -629,7 +629,7 @@ class PositionedEvent {
 }
 
 LatLng stringToLatLng(String input) {
-//  debugPrint('stringToLatLng called: input=$input');
+  // debugPrint('stringToLatLng called: input=$input');
   try {
     // Split the string into latitude and longitude
     final parts = input.split(',');
@@ -640,7 +640,7 @@ LatLng stringToLatLng(String input) {
     // Parse the latitude and longitude
     final latitude = double.parse(parts[0].trim());
     final longitude = double.parse(parts[1].trim());
-//    debugPrint('Parsed LatLng: lat=$latitude, lng=$longitude');
+    // debugPrint('Parsed LatLng: lat=$latitude, lng=$longitude');
 
     // Return the LatLng object
     return LatLng(latitude, longitude);
@@ -651,7 +651,7 @@ LatLng stringToLatLng(String input) {
 }
 
 int asTheCrowFlies(LatLng origin, LatLng destination) {
-//  debugPrint('asTheCrowFlies called: origin=$origin, destination=$destination');
+  // debugPrint('asTheCrowFlies called: origin=$origin, destination=$destination');
 
   // Constant value for converting degrees to radians (π/180)
   const p = 0.017453292519943295;
@@ -675,12 +675,12 @@ int asTheCrowFlies(LatLng origin, LatLng destination) {
   // Apply the fudge factor (See above)
   // Round the figure to 0 decimal places
   var distanceMetres = (((12742 * asin(sqrt(a))) * 1000) * fudgeFactor).round();
-//  debugPrint('Distance calculated: $distanceMetres metres');
+  // debugPrint('Distance calculated: $distanceMetres metres');
   return distanceMetres;
 }
 
 String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceUnits) {
-//  debugPrint('convertDistanceUnits called: distanceMetres=$distanceMetres, preferredDistanceUnits=$preferredDistanceUnits');
+  // debugPrint('convertDistanceUnits called: distanceMetres=$distanceMetres, preferredDistanceUnits=$preferredDistanceUnits');
   String distanceToDestination = "Distance conversion error";
 
   if (preferredDistanceUnits == DistanceUnits.metric) {
@@ -703,7 +703,7 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
     distanceToDestination = '$puntLengths punts';
   }
 
-//  debugPrint('Distance converted: $distanceToDestination');
+  // debugPrint('Distance converted: $distanceToDestination');
   return distanceToDestination;
 }
 
