@@ -1,19 +1,19 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'dart:async';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
-import 'package:mill_road_winter_fair_app/about_the_fair.dart';
-import 'package:mill_road_winter_fair_app/important_info_page.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'firebase_analytics.dart';
 

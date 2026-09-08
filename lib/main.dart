@@ -1,22 +1,22 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:firebase_core/firebase_core.dart';
-import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
 import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
-import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
+import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');

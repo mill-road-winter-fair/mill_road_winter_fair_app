@@ -1,27 +1,27 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:flutter/gestures.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/category_tools.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
-import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;

@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime) {

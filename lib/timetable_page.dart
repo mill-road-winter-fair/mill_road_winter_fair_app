@@ -1,16 +1,16 @@
-import 'dart:math';
 import 'dart:async';
-import 'package:flutter/services.dart';
+import 'dart:math';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
-import 'package:mill_road_winter_fair_app/helpers.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class TimetablePage extends StatefulWidget {
