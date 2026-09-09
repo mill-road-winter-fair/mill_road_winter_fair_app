@@ -85,7 +85,7 @@ class ListingUpdateNotifier {
                   Navigator.of(dialogContext).pop();
                 }
               },
-              child: const Text('Ok'),
+              child: const Text('OK'),
             ),
           ],
         ),
