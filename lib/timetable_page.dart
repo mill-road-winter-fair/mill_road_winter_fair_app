@@ -96,9 +96,10 @@ class _TimetablePageState extends State<TimetablePage> {
     final Orientation currentOrientation = MediaQuery.orientationOf(context);
     if (_deviceOrientationSaved != null && currentOrientation != _deviceOrientationSaved) {
       // i.e. device has been rotated (or this is the first check)
-      if (_deviceOrientationSaved != null)
+      if (_deviceOrientationSaved != null) {
         debugPrint(
             '_TimetablePageState didChangeDependencies: changed orientation, _deviceOrientation=$_deviceOrientationSaved currentOrientation=$currentOrientation');
+      }
       removeMiniPopup();
       safeRemoveRoute(context, listingDetailsDialogRoute);
       if (currentOrientation == Orientation.landscape) {
@@ -433,9 +434,10 @@ class _TimetablePageState extends State<TimetablePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!scaling)
+    if (!scaling) {
       debugPrint(
           '_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
+    }
     if (loading) {
       return FairScaffold(
         appBarTitle: 'Timetable',
