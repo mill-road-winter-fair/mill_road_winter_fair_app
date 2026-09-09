@@ -102,6 +102,11 @@ void main() {
     ];
   });
 
+  tearDown(() {
+    locationServicesEnabled = true;
+    locationPermission = LocationPermission.always;
+  });
+
   // Set up mocks
   late MapPageState mapPageState;
   setUp(() {
@@ -109,6 +114,21 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('does not enable the map location layer without permission', (WidgetTester tester) async {
+      locationPermission = LocationPermission.deniedForever;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).myLocationEnabled, isFalse);
+    });
+
     testWidgets('all map buttons are present', (WidgetTester tester) async {
       // Build the MapPage widget
       await tester.pumpWidget(
