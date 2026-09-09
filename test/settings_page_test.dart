@@ -14,6 +14,11 @@ void main() {
     await loadSettings();
   });
 
+  setUp(() {
+    selectedThemeKey = 'light';
+    themeNotifier.value = 'light';
+  });
+
   group('SettingsPage', () {
     testWidgets('displays correct initial state', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
@@ -30,10 +35,12 @@ void main() {
       // Verify the Theme section
       expect(find.text('Theme'), findsOneWidget);
       expect(find.text('Light'), findsOneWidget);
-      expect(find.text('The default for devices set to light mode'), findsOneWidget);
+      expect(find.text('A bright theme using white pages'), findsOneWidget);
       expect(find.text('Dark'), findsOneWidget);
-      expect(find.text('The default for devices set to dark mode'), findsOneWidget);
-      expect(find.text('2024 colour scheme'), findsOneWidget);
+      expect(find.text('A subdued theme using black pages'), findsOneWidget);
+      expect(find.text('Auto'), findsOneWidget);
+      expect(find.text('Follow the device’s light/dark setting'), findsOneWidget);
+      expect(find.text('2024 light scheme'), findsOneWidget);
       expect(find.text('For the Fair that blew away'), findsOneWidget);
       expect(find.text('High contrast'), findsOneWidget);
       expect(find.text('For users with visual accessibility needs'), findsOneWidget);
@@ -67,8 +74,19 @@ void main() {
       expect(themeNotifier.value, 'dark');
     });
 
+    testWidgets('changes theme to Auto', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
+
+      await tester.tap(find.text('Auto'));
+      await tester.pumpAndSettle();
+
+      expect(themeNotifier.value, 'auto');
+    });
+
     testWidgets('changes theme to Colour Blind Friendly', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
+
+      await tester.scrollUntilVisible(find.text('Colour blind friendly'), 50);
 
       // Tap on the Colour Blind Friendly theme radio button
       await tester.tap(find.text('Colour blind friendly'));
@@ -86,6 +104,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Change theme to High Contrast
+      await tester.scrollUntilVisible(find.text('High contrast'), 50);
       await tester.tap(find.text('High contrast'));
       await tester.pumpAndSettle();
 

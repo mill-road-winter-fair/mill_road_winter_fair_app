@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 
 class TextImageRow extends StatelessWidget {
   final TextSpan textSpan;
@@ -103,21 +104,6 @@ TableRow eventRow(BuildContext context, String eventTime, String eventTitle, [Li
   );
 }
 
-void showDirectionsTo(BuildContext context, String id, LatLng theDest) async {
-  debugPrint('showDirectionsTo build() called for id: $id');
-  // Set previousIndex to map page
-  previousIndex = 0;
-
-  // Switch to map tab on the home page
-  homePageKey.currentState?.setCurrentIndex(0);
-
-  // We only want to attempt this kind of navigation if we already have the listings
-  // Otherwise, the map page will handle it when the listings eventually load
-  if (listings.isNotEmpty) {
-    // Request the map page to show directions
-    await mapPageKey.currentState?.getDirections(id, theDest, true);
-  }
-}
 
 class AboutTheFairPage extends StatefulWidget {
   const AboutTheFairPage({super.key});
@@ -302,22 +288,32 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                     'Fire engine pull\n',
                                     [
                                       TextSpan(
-                                          text: 'East Road',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.202488, 0.131207));
-                                            }),
+                                        text: 'East Road',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                              listings: listings, 
+                                              onTabSelected: (_) => {}, 
+                                              destinationId: '$aSimpleMarkerId Visit/Experience', 
+                                              destinationLatLng: const LatLng(52.202488, 0.131207)
+                                            )));
+                                          }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
-                                          text: 'the bridge',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Visit/Experience', const LatLng(52.198682, 0.141051));
-                                            }),
+                                        text: 'the bridge',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                              listings: listings, 
+                                              onTabSelected: (_) => {}, 
+                                              destinationId: '$aSimpleMarkerId Visit/Experience', 
+                                              destinationLatLng: const LatLng(52.198682, 0.141051)
+                                            )));
+                                          }),
                                     ],
                                   ),
                                   eventRow(
@@ -326,13 +322,18 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                     'Opening ceremony\n',
                                     [
                                       TextSpan(
-                                          text: 'Ditchburn Gardens',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.200389, 0.136465));
-                                            }),
+                                        text: 'Ditchburn Gardens',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                              listings: listings, 
+                                              onTabSelected: (_) => {}, 
+                                              destinationId: '$aSimpleMarkerId Performance', 
+                                              destinationLatLng: const LatLng(52.200389, 0.136465)
+                                            )));
+                                          }),
                                     ],
                                   ),
                                   eventRow(
@@ -341,22 +342,32 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                     'Parade\n',
                                     [
                                       TextSpan(
-                                          text: 'Salisbury Club',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.1970778, 0.1472252));
-                                            }),
+                                        text: 'Salisbury Club',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                              listings: listings, 
+                                              onTabSelected: (_) => {}, 
+                                              destinationId: '$aSimpleMarkerId Performance', 
+                                              destinationLatLng: const LatLng(52.1970778, 0.1472252)
+                                            )));
+                                          }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
-                                          text: 'Petersfield',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () {
-                                              HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
-                                            }),
+                                        text: 'Petersfield',
+                                        style: eventsSubtitleLinkStyle,
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            HapticFeedback.lightImpact();
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                              listings: listings, 
+                                              onTabSelected: (_) => {}, 
+                                              destinationId: '$aSimpleMarkerId Performance', 
+                                              destinationLatLng: const LatLng(52.202858, 0.132253)
+                                            )));
+                                          }),
                                     ],
                                   ),
                                   eventRow(
@@ -370,7 +381,12 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.199627, 0.138407));
+                                              Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                                listings: listings, 
+                                                onTabSelected: (_) => {}, 
+                                                destinationId: '$aSimpleMarkerId Performance', 
+                                                destinationLatLng: const LatLng(52.199627, 0.138407)
+                                              )));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       TextSpan(
@@ -379,7 +395,12 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              showDirectionsTo(context, '$aSimpleMarkerId Performance', const LatLng(52.202858, 0.132253));
+                                              Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
+                                                listings: listings, 
+                                                onTabSelected: (_) => {}, 
+                                                destinationId: '$aSimpleMarkerId Performance', 
+                                                destinationLatLng: const LatLng(52.202858, 0.132253))
+                                              ));
                                             }),
                                     ],
                                   ),
