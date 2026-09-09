@@ -53,14 +53,32 @@ FirebaseOptions firebaseOptionsForBuildMode({required bool isRelease}) {
   return isRelease ? prod.DefaultFirebaseOptions.currentPlatform : dev.DefaultFirebaseOptions.currentPlatform;
 }
 
-class RootWidget extends StatelessWidget {
+class RootWidget extends StatefulWidget {
   final bool firstExecution;
   final AnalyticsService analyticsService;
   const RootWidget({super.key, required this.firstExecution, required this.analyticsService});
 
   @override
+  State<RootWidget> createState() => _RootWidgetState();
+}
+
+class _RootWidgetState extends State<RootWidget> {
+  late bool _showWelcomeScreen;
+
+  @override
+  void initState() {
+    super.initState();
+    _showWelcomeScreen = widget.firstExecution;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return firstExecution ? WelcomeScreen(analyticsService: analyticsService) : MyApp(firstExecution: firstExecution, analyticsService: analyticsService);
+    return _showWelcomeScreen
+        ? WelcomeScreen(
+            analyticsService: widget.analyticsService,
+            onFinished: () => setState(() => _showWelcomeScreen = false),
+          )
+        : MyApp(firstExecution: false, analyticsService: widget.analyticsService);
   }
 }
 

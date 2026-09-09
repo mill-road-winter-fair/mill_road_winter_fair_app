@@ -142,8 +142,8 @@ void main() {
       await tester.tap(find.text('Skip'));
       await settle(tester);
 
-      // Verify that MyApp is now displayed
-      expect(find.byType(RootWidget), findsOneWidget);
+      // Verify that the main themed application shell is now displayed
+      expect(find.byType(MyApp), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
       await tester.pump(const Duration(seconds: 21));
@@ -231,8 +231,8 @@ void main() {
       await tester.tap(find.text('Done'));
       await settle(tester);
 
-      // Verify that MyApp is now displayed
-      expect(find.byType(RootWidget), findsOneWidget);
+      // Verify that the main themed application shell is now displayed
+      expect(find.byType(MyApp), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
       await tester.pump(const Duration(seconds: 21));
@@ -299,8 +299,8 @@ void main() {
       await tester.tap(find.text('Take me straight to the app!'));
       await settle(tester);
 
-      // Verify that MyApp is now displayed
-      expect(find.byType(RootWidget), findsOneWidget);
+      // Verify that the main themed application shell is now displayed
+      expect(find.byType(MyApp), findsOneWidget);
 
       // Let the 20s toast timer complete to avoid "Timer still pending" when test disposes widgets
       await tester.pump(const Duration(seconds: 21));
