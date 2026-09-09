@@ -134,7 +134,7 @@ void main() {
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
-      expect(find.text('01223 111111'), findsNothing);  // as Details won't be open
+      expect(find.text('01223 111111'), findsNothing); // as Details won't be open
       expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
@@ -143,7 +143,6 @@ void main() {
       // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
       expect(find.byIcon(Icons.directions_walk), findsExactly(3));
       expect(find.byIcon(Icons.public), findsExactly(2));
-
     });
 
     testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
@@ -225,7 +224,7 @@ void main() {
           'email': '',
           'website': 'https://www.biteclub.com',
           'phone': '01223 333333',
-          'latLng': '52.202313,0.131562',  // 968m
+          'latLng': '52.202313,0.131562', // 968m
           'imageURL': '',
           'startTime': '14:00',
           'endTime': '16:30',
@@ -500,7 +499,7 @@ void main() {
       await settle(tester);
       expect(homePageState.index, 3);
 
-      await tester.tap(find.text('Directions'));
+      await tester.tap(find.byIcon(Icons.directions_walk).first);
       await settle(tester);
 
       expect(homePageState.index, 3);
@@ -598,7 +597,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
+            body: FilteredListingsPage(
+                filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
           ),
         ),
       );

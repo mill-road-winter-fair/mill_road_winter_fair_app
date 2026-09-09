@@ -114,7 +114,7 @@ void main() {
 
       // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
       final snowflakeButton = find.byWidgetPredicate(
-            (widget) => widget is IconButton && widget.icon is ImageIcon,
+        (widget) => widget is IconButton && widget.icon is ImageIcon,
       );
       expect(snowflakeButton, findsOneWidget);
 
@@ -177,7 +177,8 @@ void main() {
       expect(find.byType(IconButton), findsExactly(6));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('App guide'), findsOneWidget);
-      expect(find.text('About the app'), findsOneWidget);
+      expect(find.text('Share this app'), findsOneWidget);
+      expect(find.text('About this app'), findsOneWidget);
     });
 
     testWidgets('navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
@@ -364,7 +365,7 @@ void main() {
       expect(find.byType(OnBoardingPage), findsOneWidget);
     });
 
-    testWidgets('show aboutDialog when About the app in drawer is tapped', (WidgetTester tester) async {
+    testWidgets('show aboutDialog when About this app in drawer is tapped', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -402,7 +403,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('About the app'));
+      await tester.tap(find.text('About this app'));
       await tester.pumpAndSettle();
 
       expect(find.text('Android app by Alexander Berridge'), findsOneWidget);
@@ -469,7 +470,6 @@ void main() {
       await tester.tap(find.byIcon(Icons.favorite).first);
       await tester.pumpAndSettle();
       expect(homePageState.index, 4);
-
     });
 
     testWidgets('emailDetailsDialog shows emails and close button', (WidgetTester tester) async {
