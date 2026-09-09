@@ -13,6 +13,15 @@ Future<void> settle(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 1000));
 }
 
+class RecordingSearchAnalyticsService extends FakeAnalyticsService {
+  final searches = <Map<String, String>>[];
+
+  @override
+  Future<void> logSearch(String searchTerm, {required String searchArea}) async {
+    searches.add({'search_term': searchTerm, 'search_area': searchArea});
+  }
+}
+
 void main() {
   // We're on test
   onTest = true;
@@ -498,6 +507,7 @@ void main() {
     });
 
     testWidgets('FilteredListingsPage search filters results based on query (UI)', (WidgetTester tester) async {
+      final analytics = RecordingSearchAnalyticsService();
       final sampleListings = [
         {
           'id': '1',
@@ -588,7 +598,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'all', analyticsService: FakeAnalyticsService(), listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
+            body: FilteredListingsPage(filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
           ),
         ),
       );
@@ -621,6 +631,9 @@ void main() {
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsNothing);
       expect(find.text('Bite Club'), findsNothing);
+      expect(analytics.searches, [
+        {'search_term': 'sushi', 'search_area': 'listings'},
+      ]);
 
       // Clear the search using the close button in the SearchBar (Icon(Icons.close))
       await tester.tap(find.byIcon(Icons.close));

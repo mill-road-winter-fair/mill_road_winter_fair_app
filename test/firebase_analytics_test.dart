@@ -68,6 +68,7 @@ void main() {
       await service.setCurrentScreen('MapPage');
       await service.logButtonTapped('home');
       await service.logButtonTapped('listing_details', listingId: 'listing-123', listingName: 'Listing');
+      await service.logSearch('mulled wine', searchArea: 'listings');
       await service.logMapMarkerTapped('Listing');
       await service.logMapTypePreferenceSet('hybrid');
       await service.logMapOrientationPreferenceSet('alwaysNorth');
@@ -139,6 +140,21 @@ void main() {
     });
     await service.logButtonTapped('drawer_open');
     expect(sdk.events.last['parameters'], {'button_id': 'drawer_open', 'screen_name': 'ListingsPage'});
+  });
+
+  test('search records the entered string and search area', () async {
+    usageAnalyticsEnabled = true;
+    await service.logSearch('  Mulled Wine  ', searchArea: 'listings');
+    expect(sdk.events.single, {
+      'name': 'search',
+      'parameters': {'search_term': 'Mulled Wine', 'search_area': 'listings'},
+    });
+  });
+
+  test('blank searches are not recorded', () async {
+    usageAnalyticsEnabled = true;
+    await service.logSearch('   ', searchArea: 'timetable');
+    expect(sdk.events, isEmpty);
   });
 
   test('show/hide all updates every map filter property', () async {
