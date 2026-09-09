@@ -591,6 +591,7 @@ void main() {
         expect(secondLaunchResult.length, 2);
         expect(secondLaunchResult.first["title"], "Glazed and Confused");
         expect(secondLaunchResult[1]["title"], "Sushi Squad");
+        verify(mockClient.get(any, headers: anyNamed('headers'))).called(2);
       });
 
       test('does not replace cached listings with an empty successful response',
