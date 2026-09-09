@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
@@ -331,6 +334,63 @@ void main() {
 
       // Description should have prefix removed
       expect(find.text('Nice buns'), findsOneWidget);
+    });
+
+    testWidgets('disables favourite, directions and share actions when listing is cancelled', (WidgetTester tester) async {
+      bool favouriteCalled = false;
+      bool directionsCalled = false;
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: true,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: '100m',
+        detailsVisible: false,
+        onGetDirections: () {
+          directionsCalled = true;
+        },
+        listingFavourited: false,
+        onFavouriteTapped: () {
+          favouriteCalled = true;
+        },
+      ));
+
+      final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
+      final FaIcon favouriteIcon = tester.widget(find.descendant(
+        of: find.byType(IconButton).first,
+        matching: find.byType(FaIcon),
+      ));
+      final ElevatedButton directionsButton = tester.widget(find.ancestor(
+        of: find.byIcon(Icons.directions_walk),
+        matching: find.byType(ElevatedButton),
+      ));
+      final Finder shareIcon = Platform.isAndroid ? find.byIcon(Icons.share) : find.byIcon(Icons.ios_share);
+      final ElevatedButton shareButton = tester.widget(find.ancestor(
+        of: shareIcon,
+        matching: find.byType(ElevatedButton),
+      ));
+
+      expect(favouriteButton.onPressed, isNull);
+      expect(favouriteIcon.color, Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).disabledColor);
+      expect(directionsButton.onPressed, isNull);
+      expect(shareButton.onPressed, isNull);
+
+      await tester.tap(find.byType(IconButton).first);
+      await tester.tap(find.byIcon(Icons.directions_walk));
+      await tester.pump();
+
+      expect(favouriteCalled, isFalse);
+      expect(directionsCalled, isFalse);
     });
   });
 }

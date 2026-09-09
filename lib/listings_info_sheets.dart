@@ -274,20 +274,21 @@ class SpecificListingInfoSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               IconButton(
-                onPressed: onFavouriteTapped,
+                onPressed: cancelled ? null : onFavouriteTapped,
                 padding: const EdgeInsets.all(0),
                 style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 icon:FaIcon(
                   shadows: [Shadow( color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                   (listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                  size: 22, color: Theme.of(context).colorScheme.primary,
+                  size: 22,
+                  color: cancelled ? Theme.of(context).disabledColor : Theme.of(context).colorScheme.primary,
                 ),
               ),
 
               const SizedBox(width: 6),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () {
+                onPressed: cancelled ? null : () {
                   HapticFeedback.lightImpact();
                   onGetDirections();
                 },
@@ -317,7 +318,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               const SizedBox(width: 6),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () => shareListing(title, location, startTime, endTime, context),
+                onPressed: cancelled ? null : () => shareListing(title, location, startTime, endTime, context),
                 child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
               ),
               Flexible(flex: 1, child: Container()),
