@@ -202,18 +202,28 @@ class SpecificListingInfoSheet extends StatelessWidget {
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(endTime);
     final timeStyle = subSubStyle.copyWith(
-      color: ended || cancelled ? Colors.red : Theme.of(context).colorScheme.onSurface,
+      color: ended ? Colors.red : Theme.of(context).colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
     if (location == '') {
       // this SpecificListingInfoSheet must be within a Group modal, so display differently
-      subDetails = Text.rich(
-          textAlign: TextAlign.right,
-          TextSpan(children: [
-            TextSpan(text: "$subtitle\n", style: subSubStyle),
-            TextSpan(text: updatedTimes, style: timeStyle),
-          ]));
+      subDetails = cancelled
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(subtitle, style: subSubStyle),
+                const SizedBox(height: 2),
+                _cancelledLabel(context),
+              ],
+            )
+          : Text.rich(
+              textAlign: TextAlign.right,
+              TextSpan(children: [
+                TextSpan(text: "$subtitle\n", style: subSubStyle),
+                TextSpan(text: updatedTimes, style: timeStyle),
+              ]));
     } else {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: subtitle, style: cancelled ? subSubStyle : timeStyle));
     }
@@ -271,11 +281,13 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerRight,
-                    child: Text(
-                      updatedTimes,
-                      style: timeStyle,
-                      textAlign: TextAlign.end,
-                    ),
+                    child: cancelled
+                        ? _cancelledLabel(context)
+                        : Text(
+                            updatedTimes,
+                            style: timeStyle,
+                            textAlign: TextAlign.end,
+                          ),
                   ),
                 ),
               ],
@@ -459,6 +471,24 @@ class SpecificListingInfoSheet extends StatelessWidget {
           if (onDetailsTapped == null && location != '') const SizedBox(height: 20),
           if (onDetailsTapped != null || location == '') const SizedBox(height: 4),
         ],
+      ),
+    );
+  }
+
+  Widget _cancelledLabel(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        'CANCELLED',
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onPrimary,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

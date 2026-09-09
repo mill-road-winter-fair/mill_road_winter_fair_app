@@ -297,7 +297,7 @@ void main() {
       }
     });
 
-    testWidgets('formatted with line-through and red text when listing is cancelled', (WidgetTester tester) async {
+    testWidgets('formats cancelled listing with line-through text and a cancelled label', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: true,
         brickAndMortar: false,
@@ -332,11 +332,23 @@ void main() {
       expect(subtitleSpan.style?.decoration, TextDecoration.lineThrough);
       expect(subtitleSpan.style?.color, isNot(Colors.red));
 
-      // Times should be replaced by CANCELLED and be red
+      // Times should be replaced by a rounded CANCELLED label using the action-button colours
       final cancelledTextFinder = find.text('CANCELLED');
-      expect(cancelledTextFinder, findsWidgets); // Might be more than one if both subtitle and body use it
+      expect(cancelledTextFinder, findsOneWidget);
       final Text cancelledTextWidget = tester.widget(cancelledTextFinder.first);
-      expect(cancelledTextWidget.style?.color, Colors.red);
+      final colorScheme = Theme.of(tester.element(cancelledTextFinder)).colorScheme;
+      expect(cancelledTextWidget.style?.color, colorScheme.onPrimary);
+      expect(cancelledTextWidget.style?.color, isNot(Colors.red));
+
+      final cancelledLabelFinder = find.ancestor(
+        of: cancelledTextFinder,
+        matching: find.byWidgetPredicate((widget) {
+          if (widget is! Container || widget.decoration is! BoxDecoration) return false;
+          final decoration = widget.decoration! as BoxDecoration;
+          return decoration.color == colorScheme.primary && decoration.borderRadius == BorderRadius.circular(12);
+        }),
+      );
+      expect(cancelledLabelFinder, findsOneWidget);
 
       // Description should have prefix removed
       expect(find.text('Nice buns'), findsOneWidget);
