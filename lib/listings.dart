@@ -10,7 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String _listingsCacheKey = 'cached_listings_json';
 
 // Save listings to SharedPreferences
-Future<void> _saveListingsToCache(List<Map<String, dynamic>> listingsToCache) async {
+Future<void> _saveListingsToCache(
+    List<Map<String, dynamic>> listingsToCache) async {
   try {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = jsonEncode(listingsToCache);
@@ -22,7 +23,7 @@ Future<void> _saveListingsToCache(List<Map<String, dynamic>> listingsToCache) as
 }
 
 // Load listings from SharedPreferences
-Future<List<Map<String, dynamic>>> _loadListingsFromCache() async {
+Future<List<Map<String, dynamic>>> loadListingsFromCache() async {
   try {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString(_listingsCacheKey);
@@ -52,7 +53,8 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     String herokuApiKey = dotenv.env['HEROKU_API_KEY'] ?? '';
     final uri = Uri.parse(herokuApi);
 
-    final response = await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
+    final response =
+        await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
     debugPrint('API response status: ${response.statusCode}');
 
     // Retry up to 10 times for transient failures
@@ -60,7 +62,8 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
       for (var i = 0; i < 9; i++) {
         await Future.delayed(const Duration(seconds: 2));
         final retryResponse = await client.get(uri);
-        debugPrint('Retry ${i + 1} response status: ${retryResponse.statusCode}');
+        debugPrint(
+            'Retry ${i + 1} response status: ${retryResponse.statusCode}');
         if (retryResponse.statusCode == 200) {
           debugPrint('Listings fetched after retry');
           final newListings = _parseListings(retryResponse.body);
@@ -82,24 +85,25 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     await _saveListingsToCache(newListings);
     return newListings;
   } on SocketException catch (_) {
-    debugPrint('\u26a0\ufe0f Network error: unable to reach server, trying cache.');
+    debugPrint(
+        '\u26a0\ufe0f Network error: unable to reach server, trying cache.');
     // Try to load from persistent cache
     if (listings.isEmpty) {
-      listings = await _loadListingsFromCache();
+      listings = await loadListingsFromCache();
     }
     return listings.isNotEmpty ? listings : [];
   } on HttpException catch (e) {
     debugPrint('\u26a0\ufe0f Server responded with an error: $e');
     // Try to load from persistent cache
     if (listings.isEmpty) {
-      listings = await _loadListingsFromCache();
+      listings = await loadListingsFromCache();
     }
     return listings.isNotEmpty ? listings : [];
   } on FormatException catch (e) {
     debugPrint('\u26a0\ufe0f Bad response format: $e');
     // Try to load from persistent cache
     if (listings.isEmpty) {
-      listings = await _loadListingsFromCache();
+      listings = await loadListingsFromCache();
     }
     return listings.isNotEmpty ? listings : [];
   } catch (e, stack) {
@@ -107,7 +111,7 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     debugPrint(stack.toString());
     // Try to load from persistent cache
     if (listings.isEmpty) {
-      listings = await _loadListingsFromCache();
+      listings = await loadListingsFromCache();
     }
     return listings.isNotEmpty ? listings : [];
   }
@@ -122,7 +126,8 @@ List<Map<String, dynamic>> _parseListings(String body) {
   if (rows.isEmpty) return [];
 
   // Normalise headers to a list of strings
-  final headers = (rows.first as List<dynamic>).map((h) => h?.toString() ?? '').toList();
+  final headers =
+      (rows.first as List<dynamic>).map((h) => h?.toString() ?? '').toList();
   final headerCount = headers.length;
 
   return rows.skip(1).map((row) {
@@ -150,7 +155,8 @@ List<Map<String, dynamic>> _parseListings(String body) {
 }
 
 // Fetch listings only if we don't already have them
-Future<List<Map<String, dynamic>>> fetchExistingListings(http.Client client) async {
+Future<List<Map<String, dynamic>>> fetchExistingListings(
+    http.Client client) async {
   debugPrint('fetchExistingListings called');
   if (listings.isEmpty) {
     try {

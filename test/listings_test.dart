@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
@@ -30,7 +31,9 @@ void main() {
 
   group('Listings', () {
     group('fetchListings', () {
-      test('retries 10 times and returns empty listings when status code is not 200 and we have no listings cached', () async {
+      test(
+          'retries 10 times and returns empty listings when status code is not 200 and we have no listings cached',
+          () async {
         final invalidResponse = {};
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
@@ -44,7 +47,8 @@ void main() {
         final result = await fetchExistingListings(mockClient);
 
         expect(result, []);
-        verify(mockClient.get(any, headers: anyNamed('headers'))).called(equals(10));
+        verify(mockClient.get(any, headers: anyNamed('headers')))
+            .called(equals(10));
       });
 
       test('returns a list of listings when response is valid', () async {
@@ -276,7 +280,8 @@ void main() {
         expect(result.first['id'], '1');
       });
 
-      test('handles explicit null cells by converting them to empty strings', () async {
+      test('handles explicit null cells by converting them to empty strings',
+          () async {
         final mockResponse = {
           "values": [
             [
@@ -350,7 +355,8 @@ void main() {
     });
 
     group('fetchExistingListings', () {
-      test('returns listings from fetchListings if no existing listings', () async {
+      test('returns listings from fetchListings if no existing listings',
+          () async {
         listings = [];
 
         final mockResponse = {
@@ -459,7 +465,10 @@ void main() {
         expect(result.first["title"], "Glazed and Confused");
       });
 
-      test('retains cached listings data when app is restarted with API failure', () async {
+      test(
+          'retains cached listings data when app is restarted with API failure',
+          () async {
+        SharedPreferences.setMockInitialValues({});
         // Simulate first app launch: successfully fetch listings from API
         final initialMockResponse = {
           "values": [
@@ -547,7 +556,7 @@ void main() {
         listings = [];
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
-              (_) async => http.Response.bytes(
+          (_) async => http.Response.bytes(
             utf8.encode(jsonEncode(initialMockResponse)),
             200,
             headers: {'content-type': 'application/json; charset=utf-8'},
@@ -562,13 +571,21 @@ void main() {
         expect(listings.first["title"], "Glazed and Confused");
         expect(listings[1]["title"], "Sushi Squad");
 
-        // Simulate app restart: call fetchExistingListings while API is down
+        // Simulate an app restart by clearing the process-local state.
+        listings = [];
+
+        final restoredListings = await loadListingsFromCache();
+        expect(restoredListings.length, 2);
+        expect(restoredListings.first["title"], "Glazed and Confused");
+        expect(restoredListings[1]["title"], "Sushi Squad");
+        listings = restoredListings;
+
+        // The background refresh fails while the API is down.
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
-          (_) async => http.Response('Internal Server Error', 500),
+          (_) async => throw const SocketException('No network connection'),
         );
 
-        // Second app launch: API fails but cached listings should still be available
-        final secondLaunchResult = await fetchExistingListings(mockClient);
+        final secondLaunchResult = await fetchListings(mockClient);
 
         // Should return the cached listings from the first launch
         expect(secondLaunchResult.length, 2);
@@ -576,8 +593,11 @@ void main() {
         expect(secondLaunchResult[1]["title"], "Sushi Squad");
       });
 
-      test('fetchExistingListings with empty cache returns empty list on API failure', () async {
+      test(
+          'fetchExistingListings with empty cache returns empty list on API failure',
+          () async {
         // Simulate fresh app install with API down
+        SharedPreferences.setMockInitialValues({});
         listings = [];
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
@@ -587,7 +607,8 @@ void main() {
         final result = await fetchExistingListings(mockClient);
 
         expect(result, []);
-        verify(mockClient.get(any, headers: anyNamed('headers'))).called(equals(10)); // Verifies retries happened
+        verify(mockClient.get(any, headers: anyNamed('headers')))
+            .called(equals(10)); // Verifies retries happened
       });
     });
   });
