@@ -226,6 +226,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           timeInSecForIosWeb: 4,
         );
       } else {
+        widget.analyticsService.logPreferenceSet('sorting_method', selectedValue.name);
         setState(() {
           preferredSortingMethod = selectedValue;
         });
@@ -244,6 +245,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void filteringDropdownCallback(String? selectedValue) {
     HapticFeedback.selectionClick();
+    widget.analyticsService.logButtonTapped('listings_category_filter');
+    widget.analyticsService.logPreferenceSet('listings_category', selectedValue ?? 'all');
     widget.onSubfilterChange.call(selectedValue);
   }
 
@@ -255,7 +258,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   void toggleDetailsRow(int index) {
-    HapticFeedback.lightImpact();
     setState(() {
       detailsVisibilityList[index] = !detailsVisibilityList[index];
     });
@@ -313,7 +315,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             isRefreshing
                 ? const CircularProgressIndicator()
                 : ElevatedButton.icon(
-                    onPressed: refreshListings,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                      refreshListings();
+                    },
                     icon: const Icon(Icons.refresh),
                     label: const Text('Refresh listings'),
                   ),
@@ -379,9 +385,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         if (filterCategory == 'favourite' || isShowingJustPerformance)
           IconButton(
             key: nowOrSoonIconKey,
-            onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon'),
+            onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon', analyticsService: widget.analyticsService),
             onPressed: () {
               HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('listings_scroll_to_now');
               if (isItEventDay()) {
                 if (firstNextListingIndex < 0) {
                   // we may not be on Sort by Time, or the Fair may have recently started
@@ -420,7 +427,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   );
                 }
               } else {
-                showMiniPopup(context, nowOrSoonIconKey, '‘Scroll to now’ is only available when the Fair is underway', colorScheme.error);
+                showMiniPopup(context, nowOrSoonIconKey, '‘Scroll to now’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
               }
             },
             icon: Icon(
@@ -432,12 +439,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           IconButton(
             key: hidePastIconKey,
             onLongPress: () => showMiniPopup(context, hidePastIconKey,
-                (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed'),
+                (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
             onPressed: () {
               HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
               if (isItEventDay()) {
                 setState(() {
                   _hidePastListings = !_hidePastListings;
+                  widget.analyticsService.logPreferenceSet('listings_hide_past', _hidePastListings.toString());
                   numberOfVisibleListings = -1;
                   firstVisibleIndex = null;
                 });
@@ -451,7 +460,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   timeInSecForIosWeb: 2,
                 );
               } else {
-                showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', colorScheme.error);
+                showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
               }
             },
             icon: Icon(
@@ -463,9 +472,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           key: searchIconKey,
           color: colorScheme.onSecondary,
           onLongPress: () =>
-              showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
+              showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('listings_search_toggle');
             setState(() {
               _isSearching = !_isSearching;
               if (!_isSearching) {
