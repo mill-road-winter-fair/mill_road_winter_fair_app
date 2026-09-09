@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -138,6 +139,30 @@ void main() {
     await tester.tap(find.text('Dark'));
     await tester.pumpAndSettle();
     expect(analytics.calls, ['haptic', 'tap:theme_preference_option', 'theme:dark']);
+  });
+
+  testWidgets('analytics explanation lists tracked and untracked data', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(MaterialApp(
+      theme: appThemes['light'],
+      home: AnalyticsExplanationPage(analyticsService: analytics),
+    ));
+
+    expect(find.text('What do we track?'), findsOneWidget);
+    expect(find.text('• Words and phrases you enter in in-app searches.'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('What don\'t we track?'),
+      300,
+      scrollable: find.byType(Scrollable),
+    );
+    expect(find.text('What don\'t we track?'), findsOneWidget);
+    expect(find.text('• Your exact GPS location.'), findsOneWidget);
+    expect(find.text('• Data for personalised advertising.'), findsOneWidget);
   });
 
   testWidgets('only the visible tab is tracked and returning from Settings restores it', (tester) async {
