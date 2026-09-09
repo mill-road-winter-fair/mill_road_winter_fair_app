@@ -8,14 +8,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'firebase_analytics.dart';
 
 OverlayEntry? _miniPopupOverlayEntry; // widget that floats over a given widget as a 'tooltip'
 Timer? _miniPopupTimer; // times how long the above stays on screen
@@ -52,12 +51,17 @@ class FairScaffold extends StatelessWidget {
             titleSpacing: 0,
             leadingWidth: 44,
             leading: (allowBack ?? false)
-                ? const BackButton()
+                ? BackButton(onPressed: () {
+                    HapticFeedback.lightImpact();
+                    analyticsService.logButtonTapped('back');
+                    Navigator.maybePop(context);
+                  })
                 : Builder(
                     builder: (context) => IconButton(
                       icon: const Icon(Icons.menu),
                       onPressed: () {
                         HapticFeedback.lightImpact();
+                        analyticsService.logButtonTapped('drawer_open');
                         Scaffold.of(context).openDrawer();
                       },
                     ),
@@ -71,13 +75,13 @@ class FairScaffold extends StatelessWidget {
             actionsPadding: EdgeInsets.only(right: 4),
           ),
           body: body,
-          drawer: fairDrawer(context, analyticsService),
-          bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected),
+          drawer: fairDrawer(context, analyticsService: analyticsService),
+          bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected, analyticsService: analyticsService),
         ));
   }
 }
 
-BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected) {
+BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, {required AnalyticsService analyticsService}) {
   return BottomNavigationBar(
     type: BottomNavigationBarType.fixed,
     showUnselectedLabels: true,
@@ -88,6 +92,7 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     iconSize: 30,
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
+      analyticsService.logButtonTapped('navigation_${const ['home', 'map', 'timetable', 'listings', 'favourites'][selectedIndex]}');
       onTabSelected.call(selectedIndex);
     },
     items: const [
@@ -100,7 +105,7 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
   );
 }
 
-Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
+Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsService}) {
   return Drawer(
     child: Column(
       spacing: 0,
@@ -138,6 +143,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
             title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              analyticsService.logButtonTapped('drawer_about_fair');
               Navigator.pop(context);
               Navigator.push(
                   context,
@@ -155,6 +161,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
             title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              analyticsService.logButtonTapped('drawer_important_information');
               Navigator.pop(context);
               Navigator.push(
                   context,
@@ -172,6 +179,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
             title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              analyticsService.logButtonTapped('drawer_website');
               launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
             },
           ),
@@ -183,10 +191,11 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
             title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              analyticsService.logButtonTapped('drawer_contact');
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return contactUsDialog(context, analyticsService);
+                  return contactUsDialog(context, analyticsService: analyticsService);
                 },
               );
             },
@@ -206,6 +215,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
               IconButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  analyticsService.logButtonTapped('drawer_facebook');
                   launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -215,6 +225,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
               IconButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  analyticsService.logButtonTapped('drawer_x');
                   launchUrl(Uri.parse('https://x.com/millroadfair'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -224,6 +235,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
               IconButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  analyticsService.logButtonTapped('drawer_instagram');
                   launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -233,6 +245,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
               IconButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
+                  analyticsService.logButtonTapped('drawer_flickr');
                   launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
@@ -257,6 +270,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
             title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              analyticsService.logButtonTapped('drawer_settings');
               Navigator.pop(context);
               Navigator.push(
                   context,
@@ -274,6 +288,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
             title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              analyticsService.logButtonTapped('drawer_app_guide');
               Navigator.pop(context);
               Navigator.pushReplacement(
                   context,
@@ -291,8 +306,9 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
             title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
             onTap: () {
               HapticFeedback.lightImpact();
+              analyticsService.logButtonTapped('drawer_about_app');
               Navigator.pop(context);
-              aboutDialog(context);
+              aboutDialog(context, analyticsService: analyticsService);
             },
           ),
         ),
@@ -305,7 +321,7 @@ Drawer fairDrawer(BuildContext context, AnalyticsService analyticsService) {
   );
 }
 
-void aboutDialog(BuildContext context) {
+Future<void> aboutDialog(BuildContext context, {required AnalyticsService analyticsService}) {
   PackageInfo packageInfo = PackageInfo(
     appName: 'Unknown',
     packageName: 'Unknown',
@@ -314,12 +330,13 @@ void aboutDialog(BuildContext context) {
     buildSignature: 'Unknown',
     installerStore: 'Unknown',
   );
-  return showAboutDialog(
+  return showDialog<void>(
     context: context,
-    applicationName: 'Mill Road\nWinter Fair',
-    applicationVersion: packageInfo.version,
-    applicationIcon: const MyAppIcon(),
-    children: [
+    builder: (dialogContext) => AlertDialog(
+    title: const Text('Mill Road\nWinter Fair'),
+    scrollable: true,
+    content: Column(mainAxisSize: MainAxisSize.min, children: [
+      Row(children: [const MyAppIcon(), const SizedBox(width: 12), Text(packageInfo.version)]),
       ListTile(
         dense: true,
         contentPadding: EdgeInsets.zero,
@@ -331,6 +348,7 @@ void aboutDialog(BuildContext context) {
             child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
         onTap: () async {
           HapticFeedback.lightImpact();
+          analyticsService.logButtonTapped('about_android_author');
           launchUrl(Uri.parse('https://theberridge.com'));
         },
       ),
@@ -345,6 +363,7 @@ void aboutDialog(BuildContext context) {
             child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
         onTap: () async {
           HapticFeedback.lightImpact();
+          analyticsService.logButtonTapped('about_ios_author');
           launchUrl(Uri.parse('http://mattwhiting.com'));
         },
       ),
@@ -360,6 +379,7 @@ void aboutDialog(BuildContext context) {
                 Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
         onTap: () async {
           HapticFeedback.lightImpact();
+          analyticsService.logButtonTapped('about_illustrator');
           launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
         },
       ),
@@ -374,14 +394,33 @@ void aboutDialog(BuildContext context) {
             child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary))),
         onTap: () async {
           HapticFeedback.lightImpact();
+          analyticsService.logButtonTapped('about_feedback');
           launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
         },
       ),
+    ]),
+    actions: [
+      TextButton(
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          analyticsService.logButtonTapped('about_licenses');
+          showLicensePage(context: dialogContext, applicationName: 'Mill Road Winter Fair');
+        },
+        child: Text(MaterialLocalizations.of(dialogContext).viewLicensesButtonLabel),
+      ),
+      TextButton(
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          analyticsService.logButtonTapped('about_close');
+          Navigator.pop(dialogContext);
+        },
+        child: Text(MaterialLocalizations.of(dialogContext).closeButtonLabel),
+      ),
     ],
-  );
+  ));
 }
 
-Widget contactUsDialog(BuildContext theBuildContext, AnalyticsService analyticsService) {
+Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService analyticsService}) {
   final ScrollController emailDetailsDialogScrollController = ScrollController();
   return Dialog(
     insetPadding: EdgeInsets.all(10.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
@@ -407,22 +446,22 @@ Widget contactUsDialog(BuildContext theBuildContext, AnalyticsService analyticsS
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('info@millroadwinterfair.org'),
+                      _buildEmailLink('info@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('volunteers@millroadwinterfair.org'),
+                      _buildEmailLink('volunteers@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('events@millroadwinterfair.org'),
+                      _buildEmailLink('events@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('stalls@millroadwinterfair.org'),
+                      _buildEmailLink('stalls@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('it@millroadwinterfair.org'),
+                      _buildEmailLink('it@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('app@millroadwinterfair.org'),
+                      _buildEmailLink('app@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       Text.rich(
                         TextSpan(
@@ -434,6 +473,8 @@ Widget contactUsDialog(BuildContext theBuildContext, AnalyticsService analyticsS
                                 style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () async {
+                                    HapticFeedback.lightImpact();
+                                    analyticsService.logButtonTapped('contact_phone');
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
                                     if (await canLaunchUrl(phoneUri)) {
                                       await launchUrl(phoneUri);
@@ -451,6 +492,7 @@ Widget contactUsDialog(BuildContext theBuildContext, AnalyticsService analyticsS
                         child: TextButton(
                           onPressed: () {
                             HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('contact_close');
                             Navigator.pop(context);
                           },
                           child: Text(
@@ -471,10 +513,11 @@ Widget contactUsDialog(BuildContext theBuildContext, AnalyticsService analyticsS
   );
 }
 
-Widget _buildEmailLink(String email) {
+Widget _buildEmailLink(String email, {required AnalyticsService analyticsService}) {
   return InkWell(
     onTap: () async {
       HapticFeedback.lightImpact();
+      analyticsService.logButtonTapped('contact_email');
       final Uri mailUri = Uri(scheme: 'mailto', path: email);
       if (await canLaunchUrl(mailUri)) {
         await launchUrl(mailUri);
@@ -489,7 +532,7 @@ Widget _buildEmailLink(String email) {
   );
 }
 
-void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage, [Color? fgColour, Color? bgColour]) {
+void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage, {required AnalyticsService analyticsService, Color? fgColour, Color? bgColour}) {
   fgColour ??= Theme.of(itemContext).colorScheme.secondary;
   bgColour ??= Theme.of(itemContext).colorScheme.onSecondary;
 
@@ -528,6 +571,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
         // since field may be clipped
         onTap: () {
           HapticFeedback.lightImpact();
+          analyticsService.logButtonTapped('tooltip_dismiss');
           removeMiniPopup();
         },
         child: ConstrainedBox(
