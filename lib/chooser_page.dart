@@ -55,6 +55,7 @@ class _ChooserPageState extends State<ChooserPage> {
           icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
           onPressed: () {
             HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('chooser_about_fair');
             Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
           },
         ),
@@ -75,36 +76,72 @@ class _ChooserPageState extends State<ChooserPage> {
                 TextSpan(
                     style: bodyStyle,
                     text: '• Timetable (music only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(false, true)),
+                    recognizer: TapGestureRecognizer()..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('chooser_music');
+                      widget.onOpenTimetable(false, true);
+                    }),
                 TextSpan(
                     style: bodyStyle,
                     text: '• Timetable (all but music)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(false, false)),
+                    recognizer: TapGestureRecognizer()..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('chooser_other');
+                      widget.onOpenTimetable(false, false);
+                    }),
                 TextSpan(
                     style: bodyStyle,
                     text: '• Timetable (music on now or soon)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(true, true)),
+                    recognizer: TapGestureRecognizer()..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('chooser_music_now');
+                      widget.onOpenTimetable(true, true);
+                    }),
                 TextSpan(
                     style: bodyStyle,
                     text: '• Timetable (all but music on now or soon)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenTimetable(true, false)),
+                    recognizer: TapGestureRecognizer()..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('chooser_other_now');
+                      widget.onOpenTimetable(true, false);
+                    }),
                 TextSpan(
                     style: bodyStyle,
                     text: '• Listings (music only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('all', 'performanceMusic')),
+                    recognizer: TapGestureRecognizer()..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('chooser_listings_music');
+                      widget.onOpenListings('all', 'performanceMusic');
+                    }),
                 TextSpan(
                     style: bodyStyle,
                     text: '• Listings (other performances only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('all', 'performanceOther')),
+                    recognizer: TapGestureRecognizer()..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('chooser_listings_other');
+                      widget.onOpenListings('all', 'performanceOther');
+                    }),
                 TextSpan(
                     style: bodyStyle,
                     text: '• Listings (children’s only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('all', 'performanceChildrens')),
+                    recognizer: TapGestureRecognizer()..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('chooser_listings_children');
+                      widget.onOpenListings('all', 'performanceChildrens');
+                    }),
                 TextSpan(
                     style: bodyStyle,
                     text: '• Favourite listings (music only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenListings('favourite', 'performanceMusic')),
-                TextSpan(style: bodyStyle, text: '• Map (nearest 10 markers)\n', recognizer: TapGestureRecognizer()..onTap = () => widget.onOpenMap(10)),
+                    recognizer: TapGestureRecognizer()..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('chooser_favourites_music');
+                      widget.onOpenListings('favourite', 'performanceMusic');
+                    }),
+                TextSpan(style: bodyStyle, text: '• Map (nearest 10 markers)\n', recognizer: TapGestureRecognizer()..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('chooser_map_nearest');
+                      widget.onOpenMap(10);
+                    }),
               ]),
             ), // Add event details here
           ),
