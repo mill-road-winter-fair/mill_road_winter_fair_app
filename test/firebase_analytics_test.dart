@@ -67,6 +67,7 @@ void main() {
       usageAnalyticsEnabled = consent;
       await service.setCurrentScreen('MapPage');
       await service.logButtonTapped('home');
+      await service.logButtonTapped('listing_details', listingId: 'listing-123', listingName: 'Listing');
       await service.logMapMarkerTapped('Listing');
       await service.logMapTypePreferenceSet('hybrid');
       await service.logMapOrientationPreferenceSet('alwaysNorth');
@@ -123,6 +124,21 @@ void main() {
     expect(sdk.events, isEmpty);
     expect(sdk.properties, isEmpty);
     expect((await SharedPreferences.getInstance()).getBool('usageAnalyticsEnabled'), false);
+  });
+
+  test('listing button events identify same-named listings without leaking context into other buttons', () async {
+    usageAnalyticsEnabled = true;
+    await service.setCurrentScreen('ListingsPage');
+    await service.logButtonTapped('visit_listing_website', listingId: 'listing-123', listingName: 'Listing');
+    await service.logButtonTapped('visit_listing_website', listingId: 'listing-456', listingName: 'Listing');
+    expect(sdk.events[0]['parameters'], {
+      'button_id': 'visit_listing_website', 'screen_name': 'ListingsPage', 'listing_id': 'listing-123', 'listing_name': 'Listing',
+    });
+    expect(sdk.events[1]['parameters'], {
+      'button_id': 'visit_listing_website', 'screen_name': 'ListingsPage', 'listing_id': 'listing-456', 'listing_name': 'Listing',
+    });
+    await service.logButtonTapped('drawer_open');
+    expect(sdk.events.last['parameters'], {'button_id': 'drawer_open', 'screen_name': 'ListingsPage'});
   });
 
   test('show/hide all updates every map filter property', () async {

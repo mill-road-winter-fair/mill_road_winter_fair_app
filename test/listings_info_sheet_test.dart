@@ -36,6 +36,7 @@ void main() {
     return MaterialApp(
       home: Scaffold(
         body: SpecificListingInfoSheet(
+          listingId: 'test-listing',
           cancelled: cancelled,
           brickAndMortar: brickAndMortar,
           emoji: emoji,
