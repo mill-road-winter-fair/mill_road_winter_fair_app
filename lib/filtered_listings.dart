@@ -611,6 +611,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
                                         ),
                                         child: SpecificListingInfoSheet(
+                                          listingId: listing['id'],
                                           cancelled: listing['cancelled'] == 'TRUE' ? true : false,
                                           brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
                                           emoji: listing['emoji'] ?? '',

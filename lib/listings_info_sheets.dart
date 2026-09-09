@@ -134,6 +134,7 @@ class GroupListingInfoSheet extends StatelessWidget {
 }
 
 class SpecificListingInfoSheet extends StatefulWidget {
+  final String listingId;
   // From the db
   final bool cancelled;
   final bool brickAndMortar;
@@ -159,6 +160,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final AnalyticsService analyticsService;
 
   const SpecificListingInfoSheet({
+    required this.listingId,
     required this.cancelled,
     required this.brickAndMortar,
     required this.emoji,
@@ -297,7 +299,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               IconButton(
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  widget.analyticsService.logButtonTapped('save_listing');
+                  widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
                   widget.onFavouriteTapped?.call();
                   if (!widget.listingFavourited) {
                     widget.analyticsService.logListingSaved(widget.title);
@@ -328,7 +330,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  widget.analyticsService.logButtonTapped('directions_to_listing');
+                  widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
                   widget.analyticsService.logDirectionsToListingRequested(widget.title);
                   widget.onGetDirections();
                 },
@@ -363,7 +365,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('listing_details');
+                    widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
                     widget.onDetailsTapped?.call();
                   },
                   child: const Icon(Icons.info),
@@ -388,7 +390,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('listing_details');
+                    widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
                     widget.onDetailsTapped?.call();
                   },
                   icon: const Icon(Icons.info),
@@ -404,7 +406,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('visit_listing_website');
+                      widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
                       launchUrl(Uri.parse(widget.website));
                     },
                     customBorder: const CircleBorder(),
@@ -428,7 +430,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('email_listing');
+                      widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
                       final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
                       if (await canLaunchUrl(mailUri)) {
                         await launchUrl(mailUri);
@@ -457,7 +459,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('phone_listing');
+                      widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
                       final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
                       if (await canLaunchUrl(phoneUri)) {
                         await launchUrl(phoneUri);
@@ -509,7 +511,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('visit_listing_website');
+              widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
               launchUrl(Uri.parse(widget.website));
             },
             child: Row(
@@ -532,7 +534,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('email_listing');
+              widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
               if (await canLaunchUrl(mailUri)) {
                 await launchUrl(mailUri);
@@ -560,7 +562,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('phone_listing');
+              widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
               if (await canLaunchUrl(phoneUri)) {
                 await launchUrl(phoneUri);
@@ -632,6 +634,7 @@ Future<void> showListingDetailsDialog(
                     ),
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                     child: SpecificListingInfoSheet(
+                      listingId: event.id,
                       cancelled: event.cancelled,
                       brickAndMortar: event.brickAndMortar,
                       emoji: event.emoji,

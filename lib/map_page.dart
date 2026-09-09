@@ -655,6 +655,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                       return Column(
                                         children: [
                                           SpecificListingInfoSheet(
+                                            listingId: rel['id'],
                                             cancelled: rel['cancelled'] == 'TRUE' ? true : false,
                                             brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
                                             emoji: rel['emoji'] ?? '',
@@ -789,6 +790,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
                             child: SpecificListingInfoSheet(
+                              listingId: listing['id'],
                               cancelled: listing['cancelled'] == 'TRUE' ? true : false,
                               brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
                               emoji: listing['emoji'] ?? '',

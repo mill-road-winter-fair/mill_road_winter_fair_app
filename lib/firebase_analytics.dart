@@ -38,7 +38,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
-  Future<void> logButtonTapped(String buttonName) async {
+  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
     if (usageAnalyticsEnabled != true) {
       return;
     }
@@ -49,6 +49,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
       parameters: {
         'button_id': buttonName,
         'screen_name': currentScreen,
+        if (listingId != null) 'listing_id': listingId,
+        if (listingName != null) 'listing_name': listingName,
       },
     ));
   }
@@ -364,7 +366,7 @@ abstract class AnalyticsService {
   Future<void> logPreferenceSet(String preference, String value);
   Future<void> setCurrentScreen(String screenName);
   Future<void> logMapMarkerTapped(String listingName);
-  Future<void> logButtonTapped(String buttonName);
+  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName});
   Future<void> logMapTypePreferenceSet(String mapType);
   Future<void> logMapOrientationPreferenceSet(String mapOrientation);
   Future<void> logMapMarkerFilterPreferenceSet(String category, bool visible);
@@ -395,7 +397,7 @@ class FakeAnalyticsService implements AnalyticsService {
     // Do nothing
   }
   @override
-  Future<void> logButtonTapped(String buttonName) async {
+  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
     // Do nothing
   }
   @override
