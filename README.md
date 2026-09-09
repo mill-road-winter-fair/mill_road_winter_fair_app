@@ -61,7 +61,7 @@ KEY_ALIAS=upload
 KEY_PASSWORD=\\The password you set when generating the keystore
 ```
 
-12. Create `android/app/google-services.json` by copying `android/app/google-services-dev.json`. This ensures that the production releases of the app will sned their analytics to the development Firebase tenancy.
+12. Create `android/app/google-services.json` by copying `android/app/google-services-dev.json`. Debug and profile builds automatically use the development Firebase project in Dart, so this keeps the native configuration aligned with it.
 
 13. You should now have everything you need to run the app locally.
 
@@ -82,7 +82,7 @@ The app currently uses the the Google Maps Platform within GCP in order to acces
 
 5. Create a GitHub release titled with the version number, detail all of the changes made. 
 
-6. Ensure that the contents of `android/app/google-services.json` match `android/app/google-services-prod.json`. This ensures that the production releases of the app will sned their analytics to the production Firebase tenancy.
+6. Ensure that the contents of `android/app/google-services.json` match `android/app/google-services-prod.json`. Release builds automatically use the production Firebase project in Dart, so this keeps the native configuration aligned with it.
 
 7. Set environment variables for the signing key store.
 ```shell

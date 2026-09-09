@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -23,11 +24,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
-  final env = dotenv.env['ENV'];
-
-  // Initialize Firebase with the appropriate options based on the environment
+  // Release builds always use the production Firebase project. Debug and
+  // profile builds use the development project.
   await Firebase.initializeApp(
-    options: env == 'prod' ? prod.DefaultFirebaseOptions.currentPlatform : dev.DefaultFirebaseOptions.currentPlatform,
+    options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
   );
 
   await loadSettings();
@@ -47,6 +47,10 @@ Future<void> main() async {
   debugPrint('Setting preferred orientation and running app');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((value) => runApp(RootWidget(firstExecution: firstExecution, analyticsService: analyticsService)));
+}
+
+FirebaseOptions firebaseOptionsForBuildMode({required bool isRelease}) {
+  return isRelease ? prod.DefaultFirebaseOptions.currentPlatform : dev.DefaultFirebaseOptions.currentPlatform;
 }
 
 class RootWidget extends StatelessWidget {
