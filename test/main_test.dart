@@ -1,3 +1,5 @@
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:mill_road_winter_fair_app/about_app_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
@@ -343,7 +345,8 @@ void main() {
       expect(find.byType(OnBoardingPage), findsOneWidget);
     });
 
-    testWidgets('show aboutDialog when About this app in drawer is tapped', (WidgetTester tester) async {
+    testWidgets('open About app screen and return when back is tapped', (WidgetTester tester) async {
+      PackageInfo.setMockInitialValues(appName: 'Mill Road Winter Fair', packageName: 'test.mrwf', version: '1.2.3', buildNumber: '42', buildSignature: '');
       listings = [
         {
           'id': '1',
@@ -376,13 +379,20 @@ void main() {
       await tester.pumpWidget(const MyApp());
 
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
 
       await tester.tap(find.text('About this app'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
 
-      expect(find.text('Android app by Alexander Berridge'), findsOneWidget);
-      expect(find.text('iPhone version by Matt Whiting'), findsOneWidget);
+      expect(find.byType(AboutAppPage), findsOneWidget);
+      expect(find.byType(Dialog), findsNothing);
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
+      expect(find.byType(AboutAppPage), findsNothing);
+      expect(find.byType(HomePage), findsOneWidget);
     });
 
     testWidgets('BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
