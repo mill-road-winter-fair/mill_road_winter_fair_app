@@ -19,7 +19,7 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
 
       // Call maybeShowNotice; should not throw and should write to prefs
-      await ListingUpdateNotifier.maybeShowNotice(tester.element(find.byType(SizedBox)), FakeAnalyticsService());
+      await ListingUpdateNotifier.maybeShowNotice(tester.element(find.byType(SizedBox)), analyticsService: FakeAnalyticsService());
 
       // Advance time to allow the toast's internal timer (8s) to complete and avoid pending timers
       // original was 9s; changed to 13s for the lengthier interim message
