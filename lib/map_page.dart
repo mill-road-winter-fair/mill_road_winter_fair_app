@@ -13,26 +13,31 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
-import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
-import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
 import 'package:mill_road_winter_fair_app/category_tools.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
-import 'package:mill_road_winter_fair_app/string_to_latlng.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
+  final void Function()? onHomeTapped;
+  final String? destinationId; // optional if we'll be showing directions to somewhere
+  final LatLng? destinationLatLng; // optional if we'll be showing directions to somewhere
+  final int? nearestMarkerCount; // optional if we'll be zooming in to nearest X markers
 
   const MapPage({
     super.key,
     required this.listings, 
     required this.onTabSelected,
+    this.onHomeTapped,
+    this.destinationId,
+    this.destinationLatLng,
+    this.nearestMarkerCount,
   });
 
   @override
@@ -74,10 +79,11 @@ class MapPageState extends State<MapPage> {
     'Services': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
+  bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
 
   @override
   void initState() {
-    debugPrint('MapPageState initState() called');
+    debugPrint('MapPageState initState() called with destinationId=${widget.destinationId}');
     if (Platform.isAndroid) {
       googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
     } else if (Platform.isIOS) {
@@ -88,9 +94,15 @@ class MapPageState extends State<MapPage> {
     setVisibleMarkerLists();
     addAllVisibleMarkers();
     _establishLocationAndRefreshMap();
+    establishLocation();
+    if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
       ListingUpdateNotifier.maybeShowNotice(context);
+      if (doingAPushNavigation ?? false) {
+        doingAPushNavigation = false;
+        doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
+      }
     });
     super.initState();
   }
@@ -108,149 +120,13 @@ class MapPageState extends State<MapPage> {
   }
 
   Polygon roadClosurePolygon() {
-    final List<LatLng> roadClosurePolygonPoints = [];
-    roadClosurePolygonPoints.add(const LatLng(52.20235281420999, 0.1310619082596975));
-    roadClosurePolygonPoints.add(const LatLng(52.20231516801594, 0.1311597848998902));
-    roadClosurePolygonPoints.add(const LatLng(52.20234751634417, 0.1312922180728582));
-    roadClosurePolygonPoints.add(const LatLng(52.20233631517088, 0.1314355240724652));
-    roadClosurePolygonPoints.add(const LatLng(52.20200908093806, 0.1322005128635384));
-    roadClosurePolygonPoints.add(const LatLng(52.20197859926515, 0.1322488316534076));
-    roadClosurePolygonPoints.add(const LatLng(52.2019422735798, 0.1322292934474145));
-    roadClosurePolygonPoints.add(const LatLng(52.2012105622847, 0.1316364880114951));
-    roadClosurePolygonPoints.add(const LatLng(52.20117278129067, 0.1317673350512383));
-    roadClosurePolygonPoints.add(const LatLng(52.20190848239522, 0.1323816884898998));
-    roadClosurePolygonPoints.add(const LatLng(52.20191780047099, 0.1324033494486065));
-    roadClosurePolygonPoints.add(const LatLng(52.20191206154605, 0.1324377833024948));
-    roadClosurePolygonPoints.add(const LatLng(52.20180722003214, 0.1326842889403568));
-    roadClosurePolygonPoints.add(const LatLng(52.20154108514724, 0.1333489959015899));
-    roadClosurePolygonPoints.add(const LatLng(52.20124796928181, 0.1340602671079827));
-    roadClosurePolygonPoints.add(const LatLng(52.2009753675207, 0.1347188867023652));
-    roadClosurePolygonPoints.add(const LatLng(52.20078759974723, 0.1351815253610478));
-    roadClosurePolygonPoints.add(const LatLng(52.20060350929509, 0.1356303405175474));
-    roadClosurePolygonPoints.add(const LatLng(52.20033257981164, 0.1363163764622999));
-    roadClosurePolygonPoints.add(const LatLng(52.20016584154403, 0.1367620437365646));
-    roadClosurePolygonPoints.add(const LatLng(52.20014486316023, 0.1367911433027813));
-    roadClosurePolygonPoints.add(const LatLng(52.2001218686615, 0.1367779005334402));
-    roadClosurePolygonPoints.add(const LatLng(52.19998306812768, 0.1366803857699761));
-    roadClosurePolygonPoints.add(const LatLng(52.19995058464553, 0.136812478115258));
-    roadClosurePolygonPoints.add(const LatLng(52.20007112413746, 0.1368946557236161));
-    roadClosurePolygonPoints.add(const LatLng(52.20008936448654, 0.1369210598442261));
-    roadClosurePolygonPoints.add(const LatLng(52.20007929576207, 0.1369620891686041));
-    roadClosurePolygonPoints.add(const LatLng(52.20000944413438, 0.1371278011066357));
-    roadClosurePolygonPoints.add(const LatLng(52.19960936113254, 0.1381715386581228));
-    roadClosurePolygonPoints.add(const LatLng(52.1995865061542, 0.1381953576575357));
-    roadClosurePolygonPoints.add(const LatLng(52.19955963533969, 0.1381996076168601));
-    roadClosurePolygonPoints.add(const LatLng(52.19938594800258, 0.1380926323613463));
-    roadClosurePolygonPoints.add(const LatLng(52.19934316751451, 0.1382500101117978));
-    roadClosurePolygonPoints.add(const LatLng(52.1995022352211, 0.1383479669667653));
-    roadClosurePolygonPoints.add(const LatLng(52.19951582917572, 0.1383766977703216));
-    roadClosurePolygonPoints.add(const LatLng(52.1995114294751, 0.1384144685687305));
-    roadClosurePolygonPoints.add(const LatLng(52.19939091995906, 0.1386707785667762));
-    roadClosurePolygonPoints.add(const LatLng(52.19917741656872, 0.1392624799447906));
-    roadClosurePolygonPoints.add(const LatLng(52.19916631280751, 0.1392828751651831));
-    roadClosurePolygonPoints.add(const LatLng(52.1991446428936, 0.1392756075048496));
-    roadClosurePolygonPoints.add(const LatLng(52.1989175486481, 0.1391726819940953));
-    roadClosurePolygonPoints.add(const LatLng(52.19889771872434, 0.1392709721100016));
-    roadClosurePolygonPoints.add(const LatLng(52.19911453244046, 0.1393715381498972));
-    roadClosurePolygonPoints.add(const LatLng(52.19913034133225, 0.1393917519890997));
-    roadClosurePolygonPoints.add(const LatLng(52.19913119844188, 0.1394384318111475));
-    roadClosurePolygonPoints.add(const LatLng(52.19905709832486, 0.1396793349892134));
-    roadClosurePolygonPoints.add(const LatLng(52.19888886920802, 0.1401470573250951));
-    roadClosurePolygonPoints.add(const LatLng(52.19872575446356, 0.1406882487196137));
-    roadClosurePolygonPoints.add(const LatLng(52.19857919460625, 0.1412221159165639));
-    roadClosurePolygonPoints.add(const LatLng(52.19830401464963, 0.1420795096207583));
-    roadClosurePolygonPoints.add(const LatLng(52.19805523258207, 0.1428446992033949));
-    roadClosurePolygonPoints.add(const LatLng(52.19796058547896, 0.1431700690124305));
-    roadClosurePolygonPoints.add(const LatLng(52.19777043831322, 0.1439182506974968));
-    roadClosurePolygonPoints.add(const LatLng(52.19773906069497, 0.1440271555659201));
-    roadClosurePolygonPoints.add(const LatLng(52.19760690963302, 0.1446079456685312));
-    roadClosurePolygonPoints.add(const LatLng(52.19752098068638, 0.1450090212216604));
-    roadClosurePolygonPoints.add(const LatLng(52.19728430868131, 0.1458929568071077));
-    roadClosurePolygonPoints.add(const LatLng(52.19718620331415, 0.1462664966187099));
-    roadClosurePolygonPoints.add(const LatLng(52.19715943539327, 0.1464441477274536));
-    roadClosurePolygonPoints.add(const LatLng(52.19713596405279, 0.1469755713590337));
-    roadClosurePolygonPoints.add(const LatLng(52.19712231441085, 0.148011136800752));
-    roadClosurePolygonPoints.add(const LatLng(52.19710307516238, 0.148069413077816));
-    roadClosurePolygonPoints.add(const LatLng(52.19707444705853, 0.1481099103727335));
-    roadClosurePolygonPoints.add(const LatLng(52.19704767600419, 0.1481444468743121));
-    roadClosurePolygonPoints.add(const LatLng(52.19721043817059, 0.1481847622388588));
-    roadClosurePolygonPoints.add(const LatLng(52.19722302277, 0.1474140266218704));
-    roadClosurePolygonPoints.add(const LatLng(52.19722565195199, 0.146889669990915));
-    roadClosurePolygonPoints.add(const LatLng(52.19726897902555, 0.1464747706739122));
-    roadClosurePolygonPoints.add(const LatLng(52.19733900493154, 0.1461190078434771));
-    roadClosurePolygonPoints.add(const LatLng(52.19739118450674, 0.1458830211390794));
-    roadClosurePolygonPoints.add(const LatLng(52.19755813717495, 0.1452606860195216));
-    roadClosurePolygonPoints.add(const LatLng(52.19757901364062, 0.1452168759986305));
-    roadClosurePolygonPoints.add(const LatLng(52.19761552409477, 0.1451996552309986));
-    roadClosurePolygonPoints.add(const LatLng(52.19797077273405, 0.1454282307815458));
-    roadClosurePolygonPoints.add(const LatLng(52.19800074143257, 0.1453174537048341));
-    roadClosurePolygonPoints.add(const LatLng(52.19764604071845, 0.1450942683488377));
-    roadClosurePolygonPoints.add(const LatLng(52.19762791445593, 0.1450806419496486));
-    roadClosurePolygonPoints.add(const LatLng(52.19762480908257, 0.1450539383381266));
-    roadClosurePolygonPoints.add(const LatLng(52.19770791836908, 0.14475061805028));
-    roadClosurePolygonPoints.add(const LatLng(52.19783188969217, 0.1442675574167662));
-    roadClosurePolygonPoints.add(const LatLng(52.19794279870698, 0.1438312258765273));
-    roadClosurePolygonPoints.add(const LatLng(52.19803501146946, 0.1434695710127309));
-    roadClosurePolygonPoints.add(const LatLng(52.19808263193191, 0.1432575640823996));
-    roadClosurePolygonPoints.add(const LatLng(52.19810430566206, 0.1432082446911287));
-    roadClosurePolygonPoints.add(const LatLng(52.19814007266301, 0.143197469994214));
-    roadClosurePolygonPoints.add(const LatLng(52.19823619993755, 0.1432444901333763));
-    roadClosurePolygonPoints.add(const LatLng(52.19826647248333, 0.143117556460064));
-    roadClosurePolygonPoints.add(const LatLng(52.19817736904658, 0.143079741532075));
-    roadClosurePolygonPoints.add(const LatLng(52.19814857116783, 0.1430312397977263));
-    roadClosurePolygonPoints.add(const LatLng(52.19813774401835, 0.1429826127655653));
-    roadClosurePolygonPoints.add(const LatLng(52.1981395496733, 0.1429257420584218));
-    roadClosurePolygonPoints.add(const LatLng(52.19838239595334, 0.1421511196770431));
-    roadClosurePolygonPoints.add(const LatLng(52.19866819899372, 0.1412727505878197));
-    roadClosurePolygonPoints.add(const LatLng(52.1988946308355, 0.140430858937366));
-    roadClosurePolygonPoints.add(const LatLng(52.19898785139731, 0.1401239799499643));
-    roadClosurePolygonPoints.add(const LatLng(52.1990949156823, 0.1398575281699244));
-    roadClosurePolygonPoints.add(const LatLng(52.19916224790448, 0.1398825903315903));
-    roadClosurePolygonPoints.add(const LatLng(52.19960636796143, 0.1400957500436917));
-    roadClosurePolygonPoints.add(const LatLng(52.19963166053221, 0.1399841997340023));
-    roadClosurePolygonPoints.add(const LatLng(52.19920869096963, 0.1397790582244829));
-    roadClosurePolygonPoints.add(const LatLng(52.19918395215315, 0.1397595337506052));
-    roadClosurePolygonPoints.add(const LatLng(52.19917858268948, 0.1397261437714437));
-    roadClosurePolygonPoints.add(const LatLng(52.19925561252868, 0.1393610777706944));
-    roadClosurePolygonPoints.add(const LatLng(52.19938272725695, 0.1390182457566169));
-    roadClosurePolygonPoints.add(const LatLng(52.19957938929511, 0.1385117709767414));
-    roadClosurePolygonPoints.add(const LatLng(52.19959849381066, 0.1384832104027955));
-    roadClosurePolygonPoints.add(const LatLng(52.1996205426845, 0.138488654837039));
-    roadClosurePolygonPoints.add(const LatLng(52.19988950470529, 0.1386132646940519));
-    roadClosurePolygonPoints.add(const LatLng(52.19991965694164, 0.1384589372589007));
-    roadClosurePolygonPoints.add(const LatLng(52.1997044021644, 0.1383681140327409));
-    roadClosurePolygonPoints.add(const LatLng(52.19968147601194, 0.1383525488609494));
-    roadClosurePolygonPoints.add(const LatLng(52.19968791077611, 0.1382998401510327));
-    roadClosurePolygonPoints.add(const LatLng(52.19976017735745, 0.1380852582527425));
-    roadClosurePolygonPoints.add(const LatLng(52.19994474305631, 0.1376361571871065));
-    roadClosurePolygonPoints.add(const LatLng(52.20024124768548, 0.1368691189440052));
-    roadClosurePolygonPoints.add(const LatLng(52.20044131744081, 0.1363590732360365));
-    roadClosurePolygonPoints.add(const LatLng(52.20047559338849, 0.1362605493615976));
-    roadClosurePolygonPoints.add(const LatLng(52.20060058749072, 0.1359530811674525));
-    roadClosurePolygonPoints.add(const LatLng(52.20078215089771, 0.135500576050156));
-    roadClosurePolygonPoints.add(const LatLng(52.20106039161641, 0.1348202822524414));
-    roadClosurePolygonPoints.add(const LatLng(52.20119370680953, 0.1344925343925496));
-    roadClosurePolygonPoints.add(const LatLng(52.20136533156352, 0.1340803487453357));
-    roadClosurePolygonPoints.add(const LatLng(52.20147425034508, 0.1338054699789071));
-    roadClosurePolygonPoints.add(const LatLng(52.20170022686337, 0.1332403201753118));
-    roadClosurePolygonPoints.add(const LatLng(52.20185494572683, 0.1328594526718563));
-    roadClosurePolygonPoints.add(const LatLng(52.2020821221406, 0.1323470401379923));
-    roadClosurePolygonPoints.add(const LatLng(52.20217853160823, 0.1322296546103541));
-    roadClosurePolygonPoints.add(const LatLng(52.20226261801045, 0.1320472213527735));
-    roadClosurePolygonPoints.add(const LatLng(52.20229087498912, 0.1319118627783045));
-    roadClosurePolygonPoints.add(const LatLng(52.2024125802474, 0.1316399501782883));
-    roadClosurePolygonPoints.add(const LatLng(52.20246156812499, 0.1315758165697245));
-    roadClosurePolygonPoints.add(const LatLng(52.20253475854415, 0.1315288299783668));
-    roadClosurePolygonPoints.add(const LatLng(52.20259725355452, 0.1315025919232182));
-    roadClosurePolygonPoints.add(const LatLng(52.2026438385976, 0.1313751782097183));
-    roadClosurePolygonPoints.add(const LatLng(52.20235281420999, 0.1310619082596975));
-
     return Polygon(
-        polygonId: const PolygonId('roadClosure'),
-        points: roadClosurePolygonPoints,
-        strokeWidth: 3,
-        strokeColor: Theme.of(context).colorScheme.tertiary,
-        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
+      polygonId: const PolygonId('roadClosure'),
+      points: roadClosurePolygonPoints,
+      strokeWidth: 3,
+      strokeColor: Theme.of(context).colorScheme.tertiary,
+      fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50)
+    );
   }
 
   void updateRoadClosurePolygonVisibility(bool visibleState) {
@@ -369,7 +245,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void updateMarkerVisibilityIgnoringFilters(List<MarkerId> idList, bool visibleState) {
-    debugPrint('updateMarkerVisibilityIgnoringFilters called');
+    debugPrint('MapPageState updateMarkerVisibilityIgnoringFilters called');
     setState(() {
       for (var id in idList) {
         final currentMarker = markers[id];
@@ -383,7 +259,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void updateMarkerVisibilityRespectingFilters(List<MarkerId> idList, bool visibleState) {
-    debugPrint('updateMarkerVisibilityRespectingFilters called');
+    debugPrint('MapPageState updateMarkerVisibilityRespectingFilters called');
 
     // 1. Define category mapping to avoid repetition and hardcoded strings.
     const categoryMapping = {
@@ -423,7 +299,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void setVisibleMarkerLists() {
-    debugPrint('setVisibleMarkerLists called');
+    debugPrint('MapPageState setVisibleMarkerLists called');
     // Reset marker lists
     _foodMarkerIds = [];
     _shoppingMarkerIds = [];
@@ -445,7 +321,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void addAllVisibleMarkers() async {
-    debugPrint('addAllVisibleMarkers called');
+    debugPrint('MapPageState addAllVisibleMarkers called');
 
     // Create all marker bitmaps first, but only if not onTest
     if (onTest == false) {
@@ -470,7 +346,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<bool> createAllMarkerBitmaps() async {
-    debugPrint('createAllMarkerBitmaps called');
+    debugPrint('MapPageState createAllMarkerBitmaps called');
     for (var listingType
         in 'Food, Shopping, Charity/Community/Info, Performance, Visit/Experience, Service, Service-FirstAid, Service-Information, Service-Toilet, Group-Food, Group-Shopping, Group-Charity/Community/Info, Group-Performance, Group-Visit/Experience, Group-Service'
             .split(', ')) {
@@ -478,7 +354,7 @@ class MapPageState extends State<MapPage> {
       bitmapDescriptors[listingType] = newBitmapDescriptor;
     }
     if (bitmapDescriptors.isEmpty) {
-      debugPrint('Error: created zero bitmap descriptors');
+      debugPrint('MapPageState error: created zero bitmap descriptors');
       return false;
     } else {
       return true;
@@ -487,10 +363,11 @@ class MapPageState extends State<MapPage> {
 
   // Function to toggle a listing's presence in the list of favourites
   void favouriteOrNotListing(String listingID) {
+    debugPrint('MapPageState favouriteOrNotListing called');
     if (isListingFavourited(listingID)) {
-      favouriteListingKeys.remove(listingID);
+      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
     } else {
-      favouriteListingKeys.add(listingID);
+      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
     }
     setState(() {});
     _saveSettings();
@@ -498,11 +375,11 @@ class MapPageState extends State<MapPage> {
 
   // Function to determine if a listing has been added to favourites
   bool isListingFavourited(String listingID) {
-    return favouriteListingKeys.contains(listingID);
+    return favouriteListingKeys.value.contains(listingID);
   }
 
   void addGroupMarker(Map<String, dynamic> parentListing) async {
-    // debugPrint('addGroupMarker called for marker ID: ${listing['id']}');
+    //debugPrint('MapPageState addGroupMarker called');
     LatLng destinationLatLng = stringToLatLng(parentListing['latLng']);
     MarkerId markerId = MarkerId(parentListing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, getCategory(parentListing));
@@ -571,10 +448,10 @@ class MapPageState extends State<MapPage> {
 
                 void favouriteOrNotListing(String listingID) {
                   setModalState(() {
-                    if (favouriteListingKeys.contains(listingID)) {
-                      favouriteListingKeys.remove(listingID);
+                    if (isListingFavourited(listingID)) {
+                      favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
                     } else {
-                      favouriteListingKeys.add(listingID);
+                      favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
                     }
                     _saveSettings();
                   });
@@ -653,6 +530,7 @@ class MapPageState extends State<MapPage> {
                                             listingFavourited: isListingFavourited(rel['id']),
                                             onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                             onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                            inDialog: false,
                                           ),
                                           if (index != relatedListings.length - 1)
                                             SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
@@ -676,13 +554,13 @@ class MapPageState extends State<MapPage> {
       },
     );
 
-    setState(() {
+    //setState(() {
       markers[markerId] = newMarker;
-    });
+    //});
   }
 
   void addSpecificMarker(Map<String, dynamic> listing) async {
-    //debugPrint('addSpecificMarker called for marker ID: ${listing['id']}');
+    //debugPrint('MapPageState addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     Color color = getCategoryColor(selectedThemeKey, getCategory(listing));
@@ -740,10 +618,10 @@ class MapPageState extends State<MapPage> {
                   return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
                     void favouriteOrNotListing(String listingID) {
                       setModalState(() {
-                        if (favouriteListingKeys.contains(listingID)) {
-                          favouriteListingKeys.remove(listingID);
+                        if (isListingFavourited(listingID)) {
+                          favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
                         } else {
-                          favouriteListingKeys.add(listingID);
+                          favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
                         }
                         _saveSettings();
                       });
@@ -781,6 +659,7 @@ class MapPageState extends State<MapPage> {
                               listingFavourited: isListingFavourited(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                              inDialog: false,
                             ),
                           ),
                         ),
@@ -792,13 +671,13 @@ class MapPageState extends State<MapPage> {
             },
           );
         });
-    setState(() {
+    //setState(() {
       markers[markerId] = newMarker;
-    });
+    //});
   }
 
   void addSimpleMarker(String category, destinationLatLng) async {
-    debugPrint('addSimpleMarker called for category: $category');
+    //debugPrint('MapPageState addSimpleMarker called for category: $category');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
     Color color = getCategoryColor(selectedThemeKey, category);
     late BitmapDescriptor customMarker;
@@ -816,13 +695,13 @@ class MapPageState extends State<MapPage> {
       visible: true,
     );
 
-    setState(() {
+    //setState(() {
       markers[markerId] = newMarker;
-    });
+    //});
   }
 
   Future<void> updateMarkersAndPolygonsForTheme() async {
-    debugPrint('updateMarkersAndPolygonsForTheme called');
+    debugPrint('MapPageState updateMarkersAndPolygonsForTheme called');
     // Recreate marker bitmaps for the new theme colors
     await createAllMarkerBitmaps();
 
@@ -850,19 +729,19 @@ class MapPageState extends State<MapPage> {
   }
 
   void hideAllMarkers() {
-    debugPrint('hideAllMarkers called');
+    debugPrint('MapPageState hideAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
         _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, false);
   }
 
   void showAllMarkers() {
-    debugPrint('showAllMarkers called');
+    debugPrint('MapPageState showAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
         _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, true);
   }
 
   void showFilteredMarkers() {
-    debugPrint('showFilteredMarkers called');
+    debugPrint('MapPageState showFilteredMarkers called');
     updateMarkerVisibilityIgnoringFilters(_foodMarkerIds, filterSettings['Food']!);
     updateMarkerVisibilityIgnoringFilters(_shoppingMarkerIds, filterSettings['Shopping']!);
     updateMarkerVisibilityIgnoringFilters(_charityCommunityInfoMarkerIds, filterSettings['Charity/Community/Info']!);
@@ -872,7 +751,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void showFilterMenu() {
-    debugPrint('showFilterMenu called');
+    debugPrint('MapPageState showFilterMenu called');
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 0.85,
       context: context,
@@ -1069,13 +948,18 @@ class MapPageState extends State<MapPage> {
     navigationInProgress = false;
     setState(() {});
 
-    debugPrint('getDirections called for listing ID: $id');
+    debugPrint('MapPageState getDirections called for listing ID: $id');
 
     if (navigatorPop == true) {
       Navigator.pop(context);
       // The navigator is only popped when called from the map page, so if this is true set the previousIndex to 0
-      previousIndex = 0;
+      //previousIndex = 0;
     }
+
+    doTheNavigation(id, destination, navigatorPop);
+  }
+
+  Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
 
     // If user has location tracking enabled
     if (currentLatLng != null) {
@@ -1105,7 +989,7 @@ class MapPageState extends State<MapPage> {
       if (id.length > (aSimpleMarkerIdLen + 1)) {
         addSimpleMarker(id.substring(aSimpleMarkerIdLen + 1), destination);
       } else {
-        debugPrint('Adding Event type simple marker as category was not specified: $id');
+        debugPrint('MapPageState doTheNavigation Adding Event type simple marker as category was not specified: $id');
         addSimpleMarker('Event', destination);
       }
     } else {
@@ -1121,7 +1005,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void cancelNavigation() {
-    debugPrint('cancelNavigation called');
+    debugPrint('MapPageState cancelNavigation called');
     // Halt the location subscription
     _positionStream?.cancel();
 
@@ -1159,11 +1043,6 @@ class MapPageState extends State<MapPage> {
     // Reset the camera position
     _setMapCameraToFitMapMarkers();
 
-    // If we came from a page other than the map page, go back to that page
-    if (previousIndex != 0) {
-      homePageKey.currentState?.setCurrentIndex(previousIndex);
-    }
-
     setState(() {});
   }
 
@@ -1176,7 +1055,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> startLocationUpdates(LatLng destination) async {
-    debugPrint('startLocationUpdates called');
+    debugPrint('MapPageState startLocationUpdates called');
     // Store the destination
     _destination = destination;
 
@@ -1198,7 +1077,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
-    debugPrint('updatePolyline called');
+    debugPrint('MapPageState updatePolyline called');
     try {
       // Load environment variables
       await dotenv.load(fileName: ".env");
@@ -1274,16 +1153,16 @@ class MapPageState extends State<MapPage> {
         _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
     } on SocketException catch (e) {
-      debugPrint("Network error while fetching route: $e");
+      debugPrint("MapPageState updatePolyline Network error while fetching route: $e");
       _handlePolylineError("Network connection issue. Please try again.");
     } on HttpException catch (e) {
-      debugPrint("HTTP error while fetching route: $e");
+      debugPrint("MapPageState updatePolyline HTTP error while fetching route: $e");
       _handlePolylineError("Error retrieving route data. Please check your connection and try again.");
     } on FormatException catch (e) {
-      debugPrint("Data format error: $e");
+      debugPrint("MapPageState updatePolyline Data format error: $e");
       _handlePolylineError("Unexpected data format from directions API.");
     } on Exception catch (e, stack) {
-      debugPrint("Unexpected error fetching directions: $e\n$stack");
+      debugPrint("MapPageState updatePolyline Unexpected error fetching directions: $e\n$stack");
       _handlePolylineError("Failed to get route directions.");
     }
   }
@@ -1297,7 +1176,7 @@ class MapPageState extends State<MapPage> {
       _setMapCameraToFitMapMarkers();
       navigationInProgress = false;
     });
-    debugPrint(message);
+    debugPrint('MapPageState _handlePolylineError error: $message');
     // Show a snackbar with the error
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -1312,16 +1191,82 @@ class MapPageState extends State<MapPage> {
 
   // Save settings to shared preferences
   Future<void> _saveSettings() async {
-    debugPrint('_saveSettings called');
+    debugPrint('MapPageState _saveSettings called');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredMapOrientation', preferredMapOrientation.index);
     await prefs.setInt('preferredMapStyleType', preferredMapStyleType.index);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
-    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
+    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
+
+  Future<void> focusMapOnNearestMarkers(int nearestMarkerCount) async {
+    debugPrint('MapPageState focusOnNearestMarkersFromCurrentLocation called');
+
+    establishLocation();
+    if (currentLatLng == null) {
+      Fluttertoast.showToast(
+        msg: 'Unable to determine your location',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
+      );
+      return;
+    }
+
+    final visibleMarkers = markers.values.where((marker) => marker.visible).toList();
+    if (visibleMarkers.isEmpty) return;
+    final nearestMarkers = visibleMarkers..sort((a, b) {
+      final aDistance = asTheCrowFlies(currentLatLng!, a.position);
+      final bDistance = asTheCrowFlies(currentLatLng!, b.position);
+      return aDistance.compareTo(bDistance);
+    });
+
+    if (nearestMarkers.isEmpty || asTheCrowFlies(currentLatLng!, nearestMarkers.first.position) > 500) {
+      Fluttertoast.showToast(
+        msg: 'Nearest venues are more than 500m away, so please try again when you’re at the Fair',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
+      );
+      return;
+    }
+
+    final nearbyPoints = [currentLatLng!, ...nearestMarkers.take(nearestMarkerCount).map((marker) => marker.position)];
+    final southWest = LatLng(
+      nearbyPoints.map((p) => p.latitude).reduce(min),
+      nearbyPoints.map((p) => p.longitude).reduce(min),
+    );
+    final northEast = LatLng(
+      nearbyPoints.map((p) => p.latitude).reduce(max),
+      nearbyPoints.map((p) => p.longitude).reduce(max),
+    );
+    final padding = preferredMapOrientation == MapOrientation.alwaysNorth ? (mapWidth ?? 800) * 0.12 : (mapHeight ?? 600) * 0.12;
+    final rotation = preferredMapOrientation == MapOrientation.alwaysNorth ? 0.0 : 290.0;
+    final fitZoom = zoomForBounds(southWest, northEast, Size(mapWidth ?? 800, mapHeight ?? 600), padding: padding, zoomMax: 21.0);
+    final targetZoom = fitZoom.clamp(0.0, 21.0);
+    final targetCenter = LatLng((southWest.latitude + northEast.latitude) / 2, (southWest.longitude + northEast.longitude) / 2);
+
+    _controller?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: targetCenter,
+          zoom: targetZoom,
+          bearing: rotation,
+        ),
+      ),
+    );
+  }
+
+
   void _setMapCameraToFitMapMarkers() {
-    debugPrint('_setMapCameraToFitMapMarkers called');
+    debugPrint('MapPageState _setMapCameraToFitMapMarkers called');
     // Set default LatLngs bounds
     // southwest
     double markerMinLat = listings.first.containsKey('latLng') ? stringToLatLng(listings.first['latLng']).latitude : 52.199174;
@@ -1355,7 +1300,7 @@ class MapPageState extends State<MapPage> {
   }
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
-    debugPrint('_setMapCameraToFitPolyline called');
+    debugPrint('MapPageState _setMapCameraToFitPolyline called');
 
     double bearing; // the bearing to set the camera to, based on preference
     double padding; // extra space on the map around the polyline and source marker
@@ -1392,14 +1337,14 @@ class MapPageState extends State<MapPage> {
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
-    debugPrint('_moveCameraToBoundsWithRotation called');
+    debugPrint('MapPageState _moveCameraToBoundsWithRotation called');
     double theZoom;
 
     if (mapWidth != null && mapHeight != null) {
       theZoom = zoomForBounds(southwestMin, northeastMax, Size(mapWidth!, mapHeight!), padding: padding);
     } else {
       theZoom = 15;
-      debugPrint('No map areas size found so using default zoom of $theZoom');
+      debugPrint('MapPageState No map areas size found so using default zoom of $theZoom');
     }
 
     _controller?.animateCamera(
@@ -1427,10 +1372,10 @@ class MapPageState extends State<MapPage> {
     LatLng northeastMax,
     Size mapSize, {
     double padding = 0,
+    double zoomMax = 20.0, // bigger than this and mill road is half the screen width
   }) {
-    debugPrint('zoomForBounds called');
+    debugPrint('MapPageState zoomForBounds called with zoomMax=$zoomMax');
     const worldDIM = 256.0;
-    const zoomMax = 21.0;
 
     //Default bearing
     double bearing = 290;
@@ -1488,7 +1433,7 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> refreshListings() async {
-    debugPrint('refreshListings called');
+    debugPrint('MapPageState refreshListings called');
     setState(() {
       isRefreshing = true;
     });
@@ -1507,7 +1452,8 @@ class MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('MapPageState build() called');
+    debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}');
+
     return FutureBuilder(
       future: _fetchListings,
       builder: (context, snapshot) {
@@ -1571,19 +1517,30 @@ class MapPageState extends State<MapPage> {
             break;
         }
 
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (widget.nearestMarkerCount != null && !navigationInProgress) {
+            focusMapOnNearestMarkers(widget.nearestMarkerCount!);
+          }
+        });
+
         return FairScaffold(
-          appBarTitle: "Map",
+          appBarTitle: (doingAPushNavigation != null) ? 'Directions' : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
           ],
+          allowBack: (doingAPushNavigation != null),
           body: Stack(
             children: [
               LayoutBuilder(
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
                   mapHeight = constraints.maxHeight;
-                  return GoogleMap(
+                  return PopScope(
+                    onPopInvokedWithResult: (didPop, result) {
+                      if (didPop && navigationInProgress) cancelNavigation();
+                    },
+                    child: GoogleMap(
                       style: mapStyle,
                       mapType: mapType,
                       rotateGesturesEnabled: false,
@@ -1606,6 +1563,7 @@ class MapPageState extends State<MapPage> {
                         bearing: _mapBearing,
                       ),
                       onCameraMove: (CameraPosition position) {
+                        debugPrint('MapPageState onCameraMove called');
                         setState(() {
                           switch (preferredMapOrientation) {
                             case MapOrientation.adaptive:
@@ -1619,7 +1577,9 @@ class MapPageState extends State<MapPage> {
                       },
                       polygons: _polygons,
                       markers: markers.values.toSet(),
-                      polylines: polylines);
+                      polylines: polylines
+                    ),
+                  );
                 },
               ),
               Positioned(
@@ -1628,7 +1588,7 @@ class MapPageState extends State<MapPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (navigationInProgress == true)
+                    if (navigationInProgress == true && doingAPushNavigation == null)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
                         onPressed: () {
@@ -1659,6 +1619,7 @@ class MapPageState extends State<MapPage> {
                         heroTag: 'homeBtn',
                         onPressed: () {
                           HapticFeedback.lightImpact();
+                          widget.onHomeTapped?.call();
                           // Home button resets the filters if they're all toggled off
                           if (filterSettings['Food'] == false &&
                               filterSettings['Shopping'] == false &&
