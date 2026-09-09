@@ -47,7 +47,19 @@ class MapPage extends StatefulWidget {
   MapPageState createState() => MapPageState();
 }
 
-class MapPageState extends State<MapPage> {
+class MapPageState extends State<MapPage> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The tab is tracked by HomePage; only subscribe for a separately pushed map.
+    if (widget.destinationId != null) routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPush() => widget.analyticsService.setCurrentScreen('MapPage');
+
+  @override
+  void didPopNext() => widget.analyticsService.setCurrentScreen('MapPage');
   late Future<List<Map<String, dynamic>>> _fetchListings;
   late List<MarkerId> _foodMarkerIds;
   late List<MarkerId> _shoppingMarkerIds;
@@ -100,7 +112,7 @@ class MapPageState extends State<MapPage> {
     if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
-      ListingUpdateNotifier.maybeShowNotice(context, widget.analyticsService);
+      ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
       if (doingAPushNavigation ?? false) {
         doingAPushNavigation = false;
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
@@ -322,8 +334,8 @@ class MapPageState extends State<MapPage> {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
-                                      launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
                                       widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
+                                      launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
                                     }),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
@@ -573,7 +585,6 @@ class MapPageState extends State<MapPage> {
             return StatefulBuilder(
               builder: (context, setModalState) {
                 void toggleDetailsRow(int index) {
-                  HapticFeedback.lightImpact();
                   setModalState(() {
                     detailsVisibilityList[index] = !detailsVisibilityList[index];
                   });
@@ -933,7 +944,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Shopping"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('stalls_mapMarker_filter_toggle');
+                      widget.analyticsService.logButtonTapped('shopping_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Shopping"] = value!;
                       });
@@ -949,7 +960,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Charity/Community/Info"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('music_mapMarker_filter_toggle');
+                      widget.analyticsService.logButtonTapped('charity_community_info_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Charity/Community/Info"] = value!;
                       });
@@ -965,7 +976,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Performances"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('events_mapMarker_filter_toggle');
+                      widget.analyticsService.logButtonTapped('performances_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Performances"] = value!;
                       });
@@ -981,7 +992,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Visits/Experiences"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('places_mapMarker_filter_toggle');
+                      widget.analyticsService.logButtonTapped('visits_experiences_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Visits/Experiences"] = value!;
                       });
@@ -997,7 +1008,7 @@ class MapPageState extends State<MapPage> {
                     value: filterSettings["Services"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('other_mapMarker_filter_toggle');
+                      widget.analyticsService.logButtonTapped('services_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Services"] = value!;
                       });
@@ -1206,6 +1217,7 @@ class MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     debugPrint('MapPageState dispose() called');
     // Cancel the location subscription when the page is disposed
     _positionStream?.cancel();
@@ -1647,8 +1659,9 @@ class MapPageState extends State<MapPage> {
                     ? const CircularProgressIndicator()
                     : ElevatedButton.icon(
                         onPressed: () {
-                          refreshListings;
+                          HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                          refreshListings();
                         },
                         icon: const Icon(Icons.refresh),
                         label: const Text('Refresh listings'),
@@ -1752,8 +1765,8 @@ class MapPageState extends State<MapPage> {
                         heroTag: 'cancelBtn',
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          cancelNavigation();
                           widget.analyticsService.logButtonTapped('cancel_navigation');
+                          cancelNavigation();
                         },
                         backgroundColor: Colors.transparent,
                         mini: true,
@@ -1779,6 +1792,7 @@ class MapPageState extends State<MapPage> {
                         heroTag: 'homeBtn',
                         onPressed: () {
                           HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('home');
                           widget.onHomeTapped?.call();
                           // Home button resets the filters if they're all toggled off
                           if (filterSettings['Food'] == false &&
@@ -1787,6 +1801,7 @@ class MapPageState extends State<MapPage> {
                               filterSettings['Charity/Community/Info'] == false &&
                               filterSettings['Visits/Experiences'] == false &&
                               filterSettings['Services'] == false) {
+                            widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
                             final idList = _foodMarkerIds +
                                 _shoppingMarkerIds +
                                 _charityCommunityInfoMarkerIds +
@@ -1804,7 +1819,6 @@ class MapPageState extends State<MapPage> {
                             });
                           }
                           _setMapCameraToFitMapMarkers();
-                          widget.analyticsService.logButtonTapped('home');
                         },
                         backgroundColor: Colors.transparent,
                         mini: true,
@@ -1832,6 +1846,7 @@ class MapPageState extends State<MapPage> {
                         heroTag: 'centreOnUserBtn',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('centre_on_user');
                           // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
                           try {
                             if (currentLatLng == null) {
@@ -1968,9 +1983,10 @@ class MapPageState extends State<MapPage> {
                             FloatingActionButton(
                               heroTag: 'filterBtn',
                               onPressed: () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('map_filter');
                                 showFilterMenu();
                                 setVisibleMarkerLists();
-                                widget.analyticsService.logButtonTapped('map_filter');
                               },
                               backgroundColor: Colors.transparent,
                               mini: true,
@@ -2011,8 +2027,8 @@ class MapPageState extends State<MapPage> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
-                        _setMapCameraToFitPolyline(polylines);
                         widget.analyticsService.logButtonTapped('distance_to_destination');
+                        _setMapCameraToFitPolyline(polylines);
                       },
                       icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
                       label: Text(
@@ -2034,13 +2050,13 @@ class MapPageState extends State<MapPage> {
                       child: GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('road_closures_legend');
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
                               return roadClosuresDialog();
                             },
                           );
-                          widget.analyticsService.logButtonTapped('road_closures_legend');
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
