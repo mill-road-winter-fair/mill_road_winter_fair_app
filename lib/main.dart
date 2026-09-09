@@ -1,4 +1,3 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,29 +30,9 @@ Future<void> main() async {
     options: env == 'prod' ? prod.DefaultFirebaseOptions.currentPlatform : dev.DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Set consent for analytics and ad storage
-  await FirebaseAnalytics.instance.setConsent(
-    analyticsStorageConsentGranted: usageAnalyticsEnabled,
-    adStorageConsentGranted: false,
-  );
-
-  // Set user property to indicate that personalized ads are not allowed
-  await FirebaseAnalytics.instance.setUserProperty(
-    name: 'allow_personalized_ads',
-    value: 'NO',
-  );
-
-  debugPrint('[FIREBASE] Firebase initialised');
-
   await loadSettings();
-  debugPrint('Settings loaded');
-
-  // Set analytics data collection based on user preference
-  await analytics.setAnalyticsCollectionEnabled(usageAnalyticsEnabled ?? false);
-  debugPrint('[FIREBASE] Analytics collection enabled: ${usageAnalyticsEnabled ?? false}');
-
-  // We're on production so use the real analytics service
-  final AnalyticsService analyticsService = FirebaseAnalyticsService();
+  final analyticsService = FirebaseAnalyticsService();
+  await analyticsService.initialize();
 
   listings = await fetchListings(http.Client());
   debugPrint('Listings fetched: count = ${listings.length}');
@@ -144,7 +123,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           home: HomePage(key: homePageKey, analyticsService: widget.analyticsService),
           navigatorObservers: [
             routeObserver,
-            if (!onTest) FirebaseAnalyticsObserver(analytics: analytics),
           ],
         );
       },
@@ -168,14 +146,40 @@ class HomePageState extends State<HomePage> with RouteAware {
   String? listingsSubfilterCategory; // all listings visible (null) or just the one category
   int? mapNearestMarkerCount; // when opening the map, zoom in to this number nearby
 
+  static const screenNames = ['ChooserPage', 'MapPage', 'TimetablePage', 'ListingsPage', 'FavouritesPage'];
+
+  void _trackScreen() => widget.analyticsService.setCurrentScreen(screenNames[index]);
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.analyticsService.showAnalyticsConsentDialog(context);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPush() => _trackScreen();
+
+  @override
+  void didPopNext() => _trackScreen();
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
   }
 
   void setCurrentIndex(int newIndex) {
     setState(() {
       index = newIndex;
+      _trackScreen();
     });
   }
 
@@ -184,6 +188,7 @@ class HomePageState extends State<HomePage> with RouteAware {
       timetableFilteredMusicOrNot = filteredMusicOrNot;
       timetableOnlyNowOrSoon = onlyNowOrSoon;
       index = 2;
+      _trackScreen();
     });
   }
 
@@ -191,6 +196,7 @@ class HomePageState extends State<HomePage> with RouteAware {
     setState(() {
       listingsSubfilterCategory = subfilterCategory;
       index = (filterCategory == 'favourite') ? 4 : 3;
+      _trackScreen();
     });
   }
 
@@ -198,6 +204,7 @@ class HomePageState extends State<HomePage> with RouteAware {
     setState(() {
       mapNearestMarkerCount = nearestMarkerCount;
       index = 1;
+      _trackScreen();
     });
   }
 
