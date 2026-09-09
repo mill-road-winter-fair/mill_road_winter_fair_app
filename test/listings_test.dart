@@ -593,6 +593,30 @@ void main() {
         expect(secondLaunchResult[1]["title"], "Sushi Squad");
       });
 
+      test('does not replace cached listings with an empty successful response',
+          () async {
+        final cachedListings = [
+          {'id': '1', 'title': 'Cached listing'},
+        ];
+        SharedPreferences.setMockInitialValues({
+          'cached_listings_json': jsonEncode(cachedListings),
+        });
+        listings = [];
+
+        when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
+          (_) async => http.Response(
+            jsonEncode({'values': <List<dynamic>>[]}),
+            200,
+          ),
+        );
+
+        final result = await fetchListings(mockClient);
+        final stillCached = await loadListingsFromCache();
+
+        expect(result, cachedListings);
+        expect(stillCached, cachedListings);
+      });
+
       test(
           'fetchExistingListings with empty cache returns empty list on API failure',
           () async {

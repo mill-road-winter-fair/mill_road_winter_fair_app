@@ -67,6 +67,9 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
         if (retryResponse.statusCode == 200) {
           debugPrint('Listings fetched after retry');
           final newListings = _parseListings(retryResponse.body);
+          if (newListings.isEmpty) {
+            throw const FormatException('The listings response was empty');
+          }
           listings = newListings;
           // Save to persistent cache
           await _saveListingsToCache(newListings);
@@ -79,6 +82,9 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
 
     // Success
     final newListings = _parseListings(response.body);
+    if (newListings.isEmpty) {
+      throw const FormatException('The listings response was empty');
+    }
     listings = newListings;
     debugPrint('Listings successfully parsed and stored');
     // Save to persistent cache
