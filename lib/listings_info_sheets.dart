@@ -319,7 +319,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               ),
 
               const SizedBox(width: 6),
-              ElevatedButton.icon(
+              Flexible(child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                     iconSize: 24,
                     visualDensity: const VisualDensity(horizontal: 2, vertical: -2),
@@ -329,12 +329,12 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   widget.analyticsService.logButtonTapped('directions_to_listing');
-                  widget.onGetDirections();
                   widget.analyticsService.logDirectionsToListingRequested(widget.title);
+                  widget.onGetDirections();
                 },
                 icon: const Icon(Icons.directions_walk),
                 label: const FittedBox(child: Text('Directions')),
-              ),
+              )),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
               if (widget.onDetailsTapped != null &&
                   (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
@@ -362,8 +362,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           elevation: 3,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: () {
-                    widget.onDetailsTapped;
+                    HapticFeedback.lightImpact();
                     widget.analyticsService.logButtonTapped('listing_details');
+                    widget.onDetailsTapped?.call();
                   },
                   child: const Icon(Icons.info),
                 )
@@ -385,7 +386,11 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           padding: const EdgeInsets.all(0),
                           elevation: 3,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: widget.onDetailsTapped,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('listing_details');
+                    widget.onDetailsTapped?.call();
+                  },
                   icon: const Icon(Icons.info),
                   label: const FittedBox(child: Text('Details')),
                 ),
@@ -399,8 +404,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
-                      launchUrl(Uri.parse(widget.website));
                       widget.analyticsService.logButtonTapped('visit_listing_website');
+                      launchUrl(Uri.parse(widget.website));
                     },
                     customBorder: const CircleBorder(),
                     radius: 8,
@@ -423,13 +428,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('email_listing');
                       final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
                       if (await canLaunchUrl(mailUri)) {
                         await launchUrl(mailUri);
                       } else {
                         throw Exception('Could not launch email client');
                       }
-                      widget.analyticsService.logButtonTapped('email_listing');
                     },
                     customBorder: const CircleBorder(),
                     radius: 8,
@@ -452,13 +457,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('phone_listing');
                       final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
                       if (await canLaunchUrl(phoneUri)) {
                         await launchUrl(phoneUri);
                       } else {
                         throw Exception('Could not launch ${widget.phoneNumber}');
                       }
-                      widget.analyticsService.logButtonTapped('phone_listing');
                     },
                     customBorder: const CircleBorder(),
                     radius: 8,
@@ -527,13 +532,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('email_listing');
               final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
               if (await canLaunchUrl(mailUri)) {
                 await launchUrl(mailUri);
               } else {
                 throw Exception('Could not launch email client');
               }
-              widget.analyticsService.logButtonTapped('email_listing');
             },
             child: Row(
               children: [
@@ -555,13 +560,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('phone_listing');
               final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
               if (await canLaunchUrl(phoneUri)) {
                 await launchUrl(phoneUri);
               } else {
                 throw Exception('Could not launch ${widget.phoneNumber}');
               }
-              widget.analyticsService.logButtonTapped('phone_listing');
             },
             child: Row(
               children: [
@@ -587,12 +592,12 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
 Future<void> showListingDetailsDialog(
   BuildContext context,
   PositionedEvent event,
-  AnalyticsService analyticsService,
   //int alertNoticePeriod,
   void Function(VoidCallback) setStateFunction,
   // final int? Function(PositionedEvent, int, int?) toggleAlertAction,
-  Future<dynamic> Function() onGetDirections,
-) async {
+  Future<dynamic> Function() onGetDirections, {
+  required AnalyticsService analyticsService,
+}) async {
   debugPrint('showListingDetailsDialog called');
 
   removeMiniPopup(); // just in case one was opened

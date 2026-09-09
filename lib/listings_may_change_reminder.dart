@@ -16,9 +16,9 @@ class ListingUpdateNotifier {
   // }
 
   static Future maybeShowNotice(
-    BuildContext context,
-    AnalyticsService analyticsService,
-  ) async {
+    BuildContext context, {
+    required AnalyticsService analyticsService,
+  }) async {
     debugPrint('maybeShowNotice called');
 
     if (firstExecution) {
@@ -98,8 +98,8 @@ class ListingUpdateNotifier {
     // --- Custom FToast with longer duration ---
     final toast = InkWell( 
       onTap:() {
-        fToast.removeCustomToast();
         analyticsService.logButtonTapped('listing_notice_dismiss');
+        fToast.removeCustomToast();
       },
         child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
