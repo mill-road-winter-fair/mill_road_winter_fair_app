@@ -377,6 +377,7 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                   TextButton(
                     onPressed: () {
                       HapticFeedback.lightImpact();
+                      analyticsService.logButtonTapped('share_app_share');
                       Navigator.of(dialogContext).pop();
                       shareApp(itemContext,
                           'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
@@ -386,6 +387,7 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                   TextButton(
                     onPressed: () {
                       HapticFeedback.lightImpact();
+                      analyticsService.logButtonTapped('share_app_close');
                       Navigator.of(dialogContext).pop();
                     },
                     child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
