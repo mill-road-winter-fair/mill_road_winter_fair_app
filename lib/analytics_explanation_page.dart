@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AnalyticsExplanationPage extends StatefulWidget {
@@ -14,18 +16,30 @@ class AnalyticsExplanationPage extends StatefulWidget {
   State<AnalyticsExplanationPage> createState() => _AnalyticsExplanationPageState();
 }
 
-class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> {
+class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> with RouteAware {
   late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    widget.analyticsService.setCurrentScreen('AnalyticsExplanationPage');
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPush() => widget.analyticsService.setCurrentScreen('AnalyticsExplanationPage');
+
+  @override
+  void didPopNext() => widget.analyticsService.setCurrentScreen('AnalyticsExplanationPage');
+
+  @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     _scrollController.dispose();
     super.dispose();
   }
@@ -39,6 +53,11 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
+          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
+            HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('back');
+            Navigator.maybePop(context);
+          }) : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Analytics Information'),
@@ -76,8 +95,9 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                launchUrl(Uri.parse('https://firebase.google.com/'));
+                                HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('firebase_info_link');
+                                launchUrl(Uri.parse('https://firebase.google.com/'));
                               },
                           ),
                           const TextSpan(
@@ -132,8 +152,9 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                launchUrl(Uri.parse('https://policies.google.com/technologies/partner-sites'));
+                                HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('google_partner_sites_link');
+                                launchUrl(Uri.parse('https://policies.google.com/technologies/partner-sites'));
                               },
                           ),
                           const TextSpan(text: ' and in the '),
@@ -145,8 +166,9 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                launchUrl(Uri.parse('https://firebase.google.com/support/privacy'));
+                                HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('firebase_privacy_link');
+                                launchUrl(Uri.parse('https://firebase.google.com/support/privacy'));
                               },
                           ),
                           const TextSpan(text: '.'),
