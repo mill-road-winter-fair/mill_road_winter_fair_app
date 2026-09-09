@@ -134,6 +134,52 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                     ),
                     const SizedBox(height: 24),
                     Text(
+                      'What do we track?',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('• Pages you view and buttons or features you use.'),
+                          SizedBox(height: 4),
+                          Text('• Stalls and events you view, save or request directions to.'),
+                          SizedBox(height: 4),
+                          Text('• Words and phrases you enter in in-app searches.'),
+                          SizedBox(height: 4),
+                          Text('• App preferences such as your theme, distance units, map settings and filters.'),
+                          SizedBox(height: 4),
+                          Text('• Basic app and device information provided by Firebase, such as app version, device type, operating system and session information.'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'What don\'t we track?',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('• Your name, email address, phone number or other contact details.'),
+                          SizedBox(height: 4),
+                          Text('• Your exact GPS location.'),
+                          SizedBox(height: 4),
+                          Text('• Your contacts, photos, messages or activity in other apps.'),
+                          SizedBox(height: 4),
+                          Text('• Data for personalised advertising.'),
+                          SizedBox(height: 4),
+                          Text('• Any usage data before you agree to analytics, or while analytics is turned off.'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
                       'How does Google use this data?',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
