@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 
 // Some things in the app (mainly the map markers & filters) are currently dependent on the category of a listing. This file contains helper functions to determine the category of a listing based on its attributes.
 
@@ -6,27 +7,12 @@ int countCategories(Map<String, dynamic> listing) {
   // Start with a count of 0
   int count = 0;
 
-  if (listing['food'] == 'TRUE') {
-    count++;
-  }
-  if (listing['shopping'] == 'TRUE') {
-    count++;
-  }
-  if (listing['charityCommunityInfo'] == 'TRUE') {
-    count++;
-  }
-  if (listing['performance'] == 'TRUE') {
-    count++;
-  }
-  if (listing['visitExperience'] == 'TRUE') {
-    count++;
-  }
-  if (listing['service'] == 'TRUE') {
-    count++;
-  }
+  subfilterCategoryLabels.forEach((s, l) {
+    if (listing[s] == 'TRUE') count++;
+  });
 
   if (count == 0) {
-    debugPrint("No categories found for listing: ${listing['name']}");
+    debugPrint("No categories found for listing: ${listing['title']}");
   }
 
   return count;
@@ -56,10 +42,11 @@ String getCategory(Map<String, dynamic> listing) {
     if (listing['charityCommunityInfo'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
       return 'Group-Charity/Community/Info';
     }
-    if (listing['performance'] == 'TRUE') {
+    if (listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') {
       return 'Performance';
     }
-    if (listing['performance'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
+    if ((listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') 
+        && listing['groupParent'] == 'TRUE') {
       return 'Group-Performance';
     }
     if (listing['visitExperience'] == 'TRUE') {
