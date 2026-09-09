@@ -326,6 +326,12 @@ void main() {
       final Text titleWidget = tester.widget(titleFinder);
       expect(titleWidget.style?.decoration, TextDecoration.lineThrough);
 
+      // Subtitle should retain its normal colour and have line-through
+      final Text subtitleWidget = tester.widget(find.text('Food • Doughnuts'));
+      final TextSpan subtitleSpan = subtitleWidget.textSpan! as TextSpan;
+      expect(subtitleSpan.style?.decoration, TextDecoration.lineThrough);
+      expect(subtitleSpan.style?.color, isNot(Colors.red));
+
       // Times should be replaced by CANCELLED and be red
       final cancelledTextFinder = find.text('CANCELLED');
       expect(cancelledTextFinder, findsWidgets); // Might be more than one if both subtitle and body use it
