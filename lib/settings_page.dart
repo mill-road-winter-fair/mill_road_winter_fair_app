@@ -155,6 +155,11 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
+          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
+            HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('back');
+            Navigator.maybePop(context);
+          }) : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Settings'),
@@ -183,11 +188,12 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         RadioGroup<DistanceUnits>(
                           groupValue: preferredDistanceUnits,
                           onChanged: (DistanceUnits? value) {
+                            if (value == null) return;
+                            HapticFeedback.selectionClick();
+                            widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
+                            widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
                             setState(() {
-                              HapticFeedback.selectionClick();
-                              widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
-                              widget.analyticsService.logDistanceUnitPreferenceSet(value.toString().split('.').last);
-                              preferredDistanceUnits = value!;
+                              preferredDistanceUnits = value;
                             });
                             _saveSettings();
 
@@ -247,14 +253,15 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           onChanged: (value) {
                             HapticFeedback.selectionClick();
                             widget.analyticsService.logButtonTapped('theme_preference_option');
-                            selectedThemeKey = value!;
+                            if (value == null) return;
+                            widget.analyticsService.logThemePreferenceSet(value);
+                            selectedThemeKey = value;
                             setState(() {
                               _changeTheme(value);
                               mapStyle = getMapStyleForThemeKey(value);
                             });
                             _saveSettings();
                             mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
-                            widget.analyticsService.logThemePreferenceSet(value);
                           },
                           child: Column(
                             children: [
@@ -359,13 +366,13 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
                                   HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('analytics_explanation_settings');
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
                                     ),
                                   );
-                                  widget.analyticsService.logButtonTapped('analytics_explanation_settings');
                                 },
                             ),
                           ),
@@ -373,11 +380,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                       ),
                       value: usageAnalyticsEnabled ?? false,
                       onChanged: (bool value) async {
-                        debugPrint('User set analytics gathering to $value');
-                        await analytics.setAnalyticsCollectionEnabled(value);
-                        setState(() => usageAnalyticsEnabled = value);
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool('usageAnalyticsEnabled', value);
+                        HapticFeedback.selectionClick();
+                        widget.analyticsService.logButtonTapped('analytics_preference_toggle');
+                        await widget.analyticsService.setAnalyticsEnabled(value);
+                        if (mounted) setState(() {});
                       },
                     )
                   ],
