@@ -5,6 +5,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ListingUpdateNotifier {
   static String get preferenceKey => 'listingUpdateNoticeEnabled${fairDate.year}';
 
+  static String titleFor(DateTime now) {
+    if (DateUtils.isSameDay(fairDate, now)) {
+      return 'It’s the day of the Fair!';
+    }
+
+    if (now.isAfter(fairDate)) {
+      return 'Thank you!';
+    }
+
+    return 'Listings may change';
+  }
+
   static String messageFor(DateTime now) {
     if (DateUtils.isSameDay(fairDate, now)) {
       debugPrint('Current date is Fair date; showing special notice');
@@ -47,10 +59,7 @@ class ListingUpdateNotifier {
     // The dismissal preference applies only before the Fair. The notices on
     // the day and afterwards must always remain available.
     final prefs = await SharedPreferences.getInstance();
-    if (!context.mounted ||
-        (isListingsMayChange &&
-            (!listingUpdateNoticeEnabled ||
-                !(prefs.getBool(preferenceKey) ?? true)))) {
+    if (!context.mounted || (isListingsMayChange && (!listingUpdateNoticeEnabled || !(prefs.getBool(preferenceKey) ?? true)))) {
       return;
     }
 
@@ -61,7 +70,7 @@ class ListingUpdateNotifier {
       barrierDismissible: false,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Listings may change'),
+          title: Text(titleFor(noticeDate)),
           content: Text(messageFor(noticeDate)),
           actions: [
             if (isListingsMayChange)

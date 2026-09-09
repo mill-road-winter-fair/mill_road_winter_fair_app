@@ -8,6 +8,21 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ListingMayChangeReminder', () {
+    test('uses a title appropriate to the date', () {
+      expect(
+        ListingUpdateNotifier.titleFor(fairDate.subtract(const Duration(days: 1))),
+        'Listings may change',
+      );
+      expect(
+        ListingUpdateNotifier.titleFor(fairDate),
+        'It’s the day of the Fair!',
+      );
+      expect(
+        ListingUpdateNotifier.titleFor(fairDate.add(const Duration(days: 1))),
+        'Thank you!',
+      );
+    });
+
     testWidgets('can permanently dismiss the dialog', (WidgetTester tester) async {
       // Ensure no previous prefs — mock empty
       SharedPreferences.setMockInitialValues({});
@@ -45,9 +60,9 @@ void main() {
         await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
         final context = tester.element(find.byType(SizedBox));
 
-        for (final noticeDate in [
-          fairDate,
-          fairDate.add(const Duration(days: 1)),
+        for (final (noticeDate, expectedTitle) in [
+          (fairDate, 'It’s the day of the Fair!'),
+          (fairDate.add(const Duration(days: 1)), 'Thank you!'),
         ]) {
           final showNotice = ListingUpdateNotifier.maybeShowNotice(
             context,
@@ -55,7 +70,8 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          expect(find.text('Listings may change'), findsOneWidget);
+          expect(find.text(expectedTitle), findsOneWidget);
+          expect(find.text('Listings may change'), findsNothing);
           expect(find.text("Don't show this again"), findsNothing);
 
           await tester.tap(find.text('OK'));
