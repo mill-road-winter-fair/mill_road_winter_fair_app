@@ -173,8 +173,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
       return;
     }
     HapticFeedback.lightImpact();
-    launchUrl(Uri.parse(url));
     widget.analyticsService.logButtonTapped('sponsor_${name.replaceAll(' ', '_')}_hyperlink');
+    launchUrl(Uri.parse(url));
   }
 
   @override
@@ -215,6 +215,11 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
+          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
+            HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('back');
+            Navigator.maybePop(context);
+          }) : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('About Mill Road Winter Fair'),
