@@ -300,7 +300,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 10),
               Material(
                 shape: const CircleBorder(),
                 elevation: 3,
@@ -324,7 +324,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
               if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
-                const SizedBox(width: 6),
+    const SizedBox(width: 10),
               // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
               if (onDetailsTapped != null && website.isNotEmpty && email.isNotEmpty && phoneNumber.isNotEmpty && MediaQuery.of(context).size.width <= 360)
                 Material(
@@ -364,7 +364,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 10),
               Material(
                 shape: const CircleBorder(),
                 elevation: 3,
@@ -413,7 +413,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-              if (email.isNotEmpty) const SizedBox(width: 6),
+              if (email.isNotEmpty) const SizedBox(width: 10),
               if (email.isNotEmpty)
                 Material(
                   shape: const CircleBorder(),
@@ -441,7 +441,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-              if (phoneNumber.isNotEmpty) const SizedBox(width: 6),
+              if (phoneNumber.isNotEmpty) const SizedBox(width: 10),
               if (phoneNumber.isNotEmpty)
                 Material(
                   shape: const CircleBorder(),
