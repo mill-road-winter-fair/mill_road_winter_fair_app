@@ -40,6 +40,7 @@ class _TimetablePageState extends State<TimetablePage> {
   late ScrollController _verticalScrollController;
   final TextEditingController _searchController = TextEditingController();
   Timer? _nowLineTimer;
+  Timer? _searchAnalyticsTimer;
   final nowLineKey = GlobalKey();
   late double _dayPixelsPerMinute; // scale for the current day view, whatever its orientation
   late double pixelsPerMinuteL, pixelsPerMinuteP; // orientation-specific scales
@@ -75,8 +76,18 @@ class _TimetablePageState extends State<TimetablePage> {
     _horizontalScrollController.dispose();
     _verticalScrollController.dispose();
     _nowLineTimer?.cancel();
+    _searchAnalyticsTimer?.cancel();
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     super.dispose();
+  }
+
+  void _scheduleSearchAnalytics(String searchTerm) {
+    _searchAnalyticsTimer?.cancel();
+    final trimmedSearchTerm = searchTerm.trim();
+    if (trimmedSearchTerm.isEmpty) return;
+    _searchAnalyticsTimer = Timer(const Duration(milliseconds: 750), () {
+      widget.analyticsService.logSearch(trimmedSearchTerm, searchArea: 'timetable');
+    });
   }
 
   @override
@@ -536,6 +547,7 @@ class _TimetablePageState extends State<TimetablePage> {
             setState(() {
               _isSearching = !_isSearching;
               if (!_isSearching) {
+                _searchAnalyticsTimer?.cancel();
                 _searchQuery = '';
                 _searchController.clear();
                 theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
@@ -649,6 +661,7 @@ class _TimetablePageState extends State<TimetablePage> {
                               onPressed: () {
                                 HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('timetable_search_close');
+                                _searchAnalyticsTimer?.cancel();
                                 setState(() {
                                   if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
                                   _searchQuery = '';
@@ -659,6 +672,7 @@ class _TimetablePageState extends State<TimetablePage> {
                             ),
                           ],
                           onChanged: (value) {
+                            _scheduleSearchAnalytics(value);
                             setState(() {
                               _searchQuery = value.toLowerCase();
                               theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon,widget.filteredMusicOrNot, _searchQuery);

@@ -56,6 +56,21 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
+  Future<void> logSearch(String searchTerm, {required String searchArea}) async {
+    final trimmedSearchTerm = searchTerm.trim();
+    if (trimmedSearchTerm.isEmpty || usageAnalyticsEnabled != true) return;
+
+    debugPrint('[FIREBASE] Logging search in $searchArea: $trimmedSearchTerm');
+    await _record(() => analytics.logEvent(
+      name: 'search',
+      parameters: {
+        'search_term': trimmedSearchTerm,
+        'search_area': searchArea,
+      },
+    ));
+  }
+
+  @override
   Future<void> logMapMarkerTapped(String listingName) async {
     if (usageAnalyticsEnabled != true) {
       return;
@@ -308,7 +323,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
           children: [
             const Text(
               'We would like to collect anonymous usage data to help us improve the app and the Fair. '
-              'No personal information is collected.',
+              'This includes the pages you view, buttons you tap and preferences you set. '
+              'Also logged are the words and phrases you enter in search queries, as such we ask that you do not enter personal information in those searches. '
             ),
             const SizedBox(height: 12),
             RichText(
@@ -367,6 +383,7 @@ abstract class AnalyticsService {
   Future<void> setCurrentScreen(String screenName);
   Future<void> logMapMarkerTapped(String listingName);
   Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName});
+  Future<void> logSearch(String searchTerm, {required String searchArea});
   Future<void> logMapTypePreferenceSet(String mapType);
   Future<void> logMapOrientationPreferenceSet(String mapOrientation);
   Future<void> logMapMarkerFilterPreferenceSet(String category, bool visible);
@@ -398,6 +415,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logSearch(String searchTerm, {required String searchArea}) async {
     // Do nothing
   }
   @override

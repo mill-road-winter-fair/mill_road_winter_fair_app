@@ -46,6 +46,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   final itemPositionsListener = ItemPositionsListener.create();
   final ValueNotifier<bool> thumbVisible = ValueNotifier<bool>(false);
   Timer? _hideTimer; // for hiding scroll thumb when inactive i.e. iOS
+  Timer? _searchAnalyticsTimer;
   bool _isSearching = false;
   bool _hidePastListings = false;
   final TextEditingController _searchController = TextEditingController();
@@ -67,6 +68,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void dispose() {
     debugPrint('FilteredListingsPageState dispose() called');
     _hideTimer?.cancel();
+    _searchAnalyticsTimer?.cancel();
     itemPositionsListener.itemPositions.removeListener(() {});
     thumbVisible.dispose();
     _searchController.dispose();
@@ -76,11 +78,21 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void onTabVisible() {
     // This is called when user switches to this tab
     setState(() {
+      _searchAnalyticsTimer?.cancel();
       detailsVisibilityList = List<bool>.filled(500, false);
       _searchQuery = '';
       _isSearching = false;
     });
     if (itemScrollController.isAttached && filteredListings.isNotEmpty) itemScrollController.jumpTo(index: 0);
+  }
+
+  void _scheduleSearchAnalytics(String searchTerm) {
+    _searchAnalyticsTimer?.cancel();
+    final trimmedSearchTerm = searchTerm.trim();
+    if (trimmedSearchTerm.isEmpty) return;
+    _searchAnalyticsTimer = Timer(const Duration(milliseconds: 750), () {
+      widget.analyticsService.logSearch(trimmedSearchTerm, searchArea: 'listings');
+    });
   }
 
   String calculateAppBarTitle() {
@@ -479,6 +491,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             setState(() {
               _isSearching = !_isSearching;
               if (!_isSearching) {
+                _searchAnalyticsTimer?.cancel();
                 _searchQuery = '';
                 _searchController.text = '';
               }
@@ -533,6 +546,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       onPressed: () {
                                         HapticFeedback.lightImpact();
                                         widget.analyticsService.logButtonTapped('search_close');
+                                        _searchAnalyticsTimer?.cancel();
                                         setState(() {
                                           if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
                                           _searchQuery = '';
@@ -542,6 +556,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     ),
                                   ],
                                   onChanged: (value) {
+                                    _scheduleSearchAnalytics(value);
                                     setState(() {
                                       _searchQuery = value.toLowerCase();
                                       numberOfVisibleListings = -1;

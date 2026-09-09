@@ -127,6 +127,8 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                           Text('• Identify any issues or areas where the app could be improved.'),
                           SizedBox(height: 4),
                           Text('• Help us plan for future Fairs by understanding which stalls and events are most viewed.'),
+                          SizedBox(height: 4),
+                          Text('• Understand what people look for by collecting words and phrases entered in searches within the app.'),
                         ],
                       ),
                     ),
@@ -177,7 +179,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'Crucially, no personal information is collected by us or shared with Google through this app. We cannot identify you personally from this data; we don\'t collect names, email addresses, or your exact location.',
+                      'Please do not enter personal information in searches. We cannot identify you personally from the data we collect; we don\'t ask for your name or email address, or collect your exact location for analytics.',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
