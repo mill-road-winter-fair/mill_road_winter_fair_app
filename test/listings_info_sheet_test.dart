@@ -321,6 +321,9 @@ void main() {
       // Title should have line-through
       final emojiFinder = find.text('🍩 ');
       expect(emojiFinder, findsOneWidget);
+      expect(find.ancestor(of: emojiFinder, matching: find.byType(ColorFiltered)), findsOneWidget);
+      final Opacity emojiOpacity = tester.widget(find.ancestor(of: emojiFinder, matching: find.byType(Opacity)));
+      expect(emojiOpacity.opacity, 0.5);
       final titleFinder = find.text('Glazed and Confused');
       expect(titleFinder, findsOneWidget);
       final Text titleWidget = tester.widget(titleFinder);

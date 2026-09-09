@@ -242,7 +242,21 @@ class SpecificListingInfoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Prepend the emoji if we have one
-              if (emoji.isNotEmpty) Text('$emoji ', style: basicTitleStyle.copyWith(fontSize: 30)),
+              if (emoji.isNotEmpty)
+                cancelled
+                    ? Opacity(
+                        opacity: 0.5,
+                        child: ColorFiltered(
+                          colorFilter: const ColorFilter.matrix(<double>[
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0, 0, 0, 1, 0,
+                          ]),
+                          child: Text('$emoji ', style: basicTitleStyle.copyWith(fontSize: 30)),
+                        ),
+                      )
+                    : Text('$emoji ', style: basicTitleStyle.copyWith(fontSize: 30)),
               Expanded(
                 flex: 14,
                 child: Text(title, style: titleStyle),
