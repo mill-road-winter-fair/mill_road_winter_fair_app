@@ -445,7 +445,14 @@ void main() {
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
+      expect(find.byIcon(Icons.public), findsNothing);
+      await tester.tap(find.byTooltip('Info'));
+      await tester.pumpAndSettle();
+      expect(find.text('Listing details'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Website'), 200);
       expect(find.byIcon(Icons.public), findsOneWidget);
+      await tester.tap(find.byType(CloseButton));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('Adds markers, opens modal bottom sheet for specific marker, and checks content', (WidgetTester tester) async {
@@ -477,9 +484,16 @@ void main() {
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
-      expect(find.text('Telephone: 01223 222222'), findsOneWidget);
+      expect(find.text('Telephone: 01223 222222'), findsNothing);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
+      expect(find.byIcon(Icons.public), findsNothing);
+      await tester.tap(find.byTooltip('Info'));
+      await tester.pumpAndSettle();
+      expect(find.text('Listing details'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Website'), 200);
       expect(find.byIcon(Icons.public), findsOneWidget);
+      await tester.tap(find.byType(CloseButton));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
