@@ -66,7 +66,6 @@ class MapPageState extends State<MapPage> {
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller;
-  IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
   final ScrollController _roadClosuresDialogScrollController = ScrollController();
   // Declare default filters
@@ -1705,17 +1704,16 @@ class MapPageState extends State<MapPage> {
                       ),
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
+                      tooltip: mapType == MapType.normal ? 'Switch to satellite view' : 'Switch to normal map',
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         setState(() {
                           if (mapType == MapType.normal) {
                             mapType = MapType.hybrid;
-                            _layersIcon = Icons.map;
                             preferredMapStyleType = MapStyleType.hybrid;
                             _saveSettings();
                           } else {
                             mapType = MapType.normal;
-                            _layersIcon = Icons.satellite_alt;
                             preferredMapStyleType = MapStyleType.normal;
                             _saveSettings();
                           }
@@ -1737,7 +1735,7 @@ class MapPageState extends State<MapPage> {
                                 offset: const Offset(2, 2))
                           ],
                         ),
-                        child: Icon(_layersIcon),
+                        child: Icon(mapType == MapType.normal ? Icons.satellite_alt : Icons.map),
                       ),
                     ),
                     if (navigationInProgress == false)
@@ -1812,17 +1810,16 @@ class MapPageState extends State<MapPage> {
               ),
               if (_distanceToDestination != null)
                 Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                  alignment: Alignment.bottomCenter,
+                  child: SafeArea(
+                    minimum: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                          iconSize: 30,
+                          iconSize: 36,
                           backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                          minimumSize: const Size(180, 64),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          elevation: 3),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         _setMapCameraToFitPolyline(polylines);
@@ -1830,7 +1827,7 @@ class MapPageState extends State<MapPage> {
                       icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
                       label: Text(
                         _distanceToDestination!,
-                        style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
+                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
                       ),
                     ),
                   ),
