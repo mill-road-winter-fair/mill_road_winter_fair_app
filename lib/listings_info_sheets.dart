@@ -337,7 +337,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: 6),
+              const Spacer(),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     iconSize: 24,
