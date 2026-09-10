@@ -34,18 +34,17 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   late final AnimationController _animationController;
   Timer? _idleTimer;
   int? _chosenHotspotID; // hotspot that the user tapped on, if any
-  HighlightMode _highlightMode = HighlightMode.idle;
+  HighlightMode _highlightMode = HighlightMode.none;
   List<Hotspot> hotspots = [];
   int _lastAnimationStep = -1;
   final ValueNotifier<double> _paintPhase = ValueNotifier(0.0);
   final ValueNotifier<int> _hotspotImageVersion = ValueNotifier(0);
-  bool staticPage = true;
 
   @override
   void initState() {
     super.initState();
     _chooserPageScrollController = ScrollController();
-    if (!staticPage) {
+    if (!staticChooserPage.value) {
       _animationController = AnimationController(
         vsync: this,
         duration: Duration(seconds: 6),
@@ -57,7 +56,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   @override
   void dispose() {
     _chooserPageScrollController.dispose();
-    if (!staticPage) {
+    if (!staticChooserPage.value) {
       _animationController
         ..dispose()
         ..removeListener(_updatePaintPhase);
@@ -105,7 +104,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
         labelHorizontalOffset: -0.1,
         labelVerticalOffset: 0,
         left: -0.03,
-        top: 0.02,
+        top: 0.01,
         scale: 1.3,
         assetPath: 'assets/chooserPage/foodDrink.png',
         theTap: () => widget.onOpenListings('all', 'food'),
@@ -116,7 +115,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
         labelVerticalOffset: 0.03,
         left: 0.66,
         top: -0.005,
-        scale: 1.35,
+        scale: 1.22,
         assetPath: 'assets/chooserPage/music.png',
         theTap: () => widget.onOpenTimetable(false, true),
       ),
@@ -143,8 +142,8 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
         label: 'Visit &\nExperience',
         labelHorizontalOffset: 0.13,
         labelVerticalOffset: 0.02,
-        left: 0.08,
-        top: 0.55,
+        left: 0.19,
+        top: 0.53,
         scale: 1.3,
         assetPath: 'assets/chooserPage/visitExperience.png',
         theTap: () => widget.onOpenListings('all', 'visitExperience'),
@@ -153,8 +152,8 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
         label: 'Services',
         labelHorizontalOffset: 0,
         labelVerticalOffset: 0.1,
-        left: -0.02,
-        top: 0.71,
+        left: 0,
+        top: 0.69,
         scale: 1.03,
         assetPath: 'assets/chooserPage/services.png',
         theTap: () => widget.onOpenListings('all', 'service'),
@@ -164,7 +163,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
         labelHorizontalOffset: -0.05,
         labelVerticalOffset: 0.04,
         left: 0.65,
-        top: 0.41,
+        top: 0.31,
         scale: 1.35,
         assetPath: 'assets/chooserPage/shopping.png',
         theTap: () => widget.onOpenListings('all', 'shopping'),
@@ -173,7 +172,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
         label: 'Nearby',
         labelHorizontalOffset: 0.02,
         labelVerticalOffset: 0.08,
-        left: 0.4,
+        left: 0.57,
         top: 0.675,
         scale: 1.2,
         assetPath: 'assets/chooserPage/nearby.png',
@@ -214,10 +213,10 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     debugPrint('ChooserPage build() called');
 
-    if (!staticPage && _highlightMode == HighlightMode.idle && !_animationController.isAnimating) {
+    if (!staticChooserPage.value && _highlightMode == HighlightMode.idle && !_animationController.isAnimating) {
       _animationController.repeat();
     }
-    if (!staticPage && (_idleTimer == null || !_idleTimer!.isActive) && _highlightMode == HighlightMode.idle && !_animationController.isAnimating) {
+    if (!staticChooserPage.value && (_idleTimer == null || !_idleTimer!.isActive) && _highlightMode == HighlightMode.idle && !_animationController.isAnimating) {
       restartAnimation();
     }
     final colorScheme = Theme.of(context).colorScheme;
@@ -226,7 +225,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
       valueListenable: _paintPhase,
       builder: (context, phase, child) {
         return Listener(
-          onPointerDown: (!staticPage) ? _pauseAnimationOnPointerDown : null,
+          onPointerDown: (!staticChooserPage.value) ? _pauseAnimationOnPointerDown : null,
           behavior: HitTestBehavior.translucent,
           child: FairScaffold(
             appBarTitle: 'Welcome!',
@@ -241,148 +240,153 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                 },
               ),
             ],
-            body: RepaintBoundary(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  if (hotspots.isEmpty) createHotspots(constraints.maxWidth, constraints.maxHeight);
-                  final visibleCount = min(3, hotspots.length);
-                  final orderedHotspotIndices = List<int>.generate(hotspots.length, (index) => index)
-                    ..sort((a, b) {
-                      final aOpacity = _highlightMode == HighlightMode.selected && _chosenHotspotID == a
-                          ? 1.0
-                          : hotspotImageOpacityForPhase(b, phase, visibleCount: visibleCount);
-                      final bOpacity = _highlightMode == HighlightMode.selected && _chosenHotspotID == b
-                          ? 1.0
-                          : hotspotImageOpacityForPhase(b, phase, visibleCount: visibleCount);
-                      return aOpacity.compareTo(bOpacity);
-                    });
-                  final layout = List<_HotspotLayout>.generate(
-                    hotspots.length,
-                    (index) {
-                      final hotspot = hotspots[index];
-                      final size = hotspot.displaySize();
-                      return _HotspotLayout(
-                        index: index,
-                        left: hotspot.left * constraints.maxWidth,
-                        top: hotspot.top * constraints.maxHeight,
-                        size: size,
-                        labelHorizontalOffset: hotspot.labelHorizontalOffset * constraints.maxWidth,
-                        labelVerticalOffset: hotspot.labelVerticalOffset * constraints.maxHeight,
+            body: ValueListenableBuilder<bool>(
+              valueListenable: staticChooserPage,
+              builder: (context, name, child) {
+                return RepaintBoundary(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (hotspots.isEmpty) createHotspots(constraints.maxWidth, constraints.maxHeight);
+                      final visibleCount = min(3, hotspots.length);
+                      final orderedHotspotIndices = List<int>.generate(hotspots.length, (index) => index)
+                        ..sort((a, b) {
+                          final aOpacity = _highlightMode == HighlightMode.selected && _chosenHotspotID == a
+                              ? 1.0
+                              : hotspotImageOpacityForPhase(b, phase, visibleCount: visibleCount);
+                          final bOpacity = _highlightMode == HighlightMode.selected && _chosenHotspotID == b
+                              ? 1.0
+                              : hotspotImageOpacityForPhase(b, phase, visibleCount: visibleCount);
+                          return aOpacity.compareTo(bOpacity);
+                        });
+                      final layout = List<_HotspotLayout>.generate(
+                        hotspots.length,
+                        (index) {
+                          final hotspot = hotspots[index];
+                          final size = hotspot.displaySize();
+                          return _HotspotLayout(
+                            index: index,
+                            left: hotspot.left * constraints.maxWidth,
+                            top: hotspot.top * constraints.maxHeight,
+                            size: size,
+                            labelHorizontalOffset: hotspot.labelHorizontalOffset * constraints.maxWidth,
+                            labelVerticalOffset: hotspot.labelVerticalOffset * constraints.maxHeight,
+                          );
+                        },
+                        growable: false,
                       );
-                    },
-                    growable: false,
-                  );
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset('assets/chooserPage/chooserPage_background.jpg', fit: BoxFit.fill),
-                      Positioned.fill(
-                        left: 0, right: 0, top: 0, bottom: 0,
-                        child: BackdropFilter(
-                          filter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                          child: Container(color: Colors.white.withAlpha(100)),
-                        ),
-                      ),
-                      Positioned(
-                        top: 20, left: 0, right: 0, 
-                        child: Align(alignment: AlignmentGeometry.center, 
-                          child: SimpleShadow(
-                            opacity: 1,
-                            color: Colors.white,
-                            sigma: 6.0,
-                            offset: const Offset(0, 0),
-                            child: Image.asset(
-                              'assets/chooserPage/MRWF_logo_transparent.png',
-                              fit: BoxFit.contain,
-                              width: constraints.maxWidth * 0.55,
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.asset('assets/chooserPage/chooserPage_background.jpg', fit: BoxFit.fill),
+                          Positioned.fill(
+                            left: 0, right: 0, top: 0, bottom: 0,
+                            child: BackdropFilter(
+                              filter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                              child: Container(color: Colors.white.withAlpha(100)),
                             ),
                           ),
-                        ),
-                      ),
-                      for (final item in layout.where((entry) => orderedHotspotIndices.contains(entry.index)))
-                        Positioned(
-                          left: item.left,
-                          top: item.top,
-                          width: item.size.width,
-                          height: item.size.height,
-                          child: IgnorePointer(
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SimpleShadow(
-                                  opacity: (staticPage) ? 1 : hotspotLabelOpacityForPhase(item.index, phase, visibleCount: visibleCount),
-                                  color: Colors.white,
-                                  sigma: 6.0,
-                                  offset: const Offset(0, 0),
-                                  child: Image.asset(
-                                    hotspots[item.index].assetPath,
-                                    fit: BoxFit.contain,
-                                    width: item.size.width,
-                                    height: item.size.height,
-                                  ),
+                          Positioned(
+                            top: 20, left: 0, right: 0, 
+                            child: Align(alignment: AlignmentGeometry.center, 
+                              child: SimpleShadow(
+                                opacity: 1,
+                                color: Colors.white,
+                                sigma: 6.0,
+                                offset: const Offset(0, 0),
+                                child: Image.asset(
+                                  'assets/chooserPage/MRWF_logo_transparent.png',
+                                  fit: BoxFit.contain,
+                                  width: constraints.maxWidth * 0.55,
                                 ),
-                                Positioned(
-                                  left: item.labelHorizontalOffset,
-                                  width: item.size.width - item.labelHorizontalOffset,
-                                  top: item.labelVerticalOffset, 
-                                  height: item.size.height - item.labelVerticalOffset,
-                                  child: Opacity(
-                                    opacity: (staticPage || (_highlightMode == HighlightMode.selected && _chosenHotspotID == item.index))
-                                        ? 1.0
-                                        : hotspotLabelOpacityForPhase(item.index, phase, visibleCount: visibleCount),
-                                    child: Container(
-                                      alignment: AlignmentGeometry.center,
-                                      padding: EdgeInsets.symmetric(horizontal: 2),
-                                      child: AutoSizeText(
-                                        hotspots[item.index].label,
-                                        textAlign: TextAlign.center,
-                                        softWrap: false,
-                                        overflow: TextOverflow.visible,
-                                        style: TextStyle(
-                                          fontSize: 27,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          height: 0.9,
-                                          leadingDistribution: TextLeadingDistribution.even,
-                                          shadows: [
-                                            Shadow(blurRadius: 4, color: colorScheme.primary),
-                                            Shadow(blurRadius: 16, color: colorScheme.primary),
-                                          ],
+                              ),
+                            ),
+                          ),
+                          for (final item in layout.where((entry) => orderedHotspotIndices.contains(entry.index)))
+                            Positioned(
+                              left: item.left,
+                              top: item.top,
+                              width: item.size.width,
+                              height: item.size.height,
+                              child: IgnorePointer(
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    SimpleShadow(
+                                      opacity: (staticChooserPage.value) ? 1 : hotspotLabelOpacityForPhase(item.index, phase, visibleCount: visibleCount),
+                                      color: Colors.white,
+                                      sigma: 6.0,
+                                      offset: const Offset(0, 0),
+                                      child: Image.asset(
+                                        hotspots[item.index].assetPath,
+                                        fit: BoxFit.contain,
+                                        width: item.size.width,
+                                        height: item.size.height,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: item.labelHorizontalOffset,
+                                      width: item.size.width - item.labelHorizontalOffset,
+                                      top: item.labelVerticalOffset, 
+                                      height: item.size.height - item.labelVerticalOffset,
+                                      child: Opacity(
+                                        opacity: (staticChooserPage.value || (_highlightMode == HighlightMode.selected && _chosenHotspotID == item.index))
+                                            ? 1.0
+                                            : hotspotLabelOpacityForPhase(item.index, phase, visibleCount: visibleCount),
+                                        child: Container(
+                                          alignment: AlignmentGeometry.center,
+                                          padding: EdgeInsets.symmetric(horizontal: 2),
+                                          child: AutoSizeText(
+                                            hotspots[item.index].label,
+                                            textAlign: TextAlign.center,
+                                            softWrap: false,
+                                            overflow: TextOverflow.visible,
+                                            style: TextStyle(
+                                              fontSize: 27,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              height: 0.9,
+                                              leadingDistribution: TextLeadingDistribution.even,
+                                              shadows: [
+                                                Shadow(blurRadius: 4, color: colorScheme.primary),
+                                                Shadow(blurRadius: 16, color: colorScheme.primary),
+                                              ],
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                      for (final item in layout)
-                        Positioned(
-                          left: item.left,
-                          top: item.top,
-                          width: item.size.width,
-                          height: item.size.height,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () async {
-                              _idleTimer?.cancel();
-                              debugPrint('Selected ${item.index}');
-                              setState(() {
-                                _highlightMode = HighlightMode.selected;
-                                _chosenHotspotID = item.index;
-                              });
-                              _idleTimer?.cancel();
-                              if (!staticPage) _animationController.stop(canceled: false);
-                              hotspots[item.index].theTap();
-                            },
-                            child: const SizedBox.expand(),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
+                          for (final item in layout)
+                            Positioned(
+                              left: item.left,
+                              top: item.top,
+                              width: item.size.width,
+                              height: item.size.height,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () async {
+                                  _idleTimer?.cancel();
+                                  debugPrint('Selected ${item.index}');
+                                  setState(() {
+                                    _highlightMode = HighlightMode.selected;
+                                    _chosenHotspotID = item.index;
+                                  });
+                                  _idleTimer?.cancel();
+                                  if (!staticChooserPage.value) _animationController.stop(canceled: false);
+                                  hotspots[item.index].theTap();
+                                },
+                                child: const SizedBox.expand(),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              }
             ),
           ),
         );
