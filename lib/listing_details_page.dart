@@ -69,25 +69,37 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (listing.emoji.isNotEmpty) ...[
-                      Text(listing.emoji, style: const TextStyle(fontSize: 40)),
-                      const SizedBox(height: 12),
-                    ],
-                    Text(
-                      listing.title,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        decoration: listing.cancelled
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
+                    Row(
+                      children: [
+                        if (listing.emoji.isNotEmpty) ...[
+                          Text(listing.emoji,
+                              style: const TextStyle(fontSize: 40)),
+                          const SizedBox(width: 16),
+                        ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                listing.title,
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  decoration: listing.cancelled
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                ),
+                              ),
+                              if (listing.subtitle.trim().isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                Text(listing.subtitle,
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(color: colors.primary)),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    if (listing.subtitle.trim().isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(listing.subtitle,
-                          style: theme.textTheme.titleMedium
-                              ?.copyWith(color: colors.primary)),
-                    ],
                     const SizedBox(height: 24),
                     Container(
                       padding: const EdgeInsets.all(16),
