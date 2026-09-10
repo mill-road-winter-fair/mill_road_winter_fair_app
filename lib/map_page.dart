@@ -78,7 +78,6 @@ class MapPageState extends State<MapPage> {
     'Visits/Experiences': true,
     'Services': true,
   };
-  late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
 
   @override
@@ -423,15 +422,8 @@ class MapPageState extends State<MapPage> {
           isScrollControlled: true,
           useSafeArea: true,
           builder: (context) {
-            detailsVisibilityList = List<bool>.filled(relatedListings.length, false);
             return StatefulBuilder(
               builder: (context, setModalState) {
-                void toggleDetailsRow(int index) {
-                  HapticFeedback.lightImpact();
-                  setModalState(() {
-                    detailsVisibilityList[index] = !detailsVisibilityList[index];
-                  });
-                }
 
                 void favouriteOrNotListing(String listingID) {
                   setModalState(() {
@@ -512,8 +504,6 @@ class MapPageState extends State<MapPage> {
                                             startTime: "${rel['startTime']}",
                                             endTime: "${rel['endTime']}",
                                             approxDistance: '',
-                                            detailsVisible: detailsVisibilityList[index],
-                                            onDetailsTapped: () => toggleDetailsRow(index),
                                             listingFavourited: isListingFavourited(rel['id']),
                                             onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                             onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
@@ -642,7 +632,6 @@ class MapPageState extends State<MapPage> {
                               startTime: "${listing['startTime']}",
                               endTime: "${listing['endTime']}",
                               approxDistance: distanceMessage,
-                              detailsVisible: true,
                               listingFavourited: isListingFavourited(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),

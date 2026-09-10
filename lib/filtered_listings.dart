@@ -47,7 +47,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool _hidePastListings = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  List<bool> detailsVisibilityList = List<bool>.filled(500, false); // start with plenty enough to load all listings
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
@@ -73,7 +72,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   void onTabVisible() {
     // This is called when user switches to this tab
     setState(() {
-      detailsVisibilityList = List<bool>.filled(500, false);
       _searchQuery = '';
       _isSearching = false;
     });
@@ -248,13 +246,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredSortingMethod', preferredSortingMethod.index);
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
-  }
-
-  void toggleDetailsRow(int index) {
-    HapticFeedback.lightImpact();
-    setState(() {
-      detailsVisibilityList[index] = !detailsVisibilityList[index];
-    });
   }
 
   int findFirstNextListingIndex(List filteredListings) {
@@ -608,9 +599,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       startTime: "${listing['startTime']}",
                                       endTime: "${listing['endTime']}",
                                       approxDistance: approximateDistance,
-                                      detailsVisible: detailsVisibilityList[index],
                                       listingFavourited: isListingFavourited(listing['id']),
-                                      onDetailsTapped: () => toggleDetailsRow(index),
                                       onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                                       onGetDirections: () {
                                         Navigator.push(context, MaterialPageRoute(builder: (context) => MapPage(
