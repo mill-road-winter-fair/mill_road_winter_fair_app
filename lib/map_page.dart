@@ -63,6 +63,7 @@ class MapPageState extends State<MapPage> {
   double? mapWidth;
   double? mapHeight;
   String? _distanceToDestination;
+  Map<String, dynamic>? _navigationListing;
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller;
@@ -946,6 +947,12 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
+    setState(() {
+      _navigationListing = listings.cast<Map<String, dynamic>?>().firstWhere(
+        (listing) => listing?['id'].toString() == id,
+        orElse: () => null,
+      );
+    });
 
     // If user has location tracking enabled
     if (currentLatLng != null) {
@@ -993,6 +1000,7 @@ class MapPageState extends State<MapPage> {
 
   void cancelNavigation() {
     debugPrint('MapPageState cancelNavigation called');
+    _navigationListing = null;
     // Halt the location subscription
     _positionStream?.cancel();
 
@@ -1437,6 +1445,60 @@ class MapPageState extends State<MapPage> {
     }
   }
 
+  Widget _buildDestinationCard(BuildContext context, Map<String, dynamic> listing) {
+    final colors = Theme.of(context).colorScheme;
+    String field(String key) => listing[key]?.toString().trim() ?? '';
+    final times = [field('startTime'), field('endTime')].where((time) => time.isNotEmpty).join('–');
+
+    return Material(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: colors.primary, width: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      color: colors.surface,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Navigating to', style: TextStyle(fontSize: 11, color: colors.primary)),
+            const SizedBox(height: 4),
+            Text(
+              [field('emoji'), field('title')].where((text) => text.isNotEmpty).join(' '),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: colors.onSurface),
+            ),
+            if (field('subtitle').isNotEmpty)
+              Text(field('subtitle'), style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
+            if (field('location').isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.place_outlined, size: 16, color: colors.onSurfaceVariant),
+                  const SizedBox(width: 4),
+                  Expanded(child: Text(field('location'), style: TextStyle(fontSize: 12, color: colors.onSurface))),
+                ],
+              ),
+            ],
+            if (times.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.schedule, size: 16, color: colors.onSurfaceVariant),
+                  const SizedBox(width: 4),
+                  Expanded(child: Text(times, style: TextStyle(fontSize: 12, color: colors.onSurface))),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}');
@@ -1808,6 +1870,22 @@ class MapPageState extends State<MapPage> {
                   ],
                 ),
               ),
+              if (_navigationListing != null)
+                Positioned(
+                  top: 8,
+                  left: 72,
+                  right: 8,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 260),
+                        child: _buildDestinationCard(context, _navigationListing!),
+                      ),
+                    ),
+                  ),
+                ),
               if (_distanceToDestination != null)
                 Align(
                   alignment: Alignment.bottomCenter,
