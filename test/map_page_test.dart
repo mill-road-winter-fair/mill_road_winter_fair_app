@@ -446,7 +446,7 @@ void main() {
       expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsNothing);
-      await tester.tap(find.byTooltip('Info'));
+      await tester.tap(find.byIcon(Icons.info));
       await tester.pumpAndSettle();
       expect(find.text('Listing details'), findsOneWidget);
       await tester.scrollUntilVisible(find.text('Website'), 200);
@@ -487,7 +487,7 @@ void main() {
       expect(find.text('Telephone: 01223 222222'), findsNothing);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsNothing);
-      await tester.tap(find.byTooltip('Info'));
+      await tester.tap(find.byIcon(Icons.info));
       await tester.pumpAndSettle();
       expect(find.text('Listing details'), findsOneWidget);
       await tester.scrollUntilVisible(find.text('Website'), 200);

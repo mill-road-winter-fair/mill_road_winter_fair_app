@@ -8,6 +8,7 @@ SpecificListingInfoSheet listing(
         {String imageURL = '',
         String description = 'Fresh doughnuts made locally.',
         bool cancelled = false,
+        bool favourited = false,
         VoidCallback? favourite,
         VoidCallback? directions}) =>
     SpecificListingInfoSheet(
@@ -25,7 +26,7 @@ SpecificListingInfoSheet listing(
       startTime: '10:30',
       endTime: '16:30',
       approxDistance: '100 m away',
-      listingFavourited: false,
+      listingFavourited: favourited,
       onFavouriteTapped: favourite ?? () {},
       onGetDirections: directions ?? () {},
       inDialog: false,
@@ -39,9 +40,9 @@ void main() {
     expect(find.byIcon(Icons.public), findsNothing);
     expect(find.byIcon(Icons.email), findsNothing);
     expect(find.byIcon(Icons.phone), findsNothing);
-    expect(find.byType(IconButton), findsNWidgets(2));
-    expect(find.byType(ElevatedButton), findsNWidgets(2));
-    await tester.tap(find.byTooltip('Info'));
+    expect(find.byType(IconButton), findsOneWidget);
+    expect(find.byType(ElevatedButton), findsNWidgets(3));
+    await tester.tap(find.byIcon(Icons.info));
     await tester.pumpAndSettle();
     expect(find.byType(ListingDetailsPage), findsOneWidget);
     expect(find.byType(Image), findsNothing);
@@ -66,16 +67,77 @@ void main() {
       favourite: () => favourites++,
       directions: () => directions++,
     ))));
-    await tester.tap(find.byTooltip('Info'));
+    await tester.tap(find.byIcon(Icons.info));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Favourite'));
+    expect(find.text('Info'), findsNothing);
+    expect(find.byIcon(Icons.info_outline), findsNothing);
+    final favouriteButton = find.widgetWithText(OutlinedButton, 'Favourite');
+    expect(favouriteButton, findsOneWidget);
+    expect(tester.widget<OutlinedButton>(favouriteButton).style, isNull);
+    await tester.tap(favouriteButton);
     await tester.pump();
     expect(favourites, 1);
-    expect(find.text('Favourited'), findsOneWidget);
+    final selectedButton = find.widgetWithText(OutlinedButton, 'Favourited');
+    expect(selectedButton, findsOneWidget);
+    final colors = Theme.of(tester.element(selectedButton)).colorScheme;
+    expect(
+        tester
+            .widget<OutlinedButton>(selectedButton)
+            .style!
+            .backgroundColor!
+            .resolve({}),
+        colors.primary);
+    await tester.tap(selectedButton);
+    await tester.pump();
+    expect(favourites, 2);
+    expect(
+        tester
+            .widget<OutlinedButton>(
+                find.widgetWithText(OutlinedButton, 'Favourite'))
+            .style,
+        isNull);
     await tester.tap(find.text('Directions'));
     await tester.pumpAndSettle();
     expect(directions, 1);
     expect(find.byType(ListingDetailsPage), findsNothing);
+  });
+
+  testWidgets('saved favourite starts highlighted', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: ListingDetailsPage(listing: listing(favourited: true)),
+    ));
+    final button = find.widgetWithText(OutlinedButton, 'Favourited');
+    expect(button, findsOneWidget);
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+    expect(
+        tester
+            .widget<OutlinedButton>(button)
+            .style!
+            .backgroundColor!
+            .resolve({}),
+        Theme.of(tester.element(button)).colorScheme.primary);
+  });
+
+  testWidgets('title and subtitle sit beside the original sized emoji',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: ListingDetailsPage(listing: listing()),
+    ));
+    final emoji = find.text('🍩');
+    final title = find.text('Glazed and Confused');
+    final subtitle = find.text('Food • Doughnuts');
+    expect(tester.widget<Text>(emoji).style!.fontSize, 40);
+    expect(
+        tester.getTopLeft(title).dx, greaterThan(tester.getTopRight(emoji).dx));
+    expect(tester.getTopLeft(subtitle).dx, tester.getTopLeft(title).dx);
+    expect(tester.getTopLeft(subtitle).dy,
+        greaterThan(tester.getBottomLeft(title).dy));
+    expect(
+        tester.getCenter(emoji).dy,
+        closeTo(
+            (tester.getTopLeft(title).dy + tester.getBottomLeft(subtitle).dy) /
+                2,
+            0.1));
   });
 
   testWidgets('image URL is loaded and failure leaves details usable',
@@ -84,6 +146,14 @@ void main() {
         home: ListingDetailsPage(
       listing: listing(imageURL: 'https://example.com/listing.jpg'),
     )));
+    final imageRect = tester.getRect(find.byType(Image));
+    expect(
+        imageRect.top,
+        greaterThan(tester
+            .getBottomLeft(find.text('Fresh doughnuts made locally.'))
+            .dy));
+    expect(imageRect.bottom,
+        lessThan(tester.getTopLeft(find.text('Get in touch')).dy));
     final image = tester.widget<Image>(find.byType(Image));
     expect(
         (image.image as NetworkImage).url, 'https://example.com/listing.jpg');
