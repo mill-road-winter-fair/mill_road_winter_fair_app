@@ -1887,28 +1887,12 @@ class MapPageState extends State<MapPage> {
                   ),
                 ),
               if (_distanceToDestination != null)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SafeArea(
-                    minimum: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                          iconSize: 36,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          minimumSize: const Size(180, 64),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                          elevation: 3),
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        _setMapCameraToFitPolyline(polylines);
-                      },
-                      icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
-                      label: Text(
-                        _distanceToDestination!,
-                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
-                      ),
-                    ),
-                  ),
+                NavigationDistanceButton(
+                  distance: _distanceToDestination!,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    _setMapCameraToFitPolyline(polylines);
+                  },
                 ),
               if (preferredRoadClosurePolygonVisible && navigationInProgress == false)
                 Align(
@@ -1970,6 +1954,38 @@ class MapPageState extends State<MapPage> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Remaining distance control, positioned above the device's bottom safe area.
+class NavigationDistanceButton extends StatelessWidget {
+  const NavigationDistanceButton({super.key, required this.distance, required this.onPressed});
+
+  final String distance;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+              iconSize: 36,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              minimumSize: const Size(180, 64),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              elevation: 3),
+          onPressed: onPressed,
+          icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
+          label: Text(
+            distance,
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+          ),
+        ),
+      ),
     );
   }
 }
