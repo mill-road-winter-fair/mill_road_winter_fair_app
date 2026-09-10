@@ -140,21 +140,6 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
 
-  DateTime combineDateAndTime(String theTime, DateTime theDate) {
-    final parts = theTime.split(':');
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
-    final result = DateTime(
-      theDate.year,
-      theDate.month,
-      theDate.day,
-      hour,
-      minute,
-    );
-    return result;
-  }
-
-
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
     Map<String, List<PositionedEvent>> preparedEvents = {};
     for (var ev in theEvents) {
@@ -167,7 +152,7 @@ class _TimetablePageState extends State<TimetablePage> {
           || (ev['performanceOther'] != null && ev['performanceOther'] == 'TRUE')
           || (ev['visitExperience'] != null && ev['visitExperience'] == 'TRUE')
         )
-        && endTime.difference(startTime).inMinutes < 120 
+        && endTime.difference(startTime) < maxDurationToBeEvent 
       ) {
         final eventLocation = ev['location'];
         final thePreparedEvent = PositionedEvent(
