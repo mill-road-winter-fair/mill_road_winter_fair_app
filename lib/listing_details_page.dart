@@ -16,7 +16,6 @@ class ListingDetailsPage extends StatefulWidget {
 }
 
 class _ListingDetailsPageState extends State<ListingDetailsPage> {
-  final _aboutKey = GlobalKey();
   late bool _favourited = widget.listing.listingFavourited;
 
   Future<void> _launch(Uri uri) async {
@@ -152,7 +151,14 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        FilledButton.icon(
+                        OutlinedButton.icon(
+                          style: _favourited
+                              ? OutlinedButton.styleFrom(
+                                  backgroundColor: colors.primary,
+                                  foregroundColor: colors.onPrimary,
+                                  side: BorderSide.none,
+                                )
+                              : null,
                           onPressed: listing.onFavouriteTapped == null
                               ? null
                               : () {
@@ -173,14 +179,6 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                           icon: const Icon(Icons.directions_walk),
                           label: const Text('Directions'),
                         ),
-                        OutlinedButton.icon(
-                          onPressed: () => Scrollable.ensureVisible(
-                            _aboutKey.currentContext!,
-                            duration: const Duration(milliseconds: 300),
-                          ),
-                          icon: const Icon(Icons.info_outline),
-                          label: const Text('Info'),
-                        ),
                         Builder(
                             builder: (shareContext) => OutlinedButton.icon(
                                   onPressed: () => shareListing(
@@ -198,7 +196,6 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                     ),
                     const SizedBox(height: 28),
                     Text('About',
-                        key: _aboutKey,
                         style: theme.textTheme.titleLarge
                             ?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
