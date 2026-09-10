@@ -69,32 +69,6 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (imageUrl.isNotEmpty) ...[
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          frameBuilder: (context, child, frame, synchronous) =>
-                              AspectRatio(aspectRatio: 16 / 9, child: child),
-                          semanticLabel: listing.title,
-                          loadingBuilder: (context, child, progress) {
-                            if (progress == null) return child;
-                            return AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: ColoredBox(
-                                color: colors.surfaceContainerHighest,
-                                child: const Center(
-                                    child: CircularProgressIndicator()),
-                              ),
-                            );
-                          },
-                          errorBuilder: (_, error, stack) =>
-                              const SizedBox.shrink(),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
                     if (listing.emoji.isNotEmpty) ...[
                       Text(listing.emoji, style: const TextStyle(fontSize: 40)),
                       const SizedBox(height: 12),
@@ -205,6 +179,32 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                           : listing.description,
                       style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
                     ),
+                    if (imageUrl.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          frameBuilder: (context, child, frame, synchronous) =>
+                              AspectRatio(aspectRatio: 16 / 9, child: child),
+                          semanticLabel: listing.title,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: ColoredBox(
+                                color: colors.surfaceContainerHighest,
+                                child: const Center(
+                                    child: CircularProgressIndicator()),
+                              ),
+                            );
+                          },
+                          errorBuilder: (_, error, stack) =>
+                              const SizedBox.shrink(),
+                        ),
+                      ),
+                    ],
                     if (website.isNotEmpty ||
                         email.isNotEmpty ||
                         phone.isNotEmpty) ...[
