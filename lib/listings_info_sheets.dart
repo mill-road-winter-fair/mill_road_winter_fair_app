@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -284,14 +285,13 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ),
 
               const SizedBox(width: 6),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   onGetDirections();
                 },
-                icon: const Icon(Icons.directions_walk),
-                label: const FittedBox(child: Text('Directions')),
+                child: const Icon(Icons.directions_walk),
               ),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
               if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty)) const SizedBox(width: 6),
@@ -306,15 +306,20 @@ class SpecificListingInfoSheet extends StatelessWidget {
                   child: const Icon(Icons.info),
               ) 
               else if (onDetailsTapped != null && (description.isNotEmpty || website.isNotEmpty || email.isNotEmpty || phoneNumber.isNotEmpty))
-                ElevatedButton.icon(
+                ElevatedButton(
                   style: detailsVisible ?
-                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                    ElevatedButton.styleFrom(iconSize: 24, foregroundColor: Theme.of(context).colorScheme.onPrimary, backgroundColor: Theme.of(context).colorScheme.primary, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap)
                   :
-                    ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: 2, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                    ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: onDetailsTapped,
-                  icon: const Icon(Icons.info),
-                  label: const FittedBox(child: Text('Details')),
+                  child: const Icon(Icons.info),
                 ),
+              const SizedBox(width: 6),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(iconSize: 24, visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), elevation: 3, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                onPressed: () => shareListing(title, location, startTime, endTime, context),
+                child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
+              ),
               Flexible(flex: 1, child: Container()),
               if (website.isNotEmpty) const SizedBox(width: 6),
               if (website.isNotEmpty)
