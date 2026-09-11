@@ -80,6 +80,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: FilteredListingsPage(
+            key: UniqueKey(),
             filterCategory: category,
             subfilterCategory: subfilterCategory,
             listings: pageListings,
@@ -841,6 +842,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.free_cancellation));
       await settle(tester);
       expect(find.text('Past act'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 2));
     });
   });
 }
