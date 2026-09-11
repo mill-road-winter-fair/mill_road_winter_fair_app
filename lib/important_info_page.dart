@@ -3,12 +3,54 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class ImportantInfoPage extends StatelessWidget {
-  const ImportantInfoPage({super.key});
+class ImportantInfoPage extends StatefulWidget {
+  final AnalyticsService analyticsService;
+
+  const ImportantInfoPage({super.key, required this.analyticsService});
+
+  @override
+  State<ImportantInfoPage> createState() => _ImportantInfoPageState();
+}
+
+class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
+  @override
+  void initState() {
+    debugPrint('_ImportantInfoPageState initState() called');
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    debugPrint('_ImportantInfoPageState dispose() called');
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    widget.analyticsService.setCurrentScreen('ImportantInfoPage');
+  }
+
+  @override
+  void didPopNext() {
+    widget.analyticsService.setCurrentScreen('ImportantInfoPage');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +62,11 @@ class ImportantInfoPage extends StatelessWidget {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
+          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
+            HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('back');
+            Navigator.maybePop(context);
+          }) : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Important information'),
@@ -86,6 +133,7 @@ class ImportantInfoPage extends StatelessWidget {
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               HapticFeedback.lightImpact();
+                              widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
                               launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
                             }),
                       const TextSpan(text: '.'),
@@ -116,10 +164,11 @@ class ImportantInfoPage extends StatelessWidget {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () async {
                                       HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('mrwf_email_hyperlink');
                                       showDialog(
                                         context: context,
                                         builder: (BuildContext context) {
-                                          return contactUsDialog(context);
+                                          return contactUsDialog(context, analyticsService: widget.analyticsService);
                                         },
                                       );
                                     }),
@@ -148,6 +197,7 @@ class ImportantInfoPage extends StatelessWidget {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () async {
                                       HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('mrwf_phone_hyperlink');
                                       final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
                                       if (await canLaunchUrl(phoneUri)) {
                                         await launchUrl(phoneUri);

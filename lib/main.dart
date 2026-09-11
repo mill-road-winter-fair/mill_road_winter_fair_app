@@ -1,24 +1,38 @@
-import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
+import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
-import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
+import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: ".env");
+  // Release builds always use the production Firebase project. Debug and
+  // profile builds use the development project.
+  await Firebase.initializeApp(
+    options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
+  );
+
   await loadSettings();
-  debugPrint('Settings loaded');
+  final analyticsService = FirebaseAnalyticsService();
+  await analyticsService.initialize();
 
   listings = await fetchListings(http.Client());
   debugPrint('Listings fetched: count = ${listings.length}');
@@ -31,20 +45,51 @@ Future<void> main() async {
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const RootWidget()));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((value) => runApp(RootWidget(firstExecution: firstExecution, analyticsService: analyticsService)));
 }
 
-class RootWidget extends StatelessWidget {
-  const RootWidget({super.key});
+FirebaseOptions firebaseOptionsForBuildMode({required bool isRelease}) {
+  return isRelease ? prod.DefaultFirebaseOptions.currentPlatform : dev.DefaultFirebaseOptions.currentPlatform;
+}
+
+class RootWidget extends StatefulWidget {
+  final bool firstExecution;
+  final AnalyticsService analyticsService;
+  const RootWidget({super.key, required this.firstExecution, required this.analyticsService});
+
+  @override
+  State<RootWidget> createState() => _RootWidgetState();
+}
+
+class _RootWidgetState extends State<RootWidget> {
+  late bool _showWelcomeScreen;
+
+  @override
+  void initState() {
+    super.initState();
+    _showWelcomeScreen = widget.firstExecution;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return firstExecution ? const WelcomeScreen() : const MyApp();
+    return _showWelcomeScreen
+        ? WelcomeScreen(
+            analyticsService: widget.analyticsService,
+            onFinished: () => setState(() => _showWelcomeScreen = false),
+          )
+        : MyApp(firstExecution: false, analyticsService: widget.analyticsService);
   }
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final bool firstExecution;
+  final AnalyticsService analyticsService;
+  const MyApp({
+    super.key,
+    required this.firstExecution,
+    required this.analyticsService,
+  });
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -83,10 +128,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       builder: (context, selectedThemeKey, _) {
         debugPrint('MyApp build theme changed: $selectedThemeKey');
         final bool isAuto = selectedThemeKey == 'auto';
-        final ThemeMode resolvedThemeMode = isAuto ? ThemeMode.system : switch (selectedThemeKey) {
-          'dark' => ThemeMode.dark,
-          _ => ThemeMode.light,
-        };
+        final ThemeMode resolvedThemeMode = isAuto
+            ? ThemeMode.system
+            : switch (selectedThemeKey) {
+                'dark' => ThemeMode.dark,
+                _ => ThemeMode.light,
+              };
         final ThemeData baseTheme = appThemes[getEffectiveThemeKey(selectedThemeKey)] ?? appThemes['light']!;
         final ThemeData darkTheme = appThemes['dark'] ?? appThemes['light']!;
         mapStyle = getMapStyleForThemeKey(selectedThemeKey);
@@ -95,7 +142,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           themeMode: resolvedThemeMode,
           theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? baseTheme,
           darkTheme: isAuto ? appThemes['dark'] : darkTheme,
-          home: HomePage(key: homePageKey),
+          home: HomePage(key: homePageKey, analyticsService: widget.analyticsService),
+          navigatorObservers: [
+            routeObserver,
+          ],
         );
       },
     );
@@ -103,14 +153,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final AnalyticsService analyticsService;
+  const HomePage({super.key, required this.analyticsService});
 
   @override
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
-  
+class HomePageState extends State<HomePage> with RouteAware {
   int index = 0;
   // the following need to be in HomePageState to allow deep linking to configured pages
   bool timetableOnlyNowOrSoon = false; // toggled on or off to show events now or in next hour
@@ -118,14 +168,40 @@ class HomePageState extends State<HomePage> {
   String? listingsSubfilterCategory; // all listings visible (null) or just the one category
   int? mapNearestMarkerCount; // when opening the map, zoom in to this number nearby
 
+  static const screenNames = ['ChooserPage', 'MapPage', 'TimetablePage', 'ListingsPage', 'FavouritesPage'];
+
+  void _trackScreen() => widget.analyticsService.setCurrentScreen(screenNames[index]);
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.analyticsService.showAnalyticsConsentDialog(context);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPush() => _trackScreen();
+
+  @override
+  void didPopNext() => _trackScreen();
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
   }
 
   void setCurrentIndex(int newIndex) {
     setState(() {
       index = newIndex;
+      _trackScreen();
     });
   }
 
@@ -134,6 +210,7 @@ class HomePageState extends State<HomePage> {
       timetableFilteredMusicOrNot = filteredMusicOrNot;
       timetableOnlyNowOrSoon = onlyNowOrSoon;
       index = 2;
+      _trackScreen();
     });
   }
 
@@ -141,6 +218,7 @@ class HomePageState extends State<HomePage> {
     setState(() {
       listingsSubfilterCategory = subfilterCategory;
       index = (filterCategory == 'favourite') ? 4 : 3;
+      _trackScreen();
     });
   }
 
@@ -148,6 +226,7 @@ class HomePageState extends State<HomePage> {
     setState(() {
       mapNearestMarkerCount = nearestMarkerCount;
       index = 1;
+      _trackScreen();
     });
   }
 
@@ -175,15 +254,47 @@ class HomePageState extends State<HomePage> {
 
   final _allListingsKey = GlobalKey<FilteredListingsPageState>();
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
-  
+
   @override
   Widget build(BuildContext context) {
     final pages = [
-      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings, onOpenMap: openMap),
-      MapPage(listings: listings, key: mapPageKey, nearestMarkerCount: mapNearestMarkerCount, onTabSelected: setCurrentIndex, onHomeTapped: cancelMapNearest),
-      TimetablePage(theEvents: listings, onTabSelected: setCurrentIndex, filteredMusicOrNot: timetableFilteredMusicOrNot, onlyNowOrSoon: timetableOnlyNowOrSoon, onFilterChange: timetableFilterChange),
-      FilteredListingsPage(filterCategory: "all", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _allListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
-      FilteredListingsPage(filterCategory: "favourite", subfilterCategory: listingsSubfilterCategory, listings: listings, key: _savedListingsKey, onTabSelected: setCurrentIndex, onSubfilterChange: listingsSubfilterChange),
+      ChooserPage(
+          theEvents: listings,
+          onTabSelected: setCurrentIndex,
+          onOpenTimetable: openTimetable,
+          onOpenListings: openListings,
+          onOpenMap: openMap,
+          analyticsService: widget.analyticsService),
+      MapPage(
+          listings: listings,
+          key: mapPageKey,
+          nearestMarkerCount: mapNearestMarkerCount,
+          onTabSelected: setCurrentIndex,
+          onHomeTapped: cancelMapNearest,
+          analyticsService: widget.analyticsService),
+      TimetablePage(
+          theEvents: listings,
+          onTabSelected: setCurrentIndex,
+          filteredMusicOrNot: timetableFilteredMusicOrNot,
+          onlyNowOrSoon: timetableOnlyNowOrSoon,
+          onFilterChange: timetableFilterChange,
+          analyticsService: widget.analyticsService),
+      FilteredListingsPage(
+          filterCategory: "all",
+          subfilterCategory: listingsSubfilterCategory,
+          listings: listings,
+          key: _allListingsKey,
+          onTabSelected: setCurrentIndex,
+          onSubfilterChange: listingsSubfilterChange,
+          analyticsService: widget.analyticsService),
+      FilteredListingsPage(
+          filterCategory: "favourite",
+          subfilterCategory: listingsSubfilterCategory,
+          listings: listings,
+          key: _savedListingsKey,
+          onTabSelected: setCurrentIndex,
+          onSubfilterChange: listingsSubfilterChange,
+          analyticsService: widget.analyticsService),
     ];
     return IndexedStack(
       index: index,

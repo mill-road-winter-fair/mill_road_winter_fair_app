@@ -114,7 +114,7 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.200166, 0.136762),
   const LatLng(52.200145, 0.136791),
   const LatLng(52.200122, 0.136778),
-  const LatLng(52.199689, 0.136458), // tenison road 
+  const LatLng(52.199689, 0.136458), // tenison road
   const LatLng(52.199670, 0.136580), // tenison road
   const LatLng(52.200071, 0.136895),
   const LatLng(52.200089, 0.136921),
@@ -236,6 +236,7 @@ class SubfilterLabel {
   final IconData iconData;
   const SubfilterLabel(this.label, this.iconData);
 }
+
 const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'performanceMusic': SubfilterLabel('Music', Icons.music_note),
   'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free),
@@ -247,3 +248,9 @@ const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism),
   'service': SubfilterLabel('Services', Icons.family_restroom)
 };
+
+// Initialize user's analytics preference (null means they haven't been asked yet)
+bool? usageAnalyticsEnabled;
+
+// A RouteObserver to track navigation events for analytics purposes
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();

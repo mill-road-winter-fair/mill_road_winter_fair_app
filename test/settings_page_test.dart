@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
@@ -21,7 +22,7 @@ void main() {
 
   group('SettingsPage', () {
     testWidgets('displays correct initial state', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Verify the Distance Units section
       expect(find.text('Distance units'), findsOneWidget);
@@ -53,7 +54,7 @@ void main() {
     });
 
     testWidgets('changes distance units to Imperial', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Tap on Imperial radio button
       await tester.tap(find.text('Imperial'));
@@ -64,7 +65,7 @@ void main() {
     });
 
     testWidgets('changes theme to Dark', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Tap on the Dark theme radio button
       await tester.tap(find.text('Dark'));
@@ -75,7 +76,7 @@ void main() {
     });
 
     testWidgets('changes theme to Auto', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       await tester.tap(find.text('Auto'));
       await tester.pumpAndSettle();
@@ -84,7 +85,7 @@ void main() {
     });
 
     testWidgets('changes theme to Colour Blind Friendly', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       await tester.scrollUntilVisible(find.text('Colour blind friendly'), 50);
 
@@ -97,7 +98,7 @@ void main() {
     });
 
     testWidgets('persists settings after selection', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Change distance units to Imperial
       await tester.tap(find.text('Imperial'));
