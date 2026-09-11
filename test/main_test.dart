@@ -17,13 +17,16 @@ class FakeUrlLauncher extends UrlLauncherPlatform {
   final List<String> launchedUrls = [];
 
   @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
   Future<bool> launchUrl(String url, LaunchOptions options) async {
     launchedUrls.add(url);
     return true;
   }
 }
 
-Finder findDrawerIconButton(IconData icon) {
+Finder findDrawerIconButton(FaIconData icon) {
   return find.byWidgetPredicate(
     (widget) =>
         widget is IconButton &&
