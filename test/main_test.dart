@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -31,7 +32,7 @@ Finder findDrawerIconButton(FaIconData icon) {
     (widget) =>
         widget is IconButton &&
         widget.icon is FaIcon &&
-        (widget.icon as FaIcon).icon == icon,
+        identical((widget.icon as FaIcon).icon, icon),
   );
 }
 
