@@ -69,11 +69,12 @@ void main() {
   Future<void> pumpFilteredListingsPage(
     WidgetTester tester,
     String category,
-    List<Map<String, dynamic>> listings,
+    List<Map<String, dynamic>> pageListings,
     List<String> favouriteIds, {
     String? subfilterCategory,
     DateTime? currentDateTime,
   }) async {
+    listings = pageListings;
     favouriteListingKeys.value = favouriteIds.toSet();
     await tester.pumpWidget(
       MaterialApp(
@@ -81,7 +82,7 @@ void main() {
           body: FilteredListingsPage(
             filterCategory: category,
             subfilterCategory: subfilterCategory,
-            listings: listings,
+            listings: pageListings,
             onTabSelected: (_) {},
             onSubfilterChange: (_) {},
             currentDateTime: currentDateTime,
