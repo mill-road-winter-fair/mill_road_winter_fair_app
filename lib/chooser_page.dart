@@ -282,23 +282,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                             left: 0, right: 0, top: 0, bottom: 0,
                             child: BackdropFilter(
                               filter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                              child: Container(color: Colors.white.withAlpha(100)),
-                            ),
-                          ),
-                          Positioned(
-                            top: 20, left: 0, right: 0, 
-                            child: Align(alignment: AlignmentGeometry.center, 
-                              child: SimpleShadow(
-                                opacity: 1,
-                                color: Colors.white,
-                                sigma: 6.0,
-                                offset: const Offset(0, 0),
-                                child: Image.asset(
-                                  'assets/chooserPage/MRWF_logo_transparent.png',
-                                  fit: BoxFit.contain,
-                                  width: constraints.maxWidth * 0.55,
-                                ),
-                              ),
+                              child: Container(color: Colors.white.withAlpha(150)),
                             ),
                           ),
                           for (final item in layout.where((entry) => orderedHotspotIndices.contains(entry.index)))
@@ -313,9 +297,9 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                                   children: [
                                     SimpleShadow(
                                       opacity: (staticChooserPage.value) ? 1 : hotspotLabelOpacityForPhase(item.index, phase, visibleCount: visibleCount),
-                                      color: Colors.white,
-                                      sigma: 6.0,
-                                      offset: const Offset(0, 0),
+                                      color: Colors.black,
+                                      sigma: 10.0,
+                                      offset: const Offset(6, 6),
                                       child: Image.asset(
                                         hotspots[item.index].assetPath,
                                         fit: BoxFit.contain,
@@ -347,7 +331,7 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                                               height: 0.9,
                                               leadingDistribution: TextLeadingDistribution.even,
                                               shadows: [
-                                                Shadow(blurRadius: 4, color: colorScheme.primary),
+                                                Shadow(blurRadius: 4, color: Colors.black),
                                                 Shadow(blurRadius: 16, color: colorScheme.primary),
                                               ],
                                             ),
@@ -381,6 +365,28 @@ class _ChooserPageState extends State<ChooserPage> with SingleTickerProviderStat
                                 child: const SizedBox.expand(),
                               ),
                             ),
+                          Positioned(
+                            top: 15, left: 0, right: 0, 
+                            child: Align(alignment: AlignmentGeometry.center, 
+                              child: GestureDetector(
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                                },
+                                child: SimpleShadow(
+                                  opacity: 1,
+                                  color: Colors.white,
+                                  sigma: 6.0,
+                                  offset: const Offset(0, 0),
+                                  child: Image.asset(
+                                    'assets/chooserPage/MRWF_logo_transparent.png',
+                                    fit: BoxFit.contain,
+                                    width: constraints.maxWidth * 0.55,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       );
                     },
