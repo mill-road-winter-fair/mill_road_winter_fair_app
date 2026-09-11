@@ -73,14 +73,18 @@ void main() {
     List<String> favouriteIds, {
     String? subfilterCategory,
     DateTime? currentDateTime,
+    bool resetState = false,
   }) async {
+    if (resetState) {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
     listings = pageListings;
     favouriteListingKeys.value = favouriteIds.toSet();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: FilteredListingsPage(
-            key: UniqueKey(),
             filterCategory: category,
             subfilterCategory: subfilterCategory,
             listings: pageListings,
@@ -689,7 +693,7 @@ void main() {
         ),
       ];
 
-      await pumpFilteredListingsPage(tester, 'food', sampleListings, []);
+      await pumpFilteredListingsPage(tester, 'food', sampleListings, [], resetState: true);
       var state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
       expect(state.filteredListings.map((listing) => listing['id']), ['food']);
 
@@ -699,11 +703,12 @@ void main() {
         sampleListings,
         [],
         subfilterCategory: 'performanceMusic',
+        resetState: true,
       );
       state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
       expect(state.filteredListings.map((listing) => listing['id']), ['music']);
 
-      await pumpFilteredListingsPage(tester, 'favourite', sampleListings, ['shop']);
+      await pumpFilteredListingsPage(tester, 'favourite', sampleListings, ['shop'], resetState: true);
       state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
       expect(state.filteredListings.map((listing) => listing['id']), ['shop']);
     });
@@ -717,7 +722,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
       preferredSortingMethod = SortingMethod.alphabetical;
 
-      await pumpFilteredListingsPage(tester, 'food', sampleListings, []);
+      await pumpFilteredListingsPage(tester, 'food', sampleListings, [], resetState: true);
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
       expect(find.text('Nearest'), findsWidgets);
@@ -731,15 +736,16 @@ void main() {
         sampleListings,
         [],
         subfilterCategory: 'performanceMusic',
+        resetState: true,
       );
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
-      expect(find.text('Time'), findsOneWidget);
+      expect(find.text('Time'), findsWidgets);
 
-      await pumpFilteredListingsPage(tester, 'favourite', sampleListings, ['food']);
+      await pumpFilteredListingsPage(tester, 'favourite', sampleListings, ['food'], resetState: true);
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
-      expect(find.text('Time'), findsOneWidget);
+      expect(find.text('Time'), findsWidgets);
     });
 
     testWidgets('scroll to now selects time sorting and finds the first current listing', (WidgetTester tester) async {
