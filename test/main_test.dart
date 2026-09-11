@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
@@ -10,6 +12,28 @@ import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+
+class FakeUrlLauncher extends UrlLauncherPlatform {
+  final List<String> launchedUrls = [];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    launchedUrls.add(url);
+    return true;
+  }
+}
+
+Finder findDrawerSocialButton(int index) {
+  return find
+      .descendant(
+        of: find.byType(Drawer),
+        matching: find.byType(IconButton),
+      )
+      .at(index);
+}
 
 void main() {
   // We're on test
@@ -169,6 +193,106 @@ void main() {
       expect(find.text('App guide'), findsOneWidget);
       expect(find.text('Share this app'), findsOneWidget);
       expect(find.text('About this app'), findsOneWidget);
+    });
+
+    group('drawer external links', () {
+      final originalUrlLauncher = UrlLauncherPlatform.instance;
+      late FakeUrlLauncher fakeUrlLauncher;
+
+      setUp(() {
+        fakeUrlLauncher = FakeUrlLauncher();
+        UrlLauncherPlatform.instance = fakeUrlLauncher;
+      });
+
+      tearDown(() {
+        UrlLauncherPlatform.instance = originalUrlLauncher;
+      });
+
+      Future<void> openDrawer(WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: FairScaffold(
+              appBarTitle: 'Test',
+              body: const SizedBox(),
+              currentTab: 0,
+              onTabSelected: (_) {},
+            ),
+          ),
+        );
+
+        await tester.tap(find.byIcon(Icons.menu));
+        await tester.pumpAndSettle();
+      }
+
+      Future<void> expectButtonLaunches(
+        WidgetTester tester,
+        Finder button,
+        String expectedUrl,
+      ) async {
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+
+        expect(fakeUrlLauncher.launchedUrls, [expectedUrl]);
+      }
+
+      testWidgets(
+        'Visit our website button launches the Fair website',
+        (tester) async {
+          await openDrawer(tester);
+
+          await expectButtonLaunches(
+            tester,
+            find.text('Visit our website'),
+            'https://www.millroadwinterfair.org/',
+          );
+        },
+      );
+
+      testWidgets(
+        'Facebook button launches the Fair Facebook page',
+        (tester) async {
+          await openDrawer(tester);
+
+          await expectButtonLaunches(
+            tester,
+            findDrawerSocialButton(0),
+            'https://www.facebook.com/MillRoadWinterFair/',
+          );
+        },
+      );
+
+      testWidgets('X button launches the Fair X page', (tester) async {
+        await openDrawer(tester);
+
+        await expectButtonLaunches(
+          tester,
+          findDrawerSocialButton(1),
+          'https://x.com/millroadfair',
+        );
+      });
+
+      testWidgets(
+        'Instagram button launches the Fair Instagram page',
+        (tester) async {
+          await openDrawer(tester);
+
+          await expectButtonLaunches(
+            tester,
+            findDrawerSocialButton(2),
+            'https://www.instagram.com/millroadwinterfair/',
+          );
+        },
+      );
+
+      testWidgets('Flickr button launches the Fair Flickr page', (tester) async {
+        await openDrawer(tester);
+
+        await expectButtonLaunches(
+          tester,
+          findDrawerSocialButton(3),
+          'https://www.flickr.com/people/millroadwinterfair/',
+        );
+      });
     });
 
     testWidgets('navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
