@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
@@ -27,13 +26,13 @@ class FakeUrlLauncher extends UrlLauncherPlatform {
   }
 }
 
-Finder findDrawerIconButton(FaIconData icon) {
-  return find.byWidgetPredicate(
-    (widget) =>
-        widget is IconButton &&
-        widget.icon is FaIcon &&
-        identical((widget.icon as FaIcon).icon, icon),
-  );
+Finder findDrawerSocialButton(int index) {
+  return find
+      .descendant(
+        of: find.byType(Drawer),
+        matching: find.byType(IconButton),
+      )
+      .at(index);
 }
 
 void main() {
@@ -256,7 +255,7 @@ void main() {
 
           await expectButtonLaunches(
             tester,
-            findDrawerIconButton(FontAwesomeIcons.squareFacebook),
+            findDrawerSocialButton(0),
             'https://www.facebook.com/MillRoadWinterFair/',
           );
         },
@@ -267,7 +266,7 @@ void main() {
 
         await expectButtonLaunches(
           tester,
-          findDrawerIconButton(FontAwesomeIcons.squareXTwitter),
+          findDrawerSocialButton(1),
           'https://x.com/millroadfair',
         );
       });
@@ -279,7 +278,7 @@ void main() {
 
           await expectButtonLaunches(
             tester,
-            findDrawerIconButton(FontAwesomeIcons.squareInstagram),
+            findDrawerSocialButton(2),
             'https://www.instagram.com/millroadwinterfair/',
           );
         },
@@ -290,7 +289,7 @@ void main() {
 
         await expectButtonLaunches(
           tester,
-          findDrawerIconButton(FontAwesomeIcons.flickr),
+          findDrawerSocialButton(3),
           'https://www.flickr.com/people/millroadwinterfair/',
         );
       });
