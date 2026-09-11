@@ -111,14 +111,17 @@ void main() {
     testWidgets('email hyperlink opens the contact dialog', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: ImportantInfoPage()));
 
-      final emailParagraph = tester.widget<RichText>(
+      final emailParagraph = tester.widget<Text>(
         find.byWidgetPredicate(
           (widget) =>
-              widget is RichText &&
-              widget.text.toPlainText().contains('Email addresses for the Fair'),
+              widget is Text &&
+              widget.textSpan
+                      ?.toPlainText()
+                      .contains('Email addresses for the Fair') ==
+                  true,
         ),
       );
-      final paragraphSpan = emailParagraph.text as TextSpan;
+      final paragraphSpan = emailParagraph.textSpan as TextSpan;
       final linkSpan = paragraphSpan.children!
           .whereType<TextSpan>()
           .singleWhere((span) => span.text == 'here');
