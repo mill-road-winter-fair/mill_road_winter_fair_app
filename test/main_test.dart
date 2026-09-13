@@ -7,6 +7,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -22,6 +23,17 @@ void main() {
 
     // Mock user settings
     await loadSettings();
+  });
+
+  group('Chooser page entrance animation', () {
+    test('hotspots reveal in sequence and reach full opacity by the end of the five second entrance', () {
+      expect(hotspotEntranceOpacityForIndex(0, 0.0, totalHotspots: 8), 0.0);
+      expect(hotspotEntranceOpacityForIndex(0, 0.09, totalHotspots: 8), 0.0);
+      expect(hotspotEntranceOpacityForIndex(0, 0.2, totalHotspots: 8), greaterThan(0.0));
+      expect(hotspotEntranceOpacityForIndex(1, 0.2, totalHotspots: 8), 0.0);
+      expect(hotspotEntranceOpacityForIndex(1, 0.4, totalHotspots: 8), greaterThan(0.0));
+      expect(hotspotEntranceOpacityForIndex(7, 1.0, totalHotspots: 8), 1.0);
+    });
   });
 
   group('HomePage', () {
