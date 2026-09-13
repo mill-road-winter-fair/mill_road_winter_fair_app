@@ -59,25 +59,51 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    if (!staticChooserPage.value) {
-      _animationController = AnimationController(vsync: this, duration: const Duration(seconds: _idleAnimationPeriod))
-        ..addListener(_updatePaintPhase)
-        ..repeat();
-      _initialEntranceController = AnimationController(vsync: this, duration: const Duration(seconds: _entranceAnimationPeriod))
-        ..addListener(_updateEntranceProgress)
-        ..addStatusListener(_entranceStatusChanged);
+    _animationController = AnimationController(vsync: this, duration: const Duration(seconds: _idleAnimationPeriod))
+      ..addListener(_updatePaintPhase);
+    _initialEntranceController = AnimationController(vsync: this, duration: const Duration(seconds: _entranceAnimationPeriod))
+      ..addListener(_updateEntranceProgress)
+      ..addStatusListener(_entranceStatusChanged);
+    staticChooserPage.addListener(_staticChooserPageChanged);
+    if (staticChooserPage.value) {
+      _initialEntranceComplete = true;
+      _entranceProgress.value = 1.0;
     }
-  }
+}
 
 
   @override
   void dispose() {
+    staticChooserPage.removeListener(_staticChooserPageChanged);
     _animationController?..removeListener(_updatePaintPhase)..dispose();
-    _initialEntranceController?..removeListener(_updateEntranceProgress)..dispose();
+    _initialEntranceController?..removeListener(_updateEntranceProgress)..removeStatusListener(_entranceStatusChanged)..dispose();
     _paintPhase.dispose();
     _entranceProgress.dispose();
     _idleTimer?.cancel();
     super.dispose();
+  }
+
+
+  void _staticChooserPageChanged() {
+    if (!mounted) return;
+    if (staticChooserPage.value) {
+      _idleTimer?.cancel();
+      _animationController?.stop(canceled: false);
+      _initialEntranceController?.stop(canceled: false);
+      setState(() { _initialEntranceComplete = true; });
+      _entranceProgress.value = 1.0;
+      _paintPhase.value = 0.0;
+    } else {
+      _idleTimer?.cancel();
+      setState(() {
+        _initialEntranceStarted = true;
+        _initialEntranceComplete = false;
+      });
+      _entranceProgress.value = 0.0;
+      _lastEntranceStep = -1;
+      _initialEntranceController?.forward(from: 0.0);
+      _animationController?.repeat();
+    }
   }
 
 
@@ -106,7 +132,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
 
   void _pauseAnimationOnPointerDown(PointerDownEvent event) {
     _animationController?.stop(canceled: false);
-    if (!onTest) _restartAnimationTimer();
+    if (!staticChooserPage.value) _restartAnimationTimer();
   }
 
 
@@ -253,10 +279,11 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     ]);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted || staticChooserPage.value) return;
       if (!_initialEntranceStarted) {
         _initialEntranceStarted = true;
         _initialEntranceController?.forward(from: 0.0);
+        _animationController?.repeat();
       }
     });
 
@@ -295,54 +322,59 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
   Widget build(BuildContext context) {
 
     final colourScheme = Theme.of(context).colorScheme;
-
     final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
 
-    return Listener(
-      onPointerDown: staticChooserPage.value ? null : _pauseAnimationOnPointerDown,
-      behavior: HitTestBehavior.translucent,
-      child: FairScaffold(
-        appBarTitle: 'Welcome to the 2026 Fair! ', // deliberate space
-        currentTab: 0,
-        onTabSelected: widget.onTabSelected,
-        appBarActions: [
-          IconButton(icon: const Icon(Icons.warning, size: 20),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
-            },
-          ),
-          IconButton(icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-            },
-          ),
-        ],
-        body: RepaintBoundary(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              _hotspotsFuture ??= _createHotspots(constraints.maxWidth, constraints.maxHeight, devicePixelRatio);
-              return FutureBuilder<void>(
-                future: _hotspotsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
-                  return _ChooserContent(
-                    hotspots: hotspots,
-                    paintPhase: _paintPhase,
-                    entranceProgress: _entranceProgress,
-                    initialEntranceComplete: _initialEntranceComplete,
-                    chosenHotspotID: _chosenHotspotID,
-                    colourScheme: colourScheme,
-                    onHotspotTap: _selectHotspot,
-                    maxWidth: constraints.maxWidth,
+    return ValueListenableBuilder<bool>(
+      valueListenable: staticChooserPage,
+      builder: (context, name, child) {
+        return Listener(
+          onPointerDown: (staticChooserPage.value) ? null : _pauseAnimationOnPointerDown,
+          behavior: HitTestBehavior.translucent,
+          child: FairScaffold(
+            appBarTitle: 'Welcome to the 2026 Fair! ', // deliberate space
+            currentTab: 0,
+            onTabSelected: widget.onTabSelected,
+            appBarActions: [
+              IconButton(icon: const Icon(Icons.warning, size: 20),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                },
+              ),
+              IconButton(icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                },
+              ),
+            ],
+            body: RepaintBoundary(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  _hotspotsFuture ??= _createHotspots(constraints.maxWidth, constraints.maxHeight, devicePixelRatio);
+                  return FutureBuilder<void>(
+                    future: _hotspotsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
+                      return _ChooserContent(
+                        hotspots: hotspots,
+                        paintPhase: _paintPhase,
+                        staticChooserPage: staticChooserPage.value,
+                        entranceProgress: _entranceProgress,
+                        initialEntranceComplete: _initialEntranceComplete,
+                        chosenHotspotID: _chosenHotspotID,
+                        colourScheme: colourScheme,
+                        onHotspotTap: _selectHotspot,
+                        maxWidth: constraints.maxWidth,
+                      );
+                    },
                   );
                 },
-              );
-            },
-          ),
-        ),
-      ),
+              ),
+            ),
+          )
+        );
+      },
     );
 
   }
@@ -355,6 +387,7 @@ class _ChooserContent extends StatelessWidget {
   const _ChooserContent({
     required this.hotspots,
     required this.paintPhase,
+    required this.staticChooserPage,
     required this.entranceProgress,
     required this.initialEntranceComplete,
     required this.chosenHotspotID,
@@ -365,6 +398,7 @@ class _ChooserContent extends StatelessWidget {
 
   final List<Hotspot> hotspots;
   final ValueListenable<double> paintPhase;
+  final bool staticChooserPage;
   final ValueListenable<double> entranceProgress;
   final bool initialEntranceComplete;
   final int? chosenHotspotID;
@@ -388,6 +422,7 @@ class _ChooserContent extends StatelessWidget {
             paintPhase: paintPhase,
             entranceProgress: entranceProgress,
             initialEntranceComplete: initialEntranceComplete,
+            staticChooserPage: staticChooserPage,
             isSelected: chosenHotspotID == index,
             colourScheme: colourScheme,
             onTap: () => onHotspotTap(index),
@@ -466,6 +501,7 @@ class _AnimatedHotspot extends StatelessWidget {
     required this.paintPhase,
     required this.entranceProgress,
     required this.initialEntranceComplete,
+    required this.staticChooserPage,
     required this.isSelected,
     required this.colourScheme,
     required this.onTap,
@@ -477,6 +513,7 @@ class _AnimatedHotspot extends StatelessWidget {
   final ValueListenable<double> paintPhase;
   final ValueListenable<double> entranceProgress;
   final bool initialEntranceComplete;
+  final bool staticChooserPage;
   final bool isSelected;
   final ColorScheme colourScheme;
   final VoidCallback onTap;
@@ -495,6 +532,7 @@ class _AnimatedHotspot extends StatelessWidget {
         paintPhase: paintPhase,
         entranceProgress: entranceProgress,
         initialEntranceComplete: initialEntranceComplete,
+        staticChooserPage: staticChooserPage,
         isSelected: isSelected,
         colourScheme: colourScheme,
         onTap: onTap,
@@ -514,6 +552,7 @@ class _HotspotLayers extends StatelessWidget {
     required this.paintPhase,
     required this.entranceProgress,
     required this.initialEntranceComplete,
+    required this.staticChooserPage,
     required this.isSelected,
     required this.colourScheme,
     required this.onTap,
@@ -525,22 +564,32 @@ class _HotspotLayers extends StatelessWidget {
   final ValueListenable<double> paintPhase;
   final ValueListenable<double> entranceProgress;
   final bool initialEntranceComplete;
+  final bool staticChooserPage;
   final bool isSelected;
   final ColorScheme colourScheme;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-
     final animation = Listenable.merge([paintPhase, entranceProgress]);
-
     return AnimatedBuilder(
       animation: animation,
       builder: (context, _) {
+        if (staticChooserPage) {
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                _CachedNormalImage(hotspot: hotspot),
+                _CachedLabel(hotspot: hotspot, colourScheme: colourScheme),
+              ],
+            ),
+          );
+        }
         final introProgress = entranceProgress.value;
-
         final idleProgress = paintPhase.value;
-
         final introOpacity = isSelected
             ? 1.0
             : hotspotEntranceOpacityForIndex(
@@ -548,7 +597,6 @@ class _HotspotLayers extends StatelessWidget {
                 introProgress,
                 totalHotspots: 8,
               );
-
         final idleOpacity = isSelected
             ? 1.0
             : hotspotLabelOpacityForPhase(
@@ -556,13 +604,11 @@ class _HotspotLayers extends StatelessWidget {
                 idleProgress,
                 visibleCount: visibleCount,
               );
-
         final imageOpacity = initialEntranceComplete ? 1.0 : introOpacity;
         final glowOpacity = initialEntranceComplete ? idleOpacity : 0.0;
         final labelOpacity = initialEntranceComplete ? idleOpacity : 0.0;
         final shadowedOpacity = imageOpacity * glowOpacity;
         final normalOpacity = imageOpacity * (1.0 - glowOpacity); // so they combine to 100%
-
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onTap,
@@ -575,10 +621,8 @@ class _HotspotLayers extends StatelessWidget {
             ],
           ),
         );
-
       },
     );
-
   }
 
 }

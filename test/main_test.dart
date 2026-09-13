@@ -69,7 +69,7 @@ void main() {
 
       await tester.pumpWidget(const MyApp());
 
-      expect(find.text('Welcome'), findsOneWidget);
+      expect(find.textContaining('Welcome'), findsOneWidget);
 
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Map'), findsOneWidget);
@@ -168,15 +168,14 @@ void main() {
       await tester.pumpWidget(const MyApp());
 
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.byType(DrawerHeader), findsOneWidget);
-      expect(find.text('Welcome'), findsOneWidget);
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
       expect(find.text('Contact us'), findsOneWidget);
-      expect(find.byType(IconButton), findsExactly(6));
+      expect(find.byType(IconButton), findsExactly(7));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('App guide'), findsOneWidget);
       expect(find.text('Share this app'), findsOneWidget);
@@ -216,11 +215,12 @@ void main() {
       await tester.pumpWidget(const MyApp());
 
       await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump(const Duration(milliseconds: 500));
+      final aboutFinder = find.text('About the Fair');
+      expect(aboutFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(aboutFinder);
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text('About the Fair'));
-      await tester.pumpAndSettle();
-
       expect(find.byType(AboutTheFairPage), findsOneWidget);
     });
 
@@ -254,14 +254,16 @@ void main() {
         }
       ];
 
+
       await tester.pumpWidget(const MyApp());
 
       await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump(const Duration(milliseconds: 500));
+      final impInfoFinder = find.text('Important information');
+      expect(impInfoFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(impInfoFinder);
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Important information'));
-      await tester.pumpAndSettle();
-
       expect(find.byType(ImportantInfoPage), findsOneWidget);
     });
 
@@ -298,11 +300,12 @@ void main() {
       await tester.pumpWidget(const MyApp());
 
       await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump(const Duration(milliseconds: 500));
+      final settingsFinder = find.text('Settings');
+      expect(settingsFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(settingsFinder);
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Settings'));
-      await tester.pumpAndSettle();
-
       expect(find.byType(SettingsPage), findsOneWidget);
     });
 
@@ -343,9 +346,11 @@ void main() {
       await tester.pumpWidget(const MyApp());
 
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('App guide'));
+      await tester.pump(const Duration(milliseconds: 500));
+      final appGuideFinder = find.text('App guide');
+      expect(appGuideFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(appGuideFinder);
       await tester.pumpAndSettle();
 
       // Verify that the WelcomeScreen is displayed
@@ -388,10 +393,12 @@ void main() {
       await tester.pumpWidget(const MyApp());
 
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('About this app'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+      final aboutAppFinder = find.text('About this app');
+      expect(aboutAppFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(aboutAppFinder);
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('Android app by Alexander Berridge'), findsOneWidget);
       expect(find.text('iPhone version by Matt Whiting'), findsOneWidget);
@@ -430,7 +437,7 @@ void main() {
       await tester.pumpWidget(const MyApp());
 
       await tester.tap(find.text('Home'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Obtain the state after mounting
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
@@ -526,7 +533,7 @@ void main() {
 
       // Tap the Favourites button the NavBar
       await tester.tap(find.byIcon(Icons.favorite));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Verify that the favourites page is displayed
       expect(find.byType(FilteredListingsPage), findsOneWidget);

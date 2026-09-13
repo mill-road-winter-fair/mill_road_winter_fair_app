@@ -79,7 +79,7 @@ int promptedUserToEnableLocationServices = 0;
 LatLng? currentLatLng;
 
 // Whether to have a static chooser page
-ValueNotifier<bool> staticChooserPage = ValueNotifier(false);
+ValueNotifier<bool> staticChooserPage = ValueNotifier(onTest);
 
 // Fair date (and times) for this year
 // Also used by the listing-update notifier.
