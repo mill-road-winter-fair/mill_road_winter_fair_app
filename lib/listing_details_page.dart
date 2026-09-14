@@ -35,7 +35,8 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
 
   Widget _contact(IconData icon, String label, String value, Uri uri) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+      visualDensity: VisualDensity.compact,
       leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
       title: Text(label),
       subtitle: Text(value),
@@ -65,7 +66,7 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 760),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -74,7 +75,7 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                         if (listing.emoji.isNotEmpty) ...[
                           Text(listing.emoji,
                               style: const TextStyle(fontSize: 40)),
-                          const SizedBox(width: 16),
+                          const SizedBox(width: 12),
                         ],
                         Expanded(
                           child: Column(
@@ -90,7 +91,7 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                                 ),
                               ),
                               if (listing.subtitle.trim().isNotEmpty) ...[
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 4),
                                 Text(listing.subtitle,
                                     style: theme.textTheme.titleMedium
                                         ?.copyWith(color: colors.primary)),
@@ -100,9 +101,9 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: colors.surfaceContainerLow,
                         borderRadius: BorderRadius.circular(16),
@@ -117,81 +118,95 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                                   ? 'CANCELLED'
                                   : '${listing.startTime}–${listing.endTime}${ended ? ' · Ended' : ''}'),
                           if (location.trim().isNotEmpty) ...[
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 8),
                             _fact(Icons.place_outlined, location),
                           ],
                           if (listing.approxDistance.trim().isNotEmpty) ...[
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 8),
                             _fact(
                                 Icons.directions_walk, listing.approxDistance),
                           ],
                           if (listing.brickAndMortar) ...[
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 8),
                             _fact(Icons.storefront_outlined, 'Local business'),
                           ],
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                    const SizedBox(height: 12),
+                    Row(
                       children: [
-                        ElevatedButton.icon(
-                          style: _favourited
-                              ? ElevatedButton.styleFrom(
-                                  backgroundColor: colors.primary,
-                                  foregroundColor: colors.onPrimary,
-                                )
-                              : null,
-                          onPressed: listing.onFavouriteTapped == null
-                              ? null
-                              : () {
-                                  listing.onFavouriteTapped!();
-                                  setState(() => _favourited = !_favourited);
-                                },
-                          icon: Icon(_favourited
-                              ? Icons.favorite
-                              : Icons.favorite_border),
-                          label: Text(_favourited ? 'Favourited' : 'Favourite'),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: _actionButtonStyle(
+                              backgroundColor:
+                                  _favourited ? colors.primary : null,
+                              foregroundColor:
+                                  _favourited ? colors.onPrimary : null,
+                            ),
+                            onPressed: listing.onFavouriteTapped == null
+                                ? null
+                                : () {
+                                    listing.onFavouriteTapped!();
+                                    setState(() => _favourited = !_favourited);
+                                  },
+                            icon: Icon(_favourited
+                                ? Icons.favorite
+                                : Icons.favorite_border),
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                  _favourited ? 'Favourited' : 'Favourite'),
+                            ),
+                          ),
                         ),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.of(context).pop();
-                            listing.onGetDirections();
-                          },
-                          icon: const Icon(Icons.directions_walk),
-                          label: const Text('Directions'),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: _actionButtonStyle(),
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.of(context).pop();
+                              listing.onGetDirections();
+                            },
+                            icon: const Icon(Icons.directions_walk),
+                            label: const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Directions'),
+                            ),
+                          ),
                         ),
-                        Builder(
-                            builder: (shareContext) => ElevatedButton.icon(
-                                  onPressed: () => shareListing(
-                                      listing.title,
-                                      location,
-                                      listing.startTime,
-                                      listing.endTime,
-                                      shareContext),
-                                  icon: Icon(Platform.isAndroid
-                                      ? Icons.share
-                                      : Icons.ios_share),
-                                  label: const Text('Share'),
-                                )),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Builder(
+                              builder: (shareContext) => ElevatedButton.icon(
+                                    style: _actionButtonStyle(),
+                                    onPressed: () => shareListing(
+                                        listing.title,
+                                        location,
+                                        listing.startTime,
+                                        listing.endTime,
+                                        shareContext),
+                                    icon: Icon(Platform.isAndroid
+                                        ? Icons.share
+                                        : Icons.ios_share),
+                                    label: const FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text('Share'),
+                                    ),
+                                  )),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 28),
-                    Text('About',
-                        style: theme.textTheme.titleLarge
-                            ?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
                     Text(
                       listing.description.trim().isEmpty
                           ? 'Explore this listing at the fair.'
                           : listing.description,
-                      style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
+                      style: theme.textTheme.bodyLarge?.copyWith(height: 1.4),
                     ),
                     if (imageUrl.isNotEmpty) ...[
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.network(
@@ -219,11 +234,7 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                     if (website.isNotEmpty ||
                         email.isNotEmpty ||
                         phone.isNotEmpty) ...[
-                      const SizedBox(height: 28),
-                      Text('Get in touch',
-                          style: theme.textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       Card(
                         margin: EdgeInsets.zero,
                         clipBehavior: Clip.antiAlias,
@@ -263,5 +274,16 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
           Expanded(
               child: Text(text, style: Theme.of(context).textTheme.bodyLarge)),
         ],
+      );
+
+  ButtonStyle _actionButtonStyle({
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) =>
+      ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        minimumSize: const Size(0, 44),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
       );
 }
