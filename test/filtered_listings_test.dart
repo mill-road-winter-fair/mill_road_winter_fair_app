@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -10,6 +11,15 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 1000));
+}
+
+class RecordingSearchAnalyticsService extends FakeAnalyticsService {
+  final searches = <Map<String, String>>[];
+
+  @override
+  Future<void> logSearch(String searchTerm, {required String searchArea}) async {
+    searches.add({'search_term': searchTerm, 'search_area': searchArea});
+  }
 }
 
 void main() {
@@ -38,6 +48,7 @@ void main() {
             listings: listings,
             onTabSelected: (_) {},
             onSubfilterChange: (_) {},
+            analyticsService: FakeAnalyticsService(),
           ),
         ),
       ),
@@ -123,7 +134,7 @@ void main() {
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
-      expect(find.text('01223 111111'), findsNothing);  // as Details won't be open
+      expect(find.text('01223 111111'), findsNothing); // as Details won't be open
       expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
@@ -132,7 +143,6 @@ void main() {
       // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
       expect(find.byIcon(Icons.directions_walk), findsExactly(3));
       expect(find.byIcon(Icons.public), findsExactly(2));
-
     });
 
     testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
@@ -214,7 +224,7 @@ void main() {
           'email': '',
           'website': 'https://www.biteclub.com',
           'phone': '01223 333333',
-          'latLng': '52.202313,0.131562',  // 968m
+          'latLng': '52.202313,0.131562', // 968m
           'imageURL': '',
           'startTime': '14:00',
           'endTime': '16:30',
@@ -444,6 +454,9 @@ void main() {
     });
 
     testWidgets('FilteredListingsPage navigateToMapAndGetDirections function changes to MapPage', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -473,7 +486,7 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await settle(tester);
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
@@ -493,6 +506,7 @@ void main() {
     });
 
     testWidgets('FilteredListingsPage search filters results based on query (UI)', (WidgetTester tester) async {
+      final analytics = RecordingSearchAnalyticsService();
       final sampleListings = [
         {
           'id': '1',
@@ -583,7 +597,8 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
+            body: FilteredListingsPage(
+                filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
           ),
         ),
       );
@@ -616,6 +631,9 @@ void main() {
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsNothing);
       expect(find.text('Bite Club'), findsNothing);
+      expect(analytics.searches, [
+        {'search_term': 'sushi', 'search_area': 'listings'},
+      ]);
 
       // Clear the search using the close button in the SearchBar (Icon(Icons.close))
       await tester.tap(find.byIcon(Icons.close));

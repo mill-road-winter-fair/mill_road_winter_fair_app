@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1023186335345",
+    "project_id": "mrwf-app-analytics-prod",
+    "storage_bucket": "mrwf-app-analytics-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1023186335345:android:76c9864f318ba52fc78dd0",
+        "android_client_info": {
+          "package_name": "com.theberridge.mill_road_winter_fair_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTyNnR9BkkIhf5kh7py_M2k1oyior0Hj8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
