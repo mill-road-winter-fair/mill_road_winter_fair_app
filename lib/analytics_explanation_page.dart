@@ -75,6 +75,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
               child: SingleChildScrollView(
                 controller: _scrollController,
                 primary: false,
+                padding: const EdgeInsets.only(bottom: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
