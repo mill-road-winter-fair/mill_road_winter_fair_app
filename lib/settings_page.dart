@@ -350,7 +350,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     ),
                     SwitchListTile(
                       activeThumbColor: Theme.of(context).colorScheme.tertiary,
-                      title: const Text('Allow Analytics'),
+                      title: const Text('Allow analytics'),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
