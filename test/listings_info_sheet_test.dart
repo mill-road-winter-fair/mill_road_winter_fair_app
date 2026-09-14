@@ -33,8 +33,7 @@ SpecificListingInfoSheet listing(
     );
 
 void main() {
-  testWidgets('sheet only shows summary and four actions; Info opens full page',
-      (tester) async {
+  testWidgets('sheet only shows summary and four actions; Info opens full page', (tester) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: listing())));
     expect(find.text('Fresh doughnuts made locally.'), findsNothing);
     expect(find.byIcon(Icons.public), findsNothing);
@@ -51,14 +50,15 @@ void main() {
     expect(find.text('Fresh doughnuts made locally.'), findsOneWidget);
     expect(find.text('hello@example.com'), findsOneWidget);
     expect(find.text('01223 111111'), findsOneWidget);
-    await tester.tap(find.byType(CloseButton));
+    expect(find.byType(BackButton), findsOneWidget);
+    expect(find.byType(CloseButton), findsNothing);
+    await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(find.byType(ListingDetailsPage), findsNothing);
     expect(find.text('Fresh doughnuts made locally.'), findsNothing);
   });
 
-  testWidgets('full page favourite updates and directions returns to source',
-      (tester) async {
+  testWidgets('full page favourite updates and directions returns to source', (tester) async {
     var favourites = 0;
     var directions = 0;
     await tester.pumpWidget(MaterialApp(
@@ -74,35 +74,37 @@ void main() {
     final favouriteButton = find.widgetWithText(ElevatedButton, 'Favourite');
     expect(favouriteButton, findsOneWidget);
     expect(tester.widget<ElevatedButton>(favouriteButton).style, isNull);
-    expect(
-        find.descendant(
-            of: favouriteButton, matching: find.byIcon(Icons.favorite_border)),
-        findsOneWidget);
+    expect(find.descendant(of: favouriteButton, matching: find.byIcon(Icons.favorite_border)), findsOneWidget);
     await tester.tap(favouriteButton);
     await tester.pump();
     expect(favourites, 1);
     final selectedButton = find.widgetWithText(ElevatedButton, 'Favourited');
     expect(selectedButton, findsOneWidget);
     final colors = Theme.of(tester.element(selectedButton)).colorScheme;
-    expect(
-        tester
-            .widget<ElevatedButton>(selectedButton)
-            .style!
-            .backgroundColor!
-            .resolve({}),
-        colors.primary);
-    expect(
-        find.descendant(
-            of: selectedButton, matching: find.byIcon(Icons.favorite)),
-        findsOneWidget);
+    expect(tester.widget<ElevatedButton>(selectedButton).style!.backgroundColor!.resolve({}), colors.primary);
+    expect(find.descendant(of: selectedButton, matching: find.byIcon(Icons.favorite)), findsOneWidget);
     await tester.tap(selectedButton);
     await tester.pump();
     expect(favourites, 2);
     expect(find.widgetWithText(ElevatedButton, 'Favourite'), findsOneWidget);
-    await tester
-        .tap(find.widgetWithIcon(ElevatedButton, Icons.directions_walk));
+    await tester.tap(find.widgetWithIcon(ElevatedButton, Icons.directions_walk));
     await tester.pumpAndSettle();
     expect(directions, 1);
+    expect(find.byType(ListingDetailsPage), findsNothing);
+  });
+
+  testWidgets('full page supports the iOS swipe-back gesture', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: Scaffold(body: listing()),
+    ));
+    await tester.tap(find.byIcon(Icons.info));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListingDetailsPage), findsOneWidget);
+
+    await tester.dragFrom(const Offset(0, 300), const Offset(700, 0));
+    await tester.pumpAndSettle();
+
     expect(find.byType(ListingDetailsPage), findsNothing);
   });
 
@@ -112,19 +114,11 @@ void main() {
     ));
     final button = find.widgetWithText(ElevatedButton, 'Favourited');
     expect(button, findsOneWidget);
-    expect(find.descendant(of: button, matching: find.byIcon(Icons.favorite)),
-        findsOneWidget);
-    expect(
-        tester
-            .widget<ElevatedButton>(button)
-            .style!
-            .backgroundColor!
-            .resolve({}),
-        Theme.of(tester.element(button)).colorScheme.primary);
+    expect(find.descendant(of: button, matching: find.byIcon(Icons.favorite)), findsOneWidget);
+    expect(tester.widget<ElevatedButton>(button).style!.backgroundColor!.resolve({}), Theme.of(tester.element(button)).colorScheme.primary);
   });
 
-  testWidgets('title and subtitle sit beside the original sized emoji',
-      (tester) async {
+  testWidgets('title and subtitle sit beside the original sized emoji', (tester) async {
     await tester.pumpWidget(MaterialApp(
       home: ListingDetailsPage(listing: listing()),
     ));
@@ -132,46 +126,30 @@ void main() {
     final title = find.text('Glazed and Confused');
     final subtitle = find.text('Food • Doughnuts');
     expect(tester.widget<Text>(emoji).style!.fontSize, 40);
-    expect(
-        tester.getTopLeft(title).dx, greaterThan(tester.getTopRight(emoji).dx));
+    expect(tester.getTopLeft(title).dx, greaterThan(tester.getTopRight(emoji).dx));
     expect(tester.getTopLeft(subtitle).dx, tester.getTopLeft(title).dx);
-    expect(tester.getTopLeft(subtitle).dy,
-        greaterThan(tester.getBottomLeft(title).dy));
-    expect(
-        tester.getCenter(emoji).dy,
-        closeTo(
-            (tester.getTopLeft(title).dy + tester.getBottomLeft(subtitle).dy) /
-                2,
-            0.1));
+    expect(tester.getTopLeft(subtitle).dy, greaterThan(tester.getBottomLeft(title).dy));
+    expect(tester.getCenter(emoji).dy, closeTo((tester.getTopLeft(title).dy + tester.getBottomLeft(subtitle).dy) / 2, 0.1));
   });
 
-  testWidgets('image URL is loaded and failure leaves details usable',
-      (tester) async {
+  testWidgets('image URL is loaded and failure leaves details usable', (tester) async {
     await tester.pumpWidget(MaterialApp(
         home: ListingDetailsPage(
       listing: listing(imageURL: 'https://example.com/listing.jpg'),
     )));
     final imageRect = tester.getRect(find.byType(Image));
-    expect(
-        imageRect.top,
-        greaterThan(tester
-            .getBottomLeft(find.text('Fresh doughnuts made locally.'))
-            .dy));
-    expect(imageRect.bottom,
-        lessThan(tester.getTopLeft(find.text('Get in touch')).dy));
+    expect(imageRect.top, greaterThan(tester.getBottomLeft(find.text('Fresh doughnuts made locally.')).dy));
+    expect(imageRect.bottom, lessThan(tester.getTopLeft(find.text('Get in touch')).dy));
     final image = tester.widget<Image>(find.byType(Image));
-    expect(
-        (image.image as NetworkImage).url, 'https://example.com/listing.jpg');
+    expect((image.image as NetworkImage).url, 'https://example.com/listing.jpg');
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(find.text('Glazed and Confused'), findsOneWidget);
-    expect(find.widgetWithIcon(ElevatedButton, Icons.directions_walk),
-        findsOneWidget);
+    expect(find.widgetWithIcon(ElevatedButton, Icons.directions_walk), findsOneWidget);
   });
 
   for (final theme in ['light', 'dark', 'highContrast']) {
-    testWidgets('missing image and long text fit narrow screen in $theme theme',
-        (tester) async {
+    testWidgets('missing image and long text fit narrow screen in $theme theme', (tester) async {
       tester.view.physicalSize = const Size(320, 640);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -180,12 +158,7 @@ void main() {
         theme: appThemes[theme],
         home: MediaQuery(
           data: const MediaQueryData(textScaler: TextScaler.linear(1.8)),
-          child: ListingDetailsPage(
-              listing: listing(
-                  imageURL: '  ',
-                  cancelled: true,
-                  description:
-                      List.filled(20, 'A lovely local listing.').join(' '))),
+          child: ListingDetailsPage(listing: listing(imageURL: '  ', cancelled: true, description: List.filled(20, 'A lovely local listing.').join(' '))),
         ),
       ));
       await tester.pumpAndSettle();

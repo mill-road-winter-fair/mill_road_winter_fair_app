@@ -451,7 +451,7 @@ void main() {
       expect(find.text('Listing details'), findsOneWidget);
       await tester.scrollUntilVisible(find.text('Website'), 200);
       expect(find.byIcon(Icons.public), findsOneWidget);
-      await tester.tap(find.byType(CloseButton));
+      await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
     });
 
@@ -492,7 +492,7 @@ void main() {
       expect(find.text('Listing details'), findsOneWidget);
       await tester.scrollUntilVisible(find.text('Website'), 200);
       expect(find.byIcon(Icons.public), findsOneWidget);
-      await tester.tap(find.byType(CloseButton));
+      await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
     });
 

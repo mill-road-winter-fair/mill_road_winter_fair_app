@@ -65,8 +65,7 @@ class GroupListingInfoSheet extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
         borderRadius: BorderRadius.circular(12),
-        border: BoxBorder.all(
-            width: 1, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        border: BoxBorder.all(width: 1, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
       child: Column(
@@ -79,17 +78,13 @@ class GroupListingInfoSheet extends StatelessWidget {
               Expanded(
                 flex: 13,
                 child: ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxHeight: 42), // cap text height
+                  constraints: const BoxConstraints(maxHeight: 42), // cap text height
                   child: FittedBox(
                     alignment: Alignment.centerLeft,
                     fit: BoxFit.scaleDown,
                     child: Text(
                       title,
-                      style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onPrimary),
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
                     ),
                   ),
                 ),
@@ -116,10 +111,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     categories,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onPrimary),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
                   ),
                 ),
               ),
@@ -129,9 +121,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   flex: 10,
                   child: Text(
                     approxDistance,
-                    style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.onPrimary),
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary),
                     textAlign: TextAlign.end,
                   ),
                 ),
@@ -200,9 +190,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
       fontWeight: FontWeight.bold,
       color: Theme.of(context).colorScheme.onSurface,
     );
-    final titleStyle = basicTitleStyle.copyWith(
-        decoration:
-            cancelled ? TextDecoration.lineThrough : TextDecoration.none);
+    final titleStyle = basicTitleStyle.copyWith(decoration: cancelled ? TextDecoration.lineThrough : TextDecoration.none);
     updatedTimes = cancelled ? 'CANCELLED' : "$startTime—$endTime";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
@@ -211,9 +199,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(endTime);
     final timeStyle = subSubStyle.copyWith(
-      color: ended || cancelled
-          ? Colors.red
-          : Theme.of(context).colorScheme.onSurface,
+      color: ended || cancelled ? Colors.red : Theme.of(context).colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
@@ -226,23 +212,14 @@ class SpecificListingInfoSheet extends StatelessWidget {
             TextSpan(text: updatedTimes, style: timeStyle),
           ]));
     } else {
-      subDetails = Text.rich(
-          textAlign: TextAlign.right,
-          TextSpan(text: subtitle, style: timeStyle));
+      subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: subtitle, style: timeStyle));
     }
 
     return Container(
       padding: (inDialog)
           ? EdgeInsets.all(0)
-          : EdgeInsets.fromLTRB(
-              4.0 +
-                  ((MediaQuery.of(context).size.height.toInt() - 500) / 30)
-                      .toInt(),
-              8,
-              4.0 +
-                  ((MediaQuery.of(context).size.height.toInt() - 500) / 30)
-                      .toInt(),
-              12),
+          : EdgeInsets.fromLTRB(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 8,
+              4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,8 +229,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Prepend the emoji if we have one
-              if (emoji.isNotEmpty)
-                Text('$emoji ', style: basicTitleStyle.copyWith(fontSize: 30)),
+              if (emoji.isNotEmpty) Text('$emoji ', style: basicTitleStyle.copyWith(fontSize: 30)),
               Expanded(
                 flex: 14,
                 child: Text(title, style: titleStyle),
@@ -261,10 +237,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               const Expanded(flex: 1, child: SizedBox(width: 2)),
               Expanded(
                 flex: 6,
-                child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: subDetails),
+                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: subDetails),
               ),
             ],
           ),
@@ -283,11 +256,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
                       TextSpan(
                         children: [
                           TextSpan(style: subSubStyle, text: location),
-                          TextSpan(
-                              style: subSubStyle.copyWith(fontSize: 12),
-                              text: currentLatLng == null
-                                  ? ''
-                                  : ' $approxDistance'),
+                          TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' $approxDistance'),
                         ],
                       ),
                     ),
@@ -319,20 +288,12 @@ class SpecificListingInfoSheet extends StatelessWidget {
                 onPressed: onFavouriteTapped,
                 padding: const EdgeInsets.all(0),
                 style: ElevatedButton.styleFrom(
-                    visualDensity:
-                        const VisualDensity(horizontal: -4, vertical: -2),
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                     padding: const EdgeInsets.all(0),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 icon: FaIcon(
-                  shadows: [
-                    Shadow(
-                        color: Theme.of(context).shadowColor,
-                        offset: const Offset(1, 3),
-                        blurRadius: 5)
-                  ],
-                  (listingFavourited)
-                      ? FontAwesomeIcons.solidHeart
-                      : FontAwesomeIcons.heart,
+                  shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                  (listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
                   size: 22,
                   color: Theme.of(context).colorScheme.primary,
                 ),
@@ -341,8 +302,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     iconSize: 24,
-                    visualDensity:
-                        const VisualDensity(horizontal: -4, vertical: -2),
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                     padding: const EdgeInsets.all(0),
                     elevation: 3,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
@@ -356,8 +316,7 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     iconSize: 24,
-                    visualDensity:
-                    const VisualDensity(horizontal: -4, vertical: -2),
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                     padding: const EdgeInsets.all(0),
                     elevation: 3,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
@@ -371,16 +330,12 @@ class SpecificListingInfoSheet extends StatelessWidget {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     iconSize: 24,
-                    visualDensity:
-                        const VisualDensity(horizontal: -4, vertical: -2),
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                     padding: const EdgeInsets.all(0),
                     elevation: 3,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () =>
-                    shareListing(title, location, startTime, endTime, context),
-                child: (Platform.isAndroid)
-                    ? const Icon(Icons.share)
-                    : const Icon(Icons.ios_share),
+                onPressed: () => shareListing(title, location, startTime, endTime, context),
+                child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
               ),
             ],
           ),
@@ -393,7 +348,6 @@ class SpecificListingInfoSheet extends StatelessWidget {
   Future<void> openDetails(BuildContext context) async {
     HapticFeedback.lightImpact();
     await Navigator.of(context).push(MaterialPageRoute<void>(
-      fullscreenDialog: true,
       builder: (_) => ListingDetailsPage(listing: this),
     ));
   }
@@ -419,12 +373,10 @@ Future<void> showListingDetailsDialog(
       currentLatLng!,
       event.latLng,
     );
-    distanceMessage =
-        '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+    distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
   }
 
   final route = MaterialPageRoute<void>(
-    fullscreenDialog: true,
     builder: (_) => ListingDetailsPage(
       listing: SpecificListingInfoSheet(
         cancelled: event.cancelled,
@@ -474,8 +426,7 @@ void safeRemoveRoute(BuildContext context, Route? route) {
 
 void favouriteOrNotListing(PositionedEvent theEvent) {
   if (favouriteListingKeys.value.contains(theEvent.id)) {
-    favouriteListingKeys.value = {...favouriteListingKeys.value}
-      ..remove(theEvent.id);
+    favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(theEvent.id);
   } else {
     favouriteListingKeys.value = {...favouriteListingKeys.value, theEvent.id};
   }
@@ -484,6 +435,5 @@ void favouriteOrNotListing(PositionedEvent theEvent) {
 
 Future<void> _saveFavourites() async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setStringList(
-      'favouritesList', favouriteListingKeys.value.toList());
+  await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
 }
