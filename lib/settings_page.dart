@@ -148,6 +148,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    final settingLabelStyle = Theme.of(context).textTheme.titleMedium;
     return SafeArea(
       top: false,
       left: false,
@@ -184,7 +185,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Distance units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                        Text('Distance units', style: settingLabelStyle),
                         RadioGroup<DistanceUnits>(
                           groupValue: preferredDistanceUnits,
                           onChanged: (DistanceUnits? value) {
@@ -247,7 +248,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                        Text('Theme', style: settingLabelStyle),
                         RadioGroup<String>(
                           groupValue: themeNotifier.value,
                           onChanged: (value) {
@@ -348,13 +349,15 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 16),
                     SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
                       activeThumbColor: Theme.of(context).colorScheme.tertiary,
-                      title: const Text('Allow analytics'),
+                      title: Text('Allow analytics', style: settingLabelStyle),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Help us improve the app and the Fair by sharing anonymous usage data.'),
+                          const Text('Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'),
                           const SizedBox(height: 4),
                           RichText(
                             text: TextSpan(
