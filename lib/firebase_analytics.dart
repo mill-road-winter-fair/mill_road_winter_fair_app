@@ -322,7 +322,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'We would like to collect anonymous usage data to help us improve the app and the Fair. '
+              'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '
               'This includes the pages you view, buttons you tap and preferences you set. '
               'Also logged are the words and phrases you enter in search queries, as such we ask that you do not enter personal information in those searches. '
             ),
