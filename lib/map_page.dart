@@ -378,7 +378,7 @@ class MapPageState extends State<MapPage> {
         customMarker = BitmapDescriptor.defaultMarker;
       } else {
         // If the group has only one category, use the specific category marker
-        customMarker = bitmapDescriptors['Group-${getCategory(parentListing)}']!;
+        customMarker = bitmapDescriptors['Group-${getCategory(parentListing)}'] ?? BitmapDescriptor.defaultMarker;
       }
     } else {
       double hue = HSVColor.fromColor(color).hue;
@@ -556,7 +556,7 @@ class MapPageState extends State<MapPage> {
     if (onTest == false) {
       if (countCategories(listing) == 1) {
         // If the listing has only one category, use the specific category marker
-        customMarker = bitmapDescriptors[getCategory(listing)]!;
+        customMarker = bitmapDescriptors[getCategory(listing)] ?? BitmapDescriptor.defaultMarker;
       } else {
         // If the listing has multiple categories, or none, use the default marker (this is to be updated later with a "mixed" marker)
         customMarker = BitmapDescriptor.defaultMarker;
