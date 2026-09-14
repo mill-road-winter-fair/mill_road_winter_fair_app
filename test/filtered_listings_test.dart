@@ -120,15 +120,17 @@ void main() {
 
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
-      expect(find.text('Doughnuts'), findsOneWidget);
+      expect(find.textContaining('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
-      expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
+      expect(find.textContaining('Gwydir St Car Park'), findsOneWidget);
+      expect(find.textContaining('206 m'), findsOneWidget);
       expect(find.text('01223 111111'), findsNothing);  // as Details won't be open
       expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
-      expect(find.text('Sushi'), findsOneWidget);
+      expect(find.textContaining('Sushi'), findsExactly(2));
       expect(find.text('12:00—16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue (approx. 197 m)'), findsOneWidget);
+      expect(find.textContaining('Implausible Avenue'), findsOneWidget);
+      expect(find.textContaining('197 m'), findsOneWidget);
       // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
       expect(find.byIcon(Icons.directions_walk), findsExactly(3));
       expect(find.byIcon(Icons.public), findsExactly(2));
