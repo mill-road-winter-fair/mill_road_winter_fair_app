@@ -26,9 +26,19 @@ Future<void> main() async {
   await dotenv.load(fileName: ".env");
   // Release builds always use the production Firebase project. Debug and
   // profile builds use the development project.
-  await Firebase.initializeApp(
-    options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
-  );
+  try {
+    await Firebase.initializeApp(
+      options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
+    );
+    debugPrint('main(): Firebase initialized successfully');
+  } on FirebaseException catch (e) {
+    if (e.code == 'duplicate-app') {
+      // Firebase was already initialized (e.g., by native side).
+      debugPrint('main(): Firebase already initialized: ${e.message}');
+    } else {
+      rethrow;
+    }
+  }
 
   await loadSettings();
   final analyticsService = FirebaseAnalyticsService();
