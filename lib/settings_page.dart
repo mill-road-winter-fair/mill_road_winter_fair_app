@@ -55,6 +55,9 @@ Future<void> loadSettings() async {
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
 
+    // Get the choice to have a static chooser page
+    staticChooserPage.value = prefs.getBool('staticChooserPage') ?? false;
+
     debugPrint('Settings loaded from SharedPreferences');
   } else if (onTest == true) {
     int savedUnitIndex = 0;
@@ -108,6 +111,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
+    await prefs.setBool('staticChooserPage', staticChooserPage.value);
   }
 
   Future<void> _changeTheme(String themeKey) async {
@@ -302,6 +306,52 @@ class _SettingsPageState extends State<SettingsPage> {
                             ],
                           ),
                         ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Home page', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                        RadioGroup<bool>(
+                          groupValue: staticChooserPage.value,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              HapticFeedback.selectionClick();
+                              staticChooserPage.value = value!;
+                            });
+                            _saveSettings();
+                          },
+                          child: Column(
+                            children: [
+                              RadioListTile<bool>(
+                                activeColor: Theme.of(context).colorScheme.tertiary,
+                                title: const Text('Animated'),
+                                subtitle: Text(
+                                  'Spotlights the Fair’s offerings in turn',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                visualDensity: VisualDensity.compact,
+                                value: false,
+                              ),
+                              RadioListTile<bool>(
+                                activeColor: Theme.of(context).colorScheme.tertiary,
+                                title: const Text('Static'),
+                                subtitle: Text(
+                                  'Stays boringly fixed',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                visualDensity: VisualDensity.compact,
+                                value: true,
+                              ),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   ],
