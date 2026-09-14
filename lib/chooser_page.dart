@@ -197,7 +197,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         theTap: () => widget.onOpenListings('all', 'performanceChildrens'),
       ),
       Hotspot(
-        label: 'Shopping',
+        label: 'Shopping\n& Stalls',
         labelLeftOffset: 0.02,
         labelRightOffset: 0.06,
         labelTopOffset: 0.04,
