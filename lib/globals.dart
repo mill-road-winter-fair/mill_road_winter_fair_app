@@ -254,6 +254,7 @@ const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'visitExperience': SubfilterLabel('Visit & Experience', Icons.tour, false),
   'food': SubfilterLabel('Food & Drink', Icons.fastfood, false),
   'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer, false),
+  'business': SubfilterLabel('Business', Icons.business, false),
   'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism, false),
   'service': SubfilterLabel('Services', Icons.family_restroom, false)
 };

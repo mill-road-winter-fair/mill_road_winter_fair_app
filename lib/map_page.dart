@@ -493,7 +493,7 @@ class MapPageState extends State<MapPage> {
         customMarker = bitmapDescriptors['Mixed']!;
       } else {
         // If the group has only one category, use the specific category marker
-        customMarker = bitmapDescriptors['Group-${getCategory(parentListing)}']!;
+        customMarker = bitmapDescriptors['Group-${getCategory(parentListing)}'] ?? BitmapDescriptor.defaultMarker;
       }
     } else {
       double hue = HSVColor.fromColor(color).hue;

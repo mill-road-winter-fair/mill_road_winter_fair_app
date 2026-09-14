@@ -29,6 +29,9 @@ String getCategory(Map<String, dynamic> listing) {
     if (catCount == perfOrEventCount) return 'Group-PerformanceEvent';
     return 'Mixed';
   } else {
+    if (listing['business'] == 'TRUE') {
+      return 'Business';
+    }
     if (listing['food'] == 'TRUE') {
       return 'Food';
     }
