@@ -137,12 +137,11 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        OutlinedButton.icon(
+                        ElevatedButton.icon(
                           style: _favourited
-                              ? OutlinedButton.styleFrom(
+                              ? ElevatedButton.styleFrom(
                                   backgroundColor: colors.primary,
                                   foregroundColor: colors.onPrimary,
-                                  side: BorderSide.none,
                                 )
                               : null,
                           onPressed: listing.onFavouriteTapped == null
@@ -156,7 +155,7 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                               : Icons.favorite_border),
                           label: Text(_favourited ? 'Favourited' : 'Favourite'),
                         ),
-                        OutlinedButton.icon(
+                        ElevatedButton.icon(
                           onPressed: () {
                             HapticFeedback.lightImpact();
                             Navigator.of(context).pop();
@@ -166,7 +165,7 @@ class _ListingDetailsPageState extends State<ListingDetailsPage> {
                           label: const Text('Directions'),
                         ),
                         Builder(
-                            builder: (shareContext) => OutlinedButton.icon(
+                            builder: (shareContext) => ElevatedButton.icon(
                                   onPressed: () => shareListing(
                                       listing.title,
                                       location,

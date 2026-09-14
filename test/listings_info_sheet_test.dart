@@ -71,32 +71,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Info'), findsNothing);
     expect(find.byIcon(Icons.info_outline), findsNothing);
-    final favouriteButton = find.widgetWithText(OutlinedButton, 'Favourite');
+    final favouriteButton = find.widgetWithText(ElevatedButton, 'Favourite');
     expect(favouriteButton, findsOneWidget);
-    expect(tester.widget<OutlinedButton>(favouriteButton).style, isNull);
+    expect(tester.widget<ElevatedButton>(favouriteButton).style, isNull);
+    expect(
+        find.descendant(
+            of: favouriteButton, matching: find.byIcon(Icons.favorite_border)),
+        findsOneWidget);
     await tester.tap(favouriteButton);
     await tester.pump();
     expect(favourites, 1);
-    final selectedButton = find.widgetWithText(OutlinedButton, 'Favourited');
+    final selectedButton = find.widgetWithText(ElevatedButton, 'Favourited');
     expect(selectedButton, findsOneWidget);
     final colors = Theme.of(tester.element(selectedButton)).colorScheme;
     expect(
         tester
-            .widget<OutlinedButton>(selectedButton)
+            .widget<ElevatedButton>(selectedButton)
             .style!
             .backgroundColor!
             .resolve({}),
         colors.primary);
+    expect(
+        find.descendant(
+            of: selectedButton, matching: find.byIcon(Icons.favorite)),
+        findsOneWidget);
     await tester.tap(selectedButton);
     await tester.pump();
     expect(favourites, 2);
-    expect(
-        tester
-            .widget<OutlinedButton>(
-                find.widgetWithText(OutlinedButton, 'Favourite'))
-            .style,
-        isNull);
-    await tester.tap(find.text('Directions'));
+    expect(find.widgetWithText(ElevatedButton, 'Favourite'), findsOneWidget);
+    await tester
+        .tap(find.widgetWithIcon(ElevatedButton, Icons.directions_walk));
     await tester.pumpAndSettle();
     expect(directions, 1);
     expect(find.byType(ListingDetailsPage), findsNothing);
@@ -106,12 +110,13 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: ListingDetailsPage(listing: listing(favourited: true)),
     ));
-    final button = find.widgetWithText(OutlinedButton, 'Favourited');
+    final button = find.widgetWithText(ElevatedButton, 'Favourited');
     expect(button, findsOneWidget);
-    expect(find.byIcon(Icons.favorite), findsOneWidget);
+    expect(find.descendant(of: button, matching: find.byIcon(Icons.favorite)),
+        findsOneWidget);
     expect(
         tester
-            .widget<OutlinedButton>(button)
+            .widget<ElevatedButton>(button)
             .style!
             .backgroundColor!
             .resolve({}),
@@ -160,7 +165,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(find.text('Glazed and Confused'), findsOneWidget);
-    expect(find.text('Directions'), findsOneWidget);
+    expect(find.widgetWithIcon(ElevatedButton, Icons.directions_walk),
+        findsOneWidget);
   });
 
   for (final theme in ['light', 'dark', 'highContrast']) {
