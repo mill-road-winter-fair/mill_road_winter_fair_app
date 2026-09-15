@@ -63,10 +63,10 @@ class MapPageState extends State<MapPage> {
   double? mapWidth;
   double? mapHeight;
   String? _distanceToDestination;
+  Map<String, dynamic>? _navigationListing;
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller;
-  IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
   final ScrollController _roadClosuresDialogScrollController = ScrollController();
   // Declare default filters
@@ -947,6 +947,12 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
+    setState(() {
+      _navigationListing = listings.cast<Map<String, dynamic>?>().firstWhere(
+        (listing) => listing?['id'].toString() == id,
+        orElse: () => null,
+      );
+    });
 
     // If user has location tracking enabled
     if (currentLatLng != null) {
@@ -994,6 +1000,7 @@ class MapPageState extends State<MapPage> {
 
   void cancelNavigation() {
     debugPrint('MapPageState cancelNavigation called');
+    _navigationListing = null;
     // Halt the location subscription
     _positionStream?.cancel();
 
@@ -1438,6 +1445,60 @@ class MapPageState extends State<MapPage> {
     }
   }
 
+  Widget _buildDestinationCard(BuildContext context, Map<String, dynamic> listing) {
+    final colors = Theme.of(context).colorScheme;
+    String field(String key) => listing[key]?.toString().trim() ?? '';
+    final times = [field('startTime'), field('endTime')].where((time) => time.isNotEmpty).join('–');
+
+    return Material(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: colors.primary, width: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      color: colors.surface,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Navigating to', style: TextStyle(fontSize: 11, color: colors.primary)),
+            const SizedBox(height: 4),
+            Text(
+              [field('emoji'), field('title')].where((text) => text.isNotEmpty).join(' '),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: colors.onSurface),
+            ),
+            if (field('subtitle').isNotEmpty)
+              Text(field('subtitle'), style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
+            if (field('location').isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.place_outlined, size: 16, color: colors.onSurfaceVariant),
+                  const SizedBox(width: 4),
+                  Expanded(child: Text(field('location'), style: TextStyle(fontSize: 12, color: colors.onSurface))),
+                ],
+              ),
+            ],
+            if (times.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.schedule, size: 16, color: colors.onSurfaceVariant),
+                  const SizedBox(width: 4),
+                  Expanded(child: Text(times, style: TextStyle(fontSize: 12, color: colors.onSurface))),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}');
@@ -1705,17 +1766,16 @@ class MapPageState extends State<MapPage> {
                       ),
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
+                      tooltip: mapType == MapType.normal ? 'Switch to satellite view' : 'Switch to normal map',
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         setState(() {
                           if (mapType == MapType.normal) {
                             mapType = MapType.hybrid;
-                            _layersIcon = Icons.map;
                             preferredMapStyleType = MapStyleType.hybrid;
                             _saveSettings();
                           } else {
                             mapType = MapType.normal;
-                            _layersIcon = Icons.satellite_alt;
                             preferredMapStyleType = MapStyleType.normal;
                             _saveSettings();
                           }
@@ -1737,7 +1797,7 @@ class MapPageState extends State<MapPage> {
                                 offset: const Offset(2, 2))
                           ],
                         ),
-                        child: Icon(_layersIcon),
+                        child: Icon(mapType == MapType.normal ? Icons.satellite_alt : Icons.map),
                       ),
                     ),
                     if (navigationInProgress == false)
@@ -1810,30 +1870,29 @@ class MapPageState extends State<MapPage> {
                   ],
                 ),
               ),
-              if (_distanceToDestination != null)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                          iconSize: 30,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        _setMapCameraToFitPolyline(polylines);
-                      },
-                      icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
-                      label: Text(
-                        _distanceToDestination!,
-                        style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
+              if (_navigationListing != null)
+                Positioned(
+                  top: 8,
+                  left: 72,
+                  right: 8,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 260),
+                        child: _buildDestinationCard(context, _navigationListing!),
                       ),
                     ),
                   ),
+                ),
+              if (_distanceToDestination != null)
+                NavigationDistanceButton(
+                  distance: _distanceToDestination!,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    _setMapCameraToFitPolyline(polylines);
+                  },
                 ),
               if (preferredRoadClosurePolygonVisible && navigationInProgress == false)
                 Align(
@@ -1895,6 +1954,38 @@ class MapPageState extends State<MapPage> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Remaining distance control, positioned above the device's bottom safe area.
+class NavigationDistanceButton extends StatelessWidget {
+  const NavigationDistanceButton({super.key, required this.distance, required this.onPressed});
+
+  final String distance;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+              iconSize: 36,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              minimumSize: const Size(180, 64),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              elevation: 3),
+          onPressed: onPressed,
+          icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
+          label: Text(
+            distance,
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+          ),
+        ),
+      ),
     );
   }
 }
