@@ -98,7 +98,7 @@ void main() {
               'performanceOther': 'Other',
               'visitExperience': 'Visit/Experience',
               'service': 'Service', 
-              'business': 'Other business',
+              'business': 'Business',
             }[entry.key]);
     });
 
