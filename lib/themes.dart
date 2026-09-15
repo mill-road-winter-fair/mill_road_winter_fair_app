@@ -258,6 +258,8 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
       assetPath = 'assets/mapMarkers/servicesToiletsMarker.png';
     case 'Service':
       assetPath = 'assets/mapMarkers/servicesMarker.png';
+    case 'Business':
+      assetPath = 'assets/mapMarkers/businessMarker.png';
     case 'Group-PerformanceEvent':
       assetPath = 'assets/mapMarkers/performanceEventGroupMarker.png';
     case 'Mixed':
@@ -334,6 +336,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(190, 110, 230, 1.0),
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(190, 110, 230, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(79, 184, 75, 1.0),
+      "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
       "Service" || "Group-Service" => const Color.fromRGBO(84, 145, 245, 1.0),
       "Mixed" => const Color.fromRGBO(0, 100, 0, 1.0), // will become the Fair's colour for this year
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
@@ -345,6 +348,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(183, 13, 204, 1.0),
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(255, 196, 0, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(7, 128, 0, 1.0),
+      "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
       "Service" || "Group-Service" => const Color.fromRGBO(29, 112, 198, 1.0),
       "Mixed" => const Color.fromRGBO(0, 100, 0, 1.0), // will become the Fair's colour for this year
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
