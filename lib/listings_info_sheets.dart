@@ -8,7 +8,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 // Function to determine if the event has ended based on endTime string
-bool hasEventEnded(String endTime) {
+bool hasEventEnded(String endTime, [DateTime? currentDateTime]) {
   try {
     final parts = endTime.split(':');
     final endHour = int.parse(parts[0]);
@@ -22,15 +22,15 @@ bool hasEventEnded(String endTime) {
       endMinute,
     );
 
-    return DateTime.now().isAfter(endDateTime);
+    return (currentDateTime ?? DateTime.now()).isAfter(endDateTime);
   } catch (_) {
     return false; // default to not ended if parsing fails
   }
 }
 
 // Function to determine if the event is today
-bool isItEventDay() {
-  return DateUtils.isSameDay(fairDate, DateTime.now());
+bool isItEventDay([DateTime? currentDateTime]) {
+  return DateUtils.isSameDay(fairDate, currentDateTime ?? DateTime.now());
 }
 
 class GroupListingInfoSheet extends StatelessWidget {
@@ -608,4 +608,3 @@ class SpecificListingInfoSheet extends StatelessWidget {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
-
