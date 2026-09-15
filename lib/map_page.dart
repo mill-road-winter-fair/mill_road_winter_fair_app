@@ -93,6 +93,7 @@ class MapPageState extends State<MapPage> {
     _fetchListings = fetchExistingListings(http.Client());
     setVisibleMarkerLists();
     addAllVisibleMarkers();
+    _establishLocationAndRefreshMap();
     establishLocation();
     if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -104,6 +105,18 @@ class MapPageState extends State<MapPage> {
       }
     });
     super.initState();
+  }
+
+  Future<void> _establishLocationAndRefreshMap() async {
+    await establishLocation();
+
+    // On first launch Android can create the native map before the location
+    // permission dialog has completed. Rebuilding after the dialog closes lets
+    // GoogleMap observe myLocationEnabled changing from false to true and start
+    // its location layer (the blue dot).
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Polygon roadClosurePolygon() {
@@ -942,7 +955,7 @@ class MapPageState extends State<MapPage> {
       // The navigator is only popped when called from the map page, so if this is true set the previousIndex to 0
       //previousIndex = 0;
     }
-    
+
     doTheNavigation(id, destination, navigatorPop);
   }
 
@@ -990,7 +1003,6 @@ class MapPageState extends State<MapPage> {
       navigationInProgress = true;
     });
   }
-
 
   void cancelNavigation() {
     debugPrint('MapPageState cancelNavigation called');
@@ -1533,7 +1545,9 @@ class MapPageState extends State<MapPage> {
                       mapType: mapType,
                       rotateGesturesEnabled: false,
                       compassEnabled: false,
-                      myLocationEnabled: true,
+                      myLocationEnabled: locationServicesEnabled &&
+                          (locationPermission == LocationPermission.always ||
+                              locationPermission == LocationPermission.whileInUse),
                       myLocationButtonEnabled: false,
                       mapToolbarEnabled: false,
                       onMapCreated: (GoogleMapController controller) {
