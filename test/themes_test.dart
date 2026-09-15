@@ -16,7 +16,7 @@ void main() {
       expect(getCategoryColor('light', 'Childrens'), const Color.fromRGBO(190, 110, 230, 1.0));
       expect(getCategoryColor('light', 'Dance'), const Color.fromRGBO(190, 110, 230, 1.0));
       expect(getCategoryColor('light', 'Other'), const Color.fromRGBO(190, 110, 230, 1.0));
-      expect(getCategoryColor('light', 'Charity/Community/Info'), const Color.fromRGBO(190, 110, 230, 1.0));
+      expect(getCategoryColor('light', 'Charity/Community/Info'), const Color.fromRGBO(150, 80, 0, 1.0));
       expect(getCategoryColor('light', 'Visit/Experience'), const Color.fromRGBO(79, 184, 75, 1.0));
       expect(getCategoryColor('light', 'Service'), const Color.fromRGBO(84, 145, 245, 1.0));
       expect(getCategoryColor('light', 'Unknown'), const Color.fromRGBO(150, 150, 150, 1.0));
