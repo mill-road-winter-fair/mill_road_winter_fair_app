@@ -44,7 +44,7 @@ class MapPage extends StatefulWidget {
   MapPageState createState() => MapPageState();
 }
 
-class MapPageState extends State<MapPage> {
+class MapPageState extends State<MapPage> with WidgetsBindingObserver {
   late Future<List<Map<String, dynamic>>> _fetchListings;
   late List<MarkerId> _foodMarkerIds;
   late List<MarkerId> _shoppingMarkerIds;
@@ -91,13 +91,13 @@ class MapPageState extends State<MapPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isSearching = false; // true when the search bar is open (with/without text)
-  bool _isSearchFiltered = false; // true when the map has been filtered by search
   CameraPosition? _currentCamera; // saves the camera position as it is moved by user or programmatically
   CameraPosition? _cameraBeforeNavigation; // to be able to restore camera position after navigation
   CameraPosition? _cameraBeforeSearch; // to be able to restore camera position after search
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     debugPrint('MapPageState initState() called with destinationId=${widget.destinationId}');
     _ensureDirectionsConfigLoaded();
     _fetchListings = fetchExistingListings(http.Client());
@@ -424,19 +424,23 @@ class MapPageState extends State<MapPage> {
     }
   }
 
-  void addAllVisibleMarkers() async {
+  Future<void> addAllVisibleMarkers() async {
     debugPrint('MapPageState addAllVisibleMarkers called');
 
     // Create all marker bitmaps first, but only if not onTest
     if (onTest == false) {
       if (bitmapDescriptors.isEmpty) await createAllMarkerBitmaps();
     }
+    if (!mounted) return;
 
     // Ensure the markers list is empty
     markers.clear();
 
     for (var listing in listings) {
-      if (listing['visibleOnMap'] == 'TRUE') {
+      final matchesSearch = ['title', 'location'].any(
+        (field) => (listing[field] ?? '').toString().toLowerCase().contains(_searchQuery),
+      );
+      if (_searchQuery.isEmpty ? listing['visibleOnMap'] == 'TRUE' : matchesSearch) {
         // Add Group markers
         if (listing['groupParent'] == 'TRUE' && listing['cancelled'] == 'FALSE') {
           addGroupMarker(listing);
@@ -446,6 +450,38 @@ class MapPageState extends State<MapPage> {
           addSpecificMarker(listing);
         }
       }
+    }
+    setState(() {});
+  }
+
+  void _resetSearch({bool close = true}) {
+    setState(() {
+      if (close) _isSearching = false;
+      _searchQuery = '';
+      _searchController.clear();
+    });
+    addAllVisibleMarkers();
+    _cameraBeforeSearch = null;
+  }
+
+  Future<void> _searchListings(String value) async {
+    _cameraBeforeSearch ??= _currentCamera;
+    _searchQuery = value.toLowerCase();
+    await addAllVisibleMarkers();
+    if (!mounted || !_isSearching || _searchQuery != value.toLowerCase() || _searchQuery.isEmpty) return;
+    final positions = markers.values.map((marker) => marker.position).toList();
+    if (positions.isEmpty || _controller == null) return;
+    _moveCameraToBounds(
+      LatLng(positions.map((p) => p.latitude).reduce(min), positions.map((p) => p.longitude).reduce(min)),
+      LatLng(positions.map((p) => p.latitude).reduce(max), positions.map((p) => p.longitude).reduce(max)),
+    );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_isSearching && (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused || state == AppLifecycleState.detached)) {
+      _resetSearch();
     }
   }
 
@@ -1127,6 +1163,13 @@ class MapPageState extends State<MapPage> {
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    // Navigation must start with the default marker set so it can restore it later.
+    _isSearching = false;
+    _searchQuery = '';
+    _searchController.clear();
+    _cameraBeforeSearch = null;
+    await addAllVisibleMarkers();
+    if (!mounted) return;
     // Save the current view
     _cameraBeforeNavigation = _currentCamera;
     // Cancelling of any previous navigation
@@ -1143,10 +1186,6 @@ class MapPageState extends State<MapPage> {
     _distanceToDestination = null;
     // Set navigation as not in progress
     navigationInProgress = false;
-    // Close down all search artefacts
-    _isSearching = false;
-    _searchQuery = '';
-    _searchController.clear();
     setState(() {});
 
     debugPrint('MapPageState getDirections called for listing ID: $id');
@@ -1255,6 +1294,8 @@ class MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _searchController.dispose();
     debugPrint('MapPageState dispose() called');
     // Cancel the location subscription when the page is disposed
     _positionStream?.cancel();
@@ -1738,16 +1779,10 @@ class MapPageState extends State<MapPage> {
               onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
               onPressed: () async {
                 HapticFeedback.lightImpact();
-                setState(() {
-                  _isSearchFiltered = false;
-                  _isSearching = !_isSearching;
-                });
-                if (!_isSearching) {
-                  _searchQuery = '';
-                  _searchController.clear();
-                  //showFilteredMarkers();
-                  showFilteredMarkers();
-                  _cameraBeforeSearch = null; // NB not restore view as user may want the found markers visible
+                if (_isSearching) {
+                  _resetSearch();
+                } else {
+                  setState(() => _isSearching = true);
                 }
               },
               icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26),
@@ -2130,30 +2165,15 @@ class MapPageState extends State<MapPage> {
                                 icon: const Icon(Icons.close),
                                 onPressed: () async {
                                   HapticFeedback.lightImpact();
-                                  setState(() {
-                                    if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
-                                    _searchQuery = '';
-                                    _searchController.clear();
-                                    _isSearchFiltered = false;
-                                    showFilteredMarkers();
-                                  });
-                                  if (_cameraBeforeSearch != null) {
-                                    await _controller!.animateCamera(CameraUpdate.newCameraPosition(_cameraBeforeSearch!));
-                                    _cameraBeforeSearch = null;
+                                  final camera = _cameraBeforeSearch;
+                                  _resetSearch(close: _searchQuery.isEmpty);
+                                  if (camera != null) {
+                                    await _controller?.animateCamera(CameraUpdate.newCameraPosition(camera));
                                   }
                                 },
                               ),
                             ],
-                            onChanged: (value) async {
-                              if (value.length < 3 && !_isSearchFiltered) return;
-                              _cameraBeforeSearch ??= _currentCamera;
-                              _searchQuery = value.toLowerCase();
-                              _isSearchFiltered = true;
-                              final (southwest, northeast) = await filterMarkersIgnoringFiltersAndCalculateBounds(_foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds 
-                                  + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds);
-                              if (southwest != null && northeast != null ) _moveCameraToBounds(southwest, northeast);
-                              setState(() { });
-                            },
+                            onChanged: _searchListings,
                           ),
                         ),
                       ],

@@ -121,6 +121,64 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('search includes hidden listings and restores default pins', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {})),
+      ));
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      Set<String> visibleIds() => state.markers.values
+          .where((marker) => marker.visible)
+          .map((marker) => marker.markerId.value)
+          .toSet();
+      expect(visibleIds(), {'1', '3'});
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+      final field = find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
+      await tester.enterText(field, 'z');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'2'});
+      await tester.enterText(field, 'GLAZED');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'2'});
+      await tester.enterText(field, 'no such listing');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), isEmpty);
+      await tester.enterText(field, 'fake street');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '2'});
+      await tester.enterText(field, '');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+      await tester.enterText(field, 'glazed');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.search_off));
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      await tester.enterText(field, 'glazed');
+      await tester.pumpAndSettle();
+      final clear = find.descendant(of: find.byType(SearchBar), matching: find.byIcon(Icons.close));
+      await tester.tap(clear);
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+      await tester.enterText(field, 'glazed');
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+      expect(find.byType(SearchBar), findsNothing);
+    });
+
     testWidgets('all map buttons are present', (WidgetTester tester) async {
       // Build the MapPage widget
       await tester.pumpWidget(
