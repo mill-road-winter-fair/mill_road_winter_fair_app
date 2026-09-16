@@ -163,6 +163,13 @@ void main() {
     expect(find.text('What don\'t we track?'), findsOneWidget);
     expect(find.text('• Your exact GPS location.'), findsOneWidget);
     expect(find.text('• Data for personalised advertising.'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.textContaining('Mill Road Winter Fair App Privacy Policy'),
+      300,
+      scrollable: find.byType(Scrollable),
+    );
+    expect(find.textContaining('Mill Road Winter Fair App Privacy Policy'), findsOneWidget);
   });
 
   testWidgets('only the visible tab is tracked and returning from Settings restores it', (tester) async {

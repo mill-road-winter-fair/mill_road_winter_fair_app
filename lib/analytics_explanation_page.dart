@@ -225,6 +225,31 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                       ),
                     ),
                     const SizedBox(height: 24),
+                    Text.rich(
+                      TextSpan(
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        children: [
+                          const TextSpan(text: 'For full details, read the '),
+                          TextSpan(
+                            text: 'Mill Road Winter Fair App Privacy Policy',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.tertiary,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('app_privacy_policy_link');
+                                launchUrl(Uri.parse(
+                                  'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf',
+                                ));
+                              },
+                          ),
+                          const TextSpan(text: '.'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     const Text(
                       'Please do not enter personal information in searches. We cannot identify you personally from the data we collect; we don\'t ask for your name or email address, or collect your exact location for analytics.',
                       style: TextStyle(fontWeight: FontWeight.bold),
