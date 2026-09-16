@@ -3,7 +3,25 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListingUpdateNotifier {
+  static const _lastShownKey = 'listing_notice_last_shown';
+  static const _standardShowInterval = Duration(days: 3);
+  static const _fairDayShowInterval = Duration(hours: 8);
+
   static String get preferenceKey => 'listingUpdateNoticeEnabled${fairDate.year}';
+
+  static String lastShownKeyFor(DateTime now) {
+    final noticeName = DateUtils.isSameDay(fairDate, now)
+        ? 'fair_day'
+        : now.isAfter(fairDate)
+            ? 'after_fair'
+            : 'before_fair';
+
+    return '${_lastShownKey}_${fairDate.year}_$noticeName';
+  }
+
+  static Duration showIntervalFor(DateTime now) {
+    return DateUtils.isSameDay(fairDate, now) ? _fairDayShowInterval : _standardShowInterval;
+  }
 
   static String titleFor(DateTime now) {
     if (DateUtils.isSameDay(fairDate, now)) {
@@ -59,6 +77,20 @@ class ListingUpdateNotifier {
     // the day and afterwards must always remain available.
     final prefs = await SharedPreferences.getInstance();
     if (!context.mounted || (isListingsMayChange && (!listingUpdateNoticeEnabled || !(prefs.getBool(preferenceKey) ?? true)))) {
+      return;
+    }
+
+    final lastShownKey = lastShownKeyFor(noticeDate);
+    final lastShownMillis = prefs.getInt(lastShownKey);
+    if (lastShownMillis != null) {
+      final lastShown = DateTime.fromMillisecondsSinceEpoch(lastShownMillis);
+      if (noticeDate.difference(lastShown) < showIntervalFor(noticeDate)) {
+        return;
+      }
+    }
+
+    await prefs.setInt(lastShownKey, noticeDate.millisecondsSinceEpoch);
+    if (!context.mounted) {
       return;
     }
 

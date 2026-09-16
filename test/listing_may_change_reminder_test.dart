@@ -82,5 +82,66 @@ void main() {
         onTest = true;
       },
     );
+
+    testWidgets('does not show the same notice again within its interval', (WidgetTester tester) async {
+      final noticeDate = fairDate.subtract(const Duration(days: 1));
+      SharedPreferences.setMockInitialValues({
+        ListingUpdateNotifier.lastShownKeyFor(noticeDate): noticeDate.subtract(const Duration(days: 2)).millisecondsSinceEpoch,
+      });
+      onTest = false;
+      listingUpdateNoticeEnabled = true;
+
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+
+      await ListingUpdateNotifier.maybeShowNotice(
+        tester.element(find.byType(SizedBox)),
+        now: noticeDate,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Listings may change'), findsNothing);
+      onTest = true;
+    });
+
+    testWidgets('tracks the three notices independently', (WidgetTester tester) async {
+      final beforeFair = fairDate.subtract(const Duration(hours: 1));
+      SharedPreferences.setMockInitialValues({
+        ListingUpdateNotifier.lastShownKeyFor(beforeFair): beforeFair.millisecondsSinceEpoch,
+      });
+      onTest = false;
+      listingUpdateNoticeEnabled = true;
+
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      final context = tester.element(find.byType(SizedBox));
+
+      final showFairDayNotice = ListingUpdateNotifier.maybeShowNotice(
+        context,
+        now: fairDate,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('It’s the day of the Fair!'), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      await showFairDayNotice;
+
+      final afterFair = fairDate.add(const Duration(days: 1));
+      final showAfterFairNotice = ListingUpdateNotifier.maybeShowNotice(
+        context,
+        now: afterFair,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Thank you!'), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      await showAfterFairNotice;
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(beforeFair)), isNotNull);
+      expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(fairDate)), isNotNull);
+      expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(afterFair)), isNotNull);
+      onTest = true;
+    });
   });
 }
