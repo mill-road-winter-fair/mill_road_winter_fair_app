@@ -24,6 +24,9 @@ String getCategory(Map<String, dynamic> listing) {
   if (catCount > 1) {
     return 'Mixed';
   } else {
+    if (listing['business'] == 'TRUE') {
+      return 'Business';
+    }
     if (listing['food'] == 'TRUE') {
       return 'Food';
     }
