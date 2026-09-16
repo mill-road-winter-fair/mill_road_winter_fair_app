@@ -64,4 +64,28 @@ void main() {
         findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('shows Firebase information and policy links', (tester) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MaterialApp(home: AboutAppPage()));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Privacy and Firebase Analytics'),
+      500,
+    );
+    expect(find.text('Privacy and Firebase Analytics'), findsOneWidget);
+    expect(find.textContaining('Analytics is off unless you agree to it'),
+        findsOneWidget);
+    expect(find.text('Read our Privacy Policy'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('Read our Terms of Use'), 300);
+    expect(find.text('Terms of use'), findsOneWidget);
+    expect(find.text('Read our Terms of Use'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

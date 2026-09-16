@@ -216,6 +216,32 @@ class _AboutAppPageState extends State<AboutAppPage> {
                                     'https://pub.dev/packages/shared_preferences'),
                           ],
                         ),
+                        const _AboutSection(
+                          icon: Icons.privacy_tip_outlined,
+                          title: 'Privacy and Firebase Analytics',
+                          children: [
+                            Text(
+                                'If you choose to share anonymous usage data, we use Firebase Analytics to understand which parts of the app are most useful and where they could be improved. This can include the pages and features you use, stalls and events you view or save, directions you request, words and phrases entered in searches, app preferences, and basic app, device and session information.'),
+                            Text(
+                                'Analytics is off unless you agree to it, and you can turn it off again in Settings. We do not use Firebase Analytics to collect your name, contact details or exact GPS location, or for personalised advertising.'),
+                            _AboutLink(
+                                label: 'Read our Privacy Policy',
+                                url:
+                                    'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf'),
+                          ],
+                        ),
+                        const _AboutSection(
+                          icon: Icons.gavel_outlined,
+                          title: 'Terms of use',
+                          children: [
+                            Text(
+                                'The terms explain the basis on which you may use the Mill Road Winter Fair app.'),
+                            _AboutLink(
+                                label: 'Read our Terms of Use',
+                                url:
+                                    'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Terms-of-Use.pdf'),
+                          ],
+                        ),
                         _AboutSection(
                           icon: Icons.feedback,
                           title: 'Help shape the next version',
