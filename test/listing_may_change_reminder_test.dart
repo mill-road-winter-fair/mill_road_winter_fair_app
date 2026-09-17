@@ -5,6 +5,25 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class RecordingNoticeAnalyticsService extends FakeAnalyticsService {
+  final notices = <String>[];
+  final buttons = <String>[];
+  final preferences = <String, String>{};
+
+  @override
+  Future<void> logNoticeShown(String noticeName) async => notices.add(noticeName);
+
+  @override
+  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
+    buttons.add(buttonName);
+  }
+
+  @override
+  Future<void> logPreferenceSet(String preference, String value) async {
+    preferences[preference] = value;
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -35,8 +54,9 @@ void main() {
 
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
 
+      final analytics = RecordingNoticeAnalyticsService();
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
-        tester.element(find.byType(SizedBox)), analyticsService: FakeAnalyticsService(),
+        tester.element(find.byType(SizedBox)), analyticsService: analytics,
       );
       await tester.pumpAndSettle();
 
@@ -49,6 +69,36 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool(ListingUpdateNotifier.preferenceKey), isFalse);
       expect(listingUpdateNoticeEnabled, isFalse);
+      expect(analytics.notices, ['listings_may_change_notice']);
+      expect(analytics.buttons, ['listings_may_change_notice_ok']);
+      expect(analytics.preferences, {'listing_update_notice': 'disabled'});
+      onTest = true;
+    });
+
+    testWidgets('tracks opting to keep the listings notice', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({});
+      onTest = false;
+      listingUpdateNoticeEnabled = true;
+      final analytics = RecordingNoticeAnalyticsService();
+
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      final showNotice = ListingUpdateNotifier.maybeShowNotice(
+        tester.element(find.byType(SizedBox)),
+        analyticsService: analytics,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text("Don't show this again"));
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      await showNotice;
+
+      expect(listingUpdateNoticeEnabled, isTrue);
+      expect(analytics.buttons, [
+        'listings_may_change_notice_dont_show_again_toggle',
+        'listings_may_change_notice_ok',
+      ]);
+      expect(analytics.preferences, {'listing_update_notice': 'enabled'});
       onTest = true;
     });
 
@@ -117,10 +167,11 @@ void main() {
 
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
       final context = tester.element(find.byType(SizedBox));
+      final analytics = RecordingNoticeAnalyticsService();
 
       final showFairDayNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        now: fairDate, analyticsService: FakeAnalyticsService(),
+        now: fairDate, analyticsService: analytics,
       );
       await tester.pumpAndSettle();
 
@@ -132,7 +183,7 @@ void main() {
       final afterFair = fairDate.add(const Duration(days: 1));
       final showAfterFairNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        now: afterFair, analyticsService: FakeAnalyticsService(),
+        now: afterFair, analyticsService: analytics,
       );
       await tester.pumpAndSettle();
 
@@ -145,6 +196,9 @@ void main() {
       expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(beforeFair)), isNotNull);
       expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(fairDate)), isNotNull);
       expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(afterFair)), isNotNull);
+      expect(analytics.notices, ['fair_day_notice', 'post_fair_notice']);
+      expect(analytics.buttons, ['fair_day_notice_ok', 'post_fair_notice_ok']);
+      expect(analytics.preferences, isEmpty);
       onTest = true;
     });
   });

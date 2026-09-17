@@ -36,6 +36,18 @@ class ListingUpdateNotifier {
     return 'Listings may change';
   }
 
+  static String analyticsIdFor(DateTime now) {
+    if (DateUtils.isSameDay(fairDate, now)) {
+      return 'fair_day_notice';
+    }
+
+    if (now.isAfter(fairDate)) {
+      return 'post_fair_notice';
+    }
+
+    return 'listings_may_change_notice';
+  }
+
   static String messageFor(DateTime now) {
     if (DateUtils.isSameDay(fairDate, now)) {
       debugPrint('Current date is Fair date; showing special notice');
@@ -96,6 +108,12 @@ class ListingUpdateNotifier {
       return;
     }
 
+    final analyticsId = analyticsIdFor(noticeDate);
+    await analyticsService.logNoticeShown(analyticsId);
+    if (!context.mounted) {
+      return;
+    }
+
     bool dontShowAgain = true;
 
     await showDialog<void>(
@@ -110,6 +128,7 @@ class ListingUpdateNotifier {
               CheckboxListTile(
                 value: dontShowAgain,
                 onChanged: (value) {
+                  analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
                   setState(() => dontShowAgain = value ?? false);
                 },
                 title: const Text("Don't show this again"),
@@ -119,9 +138,14 @@ class ListingUpdateNotifier {
               ),
             TextButton(
               onPressed: () async {
-                if (dontShowAgain) {
-                  listingUpdateNoticeEnabled = false;
-                  await prefs.setBool(preferenceKey, false);
+                analyticsService.logButtonTapped('${analyticsId}_ok');
+                if (isListingsMayChange) {
+                  listingUpdateNoticeEnabled = !dontShowAgain;
+                  await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
+                  await analyticsService.logPreferenceSet(
+                    'listing_update_notice',
+                    listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
+                  );
                 }
                 if (dialogContext.mounted) {
                   Navigator.of(dialogContext).pop();
