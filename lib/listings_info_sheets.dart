@@ -324,7 +324,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               IconButton(
-                onPressed: widget.cancelled
+                onPressed: widget.cancelled && !widget.listingFavourited
                     ? null
                     : () {
                         widget.onFavouriteTapped?.call();
@@ -340,7 +340,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                   (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
                   size: 22,
-                  color: widget.cancelled ? Theme.of(context).disabledColor : Theme.of(context).colorScheme.primary,
+                  color: widget.cancelled && !widget.listingFavourited
+                      ? Theme.of(context).disabledColor
+                      : Theme.of(context).colorScheme.primary,
                 ),
               ),
 

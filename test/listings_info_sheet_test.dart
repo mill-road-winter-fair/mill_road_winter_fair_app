@@ -416,5 +416,50 @@ void main() {
       expect(favouriteCalled, isFalse);
       expect(directionsCalled, isFalse);
     });
+
+    testWidgets('allows a cancelled listing to be unfavourited', (WidgetTester tester) async {
+      bool favouriteCalled = false;
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: true,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: '100m',
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: true,
+        onFavouriteTapped: () {
+          favouriteCalled = true;
+        },
+      ));
+
+      final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
+      final FaIcon favouriteIcon = tester.widget(find.descendant(
+        of: find.byType(IconButton).first,
+        matching: find.byType(FaIcon),
+      ));
+
+      expect(favouriteButton.onPressed, isNotNull);
+      expect(favouriteIcon.icon, FontAwesomeIcons.solidHeart);
+      expect(
+        favouriteIcon.color,
+        Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).colorScheme.primary,
+      );
+
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pump();
+
+      expect(favouriteCalled, isTrue);
+    });
   });
 }
