@@ -93,6 +93,35 @@ void main() {
       expect(find.byIcon(Icons.public), findsOneWidget);
     });
 
+    testWidgets('displays a local business label instead of opening times for brick-and-mortar listings', (WidgetTester tester) async {
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        brickAndMortar: true,
+        emoji: '🏪',
+        title: 'Mill Road Shop',
+        subtitle: 'Shopping',
+        location: 'Mill Road',
+        description: '',
+        email: '',
+        website: '',
+        phoneNumber: '',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: false,
+      ));
+
+      expect(find.text('Local business'), findsOneWidget);
+      expect(find.text('10:30—16:30'), findsNothing);
+
+      final Text label = tester.widget(find.text('Local business'));
+      expect(label.style?.fontSize, 12);
+      expect(label.style?.fontWeight, FontWeight.bold);
+    });
+
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
