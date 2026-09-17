@@ -113,6 +113,86 @@ void main() {
     staticChooserPage.value = false;
   });
 
+  testWidgets(
+      'resizes the carousel and preserves selection across device sizes',
+      (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(402, 874);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await buildChooser(tester);
+    final phoneHeight = tester.getSize(find.byType(PageView)).height;
+    expect(find.byTooltip('Next category').hitTestable(), findsOneWidget);
+    await move(tester, 'Next');
+
+    tester.view.physicalSize = const Size(1024, 1366);
+    await tester.pumpAndSettle();
+    expect(
+        tester.getSize(find.byType(PageView)).height, greaterThan(phoneHeight));
+    expect(tester.getSize(find.byType(PageView)).width, lessThanOrEqualTo(680));
+    expect(find.text('2 / 8'), findsOneWidget);
+    expect(find.byTooltip('Next category').hitTestable(), findsOneWidget);
+
+    for (final size in [const Size(320, 568), const Size(844, 390)]) {
+      tester.view.physicalSize = size;
+      await tester.pumpAndSettle();
+      if (size.width > size.height) {
+        expect(tester.getSize(find.byType(PageView)).height,
+            lessThan(phoneHeight));
+      }
+      expect(tester.takeException(), isNull);
+      await move(tester, 'Next');
+    }
+    expect(find.text('4 / 8'), findsOneWidget);
+  });
+
+  testWidgets(
+      'small phones show complete captions and controls without scrolling',
+      (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(top: 24, bottom: 24);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPadding);
+    for (final size in [
+      const Size(320, 480),
+      const Size(320, 568),
+      const Size(360, 640),
+      const Size(375, 667)
+    ]) {
+      tester.view.physicalSize = size;
+      await buildChooser(tester);
+      for (var i = 0; i < 8; i++) {
+        final outerScroll = tester.state<ScrollableState>(find
+            .descendant(
+              of: find.byType(SingleChildScrollView),
+              matching: find.byType(Scrollable),
+            )
+            .first);
+        expect(outerScroll.position.maxScrollExtent, 0,
+            reason: 'The whole chooser should fit at $size, category $i');
+        final next = find.byTooltip('Next category');
+        expect(next.hitTestable(), findsOneWidget);
+        final card = find.byType(Card).evaluate().where((element) {
+          final rect = tester.getRect(find.byWidget(element.widget));
+          return rect.contains(tester.getCenter(find.byType(PageView)));
+        }).single;
+        for (final text in find
+            .descendant(
+                of: find.byWidget(card.widget), matching: find.byType(Text))
+            .evaluate()) {
+          final rect = tester.getRect(find.byWidget(text.widget));
+          expect(rect.bottom, lessThan(tester.getRect(next).top));
+          expect(rect.top,
+              greaterThan(tester.getRect(find.byType(AppBar)).bottom));
+        }
+        await tester.tap(next);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      }
+    }
+  });
+
   testWidgets('small screens, large text and dark themes remain usable',
       (tester) async {
     tester.view.physicalSize = const Size(360, 640);

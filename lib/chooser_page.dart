@@ -121,14 +121,36 @@ class _ChooserPageState extends State<ChooserPage> {
       ],
       body: SafeArea(
         child: LayoutBuilder(builder: (context, constraints) {
-          final textWidth =
-              math.max(1.0, math.min(680.0, constraints.maxWidth) * .82 - 88);
-          double textHeight(String text, TextStyle? style) {
+          final contentWidth = math.min(680.0, constraints.maxWidth);
+          final compact = constraints.maxHeight < 650;
+          final shortScreen = constraints.maxHeight < 560;
+          final logoHeight = shortScreen
+              ? 32.0
+              : compact
+                  ? 64.0
+                  : 100.0;
+          final outerSpacing = shortScreen
+              ? 4.0
+              : compact
+                  ? 8.0
+                  : 20.0;
+          final captionPadding = shortScreen ? 12.0 : 20.0;
+          final titleStyle = (shortScreen
+                  ? theme.textTheme.titleMedium
+                  : theme.textTheme.titleLarge)
+              ?.copyWith(fontWeight: FontWeight.bold);
+          final textWidth = math.max(
+              1.0,
+              contentWidth * .82 -
+                  12 -
+                  captionPadding * 2 -
+                  (shortScreen ? 0 : 36));
+          double textHeight(String text, TextStyle? style, {double? width}) {
             final painter = TextPainter(
               text: TextSpan(text: text, style: style),
               textDirection: Directionality.of(context),
               textScaler: MediaQuery.textScalerOf(context),
-            )..layout(maxWidth: textWidth);
+            )..layout(maxWidth: width ?? textWidth);
             final height = painter.height;
             painter.dispose();
             return height;
@@ -136,14 +158,31 @@ class _ChooserPageState extends State<ChooserPage> {
 
           final captionHeight = choices
               .map((choice) =>
-                  textHeight(
-                      choice.title,
-                      theme.textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.bold)) +
+                  textHeight(choice.title, titleStyle) +
                   textHeight(choice.description, theme.textTheme.bodyMedium) +
-                  46)
+                  captionPadding * 2 +
+                  6)
               .reduce(math.max);
-          final cardHeight = math.max(360.0, captionHeight + 240);
+          // Reserve room for the header and controls before sizing the artwork.
+          // Artwork yields space to captions. Only exceptionally large text
+          // needs the outer scroll view; ordinary small phones fit in one view.
+          final headingHeight = textHeight(
+              'Find your Fair',
+              theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
+              width: math.max(1.0, contentWidth - 48));
+          final hintHeight = textHeight(
+              'Swipe to explore. Tap to discover.', theme.textTheme.bodyMedium,
+              width: math.max(1.0, contentWidth - 48));
+          final controlsHeight =
+              math.max(48.0, textHeight('8 / 8', theme.textTheme.labelLarge));
+          final chromeHeight = outerSpacing * 2 +
+              logoHeight +
+              (shortScreen ? 28 : 60) +
+              (shortScreen ? 0 : headingHeight + hintHeight) +
+              controlsHeight;
+          final cardHeight = (constraints.maxHeight - chromeHeight).clamp(
+              captionHeight + (shortScreen ? 56 : 96), captionHeight + 468);
           return SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
@@ -153,7 +192,7 @@ class _ChooserPageState extends State<ChooserPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(height: 20),
+                      SizedBox(height: outerSpacing),
                       Semantics(
                         label: 'Mill Road Winter Fair. About the Fair',
                         button: true,
@@ -164,28 +203,30 @@ class _ChooserPageState extends State<ChooserPage> {
                             padding: const EdgeInsets.all(8),
                             child: Image.asset(
                               'assets/chooserPage/MRWF_logo_transparent.png',
-                              width: 220,
-                              height: 100,
+                              width: math.min(220.0, contentWidth * .6),
+                              height: logoHeight,
                               fit: BoxFit.contain,
                               excludeFromSemantics: true,
                             ),
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 4),
-                        child: Text('Find your Fair',
-                            style: theme.textTheme.headlineSmall
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                        child: Text('Swipe to explore. Tap to discover.',
-                            style: theme.textTheme.bodyMedium
-                                ?.copyWith(color: colours.onSurfaceVariant),
-                            textAlign: TextAlign.center),
-                      ),
+                      if (!shortScreen)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 12, 24, 4),
+                          child: Text('Find your Fair',
+                              style: theme.textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center),
+                        ),
+                      if (!shortScreen)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                          child: Text('Swipe to explore. Tap to discover.',
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: colours.onSurfaceVariant),
+                              textAlign: TextAlign.center),
+                        ),
                       SizedBox(
                         height: cardHeight,
                         child: NotificationListener<ScrollEndNotification>(
@@ -210,7 +251,8 @@ class _ChooserPageState extends State<ChooserPage> {
                                   return Padding(
                                     padding: EdgeInsets.symmetric(
                                         horizontal: 6,
-                                        vertical: 6 + distance * 18),
+                                        vertical: 6 +
+                                            distance * (shortScreen ? 6 : 18)),
                                     child: child,
                                   );
                                 },
@@ -219,6 +261,9 @@ class _ChooserPageState extends State<ChooserPage> {
                                   selected: index == _selected,
                                   index: index,
                                   total: choices.length,
+                                  titleStyle: titleStyle,
+                                  captionPadding: captionPadding,
+                                  showArrow: !shortScreen,
                                 ),
                               );
                             },
@@ -226,7 +271,7 @@ class _ChooserPageState extends State<ChooserPage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+                        padding: EdgeInsets.fromLTRB(24, 12, 24, outerSpacing),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -280,11 +325,17 @@ class _ChoiceCard extends StatelessWidget {
       {required this.choice,
       required this.selected,
       required this.index,
-      required this.total});
+      required this.total,
+      required this.titleStyle,
+      required this.captionPadding,
+      required this.showArrow});
   final _Choice choice;
   final bool selected;
   final int index;
   final int total;
+  final TextStyle? titleStyle;
+  final double captionPadding;
+  final bool showArrow;
 
   @override
   Widget build(BuildContext context) {
@@ -307,54 +358,60 @@ class _ChoiceCard extends StatelessWidget {
                   : colours.outlineVariant),
         ),
         clipBehavior: Clip.antiAlias,
-        child: Ink(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/chooserPage/${choice.asset}.png'),
-              fit: BoxFit.contain,
-              alignment: const Alignment(0, -.7),
-            ),
-          ),
-          child: InkWell(
-            key: ValueKey('choice-${choice.asset}'),
-            onTap: () {
-              HapticFeedback.selectionClick();
-              choice.onTap();
-            },
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: colours.surface.withAlpha(245),
-                    border:
-                        Border(top: BorderSide(color: colours.outlineVariant)),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(choice.title,
-                                style: theme.textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 6),
-                            Text(choice.description,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: colours.onSurfaceVariant)),
-                          ],
-                        ),
+        child: InkWell(
+          key: ValueKey('choice-${choice.asset}'),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            choice.onTap();
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(showArrow ? 24 : 12),
+                  child: Ink(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                            'assets/chooserPage/${choice.asset}.png'),
+                        fit: BoxFit.contain,
                       ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(captionPadding),
+                decoration: BoxDecoration(
+                  color: colours.surface.withAlpha(245),
+                  border:
+                      Border(top: BorderSide(color: colours.outlineVariant)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(choice.title, style: titleStyle),
+                          const SizedBox(height: 6),
+                          Text(choice.description,
+                              style: theme.textTheme.bodyMedium
+                                  ?.copyWith(color: colours.onSurfaceVariant)),
+                        ],
+                      ),
+                    ),
+                    if (showArrow) ...[
                       const SizedBox(width: 12),
                       Icon(Icons.arrow_forward, color: colours.primary),
                     ],
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
