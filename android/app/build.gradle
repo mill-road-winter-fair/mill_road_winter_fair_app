@@ -2,7 +2,11 @@ plugins {
     id "com.android.application"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
+    // The Google services Gradle plugin
+    id 'com.google.gms.google-services'
 }
+
+// FlutterFire supplies compatible native Firebase dependencies.
 
 def dartDefines = [:]
 if (project.hasProperty('dart-defines')) {
