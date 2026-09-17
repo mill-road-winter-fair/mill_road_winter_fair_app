@@ -360,7 +360,7 @@ void main() {
       expect(find.text('Nice buns'), findsOneWidget);
     });
 
-    testWidgets('disables favourite, directions and share actions when listing is cancelled', (WidgetTester tester) async {
+    testWidgets('disables favourite and directions actions but leaves share enabled when listing is cancelled', (WidgetTester tester) async {
       bool favouriteCalled = false;
       bool directionsCalled = false;
 
@@ -407,7 +407,7 @@ void main() {
       expect(favouriteButton.onPressed, isNull);
       expect(favouriteIcon.color, Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).disabledColor);
       expect(directionsButton.onPressed, isNull);
-      expect(shareButton.onPressed, isNull);
+      expect(shareButton.onPressed, isNotNull);
 
       await tester.tap(find.byType(IconButton).first);
       await tester.tap(find.byIcon(Icons.directions_walk));
