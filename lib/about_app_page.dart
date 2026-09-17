@@ -6,19 +6,22 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'android_nav_bar_detector.dart';
+import 'firebase_analytics.dart';
 import 'globals.dart';
 
 const _repositoryUrl =
     'https://github.com/mill-road-winter-fair/mill_road_winter_fair_app';
 
 class AboutAppPage extends StatefulWidget {
-  const AboutAppPage({super.key});
+  final AnalyticsService analyticsService;
+
+  const AboutAppPage({super.key, required this.analyticsService});
 
   @override
   State<AboutAppPage> createState() => _AboutAppPageState();
 }
 
-class _AboutAppPageState extends State<AboutAppPage> {
+class _AboutAppPageState extends State<AboutAppPage> with RouteAware {
   final _scrollController = ScrollController();
   PackageInfo? _packageInfo;
 
@@ -40,7 +43,20 @@ class _AboutAppPageState extends State<AboutAppPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPush() => widget.analyticsService.setCurrentScreen('AboutAppPage');
+
+  @override
+  void didPopNext() => widget.analyticsService.setCurrentScreen('AboutAppPage');
+
+  @override
   void dispose() {
+    routeObserver.unsubscribe(this);
     _scrollController.dispose();
     super.dispose();
   }
@@ -55,7 +71,16 @@ class _AboutAppPageState extends State<AboutAppPage> {
       right: false,
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
-        appBar: AppBar(title: const Text('About this app')),
+        appBar: AppBar(
+          leading: Navigator.canPop(context)
+              ? BackButton(onPressed: () {
+                  HapticFeedback.lightImpact();
+                  widget.analyticsService.logButtonTapped('back');
+                  Navigator.maybePop(context);
+                })
+              : null,
+          title: const Text('About this app'),
+        ),
         body: SafeArea(
           top: false,
           bottom: false,
@@ -112,7 +137,7 @@ class _AboutAppPageState extends State<AboutAppPage> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        const _AboutSection(
+                        _AboutSection(
                           icon: Icons.code,
                           title: 'A project we can build together',
                           children: [
@@ -122,11 +147,13 @@ class _AboutAppPageState extends State<AboutAppPage> {
                                 'We welcome collaboration, whether you enjoy coding, have an eye for design, can help test the app or have an idea to share. To get involved, visit our GitHub repository and start with the CONTRIBUTING.md guide.'),
                             _AboutLink(
                                 label: 'Read CONTRIBUTING.md',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'contributing_hyperlink',
                                 url:
                                     'https://github.com/mill-road-winter-fair/mill_road_winter_fair_app/blob/main/CONTRIBUTING.md'),
                           ],
                         ),
-                        const _AboutSection(
+                        _AboutSection(
                           icon: Icons.android,
                           title: 'Alexander Berridge',
                           subtitle: 'App Lead & founder',
@@ -137,10 +164,12 @@ class _AboutAppPageState extends State<AboutAppPage> {
                                 'His work also includes Android development and maintaining the Android build configuration, helping turn the Fair’s information into a useful companion for visitors.'),
                             _AboutLink(
                                 label: 'Visit Alex’s website',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'alex_website_hyperlink',
                                 url: 'https://theberridge.com'),
                           ],
                         ),
-                        const _AboutSection(
+                        _AboutSection(
                           icon: Icons.lightbulb_outline,
                           title: 'Matt Whiting',
                           subtitle: 'Contributor · Design, iOS & timetable',
@@ -153,16 +182,22 @@ class _AboutAppPageState extends State<AboutAppPage> {
                                 'Clashfinder Pal brings the Clashfinder website, created by fellow coder halvin, to mobile. Matt’s contribution brings that festival-planning experience to Mill Road.'),
                             _AboutLink(
                                 label: 'Visit Matt’s website',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'matt_website_hyperlink',
                                 url: 'http://mattwhiting.com'),
                             _AboutLink(
                                 label: 'Discover Clashfinder Pal',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'clashfinder_pal_hyperlink',
                                 url: 'https://linktr.ee/cfpal'),
                             _AboutLink(
                                 label: 'Explore Clashfinder by halvin',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'clashfinder_hyperlink',
                                 url: 'https://clashfinder.com'),
                           ],
                         ),
-                        const _AboutSection(
+                        _AboutSection(
                           icon: Icons.palette_outlined,
                           title: 'Clare McEwan',
                           subtitle: 'Illustrations',
@@ -173,10 +208,12 @@ class _AboutAppPageState extends State<AboutAppPage> {
                                 'Clare’s illustrations bring warmth, character and a distinctly local feel to the app, connecting it with the Fair’s printed materials and the community it celebrates.'),
                             _AboutLink(
                                 label: 'Explore Clare’s artwork',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'clare_artwork_hyperlink',
                                 url: 'https://www.claremcewan.co.uk'),
                           ],
                         ),
-                        const _AboutSection(
+                        _AboutSection(
                           icon: Icons.layers_outlined,
                           title: 'The technology behind the app',
                           children: [
@@ -184,39 +221,51 @@ class _AboutAppPageState extends State<AboutAppPage> {
                                 'Our community’s work is supported by these tools and services, alongside the open-source packages credited in the licences.'),
                             _Technology(
                                 name: 'Flutter & Dart',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'flutter_hyperlink',
                                 description:
                                     'The framework and language we use to build the app for Android and iOS from a shared codebase.',
                                 url: 'https://flutter.dev'),
                             _Technology(
                                 name: 'GitHub',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'github_hyperlink',
                                 description:
                                     'Hosts our source code and gives contributors a place to report issues, discuss improvements and review changes.',
                                 url: _repositoryUrl),
                             _Technology(
                                 name: 'Heroku',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'heroku_hyperlink',
                                 description:
                                     'Hosts the backend caching API, which fetches and caches listing information from Google Sheets for the app.',
                                 url: 'https://www.heroku.com'),
                             _Technology(
                                 name: 'Google Sheets',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'google_sheets_hyperlink',
                                 description:
                                     'Stores the Fair’s listing information, which reaches the app through our caching API.',
                                 url:
                                     'https://workspace.google.com/products/sheets/'),
                             _Technology(
                                 name: 'Google Maps Platform',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'google_maps_platform_hyperlink',
                                 description:
                                     'Provides the interactive map and walking directions to help visitors find their way around the Fair.',
                                 url: 'https://mapsplatform.google.com'),
                             _Technology(
                                 name: 'Shared Preferences',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'shared_preferences_hyperlink',
                                 description:
                                     'Saves preferences and favourite listings on your device so they are available when you return.',
                                 url:
                                     'https://pub.dev/packages/shared_preferences'),
                           ],
                         ),
-                        const _AboutSection(
+                        _AboutSection(
                           icon: Icons.privacy_tip_outlined,
                           title: 'Privacy and Firebase Analytics',
                           children: [
@@ -226,11 +275,13 @@ class _AboutAppPageState extends State<AboutAppPage> {
                                 'Analytics is off unless you agree to it, and you can turn it off again in Settings. We do not use Firebase Analytics to collect your name, contact details or exact GPS location, or for personalised advertising.'),
                             _AboutLink(
                                 label: 'Read our Privacy Policy',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'app_privacy_policy_link',
                                 url:
                                     'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf'),
                           ],
                         ),
-                        const _AboutSection(
+                        _AboutSection(
                           icon: Icons.gavel_outlined,
                           title: 'Terms of use',
                           children: [
@@ -238,6 +289,8 @@ class _AboutAppPageState extends State<AboutAppPage> {
                                 'The terms explain the basis on which you may use the Mill Road Winter Fair app.'),
                             _AboutLink(
                                 label: 'Read our Terms of Use',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'app_terms_of_use_link',
                                 url:
                                     'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Terms-of-Use.pdf'),
                           ],
@@ -248,10 +301,12 @@ class _AboutAppPageState extends State<AboutAppPage> {
                           children: [
                             const Text(
                                 'We’d love to hear what works well, what could be better and what you’d like to see next. Your feedback helps us improve the app for everyone who comes to the Fair.'),
-                            const _AboutLink(
+                            _AboutLink(
                                 label: 'Share your feedback',
                                 url:
                                     'https://www.millroadwinterfair.org/app-feedback-form/',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'app_feedback_hyperlink',
                                 prominent: true),
                             const Divider(),
                             const Text(
@@ -261,6 +316,8 @@ class _AboutAppPageState extends State<AboutAppPage> {
                               label: const Text('View licences'),
                               onPressed: () {
                                 HapticFeedback.lightImpact();
+                                widget.analyticsService
+                                    .logButtonTapped('view_licences');
                                 showLicensePage(
                                   context: context,
                                   applicationName: fairName,
@@ -334,16 +391,26 @@ class _AboutSection extends StatelessWidget {
 
 class _Technology extends StatelessWidget {
   const _Technology(
-      {required this.name, required this.description, required this.url});
+      {required this.name,
+      required this.description,
+      required this.url,
+      required this.analyticsService,
+      required this.analyticsId});
   final String name;
   final String description;
   final String url;
+  final AnalyticsService analyticsService;
+  final String analyticsId;
 
   @override
   Widget build(BuildContext context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _AboutLink(label: name, url: url),
+          _AboutLink(
+              label: name,
+              url: url,
+              analyticsService: analyticsService,
+              analyticsId: analyticsId),
           Text(description),
         ],
       );
@@ -351,13 +418,20 @@ class _Technology extends StatelessWidget {
 
 class _AboutLink extends StatelessWidget {
   const _AboutLink(
-      {required this.label, required this.url, this.prominent = false});
+      {required this.label,
+      required this.url,
+      required this.analyticsService,
+      required this.analyticsId,
+      this.prominent = false});
   final String label;
   final String url;
+  final AnalyticsService analyticsService;
+  final String analyticsId;
   final bool prominent;
 
   Future<void> _open(BuildContext context) async {
     HapticFeedback.lightImpact();
+    analyticsService.logButtonTapped(analyticsId);
     try {
       if (await launchUrl(Uri.parse(url))) return;
     } catch (error) {

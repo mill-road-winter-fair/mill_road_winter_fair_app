@@ -337,7 +337,12 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               analyticsService.logButtonTapped('drawer_about_app');
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              Navigator.push(navigatorContext, MaterialPageRoute(builder: (context) => const AboutAppPage()));
+              Navigator.push(
+                  navigatorContext,
+                  MaterialPageRoute(
+                      builder: (context) => AboutAppPage(
+                            analyticsService: analyticsService,
+                          )));
             },
           ),
         ),
