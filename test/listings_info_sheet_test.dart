@@ -458,7 +458,9 @@ void main() {
       ));
 
       expect(favouriteButton.onPressed, isNotNull);
-      expect(favouriteIcon.icon, FontAwesomeIcons.solidHeart);
+      expect(favouriteIcon.icon?.codePoint, FontAwesomeIcons.solidHeart.codePoint);
+      expect(favouriteIcon.icon?.fontFamily, FontAwesomeIcons.solidHeart.fontFamily);
+      expect(favouriteIcon.icon?.fontPackage, FontAwesomeIcons.solidHeart.fontPackage);
       expect(
         favouriteIcon.color,
         Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).colorScheme.primary,
