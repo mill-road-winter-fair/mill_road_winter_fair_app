@@ -327,7 +327,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Animated'),
                                 subtitle: Text(
-                                  'Spotlights the Fair’s offerings in turn',
+                                  'Smooth transitions between carousel categories',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -340,7 +340,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Static'),
                                 subtitle: Text(
-                                  'Stays boringly fixed',
+                                  'Change categories without button animations',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
