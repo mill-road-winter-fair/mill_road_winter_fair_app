@@ -191,6 +191,8 @@ class SpecificListingInfoSheet extends StatefulWidget {
 }
 
 class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
+  final GlobalKey _cancelledLabelKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     //debugPrint('SpecificListingInfoSheet build() called');
@@ -213,20 +215,30 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(widget.endTime);
     final timeStyle = subSubStyle.copyWith(
-      color: ended || widget.cancelled ? Colors.red : Theme.of(context).colorScheme.onSurface,
+      color: ended ? Colors.red : Theme.of(context).colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
     if (widget.location == '') {
       // this SpecificListingInfoSheet must be within a Group modal, so display differently
-      subDetails = Text.rich(
-          textAlign: TextAlign.right,
-          TextSpan(children: [
-            TextSpan(text: "${widget.subtitle}\n", style: subSubStyle),
-            TextSpan(text: updatedTimes, style: timeStyle),
-          ]));
+      subDetails = widget.cancelled
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(widget.subtitle, style: subSubStyle),
+                const SizedBox(height: 2),
+                _cancelledLabel(context),
+              ],
+            )
+          : Text.rich(
+              textAlign: TextAlign.right,
+              TextSpan(children: [
+                TextSpan(text: "${widget.subtitle}\n", style: subSubStyle),
+                TextSpan(text: updatedTimes, style: timeStyle),
+              ]));
     } else {
-      subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: timeStyle));
+      subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
     return Container(
@@ -243,7 +255,21 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Prepend the emoji if we have one
-              if (widget.emoji.isNotEmpty) Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
+              if (widget.emoji.isNotEmpty)
+                widget.cancelled
+                    ? Opacity(
+                        opacity: 0.5,
+                        child: ColorFiltered(
+                          colorFilter: const ColorFilter.matrix(<double>[
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0.2126, 0.7152, 0.0722, 0, 0,
+                            0, 0, 0, 1, 0,
+                          ]),
+                          child: Text('${widget.emoji} ', style: TextStyle(fontSize: 30)),
+                        ),
+                      )
+                    : Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
               Expanded(
                 flex: 14,
                 child: Text(widget.title, style: titleStyle),
@@ -282,11 +308,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerRight,
-                    child: Text(
-                      updatedTimes,
-                      style: timeStyle,
-                      textAlign: TextAlign.end,
-                    ),
+                    child: widget.cancelled
+                        ? _cancelledLabel(context)
+                        : Text(
+                            updatedTimes,
+                            style: timeStyle,
+                            textAlign: TextAlign.end,
+                          ),
                   ),
                 ),
               ],
@@ -298,16 +326,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               IconButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
-                  widget.onFavouriteTapped?.call();
-                  if (!widget.listingFavourited) {
-                    widget.analyticsService.logListingSaved(widget.title);
-                  } else {
-                    widget.analyticsService.logListingUnsaved(widget.title);
-                  }
-                },
+                onPressed: widget.cancelled && !widget.listingFavourited
+                    ? null
+                    : () {
+                        widget.onFavouriteTapped?.call();
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
+                      },
                 padding: const EdgeInsets.all(0),
                 style: ElevatedButton.styleFrom(
                     visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
@@ -317,7 +342,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                   (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
                   size: 22,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: widget.cancelled && !widget.listingFavourited
+                      ? Theme.of(context).disabledColor
+                      : Theme.of(context).colorScheme.primary,
                 ),
               ),
 
@@ -329,12 +356,14 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     padding: const EdgeInsets.all(0),
                     elevation: 3,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
-                  widget.analyticsService.logDirectionsToListingRequested(widget.title);
-                  widget.onGetDirections();
-                },
+                onPressed: widget.cancelled
+                    ? null
+                    : () {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
+                        widget.analyticsService.logDirectionsToListingRequested(widget.title);
+                        widget.onGetDirections();
+                      },
                 child: const Icon(Icons.directions_walk),
               ),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
@@ -403,11 +432,14 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     padding: const EdgeInsets.all(0),
                     elevation: 3,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  widget.analyticsService.logButtonTapped('listing_share', listingId: widget.listingId, listingName: widget.title);
-                  shareListing(widget.title, widget.location, widget.startTime, widget.endTime, context);
-                },
+                onPressed: () => shareListing(
+                  widget.title,
+                  widget.location,
+                  widget.startTime,
+                  widget.endTime,
+                  context,
+                  cancelled: widget.cancelled,
+                ),
                 child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
               ),
               Flexible(flex: 1, child: Container()),
@@ -500,6 +532,39 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 20),
           if (widget.onDetailsTapped != null || widget.location == '') const SizedBox(height: 4),
         ],
+      ),
+    );
+  }
+
+  Widget _cancelledLabel(BuildContext context) {
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          showMiniPopup(
+            context,
+            _cancelledLabelKey,
+            'Originally ${widget.startTime}–${widget.endTime}',
+            analyticsService: widget.analyticsService,
+          );
+        },
+        child: Container(
+          key: _cancelledLabelKey,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            'CANCELLED',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
       ),
     );
   }
