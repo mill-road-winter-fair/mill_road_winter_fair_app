@@ -529,7 +529,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

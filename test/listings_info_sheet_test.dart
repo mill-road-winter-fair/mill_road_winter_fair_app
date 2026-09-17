@@ -351,7 +351,7 @@ void main() {
         matching: find.byWidgetPredicate((widget) {
           if (widget is! Container || widget.decoration is! BoxDecoration) return false;
           final decoration = widget.decoration! as BoxDecoration;
-          return decoration.color == colorScheme.primary && decoration.borderRadius == BorderRadius.circular(12);
+          return decoration.color == colorScheme.onSurfaceVariant && decoration.borderRadius == BorderRadius.circular(12);
         }),
       );
       expect(cancelledLabelFinder, findsOneWidget);
