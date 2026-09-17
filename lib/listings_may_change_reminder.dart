@@ -1,136 +1,161 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListingUpdateNotifier {
   static const _lastShownKey = 'listing_notice_last_shown';
+  static const _standardShowInterval = Duration(days: 3);
+  static const _fairDayShowInterval = Duration(hours: 8);
 
-  // I wouldn't usually keep commented out code but this function is handy for testing this toast notification
-  // Simply uncomment it and add "ListingUpdateNotifier.resetNoticeTimer();" to the initState in map_page.dart
-  // static Future<void> resetNoticeTimer() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.remove(_lastShownKey);
-  //   debugPrint('Listing update notice timer reset.');
-  // }
+  static String get preferenceKey => 'listingUpdateNoticeEnabled${fairDate.year}';
 
-  static Future maybeShowNotice(
+  static String lastShownKeyFor(DateTime now) {
+    final noticeName = DateUtils.isSameDay(fairDate, now)
+        ? 'fair_day'
+        : now.isAfter(fairDate)
+            ? 'after_fair'
+            : 'before_fair';
+
+    return '${_lastShownKey}_${fairDate.year}_$noticeName';
+  }
+
+  static Duration showIntervalFor(DateTime now) {
+    return DateUtils.isSameDay(fairDate, now) ? _fairDayShowInterval : _standardShowInterval;
+  }
+
+  static String titleFor(DateTime now) {
+    if (DateUtils.isSameDay(fairDate, now)) {
+      return 'It’s the day of the Fair!';
+    }
+
+    if (now.isAfter(fairDate)) {
+      return 'Thank you!';
+    }
+
+    return 'Listings may change';
+  }
+
+  static String analyticsIdFor(DateTime now) {
+    if (DateUtils.isSameDay(fairDate, now)) {
+      return 'fair_day_notice';
+    }
+
+    if (now.isAfter(fairDate)) {
+      return 'post_fair_notice';
+    }
+
+    return 'listings_may_change_notice';
+  }
+
+  static String messageFor(DateTime now) {
+    if (DateUtils.isSameDay(fairDate, now)) {
+      debugPrint('Current date is Fair date; showing special notice');
+      return 'The fun starts at 10.30, and we’re looking forward to seeing '
+          'you there.\n\n'
+          'This app contains all the latest listings, updated if they '
+          'change, so you can easily see what’s on when and where.\n\n'
+          'Have a wonderful day!';
+    }
+
+    if (now.isAfter(fairDate)) {
+      return 'Thank you to everyone who came to the 2026 Fair and made it '
+          'such a huge success.\n\n'
+          'We‘ll be back in December 2027 and will be updating the app '
+          'as the Fair approaches.\n\n'
+          'Check back later in the year for the 2027 listings.';
+    }
+
+    return 'Event details may change as the Fair approaches, but this app '
+        'will always show the most up-to-date information.\n\n'
+        'Check back for the latest listings.';
+  }
+
+  static bool isListingsMayChangeNotice(DateTime now) {
+    return !DateUtils.isSameDay(fairDate, now) && now.isBefore(fairDate);
+  }
+
+  static Future<void> maybeShowNotice(
     BuildContext context, {
+    DateTime? now,
     required AnalyticsService analyticsService,
   }) async {
-    debugPrint('maybeShowNotice called');
-
-    if (firstExecution) {
-      debugPrint('First execution; not showing notice');
+    if (onTest) {
       return;
     }
 
-    late double showIntervalDays;
-    late String theMessage;
-    late int theMessageDuration;
+    final noticeDate = now ?? DateTime.now();
+    final isListingsMayChange = isListingsMayChangeNotice(noticeDate);
 
-    // Capture the theme colours and initialise Toast before async gaps
-    final theme = Theme.of(context);
-    final backgroundColor = theme.colorScheme.primary;
-    final textColor = theme.colorScheme.onPrimary;
-    final fToast = FToast();
-    fToast.init(context);
-
-    // Safely perform async work
+    // The dismissal preference applies only before the Fair. The notices on
+    // the day and afterwards must always remain available.
     final prefs = await SharedPreferences.getInstance();
-    final now = DateTime.now();
-
-    if (DateUtils.isSameDay(fairDate, DateTime.now())) {
-      debugPrint('Current date is Fair date; showing special notice');
-      showIntervalDays = 0.3; // 8 hours, so should show once on the day
-      theMessageDuration = 20; // longer message
-      theMessage = 
-        "It’s the day of the Fair!\n"
-        "The fun starts at 10.30, and "
-        "we’re looking forward to seeing "
-        "you there.\n\n"
-        "This app contains all the latest "
-        "listings, updated if they change, "
-        "so you can easily see what’s on "
-        "when and where.\n\n"
-        "Have a wonderful day!";
-    } else if (now.isAfter(fairDate)) {
-      showIntervalDays = 3;
-      theMessageDuration = 20;
-      theMessage = 
-        "Thank you to everyone who came to "
-        "the 2025 Fair and made it such a "
-        "huge success.\n\n"
-        "We‘ll be back on December 5th 2026 "
-        "and will be updating the app as "
-        "that date approaches.\n\n"
-        "Check back later in the year for "
-        "the 2026 listings.";
-    } else {
-      showIntervalDays = 3;
-      theMessageDuration = 12;
-      theMessage = 
-        "Please note that event details "
-        "may change as the Fair approaches, "
-        "but this app will always show the "
-        "most up-to-date information.\n\n"
-        "Check back for the latest listings.";
-        // interim text - keep as we may use again next year
-        // "This app currently shows many of "
-        // "the attractions you'll find at the "
-        // "2025 Fair on Saturday 6th December, "
-        // "and there’ll be more added in the "
-        // "lead-up to the Fair.\n\n"
+    if (!context.mounted || (isListingsMayChange && (!listingUpdateNoticeEnabled || !(prefs.getBool(preferenceKey) ?? true)))) {
+      return;
     }
 
-    final lastShownMillis = prefs.getInt(_lastShownKey);
+    final lastShownKey = lastShownKeyFor(noticeDate);
+    final lastShownMillis = prefs.getInt(lastShownKey);
     if (lastShownMillis != null) {
       final lastShown = DateTime.fromMillisecondsSinceEpoch(lastShownMillis);
-      if (now.difference(lastShown).inHours < showIntervalDays * 24) {
-        debugPrint('Notice shown recently, not showing again');
+      if (noticeDate.difference(lastShown) < showIntervalFor(noticeDate)) {
         return;
       }
     }
-    debugPrint('Showing listings update notice');
-    await prefs.setInt(_lastShownKey, now.millisecondsSinceEpoch);
 
-    // --- Custom FToast with longer duration ---
-    final toast = InkWell( 
-      onTap:() {
-        analyticsService.logButtonTapped('listing_notice_dismiss');
-        fToast.removeCustomToast();
-      },
-        child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-        margin: const EdgeInsets.symmetric(horizontal: 20.0),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(12.0),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 6,
-              offset: Offset(0, 3),
-            )
+    await prefs.setInt(lastShownKey, noticeDate.millisecondsSinceEpoch);
+    if (!context.mounted) {
+      return;
+    }
+
+    final analyticsId = analyticsIdFor(noticeDate);
+    await analyticsService.logNoticeShown(analyticsId);
+    if (!context.mounted) {
+      return;
+    }
+
+    bool dontShowAgain = true;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(titleFor(noticeDate)),
+          content: Text(messageFor(noticeDate)),
+          actions: [
+            if (isListingsMayChange)
+              CheckboxListTile(
+                value: dontShowAgain,
+                onChanged: (value) {
+                  analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
+                  setState(() => dontShowAgain = value ?? false);
+                },
+                title: const Text("Don't show this again"),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              ),
+            TextButton(
+              onPressed: () async {
+                analyticsService.logButtonTapped('${analyticsId}_ok');
+                if (isListingsMayChange) {
+                  listingUpdateNoticeEnabled = !dontShowAgain;
+                  await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
+                  await analyticsService.logPreferenceSet(
+                    'listing_update_notice',
+                    listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
+                  );
+                }
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+              child: const Text('OK'),
+            ),
           ],
         ),
-        child: Text(theMessage,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 14,
-            height: 1.3,
-          ),
-          textAlign: TextAlign.center,
-        ),
       ),
-    );
-
-    fToast.showToast(
-      child: toast,
-      gravity: ToastGravity.CENTER,
-      // original duration was 8s for the shorter message
-      toastDuration: Duration(seconds: theMessageDuration),
     );
   }
 }
