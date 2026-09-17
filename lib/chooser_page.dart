@@ -353,8 +353,9 @@ class _ChoiceCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),
           side: BorderSide(
+              width: 4,
               color: selected
-                  ? colours.primary.withAlpha(100)
+                  ? colours.primary
                   : colours.outlineVariant),
         ),
         clipBehavior: Clip.antiAlias,
@@ -388,7 +389,10 @@ class _ChoiceCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: colours.surface.withAlpha(245),
                   border:
-                      Border(top: BorderSide(color: colours.outlineVariant)),
+                      Border(top: BorderSide(
+                          width: 2,
+                          color: colours.outlineVariant),
+                      ),
                 ),
                 child: Row(
                   children: [
