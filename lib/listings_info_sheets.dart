@@ -264,7 +264,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                             0.2126, 0.7152, 0.0722, 0, 0,
                             0, 0, 0, 1, 0,
                           ]),
-                          child: Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
+                          child: Text('${widget.emoji} ', style: TextStyle(fontSize: 30)),
                         ),
                       )
                     : Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
