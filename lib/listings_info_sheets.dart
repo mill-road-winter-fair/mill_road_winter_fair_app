@@ -191,6 +191,8 @@ class SpecificListingInfoSheet extends StatefulWidget {
 }
 
 class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
+  final GlobalKey _cancelledLabelKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     //debugPrint('SpecificListingInfoSheet build() called');
@@ -535,18 +537,33 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
   }
 
   Widget _cancelledLabel(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        'CANCELLED',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onPrimary,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
+    return Semantics(
+      button: true,
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          showMiniPopup(
+            context,
+            _cancelledLabelKey,
+            'Originally ${widget.startTime}–${widget.endTime}',
+            analyticsService: widget.analyticsService,
+          );
+        },
+        child: Container(
+          key: _cancelledLabelKey,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            'CANCELLED',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ),
     );

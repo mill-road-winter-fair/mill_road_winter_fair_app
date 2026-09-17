@@ -356,6 +356,14 @@ void main() {
       );
       expect(cancelledLabelFinder, findsOneWidget);
 
+      await tester.tap(cancelledTextFinder);
+      await tester.pump();
+
+      expect(find.text('Originally 10:30–16:30'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 4));
+      expect(find.text('Originally 10:30–16:30'), findsNothing);
+
       // Description should have prefix removed
       expect(find.text('Nice buns'), findsOneWidget);
     });
