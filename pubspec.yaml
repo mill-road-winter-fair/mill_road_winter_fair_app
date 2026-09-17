@@ -53,6 +53,7 @@ dependencies:
   google_maps_flutter_ios_sdk9: ^2.18.6
   share_plus: ^13.3.0
   intl: ^0.20.3
+  simple_shadow: ^0.3.1
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +87,7 @@ flutter:
     - assets/importantInfoPage/
     - assets/mapMarkers/
     - assets/welcomeScreen/
+    - assets/chooserPage/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
