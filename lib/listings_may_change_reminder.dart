@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -65,6 +66,7 @@ class ListingUpdateNotifier {
   static Future<void> maybeShowNotice(
     BuildContext context, {
     DateTime? now,
+    required AnalyticsService analyticsService,
   }) async {
     if (onTest) {
       return;

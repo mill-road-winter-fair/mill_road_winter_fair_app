@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ListingMayChangeReminder', () {
+    // Set firstExecution to false to simulate normal app launch
+    firstExecution = false;
+
     test('uses a title appropriate to the date', () {
       expect(
         ListingUpdateNotifier.titleFor(fairDate.subtract(const Duration(days: 1))),
@@ -32,7 +36,7 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
 
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
-        tester.element(find.byType(SizedBox)),
+        tester.element(find.byType(SizedBox)), analyticsService: FakeAnalyticsService(),
       );
       await tester.pumpAndSettle();
 
@@ -66,7 +70,7 @@ void main() {
         ]) {
           final showNotice = ListingUpdateNotifier.maybeShowNotice(
             context,
-            now: noticeDate,
+            now: noticeDate, analyticsService: FakeAnalyticsService(),
           );
           await tester.pumpAndSettle();
 
@@ -95,7 +99,7 @@ void main() {
 
       await ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
-        now: noticeDate,
+        now: noticeDate, analyticsService: FakeAnalyticsService(),
       );
       await tester.pumpAndSettle();
 
@@ -116,7 +120,7 @@ void main() {
 
       final showFairDayNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        now: fairDate,
+        now: fairDate, analyticsService: FakeAnalyticsService(),
       );
       await tester.pumpAndSettle();
 
@@ -128,7 +132,7 @@ void main() {
       final afterFair = fairDate.add(const Duration(days: 1));
       final showAfterFairNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        now: afterFair,
+        now: afterFair, analyticsService: FakeAnalyticsService(),
       );
       await tester.pumpAndSettle();
 
