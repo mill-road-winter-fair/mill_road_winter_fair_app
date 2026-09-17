@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
@@ -27,7 +28,7 @@ void main() {
 
   group('ImportantInfoPage', () {
     testWidgets('displays expected headings and content', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: ImportantInfoPage()));
+      await tester.pumpWidget(MaterialApp(home: ImportantInfoPage(analyticsService: FakeAnalyticsService())));
 
       // Verify headings
       expect(find.text('Important information'), findsOneWidget);
@@ -39,6 +40,9 @@ void main() {
     });
 
     testWidgets('back button and back gesture return to the last selected HomePage tab', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Minimal listings so pages render correctly
       listings = [
         {
@@ -69,7 +73,10 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(
+        firstExecution: false,
+        analyticsService: FakeAnalyticsService(),
+      ));
       await settle(tester);
 
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
@@ -109,22 +116,18 @@ void main() {
     });
 
     testWidgets('email hyperlink opens the contact dialog', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: ImportantInfoPage()));
+      await tester.pumpWidget(MaterialApp(
+          home: ImportantInfoPage(
+        analyticsService: FakeAnalyticsService(),
+      )));
 
       final emailParagraph = tester.widget<Text>(
         find.byWidgetPredicate(
-          (widget) =>
-              widget is Text &&
-              widget.textSpan
-                      ?.toPlainText()
-                      .contains('Email addresses for the Fair') ==
-                  true,
+          (widget) => widget is Text && widget.textSpan?.toPlainText().contains('Email addresses for the Fair') == true,
         ),
       );
       final paragraphSpan = emailParagraph.textSpan as TextSpan;
-      final linkSpan = paragraphSpan.children!
-          .whereType<TextSpan>()
-          .singleWhere((span) => span.text == 'here');
+      final linkSpan = paragraphSpan.children!.whereType<TextSpan>().singleWhere((span) => span.text == 'here');
 
       (linkSpan.recognizer as TapGestureRecognizer).onTap!();
       await tester.pumpAndSettle();
