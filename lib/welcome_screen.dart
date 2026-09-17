@@ -1,33 +1,42 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/gestures.dart';
-import 'package:introduction_screen/introduction_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
-import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key});
+  final AnalyticsService analyticsService;
+  final VoidCallback? onFinished;
+  const WelcomeScreen({super.key, required this.analyticsService, this.onFinished});
 
   @override
   Widget build(BuildContext context) {
     debugPrint('WelcomeScreen build() called');
+    // The app guide shares the existing navigator and its route observer.
+    if (Navigator.maybeOf(context) != null) {
+      return OnBoardingPage(analyticsService: analyticsService);
+    }
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
     );
 
     final bool isAuto = selectedThemeKey == 'auto';
-    final ThemeMode resolvedThemeMode = isAuto ? ThemeMode.system : switch (selectedThemeKey) {
-      'dark' => ThemeMode.dark,
-      _ => ThemeMode.light,
-    };
+    final ThemeMode resolvedThemeMode = isAuto
+        ? ThemeMode.system
+        : switch (selectedThemeKey) {
+            'dark' => ThemeMode.dark,
+            _ => ThemeMode.light,
+          };
     mapStyle = getMapStyleForThemeKey(selectedThemeKey);
 
     return MaterialApp(
@@ -36,19 +45,22 @@ class WelcomeScreen extends StatelessWidget {
       themeMode: resolvedThemeMode,
       theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? appThemes['light']!,
       darkTheme: isAuto ? appThemes['dark'] : appThemes['dark'],
-      home: const OnBoardingPage(),
+      navigatorObservers: [routeObserver],
+      home: OnBoardingPage(analyticsService: analyticsService, onFinished: onFinished),
     );
   }
 }
 
 class OnBoardingPage extends StatefulWidget {
-  const OnBoardingPage({super.key});
+  final AnalyticsService analyticsService;
+  final VoidCallback? onFinished;
+  const OnBoardingPage({super.key, required this.analyticsService, this.onFinished});
 
   @override
   OnBoardingPageState createState() => OnBoardingPageState();
 }
 
-class OnBoardingPageState extends State<OnBoardingPage> {
+class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   final introKey = GlobalKey<IntroductionScreenState>();
 
   Future<void> _saveSettings() async {
@@ -57,9 +69,16 @@ class OnBoardingPageState extends State<OnBoardingPage> {
   }
 
   void _onIntroEnd(BuildContext context) {
+    firstExecution = false;
     _saveSettings();
+    if (widget.onFinished != null) {
+      widget.onFinished!();
+      return;
+    }
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MyApp()),
+      MaterialPageRoute(
+        builder: (_) => HomePage(analyticsService: widget.analyticsService),
+      ),
     );
   }
 
@@ -72,7 +91,28 @@ class OnBoardingPageState extends State<OnBoardingPage> {
   @override
   void dispose() {
     debugPrint('OnBoardingPageState dispose() called');
+    routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    widget.analyticsService.setCurrentScreen('WelcomePage');
+  }
+
+  @override
+  void didPopNext() {
+    widget.analyticsService.setCurrentScreen('WelcomePage');
   }
 
   @override
@@ -109,6 +149,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             ),
             onPressed: () {
               HapticFeedback.heavyImpact();
+              widget.analyticsService.logButtonTapped('skip_WelcomeScreen');
               _onIntroEnd(context);
             },
           ),
@@ -121,8 +162,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
           titleWidget: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: Text('Welcome to the official\nMill Road Winter Fair app!',
-                style: titleStyle, textAlign: TextAlign.center),
+            child: Text('Welcome to the official\nMill Road Winter Fair app!', style: titleStyle, textAlign: TextAlign.center),
           ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -158,7 +198,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart , size: 32, color: Theme.of(context).colorScheme.onSecondary))),
+                          SizedBox(
+                              width: 40,
+                              child: Align(
+                                  alignment: Alignment.center,
+                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
                           Text("Get full details for all of these,\nand save your favourites", style: bodyStyle),
                         ],
@@ -186,7 +230,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -276,7 +320,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -350,7 +394,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -428,7 +472,11 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
+                          SizedBox(
+                              width: 40,
+                              child: Align(
+                                  alignment: Alignment.center,
+                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
                           Text("Save your favourite listings, and\nview these from the main menu", style: bodyStyle),
                         ],
@@ -440,7 +488,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -490,7 +538,9 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                                      widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
+                                      Navigator.push(
+                                          context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
                                     },
                                 ),
                                 TextSpan(text: "\nabout the Fair", style: bodyStyle),
@@ -507,14 +557,14 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(
-                                    text: "Did you know the Fair is run\nentirely by volunteers? To get\ninvolved, just visit our ", style: bodyStyle),
+                                TextSpan(text: "Did you know the Fair is run\nentirely by volunteers? To get\ninvolved, just visit our ", style: bodyStyle),
                                 TextSpan(
                                   text: "website",
                                   style: bodyStyle.copyWith(decoration: TextDecoration.underline),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
                                       launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
                                     },
                                 ),
@@ -538,8 +588,8 @@ class OnBoardingPageState extends State<OnBoardingPage> {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
-                                      launchUrl(Uri.parse(
-                                          'https://www.millroadwinterfair.org/app-feedback-form/'));
+                                      widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
+                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
                                     },
                                 ),
                               ],
@@ -554,7 +604,7 @@ class OnBoardingPageState extends State<OnBoardingPage> {
             },
           ),
           decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top:12, bottom: 10),
+            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
@@ -564,10 +614,12 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       ],
       onDone: () {
         HapticFeedback.lightImpact();
+        widget.analyticsService.logButtonTapped('done_WelcomeScreen');
         _onIntroEnd(context);
       },
       onSkip: () {
         HapticFeedback.lightImpact();
+        widget.analyticsService.logButtonTapped('skip_text_WelcomeScreen');
         _onIntroEnd(context);
       },
       showSkipButton: true,
@@ -576,7 +628,16 @@ class OnBoardingPageState extends State<OnBoardingPage> {
       showBackButton: false,
       back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
       skip: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
-      next: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.tertiary),
+      overrideNext: (context, onPressed) => TextButton(
+        onPressed: onPressed == null
+            ? null
+            : () {
+                HapticFeedback.lightImpact();
+                widget.analyticsService.logButtonTapped('next_WelcomeScreen');
+                onPressed();
+              },
+        child: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.tertiary),
+      ),
       done: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
       curve: Curves.fastLinearToSlowEaseIn,
       controlsMargin: const EdgeInsets.all(16),
