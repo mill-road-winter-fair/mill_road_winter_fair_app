@@ -295,7 +295,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               IconButton(
                 onPressed: () {
@@ -308,10 +308,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     widget.analyticsService.logListingUnsaved(widget.title);
                   }
                 },
-                padding: const EdgeInsets.all(0),
+                padding: const EdgeInsets.all(3),
                 style: ElevatedButton.styleFrom(
                     visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                    padding: const EdgeInsets.all(0),
+                    padding: const EdgeInsets.all(3),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 icon: FaIcon(
                   shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
@@ -320,95 +320,104 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-
-              const SizedBox(width: 6),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    iconSize: 24,
-                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                    padding: const EdgeInsets.all(0),
-                    elevation: 3,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
-                  widget.analyticsService.logDirectionsToListingRequested(widget.title);
-                  widget.onGetDirections();
-                },
-                child: const Icon(Icons.directions_walk),
+              const SizedBox(width: 10),
+              Material(
+                shape: const CircleBorder(),
+                elevation: 3,
+                color: Theme.of(context).colorScheme.secondary,
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
+                    widget.analyticsService.logDirectionsToListingRequested(widget.title);
+                    widget.onGetDirections();
+                  },
+                  customBorder: const CircleBorder(),
+                  radius: 8,
+                  child: Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: Icon(
+                      Icons.directions_walk,
+                      size: 22,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
               ),
               // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
               if (widget.onDetailsTapped != null &&
                   (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
-                const SizedBox(width: 6),
+                const SizedBox(width: 10),
               // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
-              if (widget.onDetailsTapped != null &&
-                  widget.website.isNotEmpty &&
-                  widget.email.isNotEmpty &&
-                  widget.phoneNumber.isNotEmpty &&
-                  MediaQuery.of(context).size.width <= 360)
-                ElevatedButton(
-                  style: widget.detailsVisible
-                      ? ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap)
-                      : ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
-                    widget.onDetailsTapped?.call();
-                  },
-                  child: const Icon(Icons.info),
+              if (widget.onDetailsTapped != null && widget.website.isNotEmpty && widget.email.isNotEmpty && widget.phoneNumber.isNotEmpty && MediaQuery.of(context).size.width <= 360)
+                Material(
+                  shape: const CircleBorder(),
+                  elevation: 3,
+                  color: widget.detailsVisible ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
+                  child: InkWell(
+                    onTap: () {
+HapticFeedback.lightImpact();
+widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
+widget.onDetailsTapped?.call();},
+                    customBorder: const CircleBorder(),
+                    radius: 8,
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.info,
+                        size: 22,
+                        color: widget.detailsVisible ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
                 )
-              else if (widget.onDetailsTapped != null &&
-                  (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
-                ElevatedButton(
-                  style: widget.detailsVisible
-                      ? ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap)
-                      : ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
-                    widget.onDetailsTapped?.call();
-                  },
-                  child: const Icon(Icons.info),
+              else if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
+                Material(
+                  shape: const CircleBorder(),
+                  elevation: 3,
+                  color: widget.detailsVisible ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary,
+                  child: InkWell(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
+                      widget.onDetailsTapped?.call();},
+                    customBorder: const CircleBorder(),
+                    radius: 8,
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.info,
+                        size: 22,
+                        color: widget.detailsVisible ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
                 ),
-              const SizedBox(width: 6),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    iconSize: 24,
-                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                    padding: const EdgeInsets.all(0),
-                    elevation: 3,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  widget.analyticsService.logButtonTapped('listing_share', listingId: widget.listingId, listingName: widget.title);
-                  shareListing(widget.title, widget.location, widget.startTime, widget.endTime, context);
-                },
-                child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
+              const SizedBox(width: 10),
+              Material(
+                shape: const CircleBorder(),
+                elevation: 3,
+                color: Theme.of(context).colorScheme.secondary,
+                child: InkWell(
+                  onTap: () => shareListing(widget.title, widget.location, widget.startTime, widget.endTime, context),
+                  customBorder: const CircleBorder(),
+                  radius: 8,
+                  child: Padding(
+                    padding: const EdgeInsets.all(3),
+                    child: (Platform.isAndroid)
+                        ? Icon(
+                            Icons.share,
+                            size: 22,
+                            color: Theme.of(context).colorScheme.primary,
+                          )
+                        : Icon(
+                            Icons.ios_share,
+                            size: 22,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                  ),
+                ),
               ),
               Flexible(flex: 1, child: Container()),
               if (widget.website.isNotEmpty) const SizedBox(width: 6),
@@ -435,7 +444,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     ),
                   ),
                 ),
-              if (widget.email.isNotEmpty) const SizedBox(width: 6),
+              if (widget.email.isNotEmpty) const SizedBox(width: 10),
               if (widget.email.isNotEmpty)
                 Material(
                   shape: const CircleBorder(),
@@ -464,7 +473,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     ),
                   ),
                 ),
-              if (widget.phoneNumber.isNotEmpty) const SizedBox(width: 6),
+              if (widget.phoneNumber.isNotEmpty) const SizedBox(width: 10),
               if (widget.phoneNumber.isNotEmpty)
                 Material(
                   shape: const CircleBorder(),
