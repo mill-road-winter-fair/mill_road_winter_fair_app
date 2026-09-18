@@ -902,7 +902,7 @@ class MapPageState extends State<MapPage> with RouteAware {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1852,7 +1852,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                               _compassBearing = 0;
                               break;
                           }
-                        };
+                        });
                       },
                       polygons: _polygons,
                       markers: markers.values.toSet(),
