@@ -65,6 +65,10 @@ late String mapStyle;
 // Initialise setting for whether the road closure polygon is shown
 late bool preferredRoadClosurePolygonVisible;
 
+// Whether the "listings may change" notice is shown. This preference is scoped to
+// the fair year so it is enabled again when next year's fair date is set.
+late bool listingUpdateNoticeEnabled;
+
 // Initialise the list of favourited listings (ValueNotifier as pages need to know when others change these)
 final ValueNotifier<Set<String>> favouriteListingKeys = ValueNotifier<Set<String>>({});
 
@@ -115,7 +119,7 @@ final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.200166, 0.136762),
   const LatLng(52.200145, 0.136791),
   const LatLng(52.200122, 0.136778),
-  const LatLng(52.199689, 0.136458), // tenison road 
+  const LatLng(52.199689, 0.136458), // tenison road
   const LatLng(52.199670, 0.136580), // tenison road
   const LatLng(52.200071, 0.136895),
   const LatLng(52.200089, 0.136921),
@@ -243,6 +247,7 @@ class SubfilterLabel {
   final bool isPerformance;
   const SubfilterLabel(this.label, this.iconData, this.isPerformance);
 }
+
 const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'performanceMusic': SubfilterLabel('Music', Icons.music_note, true),
   'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free, true),
@@ -255,3 +260,9 @@ const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'business': SubfilterLabel('Other business', Icons.business, false),
   'service': SubfilterLabel('Services', Icons.family_restroom, false)
 };
+
+// Initialize user's analytics preference (null means they haven't been asked yet)
+bool? usageAnalyticsEnabled;
+
+// A RouteObserver to track navigation events for analytics purposes
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
