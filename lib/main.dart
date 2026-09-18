@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -44,23 +45,33 @@ Future<void> main() async {
   final analyticsService = FirebaseAnalyticsService();
   await analyticsService.initialize();
 
-  listings = await fetchListings(http.Client());
-  debugPrint('Listings fetched: count = ${listings.length}');
+  listings = await loadListingsFromCache();
+  debugPrint('Cached listings loaded: count = ${listings.length}');
 
   // Check whether location services are enabled and permissions are granted to the app
   locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
   locationPermission = await Geolocator.checkPermission();
-  debugPrint('Location services enabled: $locationServicesEnabled, permission: $locationPermission');
+  debugPrint(
+      'Location services enabled: $locationServicesEnabled, permission: $locationPermission');
 
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((value) => runApp(RootWidget(firstExecution: firstExecution, analyticsService: analyticsService)));
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  runApp(RootWidget(firstExecution: firstExecution, analyticsService: analyticsService));
+
+  // Refresh after rendering so a slow or unavailable network cannot block startup.
+  unawaited(_refreshListingsAfterStartup());
 }
 
 FirebaseOptions firebaseOptionsForBuildMode({required bool isRelease}) {
   return isRelease ? prod.DefaultFirebaseOptions.currentPlatform : dev.DefaultFirebaseOptions.currentPlatform;
+}
+
+Future<void> _refreshListingsAfterStartup() async {
+  final refreshedListings = await fetchListings(http.Client());
+  debugPrint('Listings refreshed: count = ${refreshedListings.length}');
+  homePageKey.currentState?.listingsUpdated();
 }
 
 class RootWidget extends StatefulWidget {
@@ -150,7 +161,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         return MaterialApp(
           title: fairName,
           themeMode: resolvedThemeMode,
-          theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? baseTheme,
+          theme: isAuto
+              ? appThemes['light']
+              : appThemes[selectedThemeKey] ?? baseTheme,
           darkTheme: isAuto ? appThemes['dark'] : darkTheme,
           home: HomePage(key: homePageKey, analyticsService: widget.analyticsService),
           navigatorObservers: [
@@ -173,10 +186,14 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> with RouteAware {
   int index = 0;
   // the following need to be in HomePageState to allow deep linking to configured pages
-  bool timetableOnlyNowOrSoon = false; // toggled on or off to show events now or in next hour
-  bool? timetableFilteredMusicOrNot; // toggled on (just music), off (all but music), null (all)
-  String? listingsSubfilterCategory; // all listings visible (null) or just the one category
-  int? mapNearestMarkerCount; // when opening the map, zoom in to this number nearby
+  bool timetableOnlyNowOrSoon =
+      false; // toggled on or off to show events now or in next hour
+  bool?
+      timetableFilteredMusicOrNot; // toggled on (just music), off (all but music), null (all)
+  String?
+      listingsSubfilterCategory; // all listings visible (null) or just the one category
+  int?
+      mapNearestMarkerCount; // when opening the map, zoom in to this number nearby
 
   static const screenNames = ['ChooserPage', 'MapPage', 'TimetablePage', 'ListingsPage', 'FavouritesPage'];
 
@@ -215,6 +232,16 @@ class HomePageState extends State<HomePage> with RouteAware {
     });
   }
 
+  void listingsUpdated() {
+    mapPageKey.currentState?.setVisibleMarkerLists();
+    if (!navigationInProgress) {
+      mapPageKey.currentState?.addAllVisibleMarkers();
+    }
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   void openTimetable(bool onlyNowOrSoon, bool? filteredMusicOrNot) {
     setState(() {
       timetableFilteredMusicOrNot = filteredMusicOrNot;
@@ -248,7 +275,8 @@ class HomePageState extends State<HomePage> with RouteAware {
   }
 
   void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
-    debugPrint('HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
+    debugPrint(
+        'HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
     setState(() {
       timetableFilteredMusicOrNot = newFilteredMusicOrNot;
       timetableOnlyNowOrSoon = newOnlyNowOrSoon;
@@ -256,7 +284,8 @@ class HomePageState extends State<HomePage> with RouteAware {
   }
 
   void listingsSubfilterChange(String? newSubfilterCategory) {
-    debugPrint('HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory');
+    debugPrint(
+        'HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory');
     setState(() {
       listingsSubfilterCategory = newSubfilterCategory;
     });
