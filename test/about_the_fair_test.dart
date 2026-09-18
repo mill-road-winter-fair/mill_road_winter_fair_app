@@ -1,3 +1,4 @@
+Formatted 1 file (0 changed) in 0.01 seconds.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -177,7 +178,7 @@ void main() {
         'Bush & Co Sales and Lettings': 'https://bushandco.co.uk/',
         'Al-Amin': 'https://www.alamin.co.uk/',
         'Anglia Ruskin University': 'https://www.aru.ac.uk/',
-        'Hughes Hall': 'https://www.hughes.ac.uk/',
+        'Hughes Hall': 'https://www.hughes.cam.ac.uk/',
         'Love Mill Road': 'https://www.lovemillroad.org.uk/',
         'Regal Star Catering': 'https://www.lamaisondusteak.co.uk/',
         'Taank Optometrists': 'https://taank.co.uk/',
