@@ -4,10 +4,11 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:mill_road_winter_fair_app/about_app_page.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -15,7 +16,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -337,7 +337,12 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               analyticsService.logButtonTapped('drawer_about_app');
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              aboutDialog(navigatorContext, analyticsService: analyticsService);
+              Navigator.push(
+                  navigatorContext,
+                  MaterialPageRoute(
+                      builder: (context) => AboutAppPage(
+                            analyticsService: analyticsService,
+                          )));
             },
           ),
         ),
@@ -424,149 +429,6 @@ void shareApp(BuildContext context, String msgText) async {
   }
 }
 
-void aboutDialog(BuildContext context, {required AnalyticsService analyticsService}) async {
-  // fallback
-  PackageInfo packageInfo = PackageInfo(
-    appName: 'Unknown',
-    packageName: 'Unknown',
-    version: 'Unknown',
-    buildNumber: 'Unknown',
-    buildSignature: 'Unknown',
-    installerStore: 'Unknown',
-  );
-  try {
-    packageInfo = await PackageInfo.fromPlatform().timeout(const Duration(milliseconds: 200), onTimeout: () => packageInfo);
-  } catch (e) {
-    debugPrint('aboutDialog: couldn’t get PackageInfo.fromPlatform:\n$e');
-  }
-
-  if (!context.mounted) return;
-
-  final inflater = (MediaQuery.of(context).size.height.toInt() - 600).clamp(0, 250) / 50;
-  final colorScheme = Theme.of(context).colorScheme;
-  final textStyle = TextStyle(fontSize: 13.0 + inflater / 3);
-  final linkStyle =
-      TextStyle(fontSize: 12.5 + inflater / 3, decoration: TextDecoration.underline, decorationColor: colorScheme.tertiary, color: colorScheme.tertiary);
-  final ScrollController aboutDialogScrollController = ScrollController();
-
-  if (context.mounted) {
-    await showDialog(
-        context: context,
-        builder: (dialogContext) {
-          return Dialog(
-              insetPadding: EdgeInsets.all(4.0 + inflater * 2),
-              child: LayoutBuilder(builder: (context, constraints) {
-                final maxWidth = constraints.maxWidth.clamp(350.0, 400.0);
-                return Container(
-                    constraints: BoxConstraints(maxWidth: maxWidth),
-                    padding: EdgeInsets.fromLTRB(16.0 + inflater * 2, 20, 10, 6),
-                    child: Scrollbar(
-                        controller: aboutDialogScrollController,
-                        thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: SingleChildScrollView(
-                          controller: aboutDialogScrollController,
-                          child: Column(mainAxisSize: MainAxisSize.min, children: [
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -4 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(6.0), child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain)),
-                              title: Text(fairName, style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold)),
-                              subtitle: Text('v${packageInfo.version}', style: textStyle),
-                            ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.phone_android, size: 28),
-                              title: Text('Android app by Alexander Berridge', style: textStyle),
-                              subtitle: Text('https://theberridge.com', style: linkStyle),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_alex');
-                                launchUrl(Uri.parse('https://theberridge.com'));
-                              },
-                            ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.phone_iphone, size: 28),
-                              title: Text('iPhone version by Matt Whiting', style: textStyle),
-                              subtitle: Text('http://mattwhiting.com', style: linkStyle),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_matt');
-                                launchUrl(Uri.parse('http://mattwhiting.com'));
-                              },
-                            ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.schedule, size: 28),
-                              title: Text('Timetable view based on Clashfinder Pal by Matt Whiting', style: textStyle),
-                              subtitle: Text('https://linktr.ee/cfpal', style: linkStyle),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_clashfinder');
-                                launchUrl(Uri.parse('https://linktr.ee/cfpal'));
-                              },
-                            ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.palette_outlined, size: 28),
-                              title: Text('Illustrations by Clare McEwan', style: textStyle),
-                              subtitle: Text('https://www.claremcewan.co.uk', style: linkStyle),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_clare');
-                                launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
-                              },
-                            ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.feedback_outlined, size: 28),
-                              title: Text('Tell us if you like this app', style: textStyle),
-                              subtitle: Text('Open a feedback form', style: linkStyle),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_feedback');
-                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
-                              },
-                            ),
-                            Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 10, children: [
-                              TextButton(
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  analyticsService.logButtonTapped('about_licenses');
-                                  Navigator.of(dialogContext).pop();
-                                  showLicensePage(context: context);
-                                },
-                                child: Text('View licences', style: TextStyle(color: colorScheme.tertiary)),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  analyticsService.logButtonTapped('about_close');
-                                  Navigator.of(dialogContext).pop();
-                                },
-                                child: Text('Close', style: TextStyle(color: colorScheme.tertiary)),
-                              ),
-                            ]),
-                          ]),
-                        )));
-              }));
-        });
-  }
-}
 
 Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService analyticsService}) {
   final ScrollController emailDetailsDialogScrollController = ScrollController();
