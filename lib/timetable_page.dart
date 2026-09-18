@@ -497,19 +497,6 @@ class _TimetablePageState extends State<TimetablePage> {
       onTabSelected: widget.onTabSelected,
       appBarActions: [
         IconButton(
-          key: subcategoryIconKey,
-          color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything',
-              analyticsService: widget.analyticsService),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('timetable_category_filter');
-            _toggleFilteredMusicOrNot();
-            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
-          },
-          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
-        ),
-        IconButton(
           key: nowOrSoonIconKey,
           onLongPress: () => showMiniPopup(
               context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon',
@@ -530,7 +517,7 @@ class _TimetablePageState extends State<TimetablePage> {
         IconButton(
           key: subcategoryIconKey,
           color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything'),
+          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             _toggleFilteredMusicOrNot();
