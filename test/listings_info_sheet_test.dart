@@ -8,6 +8,24 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+class FakeUrlLauncher extends UrlLauncherPlatform {
+  final List<String> launchedUrls = [];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> canLaunch(String url) async => true;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    launchedUrls.add(url);
+    return true;
+  }
+}
 
 void main() {
   LatLng currentLatLng = const LatLng(52.199174, 0.140929);
@@ -125,8 +143,134 @@ void main() {
       expect(find.byIcon(Icons.public), findsNothing);
     });
 
-    // TODO: Add test for tapping on phone numbers (will need to find a way of mocking launchUrl)
-    // TODO: Add test for tapping on "Open Website" button (will need to find a way of mocking launchUrl)
+    group('contact links', () {
+      final originalUrlLauncher = UrlLauncherPlatform.instance;
+      late FakeUrlLauncher fakeUrlLauncher;
+
+      setUp(() {
+        fakeUrlLauncher = FakeUrlLauncher();
+        UrlLauncherPlatform.instance = fakeUrlLauncher;
+      });
+
+      tearDown(() {
+        UrlLauncherPlatform.instance = originalUrlLauncher;
+      });
+
+      Future<void> pumpListing(
+        WidgetTester tester, {
+        required bool detailsVisible,
+      }) async {
+        await tester.pumpWidget(createWidgetUnderTest(
+          cancelled: false,
+          brickAndMortar: false,
+          emoji: '🍩',
+          title: 'Glazed and Confused',
+          subtitle: 'Food • Doughnuts',
+          location: 'Gwydir St Car Park',
+          description: 'Nice buns',
+          email: 'sales@glazedandconfused.com',
+          website: 'https://www.glazedandconfused.com',
+          phoneNumber: '01223 111111',
+          imageURL: '',
+          startTime: '10:30',
+          endTime: '16:30',
+          approxDistance: convertDistanceUnits(
+            approximateDistanceMetres,
+            DistanceUnits.metric,
+          ),
+          detailsVisible: detailsVisible,
+          onGetDirections: () {},
+          listingFavourited: false,
+          onDetailsTapped: () {},
+        ));
+      }
+
+      Future<void> expectTapLaunches(
+        WidgetTester tester,
+        Finder target,
+        String expectedUrl,
+      ) async {
+        await tester.tap(target);
+        await tester.pumpAndSettle();
+
+        expect(fakeUrlLauncher.launchedUrls, [expectedUrl]);
+      }
+
+      testWidgets('Globe button launches the listing website', (tester) async {
+        await pumpListing(tester, detailsVisible: false);
+
+        await expectTapLaunches(
+          tester,
+          find.byIcon(Icons.public),
+          'https://www.glazedandconfused.com',
+        );
+      });
+
+      testWidgets(
+        'Mail button launches the listing email address',
+        (tester) async {
+          await pumpListing(tester, detailsVisible: false);
+
+          await expectTapLaunches(
+            tester,
+            find.byIcon(Icons.email),
+            'mailto:sales@glazedandconfused.com',
+          );
+        },
+      );
+
+      testWidgets(
+        'Phone button launches the listing telephone number',
+        (tester) async {
+          await pumpListing(tester, detailsVisible: false);
+
+          await expectTapLaunches(
+            tester,
+            find.byIcon(Icons.phone),
+            'tel:01223%20111111',
+          );
+        },
+      );
+
+      testWidgets(
+        'Website hyperlink launches the listing website',
+        (tester) async {
+          await pumpListing(tester, detailsVisible: true);
+
+          await expectTapLaunches(
+            tester,
+            find.text('Website: https://www.glazedandconfused.com'),
+            'https://www.glazedandconfused.com',
+          );
+        },
+      );
+
+      testWidgets(
+        'Email hyperlink launches the listing email address',
+        (tester) async {
+          await pumpListing(tester, detailsVisible: true);
+
+          await expectTapLaunches(
+            tester,
+            find.text('Email: sales@glazedandconfused.com'),
+            'mailto:sales@glazedandconfused.com',
+          );
+        },
+      );
+
+      testWidgets(
+        'Telephone hyperlink launches the listing telephone number',
+        (tester) async {
+          await pumpListing(tester, detailsVisible: true);
+
+          await expectTapLaunches(
+            tester,
+            find.text('Telephone: 01223 111111'),
+            'tel:01223%20111111',
+          );
+        },
+      );
+    });
 
     testWidgets('calls onFavouriteTapped when heart button is pressed', (WidgetTester tester) async {
       bool favouriteCalled = false;
