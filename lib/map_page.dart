@@ -478,7 +478,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       _searchController.clear();
     });
     addAllVisibleMarkers();
-    _cameraBeforeSearch = null;
+    if (close) _cameraBeforeSearch = null;
   }
 
   Future<void> _searchListings(String value) async {
@@ -1836,8 +1836,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               onPressed: () async {
                 HapticFeedback.lightImpact();
                 if (_isSearching) {
+                  final camera = _cameraBeforeSearch;
                   _resetSearch();
+                  if (camera != null) {
+                    await _controller?.animateCamera(CameraUpdate.newCameraPosition(camera));
+                  }
                 } else {
+                  _cameraBeforeSearch = _currentCamera;
                   setState(() => _isSearching = true);
                 }
               },
@@ -2232,16 +2237,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             hintText: 'Search all locations...',
                             leading: const Icon(Icons.search),
                             trailing: [
-                              IconButton(
-                                iconSize: 20,
-                                icon: const Icon(Icons.close),
-                                onPressed: () async {
+                              TextButton(
+                                child: const Text('Clear'),
+                                onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  final camera = _cameraBeforeSearch;
-                                  _resetSearch(close: _searchQuery.isEmpty);
-                                  if (camera != null) {
-                                    await _controller?.animateCamera(CameraUpdate.newCameraPosition(camera));
-                                  }
+                                  _resetSearch(close: false);
                                 },
                               ),
                             ],

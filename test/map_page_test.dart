@@ -163,7 +163,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.enterText(field, 'glazed');
       await tester.pumpAndSettle();
-      final clear = find.descendant(of: find.byType(SearchBar), matching: find.byIcon(Icons.close));
+      final clear = find.descendant(of: find.byType(SearchBar), matching: find.text('Clear'));
       await tester.tap(clear);
       await tester.pumpAndSettle();
       expect(visibleIds(), {'1', '3'});
