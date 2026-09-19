@@ -167,8 +167,7 @@ void main() {
       expect(find.byType(IconButton), findsExactly(6));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('App guide'), findsOneWidget);
-      expect(find.text('Share this app'), findsOneWidget);
-      expect(find.text('About this app'), findsOneWidget);
+      expect(find.text('About the app'), findsOneWidget);
     });
 
     testWidgets('navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
@@ -343,7 +342,7 @@ void main() {
       expect(find.byType(OnBoardingPage), findsOneWidget);
     });
 
-    testWidgets('show aboutDialog when About this app in drawer is tapped', (WidgetTester tester) async {
+    testWidgets('show aboutDialog when About the app in drawer is tapped', (WidgetTester tester) async {
       listings = [
         {
           'id': '1',
@@ -378,7 +377,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('About this app'));
+      await tester.tap(find.text('About the app'));
       await tester.pumpAndSettle();
 
       expect(find.text('Android app by Alexander Berridge'), findsOneWidget);

@@ -192,7 +192,7 @@ void main() {
         listingFavourited: false,
       ));
 
-      final getDirectionsButton = find.byIcon(Icons.directions_walk);
+      final getDirectionsButton = find.text('Directions');
       expect(getDirectionsButton, findsOneWidget);
 
       await tester.tap(getDirectionsButton);
