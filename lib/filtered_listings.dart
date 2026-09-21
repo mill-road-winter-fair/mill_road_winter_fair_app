@@ -52,6 +52,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   int? detailsVisibleIndex; // which listing (if any) has details button selected
+  final Map<dynamic, GlobalKey> _listingKeys = {}; // global key of each listing so we can ensure it's visible
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
@@ -273,6 +274,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     setState(() {
       detailsVisibleIndex = (detailsVisibleIndex == null || detailsVisibleIndex != index) ? index : null;
     });
+    if (detailsVisibleIndex != null ) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final theKey = _listingKeys[index];
+        if (theKey == null) return;
+        ensureWidgetFullyVisible(theKey);
+      });
+    }
   }
 
   int findFirstNextListingIndex(List filteredListings) {
@@ -340,8 +348,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       );
     }
 
-    isShowingJustPerformance =
-        (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0, 11) == 'performance');
+    _listingKeys.clear();    
+    isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0, 11) == 'performance');
 
     // Step 1a: Filter by category
     List<Map<String, dynamic>> categoryFiltered = [];
@@ -614,7 +622,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 // if this is the first visible item, capture its index
                                 firstVisibleIndex ??= index;
                               }
+                              _listingKeys.putIfAbsent(index, () => GlobalKey());
                               return Column(
+                                key: _listingKeys[index],
                                 children: [
                                   if (!_hidePastListings || !hasEventEnded(listing['endTime']))
                                     Container(
@@ -647,22 +657,23 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                                           onGetDirections: () {
                                             Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) => MapPage(
-                                                        listings: listings,
-                                                        onTabSelected: (_) => {},
-                                                        destinationId: listing['id'],
-                                                        destinationLatLng: destinationLatLng,
-                                                        analyticsService: widget.analyticsService,
-                                                    )));
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => MapPage(
+                                                  listings: listings,
+                                                  onTabSelected: (_) => {},
+                                                  destinationId: listing['id'],
+                                                  destinationLatLng: destinationLatLng,
+                                                  analyticsService: widget.analyticsService,
+                                                )
+                                              )
+                                            );
                                           },
                                           analyticsService: widget.analyticsService,
                                           inDialog: false,
                                           colorScheme: colorScheme,
                                         )),
-                                  // separator except after last item
-                                  if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 8),
+                                  SizedBox(height: 8),
                                 ],
                               );
                             },
@@ -865,4 +876,5 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       ),
     );
   }
+
 }

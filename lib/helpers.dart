@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:fluttertoast/fluttertoast.dart';
@@ -1151,4 +1152,72 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
     );
   }
 
+}
+
+
+Future<void> ensureWidgetFullyVisible(GlobalKey key) async {
+  final context = key.currentContext;
+  if (context == null) return;
+  if (isWidgetFullyVisible(context)) return;
+  // First attempt with ensureVisible
+  Scrollable.ensureVisible(
+    context,
+    alignment: 1.0,
+    duration: const Duration(milliseconds: 150),
+    curve: Curves.easeInOut,
+  );
+  // Let that animation finish
+  await Future.delayed(const Duration(milliseconds: 160));
+  if (!context.mounted) return;
+  if (isWidgetFullyVisible(context)) return;
+  // Still not fully visible -> manually adjust scroll offset
+  final renderObject = context.findRenderObject();
+  if (renderObject == null || renderObject is! RenderBox) return;
+  final box = renderObject;
+  final viewport = RenderAbstractViewport.maybeOf(box);
+  if (viewport == null) return;
+  final scrollable = Scrollable.of(context);
+  final position = scrollable.position;
+  // Global offset of the box relative to the viewport
+  final offsetInViewport = box.localToGlobal(Offset.zero, ancestor: viewport);
+  final top = offsetInViewport.dy;
+  final bottom = top + box.size.height;
+  final viewportHeight = viewport.paintBounds.size.height;
+  double targetScrollOffset = position.pixels;
+  if (top < 0) {
+    // Top is above viewport -> scroll up so top aligns with 0
+    targetScrollOffset = position.pixels + top; // top is negative
+  } else if (bottom > viewportHeight) {
+    // Bottom is below viewport -> scroll down so bottom aligns with viewportHeight
+    targetScrollOffset = position.pixels + (bottom - viewportHeight);
+  } else {
+    // Already fully inside vertically; nothing to do
+    return;
+  }
+  // Clamp to valid scroll range
+  targetScrollOffset = targetScrollOffset.clamp(
+    position.minScrollExtent,
+    position.maxScrollExtent,
+  );
+  if (targetScrollOffset == position.pixels) return;
+  await position.animateTo(
+    targetScrollOffset,
+    duration: const Duration(milliseconds: 200),
+    curve: Curves.easeInOut,
+  );
+}
+
+bool isWidgetFullyVisible(BuildContext context) {
+  final renderObject = context.findRenderObject();
+  if (renderObject == null || renderObject is! RenderBox) return false;
+  final box = renderObject;
+  final viewport = RenderAbstractViewport.maybeOf(box);
+  if (viewport == null) return false;
+  final offset = box.localToGlobal(Offset.zero, ancestor: viewport);
+  final size = box.size;
+  final viewportSize = viewport.paintBounds.size;
+  return offset.dy >= 0 &&
+      offset.dy + size.height <= viewportSize.height &&
+      offset.dx >= 0 &&
+      offset.dx + size.width <= viewportSize.width;
 }

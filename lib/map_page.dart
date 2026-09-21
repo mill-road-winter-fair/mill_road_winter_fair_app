@@ -435,6 +435,8 @@ class MapPageState extends State<MapPage> with RouteAware {
           return a['title'].compareTo(b['title']);
         });
 
+        final Map<dynamic, GlobalKey> listingKeys = {}; // global key of each listing so we can ensure it's visible
+
         final groupSheetModalScrollController = ScrollController();
         showModalBottomSheet(
           context: context,
@@ -450,8 +452,15 @@ class MapPageState extends State<MapPage> with RouteAware {
                 
                 void toggleDetailsRow(int index) {
                   setModalState(() {
-                  detailsVisibleIndex = (detailsVisibleIndex == null || detailsVisibleIndex != index) ? index : null;
+                    detailsVisibleIndex = (detailsVisibleIndex == null || detailsVisibleIndex != index) ? index : null;
                   });
+                  if (detailsVisibleIndex != null ) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) async {
+                      final theKey = listingKeys[index];
+                      if (theKey == null) return;
+                      ensureWidgetFullyVisible(theKey);
+                    });
+                  }
                 }
 
                 void favouriteOrNotListing(String listingID) {
@@ -516,7 +525,9 @@ class MapPageState extends State<MapPage> with RouteAware {
                                     controller: groupSheetModalScrollController,
                                     itemBuilder: (context, index) {
                                       final rel = relatedListings[index];
+                                      listingKeys.putIfAbsent(index, () => GlobalKey());
                                       return Column(
+                                        key: listingKeys[index],
                                         children: [
                                           Container(
                                             width: constraints.maxWidth - 10,
