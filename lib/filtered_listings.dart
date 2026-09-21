@@ -617,6 +617,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               final listing = filteredListings[index]; // since index=0 is the sort/search bar
                               final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                               final approximateDistance = '(${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
+                              final isFavourited = isListingFavourited(listing['id']);
                               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
                               if (!_hidePastListings || !hasEventEnded(listing['endTime'])) {
                                 // if this is the first visible item, capture its index
@@ -630,7 +631,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     Container(
                                         width: constraints.maxWidth - 10,
                                         decoration: BoxDecoration(
-                                          color: colorScheme.onPrimary,
+                                          color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                           border: Border.all(color: colorScheme.primary, width: 0.5),
                                           borderRadius: BorderRadius.circular(8),
                                           boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
@@ -652,7 +653,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           endTime: "${listing['endTime']}",
                                           approxDistance: approximateDistance,
                                           detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
-                                          listingFavourited: isListingFavourited(listing['id']),
+                                          listingFavourited: isFavourited,
                                           onDetailsTapped: () => toggleDetailsRow(index),
                                           onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                                           onGetDirections: () {

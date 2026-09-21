@@ -525,6 +525,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                     controller: groupSheetModalScrollController,
                                     itemBuilder: (context, index) {
                                       final rel = relatedListings[index];
+                                      final isFavourited = isListingFavourited(rel['id']);
                                       listingKeys.putIfAbsent(index, () => GlobalKey());
                                       return Column(
                                         key: listingKeys[index],
@@ -532,7 +533,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                           Container(
                                             width: constraints.maxWidth - 10,
                                             decoration: BoxDecoration(
-                                              color: colorScheme.onPrimary,
+                                              color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                               border: Border.all(color: colorScheme.primary, width: 0.5),
                                               borderRadius: BorderRadius.circular(8),
                                               boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
@@ -555,7 +556,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                               approxDistance: '',
                                               detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
                                               onDetailsTapped: () => toggleDetailsRow(index),
-                                              listingFavourited: isListingFavourited(rel['id']),
+                                              listingFavourited: isFavourited,
                                               onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                               onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
                                               inDialog: false,
