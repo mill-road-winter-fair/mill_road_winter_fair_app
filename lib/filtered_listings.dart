@@ -659,6 +659,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           },
                                           analyticsService: widget.analyticsService,
                                           inDialog: false,
+                                          colorScheme: colorScheme,
                                         )),
                                   // separator except after last item
                                   if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 8),

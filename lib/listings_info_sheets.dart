@@ -14,6 +14,7 @@ class GroupListingInfoSheet extends StatelessWidget {
   final String startTime;
   final String endTime;
   final String approxDistance;
+  final ColorScheme colorScheme;
 
   const GroupListingInfoSheet({
     required this.title,
@@ -21,6 +22,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     required this.startTime,
     required this.endTime,
     required this.approxDistance,
+    required this.colorScheme,
     super.key,
   });
 
@@ -32,15 +34,15 @@ class GroupListingInfoSheet extends StatelessWidget {
     final bool ended = hasEventEnded(endTime);
     final timeStyle = TextStyle(
       fontSize: 14,
-      color: Theme.of(context).colorScheme.onPrimary,
+      color: colorScheme.onPrimary,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        color: colorScheme.primary,
         borderRadius: BorderRadius.circular(12),
-        border: BoxBorder.all(width: 1, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        border: BoxBorder.all(width: 1, color: colorScheme.onSurfaceVariant),
       ),
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
       child: Column(
@@ -59,7 +61,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       title,
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
                     ),
                   ),
                 ),
@@ -86,7 +88,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     categories,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
                   ),
                 ),
               ),
@@ -96,7 +98,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   flex: 10,
                   child: Text(
                     approxDistance,
-                    style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary),
+                    style: TextStyle(fontSize: 14, color: colorScheme.onPrimary),
                     textAlign: TextAlign.end,
                   ),
                 ),
@@ -133,6 +135,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final Function onGetDirections;
   final bool inDialog;
   final AnalyticsService analyticsService;
+  final ColorScheme colorScheme;
 
   const SpecificListingInfoSheet({
     required this.listingId,
@@ -157,6 +160,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
     required this.onGetDirections,
     required this.inDialog,
     required this.analyticsService,
+    required this.colorScheme,
     super.key,
   });
 
@@ -178,7 +182,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     final basicTitleStyle = TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
-      color: Theme.of(context).colorScheme.onSurface,
+      color: widget.colorScheme.onSurface,
       decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
     final titleStyle = basicTitleStyle.copyWith(decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none);
@@ -190,7 +194,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(widget.endTime);
     final timeStyle = subSubStyle.copyWith(
-      color: ended ? Colors.red : Theme.of(context).colorScheme.onSurface,
+      color: ended ? Colors.red : widget.colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
@@ -320,7 +324,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     size: 22,
                     color: widget.cancelled && !widget.listingFavourited
                         ? Theme.of(context).disabledColor
-                        : Theme.of(context).colorScheme.primary,
+                        : widget.colorScheme.primary,
                   ),
                 ),
 
@@ -356,8 +360,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     style: (widget.detailsVisible ?? false)
                         ? ElevatedButton.styleFrom(
                             iconSize: 24,
-                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: widget.colorScheme.onPrimary,
+                            backgroundColor: widget.colorScheme.primary,
                             visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                             padding: const EdgeInsets.all(0),
                             elevation: 3,
@@ -381,8 +385,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     style: (widget.detailsVisible ?? false)
                         ? ElevatedButton.styleFrom(
                             iconSize: 24,
-                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: widget.colorScheme.onPrimary,
+                            backgroundColor: widget.colorScheme.primary,
                             visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                             padding: const EdgeInsets.all(0),
                             elevation: 3,
@@ -424,7 +428,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   Material(
                     shape: const CircleBorder(),
                     elevation: 3,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: widget.colorScheme.primary,
                     child: InkWell(
                       onTap: () async {
                         HapticFeedback.lightImpact();
@@ -438,7 +442,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         child: Icon(
                           Icons.public,
                           size: 22,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: widget.colorScheme.onPrimary,
                         ),
                       ),
                     ),
@@ -448,7 +452,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   Material(
                     shape: const CircleBorder(),
                     elevation: 3,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: widget.colorScheme.primary,
                     child: InkWell(
                       onTap: () async {
                         HapticFeedback.lightImpact();
@@ -467,7 +471,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         child: Icon(
                           Icons.email,
                           size: 22,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: widget.colorScheme.onPrimary,
                         ),
                       ),
                     ),
@@ -477,7 +481,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   Material(
                     shape: const CircleBorder(),
                     elevation: 3,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: widget.colorScheme.primary,
                     child: InkWell(
                       onTap: () async {
                         HapticFeedback.lightImpact();
@@ -496,7 +500,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         child: Icon(
                           Icons.phone,
                           size: 22,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: widget.colorScheme.onPrimary,
                         ),
                       ),
                     ),
@@ -530,13 +534,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           key: _cancelledLabelKey,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: widget.colorScheme.onSurfaceVariant,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             'CANCELLED',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: widget.colorScheme.onPrimary,
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -556,9 +560,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
         if (widget.description.isNotEmpty) ...[
           const SizedBox(height: 8),
           if (widget.imageURL.isNotEmpty) AdaptiveImageText(
-            descriptionWidget: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), widget.description),
+            descriptionWidget: Text(style: TextStyle(fontSize: 13, color: widget.colorScheme.onSurfaceVariant), widget.description),
             imageUrl: widget.imageURL,
-          ) else Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), widget.description),
+          ) else Text(style: TextStyle(fontSize: 13, color: widget.colorScheme.onSurfaceVariant), widget.description),
         ] else if (widget.imageURL.isNotEmpty) ...[
           const SizedBox(height: 8),
           Align(alignment: AlignmentGeometry.center, child: Image.network(
@@ -578,7 +582,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Website: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Website: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.website),
                 ],
               ),
@@ -601,7 +605,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Email: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Email: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.email),
                 ],
               ),
@@ -624,7 +628,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), text: 'Telephone: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Telephone: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.phoneNumber),
                 ],
               ),
@@ -707,6 +711,7 @@ Future<void> showListingDetailsDialog(
                 },
                 inDialog: true,
                 analyticsService: analyticsService,
+                colorScheme: colorScheme,
               ),
             ),
           ),

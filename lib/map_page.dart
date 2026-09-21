@@ -498,6 +498,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                 startTime: "${parentListing['startTime']}",
                                 endTime: "${parentListing['endTime']}",
                                 approxDistance: distanceMessage,
+                                colorScheme: colorScheme,
                               ),
                             ),
                             Flexible(
@@ -548,8 +549,10 @@ class MapPageState extends State<MapPage> with RouteAware {
                                               onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
                                               inDialog: false,
                                               analyticsService: widget.analyticsService,
+                                              colorScheme: colorScheme,
                                             ),
                                           ),
+                                          if (index != relatedListings.length - 1) SizedBox(height: 8),
                                         ],
                                       );
                                     },
@@ -681,6 +684,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
                               inDialog: false,
                               analyticsService: widget.analyticsService,
+                              colorScheme: colorScheme,
                             ),
                           ),
                         ),
