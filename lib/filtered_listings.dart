@@ -280,7 +280,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   int findFirstNextListingIndex(List filteredListings) {
     for (int i = 0; i < filteredListings.length; i++) {
-      if (!hasEventEnded(filteredListings[i]['endTime'])) {
+      if (!hasEventEnded(filteredListings[i]['endTime'], widget.dateTimeProvider)) {
         return i;
       }
     }
@@ -380,7 +380,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 5: Calculate number of visible listings for scroll thumb
     if (_hidePastListings) {
-      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], widget.dateTimeProvider)).length;
     } else {
       numberOfVisibleListings = filteredListings.length;
     }
@@ -417,7 +417,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   } else {
                     filteredListings = filteredListingsTemp;
                     if (_hidePastListings) {
-                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], widget.dateTimeProvider)).length;
                     } else {
                       numberOfVisibleListings = filteredListings.length;
                     }
@@ -613,13 +613,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                               final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
                               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                              if (!_hidePastListings || !hasEventEnded(listing['endTime'])) {
+                              if (!_hidePastListings || !hasEventEnded(listing['endTime'], widget.dateTimeProvider)) {
                                 // if this is the first visible item, capture its index
                                 firstVisibleIndex ??= index;
                               }
                               return Column(
                                 children: [
-                                  if (!_hidePastListings || !hasEventEnded(listing['endTime']))
+                                  if (!_hidePastListings || !hasEventEnded(listing['endTime'], widget.dateTimeProvider))
                                     Container(
                                         width: constraints.maxWidth - 10,
                                         decoration: BoxDecoration(
@@ -664,7 +664,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           inDialog: false,
                                         )),
                                   // separator except after last item
-                                  if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 8),
+                                  if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime'], widget.dateTimeProvider))) SizedBox(height: 8),
                                 ],
                               );
                             },

@@ -1030,3 +1030,24 @@ bool isItEventDay(DateTimeProvider dateTimeProvider) {
     dateTimeProvider.now(),
   );
 }
+
+// Function to determine if the Fair has ended based on endTime string
+bool hasEventEnded(String endTime, DateTimeProvider dateTimeProvider) {
+  try {
+    final parts = endTime.split(':');
+    final endHour = int.parse(parts[0]);
+    final endMinute = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+    final endDateTime = DateTime(
+      fairDate.year,
+      fairDate.month,
+      fairDate.day,
+      endHour,
+      endMinute,
+    );
+
+    return dateTimeProvider.now().isAfter(endDateTime);
+  } catch (_) {
+    return false; // default to not ended if parsing fails
+  }
+}
