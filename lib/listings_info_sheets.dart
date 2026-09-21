@@ -662,7 +662,7 @@ Future<void> showListingDetailsDialog(
       currentLatLng!,
       event.latLng,
     );
-    distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+    distanceMessage = '(${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
   }
 
   listingDetailsDialogRoute = DialogRoute(

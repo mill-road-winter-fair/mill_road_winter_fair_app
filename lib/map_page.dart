@@ -488,7 +488,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                           currentLatLng!,
                           stringToLatLng(parentListing['latLng']),
                         );
-                        distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                        distanceMessage = '${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away';
                       }
 
                       return ConstrainedBox(
@@ -629,7 +629,7 @@ class MapPageState extends State<MapPage> with RouteAware {
               currentLatLng!,
               destinationLatLng,
             );
-            distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+            distanceMessage = '(${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
           }
 
           // Show bottom sheet with listing information
