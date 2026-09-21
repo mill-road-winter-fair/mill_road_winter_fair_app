@@ -179,7 +179,7 @@ class _TimetablePageState extends State<TimetablePage> {
           brickAndMortar: ((ev['brickAndMortar'] ?? '') == 'TRUE'),
           email: ev['email'] ?? '',
           website: ev['website'] ?? '',
-          phoneNumber: ev['phoneNumber'] ?? '',
+          phoneNumber: ev['phone'] ?? '',
           isMusic: ((ev['performanceMusic'] ?? '') == 'TRUE'),
           lane: 0, // will be computed later
           top: 0, // will be computed later
