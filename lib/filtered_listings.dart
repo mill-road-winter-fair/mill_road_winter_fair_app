@@ -51,7 +51,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   bool _hidePastListings = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  List<bool> detailsVisibilityList = List<bool>.filled(500, false); // start with plenty enough to load all listings
+  int? detailsVisibleIndex; // which listing (if any) has details button selected
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
@@ -79,7 +79,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // This is called when user switches to this tab
     setState(() {
       _searchAnalyticsTimer?.cancel();
-      detailsVisibilityList = List<bool>.filled(500, false);
+      detailsVisibleIndex = null;
       _searchQuery = '';
       _isSearching = false;
     });
@@ -271,7 +271,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void toggleDetailsRow(int index) {
     setState(() {
-      detailsVisibilityList[index] = !detailsVisibilityList[index];
+      detailsVisibleIndex = (detailsVisibleIndex == null || detailsVisibleIndex != index) ? index : null;
     });
   }
 
@@ -641,7 +641,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           startTime: "${listing['startTime']}",
                                           endTime: "${listing['endTime']}",
                                           approxDistance: approximateDistance,
-                                          detailsVisible: detailsVisibilityList[index],
+                                          detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
                                           listingFavourited: isListingFavourited(listing['id']),
                                           onDetailsTapped: () => toggleDetailsRow(index),
                                           onFavouriteTapped: () => favouriteOrNotListing(listing['id']),

@@ -92,8 +92,9 @@ class MapPageState extends State<MapPage> with RouteAware {
     'Visits/Experiences': true,
     'Services': true,
   };
-  late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
+  int? detailsVisibleIndex; // which listing (if any) on modal bottom sheet has details button selected
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
+  late ColorScheme colorScheme; // will be set in build
 
   @override
   void initState() {
@@ -443,12 +444,13 @@ class MapPageState extends State<MapPage> with RouteAware {
           isScrollControlled: true,
           useSafeArea: true,
           builder: (context) {
-            detailsVisibilityList = List<bool>.filled(relatedListings.length, false);
+            detailsVisibleIndex = null;
             return StatefulBuilder(
               builder: (context, setModalState) {
+                
                 void toggleDetailsRow(int index) {
                   setModalState(() {
-                    detailsVisibilityList[index] = !detailsVisibilityList[index];
+                  detailsVisibleIndex = (detailsVisibleIndex == null || detailsVisibleIndex != index) ? index : null;
                   });
                 }
 
@@ -513,35 +515,41 @@ class MapPageState extends State<MapPage> with RouteAware {
                                     controller: groupSheetModalScrollController,
                                     itemBuilder: (context, index) {
                                       final rel = relatedListings[index];
-
                                       return Column(
                                         children: [
-                                          SpecificListingInfoSheet(
-                                            listingId: rel['id'],
-                                            cancelled: rel['cancelled'] == 'TRUE' ? true : false,
-                                            brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
-                                            emoji: rel['emoji'] ?? '',
-                                            title: rel['title'],
-                                            subtitle: rel['subtitle'],
-                                            location: rel['location'],
-                                            description: rel['description'] ?? '',
-                                            email: rel['email'] ?? '',
-                                            website: rel['website'] ?? '',
-                                            phoneNumber: rel['phone'] ?? '',
-                                            imageURL: rel['imageURL'] ?? '',
-                                            startTime: "${rel['startTime']}",
-                                            endTime: "${rel['endTime']}",
-                                            approxDistance: '',
-                                            detailsVisible: detailsVisibilityList[index],
-                                            onDetailsTapped: () => toggleDetailsRow(index),
-                                            listingFavourited: isListingFavourited(rel['id']),
-                                            onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                            onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                            inDialog: false,
-                                            analyticsService: widget.analyticsService,
+                                          Container(
+                                            width: constraints.maxWidth - 10,
+                                            decoration: BoxDecoration(
+                                              color: colorScheme.onPrimary,
+                                              border: Border.all(color: colorScheme.primary, width: 0.5),
+                                              borderRadius: BorderRadius.circular(8),
+                                              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
+                                            ),
+                                            child: SpecificListingInfoSheet(
+                                              listingId: rel['id'],
+                                              cancelled: rel['cancelled'] == 'TRUE' ? true : false,
+                                              brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
+                                              emoji: rel['emoji'] ?? '',
+                                              title: rel['title'],
+                                              subtitle: rel['subtitle'],
+                                              location: rel['location'],
+                                              description: rel['description'] ?? '',
+                                              email: rel['email'] ?? '',
+                                              website: rel['website'] ?? '',
+                                              phoneNumber: rel['phone'] ?? '',
+                                              imageURL: rel['imageURL'] ?? '',
+                                              startTime: "${rel['startTime']}",
+                                              endTime: "${rel['endTime']}",
+                                              approxDistance: '',
+                                              detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
+                                              onDetailsTapped: () => toggleDetailsRow(index),
+                                              listingFavourited: isListingFavourited(rel['id']),
+                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                              onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                              inDialog: false,
+                                              analyticsService: widget.analyticsService,
+                                            ),
                                           ),
-                                          if (index != relatedListings.length - 1)
-                                            SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                                         ],
                                       );
                                     },
@@ -1484,6 +1492,8 @@ class MapPageState extends State<MapPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}');
+
+    colorScheme = Theme.of(context).colorScheme;
 
     return FutureBuilder(
       future: _fetchListings,

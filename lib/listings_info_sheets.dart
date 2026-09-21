@@ -126,7 +126,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final String endTime;
   // From the parent widget (calculated)
   final String approxDistance;
-  final bool detailsVisible;
+  final bool? detailsVisible; // true: details open; false: details close; null: all details pale
   final bool listingFavourited;
   final VoidCallback? onDetailsTapped;
   final VoidCallback? onFavouriteTapped;
@@ -216,297 +216,299 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
-    return Container(
-      padding: (widget.inDialog)
-          ? EdgeInsets.all(0)
-          : EdgeInsets.fromLTRB(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 8,
-              4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 0,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Prepend the emoji if we have one
-              if (widget.emoji.isNotEmpty)
-                widget.cancelled
-                    ? Opacity(
-                        opacity: 0.5,
-                        child: ColorFiltered(
-                          colorFilter: const ColorFilter.matrix(<double>[
-                            0.2126, 0.7152, 0.0722, 0, 0,
-                            0.2126, 0.7152, 0.0722, 0, 0,
-                            0.2126, 0.7152, 0.0722, 0, 0,
-                            0, 0, 0, 1, 0,
-                          ]),
-                          child: Text('${widget.emoji} ', style: TextStyle(fontSize: 30)),
-                        ),
-                      )
-                    : Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
-              Expanded(
-                flex: 14,
-                child: Text(widget.title, style: titleStyle),
-              ),
-              const Expanded(flex: 1, child: SizedBox(width: 2)),
-              Expanded(
-                flex: 6,
-                child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: subDetails),
-              ),
-            ],
-          ),
-          // add location (and space before) unless it's blank (which means it's a bottom modal group list)
-          if (widget.location != '') const SizedBox(height: 8),
-          if (widget.location != '')
+    return Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
+      child: Container(
+        padding: (widget.inDialog)
+            ? EdgeInsets.all(0)
+            : EdgeInsets.fromLTRB(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 8,
+                4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 0,
+          children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Prepend the emoji if we have one
+                if (widget.emoji.isNotEmpty)
+                  widget.cancelled
+                      ? Opacity(
+                          opacity: 0.5,
+                          child: ColorFiltered(
+                            colorFilter: const ColorFilter.matrix(<double>[
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0, 0, 0, 1, 0,
+                            ]),
+                            child: Text('${widget.emoji} ', style: TextStyle(fontSize: 30)),
+                          ),
+                        )
+                      : Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
                 Expanded(
                   flex: 14,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(style: subSubStyle, text: widget.location),
-                          TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' ${widget.approxDistance}'),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: Text(widget.title, style: titleStyle),
                 ),
                 const Expanded(flex: 1, child: SizedBox(width: 2)),
                 Expanded(
                   flex: 6,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: widget.cancelled
-                        ? _cancelledLabel(context)
-                        : Text(
-                            updatedTimes,
-                            style: timeStyle,
-                            textAlign: TextAlign.end,
-                          ),
-                  ),
+                  child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: subDetails),
                 ),
               ],
             ),
-          if (widget.detailsVisible && widget.inDialog) detailsColumn(context),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              IconButton(
-                onPressed: widget.cancelled && !widget.listingFavourited
-                    ? null
-                    : () {
-                        widget.onFavouriteTapped?.call();
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
-                      },
-                padding: const EdgeInsets.all(0),
-                style: ElevatedButton.styleFrom(
-                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                    padding: const EdgeInsets.all(0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                icon: FaIcon(
-                  shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
-                  (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                  size: 22,
-                  color: widget.cancelled && !widget.listingFavourited
-                      ? Theme.of(context).disabledColor
-                      : Theme.of(context).colorScheme.primary,
-                ),
+            // add location (and space before) unless it's blank (which means it's a bottom modal group list)
+            if (widget.location != '') const SizedBox(height: 8),
+            if (widget.location != '')
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    flex: 14,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(style: subSubStyle, text: widget.location),
+                            TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' ${widget.approxDistance}'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Expanded(flex: 1, child: SizedBox(width: 2)),
+                  Expanded(
+                    flex: 6,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: widget.cancelled
+                          ? _cancelledLabel(context)
+                          : Text(
+                              updatedTimes,
+                              style: timeStyle,
+                              textAlign: TextAlign.end,
+                            ),
+                    ),
+                  ),
+                ],
               ),
+            if ((widget.detailsVisible ?? false) && widget.inDialog) detailsColumn(context),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                IconButton(
+                  onPressed: widget.cancelled && !widget.listingFavourited
+                      ? null
+                      : () {
+                          widget.onFavouriteTapped?.call();
+                          HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
+                        },
+                  padding: const EdgeInsets.all(0),
+                  style: ElevatedButton.styleFrom(
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                      padding: const EdgeInsets.all(0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  icon: FaIcon(
+                    shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                    (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                    size: 22,
+                    color: widget.cancelled && !widget.listingFavourited
+                        ? Theme.of(context).disabledColor
+                        : Theme.of(context).colorScheme.primary,
+                  ),
+                ),
 
-              const SizedBox(width: 6),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    iconSize: 24,
-                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                    padding: const EdgeInsets.all(0),
-                    elevation: 3,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: widget.cancelled
-                    ? null
-                    : () {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
-                        widget.analyticsService.logDirectionsToListingRequested(widget.title);
-                        widget.onGetDirections();
-                      },
-                child: const Icon(Icons.directions_walk),
-              ),
-              // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
-              if (widget.onDetailsTapped != null &&
-                  (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
                 const SizedBox(width: 6),
-              // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
-              if (widget.onDetailsTapped != null &&
-                  widget.website.isNotEmpty &&
-                  widget.email.isNotEmpty &&
-                  widget.phoneNumber.isNotEmpty &&
-                  MediaQuery.of(context).size.width <= 360)
                 ElevatedButton(
-                  style: widget.detailsVisible
-                      ? ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap)
-                      : ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
-                    widget.onDetailsTapped?.call();
-                  },
-                  child: const Icon(Icons.info),
-                )
-              else if (widget.onDetailsTapped != null &&
-                  (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
-                ElevatedButton(
-                  style: widget.detailsVisible
-                      ? ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap)
-                      : ElevatedButton.styleFrom(
-                          iconSize: 24,
-                          visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
-                    widget.onDetailsTapped?.call();
-                  },
-                  child: const Icon(Icons.info),
+                  style: ElevatedButton.styleFrom(
+                      iconSize: 24,
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                      padding: const EdgeInsets.all(0),
+                      elevation: 3,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: widget.cancelled
+                      ? null
+                      : () {
+                          HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
+                          widget.analyticsService.logDirectionsToListingRequested(widget.title);
+                          widget.onGetDirections();
+                        },
+                  child: const Icon(Icons.directions_walk),
                 ),
-              const SizedBox(width: 6),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    iconSize: 24,
-                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                    padding: const EdgeInsets.all(0),
+                // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
+                if (widget.onDetailsTapped != null &&
+                    (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
+                  const SizedBox(width: 6),
+                // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
+                if (widget.onDetailsTapped != null &&
+                    widget.website.isNotEmpty &&
+                    widget.email.isNotEmpty &&
+                    widget.phoneNumber.isNotEmpty &&
+                    MediaQuery.of(context).size.width <= 360)
+                  ElevatedButton(
+                    style: (widget.detailsVisible ?? false)
+                        ? ElevatedButton.styleFrom(
+                            iconSize: 24,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                            padding: const EdgeInsets.all(0),
+                            elevation: 3,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                        : ElevatedButton.styleFrom(
+                            iconSize: 24,
+                            visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                            padding: const EdgeInsets.all(0),
+                            elevation: 3,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
+                      widget.onDetailsTapped?.call();
+                    },
+                    child: const Icon(Icons.info),
+                  )
+                else if (widget.onDetailsTapped != null &&
+                    (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
+                  ElevatedButton(
+                    style: (widget.detailsVisible ?? false)
+                        ? ElevatedButton.styleFrom(
+                            iconSize: 24,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                            padding: const EdgeInsets.all(0),
+                            elevation: 3,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap)
+                        : ElevatedButton.styleFrom(
+                            iconSize: 24,
+                            visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                            padding: const EdgeInsets.all(0),
+                            elevation: 3,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
+                      widget.onDetailsTapped?.call();
+                    },
+                    child: const Icon(Icons.info),
+                  ),
+                const SizedBox(width: 6),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      iconSize: 24,
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                      padding: const EdgeInsets.all(0),
+                      elevation: 3,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  onPressed: () => shareListing(
+                    widget.title,
+                    widget.location,
+                    widget.startTime,
+                    widget.endTime,
+                    context,
+                    cancelled: widget.cancelled,
+                  ),
+                  child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
+                ),
+                Flexible(flex: 1, child: Container()),
+                if (widget.website.isNotEmpty) const SizedBox(width: 6),
+                if (widget.website.isNotEmpty)
+                  Material(
+                    shape: const CircleBorder(),
                     elevation: 3,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () => shareListing(
-                  widget.title,
-                  widget.location,
-                  widget.startTime,
-                  widget.endTime,
-                  context,
-                  cancelled: widget.cancelled,
-                ),
-                child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
-              ),
-              Flexible(flex: 1, child: Container()),
-              if (widget.website.isNotEmpty) const SizedBox(width: 6),
-              if (widget.website.isNotEmpty)
-                Material(
-                  shape: const CircleBorder(),
-                  elevation: 3,
-                  color: Theme.of(context).colorScheme.primary,
-                  child: InkWell(
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
-                      launchUrl(Uri.parse(widget.website));
-                    },
-                    customBorder: const CircleBorder(),
-                    radius: 8,
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Icon(
-                        Icons.public,
-                        size: 22,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                    color: Theme.of(context).colorScheme.primary,
+                    child: InkWell(
+                      onTap: () async {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
+                        launchUrl(Uri.parse(widget.website));
+                      },
+                      customBorder: const CircleBorder(),
+                      radius: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(3),
+                        child: Icon(
+                          Icons.public,
+                          size: 22,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              if (widget.email.isNotEmpty) const SizedBox(width: 6),
-              if (widget.email.isNotEmpty)
-                Material(
-                  shape: const CircleBorder(),
-                  elevation: 3,
-                  color: Theme.of(context).colorScheme.primary,
-                  child: InkWell(
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
-                      final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
-                      if (await canLaunchUrl(mailUri)) {
-                        await launchUrl(mailUri);
-                      } else {
-                        throw Exception('Could not launch email client');
-                      }
-                    },
-                    customBorder: const CircleBorder(),
-                    radius: 8,
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Icon(
-                        Icons.email,
-                        size: 22,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                if (widget.email.isNotEmpty) const SizedBox(width: 6),
+                if (widget.email.isNotEmpty)
+                  Material(
+                    shape: const CircleBorder(),
+                    elevation: 3,
+                    color: Theme.of(context).colorScheme.primary,
+                    child: InkWell(
+                      onTap: () async {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
+                        final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
+                        if (await canLaunchUrl(mailUri)) {
+                          await launchUrl(mailUri);
+                        } else {
+                          throw Exception('Could not launch email client');
+                        }
+                      },
+                      customBorder: const CircleBorder(),
+                      radius: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(3),
+                        child: Icon(
+                          Icons.email,
+                          size: 22,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              if (widget.phoneNumber.isNotEmpty) const SizedBox(width: 6),
-              if (widget.phoneNumber.isNotEmpty)
-                Material(
-                  shape: const CircleBorder(),
-                  elevation: 3,
-                  color: Theme.of(context).colorScheme.primary,
-                  child: InkWell(
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
-                      final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
-                      if (await canLaunchUrl(phoneUri)) {
-                        await launchUrl(phoneUri);
-                      } else {
-                        throw Exception('Could not launch ${widget.phoneNumber}');
-                      }
-                    },
-                    customBorder: const CircleBorder(),
-                    radius: 8,
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Icon(
-                        Icons.phone,
-                        size: 22,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                if (widget.phoneNumber.isNotEmpty) const SizedBox(width: 6),
+                if (widget.phoneNumber.isNotEmpty)
+                  Material(
+                    shape: const CircleBorder(),
+                    elevation: 3,
+                    color: Theme.of(context).colorScheme.primary,
+                    child: InkWell(
+                      onTap: () async {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
+                        final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
+                        if (await canLaunchUrl(phoneUri)) {
+                          await launchUrl(phoneUri);
+                        } else {
+                          throw Exception('Could not launch ${widget.phoneNumber}');
+                        }
+                      },
+                      customBorder: const CircleBorder(),
+                      radius: 8,
+                      child: Padding(
+                        padding: const EdgeInsets.all(3),
+                        child: Icon(
+                          Icons.phone,
+                          size: 22,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          if (widget.detailsVisible && !widget.inDialog) detailsColumn(context),
-          // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
-          if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 20),
-          if (widget.onDetailsTapped != null || widget.location == '') const SizedBox(height: 4),
-        ],
+              ],
+            ),
+            if ((widget.detailsVisible ?? false) && !widget.inDialog) detailsColumn(context),
+            // if we're on a modal bottom sheet, add lots of space to avoid bottom of screen; otherwise just a bit between listings
+            if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 20),
+            if (widget.onDetailsTapped != null || widget.location == '') const SizedBox(height: 4),
+          ],
+        ),
       ),
     );
   }
