@@ -1024,6 +1024,34 @@ String formatFullDate(DateTime date) {
 }
 
 
+// Function to determine if the event has ended based on endTime string
+bool hasEventEnded(String endTime) {
+  try {
+    final parts = endTime.split(':');
+    final endHour = int.parse(parts[0]);
+    final endMinute = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+    final endDateTime = DateTime(
+      fairDate.year,
+      fairDate.month,
+      fairDate.day,
+      endHour,
+      endMinute,
+    );
+
+    return DateTime.now().isAfter(endDateTime);
+  } catch (_) {
+    return false; // default to not ended if parsing fails
+  }
+}
+
+
+// Function to determine if the event is today
+bool isItEventDay() {
+  return DateUtils.isSameDay(fairDate, DateTime.now());
+}
+
+
 class AdaptiveImageText extends StatefulWidget {
   const AdaptiveImageText({
     super.key,
