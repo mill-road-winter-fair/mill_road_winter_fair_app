@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/gestures.dart';
@@ -1020,4 +1021,106 @@ String formatFullDate(DateTime date) {
   final day = date.day;
   final suffix = day >= 11 && day <= 13 ? 'th' : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][day % 10];
   return '$dayName $monthName $day$suffix';
+}
+
+
+class AdaptiveImageText extends StatefulWidget {
+  const AdaptiveImageText({
+    super.key,
+    required this.imageUrl,
+    required this.descriptionWidget,
+  });
+
+  final String imageUrl;
+  final Widget descriptionWidget;
+
+  @override
+  State<AdaptiveImageText> createState() => _AdaptiveImageTextState();
+}
+
+class _AdaptiveImageTextState extends State<AdaptiveImageText> {
+  Future<ui.Image>? _imageFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageFuture = _resolveImage(NetworkImage(widget.imageUrl));
+  }
+
+  @override
+  void didUpdateWidget(covariant AdaptiveImageText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.imageUrl != widget.imageUrl) {
+      _imageFuture = _resolveImage(NetworkImage(widget.imageUrl));
+    }
+  }
+
+  Future<ui.Image> _resolveImage(ImageProvider provider) {
+    final completer = Completer<ui.Image>();
+    final stream = provider.resolve(ImageConfiguration.empty);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (ImageInfo info, bool synchronousCall) {
+        if (!completer.isCompleted) completer.complete(info.image);
+        stream.removeListener(listener);
+      },
+      onError: (Object error, StackTrace? stackTrace) {
+        if (!completer.isCompleted) completer.completeError(error, stackTrace ?? StackTrace.current);
+        stream.removeListener(listener);
+      },
+    );
+    stream.addListener(listener);
+    return completer.future;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ui.Image>(
+      future: _imageFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return const Text('Could not load image');
+        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        final image = snapshot.data!;
+        final imageIsLandscape = image.width > image.height;
+        return imageIsLandscape
+            ? _buildVerticalLayout()
+            : _buildHorizontalLayout();
+      },
+    );
+  }
+
+  Widget _buildHorizontalLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: widget.descriptionWidget),
+        const SizedBox(width: 12),
+        _buildImage(width: 160),
+      ],
+    );
+  }
+
+  Widget _buildVerticalLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(alignment: AlignmentGeometry.center, child: _buildImage()),
+        const SizedBox(height: 12),
+        widget.descriptionWidget,
+      ],
+    );
+  }
+
+  Widget _buildImage({double? width}) {
+    return Image.network(
+      widget.imageUrl,
+      width: width,
+      fit: BoxFit.scaleDown,
+      errorBuilder: (context, error, stackTrace) {
+        return const Icon(Icons.broken_image);
+      },
+    );
+  }
+
 }

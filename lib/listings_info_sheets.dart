@@ -576,27 +576,28 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       spacing: 0,
       children: [
         if (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty) const SizedBox(height: 8),
-        if (widget.description.isNotEmpty) ...[const SizedBox(height: 8), Flexible(
-            child: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), widget.description),
-          )],
-        if (widget.imageURL.isNotEmpty) ...[const SizedBox(height: 8), Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 150),
-            child: Image.network(
-              widget.imageURL,
-              fit: BoxFit.scaleDown,
-              errorBuilder: (context, error, stackTrace) { return const Icon(Icons.broken_image); },
-            ),
-          ),
-        )],
-        if (widget.website.isNotEmpty) ...[const SizedBox(height: 8), GestureDetector(
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
-            launchUrl(Uri.parse(widget.website));
-          },
-          child: Flexible(
+        if (widget.description.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          if (widget.imageURL.isNotEmpty) AdaptiveImageText(
+            descriptionWidget: Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), widget.description),
+            imageUrl: widget.imageURL,
+          ) else Text(style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant), widget.description),
+        ] else if (widget.imageURL.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Align(alignment: AlignmentGeometry.center, child: Image.network(
+            widget.imageURL,
+            fit: BoxFit.scaleDown,
+            errorBuilder: (context, error, stackTrace) { return const Icon(Icons.broken_image); },
+          )),
+        ],
+        if (widget.website.isNotEmpty) ...[
+          const SizedBox(height: 8), 
+          GestureDetector(
+            onTap: () async {
+              HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
+              launchUrl(Uri.parse(widget.website));
+            },
             child: Text.rich(
               TextSpan(
                 children: [
@@ -606,19 +607,20 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               ),
             ),
           ),
-        )],
-        if (widget.email.isNotEmpty) ...[const SizedBox(height: 8), GestureDetector(
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
-            final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
-            if (await canLaunchUrl(mailUri)) {
-              await launchUrl(mailUri);
-            } else {
-              throw Exception('Could not launch email client');
-            }
-          },
-          child:Flexible(
+        ],
+        if (widget.email.isNotEmpty) ...[
+          const SizedBox(height: 8), 
+          GestureDetector(
+            onTap: () async {
+              HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
+              final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
+              if (await canLaunchUrl(mailUri)) {
+                await launchUrl(mailUri);
+              } else {
+                throw Exception('Could not launch email client');
+              }
+            },
             child: Text.rich(
               TextSpan(
                 children: [
@@ -628,19 +630,20 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               ),
             ),
           ),
-        )],
-        if (widget.phoneNumber.isNotEmpty) ...[const SizedBox(height: 8), GestureDetector(
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
-            final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
-            if (await canLaunchUrl(phoneUri)) {
-              await launchUrl(phoneUri);
-            } else {
-              throw Exception('Could not launch ${widget.phoneNumber}');
-            }
-          },
-          child: Flexible(
+        ],
+        if (widget.phoneNumber.isNotEmpty) ...[
+          const SizedBox(height: 8), 
+          GestureDetector(
+            onTap: () async {
+              HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
+              final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
+              if (await canLaunchUrl(phoneUri)) {
+                await launchUrl(phoneUri);
+              } else {
+                throw Exception('Could not launch ${widget.phoneNumber}');
+              }
+            },
             child: Text.rich(
               TextSpan(
                 children: [
@@ -650,7 +653,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               ),
             ),
           ),
-        )],
+        ],
       ],
     );
   }
