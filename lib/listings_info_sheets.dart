@@ -676,42 +676,46 @@ Future<void> showListingDetailsDialog(
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,
           elevation: 12,
-          child: SingleChildScrollView(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => Navigator.of(ctx2).pop(),
+            child: SingleChildScrollView(
             child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-              child: SpecificListingInfoSheet(
-                listingId: event.id,
-                cancelled: event.cancelled,
-                brickAndMortar: event.brickAndMortar,
-                emoji: event.emoji,
-                title: event.name,
-                subtitle: event.subtitle,
-                location: event.location,
-                description: event.description,
-                email: event.email,
-                website: event.website,
-                phoneNumber: event.phoneNumber,
-                imageURL: event.imageURL,
-                startTime: formatTime(event.startTime),
-                endTime: formatTime(event.endTime),
-                approxDistance: distanceMessage,
-                detailsVisible: true,
-                listingFavourited: favouriteListingKeys.value.contains(event.id),
-                onFavouriteTapped: () {
-                  favouriteOrNotListing(event);
-                  setStateFunction.call;
-                  setStateDialog(() {});
-                },
-                onGetDirections: () async {
-                  safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
-                  onGetDirections.call();
-                },
-                inDialog: true,
-                analyticsService: analyticsService,
-                colorScheme: colorScheme,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                child: SpecificListingInfoSheet(
+                  listingId: event.id,
+                  cancelled: event.cancelled,
+                  brickAndMortar: event.brickAndMortar,
+                  emoji: event.emoji,
+                  title: event.name,
+                  subtitle: event.subtitle,
+                  location: event.location,
+                  description: event.description,
+                  email: event.email,
+                  website: event.website,
+                  phoneNumber: event.phoneNumber,
+                  imageURL: event.imageURL,
+                  startTime: formatTime(event.startTime),
+                  endTime: formatTime(event.endTime),
+                  approxDistance: distanceMessage,
+                  detailsVisible: true,
+                  listingFavourited: favouriteListingKeys.value.contains(event.id),
+                  onFavouriteTapped: () {
+                    favouriteOrNotListing(event);
+                    setStateFunction.call;
+                    setStateDialog(() {});
+                  },
+                  onGetDirections: () async {
+                    safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                    onGetDirections.call();
+                  },
+                  inDialog: true,
+                  analyticsService: analyticsService,
+                  colorScheme: colorScheme,
+                ),
               ),
             ),
           ),
