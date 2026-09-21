@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:mill_road_winter_fair_app/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -23,6 +24,7 @@ class FilteredListingsPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
   final Function(String?) onSubfilterChange;
+  final DateTimeProvider dateTimeProvider;
 
   const FilteredListingsPage({
     required this.analyticsService,
@@ -31,6 +33,7 @@ class FilteredListingsPage extends StatefulWidget {
     required this.onSubfilterChange,
     required this.listings,
     required this.onTabSelected,
+    this.dateTimeProvider = const SystemDateTimeProvider(),
     super.key,
   });
 
@@ -401,7 +404,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             onPressed: () {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('listings_scroll_to_now');
-              if (isItEventDay()) {
+              if (isItEventDay(widget.dateTimeProvider)) {
                 if (firstNextListingIndex < 0) {
                   // we may not be on Sort by Time, or the Fair may have recently started
                   SortingMethod savedSortingMethod = preferredSortingMethod;
@@ -444,7 +447,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               Icons.update,
-              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+              color: (isItEventDay(widget.dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         if (isShowingJustPerformance || filterCategory == 'favourite')
@@ -455,7 +458,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             onPressed: () {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
-              if (isItEventDay()) {
+              if (isItEventDay(widget.dateTimeProvider)) {
                 setState(() {
                   _hidePastListings = !_hidePastListings;
                   widget.analyticsService.logPreferenceSet('listings_hide_past', _hidePastListings.toString());
@@ -477,7 +480,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               (_hidePastListings) ? Icons.free_cancellation : Icons.event_busy,
-              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+              color: (isItEventDay(widget.dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         IconButton(

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mill_road_winter_fair_app/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -20,6 +21,7 @@ class TimetablePage extends StatefulWidget {
   final bool onlyNowOrSoon;
   final bool? filteredMusicOrNot;
   final AnalyticsService analyticsService;
+  final DateTimeProvider dateTimeProvider;
   const TimetablePage({
     required this.theEvents,
     required this.onTabSelected,
@@ -28,6 +30,7 @@ class TimetablePage extends StatefulWidget {
     required this.onlyNowOrSoon,
     this.filteredMusicOrNot,
     required this.analyticsService,
+    this.dateTimeProvider = const SystemDateTimeProvider(),
     super.key,
   });
   @override
@@ -511,14 +514,14 @@ class _TimetablePageState extends State<TimetablePage> {
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_now_or_soon_toggle');
-            (isItEventDay())
+            (isItEventDay(widget.dateTimeProvider))
                 ? _toggleOnlyNowOrSoon()
                 : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway',
                     fgColour: colorScheme.error, analyticsService: widget.analyticsService);
           },
           icon: Icon(
             (widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule,
-            color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
+            color: (isItEventDay(widget.dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
           ),
         ),
         IconButton(

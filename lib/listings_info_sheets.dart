@@ -29,11 +29,6 @@ bool hasEventEnded(String endTime) {
   }
 }
 
-// Function to determine if the event is today
-bool isItEventDay() {
-  return DateUtils.isSameDay(fairDate, DateTime.now());
-}
-
 class GroupListingInfoSheet extends StatelessWidget {
   final String title;
   final String categories;

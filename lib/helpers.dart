@@ -10,6 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
@@ -1020,4 +1021,12 @@ String formatFullDate(DateTime date) {
   final day = date.day;
   final suffix = day >= 11 && day <= 13 ? 'th' : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][day % 10];
   return '$dayName $monthName $day$suffix';
+}
+
+// Function to determine if the event is today
+bool isItEventDay(DateTimeProvider dateTimeProvider) {
+  return DateUtils.isSameDay(
+    fairDate,
+    dateTimeProvider.now(),
+  );
 }
