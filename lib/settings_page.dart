@@ -55,8 +55,8 @@ Future<void> loadSettings() async {
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
 
-    // Get the choice to have a static chooser page
-    staticChooserPage.value = prefs.getBool('staticChooserPage') ?? false;
+    // Get the choice to have a static main menu page
+    staticMainMenuPage.value = prefs.getBool('staticMainMenuPage') ?? false;
 
     debugPrint('Settings loaded from SharedPreferences');
   } else if (onTest == true) {
@@ -111,7 +111,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
-    await prefs.setBool('staticChooserPage', staticChooserPage.value);
+    await prefs.setBool('staticMainMenuPage', staticMainMenuPage.value);
   }
 
   Future<void> _changeTheme(String themeKey) async {
@@ -313,11 +313,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       children: [
                         const Text('Home page', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                         RadioGroup<bool>(
-                          groupValue: staticChooserPage.value,
+                          groupValue: staticMainMenuPage.value,
                           onChanged: (bool? value) {
                             setState(() {
                               HapticFeedback.selectionClick();
-                              staticChooserPage.value = value!;
+                              staticMainMenuPage.value = value!;
                             });
                             _saveSettings();
                           },

@@ -78,8 +78,8 @@ int promptedUserToEnableLocationServices = 0;
 // Cached user location used by the map and listings pages.
 LatLng? currentLatLng;
 
-// Whether to have a static chooser page
-ValueNotifier<bool> staticChooserPage = ValueNotifier(onTest);
+// Whether to have a static main menu page
+ValueNotifier<bool> staticMainMenuPage = ValueNotifier(onTest);
 
 // Fair date (and times) for this year
 // Also used by the listing-update notifier.

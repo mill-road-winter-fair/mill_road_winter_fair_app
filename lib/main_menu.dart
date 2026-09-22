@@ -6,8 +6,8 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 
-class ChooserPage extends StatefulWidget {
-  const ChooserPage({
+class MainMenu extends StatefulWidget {
+  const MainMenu({
     required this.theEvents,
     required this.onOpenTimetable,
     required this.onOpenListings,
@@ -21,10 +21,10 @@ class ChooserPage extends StatefulWidget {
   final Function(int?) onOpenMap;
   final ValueChanged<int> onTabSelected;
   @override
-  State<ChooserPage> createState() => _ChooserPageState();
+  State<MainMenu> createState() => _MainMenuState();
 }
 
-class _ChooserPageState extends State<ChooserPage> {
+class _MainMenuState extends State<MainMenu> {
   // Rebase after scrolling to keep an unlimited number of cycles in both directions.
   static const _origin = 8000;
   final _controller =
@@ -67,7 +67,7 @@ class _ChooserPageState extends State<ChooserPage> {
 
   void _move(int delta) {
     final target = (_controller.page ?? _origin.toDouble()).round() + delta;
-    if (MediaQuery.disableAnimationsOf(context) || staticChooserPage.value) {
+    if (MediaQuery.disableAnimationsOf(context) || staticMainMenuPage.value) {
       _controller.jumpToPage(target);
     } else {
       _controller.animateToPage(target,
@@ -202,7 +202,7 @@ class _ChooserPageState extends State<ChooserPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8),
                             child: Image.asset(
-                              'assets/chooserPage/MRWF_logo_transparent.png',
+                              'assets/mainMenuPage/MRWF_logo_transparent.png',
                               width: math.min(220.0, contentWidth * .6),
                               height: logoHeight,
                               fit: BoxFit.contain,
@@ -232,7 +232,7 @@ class _ChooserPageState extends State<ChooserPage> {
                         child: NotificationListener<ScrollEndNotification>(
                           onNotification: _rebase,
                           child: PageView.builder(
-                            key: const ValueKey('chooser-carousel'),
+                            key: const ValueKey('main-menu-carousel'),
                             controller: _controller,
                             onPageChanged: (page) => setState(
                                 () => _selected = page % choices.length),
@@ -376,7 +376,7 @@ class _ChoiceCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage(
-                            'assets/chooserPage/${choice.asset}.png'),
+                            'assets/mainMenuPage/${choice.asset}.png'),
                         fit: BoxFit.contain,
                       ),
                     ),
