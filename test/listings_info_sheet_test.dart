@@ -11,6 +11,11 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 
 void main() {
+    // Mocking DateTime.now()
+    final dateTimeProvider = FixedDateTimeProvider(
+      DateTime(2026, 12, 5, 21, 15),
+    );
+
   LatLng currentLatLng = const LatLng(52.199174, 0.140929);
   LatLng destinationLatLng = const LatLng(52.199687, 0.138813);
   int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
@@ -71,11 +76,6 @@ void main() {
 
   group('ListingsInfoSheet', () {
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
-      // Mocking DateTime.now()
-      final dateTimeProvider = FixedDateTimeProvider(
-        DateTime(2026, 12, 5, 21, 15),
-      );
-
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
         brickAndMortar: false,
@@ -106,11 +106,6 @@ void main() {
     });
 
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
-      // Mocking DateTime.now()
-      final dateTimeProvider = FixedDateTimeProvider(
-        DateTime(2026, 12, 5, 21, 15),
-      );
-
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
         brickAndMortar: false,
@@ -144,11 +139,6 @@ void main() {
     // TODO: Add test for tapping on "Open Website" button (will need to find a way of mocking launchUrl)
 
     testWidgets('calls onFavouriteTapped when heart button is pressed', (WidgetTester tester) async {
-      // Mocking DateTime.now()
-      final dateTimeProvider = FixedDateTimeProvider(
-        DateTime(2026, 12, 5, 21, 15),
-      );
-
       bool favouriteCalled = false;
 
       await tester.pumpWidget(createWidgetUnderTest(
@@ -187,11 +177,6 @@ void main() {
     });
 
     testWidgets('tapping Details button toggles visibility of extra information', (WidgetTester tester) async {
-      // Mocking DateTime.now()
-      final dateTimeProvider = FixedDateTimeProvider(
-        DateTime(2026, 12, 5, 21, 15),
-      );
-
       bool detailsToggled = false;
 
       // Initial state: details NOT visible
@@ -260,11 +245,6 @@ void main() {
     });
 
     testWidgets('calls onGetDirections when Get Directions button is pressed', (WidgetTester tester) async {
-      // Mocking DateTime.now()
-      final dateTimeProvider = FixedDateTimeProvider(
-        DateTime(2026, 12, 5, 21, 15),
-      );
-
       bool directionsCalled = false;
 
       await tester.pumpWidget(createWidgetUnderTest(
@@ -301,11 +281,6 @@ void main() {
     });
 
     testWidgets('formatted with line-through and red text when endTime has passed', (WidgetTester tester) async {
-      // Mocking DateTime.now()
-      final dateTimeProvider = FixedDateTimeProvider(
-        DateTime(2026, 12, 5, 21, 15),
-      );
-
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
         brickAndMortar: false,
@@ -339,11 +314,6 @@ void main() {
     });
 
     testWidgets('formats cancelled listing with line-through text and a cancelled label', (WidgetTester tester) async {
-      // Mocking DateTime.now()
-      final dateTimeProvider = FixedDateTimeProvider(
-        DateTime(2026, 12, 5, 21, 15),
-      );
-
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: true,
         brickAndMortar: false,
@@ -413,11 +383,6 @@ void main() {
     });
 
     testWidgets('disables favourite and directions actions but leaves share enabled when listing is cancelled', (WidgetTester tester) async {
-      // Mocking DateTime.now()
-      final dateTimeProvider = FixedDateTimeProvider(
-        DateTime(2026, 12, 5, 21, 15),
-      );
-
       bool favouriteCalled = false;
       bool directionsCalled = false;
 
@@ -476,11 +441,6 @@ void main() {
     });
 
     testWidgets('allows a cancelled listing to be unfavourited', (WidgetTester tester) async {
-      // Mocking DateTime.now()
-      final dateTimeProvider = FixedDateTimeProvider(
-        DateTime(2026, 12, 5, 21, 15),
-      );
-
       bool favouriteCalled = false;
 
       await tester.pumpWidget(createWidgetUnderTest(
