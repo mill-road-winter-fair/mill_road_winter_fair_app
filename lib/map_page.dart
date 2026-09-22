@@ -2237,13 +2237,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             hintText: 'Search all locations...',
                             leading: const Icon(Icons.search),
                             trailing: [
-                              TextButton(
-                                child: const Text('Clear'),
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  _resetSearch(close: false);
-                                },
-                              ),
+                              IconButton(
+                                  iconSize: 20,
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () async {
+                                    HapticFeedback.lightImpact();
+                                    widget.analyticsService.logButtonTapped('map_search_clear');
+                                    _resetSearch(close: false);
+                                  })
                             ],
                             onChanged: _searchListings,
                           ),
