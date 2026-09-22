@@ -117,6 +117,7 @@ class MapPageState extends State<MapPage> with RouteAware {
     _fetchListings = fetchExistingListings(http.Client());
     setVisibleMarkerLists();
     addAllVisibleMarkers();
+    _establishLocationAndRefreshMap();
     establishLocation();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -127,6 +128,18 @@ class MapPageState extends State<MapPage> with RouteAware {
       }
     });
     super.initState();
+  }
+
+  Future<void> _establishLocationAndRefreshMap() async {
+    await establishLocation();
+
+    // On first launch Android can create the native map before the location
+    // permission dialog has completed. Rebuilding after the dialog closes lets
+    // GoogleMap observe myLocationEnabled changing from false to true and start
+    // its location layer (the blue dot).
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Polygon roadClosurePolygon() {
@@ -1656,7 +1669,9 @@ class MapPageState extends State<MapPage> with RouteAware {
                               mapType: mapType,
                               rotateGesturesEnabled: false,
                               compassEnabled: false,
-                              myLocationEnabled: true,
+                              myLocationEnabled: locationServicesEnabled &&
+        (locationPermission == LocationPermission.always ||
+        locationPermission == LocationPermission.whileInUse),
                               myLocationButtonEnabled: false,
                               mapToolbarEnabled: false,
                               onMapCreated: (GoogleMapController controller) {
@@ -2017,6 +2032,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                   distance: _distanceToDestination,
                   onDistancePressed: () {
                     HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('distance_to_destination');
                     _setMapCameraToFitPolyline(polylines);
                   },
                   ),
