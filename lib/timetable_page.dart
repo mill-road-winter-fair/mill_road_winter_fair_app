@@ -140,7 +140,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void startClockUpdates(VoidCallback tick) {
-    final now = DateTime.now();
+    final now = widget.dateTimeProvider.now();
     final delay = Duration(seconds: (60 / _dayPixelsPerMinute).toInt());
     final initialDelay = delay - Duration(seconds: now.second, milliseconds: now.millisecond);
     _nowLineTimer?.cancel();
@@ -209,7 +209,7 @@ class _TimetablePageState extends State<TimetablePage> {
         '_TimetablePageState filterEventsAndComputeDefaults called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery');
     timelineMinStart = DateTime(9999);
     timelineMaxEnd = DateTime(0);
-    final now = DateTime.now();
+    final now = widget.dateTimeProvider.now();
     Map<String, List<PositionedEvent>> theFilteredEvents = {};
     for (final location in theEvents.entries) {
       final theEventsAtThisLocation = location.value;
@@ -458,7 +458,7 @@ class _TimetablePageState extends State<TimetablePage> {
       theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
     }
     calculateInitialScalesIfNeeded();
-    if (fairDate.difference(DateTime.now()).inDays == 0 && timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now())) {
+    if (fairDate.difference(widget.dateTimeProvider.now()).inDays == 0 && timelineMinStart.isBefore(widget.dateTimeProvider.now()) && timelineMaxEnd.isAfter(widget.dateTimeProvider.now())) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_nowLineTimer == null) startClockUpdates(updateNowLine);
         if (!widget.onlyNowOrSoon && _searchQuery.isEmpty) scrollToKey(nowLineKey, 0.3);
@@ -476,7 +476,7 @@ class _TimetablePageState extends State<TimetablePage> {
       if (_searchQuery != '') theErrorMessage += '\n\nYou can clear your search by tapping the X icon in the search bar.';
     }
 
-    final now = DateTime.now();
+    final now = widget.dateTimeProvider.now();
     final isLandscape = MediaQuery.orientationOf(context) == Orientation.landscape;
     final colorScheme = Theme.of(context).colorScheme;
     final appBarTheme = Theme.of(context).appBarTheme;
@@ -791,7 +791,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                             // time markers lines and labels and swim lanes
                                             ...swimlanes,
                                             // red 'now' line
-                                            if (timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now()))
+                                            if (timelineMinStart.isBefore(widget.dateTimeProvider.now()) && timelineMaxEnd.isAfter(widget.dateTimeProvider.now()))
                                               Positioned(
                                                 key: nowLineKey,
                                                 top: nowTop,
