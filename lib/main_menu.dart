@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
-import 'package:mill_road_winter_fair_app/important_info_page.dart';
 
 class MainMenu extends StatefulWidget {
   const MainMenu({
@@ -106,12 +105,6 @@ class _MainMenuState extends State<MainMenu> {
       currentTab: 0,
       onTabSelected: widget.onTabSelected,
       appBarActions: [
-        IconButton(
-          tooltip: 'Important information',
-          icon: const Icon(Icons.warning, size: 20),
-          onPressed: () => Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const ImportantInfoPage())),
-        ),
         IconButton(
           tooltip: 'About the Fair',
           icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
