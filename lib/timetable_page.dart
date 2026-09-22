@@ -619,6 +619,11 @@ class _TimetablePageState extends State<TimetablePage> {
 
               final nowTop = max(0.0, (now.difference(timelineMinStart).inMinutes) * _dayPixelsPerMinute) - 1.5;
               final timelineHeight = max(constraints.maxHeight - 40, spanMinutes * _dayPixelsPerMinute + 4);
+              final hintTextSnippet = switch (widget.filteredMusicOrNot) {
+                null => 'all',
+                true => 'music',
+                false => 'non-music'
+              };
               final theContent = Column(children: [
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
@@ -635,7 +640,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                 autoFocus: true,
                                 controller: _searchController,
                                 elevation: const WidgetStatePropertyAll(0),
-                                hintText: 'Search all events...',
+                                hintText: 'Search $hintTextSnippet events...',
                                 leading: const Icon(Icons.search),
                                 trailing: [
                                   IconButton(
