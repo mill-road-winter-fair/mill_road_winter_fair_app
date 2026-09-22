@@ -657,6 +657,7 @@ Future<void> showListingDetailsDialog(
   // final int? Function(PositionedEvent, int, int?) toggleAlertAction,
   Future<dynamic> Function() onGetDirections, {
   required AnalyticsService analyticsService,
+  required DateTimeProvider dateTimeProvider,
 }) async {
   debugPrint('showListingDetailsDialog called');
 
@@ -720,6 +721,7 @@ Future<void> showListingDetailsDialog(
                       },
                       inDialog: true,
                       analyticsService: analyticsService,
+                      dateTimeProvider: dateTimeProvider,
                     ),
                   ),
                 ),

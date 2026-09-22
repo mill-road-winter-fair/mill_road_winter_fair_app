@@ -861,6 +861,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                               if (mounted) widget.analyticsService.setCurrentScreen('TimetablePage');
                                                                             },
                                                                             analyticsService: widget.analyticsService,
+                                                                            dateTimeProvider: widget.dateTimeProvider,
                                                                           );
                                                                         },
                                                                         child: Container(
