@@ -306,11 +306,8 @@ void main() {
       expect(timeTextFinder, findsOneWidget);
 
       final Text timeTextWidget = tester.widget(timeTextFinder);
-      // If the event has ended, it should be red and have a line-through decoration
-      if (hasEventEnded('10:00', dateTimeProvider)) {
-        expect(timeTextWidget.style?.color, Colors.red);
-        expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
-      }
+      expect(timeTextWidget.style?.color, Colors.red);
+      expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
     });
 
     testWidgets('formats cancelled listing with line-through text and a cancelled label', (WidgetTester tester) async {
