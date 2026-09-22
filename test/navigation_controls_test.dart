@@ -201,8 +201,10 @@ void main() {
     expect(cardBounds.top, greaterThan(mapBounds.bottom));
     expect(bounds.bottom, lessThanOrEqualTo(804));
     expect(tester.getRect(find.byType(NavigationBottomRow)).bottom, closeTo(844, 1));
-    expect(bounds.height, greaterThanOrEqualTo(64));
-    expect(tester.widget<Text>(find.text('250 m')).style!.fontSize, greaterThanOrEqualTo(26));
+    expect(bounds.height, 48);
+    expect(bounds.top, closeTo(cardBounds.top, 1));
+    expect(bounds.right, closeTo(tester.getRect(sharedCard).right - 12, 1));
+    expect(tester.widget<Text>(find.text('250 m')).style!.fontSize, 16);
     await tester.tap(button);
     expect(taps, 1);
     expect(tester.takeException(), isNull);

@@ -2069,11 +2069,15 @@ class NavigationBottomRow extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (destinationCard != null) Expanded(flex: 2, child: destinationCard!),
+                if (destinationCard != null) Expanded(child: destinationCard!),
                 if (destinationCard != null && distance != null) const SizedBox(width: 12),
                 if (distance != null)
-                  Expanded(child: NavigationDistanceButton(distance: distance!, onPressed: onDistancePressed)),
+                  SizedBox(
+                    width: 120,
+                    child: NavigationDistanceButton(distance: distance!, onPressed: onDistancePressed),
+                  ),
               ],
             ),
           ),
@@ -2094,22 +2098,21 @@ class NavigationDistanceButton extends StatelessWidget {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
-          //side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 0.5),
           borderRadius: BorderRadius.circular(12),
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        minimumSize: const Size(0, 64),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         elevation: 3,
       ),
       onPressed: onPressed,
-      child: Column(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.directions, size: 32),
-          const SizedBox(height: 4),
-          Text(distance, textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+          const Icon(Icons.directions, size: 16),
+          const SizedBox(width: 4),
+          Flexible(child: Text(distance, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
         ],
       ),
     );
