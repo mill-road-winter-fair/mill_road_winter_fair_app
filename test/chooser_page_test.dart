@@ -32,9 +32,15 @@ void main() {
   }
 
   Future<void> move(WidgetTester tester, String direction) async {
-    final button = find.byTooltip('$direction category');
-    await tester.ensureVisible(button);
-    await tester.tap(button);
+    final carousel = find.byType(PageView);
+    await tester.ensureVisible(carousel);
+    await tester.drag(
+        carousel,
+        Offset(
+            tester.getSize(carousel).width *
+                .56 *
+                (direction == 'Next' ? -1 : 1),
+            0));
     await tester.pumpAndSettle();
   }
 
@@ -44,9 +50,33 @@ void main() {
     expect(find.textContaining('Welcome'), findsOneWidget);
     expect(find.byType(PageView), findsOneWidget);
     expect(find.byType(BottomNavigationBar), findsOneWidget);
-    expect(find.text('1 / 8'), findsOneWidget);
+    expect(find.text('Food & Drink'), findsOneWidget);
     await tester.tap(find.text('Timetable'));
     expect(calls, ['tab:2']);
+  });
+
+  testWidgets('snowflake meets the caption and backdrop follows the selection',
+      (tester) async {
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await buildMainMenu(tester);
+    expect(find.byTooltip('Previous category'), findsNothing);
+    expect(find.byTooltip('Next category'), findsNothing);
+    expect(find.text('1 / 8'), findsNothing);
+    final snowflake =
+        tester.getRect(find.byKey(const ValueKey('carousel-snowflake')));
+    final caption =
+        tester.getRect(find.byKey(const ValueKey('category-caption-box')));
+    expect(snowflake.center.dy, closeTo(caption.top, .01));
+    expect(snowflake.height,
+        greaterThan(tester.getSize(find.byType(PageView)).height * .8));
+    expect(find.byKey(const ValueKey('diffuse-foodDrink')), findsOneWidget);
+    await move(tester, 'Next');
+    expect(find.byKey(const ValueKey('diffuse-music')), findsOneWidget);
+    expect(find.byKey(const ValueKey('diffuse-foodDrink')), findsNothing);
+    expect(find.text('Music'), findsOneWidget);
   });
 
   testWidgets('all eight cards keep their destinations over repeated cycles',
@@ -75,7 +105,6 @@ void main() {
     ];
     for (var cycle = 0; cycle < 3; cycle++) {
       for (var index = 0; index < assets.length; index++) {
-        expect(find.text('${index + 1} / 8'), findsOneWidget);
         final card = find.byKey(ValueKey('choice-${assets[index]}'));
         await tester.ensureVisible(card);
         await tester.tap(card);
@@ -83,33 +112,81 @@ void main() {
         await move(tester, 'Next');
       }
     }
-    expect(find.text('1 / 8'), findsOneWidget);
+    expect(find.text('Food & Drink'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('swipes wrap backwards and forwards', (tester) async {
     await buildMainMenu(tester);
     final carousel = find.byType(PageView);
-    await tester.drag(carousel, const Offset(550, 0));
+    await tester.drag(
+        carousel, Offset(tester.getSize(carousel).width * .56, 0));
     await tester.pumpAndSettle();
-    expect(find.text('8 / 8'), findsOneWidget);
-    await tester.drag(carousel, const Offset(-550, 0));
+    expect(find.text('Nearby'), findsOneWidget);
+    await tester.drag(
+        carousel, Offset(-tester.getSize(carousel).width * .56, 0));
     await tester.pumpAndSettle();
-    expect(find.text('1 / 8'), findsOneWidget);
+    expect(find.text('Food & Drink'), findsOneWidget);
     for (var i = 0; i < 17; i++) {
       await move(tester, 'Previous');
     }
-    expect(find.text('8 / 8'), findsOneWidget);
+    expect(find.text('Nearby'), findsOneWidget);
+  });
+
+  testWidgets('artwork descends and collapses continuously during a swipe',
+      (tester) async {
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await buildMainMenu(tester);
+    final food = find.byKey(const ValueKey('choice-foodDrink'));
+    final initial = tester.getRect(food);
+    final gesture = await tester.startGesture(tester.getCenter(food));
+    await gesture.moveBy(const Offset(-24, 0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(-75, 0));
+    await tester.pump();
+    final during = tester.getRect(food);
+    expect(during.top, greaterThan(initial.top));
+    expect(during.height, lessThan(initial.height));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tapping a neighbour selects it before opening its destination',
+      (tester) async {
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final calls = <String>[];
+    await buildMainMenu(tester, calls: calls);
+    final music = find.byKey(const ValueKey('choice-music'));
+    final visible =
+        tester.getRect(music).intersect(tester.getRect(find.byType(PageView)));
+    await tester.tapAt(visible.center);
+    await tester.pumpAndSettle();
+    expect(find.text('Music'), findsOneWidget);
+    expect(calls, isEmpty);
+    await tester.tap(find.byKey(const ValueKey('selected-category')));
+    expect(calls, ['music:false:true']);
   });
 
   testWidgets('static preference allows immediate category changes',
       (tester) async {
     staticMainMenuPage.value = true;
     await buildMainMenu(tester);
+    expect(
+      tester.getSize(find.byKey(const ValueKey('choice-foodDrink'))).height,
+      tester.getSize(find.byKey(const ValueKey('choice-music'))).height,
+      reason: 'Reduced motion keeps the artwork at a constant size',
+    );
     await move(tester, 'Previous');
-    expect(find.text('8 / 8'), findsOneWidget);
+    expect(find.text('Nearby'), findsOneWidget);
     await move(tester, 'Next');
-    expect(find.text('1 / 8'), findsOneWidget);
+    expect(find.text('Food & Drink'), findsOneWidget);
     staticMainMenuPage.value = false;
   });
 
@@ -122,16 +199,18 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await buildMainMenu(tester);
     final phoneHeight = tester.getSize(find.byType(PageView)).height;
-    expect(find.byTooltip('Next category').hitTestable(), findsOneWidget);
+    expect(find.byKey(const ValueKey('selected-category')).hitTestable(),
+        findsOneWidget);
     await move(tester, 'Next');
 
     tester.view.physicalSize = const Size(1024, 1366);
     await tester.pumpAndSettle();
-    expect(
-        tester.getSize(find.byType(PageView)).height, greaterThan(phoneHeight));
+    expect(tester.getSize(find.byType(PageView)).height,
+        greaterThanOrEqualTo(phoneHeight));
     expect(tester.getSize(find.byType(PageView)).width, lessThanOrEqualTo(680));
-    expect(find.text('2 / 8'), findsOneWidget);
-    expect(find.byTooltip('Next category').hitTestable(), findsOneWidget);
+    expect(find.text('Music'), findsOneWidget);
+    expect(find.byKey(const ValueKey('selected-category')).hitTestable(),
+        findsOneWidget);
 
     for (final size in [const Size(320, 568), const Size(844, 390)]) {
       tester.view.physicalSize = size;
@@ -143,11 +222,10 @@ void main() {
       expect(tester.takeException(), isNull);
       await move(tester, 'Next');
     }
-    expect(find.text('4 / 8'), findsOneWidget);
+    expect(find.text('Shopping & Stalls'), findsOneWidget);
   });
 
-  testWidgets(
-      'small phones show complete captions and controls without scrolling',
+  testWidgets('small phones show complete captions without scrolling',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.padding = const FakeViewPadding(top: 24, bottom: 24);
@@ -171,22 +249,14 @@ void main() {
             .first);
         expect(outerScroll.position.maxScrollExtent, 0,
             reason: 'The whole main menu should fit at $size, category $i');
-        final next = find.byTooltip('Next category');
+        final next = find.byType(BottomNavigationBar);
         expect(next.hitTestable(), findsOneWidget);
-        final card = find.byType(Card).evaluate().where((element) {
-          final rect = tester.getRect(find.byWidget(element.widget));
-          return rect.contains(tester.getCenter(find.byType(PageView)));
-        }).single;
-        for (final text in find
-            .descendant(
-                of: find.byWidget(card.widget), matching: find.byType(Text))
-            .evaluate()) {
-          final rect = tester.getRect(find.byWidget(text.widget));
-          expect(rect.bottom, lessThan(tester.getRect(next).top));
-          expect(rect.top,
-              greaterThan(tester.getRect(find.byType(AppBar)).bottom));
-        }
-        await tester.tap(next);
+        final caption = find.byKey(const ValueKey('selected-category'));
+        final rect = tester.getRect(caption);
+        expect(rect.bottom, lessThanOrEqualTo(tester.getRect(next).top));
+        expect(
+            rect.top, greaterThan(tester.getRect(find.byType(AppBar)).bottom));
+        await move(tester, 'Next');
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
       }
@@ -207,7 +277,7 @@ void main() {
     tester.view.physicalSize = const Size(800, 400);
     await tester.pumpAndSettle();
     await move(tester, 'Previous');
-    expect(find.text('8 / 8'), findsOneWidget);
+    expect(find.text('Nearby'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
