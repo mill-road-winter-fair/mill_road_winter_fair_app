@@ -74,7 +74,32 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('destination card shows listing details at top right with matching border and clears on cancel', (tester) async {
+  testWidgets('directions from the map opens its own route and leaves the map unchanged', (tester) async {
+    firstExecution = false;
+    final original = await openMap(tester);
+    final originalMarkers = Map.of(original.markers);
+    final routeClosed = original.getDirections('destination', const LatLng(52.199687, 0.138813), false);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Directions'), findsOneWidget);
+    expect(find.byIcon(Icons.filter_alt), findsNothing);
+    expect(find.byIcon(Icons.assistant_navigation), findsNothing);
+    expect(find.text('Road closures'), findsNothing);
+    expect(find.byTooltip('Switch to satellite view'), findsOneWidget);
+    expect(find.byType(BackButton), findsOneWidget);
+    expect(original.navigationInProgress, isFalse);
+    expect(original.markers, originalMarkers);
+    expect(tester.state<MapPageState>(find.byType(MapPage)), isNot(same(original)));
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    await routeClosed;
+    expect(tester.state<MapPageState>(find.byType(MapPage)), same(original));
+    expect(find.byIcon(Icons.filter_alt), findsOneWidget);
+    expect(find.text('Navigating to'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('destination card floats over the map with camera clearance with matching border and clears on cancel', (tester) async {
     // Set firstExecution to false to simulate normal app launch
     firstExecution = false;
 
@@ -93,12 +118,19 @@ void main() {
     expect(shape.side, BorderSide(color: Theme.of(tester.element(card)).colorScheme.primary, width: 0.5));
     final bounds = tester.getRect(card);
     final mapBounds = tester.getRect(find.byType(GoogleMap));
-    expect(bounds.right, closeTo(mapBounds.right - 8, 1));
-    expect(bounds.top, closeTo(mapBounds.top + 8, 1));
-    expect(bounds.width, lessThanOrEqualTo(260));
+    expect(bounds.left, closeTo(mapBounds.left + 12, 1));
+    expect(bounds.bottom, lessThanOrEqualTo(mapBounds.bottom - 12));
+    final padding = tester.widget<GoogleMap>(find.byType(GoogleMap)).padding.bottom;
+    expect(padding, greaterThanOrEqualTo(mapBounds.bottom - bounds.top));
+    expect(state.mapHeight, closeTo(mapBounds.height - padding, 1));
     expect(bounds.overlaps(tester.getRect(find.byTooltip('Switch to satellite view'))), isFalse);
     expect(tester.takeException(), isNull);
 
+    // Completing/repeating normal map initialisation must not clear the destination.
+    state.addAllVisibleMarkers();
+    await tester.pumpAndSettle();
+    expect(state.markers[const MarkerId('destination')]?.visible, isTrue);
+    expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).markers.any((marker) => marker.markerId.value == 'destination' && marker.visible), isTrue);
     await tester.tap(find.byIcon(Icons.cancel));
     await tester.pumpAndSettle();
     expect(find.text('Navigating to'), findsNothing);
@@ -141,7 +173,7 @@ void main() {
     expect(find.text('Navigating to'), findsOneWidget);
   });
 
-  testWidgets('distance control is large, bottom centred, safe from system inset and tappable', (tester) async {
+  testWidgets('navigation row keeps both controls below the map and above the system inset', (tester) async {
     var taps = 0;
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -149,17 +181,40 @@ void main() {
     await tester.pumpWidget(MaterialApp(
         home: MediaQuery(
       data: const MediaQueryData(size: Size(390, 844), padding: EdgeInsets.only(bottom: 40)),
-      child: Scaffold(body: NavigationDistanceButton(distance: '250 m', onPressed: () => taps++)),
+      child: Scaffold(body: Column(children: [
+        const Expanded(child: SizedBox(key: ValueKey('map-area'), width: double.infinity)),
+        NavigationBottomRow(
+          destinationCard: const SizedBox(height: 150, child: Text('Destination details')),
+          distance: '250 m',
+          onDistancePressed: () => taps++,
+        ),
+      ])),
     )));
     final button = find.byType(ElevatedButton);
     final bounds = tester.getRect(button);
-    expect(bounds.center.dx, closeTo(195, 1));
-    expect(bounds.bottom, closeTo(804, 1));
-    expect(bounds.width, greaterThanOrEqualTo(180));
+    final sharedCard = find.ancestor(of: find.text('Destination details'), matching: find.byType(Material)).first;
+    expect(find.descendant(of: sharedCard, matching: find.byType(NavigationDistanceButton)), findsOneWidget);
+    final cardBounds = tester.getRect(find.text('Destination details'));
+    final mapBounds = tester.getRect(find.byKey(const ValueKey('map-area')));
+    expect(bounds.left, greaterThan(cardBounds.right));
+    expect(bounds.top, greaterThan(mapBounds.bottom));
+    expect(cardBounds.top, greaterThan(mapBounds.bottom));
+    expect(bounds.bottom, lessThanOrEqualTo(804));
+    expect(tester.getRect(find.byType(NavigationBottomRow)).bottom, closeTo(844, 1));
     expect(bounds.height, greaterThanOrEqualTo(64));
     expect(tester.widget<Text>(find.text('250 m')).style!.fontSize, greaterThanOrEqualTo(26));
     await tester.tap(button);
     expect(taps, 1);
+    expect(tester.takeException(), isNull);
+
+    // Both controls remain alongside one another on a small phone.
+    tester.view.physicalSize = const Size(320, 568);
+    await tester.pumpAndSettle();
+    final narrowButton = tester.getRect(button);
+    final narrowCard = tester.getRect(find.text('Destination details'));
+    expect(narrowButton.left, greaterThan(narrowCard.right));
+    expect(narrowButton.right, lessThanOrEqualTo(308));
+    expect(narrowButton.top, greaterThan(tester.getRect(find.byKey(const ValueKey('map-area'))).bottom));
     expect(tester.takeException(), isNull);
   });
 }
