@@ -226,6 +226,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void sortingDropdownCallback(SortingMethod? selectedValue) {
     HapticFeedback.selectionClick();
+    detailsVisibleIndex = null;
     widget.analyticsService.logButtonTapped('sorting_dropdown_option');
     if (selectedValue is SortingMethod) {
       if (selectedValue == SortingMethod.nearest && currentLatLng == null) {
@@ -258,6 +259,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void filteringDropdownCallback(String? selectedValue) {
     HapticFeedback.selectionClick();
+    detailsVisibleIndex = null;
     widget.analyticsService.logButtonTapped('listings_category_filter');
     widget.analyticsService.logPreferenceSet('listings_category', selectedValue ?? 'all');
     widget.onSubfilterChange.call(selectedValue);
@@ -497,6 +499,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('listings_search_toggle');
             setState(() {
+              detailsVisibleIndex = null;
               _isSearching = !_isSearching;
               if (!_isSearching) {
                 _searchAnalyticsTimer?.cancel();
@@ -553,6 +556,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       icon: const Icon(Icons.close),
                                       onPressed: () {
                                         HapticFeedback.lightImpact();
+                                        detailsVisibleIndex = null;
                                         widget.analyticsService.logButtonTapped('search_close');
                                         _searchAnalyticsTimer?.cancel();
                                         setState(() {
@@ -564,6 +568,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     ),
                                   ],
                                   onChanged: (value) {
+                                    detailsVisibleIndex = null;
                                     _scheduleSearchAnalytics(value);
                                     setState(() {
                                       _searchQuery = value.toLowerCase();
