@@ -226,7 +226,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   void sortingDropdownCallback(SortingMethod? selectedValue) {
     HapticFeedback.selectionClick();
-    detailsVisibleIndex = null;
     widget.analyticsService.logButtonTapped('sorting_dropdown_option');
     if (selectedValue is SortingMethod) {
       if (selectedValue == SortingMethod.nearest && currentLatLng == null) {
@@ -242,6 +241,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       } else {
         widget.analyticsService.logPreferenceSet('sorting_method', selectedValue.name);
         setState(() {
+          detailsVisibleIndex = null;
           preferredSortingMethod = selectedValue;
         });
         if (itemScrollController.isAttached) {
