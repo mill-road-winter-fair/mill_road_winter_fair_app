@@ -108,6 +108,7 @@ class MapPageState extends State<MapPage> with RouteAware {
     _fetchListings = fetchExistingListings(http.Client());
     setVisibleMarkerLists();
     addAllVisibleMarkers();
+    _establishLocationAndRefreshMap();
     establishLocation();
     if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -119,6 +120,18 @@ class MapPageState extends State<MapPage> with RouteAware {
       }
     });
     super.initState();
+  }
+
+  Future<void> _establishLocationAndRefreshMap() async {
+    await establishLocation();
+
+    // On first launch Android can create the native map before the location
+    // permission dialog has completed. Rebuilding after the dialog closes lets
+    // GoogleMap observe myLocationEnabled changing from false to true and start
+    // its location layer (the blue dot).
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Polygon roadClosurePolygon() {
@@ -1601,41 +1614,44 @@ class MapPageState extends State<MapPage> with RouteAware {
                       if (didPop && navigationInProgress) cancelNavigation();
                     },
                     child: GoogleMap(
-                        style: mapStyle,
-                        mapType: mapType,
-                        rotateGesturesEnabled: false,
-                        compassEnabled: false,
-                        myLocationEnabled: true,
-                        myLocationButtonEnabled: false,
-                        mapToolbarEnabled: false,
-                        onMapCreated: (GoogleMapController controller) {
-                          _controller = controller;
-                          if (listings.isNotEmpty) {
-                            // We should have listings by this point so set the camera to their bounds
-                            _setMapCameraToFitMapMarkers();
+                      style: mapStyle,
+                      mapType: mapType,
+                      rotateGesturesEnabled: false,
+                      compassEnabled: false,
+                      myLocationEnabled: locationServicesEnabled &&
+                          (locationPermission == LocationPermission.always ||
+                              locationPermission == LocationPermission.whileInUse),
+                      myLocationButtonEnabled: false,
+                      mapToolbarEnabled: false,
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller = controller;
+                        if (listings.isNotEmpty) {
+                          // We should have listings by this point so set the camera to their bounds
+                          _setMapCameraToFitMapMarkers();
+                        }
+                      },
+                      initialCameraPosition: CameraPosition(
+                        target: const LatLng(52.199174, 0.140929),
+                        zoom: 14.1,
+                        bearing: _mapBearing,
+                      ),
+                      onCameraMove: (CameraPosition position) {
+                        debugPrint('MapPageState onCameraMove called');
+                        setState(() {
+                          switch (preferredMapOrientation) {
+                            case MapOrientation.adaptive:
+                              _compassBearing = 90;
+                              break;
+                            case MapOrientation.alwaysNorth:
+                              _compassBearing = 0;
+                              break;
                           }
-                        },
-                        initialCameraPosition: CameraPosition(
-                          target: const LatLng(52.199174, 0.140929),
-                          zoom: 14.1,
-                          bearing: _mapBearing,
-                        ),
-                        onCameraMove: (CameraPosition position) {
-                          debugPrint('MapPageState onCameraMove called');
-                          setState(() {
-                            switch (preferredMapOrientation) {
-                              case MapOrientation.adaptive:
-                                _compassBearing = 90;
-                                break;
-                              case MapOrientation.alwaysNorth:
-                                _compassBearing = 0;
-                                break;
-                            }
-                          });
-                        },
-                        polygons: _polygons,
-                        markers: markers.values.toSet(),
-                        polylines: polylines),
+                        });
+                      },
+                      polygons: _polygons,
+                      markers: markers.values.toSet(),
+                      polylines: polylines
+                    ),
                   );
                 },
               ),
