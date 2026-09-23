@@ -1638,6 +1638,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                     if (navigationInProgress == true && doingAPushNavigation == null)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
+                        tooltip: 'Cancel navigation',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('cancel_navigation');
@@ -1665,6 +1666,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'homeBtn',
+                        tooltip: 'Show the whole Fair map',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('home');
@@ -1719,6 +1721,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
                         heroTag: 'centreOnUserBtn',
+                        tooltip: 'Centre map on your location',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('centre_on_user');
@@ -1770,6 +1773,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                       ),
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
+                      tooltip: mapType == MapType.normal ? 'Switch to satellite map' : 'Switch to street map',
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         widget.analyticsService.logButtonTapped('map_type_toggle');
@@ -1811,6 +1815,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'mapBearingBtn',
+                        tooltip: preferredMapOrientation == MapOrientation.adaptive ? 'Keep north at the top' : 'Use direction of travel',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('map_orientation_toggle');
@@ -1857,6 +1862,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                           if (navigationInProgress == false)
                             FloatingActionButton(
                               heroTag: 'filterBtn',
+                              tooltip: 'Filter map markers',
                               onPressed: () {
                                 HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('map_filter');
@@ -1922,18 +1928,22 @@ class MapPageState extends State<MapPage> with RouteAware {
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
                       color: Theme.of(context).colorScheme.surface,
-                      child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('road_closures_legend');
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return roadClosuresDialog();
-                            },
-                          );
-                        },
-                        child: Container(
+                      child: Semantics(
+                        button: true,
+                        label: 'Road closures. Show more information',
+                        excludeSemantics: true,
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('road_closures_legend');
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return roadClosuresDialog();
+                              },
+                            );
+                          },
+                          child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
@@ -1964,6 +1974,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                 ),
                               ),
                             ],
+                          ),
                           ),
                         ),
                       ),
