@@ -65,6 +65,30 @@ KEY_PASSWORD=\\The password you set when generating the keystore
 
 13. You should now have everything you need to run the app locally.
 
+### Run configurations and analytics
+
+Shared run configurations are provided for Android Studio in `.run/` and VS Code in `.vscode/launch.json`. They correspond to these commands:
+
+No analytics (the default development mode):
+
+```shell
+flutter run --dart-define-from-file=.env
+```
+
+Analytics sent to the development Firebase project (in Firebase debug mode):
+
+```shell
+flutter run --dart-define-from-file=.env --dart-define=DEV_ANALYTICS=true
+```
+
+Analytics sent to the production Firebase project:
+
+```shell
+flutter run --dart-define-from-file=.env --release
+```
+
+The matching configurations are named `MRWF: no analytics`, `MRWF: dev analytics` and `MRWF: production release`. The development-analytics configuration first enables Firebase Analytics DebugView for the app with `adb shell setprop debug.firebase.analytics.app com.theberridge.mill_road_winter_fair_app`. An analytics-free run does not initialise Firebase analytics and does not change the user's saved consent preference.
+
 ## Google Cloud Platform
 The app currently uses the the Google Maps Platform within GCP in order to access the following API(s):
 1. Maps SDK for Android (To render the interactive map on the app's homepage.)
