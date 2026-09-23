@@ -770,9 +770,56 @@ String formatTimeRange(DateTime startTime, DateTime endTime) {
   return '${formatTime(startTime)}–${formatTime(endTime)}';
 }
 
-void shareListing(String theTitle, String theLocation, String theStartTimeString, String theEndTimeString, BuildContext context) async {
+void shareListing(
+  String theTitle,
+  String theLocation,
+  String theStartTimeString,
+  String theEndTimeString,
+  BuildContext context, {
+  bool cancelled = false,
+}) async {
   debugPrint('shareEvent called with theEvent=$theTitle theLocation=$theLocation theStartTime=$theStartTimeString theEndTimeString=$theEndTimeString');
-  final now = DateTime.now();
+  final msgText = buildListingShareText(
+    theTitle,
+    theLocation,
+    theStartTimeString,
+    theEndTimeString,
+    cancelled: cancelled,
+  );
+  final params = ShareParams(
+    text: msgText,
+  );
+  try {
+    await SharePlus.instance.share(params);
+  } catch (e) {
+    debugPrint('shareEvent error launching SharePlus::\n$e');
+    if (context.mounted) {
+      Fluttertoast.showToast(
+        msg: 'Couldn’t launch share sheet. Please try again later',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
+      );
+    }
+  }
+}
+
+String buildListingShareText(
+  String theTitle,
+  String theLocation,
+  String theStartTimeString,
+  String theEndTimeString, {
+  required bool cancelled,
+  DateTime? currentTime,
+}) {
+  if (cancelled) {
+    return '$theTitle at $theLocation has been cancelled and will not be appearing at $fairName.\nhttps://www.millroadwinterfair.org/';
+  }
+
+  final now = currentTime ?? DateTime.now();
   final startTime = combineDateAndTime(theStartTimeString, fairDate);
   final endTime = combineDateAndTime(theEndTimeString, fairDate);
   final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
@@ -812,25 +859,7 @@ void shareListing(String theTitle, String theLocation, String theStartTimeString
     msgText += 'at $theTitle at $theLocation';
   }
   msgText += ', $fairName\nhttps://www.millroadwinterfair.org/';
-  final params = ShareParams(
-    text: msgText,
-  );
-  try {
-    await SharePlus.instance.share(params);
-  } catch (e) {
-    debugPrint('shareEvent error launching SharePlus::\n$e');
-    if (context.mounted) {
-      Fluttertoast.showToast(
-        msg: 'Couldn’t launch share sheet. Please try again later',
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
-        fontSize: 16,
-        toastLength: Toast.LENGTH_LONG,
-        timeInSecForIosWeb: 4,
-      );
-    }
-  }
+  return msgText;
 }
 
 DateTime combineDateAndTime(String theTime, DateTime theDate) {
