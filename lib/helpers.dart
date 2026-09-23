@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -47,6 +48,7 @@ class FairScaffold extends StatelessWidget {
       right: false,
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
+        extendBody: currentTab == 0 && !(allowBack ?? false),
         appBar: AppBar(
           titleSpacing: 0,
           leadingWidth: 44,
@@ -69,7 +71,44 @@ class FairScaffold extends StatelessWidget {
         ),
         body: body,
         drawer: fairDrawer(context),
-        bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: (allowBack ?? false) ? null : SizedBox(
+          width: 64,
+          height: 64,
+          child: Semantics(
+            selected: currentTab == 0,
+            child: FloatingActionButton(
+              key: const ValueKey('home-navigation-button'),
+              heroTag: null,
+              tooltip: 'Home',
+              elevation: 4,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              shape: CircleBorder(side: BorderSide(
+                color: Theme.of(context).colorScheme.surface, width: 3)),
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                onTabSelected(0);
+              },
+              child: SvgPicture.asset('assets/mainMenuPage/snowflake.svg',
+                width: 36, height: 36, excludeFromSemantics: true,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).colorScheme.onPrimary, BlendMode.srcIn)),
+            ),
+          ),
+        ),
+        bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
+          key: const ValueKey('navigation-bar-surface'),
+          height: 64,
+          padding: EdgeInsets.zero,
+          elevation: 0,
+          color: Theme.of(context).colorScheme.surface,
+          surfaceTintColor: Colors.transparent,
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 5,
+          clipBehavior: Clip.antiAlias,
+          child: fairBottomNavigationBar(currentTab, onTabSelected),
+        ),
       )
     );
   }
@@ -78,22 +117,25 @@ class FairScaffold extends StatelessWidget {
 
 
 BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected) {
+  // Visual order differs from the stable page indices used throughout the app.
+  const tabOrder = [1, 2, 0, 3, 4];
   return BottomNavigationBar(
+    backgroundColor: Colors.transparent,
     type: BottomNavigationBarType.fixed,
     showUnselectedLabels: true,
     elevation: 0,
-    currentIndex: index,
+    currentIndex: tabOrder.indexOf(index),
     selectedFontSize: 12,
     unselectedFontSize: 12,
     iconSize: 30,
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
-      onTabSelected.call(selectedIndex);
+      onTabSelected.call(tabOrder[selectedIndex]);
     },
     items: const [
-      BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
       BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
       BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
+      BottomNavigationBarItem(icon: SizedBox(width: 30, height: 30), label: "Home"),
       BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
       BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
     ],

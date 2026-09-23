@@ -250,7 +250,8 @@ void main() {
         expect(outerScroll.position.maxScrollExtent, 0,
             reason: 'The whole main menu should fit at $size, category $i');
         final next = find.byType(BottomNavigationBar);
-        expect(next.hitTestable(), findsOneWidget);
+        expect(find.byKey(const ValueKey('home-navigation-button')).hitTestable(),
+            findsOneWidget);
         final caption = find.byKey(const ValueKey('selected-category'));
         final rect = tester.getRect(caption);
         expect(rect.bottom, lessThanOrEqualTo(tester.getRect(next).top));

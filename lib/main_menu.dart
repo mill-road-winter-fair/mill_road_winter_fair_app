@@ -111,32 +111,31 @@ class _MainMenuState extends State<MainMenu> {
           onPressed: _about,
         ),
       ],
-      body: SafeArea(
-        child: ValueListenableBuilder<bool>(
-          valueListenable: staticMainMenuPage,
-          builder: (context, staticMode, _) => Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned.fill(
-                  child: _DiffuseArtwork(
-                asset: choices[_selected].asset,
-                reduceMotion:
-                    staticMode || MediaQuery.disableAnimationsOf(context),
-              )),
-              _FairCarousel(
-                controller: _controller,
-                choices: choices,
-                selected: _selected,
-                reduceMotion:
-                    staticMode || MediaQuery.disableAnimationsOf(context),
-                onSelected: (page) =>
-                    setState(() => _selected = page % choices.length),
-                onScrollEnd: _rebase,
-                onMove: _move,
-                onAbout: _about,
-              ),
-            ],
-          ),
+      body: ValueListenableBuilder<bool>(
+        valueListenable: staticMainMenuPage,
+        builder: (context, staticMode, _) => Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+                child: _DiffuseArtwork(
+              asset: choices[_selected].asset,
+              reduceMotion:
+                  staticMode || MediaQuery.disableAnimationsOf(context),
+            )),
+            SafeArea(
+                child: _FairCarousel(
+              controller: _controller,
+              choices: choices,
+              selected: _selected,
+              reduceMotion:
+                  staticMode || MediaQuery.disableAnimationsOf(context),
+              onSelected: (page) =>
+                  setState(() => _selected = page % choices.length),
+              onScrollEnd: _rebase,
+              onMove: _move,
+              onAbout: _about,
+            )),
+          ],
         ),
       ),
     );
@@ -201,7 +200,7 @@ class _FairCarousel extends StatelessWidget {
           .map((choice) =>
               measure(choice.title, titleStyle) +
               measure(choice.description, theme.textTheme.bodyMedium) +
-              38)
+              70)
           .reduce(math.max);
       final availableHeight = constraints.maxHeight - logoHeight - 16;
       final stageHeight = landscape
@@ -237,7 +236,8 @@ class _FairCarousel extends StatelessWidget {
                     onTap: choices[selected].onTap,
                     borderRadius: BorderRadius.circular(20),
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      // Keep the caption clear of the floating Home button.
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
                       child: Row(children: [
                         Expanded(
                             child: Column(

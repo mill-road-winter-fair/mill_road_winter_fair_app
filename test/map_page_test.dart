@@ -121,8 +121,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check the map buttons
-      expect(find.byType(FloatingActionButton), findsExactly(5));
-      expect(find.byIcon(Icons.home), findsExactly(2));
+      expect(find.byType(FloatingActionButton), findsExactly(6));
+      expect(find.byIcon(Icons.home), findsOneWidget);
       expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
       expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
       expect(find.byIcon(Icons.filter_alt), findsOneWidget);
