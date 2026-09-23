@@ -154,8 +154,10 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final String approxDistance;
   final bool detailsVisible;
   final bool listingFavourited;
+  final bool listingAlerted;
   final VoidCallback? onDetailsTapped;
   final VoidCallback? onFavouriteTapped;
+  final VoidCallback? onAlertTapped;
   final Function onGetDirections;
   final bool inDialog;
   final AnalyticsService analyticsService;
@@ -178,8 +180,10 @@ class SpecificListingInfoSheet extends StatefulWidget {
     required this.approxDistance,
     required this.detailsVisible,
     required this.listingFavourited,
+    required this.listingAlerted,
     this.onDetailsTapped,
     this.onFavouriteTapped,
+    this.onAlertTapped,
     required this.onGetDirections,
     required this.inDialog,
     required this.analyticsService,
@@ -329,8 +333,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 onPressed: widget.cancelled && !widget.listingFavourited
                     ? null
                     : () {
-                        widget.onFavouriteTapped?.call();
                         HapticFeedback.lightImpact();
+                        widget.onFavouriteTapped?.call();
                         widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
                       },
                 padding: const EdgeInsets.all(0),
@@ -341,13 +345,36 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 icon: FaIcon(
                   shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                   (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                  size: 22,
+                  size: 25,
                   color: widget.cancelled && !widget.listingFavourited
                       ? Theme.of(context).disabledColor
                       : Theme.of(context).colorScheme.primary,
                 ),
               ),
-
+              const SizedBox(width: 6),
+              IconButton(
+                onPressed: widget.cancelled && !alertsStore.alertExists(widget.listingId)
+                    ? null
+                    : () {
+                        HapticFeedback.lightImpact();
+                        widget.onAlertTapped?.call();
+                        setState(() { });
+                        widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
+                      },
+                padding: const EdgeInsets.all(0),
+                style: ElevatedButton.styleFrom(
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                    padding: const EdgeInsets.all(0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                icon: FaIcon(
+                  shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                  (widget.listingAlerted) ? FontAwesomeIcons.solidBell : FontAwesomeIcons.bell,
+                  size: 25,
+                  color: widget.cancelled && !widget.listingAlerted
+                      ? Theme.of(context).disabledColor
+                      : Theme.of(context).colorScheme.primary,
+                ),
+              ),
               const SizedBox(width: 6),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -676,6 +703,7 @@ Future<void> showListingDetailsDialog(
   //int alertNoticePeriod,
   void Function(VoidCallback) setStateFunction,
   // final int? Function(PositionedEvent, int, int?) toggleAlertAction,
+  void Function() onAlertTapped,
   Future<dynamic> Function() onGetDirections, {
   required AnalyticsService analyticsService,
 }) async {
@@ -699,54 +727,63 @@ Future<void> showListingDetailsDialog(
       context: context,
       barrierColor: Colors.black38,
       builder: (_) => StatefulBuilder(
-            builder: (ctx2, setStateDialog) {
-              return Dialog(
-                insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
-                shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
-                backgroundColor: colorScheme.surfaceContainerLowest,
-                shadowColor: colorScheme.surfaceContainerHighest,
-                elevation: 12,
-                child: SingleChildScrollView(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                    child: SpecificListingInfoSheet(
-                      listingId: event.id,
-                      cancelled: event.cancelled,
-                      brickAndMortar: event.brickAndMortar,
-                      emoji: event.emoji,
-                      title: event.name,
-                      subtitle: event.subtitle,
-                      location: event.location,
-                      description: event.description,
-                      email: event.email,
-                      website: event.website,
-                      phoneNumber: event.phoneNumber,
-                      imageURL: event.imageURL,
-                      startTime: formatTime(event.startTime),
-                      endTime: formatTime(event.endTime),
-                      approxDistance: distanceMessage,
-                      detailsVisible: true,
-                      listingFavourited: favouriteListingKeys.value.contains(event.id),
-                      onFavouriteTapped: () {
-                        favouriteOrNotListing(event);
-                        setStateFunction.call;
-                        setStateDialog(() {});
-                      },
-                      onGetDirections: () async {
-                        safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
-                        onGetDirections.call();
-                      },
-                      inDialog: true,
-                      analyticsService: analyticsService,
-                    ),
-                  ),
+        builder: (ctx2, setStateDialog) {
+          return Dialog(
+            insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
+            shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+            backgroundColor: colorScheme.surfaceContainerLowest,
+            shadowColor: colorScheme.surfaceContainerHighest,
+            elevation: 12,
+            child: SingleChildScrollView(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              );
-            },
-          ));
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                child: SpecificListingInfoSheet(
+                  listingId: event.id,
+                  cancelled: event.cancelled,
+                  brickAndMortar: event.brickAndMortar,
+                  emoji: event.emoji,
+                  title: event.name,
+                  subtitle: event.subtitle,
+                  location: event.location,
+                  description: event.description,
+                  email: event.email,
+                  website: event.website,
+                  phoneNumber: event.phoneNumber,
+                  imageURL: event.imageURL,
+                  startTime: formatTime(event.startTime),
+                  endTime: formatTime(event.endTime),
+                  approxDistance: distanceMessage,
+                  detailsVisible: true,
+                  listingFavourited: favouriteListingKeys.value.contains(event.id),
+                  listingAlerted: alertsStore.alertExists(event.id),
+                  onFavouriteTapped: () {
+                    HapticFeedback.lightImpact();
+                    favouriteOrNotListing(event);
+                    setStateFunction.call;
+                    setStateDialog(() {});
+                  },
+                  onGetDirections: () async {
+                    HapticFeedback.lightImpact();
+                    safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                    onGetDirections.call();
+                  },
+                  onAlertTapped: () async {
+                    HapticFeedback.lightImpact();
+                    onAlertTapped.call();
+                    setStateDialog(() {});
+                  },
+                  inDialog: true,
+                  analyticsService: analyticsService,
+                ),
+              ),
+            ),
+          );
+        },
+      )
+    );
   await Navigator.of(context).push(listingDetailsDialogRoute!);
   removeMiniPopup(); // just in case one was opened
 }

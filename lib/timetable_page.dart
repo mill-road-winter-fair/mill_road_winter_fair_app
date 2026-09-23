@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -329,14 +330,16 @@ class _TimetablePageState extends State<TimetablePage> {
           children: [
             Flexible(
               fit: FlexFit.loose,
-              child: AutoSizeText('${pe.name}\u{00AD}',
-                  style: TextStyle(height: 0.95, fontSize: maxTitleFontSize, fontWeight: FontWeight.bold),
-                  maxLines: maxLines,
-                  minFontSize: minTitleFontSize,
-                  maxFontSize: maxTitleFontSize,
-                  stepGranularity: step,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis),
+              child: AutoSizeText(
+                '${pe.name}\u{00AD}',
+                style: TextStyle(height: 0.95, fontSize: maxTitleFontSize, fontWeight: FontWeight.bold),
+                maxLines: maxLines,
+                minFontSize: minTitleFontSize,
+                maxFontSize: maxTitleFontSize,
+                stepGranularity: step,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis
+              ),
             ),
             if (includeDate) SizedBox(height: (pe.height * 0.05).clamp(2, pe.height * 0.25)),
             if (includeDate)
@@ -842,19 +845,25 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                           showListingDetailsDialog(
                                                                             context,
                                                                             pe,
-                                                                            //alertNoticePeriod,
                                                                             setState,
                                                                             () async {
+                                                                              HapticFeedback.lightImpact();
+                                                                              toggleListingAlert(pe.id, alertNoticePeriod, context);
+                                                                              setState(() { });
+                                                                            },
+                                                                            () async {
                                                                               await Navigator.push(
-                                                                                  context,
-                                                                                  MaterialPageRoute(
-                                                                                      builder: (context) => MapPage(
-                                                                                            listings: listings,
-                                                                                            onTabSelected: (_) => {},
-                                                                                            destinationId: pe.id,
-                                                                                            destinationLatLng: pe.latLng,
-                                                                                            analyticsService: widget.analyticsService,
-                                                                                          )));
+                                                                                context,
+                                                                                MaterialPageRoute(
+                                                                                  builder: (context) => MapPage(
+                                                                                    listings: listings,
+                                                                                    onTabSelected: (_) => {},
+                                                                                    destinationId: pe.id,
+                                                                                    destinationLatLng: pe.latLng,
+                                                                                    analyticsService: widget.analyticsService,
+                                                                                  )
+                                                                                )
+                                                                              );
                                                                               if (mounted) widget.analyticsService.setCurrentScreen('TimetablePage');
                                                                             },
                                                                             analyticsService: widget.analyticsService,
@@ -867,10 +876,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                                 ? colorScheme.primary.withAlpha(40)
                                                                                 : colorScheme.onPrimary,
                                                                             borderRadius: BorderRadius.circular(4),
-                                                                            boxShadow: [
-                                                                              BoxShadow(
-                                                                                  color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)
-                                                                            ],
+                                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
                                                                             border: Border.all(width: 0.2, color: colorScheme.onSecondary),
                                                                           ),
                                                                           child: eventRect(pe, colorScheme, isLandscape, null),
@@ -879,9 +885,15 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                     ),
                                                               if (!scaling && favouriteListingKeys.value.contains(pe.id))
                                                                 Positioned(
-                                                                  top: pe.top + 2,
-                                                                  left: pe.left + pe.width - 18,
-                                                                  child: Icon(Icons.favorite, size: 16, color: Colors.red.withAlpha(120)),
+                                                                  top: pe.top + 1,
+                                                                  left: pe.left + pe.width - 15,
+                                                                  child: Icon(Icons.favorite, size: 14, color: Colors.red.withAlpha(120)),
+                                                                ),
+                                                              if (!scaling && alertsStore.alertExists(pe.id))
+                                                                Positioned(
+                                                                  top: pe.top + pe.height - 14,
+                                                                  left: pe.left + pe.width - 15,
+                                                                  child: FaIcon(FontAwesomeIcons.solidBell, size: 14, color: Colors.red.withAlpha(120)),
                                                                 ),
                                                             ],
                                                           ],
