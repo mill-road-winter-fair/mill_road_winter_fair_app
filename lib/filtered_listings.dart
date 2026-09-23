@@ -297,6 +297,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   // Function to toggle the listing's presence in the list of favourites
   void favouriteOrNotListing(String listingID) {
     if (isListingFavourited(listingID)) {
+      if (filterCategory == 'favourite' && detailsVisibleIndex != null && filteredListings[detailsVisibleIndex!]['id'] == listingID) detailsVisibleIndex = null;
       favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
     } else {
       favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
