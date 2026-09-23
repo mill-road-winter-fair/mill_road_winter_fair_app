@@ -12,6 +12,16 @@ import 'globals.dart';
 const _repositoryUrl =
     'https://github.com/mill-road-winter-fair/mill_road_winter_fair_app';
 
+const _panelShadows = [
+  BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2)),
+];
+
+ButtonStyle _aboutButtonStyle(BuildContext context) => TextButton.styleFrom(
+      foregroundColor: Theme.of(context).colorScheme.tertiary,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      alignment: Alignment.centerLeft,
+    );
+
 class AboutAppPage extends StatefulWidget {
   final AnalyticsService analyticsService;
 
@@ -71,6 +81,7 @@ class _AboutAppPageState extends State<AboutAppPage> with RouteAware {
       right: false,
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
+        backgroundColor: colours.surfaceDim,
         appBar: AppBar(
           leading: Navigator.canPop(context)
               ? BackButton(onPressed: () {
@@ -102,6 +113,7 @@ class _AboutAppPageState extends State<AboutAppPage> with RouteAware {
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
                             color: colours.primary,
+                            boxShadow: _panelShadows,
                             borderRadius: BorderRadius.circular(24),
                           ),
                           child: Column(
@@ -306,13 +318,14 @@ class _AboutAppPageState extends State<AboutAppPage> with RouteAware {
                                 url:
                                     'https://www.millroadwinterfair.org/app-feedback-form/',
                                 analyticsService: widget.analyticsService,
-                                analyticsId: 'app_feedback_hyperlink',
-                                prominent: true),
+                                analyticsId: 'app_feedback_hyperlink'),
                             const Divider(),
                             const Text(
                                 'With thanks to everyone who contributes code, artwork, ideas and time, and to the people who maintain the open-source software we use.'),
-                            OutlinedButton.icon(
-                              icon: const Icon(Icons.description_outlined),
+                            TextButton.icon(
+                              style: _aboutButtonStyle(context),
+                              icon: const Icon(Icons.description_outlined,
+                                  size: 16),
                               label: const Text('View licences'),
                               onPressed: () {
                                 HapticFeedback.lightImpact();
@@ -359,6 +372,8 @@ class _AboutSection extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
+        color: theme.colorScheme.onPrimary,
+        boxShadow: _panelShadows,
         border: Border.all(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.16)),
         borderRadius: BorderRadius.circular(20),
@@ -421,13 +436,11 @@ class _AboutLink extends StatelessWidget {
       {required this.label,
       required this.url,
       required this.analyticsService,
-      required this.analyticsId,
-      this.prominent = false});
+      required this.analyticsId});
   final String label;
   final String url;
   final AnalyticsService analyticsService;
   final String analyticsId;
-  final bool prominent;
 
   Future<void> _open(BuildContext context) async {
     HapticFeedback.lightImpact();
@@ -450,22 +463,12 @@ class _AboutLink extends StatelessWidget {
     final child = Text(label);
     return Semantics(
       link: true,
-      child: prominent
-          ? FilledButton.icon(
-              onPressed: () => _open(context),
-              icon: const Icon(Icons.open_in_new, size: 18),
-              label: child)
-          : TextButton.icon(
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.tertiary,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                alignment: Alignment.centerLeft,
-              ),
-              onPressed: () => _open(context),
-              icon: const Icon(Icons.open_in_new, size: 16),
-              label: child,
-            ),
+      child: TextButton.icon(
+        style: _aboutButtonStyle(context),
+        onPressed: () => _open(context),
+        icon: const Icon(Icons.open_in_new, size: 16),
+        label: child,
+      ),
     );
   }
 }
