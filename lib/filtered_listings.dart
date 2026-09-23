@@ -537,7 +537,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   controller: _searchController,
                                   elevation: const WidgetStatePropertyAll(0),
                                   hintText: switch (widget.subfilterCategory) {
-                                    'all' => 'Search all listings...',
                                     'food' => 'Search food & drink vendors...',
                                     'shopping' => 'Search market stalls and shops...',
                                     'performanceMusic' => 'Search musical performances...',
@@ -548,7 +547,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     'visitExperience' => 'Search visits & experiences...',
                                     'service' => 'Search services...',
                                     'business' => 'Search other local businesses...',
-                                    _ => 'Search listings...',
+                                    _ => 'Search all listings...',
                                   },
                                   leading: const Icon(Icons.search),
                                   trailing: [
