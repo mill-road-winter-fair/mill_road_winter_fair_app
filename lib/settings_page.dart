@@ -368,7 +368,11 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'),
+                          Text(
+                            analyticsEnabledForBuild
+                                ? 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'
+                                : 'Analytics is disabled for this development run.',
+                          ),
                           const SizedBox(height: 4),
                           RichText(
                             text: TextSpan(
@@ -392,13 +396,15 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           ),
                         ],
                       ),
-                      value: usageAnalyticsEnabled ?? false,
-                      onChanged: (bool value) async {
-                        HapticFeedback.selectionClick();
-                        widget.analyticsService.logButtonTapped('analytics_preference_toggle');
-                        await widget.analyticsService.setAnalyticsEnabled(value);
-                        if (mounted) setState(() {});
-                      },
+                      value: analyticsEnabledForBuild ? usageAnalyticsEnabled ?? false : false,
+                      onChanged: analyticsEnabledForBuild
+                          ? (bool value) async {
+                              HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('analytics_preference_toggle');
+                              await widget.analyticsService.setAnalyticsEnabled(value);
+                              if (mounted) setState(() {});
+                            }
+                          : null,
                     )
                   ],
                 ),
