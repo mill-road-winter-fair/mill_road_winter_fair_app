@@ -37,17 +37,22 @@ void main() {
       expect(result, equals(listings));
     });
 
-    test('fetchListings handles bad format (FormatException) and returns cached listings', () async {
-      listings = [
-        {'name': 'cached2'},
-      ];
+    test(
+      'fetchListings handles bad format (FormatException) and returns cached listings',
+      () async {
+        listings = [
+          {'name': 'cached2'},
+        ];
 
-      // Return an invalid JSON body that will cause json.decode to throw
-      mockClient = MockClient((request) async => http.Response('not a json', 200));
+        // Return an invalid JSON body that will cause json.decode to throw
+        mockClient = MockClient(
+          (request) async => http.Response('not a json', 200),
+        );
 
-      final result = await fetchListings(mockClient as http.Client);
+        final result = await fetchListings(mockClient as http.Client);
 
-      expect(result, equals(listings));
-    });
+        expect(result, equals(listings));
+      },
+    );
   });
 }

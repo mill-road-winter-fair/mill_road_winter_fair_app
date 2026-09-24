@@ -27,8 +27,14 @@ void main() {
   });
 
   group('ImportantInfoPage', () {
-    testWidgets('displays expected headings and content', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: ImportantInfoPage(analyticsService: FakeAnalyticsService())));
+    testWidgets('displays expected headings and content', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ImportantInfoPage(analyticsService: FakeAnalyticsService()),
+        ),
+      );
 
       // Verify headings
       expect(find.text('Important information'), findsOneWidget);
@@ -39,95 +45,111 @@ void main() {
       expect(find.text('Updates and contact'), findsOneWidget);
     });
 
-    testWidgets('back button and back gesture return to the last selected HomePage tab', (WidgetTester tester) async {
-      // Set firstExecution to false to simulate normal app launch
-      firstExecution = false;
+    testWidgets(
+      'back button and back gesture return to the last selected HomePage tab',
+      (WidgetTester tester) async {
+        // Set firstExecution to false to simulate normal app launch
+        firstExecution = false;
 
-      // Minimal listings so pages render correctly
-      listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
-      ];
+        // Minimal listings so pages render correctly
+        listings = [
+          {
+            'id': '1',
+            'visibleOnMap': 'TRUE',
+            'cancelled': 'FALSE',
+            'groupParent': 'FALSE',
+            'brickAndMortar': 'FALSE',
+            'emoji': '🍩',
+            'title': 'Glazed and Confused',
+            'subtitle': 'Doughnuts',
+            'groupID': '',
+            'food': 'TRUE',
+            'shopping': 'FALSE',
+            'charityCommunityInfo': 'FALSE',
+            'performance': 'FALSE',
+            'visitExperience': 'FALSE',
+            'service': 'FALSE',
+            'location': 'Gwydir St Car Park',
+            'description': 'Nice buns',
+            'email': '',
+            'website': 'https://www.glazedandconfused.com',
+            'phone': '01223 111111',
+            'latLng': '52.199687,0.138813',
+            'imageURL': '',
+            'startTime': '10:30',
+            'endTime': '16:30',
+          },
+        ];
 
-      await tester.pumpWidget(MyApp(
-        firstExecution: false,
-        analyticsService: FakeAnalyticsService(),
-      ));
-      await settle(tester);
+        await tester.pumpWidget(
+          MyApp(
+            firstExecution: false,
+            analyticsService: FakeAnalyticsService(),
+          ),
+        );
+        await settle(tester);
 
-      final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
+        final homePageState =
+            tester.state(find.byType(HomePage)) as HomePageState;
 
-      // Select the Listings tab before opening Important information.
-      await tester.tap(find.text('Listings'));
-      await settle(tester);
-      expect(homePageState.index, 3);
+        // Select the Listings tab before opening Important information.
+        await tester.tap(find.text('Listings'));
+        await settle(tester);
+        expect(homePageState.index, 3);
 
-      await tester.tap(find.byIcon(Icons.menu));
-      await settle(tester);
-      await tester.tap(find.text('Important information'));
-      await settle(tester);
-      expect(find.byType(ImportantInfoPage), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.menu));
+        await settle(tester);
+        await tester.tap(find.text('Important information'));
+        await settle(tester);
+        expect(find.byType(ImportantInfoPage), findsOneWidget);
 
-      // The AppBar back button returns to the previously selected tab.
-      await tester.tap(find.byTooltip('Back'));
-      await settle(tester);
-      expect(find.byType(ImportantInfoPage), findsNothing);
-      expect(homePageState.index, 3);
+        // The AppBar back button returns to the previously selected tab.
+        await tester.tap(find.byTooltip('Back'));
+        await settle(tester);
+        expect(find.byType(ImportantInfoPage), findsNothing);
+        expect(homePageState.index, 3);
 
-      // Repeat from a different tab using the system back/back gesture.
-      await tester.tap(find.text('Timetable'));
-      await settle(tester);
-      expect(homePageState.index, 2);
+        // Repeat from a different tab using the system back/back gesture.
+        await tester.tap(find.text('Timetable'));
+        await settle(tester);
+        expect(homePageState.index, 2);
 
-      await tester.tap(find.byIcon(Icons.menu));
-      await settle(tester);
-      await tester.tap(find.text('Important information'));
-      await settle(tester);
-      expect(find.byType(ImportantInfoPage), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.menu));
+        await settle(tester);
+        await tester.tap(find.text('Important information'));
+        await settle(tester);
+        expect(find.byType(ImportantInfoPage), findsOneWidget);
 
-      await tester.pageBack();
-      await settle(tester);
-      expect(find.byType(ImportantInfoPage), findsNothing);
-      expect(homePageState.index, 2);
-    });
+        await tester.pageBack();
+        await settle(tester);
+        expect(find.byType(ImportantInfoPage), findsNothing);
+        expect(homePageState.index, 2);
+      },
+    );
 
-    testWidgets('email hyperlink opens the contact dialog', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-          home: ImportantInfoPage(
-        analyticsService: FakeAnalyticsService(),
-      )));
+    testWidgets('email hyperlink opens the contact dialog', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ImportantInfoPage(analyticsService: FakeAnalyticsService()),
+        ),
+      );
 
       final emailParagraph = tester.widget<Text>(
         find.byWidgetPredicate(
-          (widget) => widget is Text && widget.textSpan?.toPlainText().contains('Email addresses for the Fair') == true,
+          (widget) =>
+              widget is Text &&
+              widget.textSpan?.toPlainText().contains(
+                    'Email addresses for the Fair',
+                  ) ==
+                  true,
         ),
       );
       final paragraphSpan = emailParagraph.textSpan as TextSpan;
-      final linkSpan = paragraphSpan.children!.whereType<TextSpan>().singleWhere((span) => span.text == 'here');
+      final linkSpan = paragraphSpan.children!
+          .whereType<TextSpan>()
+          .singleWhere((span) => span.text == 'here');
 
       (linkSpan.recognizer as TapGestureRecognizer).onTap!();
       await tester.pumpAndSettle();

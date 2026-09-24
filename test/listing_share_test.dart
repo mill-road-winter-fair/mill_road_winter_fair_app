@@ -31,7 +31,12 @@ void main() {
         currentTime: DateTime(2026, 12, 5, 9),
       );
 
-      expect(message, startsWith('At 10:30 I’ll be at Glazed and Confused at Gwydir St Car Park'));
+      expect(
+        message,
+        startsWith(
+          'At 10:30 I’ll be at Glazed and Confused at Gwydir St Car Park',
+        ),
+      );
       expect(message, isNot(contains('cancelled')));
     });
   });

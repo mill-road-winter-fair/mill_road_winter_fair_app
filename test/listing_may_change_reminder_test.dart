@@ -11,10 +11,15 @@ class RecordingNoticeAnalyticsService extends FakeAnalyticsService {
   final preferences = <String, String>{};
 
   @override
-  Future<void> logNoticeShown(String noticeName) async => notices.add(noticeName);
+  Future<void> logNoticeShown(String noticeName) async =>
+      notices.add(noticeName);
 
   @override
-  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
+  Future<void> logButtonTapped(
+    String buttonName, {
+    String? listingId,
+    String? listingName,
+  }) async {
     buttons.add(buttonName);
   }
 
@@ -33,7 +38,9 @@ void main() {
 
     test('uses a title appropriate to the date', () {
       expect(
-        ListingUpdateNotifier.titleFor(fairDate.subtract(const Duration(days: 1))),
+        ListingUpdateNotifier.titleFor(
+          fairDate.subtract(const Duration(days: 1)),
+        ),
         'Listings may change',
       );
       expect(
@@ -46,17 +53,22 @@ void main() {
       );
     });
 
-    testWidgets('can permanently dismiss the dialog', (WidgetTester tester) async {
+    testWidgets('can permanently dismiss the dialog', (
+      WidgetTester tester,
+    ) async {
       // Ensure no previous prefs — mock empty
       SharedPreferences.setMockInitialValues({});
       onTest = false;
       listingUpdateNoticeEnabled = true;
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: SizedBox())),
+      );
 
       final analytics = RecordingNoticeAnalyticsService();
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
-        tester.element(find.byType(SizedBox)), analyticsService: analytics,
+        tester.element(find.byType(SizedBox)),
+        analyticsService: analytics,
       );
       await tester.pumpAndSettle();
 
@@ -75,13 +87,17 @@ void main() {
       onTest = true;
     });
 
-    testWidgets('tracks opting to keep the listings notice', (WidgetTester tester) async {
+    testWidgets('tracks opting to keep the listings notice', (
+      WidgetTester tester,
+    ) async {
       SharedPreferences.setMockInitialValues({});
       onTest = false;
       listingUpdateNoticeEnabled = true;
       final analytics = RecordingNoticeAnalyticsService();
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: SizedBox())),
+      );
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
         analyticsService: analytics,
@@ -111,7 +127,9 @@ void main() {
         onTest = false;
         listingUpdateNoticeEnabled = false;
 
-        await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+        await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: SizedBox())),
+        );
         final context = tester.element(find.byType(SizedBox));
 
         for (final (noticeDate, expectedTitle) in [
@@ -120,7 +138,8 @@ void main() {
         ]) {
           final showNotice = ListingUpdateNotifier.maybeShowNotice(
             context,
-            now: noticeDate, analyticsService: FakeAnalyticsService(),
+            now: noticeDate,
+            analyticsService: FakeAnalyticsService(),
           );
           await tester.pumpAndSettle();
 
@@ -137,19 +156,25 @@ void main() {
       },
     );
 
-    testWidgets('does not show the same notice again within its interval', (WidgetTester tester) async {
+    testWidgets('does not show the same notice again within its interval', (
+      WidgetTester tester,
+    ) async {
       final noticeDate = fairDate.subtract(const Duration(days: 1));
       SharedPreferences.setMockInitialValues({
-        ListingUpdateNotifier.lastShownKeyFor(noticeDate): noticeDate.subtract(const Duration(days: 2)).millisecondsSinceEpoch,
+        ListingUpdateNotifier.lastShownKeyFor(noticeDate):
+            noticeDate.subtract(const Duration(days: 2)).millisecondsSinceEpoch,
       });
       onTest = false;
       listingUpdateNoticeEnabled = true;
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: SizedBox())),
+      );
 
       await ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
-        now: noticeDate, analyticsService: FakeAnalyticsService(),
+        now: noticeDate,
+        analyticsService: FakeAnalyticsService(),
       );
       await tester.pumpAndSettle();
 
@@ -157,21 +182,27 @@ void main() {
       onTest = true;
     });
 
-    testWidgets('tracks the three notices independently', (WidgetTester tester) async {
+    testWidgets('tracks the three notices independently', (
+      WidgetTester tester,
+    ) async {
       final beforeFair = fairDate.subtract(const Duration(hours: 1));
       SharedPreferences.setMockInitialValues({
-        ListingUpdateNotifier.lastShownKeyFor(beforeFair): beforeFair.millisecondsSinceEpoch,
+        ListingUpdateNotifier.lastShownKeyFor(beforeFair):
+            beforeFair.millisecondsSinceEpoch,
       });
       onTest = false;
       listingUpdateNoticeEnabled = true;
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: SizedBox())),
+      );
       final context = tester.element(find.byType(SizedBox));
       final analytics = RecordingNoticeAnalyticsService();
 
       final showFairDayNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        now: fairDate, analyticsService: analytics,
+        now: fairDate,
+        analyticsService: analytics,
       );
       await tester.pumpAndSettle();
 
@@ -183,7 +214,8 @@ void main() {
       final afterFair = fairDate.add(const Duration(days: 1));
       final showAfterFairNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        now: afterFair, analyticsService: analytics,
+        now: afterFair,
+        analyticsService: analytics,
       );
       await tester.pumpAndSettle();
 
@@ -193,9 +225,18 @@ void main() {
       await showAfterFairNotice;
 
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(beforeFair)), isNotNull);
-      expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(fairDate)), isNotNull);
-      expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(afterFair)), isNotNull);
+      expect(
+        prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(beforeFair)),
+        isNotNull,
+      );
+      expect(
+        prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(fairDate)),
+        isNotNull,
+      );
+      expect(
+        prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(afterFair)),
+        isNotNull,
+      );
       expect(analytics.notices, ['fair_day_notice', 'post_fair_notice']);
       expect(analytics.buttons, ['fair_day_notice_ok', 'post_fair_notice_ok']);
       expect(analytics.preferences, isEmpty);

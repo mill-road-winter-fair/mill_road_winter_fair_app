@@ -69,7 +69,8 @@ late bool preferredRoadClosurePolygonVisible;
 late bool listingUpdateNoticeEnabled;
 
 // Initialise the list of favourited listings (ValueNotifier as pages need to know when others change these)
-final ValueNotifier<Set<String>> favouriteListingKeys = ValueNotifier<Set<String>>({});
+final ValueNotifier<Set<String>> favouriteListingKeys =
+    ValueNotifier<Set<String>>({});
 
 // --- Location related globals (moved from get_current_location.dart) ---
 // Whether device location services are enabled and the permission status.
@@ -92,7 +93,8 @@ const maxDurationToBeEvent = Duration(minutes: 120);
 
 // Title
 const fairName = 'Mill Road Winter Fair 2026';
-String appBarTitle = fairName; // this may be changed in main, filtered_listings etc.
+String appBarTitle =
+    fairName; // this may be changed in main, filtered_listings etc.
 
 // Road closure coordinates rounded to 6 decimal places (~0.1 m precision).
 final List<LatLng> roadClosurePolygonPoints = [
@@ -245,17 +247,24 @@ const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'performanceMusic': SubfilterLabel('Music', Icons.music_note),
   'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free),
   'performanceDance': SubfilterLabel('Dance', Icons.emoji_people),
-  'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy),
+  'performanceOther': SubfilterLabel(
+    'Other performances',
+    Icons.theater_comedy,
+  ),
   'visitExperience': SubfilterLabel('Visit & Experience', Icons.tour),
   'food': SubfilterLabel('Food & Drink', Icons.fastfood),
   'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer),
   'business': SubfilterLabel('Business', Icons.business),
-  'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism),
-  'service': SubfilterLabel('Services', Icons.family_restroom)
+  'charityCommunityInfo': SubfilterLabel(
+    'Charity, Community, Info',
+    Icons.volunteer_activism,
+  ),
+  'service': SubfilterLabel('Services', Icons.family_restroom),
 };
 
 // Initialize user's analytics preference (null means they haven't been asked yet)
 bool? usageAnalyticsEnabled;
 
 // A RouteObserver to track navigation events for analytics purposes
-final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();

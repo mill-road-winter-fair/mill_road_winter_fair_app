@@ -29,10 +29,7 @@ class FakeUrlLauncher extends UrlLauncherPlatform {
 
 Finder findDrawerSocialButton(int index) {
   return find
-      .descendant(
-        of: find.byType(Drawer),
-        matching: find.byType(IconButton),
-      )
+      .descendant(of: find.byType(Drawer), matching: find.byType(IconButton))
       .at(index);
 }
 
@@ -50,7 +47,9 @@ void main() {
   });
 
   group('HomePage', () {
-    testWidgets('displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
+    testWidgets('displays correct title, BottomNavigationBar and buttons', (
+      WidgetTester tester,
+    ) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -84,10 +83,12 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(
+        MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+      );
 
       expect(find.text('Welcome'), findsOneWidget);
 
@@ -98,7 +99,9 @@ void main() {
       expect(find.text('Favourites'), findsOneWidget);
     });
 
-    testWidgets('Snowflake button in AppBar navigates to About the Fair page', (WidgetTester tester) async {
+    testWidgets('Snowflake button in AppBar navigates to About the Fair page', (
+      WidgetTester tester,
+    ) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -133,7 +136,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Provide initial mock values for shared preferences
@@ -141,7 +144,9 @@ void main() {
       await loadSettings();
 
       // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(
+        MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+      );
       await tester.pumpAndSettle();
 
       // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
@@ -162,7 +167,9 @@ void main() {
       await tester.pump(const Duration(seconds: 21));
     });
 
-    testWidgets('drawer displays expected widgets', (WidgetTester tester) async {
+    testWidgets('drawer displays expected widgets', (
+      WidgetTester tester,
+    ) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -196,10 +203,12 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(
+        MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+      );
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -237,7 +246,8 @@ void main() {
               appBarTitle: 'Test',
               body: const SizedBox(),
               currentTab: 0,
-              onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
             ),
           ),
         );
@@ -257,31 +267,29 @@ void main() {
         expect(fakeUrlLauncher.launchedUrls, [expectedUrl]);
       }
 
-      testWidgets(
-        'Visit our website button launches the Fair website',
-        (tester) async {
-          await openDrawer(tester);
+      testWidgets('Visit our website button launches the Fair website', (
+        tester,
+      ) async {
+        await openDrawer(tester);
 
-          await expectButtonLaunches(
-            tester,
-            find.text('Visit our website'),
-            'https://www.millroadwinterfair.org/',
-          );
-        },
-      );
+        await expectButtonLaunches(
+          tester,
+          find.text('Visit our website'),
+          'https://www.millroadwinterfair.org/',
+        );
+      });
 
-      testWidgets(
-        'Facebook button launches the Fair Facebook page',
-        (tester) async {
-          await openDrawer(tester);
+      testWidgets('Facebook button launches the Fair Facebook page', (
+        tester,
+      ) async {
+        await openDrawer(tester);
 
-          await expectButtonLaunches(
-            tester,
-            findDrawerSocialButton(0),
-            'https://www.facebook.com/MillRoadWinterFair/',
-          );
-        },
-      );
+        await expectButtonLaunches(
+          tester,
+          findDrawerSocialButton(0),
+          'https://www.facebook.com/MillRoadWinterFair/',
+        );
+      });
 
       testWidgets('X button launches the Fair X page', (tester) async {
         await openDrawer(tester);
@@ -293,20 +301,21 @@ void main() {
         );
       });
 
-      testWidgets(
-        'Instagram button launches the Fair Instagram page',
-        (tester) async {
-          await openDrawer(tester);
+      testWidgets('Instagram button launches the Fair Instagram page', (
+        tester,
+      ) async {
+        await openDrawer(tester);
 
-          await expectButtonLaunches(
-            tester,
-            findDrawerSocialButton(2),
-            'https://www.instagram.com/millroadwinterfair/',
-          );
-        },
-      );
+        await expectButtonLaunches(
+          tester,
+          findDrawerSocialButton(2),
+          'https://www.instagram.com/millroadwinterfair/',
+        );
+      });
 
-      testWidgets('Flickr button launches the Fair Flickr page', (tester) async {
+      testWidgets('Flickr button launches the Fair Flickr page', (
+        tester,
+      ) async {
         await openDrawer(tester);
 
         await expectButtonLaunches(
@@ -317,7 +326,121 @@ void main() {
       });
     });
 
-    testWidgets('navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
+    testWidgets(
+      'navigates to AboutTheFairPage when About the Fair in drawer is tapped',
+      (WidgetTester tester) async {
+        // Set firstExecution to false to simulate normal app launch
+        firstExecution = false;
+
+        listings = [
+          {
+            'id': '1',
+            'visibleOnMap': 'TRUE',
+            'cancelled': 'FALSE',
+            'groupParent': 'FALSE',
+            'brickAndMortar': 'FALSE',
+            'emoji': '🍩',
+            'title': 'Glazed and Confused',
+            'subtitle': 'Doughnuts',
+            'groupID': '',
+            'food': 'TRUE',
+            'shopping': 'FALSE',
+            'charityCommunityInfo': 'FALSE',
+            'performanceMusic': 'FALSE',
+            'performanceChildrens': 'FALSE',
+            'performanceDance': 'FALSE',
+            'performanceOther': 'FALSE',
+            'visitExperience': 'FALSE',
+            'service': 'FALSE',
+            'business': 'FALSE',
+            'location': 'Gwydir St Car Park',
+            'description': 'Nice buns',
+            'email': '',
+            'website': 'https://www.glazedandconfused.com',
+            'phone': '01223 111111',
+            'latLng': '52.199687,0.138813',
+            'imageURL': '',
+            'startTime': '10:30',
+            'endTime': '16:30',
+          },
+        ];
+
+        await tester.pumpWidget(
+          MyApp(
+            firstExecution: false,
+            analyticsService: FakeAnalyticsService(),
+          ),
+        );
+
+        await tester.tap(find.byIcon(Icons.menu));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('About the Fair'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AboutTheFairPage), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'navigates to ImportantInfoPage when Important information in drawer is tapped',
+      (WidgetTester tester) async {
+        // Set firstExecution to false to simulate normal app launch
+        firstExecution = false;
+
+        listings = [
+          {
+            'id': '1',
+            'visibleOnMap': 'TRUE',
+            'cancelled': 'FALSE',
+            'groupParent': 'FALSE',
+            'brickAndMortar': 'FALSE',
+            'emoji': '🍩',
+            'title': 'Glazed and Confused',
+            'subtitle': 'Doughnuts',
+            'groupID': '',
+            'food': 'TRUE',
+            'shopping': 'FALSE',
+            'charityCommunityInfo': 'FALSE',
+            'performanceMusic': 'FALSE',
+            'performanceChildrens': 'FALSE',
+            'performanceDance': 'FALSE',
+            'performanceOther': 'FALSE',
+            'visitExperience': 'FALSE',
+            'service': 'FALSE',
+            'business': 'FALSE',
+            'location': 'Gwydir St Car Park',
+            'description': 'Nice buns',
+            'email': '',
+            'website': 'https://www.glazedandconfused.com',
+            'phone': '01223 111111',
+            'latLng': '52.199687,0.138813',
+            'imageURL': '',
+            'startTime': '10:30',
+            'endTime': '16:30',
+          },
+        ];
+
+        await tester.pumpWidget(
+          MyApp(
+            firstExecution: false,
+            analyticsService: FakeAnalyticsService(),
+          ),
+        );
+
+        await tester.tap(find.byIcon(Icons.menu));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Important information'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ImportantInfoPage), findsOneWidget);
+      },
+    );
+
+    testWidgets('navigates to SettingsPage when Settings in drawer is tapped', (
+      WidgetTester tester,
+    ) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -351,106 +474,12 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
-
-      await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('About the Fair'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(AboutTheFairPage), findsOneWidget);
-    });
-
-    testWidgets('navigates to ImportantInfoPage when Important information in drawer is tapped', (WidgetTester tester) async {
-      // Set firstExecution to false to simulate normal app launch
-      firstExecution = false;
-
-      listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
-      ];
-
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
-
-      await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Important information'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ImportantInfoPage), findsOneWidget);
-    });
-
-    testWidgets('navigates to SettingsPage when Settings in drawer is tapped', (WidgetTester tester) async {
-      // Set firstExecution to false to simulate normal app launch
-      firstExecution = false;
-
-      listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
-      ];
-
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(
+        MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+      );
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -461,13 +490,75 @@ void main() {
       expect(find.byType(SettingsPage), findsOneWidget);
     });
 
-    testWidgets('navigates to WelcomeScreen/OnBoardingPage when App guide in drawer is tapped', (WidgetTester tester) async {
+    testWidgets(
+      'navigates to WelcomeScreen/OnBoardingPage when App guide in drawer is tapped',
+      (WidgetTester tester) async {
+        // Set firstExecution to false to simulate normal app launch
+        firstExecution = false;
+
+        // Set a realistic window size to avoid layout overflow in the test
+        tester.view.physicalSize = const Size(1080, 2400);
+        addTearDown(tester.view.resetPhysicalSize);
+
+        listings = [
+          {
+            'id': '1',
+            'visibleOnMap': 'TRUE',
+            'cancelled': 'FALSE',
+            'groupParent': 'FALSE',
+            'brickAndMortar': 'FALSE',
+            'emoji': '🍩',
+            'title': 'Glazed and Confused',
+            'subtitle': 'Doughnuts',
+            'groupID': '',
+            'food': 'TRUE',
+            'shopping': 'FALSE',
+            'charityCommunityInfo': 'FALSE',
+            'performanceMusic': 'FALSE',
+            'performanceChildrens': 'FALSE',
+            'performanceDance': 'FALSE',
+            'performanceOther': 'FALSE',
+            'visitExperience': 'FALSE',
+            'service': 'FALSE',
+            'business': 'FALSE',
+            'location': 'Gwydir St Car Park',
+            'description': 'Nice buns',
+            'email': '',
+            'website': 'https://www.glazedandconfused.com',
+            'phone': '01223 111111',
+            'latLng': '52.199687,0.138813',
+            'imageURL': '',
+            'startTime': '10:30',
+            'endTime': '16:30',
+          },
+        ];
+
+        await tester.pumpWidget(
+          MyApp(
+            firstExecution: false,
+            analyticsService: FakeAnalyticsService(),
+          ),
+        );
+
+        await tester.tap(find.byIcon(Icons.menu));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('App guide'));
+        await tester.pumpAndSettle();
+
+        // Verify that the WelcomeScreen is displayed
+        expect(find.byType(WelcomeScreen), findsOneWidget);
+
+        // Verify that OnBoardingPage is rendered within the WelcomeScreen
+        expect(find.byType(OnBoardingPage), findsOneWidget);
+      },
+    );
+
+    testWidgets('show aboutDialog when About this app in drawer is tapped', (
+      WidgetTester tester,
+    ) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
-
-      // Set a realistic window size to avoid layout overflow in the test
-      tester.view.physicalSize = const Size(1080, 2400);
-      addTearDown(tester.view.resetPhysicalSize);
 
       listings = [
         {
@@ -499,62 +590,12 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
-
-      await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('App guide'));
-      await tester.pumpAndSettle();
-
-      // Verify that the WelcomeScreen is displayed
-      expect(find.byType(WelcomeScreen), findsOneWidget);
-
-      // Verify that OnBoardingPage is rendered within the WelcomeScreen
-      expect(find.byType(OnBoardingPage), findsOneWidget);
-    });
-
-    testWidgets('show aboutDialog when About this app in drawer is tapped', (WidgetTester tester) async {
-      // Set firstExecution to false to simulate normal app launch
-      firstExecution = false;
-
-      listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
-      ];
-
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(
+        MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+      );
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -566,7 +607,9 @@ void main() {
       expect(find.text('iPhone version by Matt Whiting'), findsOneWidget);
     });
 
-    testWidgets('BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
+    testWidgets('BottomNavigationBar updates currentIndex on tap', (
+      WidgetTester tester,
+    ) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -600,16 +643,19 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(
+        MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+      );
 
       await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
-      final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
+      final homePageState =
+          tester.state(find.byType(HomePage)) as HomePageState;
       expect(homePageState.index, 0);
 
       await tester.tap(find.byIcon(Icons.map).first);
@@ -632,11 +678,22 @@ void main() {
       expect(homePageState.index, 4);
     });
 
-    testWidgets('emailDetailsDialog shows emails and close button', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+    testWidgets('emailDetailsDialog shows emails and close button', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: SizedBox())),
+      );
 
       // show the dialog
-      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context, analyticsService: FakeAnalyticsService()));
+      showDialog(
+        context: tester.element(find.byType(SizedBox)),
+        builder:
+            (context) => contactUsDialog(
+              context,
+              analyticsService: FakeAnalyticsService(),
+            ),
+      );
       await tester.pumpAndSettle();
 
       // Check for some known email addresses
@@ -657,7 +714,9 @@ void main() {
       expect(find.text('info@millroadwinterfair.org'), findsNothing);
     });
 
-    testWidgets('Favourites button in NavBar navigates to Favourites page', (WidgetTester tester) async {
+    testWidgets('Favourites button in NavBar navigates to Favourites page', (
+      WidgetTester tester,
+    ) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -692,7 +751,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Provide initial mock values for shared preferences
@@ -703,7 +762,9 @@ void main() {
       favouriteListingKeys.value = {...favouriteListingKeys.value, '1'};
 
       // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(
+        MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+      );
       await tester.pumpAndSettle();
 
       // Tap the Favourites button the NavBar

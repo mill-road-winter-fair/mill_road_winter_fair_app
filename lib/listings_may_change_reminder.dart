@@ -9,12 +9,14 @@ class ListingUpdateNotifier {
   static const _standardShowInterval = Duration(days: 3);
   static const _fairDayShowInterval = Duration(hours: 8);
 
-  static String get preferenceKey => 'listingUpdateNoticeEnabled${fairDate.year}';
+  static String get preferenceKey =>
+      'listingUpdateNoticeEnabled${fairDate.year}';
 
   static String lastShownKeyFor(DateTime now) {
-    final noticeName = DateUtils.isSameDay(fairDate, now)
-        ? 'fair_day'
-        : now.isAfter(fairDate)
+    final noticeName =
+        DateUtils.isSameDay(fairDate, now)
+            ? 'fair_day'
+            : now.isAfter(fairDate)
             ? 'after_fair'
             : 'before_fair';
 
@@ -22,7 +24,9 @@ class ListingUpdateNotifier {
   }
 
   static Duration showIntervalFor(DateTime now) {
-    return DateUtils.isSameDay(fairDate, now) ? _fairDayShowInterval : _standardShowInterval;
+    return DateUtils.isSameDay(fairDate, now)
+        ? _fairDayShowInterval
+        : _standardShowInterval;
   }
 
   static String titleFor(DateTime now) {
@@ -91,7 +95,10 @@ class ListingUpdateNotifier {
     // The dismissal preference applies only before the Fair. The notices on
     // the day and afterwards must always remain available.
     final prefs = await SharedPreferences.getInstance();
-    if (!context.mounted || (isListingsMayChange && (!listingUpdateNoticeEnabled || !(prefs.getBool(preferenceKey) ?? true)))) {
+    if (!context.mounted ||
+        (isListingsMayChange &&
+            (!listingUpdateNoticeEnabled ||
+                !(prefs.getBool(preferenceKey) ?? true)))) {
       return;
     }
 
@@ -120,45 +127,52 @@ class ListingUpdateNotifier {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(titleFor(noticeDate)),
-          content: Text(messageFor(noticeDate)),
-          actions: [
-            if (isListingsMayChange)
-              CheckboxListTile(
-                value: dontShowAgain,
-                onChanged: (value) {
-                  HapticFeedback.selectionClick();
-                  analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
-                  setState(() => dontShowAgain = value ?? false);
-                },
-                title: const Text("Don't show this again"),
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              ),
-            TextButton(
-              onPressed: () async {
-                HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('${analyticsId}_ok');
-                if (isListingsMayChange) {
-                  listingUpdateNoticeEnabled = !dontShowAgain;
-                  await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
-                  await analyticsService.logPreferenceSet(
-                    'listing_update_notice',
-                    listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
-                  );
-                }
-                if (dialogContext.mounted) {
-                  Navigator.of(dialogContext).pop();
-                }
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      ),
+      builder:
+          (dialogContext) => StatefulBuilder(
+            builder:
+                (context, setState) => AlertDialog(
+                  title: Text(titleFor(noticeDate)),
+                  content: Text(messageFor(noticeDate)),
+                  actions: [
+                    if (isListingsMayChange)
+                      CheckboxListTile(
+                        value: dontShowAgain,
+                        onChanged: (value) {
+                          HapticFeedback.selectionClick();
+                          analyticsService.logButtonTapped(
+                            '${analyticsId}_dont_show_again_toggle',
+                          );
+                          setState(() => dontShowAgain = value ?? false);
+                        },
+                        title: const Text("Don't show this again"),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                      ),
+                    TextButton(
+                      onPressed: () async {
+                        HapticFeedback.lightImpact();
+                        analyticsService.logButtonTapped('${analyticsId}_ok');
+                        if (isListingsMayChange) {
+                          listingUpdateNoticeEnabled = !dontShowAgain;
+                          await prefs.setBool(
+                            preferenceKey,
+                            listingUpdateNoticeEnabled,
+                          );
+                          await analyticsService.logPreferenceSet(
+                            'listing_update_notice',
+                            listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
+                          );
+                        }
+                        if (dialogContext.mounted) {
+                          Navigator.of(dialogContext).pop();
+                        }
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+          ),
     );
   }
 }
