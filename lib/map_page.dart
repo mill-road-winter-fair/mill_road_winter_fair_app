@@ -20,6 +20,7 @@ import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -30,17 +31,16 @@ class MapPage extends StatefulWidget {
   final String? destinationId; // optional if we'll be showing directions to somewhere
   final LatLng? destinationLatLng; // optional if we'll be showing directions to somewhere
   final int? nearestMarkerCount; // optional if we'll be zooming in to nearest X markers
-  final AnalyticsService analyticsService;
 
-  const MapPage(
-      {super.key,
-      required this.listings,
-      required this.onTabSelected,
-      this.onHomeTapped,
-      this.destinationId,
-      this.destinationLatLng,
-      this.nearestMarkerCount,
-      required this.analyticsService});
+  const MapPage({
+    super.key,
+    required this.listings,
+    required this.onTabSelected,
+    this.onHomeTapped,
+    this.destinationId,
+    this.destinationLatLng,
+    this.nearestMarkerCount,
+  });
 
   @override
   MapPageState createState() => MapPageState();
@@ -55,10 +55,10 @@ class MapPageState extends State<MapPage> with RouteAware {
   }
 
   @override
-  void didPush() => widget.analyticsService.setCurrentScreen('MapPage');
+  void didPush() => context.read<AnalyticsService>().setCurrentScreen('MapPage');
 
   @override
-  void didPopNext() => widget.analyticsService.setCurrentScreen('MapPage');
+  void didPopNext() => context.read<AnalyticsService>().setCurrentScreen('MapPage');
   late Future<List<Map<String, dynamic>>> _fetchListings;
   late List<MarkerId> _foodMarkerIds;
   late List<MarkerId> _shoppingMarkerIds;
@@ -112,7 +112,7 @@ class MapPageState extends State<MapPage> with RouteAware {
     if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
-      ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
+      ListingUpdateNotifier.maybeShowNotice(context);
       if (doingAPushNavigation ?? false) {
         doingAPushNavigation = false;
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
@@ -209,7 +209,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
+                                      context.read<AnalyticsService>().logButtonTapped('mrwf_roadClosures_hyperlink');
                                       launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
                                     }),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
@@ -225,8 +225,8 @@ class MapPageState extends State<MapPage> with RouteAware {
                               TextButton(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  widget.analyticsService.logButtonTapped('hide_road_closures');
-                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(false);
+                                  context.read<AnalyticsService>().logButtonTapped('hide_road_closures');
+                                  context.read<AnalyticsService>().logRoadClosurePolygonPreferenceSet(false);
                                   updateRoadClosurePolygonVisibility(false);
                                   Navigator.pop(context);
                                 },
@@ -238,7 +238,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                               TextButton(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  widget.analyticsService.logButtonTapped('close_road_closures_dialog');
+                                  context.read<AnalyticsService>().logButtonTapped('close_road_closures_dialog');
                                   Navigator.pop(context);
                                 },
                                 child: Text(
@@ -422,8 +422,8 @@ class MapPageState extends State<MapPage> with RouteAware {
       visible: true,
       onTap: () {
         HapticFeedback.lightImpact();
-        widget.analyticsService.logButtonTapped('group_map_marker');
-        widget.analyticsService.logMapMarkerTapped(parentListing['title'] + ' (Group)');
+        context.read<AnalyticsService>().logButtonTapped('group_map_marker');
+        context.read<AnalyticsService>().logMapMarkerTapped(parentListing['title'] + ' (Group)');
 
         // Update the current location, do not await as this causes issues with using the context across async gaps
         establishLocation();
@@ -551,7 +551,6 @@ class MapPageState extends State<MapPage> with RouteAware {
                                             onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                             onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
                                             inDialog: false,
-                                            analyticsService: widget.analyticsService,
                                           ),
                                           if (index != relatedListings.length - 1)
                                             SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
@@ -607,8 +606,8 @@ class MapPageState extends State<MapPage> with RouteAware {
         visible: true,
         onTap: () {
           HapticFeedback.lightImpact();
-          widget.analyticsService.logButtonTapped('specific_map_marker');
-          widget.analyticsService.logMapMarkerTapped(listing['title']);
+          context.read<AnalyticsService>().logButtonTapped('specific_map_marker');
+          context.read<AnalyticsService>().logMapMarkerTapped(listing['title']);
 
           // Update the current location, do not await as this causes issues with using the context across async gaps
           establishLocation();
@@ -685,7 +684,6 @@ class MapPageState extends State<MapPage> with RouteAware {
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
                               inDialog: false,
-                              analyticsService: widget.analyticsService,
                             ),
                           ),
                         ),
@@ -805,13 +803,13 @@ class MapPageState extends State<MapPage> with RouteAware {
                     value: filterSettings["Food"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('food_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('food_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Food"] = value!;
                       });
                       final idList = _foodMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('food', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('food', value);
                     },
                   ),
                   CheckboxListTile(
@@ -821,13 +819,13 @@ class MapPageState extends State<MapPage> with RouteAware {
                     value: filterSettings["Shopping"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('shopping_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('shopping_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Shopping"] = value!;
                       });
                       final idList = _shoppingMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('shopping', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('shopping', value);
                     },
                   ),
                   CheckboxListTile(
@@ -837,13 +835,13 @@ class MapPageState extends State<MapPage> with RouteAware {
                     value: filterSettings["Charity/Community/Info"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('charity_community_info_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('charity_community_info_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Charity/Community/Info"] = value!;
                       });
                       final idList = _charityCommunityInfoMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('charityCommunityInfo', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('charityCommunityInfo', value);
                     },
                   ),
                   CheckboxListTile(
@@ -853,13 +851,13 @@ class MapPageState extends State<MapPage> with RouteAware {
                     value: filterSettings["Performances"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('performances_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('performances_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Performances"] = value!;
                       });
                       final idList = _performanceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('performances', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('performances', value);
                     },
                   ),
                   CheckboxListTile(
@@ -869,13 +867,13 @@ class MapPageState extends State<MapPage> with RouteAware {
                     value: filterSettings["Visits/Experiences"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('visits_experiences_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('visits_experiences_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Visits/Experiences"] = value!;
                       });
                       final idList = _visitExperienceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('visitsExperiences', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('visitsExperiences', value);
                     },
                   ),
                   CheckboxListTile(
@@ -885,13 +883,13 @@ class MapPageState extends State<MapPage> with RouteAware {
                     value: filterSettings["Services"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('services_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('services_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Services"] = value!;
                       });
                       final idList = _serviceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('services', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('services', value);
                     },
                   ),
                   Divider(color: Colors.grey[350]),
@@ -902,12 +900,12 @@ class MapPageState extends State<MapPage> with RouteAware {
                     value: preferredRoadClosurePolygonVisible,
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('roadClosure_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('roadClosure_filter_toggle');
                       setState(() {
                         preferredRoadClosurePolygonVisible = value!;
                       });
                       updateRoadClosurePolygonVisibility(value!);
-                      widget.analyticsService.logRoadClosurePolygonPreferenceSet(value);
+                      context.read<AnalyticsService>().logRoadClosurePolygonPreferenceSet(value);
                     },
                   ),
                   Row(
@@ -920,14 +918,14 @@ class MapPageState extends State<MapPage> with RouteAware {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  widget.analyticsService.logButtonTapped('showAll_filter');
+                                  context.read<AnalyticsService>().logButtonTapped('showAll_filter');
                                   setState(() {
                                     filterSettings.forEach((key, _) {
                                       filterSettings[key] = true;
                                     });
                                   });
                                   showAllMarkers();
-                                  widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
+                                  context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('all', true);
                                   updateRoadClosurePolygonVisibility(true);
                                 },
                                 icon: const Icon(Icons.filter_alt),
@@ -937,14 +935,14 @@ class MapPageState extends State<MapPage> with RouteAware {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  widget.analyticsService.logButtonTapped('hideAll_filter');
+                                  context.read<AnalyticsService>().logButtonTapped('hideAll_filter');
                                   setState(() {
                                     filterSettings.forEach((key, _) {
                                       filterSettings[key] = false;
                                     });
                                   });
                                   hideAllMarkers();
-                                  widget.analyticsService.logMapMarkerFilterPreferenceSet('all', false);
+                                  context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('all', false);
                                   updateRoadClosurePolygonVisibility(false);
                                 },
                                 icon: const Icon(Icons.filter_alt_off),
@@ -954,7 +952,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                               ElevatedButton.icon(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  widget.analyticsService.logButtonTapped('filter_done');
+                                  context.read<AnalyticsService>().logButtonTapped('filter_done');
                                   Navigator.pop(context);
                                 },
                                 icon: const Icon(Icons.check_circle),
@@ -1534,7 +1532,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                     : ElevatedButton.icon(
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                          context.read<AnalyticsService>().logButtonTapped('refresh_listings_from_error');
                           refreshListings();
                         },
                         icon: const Icon(Icons.refresh),
@@ -1588,44 +1586,42 @@ class MapPageState extends State<MapPage> with RouteAware {
                       if (didPop && navigationInProgress) cancelNavigation();
                     },
                     child: GoogleMap(
-                      style: mapStyle,
-                      mapType: mapType,
-                      rotateGesturesEnabled: false,
-                      compassEnabled: false,
-                      myLocationEnabled: locationServicesEnabled &&
-                          (locationPermission == LocationPermission.always ||
-                              locationPermission == LocationPermission.whileInUse),
-                      myLocationButtonEnabled: false,
-                      mapToolbarEnabled: false,
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller = controller;
-                        if (listings.isNotEmpty) {
-                          // We should have listings by this point so set the camera to their bounds
-                          _setMapCameraToFitMapMarkers();
-                        }
-                      },
-                      initialCameraPosition: CameraPosition(
-                        target: const LatLng(52.199174, 0.140929),
-                        zoom: 14.1,
-                        bearing: _mapBearing,
-                      ),
-                      onCameraMove: (CameraPosition position) {
-                        debugPrint('MapPageState onCameraMove called');
-                        setState(() {
-                          switch (preferredMapOrientation) {
-                            case MapOrientation.adaptive:
-                              _compassBearing = 90;
-                              break;
-                            case MapOrientation.alwaysNorth:
-                              _compassBearing = 0;
-                              break;
+                        style: mapStyle,
+                        mapType: mapType,
+                        rotateGesturesEnabled: false,
+                        compassEnabled: false,
+                        myLocationEnabled:
+                            locationServicesEnabled && (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse),
+                        myLocationButtonEnabled: false,
+                        mapToolbarEnabled: false,
+                        onMapCreated: (GoogleMapController controller) {
+                          _controller = controller;
+                          if (listings.isNotEmpty) {
+                            // We should have listings by this point so set the camera to their bounds
+                            _setMapCameraToFitMapMarkers();
                           }
-                        });
-                      },
-                      polygons: _polygons,
-                      markers: markers.values.toSet(),
-                      polylines: polylines
-                    ),
+                        },
+                        initialCameraPosition: CameraPosition(
+                          target: const LatLng(52.199174, 0.140929),
+                          zoom: 14.1,
+                          bearing: _mapBearing,
+                        ),
+                        onCameraMove: (CameraPosition position) {
+                          debugPrint('MapPageState onCameraMove called');
+                          setState(() {
+                            switch (preferredMapOrientation) {
+                              case MapOrientation.adaptive:
+                                _compassBearing = 90;
+                                break;
+                              case MapOrientation.alwaysNorth:
+                                _compassBearing = 0;
+                                break;
+                            }
+                          });
+                        },
+                        polygons: _polygons,
+                        markers: markers.values.toSet(),
+                        polylines: polylines),
                   );
                 },
               ),
@@ -1640,7 +1636,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                         heroTag: 'cancelBtn',
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('cancel_navigation');
+                          context.read<AnalyticsService>().logButtonTapped('cancel_navigation');
                           cancelNavigation();
                         },
                         backgroundColor: Colors.transparent,
@@ -1667,7 +1663,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                         heroTag: 'homeBtn',
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('home');
+                          context.read<AnalyticsService>().logButtonTapped('home');
                           widget.onHomeTapped?.call();
                           // Home button resets the filters if they're all toggled off
                           if (filterSettings['Food'] == false &&
@@ -1676,7 +1672,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                               filterSettings['Charity/Community/Info'] == false &&
                               filterSettings['Visits/Experiences'] == false &&
                               filterSettings['Services'] == false) {
-                            widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
+                            context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('all', true);
                             final idList = _foodMarkerIds +
                                 _shoppingMarkerIds +
                                 _charityCommunityInfoMarkerIds +
@@ -1721,7 +1717,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                         heroTag: 'centreOnUserBtn',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('centre_on_user');
+                          context.read<AnalyticsService>().logButtonTapped('centre_on_user');
                           // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
                           try {
                             if (currentLatLng == null) {
@@ -1772,20 +1768,20 @@ class MapPageState extends State<MapPage> with RouteAware {
                       heroTag: 'mapTypeBtn',
                       onPressed: () {
                         HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('map_type_toggle');
+                        context.read<AnalyticsService>().logButtonTapped('map_type_toggle');
                         setState(() {
                           if (mapType == MapType.normal) {
                             mapType = MapType.hybrid;
                             _layersIcon = Icons.map;
                             preferredMapStyleType = MapStyleType.hybrid;
                             _saveSettings();
-                            widget.analyticsService.logMapTypePreferenceSet('hybrid');
+                            context.read<AnalyticsService>().logMapTypePreferenceSet('hybrid');
                           } else {
                             mapType = MapType.normal;
                             _layersIcon = Icons.satellite_alt;
                             preferredMapStyleType = MapStyleType.normal;
                             _saveSettings();
-                            widget.analyticsService.logMapTypePreferenceSet('normal');
+                            context.read<AnalyticsService>().logMapTypePreferenceSet('normal');
                           }
                         });
                       },
@@ -1813,16 +1809,16 @@ class MapPageState extends State<MapPage> with RouteAware {
                         heroTag: 'mapBearingBtn',
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('map_orientation_toggle');
+                          context.read<AnalyticsService>().logButtonTapped('map_orientation_toggle');
                           setState(() {
                             if (preferredMapOrientation == MapOrientation.adaptive) {
                               preferredMapOrientation = MapOrientation.alwaysNorth;
                               _saveSettings();
-                              widget.analyticsService.logMapOrientationPreferenceSet('alwaysNorth');
+                              context.read<AnalyticsService>().logMapOrientationPreferenceSet('alwaysNorth');
                             } else {
                               preferredMapOrientation = MapOrientation.adaptive;
                               _saveSettings();
-                              widget.analyticsService.logMapOrientationPreferenceSet('adaptive');
+                              context.read<AnalyticsService>().logMapOrientationPreferenceSet('adaptive');
                             }
                           });
                           _setMapCameraToFitMapMarkers();
@@ -1859,7 +1855,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                               heroTag: 'filterBtn',
                               onPressed: () {
                                 HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('map_filter');
+                                context.read<AnalyticsService>().logButtonTapped('map_filter');
                                 showFilterMenu();
                                 setVisibleMarkerLists();
                               },
@@ -1902,7 +1898,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('distance_to_destination');
+                        context.read<AnalyticsService>().logButtonTapped('distance_to_destination');
                         _setMapCameraToFitPolyline(polylines);
                       },
                       icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
@@ -1925,7 +1921,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                       child: GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('road_closures_legend');
+                          context.read<AnalyticsService>().logButtonTapped('road_closures_legend');
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
@@ -1972,7 +1968,6 @@ class MapPageState extends State<MapPage> with RouteAware {
                 )
             ],
           ),
-          analyticsService: widget.analyticsService,
         );
       },
     );

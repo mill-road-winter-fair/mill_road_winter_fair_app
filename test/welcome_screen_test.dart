@@ -6,6 +6,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> settle(WidgetTester tester) async {
@@ -36,7 +37,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget to test that the app correctly chooses the WelcomeScreen
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
 
       // Verify that the WelcomeScreen is displayed
       expect(find.byType(WelcomeScreen), findsOneWidget);
@@ -88,7 +89,7 @@ void main() {
       ];
 
       // Pump the RootWidget
-      await tester.pumpWidget(RootWidget(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: false)));
 
       // Verify that WelcomeScreen is NOT displayed
       expect(find.byType(WelcomeScreen), findsNothing);
@@ -143,7 +144,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
 
       // Verify the 'Skip' button is present and tap it
       expect(find.text('Skip'), findsOneWidget);
@@ -170,7 +171,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
 
       // Verify we are on the first page
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
@@ -229,7 +230,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
 
       // Advance through the onboarding slides to reach the last page
       final nextButton = find.byIcon(Icons.arrow_forward);
@@ -267,7 +268,7 @@ void main() {
       addTearDown(() async {
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
-        await tester.pumpWidget(Container());
+        await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: Container()));
         await tester.pump(); // allow disposal to complete
       });
 
@@ -306,7 +307,7 @@ void main() {
 
       // Pump the RootWidget
       firstExecution = true;
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
 
       // The footer button text should be present
       expect(find.text('Take me straight to the app!'), findsOneWidget);

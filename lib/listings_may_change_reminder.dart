@@ -1,3 +1,4 @@
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -79,7 +80,6 @@ class ListingUpdateNotifier {
   static Future<void> maybeShowNotice(
     BuildContext context, {
     DateTime? now,
-    required AnalyticsService analyticsService,
   }) async {
     if (onTest) {
       return;
@@ -109,6 +109,7 @@ class ListingUpdateNotifier {
       return;
     }
 
+    final analyticsService = context.read<AnalyticsService>();
     final analyticsId = analyticsIdFor(noticeDate);
     await analyticsService.logNoticeShown(analyticsId);
     if (!context.mounted) {

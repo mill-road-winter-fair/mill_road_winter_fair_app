@@ -10,6 +10,7 @@ import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -87,7 +88,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
 
       expect(find.text('Welcome'), findsOneWidget);
 
@@ -141,7 +142,7 @@ void main() {
       await loadSettings();
 
       // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
       await tester.pumpAndSettle();
 
       // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
@@ -199,7 +200,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -231,16 +232,16 @@ void main() {
       });
 
       Future<void> openDrawer(WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: FairScaffold(
-              appBarTitle: 'Test',
-              body: const SizedBox(),
-              currentTab: 0,
-              onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
-            ),
-          ),
-        );
+        await tester.pumpWidget(Provider<AnalyticsService>.value(
+            value: FakeAnalyticsService(),
+            child: MaterialApp(
+              home: FairScaffold(
+                appBarTitle: 'Test',
+                body: const SizedBox(),
+                currentTab: 0,
+                onTabSelected: (_) {},
+              ),
+            )));
 
         await tester.tap(find.byIcon(Icons.menu));
         await tester.pumpAndSettle();
@@ -354,7 +355,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -402,7 +403,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -450,7 +451,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -502,7 +503,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -554,7 +555,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -603,7 +604,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
 
       await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
@@ -633,10 +634,10 @@ void main() {
     });
 
     testWidgets('emailDetailsDialog shows emails and close button', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: Scaffold(body: SizedBox()))));
 
       // show the dialog
-      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context, analyticsService: FakeAnalyticsService()));
+      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context));
       await tester.pumpAndSettle();
 
       // Check for some known email addresses
@@ -703,7 +704,7 @@ void main() {
       favouriteListingKeys.value = {...favouriteListingKeys.value, '1'};
 
       // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
       await tester.pumpAndSettle();
 
       // Tap the Favourites button the NavBar

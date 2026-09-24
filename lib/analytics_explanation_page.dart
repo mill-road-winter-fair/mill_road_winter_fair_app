@@ -5,12 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AnalyticsExplanationPage extends StatefulWidget {
-  final AnalyticsService analyticsService;
-
-  const AnalyticsExplanationPage({super.key, required this.analyticsService});
+  const AnalyticsExplanationPage({super.key});
 
   @override
   State<AnalyticsExplanationPage> createState() => _AnalyticsExplanationPageState();
@@ -32,10 +31,10 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
   }
 
   @override
-  void didPush() => widget.analyticsService.setCurrentScreen('AnalyticsExplanationPage');
+  void didPush() => context.read<AnalyticsService>().setCurrentScreen('AnalyticsExplanationPage');
 
   @override
-  void didPopNext() => widget.analyticsService.setCurrentScreen('AnalyticsExplanationPage');
+  void didPopNext() => context.read<AnalyticsService>().setCurrentScreen('AnalyticsExplanationPage');
 
   @override
   void dispose() {
@@ -53,11 +52,13 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.read<AnalyticsService>().logButtonTapped('back');
+                  Navigator.maybePop(context);
+                })
+              : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Analytics Information'),
@@ -97,7 +98,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('firebase_info_link');
+                                context.read<AnalyticsService>().logButtonTapped('firebase_info_link');
                                 launchUrl(Uri.parse('https://firebase.google.com/'));
                               },
                           ),
@@ -152,7 +153,8 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                           SizedBox(height: 4),
                           Text('• App preferences such as your theme, distance units, map settings and filters.'),
                           SizedBox(height: 4),
-                          Text('• Basic app and device information provided by Firebase, such as app version, device type, operating system and session information.'),
+                          Text(
+                              '• Basic app and device information provided by Firebase, such as app version, device type, operating system and session information.'),
                         ],
                       ),
                     ),
@@ -202,7 +204,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('google_partner_sites_link');
+                                context.read<AnalyticsService>().logButtonTapped('google_partner_sites_link');
                                 launchUrl(Uri.parse('https://policies.google.com/technologies/partner-sites'));
                               },
                           ),
@@ -216,7 +218,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('firebase_privacy_link');
+                                context.read<AnalyticsService>().logButtonTapped('firebase_privacy_link');
                                 launchUrl(Uri.parse('https://firebase.google.com/support/privacy'));
                               },
                           ),
@@ -239,7 +241,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('app_privacy_policy_link');
+                                context.read<AnalyticsService>().logButtonTapped('app_privacy_policy_link');
                                 launchUrl(Uri.parse(
                                   'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf',
                                 ));
@@ -270,6 +272,9 @@ class AnalyticsExplanationPagePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnalyticsExplanationPage(analyticsService: FakeAnalyticsService());
+    return Provider<AnalyticsService>(
+      create: (_) => FakeAnalyticsService(),
+      child: const AnalyticsExplanationPage(),
+    );
   }
 }
