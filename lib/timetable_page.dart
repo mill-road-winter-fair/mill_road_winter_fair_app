@@ -266,10 +266,12 @@ class _TimetablePageState extends State<TimetablePage> {
           } else {
             theFilteredEvents[location.key] = [ev];
           }
-          if (ev.startTime.difference(timelineMinStart).inMinutes < 0)
+          if (ev.startTime.difference(timelineMinStart).inMinutes < 0) {
             timelineMinStart = ev.startTime;
-          if (ev.endTime.difference(timelineMaxEnd).inMinutes > 0)
+          }
+          if (ev.endTime.difference(timelineMaxEnd).inMinutes > 0) {
             timelineMaxEnd = ev.endTime;
+          }
         }
       }
     }
@@ -570,8 +572,9 @@ class _TimetablePageState extends State<TimetablePage> {
         timelineMaxEnd.isAfter(DateTime.now())) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_nowLineTimer == null) startClockUpdates(updateNowLine);
-        if (!widget.onlyNowOrSoon && _searchQuery.isEmpty)
+        if (!widget.onlyNowOrSoon && _searchQuery.isEmpty) {
           scrollToKey(nowLineKey, 0.3);
+        }
       });
     } else if (_searchQuery.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -586,11 +589,13 @@ class _TimetablePageState extends State<TimetablePage> {
     String theErrorMessage = '';
     if (spanMinutes == 0 || theFilteredEvents.isEmpty) {
       theErrorMessage = 'Nothing to show.';
-      if (widget.onlyNowOrSoon)
+      if (widget.onlyNowOrSoon) {
         theErrorMessage += '\n\nUnselect ‘now or soon’ to see the whole day.';
-      if (_searchQuery != '')
+      }
+      if (_searchQuery != '') {
         theErrorMessage +=
             '\n\nYou can clear your search by tapping the X icon in the search bar.';
+      }
     }
 
     final now = DateTime.now();
@@ -870,9 +875,10 @@ class _TimetablePageState extends State<TimetablePage> {
                                               );
                                           _searchAnalyticsTimer?.cancel();
                                           setState(() {
-                                            if (_searchQuery.isEmpty)
+                                            if (_searchQuery.isEmpty) {
                                               _isSearching =
                                                   false; // first click clears field; second closes search
+                                            }
                                             _searchQuery = '';
                                             _searchController.clear();
                                             theFilteredEvents =
@@ -1021,16 +1027,18 @@ class _TimetablePageState extends State<TimetablePage> {
                                   child: GestureDetector(
                                     onScaleStart: (details) {
                                       if (widget.onlyNowOrSoon ||
-                                          details.pointerCount < 2)
+                                          details.pointerCount < 2) {
                                         return; // ignore drags
+                                      }
                                       scaling = true;
                                       startPixelsPerMinute =
                                           _dayPixelsPerMinute;
                                     },
                                     onScaleUpdate: (details) {
                                       if (widget.onlyNowOrSoon ||
-                                          details.pointerCount < 2)
+                                          details.pointerCount < 2) {
                                         return; // ignore drags
+                                      }
                                       final dampenedScale =
                                           1 + (details.scale - 1) * 0.5;
                                       final newdayPixelsPerMinute = max(
@@ -1235,10 +1243,11 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                                     ),
                                                                               ),
                                                                             );
-                                                                            if (mounted)
+                                                                            if (mounted) {
                                                                               widget.analyticsService.setCurrentScreen(
                                                                                 'TimetablePage',
                                                                               );
+                                                                            }
                                                                           },
                                                                           analyticsService:
                                                                               widget.analyticsService,

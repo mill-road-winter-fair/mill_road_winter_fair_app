@@ -60,8 +60,9 @@ Future<void> loadSettings() async {
     // Set initial theme and map style to change according to system brightness
     String defaultTheme = 'auto';
     selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme;
-    if (!appThemes.containsKey(selectedThemeKey) && selectedThemeKey != 'auto')
+    if (!appThemes.containsKey(selectedThemeKey) && selectedThemeKey != 'auto') {
       selectedThemeKey = defaultTheme;
+    }
     mapStyle = getMapStyleForThemeKey(selectedThemeKey);
 
     // Create a ValueNotifier to hold the current theme

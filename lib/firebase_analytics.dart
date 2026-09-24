@@ -421,8 +421,9 @@ class FirebaseAnalyticsService implements AnalyticsService {
                                     ),
                               ),
                             );
-                            if (context.mounted)
+                            if (context.mounted) {
                               setCurrentScreen(previousScreen);
+                            }
                           },
                   ),
                 ),

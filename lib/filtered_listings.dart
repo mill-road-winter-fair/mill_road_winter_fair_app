@@ -88,8 +88,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       _searchQuery = '';
       _isSearching = false;
     });
-    if (itemScrollController.isAttached && filteredListings.isNotEmpty)
+    if (itemScrollController.isAttached && filteredListings.isNotEmpty) {
       itemScrollController.jumpTo(index: 0);
+    }
   }
 
   void _scheduleSearchAnalytics(String searchTerm) {
@@ -709,9 +710,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                               .logButtonTapped('search_close');
                                           _searchAnalyticsTimer?.cancel();
                                           setState(() {
-                                            if (_searchQuery.isEmpty)
+                                            if (_searchQuery.isEmpty) {
                                               _isSearching =
                                                   false; // first click clears field; second closes search
+                                            }
                                             _searchQuery = '';
                                             _searchController.clear();
                                           });

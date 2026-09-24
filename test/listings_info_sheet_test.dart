@@ -416,8 +416,9 @@ void main() {
         final cancelledLabelFinder = find.ancestor(
           of: cancelledTextFinder,
           matching: find.byWidgetPredicate((widget) {
-            if (widget is! Container || widget.decoration is! BoxDecoration)
+            if (widget is! Container || widget.decoration is! BoxDecoration) {
               return false;
+            }
             final decoration = widget.decoration! as BoxDecoration;
             return decoration.color == colorScheme.onSurfaceVariant &&
                 decoration.borderRadius == BorderRadius.circular(12);

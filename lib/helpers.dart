@@ -1073,8 +1073,9 @@ void showMiniPopup(
   // Horizontal: try to centre above the item
   double desiredLeft = itemTopLeft.dx + itemSize.width / 2 - overlayW / 2;
   if (desiredLeft < 4) desiredLeft = 4;
-  if (desiredLeft + overlayW > screenWidth - 4)
+  if (desiredLeft + overlayW > screenWidth - 4) {
     desiredLeft = screenWidth - overlayW - 4;
+  }
   _miniPopupOverlayEntry = OverlayEntry(
     builder:
         (ctx) => Positioned(
@@ -1375,9 +1376,10 @@ String buildListingShareText(
   } else if (whenEventStart < 0 && whenEventEnd > 0) {
     msgText += 'I am ';
   } else {
-    if (msgText.isEmpty)
+    if (msgText.isEmpty) {
       msgText =
           'Later today '; // day of Fair but non-event listing not yet started
+    }
     msgText += 'I’ll be ';
   }
 

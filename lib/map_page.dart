@@ -56,8 +56,9 @@ class MapPageState extends State<MapPage> with RouteAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // The tab is tracked by HomePage; only subscribe for a separately pushed map.
-    if (widget.destinationId != null)
+    if (widget.destinationId != null) {
       routeObserver.subscribe(this, ModalRoute.of(context)!);
+    }
   }
 
   @override
@@ -129,11 +130,13 @@ class MapPageState extends State<MapPage> with RouteAware {
     establishLocation();
     if (widget.destinationId != null &&
         widget.destinationId!.isNotEmpty &&
-        widget.destinationLatLng != null)
+        widget.destinationLatLng != null) {
       doingAPushNavigation = true;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (preferredRoadClosurePolygonVisible)
+      if (preferredRoadClosurePolygonVisible) {
         _polygons.add(roadClosurePolygon());
+      }
       ListingUpdateNotifier.maybeShowNotice(
         context,
         analyticsService: widget.analyticsService,
@@ -408,18 +411,24 @@ class MapPageState extends State<MapPage> with RouteAware {
     final allListings = listings as List;
     for (var listing in allListings) {
       // Assign markerIds to maps for filtering
-      if (listing['food'] == "TRUE")
+      if (listing['food'] == "TRUE") {
         _foodMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['shopping'] == "TRUE")
+      }
+      if (listing['shopping'] == "TRUE") {
         _shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['charityCommunityInfo'] == "TRUE")
+      }
+      if (listing['charityCommunityInfo'] == "TRUE") {
         _charityCommunityInfoMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['performance'] == "TRUE")
+      }
+      if (listing['performance'] == "TRUE") {
         _performanceMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['visitExperience'] == "TRUE")
+      }
+      if (listing['visitExperience'] == "TRUE") {
         _visitExperienceMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['service'] == "TRUE")
+      }
+      if (listing['service'] == "TRUE") {
         _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
     }
   }
 
@@ -1679,14 +1688,18 @@ class MapPageState extends State<MapPage> with RouteAware {
     if (listings.isNotEmpty) {
       for (var listing in listings) {
         LatLng markerLatLng = stringToLatLng(listing['latLng']);
-        if (markerLatLng.latitude < markerMinLat)
+        if (markerLatLng.latitude < markerMinLat) {
           markerMinLat = markerLatLng.latitude;
-        if (markerLatLng.latitude > markerMaxLat)
+        }
+        if (markerLatLng.latitude > markerMaxLat) {
           markerMaxLat = markerLatLng.latitude;
-        if (markerLatLng.longitude < markerMinLong)
+        }
+        if (markerLatLng.longitude < markerMinLong) {
           markerMinLong = markerLatLng.longitude;
-        if (markerLatLng.longitude > markerMaxLong)
+        }
+        if (markerLatLng.longitude > markerMaxLong) {
           markerMaxLong = markerLatLng.longitude;
+        }
       }
     }
 
@@ -1731,10 +1744,12 @@ class MapPageState extends State<MapPage> with RouteAware {
       for (var point in polyline.points) {
         if (point.latitude < polylineMinLat) polylineMinLat = point.latitude;
         if (point.latitude > polylineMaxLat) polylineMaxLat = point.latitude;
-        if (point.longitude < polylineMinLong)
+        if (point.longitude < polylineMinLong) {
           polylineMinLong = point.longitude;
-        if (point.longitude > polylineMaxLong)
+        }
+        if (point.longitude > polylineMaxLong) {
           polylineMaxLong = point.longitude;
+        }
       }
     }
 

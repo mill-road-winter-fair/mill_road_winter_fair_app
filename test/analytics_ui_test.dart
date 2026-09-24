@@ -85,8 +85,9 @@ void main() {
     analytics = RecordingAnalyticsService();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (call) async {
-          if (call.method == 'HapticFeedback.vibrate')
+          if (call.method == 'HapticFeedback.vibrate') {
             analytics.calls.add('haptic');
+          }
           return null;
         });
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
