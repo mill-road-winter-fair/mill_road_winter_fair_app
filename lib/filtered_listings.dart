@@ -614,75 +614,84 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             }
                             return false;
                           },
-                          child: ScrollablePositionedList.builder(
-                            itemCount: filteredListings.length,
-                            itemScrollController: itemScrollController,
-                            itemPositionsListener: itemPositionsListener,
-                            itemBuilder: (context, index) {
-                              final listing = filteredListings[index]; // since index=0 is the sort/search bar
-                              final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                              final approximateDistance = '(~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
-                              final isFavourited = isListingFavourited(listing['id']);
-                              LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                              if (!_hidePastListings || !hasEventEnded(listing['endTime'])) {
-                                // if this is the first visible item, capture its index
-                                firstVisibleIndex ??= index;
-                              }
-                              _listingKeys.putIfAbsent(index, () => GlobalKey());
-                              return Column(
-                                key: _listingKeys[index],
-                                children: [
-                                  if (!_hidePastListings || !hasEventEnded(listing['endTime']))
-                                    Container(
-                                        width: constraints.maxWidth - 10,
-                                        decoration: BoxDecoration(
-                                          color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
-                                          border: Border.all(color: colorScheme.primary, width: 0.5),
-                                          borderRadius: BorderRadius.circular(8),
-                                          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
-                                        ),
-                                        child: SpecificListingInfoSheet(
-                                          listingId: listing['id'],
-                                          cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                                          brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                                          emoji: listing['emoji'] ?? '',
-                                          title: listing['title'] ?? '',
-                                          subtitle: listing['subtitle'] ?? '',
-                                          location: listing['location'],
-                                          description: listing['description'] ?? '',
-                                          email: listing['email'] ?? '',
-                                          website: listing['website'] ?? '',
-                                          phoneNumber: listing['phone'] ?? '',
-                                          imageURL: listing['imageURL'] ?? '',
-                                          startTime: "${listing['startTime']}",
-                                          endTime: "${listing['endTime']}",
-                                          approxDistance: approximateDistance,
-                                          detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
-                                          listingFavourited: isFavourited,
-                                          onDetailsTapped: () => toggleDetailsRow(index),
-                                          onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                          onGetDirections: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => MapPage(
-                                                  listings: listings,
-                                                  onTabSelected: (_) => {},
-                                                  destinationId: listing['id'],
-                                                  destinationLatLng: destinationLatLng,
-                                                  analyticsService: widget.analyticsService,
+                          child: GestureDetector(
+                            onTap: (detailsVisibleIndex == null)
+                              ? null
+                              : () {
+                                detailsVisibleIndex = null;
+                                setState(() { });
+                              },
+                            child: ScrollablePositionedList.builder(
+                              itemCount: filteredListings.length,
+                              itemScrollController: itemScrollController,
+                              itemPositionsListener: itemPositionsListener,
+                              physics: (detailsVisibleIndex == null) ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                final listing = filteredListings[index]; // since index=0 is the sort/search bar
+                                final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                                final approximateDistance = '(~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
+                                final isFavourited = isListingFavourited(listing['id']);
+                                LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                                if (!_hidePastListings || !hasEventEnded(listing['endTime'])) {
+                                  // if this is the first visible item, capture its index
+                                  firstVisibleIndex ??= index;
+                                }
+                                _listingKeys.putIfAbsent(index, () => GlobalKey());
+                                return Column(
+                                  key: _listingKeys[index],
+                                  children: [
+                                    if (!_hidePastListings || !hasEventEnded(listing['endTime']))
+                                      Container(
+                                          width: constraints.maxWidth - 10,
+                                          decoration: BoxDecoration(
+                                            color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
+                                            border: Border.all(color: colorScheme.primary, width: 0.5),
+                                            borderRadius: BorderRadius.circular(8),
+                                            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
+                                          ),
+                                          child: SpecificListingInfoSheet(
+                                            listingId: listing['id'],
+                                            cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                                            brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
+                                            emoji: listing['emoji'] ?? '',
+                                            title: listing['title'] ?? '',
+                                            subtitle: listing['subtitle'] ?? '',
+                                            location: listing['location'],
+                                            description: listing['description'] ?? '',
+                                            email: listing['email'] ?? '',
+                                            website: listing['website'] ?? '',
+                                            phoneNumber: listing['phone'] ?? '',
+                                            imageURL: listing['imageURL'] ?? '',
+                                            startTime: "${listing['startTime']}",
+                                            endTime: "${listing['endTime']}",
+                                            approxDistance: approximateDistance,
+                                            detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
+                                            listingFavourited: isFavourited,
+                                            onDetailsTapped: () => toggleDetailsRow(index),
+                                            onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                            onGetDirections: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => MapPage(
+                                                    listings: listings,
+                                                    onTabSelected: (_) => {},
+                                                    destinationId: listing['id'],
+                                                    destinationLatLng: destinationLatLng,
+                                                    analyticsService: widget.analyticsService,
+                                                  )
                                                 )
-                                              )
-                                            );
-                                          },
-                                          analyticsService: widget.analyticsService,
-                                          inDialog: false,
-                                          colorScheme: colorScheme,
-                                        )),
-                                  SizedBox(height: 8),
-                                ],
-                              );
-                            },
+                                              );
+                                            },
+                                            analyticsService: widget.analyticsService,
+                                            inDialog: false,
+                                            colorScheme: colorScheme,
+                                          )),
+                                    SizedBox(height: 8),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ),
                         ValueListenableBuilder<Iterable<ItemPosition>>(
