@@ -2196,7 +2196,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                 SnackBar(
                                   backgroundColor:
                                       Theme.of(context).colorScheme.primary,
-                                  content: Text(
+                                  content: const Text(
                                     'Unable to determine your location',
                                   ),
                                 ),
@@ -2325,7 +2325,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                             turns: _compassBearing / 360.0,
                             duration: const Duration(milliseconds: 200),
                             curve: Curves.easeOut,
-                            child: Icon(Icons.assistant_navigation),
+                            child: const Icon(Icons.assistant_navigation),
                           ),
                         ),
                       ),

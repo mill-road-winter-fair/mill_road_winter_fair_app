@@ -428,7 +428,7 @@ class _TimetablePageState extends State<TimetablePage> {
               if (includeDate)
                 Container(
                   height: 1.1 * maxTimeFontSize,
-                  padding: EdgeInsets.symmetric(horizontal: 1),
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
                   child: AutoSizeText(
                     formatTimeRange(pe.startTime, pe.endTime),
                     style: TextStyle(
@@ -465,7 +465,7 @@ class _TimetablePageState extends State<TimetablePage> {
       // all good so we've got a proper scroll to do
       await _verticalScrollController.animateTo(
         offset,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
       );
     } else {
@@ -580,7 +580,7 @@ class _TimetablePageState extends State<TimetablePage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _verticalScrollController.animateTo(
           0,
-          duration: Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 100),
           curve: Curves.easeIn,
         );
       });
@@ -818,7 +818,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         shadows: [
                           Shadow(
                             color: colorScheme.onPrimary,
-                            offset: Offset(0, 0),
+                            offset: const Offset(0, 0),
                             blurRadius: 2,
                           ),
                         ],
@@ -856,7 +856,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                     maxWidth: MediaQuery.of(context).size.width,
                                     maxHeight: 52,
                                   ),
-                                  padding: EdgeInsets.all(8),
+                                  padding: const EdgeInsets.all(8),
                                   child: SearchBar(
                                     autoFocus: true,
                                     controller: _searchController,
@@ -909,13 +909,13 @@ class _TimetablePageState extends State<TimetablePage> {
                                 ),
                               ],
                             )
-                            : SizedBox.shrink(),
+                            : const SizedBox.shrink(),
                   ),
                   (theErrorMessage != '')
                       ? Align(
                         alignment: Alignment.center,
                         child: Padding(
-                          padding: EdgeInsetsGeometry.all(60),
+                          padding: const EdgeInsetsGeometry.all(60),
                           child: Text(
                             theErrorMessage,
                             style: const TextStyle(fontSize: 16),
@@ -934,7 +934,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         child: SingleChildScrollView(
                           controller: _horizontalScrollController,
                           scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.only(
+                          padding: const EdgeInsets.only(
                             right: 2,
                           ), // stop it crashing into edge
                           child: SizedBox(
@@ -976,11 +976,11 @@ class _TimetablePageState extends State<TimetablePage> {
                                                     width: 0.1,
                                                   ),
                                                   borderRadius:
-                                                      BorderRadius.only(
+                                                      const BorderRadius.only(
                                                         topLeft:
-                                                            Radius.circular(4),
+                                                            const Radius.circular(4),
                                                         topRight:
-                                                            Radius.circular(4),
+                                                            const Radius.circular(4),
                                                       ),
                                                 ),
                                                 width:
@@ -988,7 +988,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                             leftColumnWidth) /
                                                         cols -
                                                     4,
-                                                padding: EdgeInsets.symmetric(
+                                                padding: const EdgeInsets.symmetric(
                                                   horizontal: 4,
                                                   vertical: 2,
                                                 ),
@@ -1109,7 +1109,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                       controller: _verticalScrollController,
                                       physics: const ClampingScrollPhysics(),
                                       scrollDirection: Axis.vertical,
-                                      key: PageStorageKey('verticalList'),
+                                      key: const PageStorageKey('verticalList'),
                                       child: SizedBox(
                                         width: totalWidth,
                                         height: timelineHeight,
@@ -1181,7 +1181,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                           BoxShadow(
                                                                             color:
                                                                                 colorScheme.surfaceContainerLow,
-                                                                            offset: Offset(
+                                                                            offset: const Offset(
                                                                               2,
                                                                               2,
                                                                             ),
@@ -1254,7 +1254,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                         );
                                                                       },
                                                                       child: Container(
-                                                                        padding: EdgeInsets.symmetric(
+                                                                        padding: const EdgeInsets.symmetric(
                                                                           vertical:
                                                                               0,
                                                                           horizontal:
@@ -1277,7 +1277,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                             BoxShadow(
                                                                               color:
                                                                                   colorScheme.surfaceContainerLow,
-                                                                              offset: Offset(
+                                                                              offset: const Offset(
                                                                                 2,
                                                                                 2,
                                                                               ),

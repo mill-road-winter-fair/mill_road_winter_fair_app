@@ -895,7 +895,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                               !hasEventEnded(
                                                 listing['endTime'],
                                               )))
-                                        SizedBox(height: 8),
+                                        const SizedBox(height: 8),
                                     ],
                                   );
                                 },
@@ -1049,8 +1049,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   Widget _buildSortingDropdown(BuildContext context, bool isPerformance) {
     final colorScheme = Theme.of(context).colorScheme;
-    final dropdownStyle = ButtonStyle(
-      textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)),
+    final dropdownStyle = const ButtonStyle(
+      textStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 13)),
     );
     return Container(
       key: const ValueKey('sortingdropdown'),
@@ -1062,9 +1062,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               useFallbackSorting
                   ? SortingMethod.alphabetical
                   : preferredSortingMethod,
-          label: Text(
+          label: const Text(
             "Sort by",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
           leadingIcon: const Icon(Icons.sort),
           textStyle: TextStyle(
@@ -1082,8 +1082,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             isDense: true,
             visualDensity: const VisualDensity(horizontal: -4),
             contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-            constraints: BoxConstraints(maxHeight: 40),
-            suffixIconConstraints: BoxConstraints(minWidth: 30, maxWidth: 30),
+            constraints: const BoxConstraints(maxHeight: 40),
+            suffixIconConstraints: const BoxConstraints(minWidth: 30, maxWidth: 30),
           ),
           dropdownMenuEntries: [
             if (locationPermission == LocationPermission.whileInUse ||
@@ -1122,8 +1122,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   Widget _buildFilteringDropdown(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final dropdownStyle = ButtonStyle(
-      textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)),
+    final dropdownStyle = const ButtonStyle(
+      textStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 13)),
     );
     return Container(
       key: const ValueKey('filteringdropdown'),
@@ -1153,8 +1153,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             isDense: true,
             visualDensity: const VisualDensity(horizontal: -4),
             contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-            constraints: BoxConstraints(maxHeight: 40),
-            suffixIconConstraints: BoxConstraints(minWidth: 30, maxWidth: 30),
+            constraints: const BoxConstraints(maxHeight: 40),
+            suffixIconConstraints: const BoxConstraints(minWidth: 30, maxWidth: 30),
           ),
           dropdownMenuEntries: [
             DropdownMenuEntry(

@@ -278,7 +278,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     return Container(
       padding:
           (widget.inDialog)
-              ? EdgeInsets.all(0)
+              ? const EdgeInsets.all(0)
               : EdgeInsets.fromLTRB(
                 4.0 +
                     ((MediaQuery.of(context).size.height.toInt() - 500) / 30)
@@ -313,7 +313,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         ]),
                         child: Text(
                           '${widget.emoji} ',
-                          style: TextStyle(fontSize: 30),
+                          style: const TextStyle(fontSize: 30),
                         ),
                       ),
                     )
@@ -918,7 +918,7 @@ Future<void> showListingDetailsDialog(
         (_) => StatefulBuilder(
           builder: (ctx2, setStateDialog) {
             return Dialog(
-              insetPadding: EdgeInsets.symmetric(
+              insetPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
               ), // margin from screen edges
               shape: RoundedRectangleBorder(

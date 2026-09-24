@@ -85,7 +85,7 @@ class FairScaffold extends StatelessWidget {
           centerTitle: false,
           actions:
               appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
-          actionsPadding: EdgeInsets.only(right: 4),
+          actionsPadding: const EdgeInsets.only(right: 4),
         ),
         body: body,
         drawer: fairDrawer(context, analyticsService: analyticsService),
@@ -478,7 +478,7 @@ void displayAppShareDialog(
     context: itemContext,
     builder: (dialogContext) {
       return Dialog(
-        insetPadding: EdgeInsets.symmetric(
+        insetPadding: const EdgeInsets.symmetric(
           vertical: 0,
           horizontal: 24,
         ), // margin from screen edges
@@ -498,16 +498,16 @@ void displayAppShareDialog(
               spacing: 8,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                const Text(
+                  style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
                   'Share this app',
                 ),
-                Text(
-                  style: TextStyle(fontSize: 14.0),
+                const Text(
+                  style: const TextStyle(fontSize: 14.0),
                   'This QR code links to a web page allowing someone to install the iOS or Android version of this app.',
                 ),
-                Text(
-                  style: TextStyle(fontSize: 14.0),
+                const Text(
+                  style: const TextStyle(fontSize: 14.0),
                   'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.',
                 ),
                 Align(
@@ -1102,7 +1102,7 @@ void showMiniPopup(
                     BoxShadow(
                       color: bgColour!,
                       blurRadius: 6,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
