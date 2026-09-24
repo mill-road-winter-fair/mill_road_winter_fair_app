@@ -17,11 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 class WelcomeScreen extends StatelessWidget {
   final AnalyticsService analyticsService;
   final VoidCallback? onFinished;
-  const WelcomeScreen({
-    super.key,
-    required this.analyticsService,
-    this.onFinished,
-  });
+  const WelcomeScreen({super.key, required this.analyticsService, this.onFinished});
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +26,7 @@ class WelcomeScreen extends StatelessWidget {
     if (Navigator.maybeOf(context) != null) {
       return OnBoardingPage(analyticsService: analyticsService);
     }
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
-    );
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent));
 
     final bool isAuto = selectedThemeKey == 'auto';
     final ThemeMode resolvedThemeMode =
@@ -48,16 +42,10 @@ class WelcomeScreen extends StatelessWidget {
       title: 'Welcome screen',
       debugShowCheckedModeBanner: false,
       themeMode: resolvedThemeMode,
-      theme:
-          isAuto
-              ? appThemes['light']
-              : appThemes[selectedThemeKey] ?? appThemes['light']!,
+      theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? appThemes['light']!,
       darkTheme: isAuto ? appThemes['dark'] : appThemes['dark'],
       navigatorObservers: [routeObserver],
-      home: OnBoardingPage(
-        analyticsService: analyticsService,
-        onFinished: onFinished,
-      ),
+      home: OnBoardingPage(analyticsService: analyticsService, onFinished: onFinished),
     );
   }
 }
@@ -65,11 +53,7 @@ class WelcomeScreen extends StatelessWidget {
 class OnBoardingPage extends StatefulWidget {
   final AnalyticsService analyticsService;
   final VoidCallback? onFinished;
-  const OnBoardingPage({
-    super.key,
-    required this.analyticsService,
-    this.onFinished,
-  });
+  const OnBoardingPage({super.key, required this.analyticsService, this.onFinished});
 
   @override
   OnBoardingPageState createState() => OnBoardingPageState();
@@ -90,11 +74,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       widget.onFinished!();
       return;
     }
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => HomePage(analyticsService: widget.analyticsService),
-      ),
-    );
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomePage(analyticsService: widget.analyticsService)));
   }
 
   @override
@@ -130,39 +110,19 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     debugPrint('OnBoardingPageState build() called');
-    var bodyStyle = TextStyle(
-      fontSize: 19,
-      color: Theme.of(context).colorScheme.onSecondary,
-      height: 1.4,
-    );
-    var titleStyle = TextStyle(
-      fontSize: 21,
-      fontWeight: FontWeight.bold,
-      color: Theme.of(context).colorScheme.onSecondary,
-    );
+    var bodyStyle = TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary, height: 1.4);
+    var titleStyle = TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary);
 
     var pageDecoration = PageDecoration(
-      titleTextStyle: TextStyle(
-        fontSize: 25,
-        fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.onSecondary,
-      ),
-      bodyTextStyle: TextStyle(
-        fontSize: 19,
-        color: Theme.of(context).colorScheme.onSecondary,
-      ),
+      titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
+      bodyTextStyle: TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary),
       bodyPadding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
       pageColor: Theme.of(context).colorScheme.secondary,
     );
 
     return IntroductionScreen(
       key: introKey,
-      safeAreaList: [
-        false,
-        false,
-        false,
-        Platform.isAndroid && isNavBarVisible(context),
-      ],
+      safeAreaList: [false, false, false, Platform.isAndroid && isNavBarVisible(context)],
       autoScrollDuration: onTest ? null : 150000,
       infiniteAutoScroll: onTest ? false : true,
       globalBackgroundColor: Theme.of(context).colorScheme.secondary,
@@ -173,19 +133,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
           width: double.infinity,
           height: 50,
           child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text(
-                'Take me straight to the app!',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-              ),
+              child: Text('Take me straight to the app!', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
             ),
             onPressed: () {
               HapticFeedback.heavyImpact();
@@ -202,11 +153,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
           titleWidget: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            child: Text(
-              'Welcome to the official\nMill Road Winter Fair app!',
-              style: titleStyle,
-              textAlign: TextAlign.center,
-            ),
+            child: Text('Welcome to the official\nMill Road Winter Fair app!', style: titleStyle, textAlign: TextAlign.center),
           ),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
@@ -221,94 +168,39 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "What can I do with the app?",
-                        style: TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSecondary,
-                        ),
-                      ),
+                      Text("What can I do with the app?", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Icon(
-                            Icons.map,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Use our interactive map to help\nyou navigate the Fair",
-                            style: bodyStyle,
-                          ),
+                          Text("Use our interactive map to help\nyou navigate the Fair", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Icon(
-                            Icons.calendar_month,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.calendar_month, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "See listings for stalls, events,\nmusic, food and venues",
-                            style: bodyStyle,
-                          ),
+                          Text("See listings for stalls, events,\nmusic, food and venues", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          SizedBox(
-                            width: 40,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: FaIcon(
-                                FontAwesomeIcons.heart,
-                                size: 32,
-                                color:
-                                    Theme.of(context).colorScheme.onSecondary,
-                              ),
-                            ),
-                          ),
+                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
-                          Text(
-                            "Get full details for all of these,\nand save your favourites",
-                            style: bodyStyle,
-                          ),
+                          Text("Get full details for all of these,\nand save your favourites", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.radar,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            "See what’s on nearby or soon",
-                            style: bodyStyle,
-                          ),
-                        ],
-                      ),
+                      Row(children: [Icon(Icons.radar, size: 40, color: Theme.of(context).colorScheme.onSecondary), const SizedBox(width: 8), Text("See what’s on nearby or soon", style: bodyStyle)]),
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Icon(
-                            Icons.info,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.info, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Find important information about\nthe Fair and its facilities",
-                            style: bodyStyle,
-                          ),
+                          Text("Find important information about\nthe Fair and its facilities", style: bodyStyle),
                         ],
                       ),
                     ],
@@ -322,23 +214,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(
-              context,
-            ).colorScheme.secondary.withValues(alpha: 0.8),
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork01.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text(
-              'What do the pins mean?',
-              style: titleStyle,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          titleWidget: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text('What do the pins mean?', style: titleStyle, textAlign: TextAlign.center)),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -354,113 +236,57 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.fastfood,
-                            size: 40,
-                            color: getCategoryColor(selectedThemeKey, "Food"),
-                          ),
+                          Icon(Icons.fastfood, size: 40, color: getCategoryColor(selectedThemeKey, "Food")),
                           const SizedBox(width: 8),
-                          Text(
-                            "Our delicious ready-to-eat food\nand drink stalls and trucks",
-                            style: bodyStyle,
-                          ),
+                          Text("Our delicious ready-to-eat food\nand drink stalls and trucks", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 9),
                       Row(
                         children: [
-                          Icon(
-                            Icons.storefront,
-                            size: 40,
-                            color: getCategoryColor(
-                              selectedThemeKey,
-                              "Shopping",
-                            ),
-                          ),
+                          Icon(Icons.storefront, size: 40, color: getCategoryColor(selectedThemeKey, "Shopping")),
                           const SizedBox(width: 8),
-                          Text(
-                            "Stalls with arts, crafts and goodies;\ncharities and other organisations",
-                            style: bodyStyle,
-                          ),
+                          Text("Stalls with arts, crafts and goodies;\ncharities and other organisations", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 9),
                       Row(
                         children: [
-                          Icon(
-                            Icons.music_note,
-                            size: 40,
-                            color: getCategoryColor(selectedThemeKey, "Music"),
-                          ),
+                          Icon(Icons.music_note, size: 40, color: getCategoryColor(selectedThemeKey, "Music")),
                           const SizedBox(width: 8),
-                          Text(
-                            "The Fair’s amazing and talented\nmusicians, buskers and bands",
-                            style: bodyStyle,
-                          ),
+                          Text("The Fair’s amazing and talented\nmusicians, buskers and bands", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 9),
                       Row(
                         children: [
-                          Icon(
-                            Icons.event,
-                            size: 40,
-                            color: getCategoryColor(selectedThemeKey, "Event"),
-                          ),
+                          Icon(Icons.event, size: 40, color: getCategoryColor(selectedThemeKey, "Event")),
                           const SizedBox(width: 8),
-                          Text(
-                            "Our exciting events, such as\nSanta’s Grotto and the parade",
-                            style: bodyStyle,
-                          ),
+                          Text("Our exciting events, such as\nSanta’s Grotto and the parade", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 9),
                       Row(
                         children: [
-                          Icon(
-                            Icons.home_work,
-                            size: 40,
-                            color: getCategoryColor(selectedThemeKey, "Place"),
-                          ),
+                          Icon(Icons.home_work, size: 40, color: getCategoryColor(selectedThemeKey, "Place")),
                           const SizedBox(width: 8),
-                          Text(
-                            "Venues or other organisations with\nactivities, events, food and drinks",
-                            style: bodyStyle,
-                          ),
+                          Text("Venues or other organisations with\nactivities, events, food and drinks", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 9),
                       Row(
                         children: [
-                          Icon(
-                            Icons.wheelchair_pickup,
-                            size: 40,
-                            color: getCategoryColor(
-                              selectedThemeKey,
-                              "Service",
-                            ),
-                          ),
+                          Icon(Icons.wheelchair_pickup, size: 40, color: getCategoryColor(selectedThemeKey, "Service")),
                           const SizedBox(width: 8),
-                          Text(
-                            "Other important services, such\nas toilets, info and first aid points",
-                            style: bodyStyle,
-                          ),
+                          Text("Other important services, such\nas toilets, info and first aid points", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 9),
                       Row(
                         children: [
-                          Image.asset(
-                            'assets/mapMarkers/genericGroupMarker.png',
-                            height: 40,
-                            width: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Image.asset('assets/mapMarkers/genericGroupMarker.png', height: 40, width: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Wide pins show where there’s\nmore than one thing at a location",
-                            style: bodyStyle,
-                          ),
+                          Text("Wide pins show where there’s\nmore than one thing at a location", style: bodyStyle),
                         ],
                       ),
                     ],
@@ -474,23 +300,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(
-              context,
-            ).colorScheme.secondary.withValues(alpha: 0.8),
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork02.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text(
-              'Choosing what’s shown',
-              style: titleStyle,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          titleWidget: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text('Choosing what’s shown', style: titleStyle, textAlign: TextAlign.center)),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -506,76 +322,41 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.filter_alt,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.filter_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "First tap the filter icon on\nthe map page",
-                            style: bodyStyle,
-                          ),
+                          Text("First tap the filter icon on\nthe map page", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          Icon(
-                            Icons.check_box_outlined,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.check_box_outlined, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Then simply select the marker\ncategories you want to see",
-                            style: bodyStyle,
-                          ),
+                          Text("Then simply select the marker\ncategories you want to see", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          Icon(
-                            Icons.no_transfer,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.no_transfer, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Choose whether or not to see\nour road closure",
-                            style: bodyStyle,
-                          ),
+                          Text("Choose whether or not to see\nour road closure", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          Icon(
-                            Icons.map,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "When you tap back on the map\nonly those will be showing",
-                            style: bodyStyle,
-                          ),
+                          Text("When you tap back on the map\nonly those will be showing", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 20),
                       Row(
                         children: [
-                          Icon(
-                            Icons.assistant_navigation,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.assistant_navigation, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Other buttons change the map’s\norientation and display style",
-                            style: bodyStyle,
-                          ),
+                          Text("Other buttons change the map’s\norientation and display style", style: bodyStyle),
                         ],
                       ),
                     ],
@@ -589,23 +370,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(
-              context,
-            ).colorScheme.secondary.withValues(alpha: 0.8),
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork03.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text(
-              'What’s on and when',
-              style: titleStyle,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          titleWidget: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text('What’s on and when', style: titleStyle, textAlign: TextAlign.center)),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -621,113 +392,57 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.smart_button,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.smart_button, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "There’s a button for each listings\ncategory at the bottom of the app",
-                            style: bodyStyle.copyWith(height: 1.2),
-                          ),
+                          Text("There’s a button for each listings\ncategory at the bottom of the app", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(
-                            Icons.list_alt,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Tap on these to see everything\nthat’s on in that category",
-                            style: bodyStyle.copyWith(height: 1.2),
-                          ),
+                          Text("Tap on these to see everything\nthat’s on in that category", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(
-                            Icons.sort,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Sort the list by location,\nnearest, name or time",
-                            style: bodyStyle.copyWith(height: 1.2),
-                          ),
+                          Text("Sort the list by location,\nnearest, name or time", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(
-                            Icons.update,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.update, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Tap this button to jump to the\ncurrent time in the list",
-                            style: bodyStyle.copyWith(height: 1.2),
-                          ),
+                          Text("Tap this button to jump to the\ncurrent time in the list", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(
-                            Icons.event_busy,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.event_busy, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "This button hides all the listings\nthat have finished",
-                            style: bodyStyle.copyWith(height: 1.2),
-                          ),
+                          Text("This button hides all the listings\nthat have finished", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(
-                            Icons.search,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.search, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Tap the search button and type\nto find specific listings",
-                            style: bodyStyle.copyWith(height: 1.2),
-                          ),
+                          Text("Tap the search button and type\nto find specific listings", style: bodyStyle.copyWith(height: 1.2)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          SizedBox(
-                            width: 40,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: FaIcon(
-                                FontAwesomeIcons.heart,
-                                size: 32,
-                                color:
-                                    Theme.of(context).colorScheme.onSecondary,
-                              ),
-                            ),
-                          ),
+                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
-                          Text(
-                            "Save your favourite listings, and\nview these from the main menu",
-                            style: bodyStyle,
-                          ),
+                          Text("Save your favourite listings, and\nview these from the main menu", style: bodyStyle),
                         ],
                       ),
                     ],
@@ -741,23 +456,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(
-              context,
-            ).colorScheme.secondary.withValues(alpha: 0.8),
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork04.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text(
-              'A few final things…',
-              style: titleStyle,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          titleWidget: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text('A few final things…', style: titleStyle, textAlign: TextAlign.center)),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -773,65 +478,32 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.favorite,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.favorite, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
-                          Text(
-                            "Thank you for visiting Mill\nRoad Winter Fair and using\nour new app",
-                            style: bodyStyle,
-                          ),
+                          Text("Thank you for visiting Mill\nRoad Winter Fair and using\nour new app", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Icon(
-                            Icons.report,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.report, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(
-                                  text: "Please make sure you’ve read\nthe ",
-                                  style: bodyStyle,
-                                ),
+                                TextSpan(text: "Please make sure you’ve read\nthe ", style: bodyStyle),
                                 TextSpan(
                                   text: "important information",
-                                  style: bodyStyle.copyWith(
-                                    decoration: TextDecoration.underline,
-                                  ),
+                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline),
                                   recognizer:
                                       TapGestureRecognizer()
                                         ..onTap = () {
                                           HapticFeedback.lightImpact();
-                                          widget.analyticsService
-                                              .logButtonTapped(
-                                                'importantInfo_hyperlink',
-                                              );
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (
-                                                    context,
-                                                  ) => ImportantInfoPage(
-                                                    analyticsService:
-                                                        widget.analyticsService,
-                                                  ),
-                                            ),
-                                          );
+                                          widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
                                         },
                                 ),
-                                TextSpan(
-                                  text: "\nabout the Fair",
-                                  style: bodyStyle,
-                                ),
+                                TextSpan(text: "\nabout the Fair", style: bodyStyle),
                               ],
                             ),
                           ),
@@ -840,38 +512,21 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Icon(
-                            Icons.diversity_1,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(
-                                  text:
-                                      "Did you know the Fair is run\nentirely by volunteers? To get\ninvolved, just visit our ",
-                                  style: bodyStyle,
-                                ),
+                                TextSpan(text: "Did you know the Fair is run\nentirely by volunteers? To get\ninvolved, just visit our ", style: bodyStyle),
                                 TextSpan(
                                   text: "website",
-                                  style: bodyStyle.copyWith(
-                                    decoration: TextDecoration.underline,
-                                  ),
+                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline),
                                   recognizer:
                                       TapGestureRecognizer()
                                         ..onTap = () {
                                           HapticFeedback.lightImpact();
-                                          widget.analyticsService
-                                              .logButtonTapped(
-                                                'mrwf_website_hyperlink',
-                                              );
-                                          launchUrl(
-                                            Uri.parse(
-                                              'https://www.millroadwinterfair.org/',
-                                            ),
-                                          );
+                                          widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
+                                          launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
                                         },
                                 ),
                               ],
@@ -882,38 +537,21 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                       const SizedBox(height: 10),
                       Row(
                         children: [
-                          Icon(
-                            Icons.feedback,
-                            size: 40,
-                            color: Theme.of(context).colorScheme.onSecondary,
-                          ),
+                          Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           RichText(
                             text: TextSpan(
                               children: [
-                                TextSpan(
-                                  text:
-                                      "If you have feedback about\nthe app we’d love to hear from\nyou! Just fill in ",
-                                  style: bodyStyle,
-                                ),
+                                TextSpan(text: "If you have feedback about\nthe app we’d love to hear from\nyou! Just fill in ", style: bodyStyle),
                                 TextSpan(
                                   text: "this form",
-                                  style: bodyStyle.copyWith(
-                                    decoration: TextDecoration.underline,
-                                  ),
+                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline),
                                   recognizer:
                                       TapGestureRecognizer()
                                         ..onTap = () {
                                           HapticFeedback.lightImpact();
-                                          widget.analyticsService
-                                              .logButtonTapped(
-                                                'app_feedback_hyperlink',
-                                              );
-                                          launchUrl(
-                                            Uri.parse(
-                                              'https://www.millroadwinterfair.org/app-feedback-form/',
-                                            ),
-                                          );
+                                          widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
+                                          launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
                                         },
                                 ),
                               ],
@@ -932,9 +570,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             contentMargin: const EdgeInsets.symmetric(horizontal: 16),
             bodyFlex: 0,
             safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(
-              context,
-            ).colorScheme.secondary.withValues(alpha: 0.8),
+            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -952,17 +588,8 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       skipOrBackFlex: 0,
       nextFlex: 0,
       showBackButton: false,
-      back: Icon(
-        Icons.arrow_back,
-        color: Theme.of(context).colorScheme.tertiary,
-      ),
-      skip: Text(
-        'Skip',
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: Theme.of(context).colorScheme.tertiary,
-        ),
-      ),
+      back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
+      skip: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
       overrideNext:
           (context, onPressed) => TextButton(
             onPressed:
@@ -970,43 +597,22 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     ? null
                     : () {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped(
-                        'next_WelcomeScreen',
-                      );
+                      widget.analyticsService.logButtonTapped('next_WelcomeScreen');
                       onPressed();
                     },
-            child: Icon(
-              Icons.arrow_forward,
-              color: Theme.of(context).colorScheme.tertiary,
-            ),
+            child: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.tertiary),
           ),
-      done: Text(
-        'Done',
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: Theme.of(context).colorScheme.tertiary,
-        ),
-      ),
+      done: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
       curve: Curves.fastLinearToSlowEaseIn,
       controlsMargin: const EdgeInsets.all(16),
-      controlsPadding:
-          kIsWeb
-              ? const EdgeInsets.all(12.0)
-              : const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
+      controlsPadding: kIsWeb ? const EdgeInsets.all(12.0) : const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
       dotsDecorator: const DotsDecorator(
         size: Size(10.0, 10.0),
         color: Color(0xFFBDBDBD),
         activeSize: Size(22.0, 10.0),
-        activeShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(25.0)),
-        ),
+        activeShape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25.0))),
       ),
-      dotsContainerDecorator: const ShapeDecoration(
-        color: Colors.black87,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-        ),
-      ),
+      dotsContainerDecorator: const ShapeDecoration(color: Colors.black87, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0)))),
     );
   }
 }

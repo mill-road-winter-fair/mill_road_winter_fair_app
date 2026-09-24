@@ -123,40 +123,20 @@ void main() {
   // Set up mocks
   late MapPageState mapPageState;
   setUp(() {
-    mapPageState =
-        MapPage(
-          listings: listings,
-          analyticsService: FakeAnalyticsService(),
-          onTabSelected: (_) {},
-        ).createState();
+    mapPageState = MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}).createState();
   });
 
   group('MapPage', () {
-    testWidgets('does not enable the map location layer without permission', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('does not enable the map location layer without permission', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
       locationPermission = LocationPermission.deniedForever;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              onTabSelected: (_) {},
-              analyticsService: FakeAnalyticsService(),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()))));
       await tester.pump();
 
-      expect(
-        tester.widget<GoogleMap>(find.byType(GoogleMap)).myLocationEnabled,
-        isFalse,
-      );
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).myLocationEnabled, isFalse);
     });
 
     testWidgets('all map buttons are present', (WidgetTester tester) async {
@@ -164,17 +144,7 @@ void main() {
       firstExecution = false;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              analyticsService: FakeAnalyticsService(),
-              onTabSelected: (_) {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Check the map buttons
@@ -189,34 +159,19 @@ void main() {
       expect(find.text('Road closures'), findsOneWidget);
     });
 
-    testWidgets('Home button centres the map and resets filters if all were off', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('Home button centres the map and resets filters if all were off', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
       // Mock the MethodChannel for Google Maps to capture camera movements
       final List<MethodCall> methodCalls = <MethodCall>[];
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        const MethodChannel('plugins.flutter.io/google_maps_0'),
-        (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        },
-      );
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/google_maps_0'), (MethodCall methodCall) async {
+        methodCalls.add(methodCall);
+        return null;
+      });
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              analyticsService: FakeAnalyticsService(),
-              onTabSelected: (_) {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
@@ -241,38 +196,20 @@ void main() {
       expect(mapPageState.filterSettings.values.every((v) => v == true), true);
 
       // Verify that camera move commands were sent to the platform side if the controller was initialized
-      final cameraUpdateCalls =
-          methodCalls.where((call) => call.method == 'camera#animate').toList();
+      final cameraUpdateCalls = methodCalls.where((call) => call.method == 'camera#animate').toList();
       // In some test environments, the platform view controller might not initialize fully,
       // so we check if calls were made, but the filter reset above already proves the button works.
       if (cameraUpdateCalls.isNotEmpty) {
-        expect(
-          cameraUpdateCalls.any(
-            (call) => call.arguments.toString().contains('cameraUpdate'),
-          ),
-          true,
-        );
+        expect(cameraUpdateCalls.any((call) => call.arguments.toString().contains('cameraUpdate')), true);
       }
     });
 
-    testWidgets('map type button changes map type', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('map type button changes map type', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              analyticsService: FakeAnalyticsService(),
-              onTabSelected: (_) {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
@@ -291,67 +228,43 @@ void main() {
       expect(mapPageState.mapType, MapType.normal);
     });
 
-    testWidgets(
-      'Compass button toggles map orientation between Adaptive and North-up',
-      (WidgetTester tester) async {
-        // Set firstExecution to false to simulate normal app launch
-        firstExecution = false;
+    testWidgets('Compass button toggles map orientation between Adaptive and North-up', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
 
-        // Ensure we start in a known state before pumping the widget
-        preferredMapOrientation = MapOrientation.adaptive;
+      // Ensure we start in a known state before pumping the widget
+      preferredMapOrientation = MapOrientation.adaptive;
 
-        // Build the MapPage widget
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: MapPage(
-                listings: listings,
-                analyticsService: FakeAnalyticsService(),
-                onTabSelected: (_) {},
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
+      // Build the MapPage widget
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
+      await tester.pumpAndSettle();
 
-        // Find the compass button by its icon
-        final compassButtonFinder = find.byIcon(Icons.assistant_navigation);
-        expect(compassButtonFinder, findsOneWidget);
+      // Find the compass button by its icon
+      final compassButtonFinder = find.byIcon(Icons.assistant_navigation);
+      expect(compassButtonFinder, findsOneWidget);
 
-        // Verify initial rotation (Adaptive is 90 degrees/0.25 turns)
-        final animatedRotationFinder = find.byType(AnimatedRotation);
-        expect(
-          tester.widget<AnimatedRotation>(animatedRotationFinder).turns,
-          0.25,
-        );
+      // Verify initial rotation (Adaptive is 90 degrees/0.25 turns)
+      final animatedRotationFinder = find.byType(AnimatedRotation);
+      expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.25);
 
-        // Tap the button to toggle to North-up
-        await tester.tap(compassButtonFinder);
-        await tester.pumpAndSettle();
+      // Tap the button to toggle to North-up
+      await tester.tap(compassButtonFinder);
+      await tester.pumpAndSettle();
 
-        // Verify state and rotation updated (North-up is 0 degrees/0.0 turns)
-        expect(preferredMapOrientation, MapOrientation.alwaysNorth);
-        expect(
-          tester.widget<AnimatedRotation>(animatedRotationFinder).turns,
-          0.0,
-        );
+      // Verify state and rotation updated (North-up is 0 degrees/0.0 turns)
+      expect(preferredMapOrientation, MapOrientation.alwaysNorth);
+      expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.0);
 
-        // Tap again to toggle back to Adaptive
-        await tester.tap(compassButtonFinder);
-        await tester.pumpAndSettle();
+      // Tap again to toggle back to Adaptive
+      await tester.tap(compassButtonFinder);
+      await tester.pumpAndSettle();
 
-        // Verify we returned to the original state
-        expect(preferredMapOrientation, MapOrientation.adaptive);
-        expect(
-          tester.widget<AnimatedRotation>(animatedRotationFinder).turns,
-          0.25,
-        );
-      },
-    );
+      // Verify we returned to the original state
+      expect(preferredMapOrientation, MapOrientation.adaptive);
+      expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.25);
+    });
 
-    testWidgets('tapping Road Closure legend opens road closures dialog', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('tapping Road Closure legend opens road closures dialog', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -359,17 +272,7 @@ void main() {
       preferredRoadClosurePolygonVisible = true;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              analyticsService: FakeAnalyticsService(),
-              onTabSelected: (_) {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Find the "Road closures" legend at the bottom left
@@ -396,68 +299,47 @@ void main() {
       expect(find.text('Close'), findsOneWidget);
     });
 
-    testWidgets(
-      'tapping the Hide road closures text in the dialog hides the Road Closure polygon',
-      (WidgetTester tester) async {
-        // Set firstExecution to false to simulate normal app launch
-        firstExecution = false;
+    testWidgets('tapping the Hide road closures text in the dialog hides the Road Closure polygon', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
 
-        // Set a realistic window size to avoid the dialog contents being off-screen
-        tester.view.physicalSize = const Size(1080, 2400);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(() {
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-        });
+      // Set a realistic window size to avoid the dialog contents being off-screen
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
 
-        // Ensure we start in a known state
-        preferredRoadClosurePolygonVisible = true;
+      // Ensure we start in a known state
+      preferredRoadClosurePolygonVisible = true;
 
-        // Build the MapPage widget
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: MapPage(
-                listings: listings,
-                analyticsService: FakeAnalyticsService(),
-                onTabSelected: (_) {},
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
+      // Build the MapPage widget
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
+      await tester.pumpAndSettle();
 
-        // Find the "Road closures" legend at the bottom left
-        // There are two "Road closures" texts potentially (legend and dialog title),
-        // but only the legend is present initially.
-        final legendFinder = find.text('Road closures');
-        expect(legendFinder, findsOneWidget);
+      // Find the "Road closures" legend at the bottom left
+      // There are two "Road closures" texts potentially (legend and dialog title),
+      // but only the legend is present initially.
+      final legendFinder = find.text('Road closures');
+      expect(legendFinder, findsOneWidget);
 
-        // Tap the legend
-        await tester.tap(legendFinder);
-        await tester.pumpAndSettle();
+      // Tap the legend
+      await tester.tap(legendFinder);
+      await tester.pumpAndSettle();
 
-        // Tap the "Hide road closures" text in the dialog
-        final hideRoadClosuresFinder = find.text('Hide road closures');
-        expect(hideRoadClosuresFinder, findsOneWidget);
-        await tester.tap(hideRoadClosuresFinder);
-        await tester.pumpAndSettle();
+      // Tap the "Hide road closures" text in the dialog
+      final hideRoadClosuresFinder = find.text('Hide road closures');
+      expect(hideRoadClosuresFinder, findsOneWidget);
+      await tester.tap(hideRoadClosuresFinder);
+      await tester.pumpAndSettle();
 
-        // Verify state update and polygon removal
-        expect(preferredRoadClosurePolygonVisible, isFalse);
-        expect(
-          tester
-              .widget<GoogleMap>(find.byType(GoogleMap))
-              .polygons
-              .any((p) => p.polygonId.value == 'roadClosure'),
-          isFalse,
-        );
-      },
-    );
+      // Verify state update and polygon removal
+      expect(preferredRoadClosurePolygonVisible, isFalse);
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isFalse);
+    });
 
-    testWidgets('Road Closure filter toggles polygon visibility', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('Road Closure filter toggles polygon visibility', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -465,28 +347,12 @@ void main() {
       preferredRoadClosurePolygonVisible = true;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              analyticsService: FakeAnalyticsService(),
-              onTabSelected: (_) {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Verify initial state: polygon should be present
       // We check the GoogleMap widget directly as _polygons is private
-      expect(
-        tester
-            .widget<GoogleMap>(find.byType(GoogleMap))
-            .polygons
-            .any((p) => p.polygonId.value == 'roadClosure'),
-        isTrue,
-      );
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isTrue);
 
       // Open the filter menu
       await tester.tap(find.byIcon(Icons.filter_alt));
@@ -500,13 +366,7 @@ void main() {
 
       // Verify state update and polygon removal
       expect(preferredRoadClosurePolygonVisible, isFalse);
-      expect(
-        tester
-            .widget<GoogleMap>(find.byType(GoogleMap))
-            .polygons
-            .any((p) => p.polygonId.value == 'roadClosure'),
-        isFalse,
-      );
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isFalse);
 
       // Toggle it back on
       await tester.tap(roadClosureCheckbox);
@@ -514,33 +374,15 @@ void main() {
 
       // Verify state is true and polygon is back
       expect(preferredRoadClosurePolygonVisible, isTrue);
-      expect(
-        tester
-            .widget<GoogleMap>(find.byType(GoogleMap))
-            .polygons
-            .any((p) => p.polygonId.value == 'roadClosure'),
-        isTrue,
-      );
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isTrue);
     });
 
-    testWidgets('addMarker filters and adds marker based on filter settings', (
-      tester,
-    ) async {
+    testWidgets('addMarker filters and adds marker based on filter settings', (tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              analyticsService: FakeAnalyticsService(),
-              onTabSelected: (_) {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
@@ -553,139 +395,93 @@ void main() {
       // Verify that the expected marker was added
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 2);
-      expect(
-        mapPageState.markers.values.toSet().any(
-          (marker) => marker.markerId == const MarkerId('1'),
-        ),
-        true,
-      );
+      expect(mapPageState.markers.values.toSet().any((marker) => marker.markerId == const MarkerId('1')), true);
     });
 
     test('getCategoryColor returns correct color for given types', () {
       final foodColor = getCategoryColor("light", "Food");
       final shoppingColor = getCategoryColor("light", "Shopping");
       final performanceColor = getCategoryColor("light", "Performance");
-      final charityCommunityInfoColor = getCategoryColor(
-        "light",
-        "Charity/Community/Info",
-      );
-      final visitExperienceColor = getCategoryColor(
-        "light",
-        "Visit/Experience",
-      );
+      final charityCommunityInfoColor = getCategoryColor("light", "Charity/Community/Info");
+      final visitExperienceColor = getCategoryColor("light", "Visit/Experience");
       final serviceColor = getCategoryColor("light", "Service");
 
       expect(foodColor, const Color.fromRGBO(255, 156, 26, 1.0));
       expect(shoppingColor, const Color.fromRGBO(209, 81, 85, 1.0));
       expect(performanceColor, const Color.fromRGBO(190, 110, 230, 1.0));
-      expect(
-        charityCommunityInfoColor,
-        const Color.fromRGBO(243, 190, 66, 1.0),
-      );
+      expect(charityCommunityInfoColor, const Color.fromRGBO(243, 190, 66, 1.0));
       expect(visitExperienceColor, const Color.fromRGBO(79, 184, 75, 1.0));
       expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
     });
 
-    testWidgets(
-      'Adds markers, opens modal bottom sheet for group marker, and checks content',
-      (WidgetTester tester) async {
-        // Set firstExecution to false to simulate normal app launch
-        firstExecution = false;
+    testWidgets('Adds markers, opens modal bottom sheet for group marker, and checks content', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
 
-        // Override user location global
-        currentLatLng = const LatLng(52.199174, 0.140929);
+      // Override user location global
+      currentLatLng = const LatLng(52.199174, 0.140929);
 
-        // Build the MapPage widget
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: MapPage(
-                listings: listings,
-                analyticsService: FakeAnalyticsService(),
-                onTabSelected: (_) {},
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
+      // Build the MapPage widget
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
+      await tester.pumpAndSettle();
 
-        // Obtain the state after mounting
-        final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
-        mapPageState.addAllVisibleMarkers();
+      // Obtain the state after mounting
+      final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
+      mapPageState.addAllVisibleMarkers();
 
-        // Simulate a tap on the map marker
-        const markerId = MarkerId('1');
-        final marker = mapPageState.markers.values.toList().firstWhere(
-          (marker) => marker.markerId == markerId,
-        );
-        marker.onTap!();
-        await tester.pumpAndSettle();
+      // Simulate a tap on the map marker
+      const markerId = MarkerId('1');
+      final marker = mapPageState.markers.values.toList().firstWhere((marker) => marker.markerId == markerId);
+      marker.onTap!();
+      await tester.pumpAndSettle();
 
-        // Check the text content in the bottom sheet
-        // Group marker content
-        expect(find.text('Food Group'), findsOneWidget);
-        expect(find.text('10:30—16:30'), findsOneWidget);
-        expect(find.text('Food'), findsOneWidget);
-        expect(find.text('approx. 199 m'), findsOneWidget);
-        // Specific marker content
-        expect(find.text('🍩 '), findsOneWidget);
-        expect(find.text('Glazed and Confused'), findsOneWidget);
-        expect(find.text('Doughnuts'), findsOneWidget);
-        expect(find.text('11:00—15:00'), findsOneWidget);
-        expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-        expect(find.byIcon(Icons.public), findsOneWidget);
-      },
-    );
+      // Check the text content in the bottom sheet
+      // Group marker content
+      expect(find.text('Food Group'), findsOneWidget);
+      expect(find.text('10:30—16:30'), findsOneWidget);
+      expect(find.text('Food'), findsOneWidget);
+      expect(find.text('approx. 199 m'), findsOneWidget);
+      // Specific marker content
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
+      expect(find.text('Doughnuts'), findsOneWidget);
+      expect(find.text('11:00—15:00'), findsOneWidget);
+      expect(find.byIcon(Icons.directions_walk), findsOneWidget);
+      expect(find.byIcon(Icons.public), findsOneWidget);
+    });
 
-    testWidgets(
-      'Adds markers, opens modal bottom sheet for specific marker, and checks content',
-      (WidgetTester tester) async {
-        // Set firstExecution to false to simulate normal app launch
-        firstExecution = false;
+    testWidgets('Adds markers, opens modal bottom sheet for specific marker, and checks content', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
 
-        // Override user location global
-        currentLatLng = const LatLng(52.199174, 0.140929);
+      // Override user location global
+      currentLatLng = const LatLng(52.199174, 0.140929);
 
-        // Build the MapPage widget
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: MapPage(
-                listings: listings,
-                analyticsService: FakeAnalyticsService(),
-                onTabSelected: (_) {},
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
+      // Build the MapPage widget
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
+      await tester.pumpAndSettle();
 
-        // Obtain the state after mounting
-        final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
-        mapPageState.addAllVisibleMarkers();
+      // Obtain the state after mounting
+      final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
+      mapPageState.addAllVisibleMarkers();
 
-        // Simulate a tap on the map marker
-        const markerId = MarkerId('3');
-        final marker = mapPageState.markers.values.toList().firstWhere(
-          (marker) => marker.markerId == markerId,
-        );
-        marker.onTap!();
-        await tester.pumpAndSettle();
+      // Simulate a tap on the map marker
+      const markerId = MarkerId('3');
+      final marker = mapPageState.markers.values.toList().firstWhere((marker) => marker.markerId == markerId);
+      marker.onTap!();
+      await tester.pumpAndSettle();
 
-        // Check the text content in the bottom sheet
-        expect(find.text('🍣 '), findsOneWidget);
-        expect(find.text('Sushi Squad'), findsOneWidget);
-        expect(find.text('12:00—16:30'), findsOneWidget);
-        expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
-        expect(find.text('Telephone: 01223 222222'), findsOneWidget);
-        expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-        expect(find.byIcon(Icons.public), findsOneWidget);
-      },
-    );
+      // Check the text content in the bottom sheet
+      expect(find.text('🍣 '), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
+      expect(find.text('12:00—16:30'), findsOneWidget);
+      expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
+      expect(find.text('Telephone: 01223 222222'), findsOneWidget);
+      expect(find.byIcon(Icons.directions_walk), findsOneWidget);
+      expect(find.byIcon(Icons.public), findsOneWidget);
+    });
 
-    testWidgets('shows filter menu and interacts with filter options', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -823,17 +619,7 @@ void main() {
       ];
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              analyticsService: FakeAnalyticsService(),
-              onTabSelected: (_) {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
@@ -859,18 +645,9 @@ void main() {
       // Verify all checkboxes are present
       expect(find.widgetWithText(CheckboxListTile, "Food"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Shopping"), findsOneWidget);
-      expect(
-        find.widgetWithText(CheckboxListTile, "Performances"),
-        findsOneWidget,
-      );
-      expect(
-        find.widgetWithText(CheckboxListTile, "Charity/Community/Info"),
-        findsOneWidget,
-      );
-      expect(
-        find.widgetWithText(CheckboxListTile, "Visits/Experiences"),
-        findsOneWidget,
-      );
+      expect(find.widgetWithText(CheckboxListTile, "Performances"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Charity/Community/Info"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Visits/Experiences"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
 
       // Test Food checkbox
@@ -934,9 +711,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Events checkbox
-      await tester.tap(
-        find.widgetWithText(CheckboxListTile, "Charity/Community/Info"),
-      );
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity/Community/Info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -945,9 +720,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(
-        find.widgetWithText(CheckboxListTile, "Charity/Community/Info"),
-      );
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity/Community/Info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -979,11 +752,7 @@ void main() {
 
       // Verify "Show All" button works
       final showAll = find.text("Show all");
-      await tester.dragUntilVisible(
-        showAll,
-        find.byType(SingleChildScrollView),
-        const Offset(0, 50),
-      );
+      await tester.dragUntilVisible(showAll, find.byType(SingleChildScrollView), const Offset(0, 50));
       await tester.tap(showAll);
       await tester.pumpAndSettle();
       expect(find.text("Filter map layers"), findsOne);
@@ -995,11 +764,7 @@ void main() {
 
       // Verify "Hide All" button works
       final hideAll = find.text("Hide all");
-      await tester.dragUntilVisible(
-        showAll,
-        find.byType(SingleChildScrollView),
-        const Offset(0, 50),
-      );
+      await tester.dragUntilVisible(showAll, find.byType(SingleChildScrollView), const Offset(0, 50));
       await tester.tap(hideAll);
       await tester.pumpAndSettle();
       expect(find.text("Filter map layers"), findsOne);
@@ -1048,17 +813,7 @@ void main() {
       ];
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              analyticsService: FakeAnalyticsService(),
-              onTabSelected: (_) {},
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
@@ -1072,65 +827,47 @@ void main() {
       expect(mapPageState.markers[const MarkerId('1')]?.visible, false);
     });
 
-    testWidgets(
-      'Compass AnimatedRotation reflects preferredMapOrientation and toggles on button press',
-      (WidgetTester tester) async {
-        // We'll build a small widget that mirrors MapPage's AnimatedRotation and toggle logic.
-        preferredMapOrientation = MapOrientation.adaptive;
+    testWidgets('Compass AnimatedRotation reflects preferredMapOrientation and toggles on button press', (WidgetTester tester) async {
+      // We'll build a small widget that mirrors MapPage's AnimatedRotation and toggle logic.
+      preferredMapOrientation = MapOrientation.adaptive;
 
-        Widget testWidget = MaterialApp(
-          home: Scaffold(
-            body: StatefulBuilder(
-              builder: (context, setState) {
-                double compassBearing =
-                    (preferredMapOrientation == MapOrientation.adaptive)
-                        ? 90
-                        : 0;
-                return Column(
-                  children: [
-                    AnimatedRotation(
-                      turns: compassBearing / 360.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: const Icon(Icons.navigation),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.assistant_navigation),
-                      onPressed: () {
-                        setState(() {
-                          preferredMapOrientation =
-                              (preferredMapOrientation ==
-                                      MapOrientation.adaptive)
-                                  ? MapOrientation.alwaysNorth
-                                  : MapOrientation.adaptive;
-                        });
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
+      Widget testWidget = MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) {
+              double compassBearing = (preferredMapOrientation == MapOrientation.adaptive) ? 90 : 0;
+              return Column(
+                children: [
+                  AnimatedRotation(turns: compassBearing / 360.0, duration: const Duration(milliseconds: 200), child: const Icon(Icons.navigation)),
+                  IconButton(
+                    icon: const Icon(Icons.assistant_navigation),
+                    onPressed: () {
+                      setState(() {
+                        preferredMapOrientation = (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
           ),
-        );
+        ),
+      );
 
-        await tester.pumpWidget(testWidget);
-        await tester.pumpAndSettle();
+      await tester.pumpWidget(testWidget);
+      await tester.pumpAndSettle();
 
-        final animatedRotationFinder = find.byType(AnimatedRotation);
-        expect(animatedRotationFinder, findsOneWidget);
-        AnimatedRotation widgetBefore = tester.widget<AnimatedRotation>(
-          animatedRotationFinder,
-        );
-        expect(widgetBefore.turns, closeTo(90.0 / 360.0, 0.001));
+      final animatedRotationFinder = find.byType(AnimatedRotation);
+      expect(animatedRotationFinder, findsOneWidget);
+      AnimatedRotation widgetBefore = tester.widget<AnimatedRotation>(animatedRotationFinder);
+      expect(widgetBefore.turns, closeTo(90.0 / 360.0, 0.001));
 
-        await tester.tap(find.byIcon(Icons.assistant_navigation));
-        await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.assistant_navigation));
+      await tester.pumpAndSettle();
 
-        AnimatedRotation widgetAfter = tester.widget<AnimatedRotation>(
-          animatedRotationFinder,
-        );
-        expect(widgetAfter.turns, closeTo(0.0, 0.001));
-      },
-    );
+      AnimatedRotation widgetAfter = tester.widget<AnimatedRotation>(animatedRotationFinder);
+      expect(widgetAfter.turns, closeTo(0.0, 0.001));
+    });
 
     // TODO: Add test for initial polyline plotting
     // TODO: Add test for polyline updates

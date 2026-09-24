@@ -7,8 +7,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 
 String getEffectiveThemeKey(String themeKey, [Brightness? brightness]) {
   if (themeKey != 'auto') return themeKey;
-  final currentBrightness =
-      brightness ?? ui.PlatformDispatcher.instance.platformBrightness;
+  final currentBrightness = brightness ?? ui.PlatformDispatcher.instance.platformBrightness;
   return currentBrightness == Brightness.dark ? 'dark' : 'light';
 }
 
@@ -46,14 +45,8 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.black,
       onSurfaceVariant: Colors.grey[700]!,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(166, 34, 43, 1),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(166, 34, 43, 1),
-      unselectedItemColor: Colors.grey,
-    ),
+    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(166, 34, 43, 1), foregroundColor: Colors.white),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(166, 34, 43, 1), unselectedItemColor: Colors.grey),
     drawerTheme: const DrawerThemeData(backgroundColor: Colors.white),
     shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
@@ -73,27 +66,11 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.white,
       onSurfaceVariant: Colors.grey[300]!,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0),
-        foregroundColor: Colors.white,
-        iconColor: Colors.white,
-      ),
-    ),
-    listTileTheme: const ListTileThemeData(
-      tileColor: Color.fromRGBO(44, 44, 44, 1.0),
-    ),
+    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(44, 44, 44, 1.0), foregroundColor: Colors.white),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0), unselectedItemColor: Colors.grey),
+    drawerTheme: const DrawerThemeData(backgroundColor: Color.fromRGBO(44, 44, 44, 1.0)),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
+    listTileTheme: const ListTileThemeData(tileColor: Color.fromRGBO(44, 44, 44, 1.0)),
     shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   '2024': ThemeData(
@@ -112,14 +89,8 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.black,
       onSurfaceVariant: Colors.grey[700]!,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(37, 63, 128, 1.0),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(37, 63, 128, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
+    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(37, 63, 128, 1.0), foregroundColor: Colors.white),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(37, 63, 128, 1.0), unselectedItemColor: Colors.grey),
     drawerTheme: const DrawerThemeData(backgroundColor: Colors.white),
     shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
@@ -139,27 +110,11 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Color.fromRGBO(255, 243, 0, 1.0),
       onSurfaceVariant: Color.fromRGBO(0, 255, 244, 1.0),
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.black,
-      foregroundColor: Color.fromRGBO(255, 243, 0, 1.0),
-    ),
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0),
-      ),
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
+    appBarTheme: const AppBarTheme(backgroundColor: Colors.black, foregroundColor: Color.fromRGBO(255, 243, 0, 1.0)),
+    iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0))),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0), unselectedItemColor: Colors.grey),
     drawerTheme: const DrawerThemeData(backgroundColor: Colors.black),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0),
-        foregroundColor: Colors.white,
-        iconColor: Colors.white,
-      ),
-    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
     listTileTheme: const ListTileThemeData(tileColor: Colors.black),
     shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
@@ -179,14 +134,8 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.black,
       onSurfaceVariant: Colors.grey[700]!,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(102, 55, 133, 1.0),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
+    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(102, 55, 133, 1.0), foregroundColor: Colors.white),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0), unselectedItemColor: Colors.grey),
     drawerTheme: const DrawerThemeData(backgroundColor: Colors.white),
     shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
@@ -251,13 +200,9 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
 
   // Adjust the asset path if this is a group and load the relevant backdrop image (frame)
   if (category.contains('Group-')) {
-    backdropData = await rootBundle.load(
-      "assets/mapMarkers/groupMarkerIconFrame.png",
-    );
+    backdropData = await rootBundle.load("assets/mapMarkers/groupMarkerIconFrame.png");
   } else {
-    backdropData = await rootBundle.load(
-      "assets/mapMarkers/markerIconFrame.png",
-    );
+    backdropData = await rootBundle.load("assets/mapMarkers/markerIconFrame.png");
   }
 
   if (onTest == true) {
@@ -266,22 +211,14 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
   }
   try {
     int markerPixelSize = 288;
-    final ui.Codec backdropCodec = await ui.instantiateImageCodec(
-      backdropData.buffer.asUint8List(),
-      targetWidth: markerPixelSize,
-      targetHeight: markerPixelSize,
-    );
+    final ui.Codec backdropCodec = await ui.instantiateImageCodec(backdropData.buffer.asUint8List(), targetWidth: markerPixelSize, targetHeight: markerPixelSize);
     // The below line does not seem to work at all in the unit tests, it crashes the function without error
     final ui.FrameInfo backdropFrame = await backdropCodec.getNextFrame();
     final ui.Image backdropImage = backdropFrame.image;
 
     // Load the base image (to be colorized)
     final ByteData markerData = await rootBundle.load(assetPath);
-    final ui.Codec markerCodec = await ui.instantiateImageCodec(
-      markerData.buffer.asUint8List(),
-      targetWidth: markerPixelSize,
-      targetHeight: markerPixelSize,
-    );
+    final ui.Codec markerCodec = await ui.instantiateImageCodec(markerData.buffer.asUint8List(), targetWidth: markerPixelSize, targetHeight: markerPixelSize);
     // The below line does not seem to work at all in the unit tests, it crashes the function without error
     final ui.FrameInfo markerFrame = await markerCodec.getNextFrame();
     final ui.Image markerImage = markerFrame.image;
@@ -295,30 +232,15 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
     canvas.drawImage(backdropImage, Offset.zero, backdropPaint);
 
     // Draw the marker image on top with the color overlay
-    final Paint markerPaint =
-        Paint()
-          ..colorFilter = ColorFilter.mode(
-            color,
-            BlendMode.srcIn,
-          ); // Apply color to the marker image
+    final Paint markerPaint = Paint()..colorFilter = ColorFilter.mode(color, BlendMode.srcIn); // Apply color to the marker image
     canvas.drawImage(markerImage, Offset.zero, markerPaint);
 
     // Convert the final image to a BitmapDescriptor
-    final ui.Image finalImage = await recorder.endRecording().toImage(
-      markerImage.width,
-      markerImage.height,
-    );
-    final ByteData? byteData = await finalImage.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
+    final ui.Image finalImage = await recorder.endRecording().toImage(markerImage.width, markerImage.height);
+    final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-    return BitmapDescriptor.bytes(
-      pngBytes,
-      imagePixelRatio: 1.0,
-      height: 32.0,
-      width: 32.0,
-    );
+    return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: 32.0, width: 32.0);
   } catch (e) {
     debugPrint("Custom marker rendering failed: $e");
     return BitmapDescriptor.defaultMarker;
@@ -338,12 +260,10 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(190, 110, 230, 1.0);
       return color;
-    } else if (category == "Charity/Community/Info" ||
-        category == "Group-Charity/Community/Info") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(243, 190, 66, 1.0);
       return color;
-    } else if (category == "Visit/Experience" ||
-        category == "Group-Visit/Experience") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(79, 184, 75, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {
@@ -364,12 +284,10 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(183, 13, 204, 1.0);
       return color;
-    } else if (category == "Charity/Community/Info" ||
-        category == "Group-Charity/Community/Info") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(255, 196, 0, 1.0);
       return color;
-    } else if (category == "Visit/Experience" ||
-        category == "Group-Visit/Experience") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(7, 128, 0, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {
@@ -390,12 +308,10 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(175, 98, 214, 1.0);
       return color;
-    } else if (category == "Charity/Community/Info" ||
-        category == "Group-Charity/Community/Info") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(204, 161, 51, 1.0);
       return color;
-    } else if (category == "Visit/Experience" ||
-        category == "Group-Visit/Experience") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(0, 115, 37, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {
@@ -416,12 +332,10 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(228, 0, 255, 1.0);
       return color;
-    } else if (category == "Charity/Community/Info" ||
-        category == "Group-Charity/Community/Info") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(237, 201, 0, 1.0);
       return color;
-    } else if (category == "Visit/Experience" ||
-        category == "Group-Visit/Experience") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(28, 213, 0, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {
@@ -442,12 +356,10 @@ Color getCategoryColor(String selectedThemeKey, String category) {
     } else if (category == "Performance" || category == "Group-Performance") {
       Color color = const Color.fromRGBO(204, 121, 167, 1.0);
       return color;
-    } else if (category == "Charity/Community/Info" ||
-        category == "Group-Charity/Community/Info") {
+    } else if (category == "Charity/Community/Info" || category == "Group-Charity/Community/Info") {
       Color color = const Color.fromRGBO(240, 228, 66, 1.0);
       return color;
-    } else if (category == "Visit/Experience" ||
-        category == "Group-Visit/Experience") {
+    } else if (category == "Visit/Experience" || category == "Group-Visit/Experience") {
       Color color = const Color.fromRGBO(0, 158, 115, 1.0);
       return color;
     } else if (category.startsWith("Service") || category == "Group-Service") {

@@ -42,28 +42,20 @@ String getCategory(Map<String, dynamic> listing) {
     if (listing['charityCommunityInfo'] == 'TRUE') {
       return 'Charity/Community/Info';
     }
-    if (listing['charityCommunityInfo'] == 'TRUE' &&
-        listing['groupParent'] == 'TRUE') {
+    if (listing['charityCommunityInfo'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
       return 'Group-Charity/Community/Info';
     }
-    if (listing['performanceMusic'] == 'TRUE' ||
-        listing['performanceChildrens'] == 'TRUE' ||
-        listing['performanceDance'] == 'TRUE' ||
-        listing['performanceOther'] == 'TRUE') {
+    if (listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') {
       return 'Performance';
     }
-    if ((listing['performanceMusic'] == 'TRUE' ||
-            listing['performanceChildrens'] == 'TRUE' ||
-            listing['performanceDance'] == 'TRUE' ||
-            listing['performanceOther'] == 'TRUE') &&
+    if ((listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') &&
         listing['groupParent'] == 'TRUE') {
       return 'Group-Performance';
     }
     if (listing['visitExperience'] == 'TRUE') {
       return 'Visit/Experience';
     }
-    if (listing['visitExperience'] == 'TRUE' &&
-        listing['groupParent'] == 'TRUE') {
+    if (listing['visitExperience'] == 'TRUE' && listing['groupParent'] == 'TRUE') {
       return 'Group-Visit/Experience';
     }
     if (listing['service'] == 'TRUE') {
@@ -77,13 +69,9 @@ String getCategory(Map<String, dynamic> listing) {
   return 'No Category';
 }
 
-bool isGroupSingleCategory(
-  String groupID,
-  List<Map<String, dynamic>> listings,
-) {
+bool isGroupSingleCategory(String groupID, List<Map<String, dynamic>> listings) {
   // Get all listings with the same groupID
-  final groupListings =
-      listings.where((listing) => listing['groupID'] == groupID).toList();
+  final groupListings = listings.where((listing) => listing['groupID'] == groupID).toList();
 
   // If there are no listings in the group, return false
   if (groupListings.isEmpty) {

@@ -9,8 +9,7 @@ class ListingUpdateNotifier {
   static const _standardShowInterval = Duration(days: 3);
   static const _fairDayShowInterval = Duration(hours: 8);
 
-  static String get preferenceKey =>
-      'listingUpdateNoticeEnabled${fairDate.year}';
+  static String get preferenceKey => 'listingUpdateNoticeEnabled${fairDate.year}';
 
   static String lastShownKeyFor(DateTime now) {
     final noticeName =
@@ -24,9 +23,7 @@ class ListingUpdateNotifier {
   }
 
   static Duration showIntervalFor(DateTime now) {
-    return DateUtils.isSameDay(fairDate, now)
-        ? _fairDayShowInterval
-        : _standardShowInterval;
+    return DateUtils.isSameDay(fairDate, now) ? _fairDayShowInterval : _standardShowInterval;
   }
 
   static String titleFor(DateTime now) {
@@ -80,11 +77,7 @@ class ListingUpdateNotifier {
     return !DateUtils.isSameDay(fairDate, now) && now.isBefore(fairDate);
   }
 
-  static Future<void> maybeShowNotice(
-    BuildContext context, {
-    DateTime? now,
-    required AnalyticsService analyticsService,
-  }) async {
+  static Future<void> maybeShowNotice(BuildContext context, {DateTime? now, required AnalyticsService analyticsService}) async {
     if (onTest) {
       return;
     }
@@ -95,10 +88,7 @@ class ListingUpdateNotifier {
     // The dismissal preference applies only before the Fair. The notices on
     // the day and afterwards must always remain available.
     final prefs = await SharedPreferences.getInstance();
-    if (!context.mounted ||
-        (isListingsMayChange &&
-            (!listingUpdateNoticeEnabled ||
-                !(prefs.getBool(preferenceKey) ?? true)))) {
+    if (!context.mounted || (isListingsMayChange && (!listingUpdateNoticeEnabled || !(prefs.getBool(preferenceKey) ?? true)))) {
       return;
     }
 
@@ -139,9 +129,7 @@ class ListingUpdateNotifier {
                         value: dontShowAgain,
                         onChanged: (value) {
                           HapticFeedback.selectionClick();
-                          analyticsService.logButtonTapped(
-                            '${analyticsId}_dont_show_again_toggle',
-                          );
+                          analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
                           setState(() => dontShowAgain = value ?? false);
                         },
                         title: const Text("Don't show this again"),
@@ -155,14 +143,8 @@ class ListingUpdateNotifier {
                         analyticsService.logButtonTapped('${analyticsId}_ok');
                         if (isListingsMayChange) {
                           listingUpdateNoticeEnabled = !dontShowAgain;
-                          await prefs.setBool(
-                            preferenceKey,
-                            listingUpdateNoticeEnabled,
-                          );
-                          await analyticsService.logPreferenceSet(
-                            'listing_update_notice',
-                            listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
-                          );
+                          await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
+                          await analyticsService.logPreferenceSet('listing_update_notice', listingUpdateNoticeEnabled ? 'enabled' : 'disabled');
                         }
                         if (dialogContext.mounted) {
                           Navigator.of(dialogContext).pop();

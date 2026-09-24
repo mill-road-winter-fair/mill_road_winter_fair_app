@@ -17,10 +17,7 @@ class RecordingSearchAnalyticsService extends FakeAnalyticsService {
   final searches = <Map<String, String>>[];
 
   @override
-  Future<void> logSearch(
-    String searchTerm, {
-    required String searchArea,
-  }) async {
+  Future<void> logSearch(String searchTerm, {required String searchArea}) async {
     searches.add({'search_term': searchTerm, 'search_area': searchArea});
   }
 }
@@ -37,33 +34,16 @@ void main() {
   });
 
   // Build widget tree helper
-  Future<void> pumpFilteredListingsPage(
-    WidgetTester tester,
-    String category,
-    List<Map<String, dynamic>> listings,
-    List<String> favouriteListingKeys,
-  ) async {
+  Future<void> pumpFilteredListingsPage(WidgetTester tester, String category, List<Map<String, dynamic>> listings, List<String> favouriteListingKeys) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: FilteredListingsPage(
-            filterCategory: category,
-            listings: listings,
-            onTabSelected: (_) {},
-            onSubfilterChange: (_) {},
-            analyticsService: FakeAnalyticsService(),
-          ),
-        ),
-      ),
+      MaterialApp(home: Scaffold(body: FilteredListingsPage(filterCategory: category, listings: listings, onTabSelected: (_) {}, onSubfilterChange: (_) {}, analyticsService: FakeAnalyticsService()))),
     );
     await tester.pump();
     await settle(tester);
   }
 
   group('FilteredListingsPage', () {
-    testWidgets('displays error text when fetchFilteredListings fails', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('displays error text when fetchFilteredListings fails', (WidgetTester tester) async {
       // Define a test listing
       List<Map<String, dynamic>> listings = [];
 
@@ -72,9 +52,7 @@ void main() {
       expect(find.text('Unable to retrieve listings'), findsOneWidget);
     });
 
-    testWidgets('displays filtered listings correctly', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('displays filtered listings correctly', (WidgetTester tester) async {
       // Override user location global
       currentLatLng = const LatLng(52.199174, 0.140929);
       // Define mock values
@@ -149,10 +127,7 @@ void main() {
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
-      expect(
-        find.text('01223 111111'),
-        findsNothing,
-      ); // as Details won't be open
+      expect(find.text('01223 111111'), findsNothing); // as Details won't be open
       expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
@@ -163,9 +138,7 @@ void main() {
       expect(find.byIcon(Icons.public), findsExactly(2));
     });
 
-    testWidgets('different sorting methodologies change the order', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
       await loadSettings();
       // Override user location global
       currentLatLng = const LatLng(52.199174, 0.140929);
@@ -267,355 +240,293 @@ void main() {
       preferredSortingMethod = SortingMethod.values[0];
 
       await pumpFilteredListingsPage(tester, 'all', listings, []);
-      var filteredListingsPageState =
-          tester.state(find.byType(FilteredListingsPage))
-              as FilteredListingsPageState;
+      var filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
-      expect(
-        filteredListingsPageState.filteredListings[0]['title'],
-        'Bite Club',
-      );
-      expect(
-        filteredListingsPageState.filteredListings[1]['title'],
-        'Glazed and Confused',
-      );
-      expect(
-        filteredListingsPageState.filteredListings[2]['title'],
-        'Sushi Squad',
-      );
+      expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
+      expect(filteredListingsPageState.filteredListings[1]['title'], 'Glazed and Confused');
+      expect(filteredListingsPageState.filteredListings[2]['title'], 'Sushi Squad');
 
       // Mock sorting preference is distance
       preferredSortingMethod = SortingMethod.values[1];
 
       await pumpFilteredListingsPage(tester, 'all', listings, []);
-      filteredListingsPageState =
-          tester.state(find.byType(FilteredListingsPage))
-              as FilteredListingsPageState;
+      filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
-      expect(
-        filteredListingsPageState.filteredListings[0]['title'],
-        'Sushi Squad',
-      );
-      expect(
-        filteredListingsPageState.filteredListings[1]['title'],
-        'Glazed and Confused',
-      );
-      expect(
-        filteredListingsPageState.filteredListings[2]['title'],
-        'Bite Club',
-      );
+      expect(filteredListingsPageState.filteredListings[0]['title'], 'Sushi Squad');
+      expect(filteredListingsPageState.filteredListings[1]['title'], 'Glazed and Confused');
+      expect(filteredListingsPageState.filteredListings[2]['title'], 'Bite Club');
 
       // Mock sorting preference is time - which for Food should sort by A-Z since time isn't allowed for sorting
       preferredSortingMethod = SortingMethod.values[2];
 
       await pumpFilteredListingsPage(tester, 'all', listings, []);
-      filteredListingsPageState =
-          tester.state(find.byType(FilteredListingsPage))
-              as FilteredListingsPageState;
+      filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
-      expect(
-        filteredListingsPageState.filteredListings[0]['title'],
-        'Bite Club',
-      );
-      expect(
-        filteredListingsPageState.filteredListings[1]['title'],
-        'Glazed and Confused',
-      );
-      expect(
-        filteredListingsPageState.filteredListings[2]['title'],
-        'Sushi Squad',
-      );
+      expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
+      expect(filteredListingsPageState.filteredListings[1]['title'], 'Glazed and Confused');
+      expect(filteredListingsPageState.filteredListings[2]['title'], 'Sushi Squad');
     });
 
-    testWidgets(
-      'tapping the sorting buttons changes preferred sorting method',
-      (WidgetTester tester) async {
-        await loadSettings();
+    testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {
+      await loadSettings();
 
-        // Provide a listing so the page renders the sorting controls.
-        listings = [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'groupParent': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'TRUE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          },
-        ];
+      // Provide a listing so the page renders the sorting controls.
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performanceMusic': 'TRUE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'business': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        },
+      ];
 
-        // Ensure the nearest sorting option is available in the menu
-        locationPermission = LocationPermission.always;
-        currentLatLng = const LatLng(52.199174, 0.140929);
-        preferredSortingMethod = SortingMethod.values[0];
+      // Ensure the nearest sorting option is available in the menu
+      locationPermission = LocationPermission.always;
+      currentLatLng = const LatLng(52.199174, 0.140929);
+      preferredSortingMethod = SortingMethod.values[0];
 
-        await pumpFilteredListingsPage(tester, 'favourite', listings, ['1']);
+      await pumpFilteredListingsPage(tester, 'favourite', listings, ['1']);
 
-        await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-        await settle(tester);
-        await tester.tap(find.text('Nearest').last);
-        await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
+      await settle(tester);
+      await tester.tap(find.text('Nearest').last);
+      await settle(tester);
 
-        expect(preferredSortingMethod, SortingMethod.values[1]);
+      expect(preferredSortingMethod, SortingMethod.values[1]);
 
-        await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-        await settle(tester);
-        await tester.tap(find.text('Time').last);
-        await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
+      await settle(tester);
+      await tester.tap(find.text('Time').last);
+      await settle(tester);
 
-        expect(preferredSortingMethod, SortingMethod.values[2]);
+      expect(preferredSortingMethod, SortingMethod.values[2]);
 
-        await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-        await settle(tester);
-        await tester.tap(find.text('Location (a–z)').last);
-        await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
+      await settle(tester);
+      await tester.tap(find.text('Location (a–z)').last);
+      await settle(tester);
 
-        expect(preferredSortingMethod, SortingMethod.values[3]);
+      expect(preferredSortingMethod, SortingMethod.values[3]);
 
-        await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-        await settle(tester);
-        await tester.tap(find.text('Name (a–z)').last);
-        await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
+      await settle(tester);
+      await tester.tap(find.text('Name (a–z)').last);
+      await settle(tester);
 
-        expect(preferredSortingMethod, SortingMethod.values[0]);
-      },
-    );
+      expect(preferredSortingMethod, SortingMethod.values[0]);
+    });
 
-    testWidgets(
-      'change the preferred sorting method when location permission is denied',
-      (WidgetTester tester) async {
-        // Mock sorting preference is distance
-        preferredSortingMethod = SortingMethod.values[1];
+    testWidgets('change the preferred sorting method when location permission is denied', (WidgetTester tester) async {
+      // Mock sorting preference is distance
+      preferredSortingMethod = SortingMethod.values[1];
 
-        // Location permission is denied
-        locationPermission = LocationPermission.deniedForever;
+      // Location permission is denied
+      locationPermission = LocationPermission.deniedForever;
 
-        // Define mock values
-        listings = [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'groupParent': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'FALSE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          },
-        ];
+      // Define mock values
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'business': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        },
+      ];
 
-        await loadSettings();
-        await pumpFilteredListingsPage(tester, 'all', listings, []);
+      await loadSettings();
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
-        // Preferred sorting method should have been reset to 0 (alphabetical)
-        expect(preferredSortingMethod, SortingMethod.values[0]);
-      },
-    );
+      // Preferred sorting method should have been reset to 0 (alphabetical)
+      expect(preferredSortingMethod, SortingMethod.values[0]);
+    });
 
-    testWidgets(
-      'use fallback sorting when location is unavailable, do not use it when location returns',
-      (WidgetTester tester) async {
-        await loadSettings();
+    testWidgets('use fallback sorting when location is unavailable, do not use it when location returns', (WidgetTester tester) async {
+      await loadSettings();
 
-        // Mock sorting preference is distance
-        preferredSortingMethod = SortingMethod.values[1];
+      // Mock sorting preference is distance
+      preferredSortingMethod = SortingMethod.values[1];
 
-        // Location permission is granted
-        locationPermission = LocationPermission.always;
+      // Location permission is granted
+      locationPermission = LocationPermission.always;
 
-        // Define mock values
-        listings = [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'groupParent': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'FALSE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          },
-        ];
+      // Define mock values
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'business': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        },
+      ];
 
-        // Mock location services are disabled
-        locationServicesEnabled = false;
+      // Mock location services are disabled
+      locationServicesEnabled = false;
 
-        await pumpFilteredListingsPage(tester, 'all', listings, []);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
-        // Obtain the state after mounting
-        final filteredListingsPageState =
-            tester.state(find.byType(FilteredListingsPage))
-                as FilteredListingsPageState;
+      // Obtain the state after mounting
+      final filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
-        // Fallback sorting should be enabled
-        expect(filteredListingsPageState.useFallbackSorting, true);
+      // Fallback sorting should be enabled
+      expect(filteredListingsPageState.useFallbackSorting, true);
 
-        // Preferred sorting method should be unchanged
-        expect(preferredSortingMethod, SortingMethod.values[1]);
+      // Preferred sorting method should be unchanged
+      expect(preferredSortingMethod, SortingMethod.values[1]);
 
-        // Mock location services are re-enabled
-        locationServicesEnabled = true;
-        // Mock location is available
-        currentLatLng = const LatLng(52.199174, 0.140929);
+      // Mock location services are re-enabled
+      locationServicesEnabled = true;
+      // Mock location is available
+      currentLatLng = const LatLng(52.199174, 0.140929);
 
-        await pumpFilteredListingsPage(tester, 'all', listings, []);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
-        // Fallback sorting should be disabled
-        expect(filteredListingsPageState.useFallbackSorting, false);
+      // Fallback sorting should be disabled
+      expect(filteredListingsPageState.useFallbackSorting, false);
 
-        // Preferred sorting method should be unchanged
-        expect(preferredSortingMethod, SortingMethod.values[1]);
+      // Preferred sorting method should be unchanged
+      expect(preferredSortingMethod, SortingMethod.values[1]);
 
-        // Mock location is now unavailable
-        currentLatLng = null;
+      // Mock location is now unavailable
+      currentLatLng = null;
 
-        await pumpFilteredListingsPage(tester, 'all', listings, []);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
-        // Fallback sorting should be enabled
-        expect(filteredListingsPageState.useFallbackSorting, true);
+      // Fallback sorting should be enabled
+      expect(filteredListingsPageState.useFallbackSorting, true);
 
-        // Preferred sorting method should be unchanged
-        expect(preferredSortingMethod, SortingMethod.values[1]);
-      },
-    );
+      // Preferred sorting method should be unchanged
+      expect(preferredSortingMethod, SortingMethod.values[1]);
+    });
 
-    testWidgets(
-      'FilteredListingsPage navigateToMapAndGetDirections function changes to MapPage',
-      (WidgetTester tester) async {
-        // Set firstExecution to false to simulate normal app launch
-        firstExecution = false;
+    testWidgets('FilteredListingsPage navigateToMapAndGetDirections function changes to MapPage', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
 
-        listings = [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'groupParent': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'FALSE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          },
-        ];
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'business': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        },
+      ];
 
-        await tester.pumpWidget(
-          MyApp(
-            firstExecution: false,
-            analyticsService: FakeAnalyticsService(),
-          ),
-        );
-        await settle(tester);
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await settle(tester);
 
-        expect(
-          homePageKey.currentState,
-          isNotNull,
-          reason: 'HomePage should be mounted',
-        );
-        expect(
-          mapPageKey.currentState,
-          isNotNull,
-          reason: 'MapPage should be mounted',
-        );
-        final homePageState = homePageKey.currentState!;
-        final mapPageState = mapPageKey.currentState!;
-        mapPageState.addAllVisibleMarkers();
+      expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
+      expect(mapPageKey.currentState, isNotNull, reason: 'MapPage should be mounted');
+      final homePageState = homePageKey.currentState!;
+      final mapPageState = mapPageKey.currentState!;
+      mapPageState.addAllVisibleMarkers();
 
-        await tester.tap(find.text('Listings'));
-        await settle(tester);
-        expect(homePageState.index, 3);
+      await tester.tap(find.text('Listings'));
+      await settle(tester);
+      expect(homePageState.index, 3);
 
-        await tester.tap(find.byIcon(Icons.directions_walk).first);
-        await settle(tester);
+      await tester.tap(find.byIcon(Icons.directions_walk).first);
+      await settle(tester);
 
-        expect(homePageState.index, 3);
-      },
-    );
+      expect(homePageState.index, 3);
+    });
 
-    testWidgets('FilteredListingsPage search filters results based on query (UI)', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('FilteredListingsPage search filters results based on query (UI)', (WidgetTester tester) async {
       final analytics = RecordingSearchAnalyticsService();
       final sampleListings = [
         {
@@ -717,17 +628,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FilteredListingsPage(
-              filterCategory: 'all',
-              analyticsService: analytics,
-              listings: sampleListings,
-              onTabSelected: (_) {},
-              onSubfilterChange: (_) {},
-            ),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: FilteredListingsPage(filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}))),
       );
 
       await settle(tester);
@@ -747,10 +648,7 @@ void main() {
       final searchBarBox = find.byKey(const ValueKey('searchBar'));
       expect(searchBarBox, findsOneWidget);
 
-      final textFieldFinder = find.descendant(
-        of: searchBarBox,
-        matching: find.byType(TextField),
-      );
+      final textFieldFinder = find.descendant(of: searchBarBox, matching: find.byType(TextField));
       expect(textFieldFinder, findsOneWidget);
 
       // Enter text that matches only Sushi Squad

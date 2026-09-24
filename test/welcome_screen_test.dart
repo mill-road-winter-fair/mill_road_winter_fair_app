@@ -27,9 +27,7 @@ void main() {
   });
 
   group('WelcomeScreen', () {
-    testWidgets('displays welcome screen on first app execution', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('displays welcome screen on first app execution', (WidgetTester tester) async {
       // Set firstExecution to true to simulate first time app launch
       firstExecution = true;
 
@@ -38,12 +36,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget to test that the app correctly chooses the WelcomeScreen
-      await tester.pumpWidget(
-        RootWidget(
-          firstExecution: true,
-          analyticsService: FakeAnalyticsService(),
-        ),
-      );
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Verify that the WelcomeScreen is displayed
       expect(find.byType(WelcomeScreen), findsOneWidget);
@@ -56,9 +49,7 @@ void main() {
       expect(find.text('Take me straight to the app!'), findsOneWidget);
     });
 
-    testWidgets('displays MyApp when not first app execution', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('displays MyApp when not first app execution', (WidgetTester tester) async {
       // Set firstExecution to false to simulate subsequent app launch
       firstExecution = false;
 
@@ -97,12 +88,7 @@ void main() {
       ];
 
       // Pump the RootWidget
-      await tester.pumpWidget(
-        RootWidget(
-          firstExecution: false,
-          analyticsService: FakeAnalyticsService(),
-        ),
-      );
+      await tester.pumpWidget(RootWidget(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       // Verify that WelcomeScreen is NOT displayed
       expect(find.byType(WelcomeScreen), findsNothing);
@@ -115,9 +101,7 @@ void main() {
       await tester.pump(const Duration(seconds: 21));
     });
 
-    testWidgets('skip button saves settings and navigates', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('skip button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
       firstExecution = true;
 
@@ -159,12 +143,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(
-        RootWidget(
-          firstExecution: true,
-          analyticsService: FakeAnalyticsService(),
-        ),
-      );
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Verify the 'Skip' button is present and tap it
       expect(find.text('Skip'), findsOneWidget);
@@ -183,9 +162,7 @@ void main() {
       expect(prefs.getBool('firstExecution'), isFalse);
     });
 
-    testWidgets('next button advances onboarding slides', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('next button advances onboarding slides', (WidgetTester tester) async {
       firstExecution = true;
 
       // Set a realistic window size to avoid layout overflow in the test
@@ -193,18 +170,10 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(
-        RootWidget(
-          firstExecution: true,
-          analyticsService: FakeAnalyticsService(),
-        ),
-      );
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Verify we are on the first page
-      expect(
-        find.text('Welcome to the official\nMill Road Winter Fair app!'),
-        findsOneWidget,
-      );
+      expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
       expect(find.text('What do the pins mean?'), findsNothing);
 
       // Find and tap the 'Next' button (the arrow forward icon)
@@ -215,15 +184,10 @@ void main() {
 
       // Verify we have advanced to the second page
       expect(find.text('What do the pins mean?'), findsOneWidget);
-      expect(
-        find.text('Welcome to the official\nMill Road Winter Fair app!'),
-        findsNothing,
-      );
+      expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsNothing);
     });
 
-    testWidgets('done button saves settings and navigates', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('done button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
       firstExecution = true;
 
@@ -265,12 +229,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(
-        RootWidget(
-          firstExecution: true,
-          analyticsService: FakeAnalyticsService(),
-        ),
-      );
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Advance through the onboarding slides to reach the last page
       final nextButton = find.byIcon(Icons.arrow_forward);
@@ -296,9 +255,7 @@ void main() {
       expect(prefs.getBool('firstExecution'), isFalse);
     });
 
-    testWidgets('Take me straight to the app button saves settings and navigates', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('Take me straight to the app button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
       // Since flutter's default test screen size is for desktop i.e. 800x600, set a sensible minimum mobile screen size
@@ -349,12 +306,7 @@ void main() {
 
       // Pump the RootWidget
       firstExecution = true;
-      await tester.pumpWidget(
-        RootWidget(
-          firstExecution: true,
-          analyticsService: FakeAnalyticsService(),
-        ),
-      );
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // The footer button text should be present
       expect(find.text('Take me straight to the app!'), findsOneWidget);

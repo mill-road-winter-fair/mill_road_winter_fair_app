@@ -45,10 +45,7 @@ class _ChooserPageState extends State<ChooserPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('ChooserPage build() called');
-    var bodyStyle = TextStyle(
-      fontSize: 14,
-      color: Theme.of(context).colorScheme.tertiary,
-    );
+    var bodyStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.tertiary);
     return FairScaffold(
       appBarTitle: "Welcome",
       currentTab: 0,
@@ -59,15 +56,7 @@ class _ChooserPageState extends State<ChooserPage> {
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('chooser_about_fair');
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder:
-                    (context) => AboutTheFairPage(
-                      analyticsService: widget.analyticsService,
-                    ),
-              ),
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
           },
         ),
       ],
@@ -84,10 +73,7 @@ class _ChooserPageState extends State<ChooserPage> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(
-                    style: bodyStyle,
-                    text: 'Test links for plumbing:\n\n',
-                  ),
+                  TextSpan(style: bodyStyle, text: 'Test links for plumbing:\n\n'),
                   TextSpan(
                     style: bodyStyle,
                     text: '• Timetable (music only)\n',
@@ -95,9 +81,7 @@ class _ChooserPageState extends State<ChooserPage> {
                         TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped(
-                              'chooser_music',
-                            );
+                            widget.analyticsService.logButtonTapped('chooser_music');
                             widget.onOpenTimetable(false, true);
                           },
                   ),
@@ -108,9 +92,7 @@ class _ChooserPageState extends State<ChooserPage> {
                         TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped(
-                              'chooser_other',
-                            );
+                            widget.analyticsService.logButtonTapped('chooser_other');
                             widget.onOpenTimetable(false, false);
                           },
                   ),
@@ -121,9 +103,7 @@ class _ChooserPageState extends State<ChooserPage> {
                         TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped(
-                              'chooser_music_now',
-                            );
+                            widget.analyticsService.logButtonTapped('chooser_music_now');
                             widget.onOpenTimetable(true, true);
                           },
                   ),
@@ -134,9 +114,7 @@ class _ChooserPageState extends State<ChooserPage> {
                         TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped(
-                              'chooser_other_now',
-                            );
+                            widget.analyticsService.logButtonTapped('chooser_other_now');
                             widget.onOpenTimetable(true, false);
                           },
                   ),
@@ -147,9 +125,7 @@ class _ChooserPageState extends State<ChooserPage> {
                         TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped(
-                              'chooser_listings_music',
-                            );
+                            widget.analyticsService.logButtonTapped('chooser_listings_music');
                             widget.onOpenListings('all', 'performanceMusic');
                           },
                   ),
@@ -160,9 +136,7 @@ class _ChooserPageState extends State<ChooserPage> {
                         TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped(
-                              'chooser_listings_other',
-                            );
+                            widget.analyticsService.logButtonTapped('chooser_listings_other');
                             widget.onOpenListings('all', 'performanceOther');
                           },
                   ),
@@ -173,13 +147,8 @@ class _ChooserPageState extends State<ChooserPage> {
                         TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped(
-                              'chooser_listings_children',
-                            );
-                            widget.onOpenListings(
-                              'all',
-                              'performanceChildrens',
-                            );
+                            widget.analyticsService.logButtonTapped('chooser_listings_children');
+                            widget.onOpenListings('all', 'performanceChildrens');
                           },
                   ),
                   TextSpan(
@@ -189,13 +158,8 @@ class _ChooserPageState extends State<ChooserPage> {
                         TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped(
-                              'chooser_favourites_music',
-                            );
-                            widget.onOpenListings(
-                              'favourite',
-                              'performanceMusic',
-                            );
+                            widget.analyticsService.logButtonTapped('chooser_favourites_music');
+                            widget.onOpenListings('favourite', 'performanceMusic');
                           },
                   ),
                   TextSpan(
@@ -205,9 +169,7 @@ class _ChooserPageState extends State<ChooserPage> {
                         TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped(
-                              'chooser_map_nearest',
-                            );
+                            widget.analyticsService.logButtonTapped('chooser_map_nearest');
                             widget.onOpenMap(10);
                           },
                   ),

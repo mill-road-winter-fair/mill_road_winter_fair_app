@@ -26,92 +26,83 @@ void main() {
   });
 
   group('AboutTheFairPage', () {
-    testWidgets(
-      'back button and back gesture return to the last selected HomePage tab',
-      (WidgetTester tester) async {
-        // Set firstExecution to false to simulate normal app launch
-        firstExecution = false;
+    testWidgets('back button and back gesture return to the last selected HomePage tab', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
 
-        // Minimal listings so pages render correctly
-        listings = [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'FALSE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          },
-        ];
+      // Minimal listings so pages render correctly
+      listings = [
+        {
+          'id': '1',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '🍩',
+          'title': 'Glazed and Confused',
+          'subtitle': 'Doughnuts',
+          'groupID': '',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'business': 'FALSE',
+          'location': 'Gwydir St Car Park',
+          'description': 'Nice buns',
+          'email': '',
+          'website': 'https://www.glazedandconfused.com',
+          'phone': '01223 111111',
+          'latLng': '52.199687,0.138813',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        },
+      ];
 
-        await tester.pumpWidget(
-          MyApp(
-            firstExecution: false,
-            analyticsService: FakeAnalyticsService(),
-          ),
-        );
-        await settle(tester);
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await settle(tester);
 
-        // Obtain the HomePage state
-        final homePageState =
-            tester.state(find.byType(HomePage)) as HomePageState;
+      // Obtain the HomePage state
+      final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
 
-        // 1) Select Food tab (index 1)
-        await tester.tap(find.text('Listings'));
-        await settle(tester);
-        expect(homePageState.index, 3);
+      // 1) Select Food tab (index 1)
+      await tester.tap(find.text('Listings'));
+      await settle(tester);
+      expect(homePageState.index, 3);
 
-        // Open drawer and navigate to About the Fair
-        await tester.tap(find.byIcon(Icons.menu));
-        await settle(tester);
-        await tester.tap(find.text('About the Fair'));
-        await settle(tester);
+      // Open drawer and navigate to About the Fair
+      await tester.tap(find.byIcon(Icons.menu));
+      await settle(tester);
+      await tester.tap(find.text('About the Fair'));
+      await settle(tester);
 
-        expect(find.byType(AboutTheFairPage), findsOneWidget);
+      expect(find.byType(AboutTheFairPage), findsOneWidget);
 
-        // Tap the AppBar back button (leading) and verify we return to the Listings tab
-        await tester.tap(find.byTooltip('Back'));
-        await settle(tester);
-        expect(homePageState.index, 3);
+      // Tap the AppBar back button (leading) and verify we return to the Listings tab
+      await tester.tap(find.byTooltip('Back'));
+      await settle(tester);
+      expect(homePageState.index, 3);
 
-        // 2) Select Stalls tab (index 2)
-        await tester.tap(find.text('Listings'));
-        await settle(tester);
-        expect(homePageState.index, 3);
+      // 2) Select Stalls tab (index 2)
+      await tester.tap(find.text('Listings'));
+      await settle(tester);
+      expect(homePageState.index, 3);
 
-        // Open drawer and navigate to About the Fair again
-        await tester.tap(find.byIcon(Icons.menu));
-        await settle(tester);
-        await tester.tap(find.text('About the Fair'));
-        await settle(tester);
-        expect(find.byType(AboutTheFairPage), findsOneWidget);
+      // Open drawer and navigate to About the Fair again
+      await tester.tap(find.byIcon(Icons.menu));
+      await settle(tester);
+      await tester.tap(find.text('About the Fair'));
+      await settle(tester);
+      expect(find.byType(AboutTheFairPage), findsOneWidget);
 
-        // Simulate system back / back gesture and verify we return to the Stalls tab
-        await tester.pageBack();
-        await settle(tester);
-        expect(homePageState.index, 3);
-      },
-    );
+      // Simulate system back / back gesture and verify we return to the Stalls tab
+      await tester.pageBack();
+      await settle(tester);
+      expect(homePageState.index, 3);
+    });
   });
 }

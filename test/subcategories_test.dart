@@ -89,32 +89,25 @@ void main() {
     favouriteListingKeys.value = {};
   });
 
-  test(
-    'API preserves each subcategory and the columns following business',
-    () async {
-      final expected =
-          expectedSubcategories.keys
-              .map((key) => listingFor(key, key))
-              .toList();
-      final client = MockClient(
-        (_) async => http.Response(
-          jsonEncode({
-            'range': "'2025'!A1:AB350",
-            'majorDimension': 'ROWS',
-            'values': [
-              apiHeaders,
-              for (final listing in expected)
-                [for (final header in apiHeaders) listing[header]],
-            ],
-          }),
-          200,
-        ),
-      );
-      addTearDown(client.close);
+  test('API preserves each subcategory and the columns following business', () async {
+    final expected = expectedSubcategories.keys.map((key) => listingFor(key, key)).toList();
+    final client = MockClient(
+      (_) async => http.Response(
+        jsonEncode({
+          'range': "'2025'!A1:AB350",
+          'majorDimension': 'ROWS',
+          'values': [
+            apiHeaders,
+            for (final listing in expected) [for (final header in apiHeaders) listing[header]],
+          ],
+        }),
+        200,
+      ),
+    );
+    addTearDown(client.close);
 
-      expect(await fetchListings(client), expected);
-    },
-  );
+    expect(await fetchListings(client), expected);
+  });
 
   for (final entry in expectedSubcategories.entries) {
     test('${entry.key} is recognised as a single category', () {
@@ -124,21 +117,13 @@ void main() {
         getCategory(listing),
         entry.key.startsWith('performance')
             ? 'Performance'
-            : {
-              'food': 'Food',
-              'shopping': 'Shopping',
-              'charityCommunityInfo': 'Charity/Community/Info',
-              'visitExperience': 'Visit/Experience',
-              'service': 'Service',
-              'business': 'Business',
-            }[entry.key],
+            : {'food': 'Food', 'shopping': 'Shopping', 'charityCommunityInfo': 'Charity/Community/Info', 'visitExperience': 'Visit/Experience', 'service': 'Service', 'business': 'Business'}[entry
+                .key],
       );
     });
 
     for (final page in ['all', 'favourite']) {
-      testWidgets('$page dropdown filters ${entry.key} independently', (
-        tester,
-      ) async {
+      testWidgets('$page dropdown filters ${entry.key} independently', (tester) async {
         listings = [
           for (final key in expectedSubcategories.keys) listingFor(key, key),
           listingFor('not-favourited', entry.key),
@@ -156,8 +141,7 @@ void main() {
                     subfilterCategory: selected,
                     listings: listings,
                     onTabSelected: (_) {},
-                    onSubfilterChange:
-                        (value) => setState(() => selected = value),
+                    onSubfilterChange: (value) => setState(() => selected = value),
                     analyticsService: FakeAnalyticsService(),
                   );
                 },
@@ -167,39 +151,19 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final dropdownFinder = find.descendant(
-          of: find.byKey(const ValueKey('filteringdropdown')),
-          matching: find.byType(DropdownMenu<String?>),
-        );
+        final dropdownFinder = find.descendant(of: find.byKey(const ValueKey('filteringdropdown')), matching: find.byType(DropdownMenu<String?>));
         final dropdown = tester.widget<DropdownMenu<String?>>(dropdownFinder);
-        expect(
-          {
-            for (final option in dropdown.dropdownMenuEntries)
-              option.value: option.label,
-          },
-          {null: 'All', ...expectedSubcategories},
-        );
+        expect({for (final option in dropdown.dropdownMenuEntries) option.value: option.label}, {null: 'All', ...expectedSubcategories});
         dropdown.onSelected!(entry.key);
         await tester.pumpAndSettle();
 
-        final state = tester.state<FilteredListingsPageState>(
-          find.byType(FilteredListingsPage),
-        );
-        expect(
-          state.filteredListings.map((listing) => listing['id']),
-          unorderedEquals([entry.key, if (page == 'all') 'not-favourited']),
-        );
-        expect(
-          state.isShowingJustPerformance,
-          entry.key.startsWith('performance'),
-        );
+        final state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
+        expect(state.filteredListings.map((listing) => listing['id']), unorderedEquals([entry.key, if (page == 'all') 'not-favourited']));
+        expect(state.isShowingJustPerformance, entry.key.startsWith('performance'));
 
         tester.widget<DropdownMenu<String?>>(dropdownFinder).onSelected!(null);
         await tester.pumpAndSettle();
-        expect(
-          state.filteredListings.length,
-          expectedSubcategories.length + (page == 'all' ? 1 : 0),
-        );
+        expect(state.filteredListings.length, expectedSubcategories.length + (page == 'all' ? 1 : 0));
       });
     }
   }

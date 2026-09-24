@@ -10,26 +10,14 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('GetCurrentLocation', () {
-    test(
-      'getCurrentPosition throws when location services disabled and no prompt',
-      () async {
-        // Configure globals to avoid calling Geolocator.openLocationSettings by ensuring promptedUserToEnableLocationServices >= 2
-        locationServicesEnabled = false;
-        promptedUserToEnableLocationServices = 2;
+    test('getCurrentPosition throws when location services disabled and no prompt', () async {
+      // Configure globals to avoid calling Geolocator.openLocationSettings by ensuring promptedUserToEnableLocationServices >= 2
+      locationServicesEnabled = false;
+      promptedUserToEnableLocationServices = 2;
 
-        // Call and expect an exception describing disabled services
-        expect(
-          () async => await getCurrentPosition(),
-          throwsA(
-            predicate(
-              (e) =>
-                  e is Exception &&
-                  e.toString().contains('Location services are disabled'),
-            ),
-          ),
-        );
-      },
-    );
+      // Call and expect an exception describing disabled services
+      expect(() async => await getCurrentPosition(), throwsA(predicate((e) => e is Exception && e.toString().contains('Location services are disabled'))));
+    });
 
     test('getCurrentPosition throws when permission denied forever', () async {
       // Configure globals so location services are enabled but permission is denied forever
@@ -37,15 +25,7 @@ void main() {
       locationPermission = LocationPermission.deniedForever;
 
       // Call and expect an exception describing permanently denied permissions
-      expect(
-        () async => await getCurrentPosition(),
-        throwsA(
-          predicate(
-            (e) =>
-                e is Exception && e.toString().contains('permanently denied'),
-          ),
-        ),
-      );
+      expect(() async => await getCurrentPosition(), throwsA(predicate((e) => e is Exception && e.toString().contains('permanently denied'))));
     });
   });
 }

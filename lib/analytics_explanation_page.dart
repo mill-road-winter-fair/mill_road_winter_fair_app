@@ -13,12 +13,10 @@ class AnalyticsExplanationPage extends StatefulWidget {
   const AnalyticsExplanationPage({super.key, required this.analyticsService});
 
   @override
-  State<AnalyticsExplanationPage> createState() =>
-      _AnalyticsExplanationPageState();
+  State<AnalyticsExplanationPage> createState() => _AnalyticsExplanationPageState();
 }
 
-class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage>
-    with RouteAware {
+class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> with RouteAware {
   late ScrollController _scrollController;
 
   @override
@@ -34,12 +32,10 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage>
   }
 
   @override
-  void didPush() =>
-      widget.analyticsService.setCurrentScreen('AnalyticsExplanationPage');
+  void didPush() => widget.analyticsService.setCurrentScreen('AnalyticsExplanationPage');
 
   @override
-  void didPopNext() =>
-      widget.analyticsService.setCurrentScreen('AnalyticsExplanationPage');
+  void didPopNext() => widget.analyticsService.setCurrentScreen('AnalyticsExplanationPage');
 
   @override
   void dispose() {
@@ -67,10 +63,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage>
                     },
                   )
                   : null,
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text('Analytics Information'),
-          ),
+          title: const FittedBox(fit: BoxFit.scaleDown, child: Text('Analytics Information')),
         ),
         body: Container(
           padding: const EdgeInsets.all(16.0),
@@ -88,12 +81,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'What is Firebase?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text('What is Firebase?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Text.rich(
                       TextSpan(
@@ -101,20 +89,13 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage>
                         children: [
                           TextSpan(
                             text: 'Firebase',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
                             recognizer:
                                 TapGestureRecognizer()
                                   ..onTap = () {
                                     HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped(
-                                      'firebase_info_link',
-                                    );
-                                    launchUrl(
-                                      Uri.parse('https://firebase.google.com/'),
-                                    );
+                                    widget.analyticsService.logButtonTapped('firebase_info_link');
+                                    launchUrl(Uri.parse('https://firebase.google.com/'));
                                   },
                           ),
                           const TextSpan(
@@ -125,12 +106,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage>
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'What are we using it for?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text('What are we using it for?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     const Text('We use this anonymous data to:'),
                     const SizedBox(height: 8),
@@ -139,97 +115,58 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '• Understand which parts of the app are most useful to Fair attendees.',
-                          ),
+                          Text('• Understand which parts of the app are most useful to Fair attendees.'),
                           SizedBox(height: 4),
-                          Text(
-                            '• Identify any issues or areas where the app could be improved.',
-                          ),
+                          Text('• Identify any issues or areas where the app could be improved.'),
                           SizedBox(height: 4),
-                          Text(
-                            '• Help us plan for future Fairs by understanding which stalls and events are most viewed.',
-                          ),
+                          Text('• Help us plan for future Fairs by understanding which stalls and events are most viewed.'),
                           SizedBox(height: 4),
-                          Text(
-                            '• Understand what people look for by collecting words and phrases entered in searches within the app.',
-                          ),
+                          Text('• Understand what people look for by collecting words and phrases entered in searches within the app.'),
                         ],
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'What do we track?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text('What do we track?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     const Padding(
                       padding: EdgeInsets.only(left: 16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '• Pages you view and buttons or features you use.',
-                          ),
+                          Text('• Pages you view and buttons or features you use.'),
                           SizedBox(height: 4),
-                          Text(
-                            '• Stalls and events you view, save or request directions to.',
-                          ),
+                          Text('• Stalls and events you view, save or request directions to.'),
                           SizedBox(height: 4),
-                          Text(
-                            '• Words and phrases you enter in in-app searches.',
-                          ),
+                          Text('• Words and phrases you enter in in-app searches.'),
                           SizedBox(height: 4),
-                          Text(
-                            '• App preferences such as your theme, distance units, map settings and filters.',
-                          ),
+                          Text('• App preferences such as your theme, distance units, map settings and filters.'),
                           SizedBox(height: 4),
-                          Text(
-                            '• Basic app and device information provided by Firebase, such as app version, device type, operating system and session information.',
-                          ),
+                          Text('• Basic app and device information provided by Firebase, such as app version, device type, operating system and session information.'),
                         ],
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'What don\'t we track?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text('What don\'t we track?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     const Padding(
                       padding: EdgeInsets.only(left: 16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '• Your name, email address, phone number or other contact details.',
-                          ),
+                          Text('• Your name, email address, phone number or other contact details.'),
                           SizedBox(height: 4),
                           Text('• Your exact GPS location.'),
                           SizedBox(height: 4),
-                          Text(
-                            '• Your contacts, photos, messages or activity in other apps.',
-                          ),
+                          Text('• Your contacts, photos, messages or activity in other apps.'),
                           SizedBox(height: 4),
                           Text('• Data for personalised advertising.'),
                           SizedBox(height: 4),
-                          Text(
-                            '• Any usage data before you agree to analytics, or while analytics is turned off.',
-                          ),
+                          Text('• Any usage data before you agree to analytics, or while analytics is turned off.'),
                         ],
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'How does Google use this data?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text('How does Google use this data?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Text.rich(
                       TextSpan(
@@ -241,43 +178,25 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage>
                           ),
                           TextSpan(
                             text: 'here',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
                             recognizer:
                                 TapGestureRecognizer()
                                   ..onTap = () {
                                     HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped(
-                                      'google_partner_sites_link',
-                                    );
-                                    launchUrl(
-                                      Uri.parse(
-                                        'https://policies.google.com/technologies/partner-sites',
-                                      ),
-                                    );
+                                    widget.analyticsService.logButtonTapped('google_partner_sites_link');
+                                    launchUrl(Uri.parse('https://policies.google.com/technologies/partner-sites'));
                                   },
                           ),
                           const TextSpan(text: ' and in the '),
                           TextSpan(
                             text: 'Firebase Privacy and Security documentation',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
                             recognizer:
                                 TapGestureRecognizer()
                                   ..onTap = () {
                                     HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped(
-                                      'firebase_privacy_link',
-                                    );
-                                    launchUrl(
-                                      Uri.parse(
-                                        'https://firebase.google.com/support/privacy',
-                                      ),
-                                    );
+                                    widget.analyticsService.logButtonTapped('firebase_privacy_link');
+                                    launchUrl(Uri.parse('https://firebase.google.com/support/privacy'));
                                   },
                           ),
                           const TextSpan(text: '.'),
@@ -292,22 +211,13 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage>
                           const TextSpan(text: 'For full details, read the '),
                           TextSpan(
                             text: 'Mill Road Winter Fair App Privacy Policy',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
                             recognizer:
                                 TapGestureRecognizer()
                                   ..onTap = () {
                                     HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped(
-                                      'app_privacy_policy_link',
-                                    );
-                                    launchUrl(
-                                      Uri.parse(
-                                        'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf',
-                                      ),
-                                    );
+                                    widget.analyticsService.logButtonTapped('app_privacy_policy_link');
+                                    launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf'));
                                   },
                           ),
                           const TextSpan(text: '.'),

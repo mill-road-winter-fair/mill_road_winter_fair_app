@@ -22,11 +22,7 @@ void main() {
 
   group('SettingsPage', () {
     testWidgets('displays correct initial state', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SettingsPage(analyticsService: FakeAnalyticsService()),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Verify the Distance Units section
       expect(find.text('Distance units'), findsOneWidget);
@@ -44,17 +40,11 @@ void main() {
       expect(find.text('Dark'), findsOneWidget);
       expect(find.text('A subdued theme using black pages'), findsOneWidget);
       expect(find.text('Auto'), findsOneWidget);
-      expect(
-        find.text('Follow the device’s light/dark setting'),
-        findsOneWidget,
-      );
+      expect(find.text('Follow the device’s light/dark setting'), findsOneWidget);
       expect(find.text('2024 light scheme'), findsOneWidget);
       expect(find.text('For the Fair that blew away'), findsOneWidget);
       expect(find.text('High contrast'), findsOneWidget);
-      expect(
-        find.text('For users with visual accessibility needs'),
-        findsOneWidget,
-      );
+      expect(find.text('For users with visual accessibility needs'), findsOneWidget);
       expect(find.text('Colour blind friendly'), findsOneWidget);
       expect(find.text('For users with colour blindness'), findsOneWidget);
 
@@ -63,14 +53,8 @@ void main() {
       expect(themeNotifier.value, 'light');
     });
 
-    testWidgets('changes distance units to Imperial', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SettingsPage(analyticsService: FakeAnalyticsService()),
-        ),
-      );
+    testWidgets('changes distance units to Imperial', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Tap on Imperial radio button
       await tester.tap(find.text('Imperial'));
@@ -81,11 +65,7 @@ void main() {
     });
 
     testWidgets('changes theme to Dark', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SettingsPage(analyticsService: FakeAnalyticsService()),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Tap on the Dark theme radio button
       await tester.tap(find.text('Dark'));
@@ -96,11 +76,7 @@ void main() {
     });
 
     testWidgets('changes theme to Auto', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SettingsPage(analyticsService: FakeAnalyticsService()),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       await tester.tap(find.text('Auto'));
       await tester.pumpAndSettle();
@@ -108,14 +84,8 @@ void main() {
       expect(themeNotifier.value, 'auto');
     });
 
-    testWidgets('changes theme to Colour Blind Friendly', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SettingsPage(analyticsService: FakeAnalyticsService()),
-        ),
-      );
+    testWidgets('changes theme to Colour Blind Friendly', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       await tester.scrollUntilVisible(find.text('Colour blind friendly'), 50);
 
@@ -127,14 +97,8 @@ void main() {
       expect(themeNotifier.value, 'colourBlindFriendly');
     });
 
-    testWidgets('persists settings after selection', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SettingsPage(analyticsService: FakeAnalyticsService()),
-        ),
-      );
+    testWidgets('persists settings after selection', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Change distance units to Imperial
       await tester.tap(find.text('Imperial'));
