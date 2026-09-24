@@ -319,6 +319,13 @@ class _AboutAppPageState extends State<AboutAppPage> with RouteAware {
                                     'https://www.millroadwinterfair.org/app-feedback-form/',
                                 analyticsService: widget.analyticsService,
                                 analyticsId: 'app_feedback_hyperlink'),
+                            const Text(
+                                'A special thank-you to everyone who helps us test the app. Your time, patience and feedback help us spot problems and improve the experience for everyone. If you’d like to help test early versions of the app, please email us using the link below.'),
+                            _AboutLink(
+                                label: 'app@millroadwinterfair.org',
+                                url: 'mailto:app@millroadwinterfair.org',
+                                analyticsService: widget.analyticsService,
+                                analyticsId: 'app_testing_email'),
                             const Divider(),
                             const Text(
                                 'With thanks to everyone who contributes code, artwork, ideas and time, and to the people who maintain the open-source software we use.'),
