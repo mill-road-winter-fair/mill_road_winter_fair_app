@@ -1,12 +1,11 @@
-import 'pump_with_clock.dart';
+import 'fixed_date_time_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'fixed_date_time_provider.dart';
+import 'pump_with_clock.dart';
 
 class RecordingNoticeAnalyticsService extends FakeAnalyticsService {
   final notices = <String>[];

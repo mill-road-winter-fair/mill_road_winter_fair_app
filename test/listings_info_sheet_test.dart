@@ -1,4 +1,3 @@
-import 'package:provider/provider.dart';
 import 'dart:io';
 import 'fixed_date_time_provider.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   // Mocking DateTime.now()
