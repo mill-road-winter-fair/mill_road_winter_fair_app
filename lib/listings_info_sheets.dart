@@ -186,7 +186,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
     final titleStyle = basicTitleStyle.copyWith(decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none);
-    updatedTimes = widget.cancelled ? 'CANCELLED' : "${widget.startTime}—${widget.endTime}";
+    updatedTimes = '';//widget.cancelled ? 'CANCELLED' : "${widget.startTime}—${widget.endTime}";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
     final subSubStyle = subStyle.copyWith(fontWeight: FontWeight.normal);
@@ -665,7 +665,7 @@ Future<void> showListingDetailsDialog(
       currentLatLng!,
       event.latLng,
     );
-    distanceMessage = '(${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
+    distanceMessage = '(~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
   }
 
   listingDetailsDialogRoute = DialogRoute(

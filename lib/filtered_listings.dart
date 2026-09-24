@@ -621,7 +621,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             itemBuilder: (context, index) {
                               final listing = filteredListings[index]; // since index=0 is the sort/search bar
                               final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                              final approximateDistance = '(${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
+                              final approximateDistance = '(~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
                               final isFavourited = isListingFavourited(listing['id']);
                               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
                               if (!_hidePastListings || !hasEventEnded(listing['endTime'])) {

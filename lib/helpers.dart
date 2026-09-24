@@ -880,10 +880,10 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
 
   if (preferredDistanceUnits == DistanceUnits.metric) {
     if (distanceMetres <= 999) {
-      distanceToDestination = '$distanceMetres m';
+      distanceToDestination = '${distanceMetres}m';
     } else {
       final distanceKilometresRounded = (distanceMetres / 1000).toStringAsFixed(2);
-      distanceToDestination = '$distanceKilometresRounded km';
+      distanceToDestination = '${distanceKilometresRounded}km';
     }
   } else if (preferredDistanceUnits == DistanceUnits.imperial) {
     if (distanceMetres <= 161) {
