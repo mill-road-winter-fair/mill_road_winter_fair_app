@@ -200,22 +200,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
 
     if (widget.location == '') {
       // this SpecificListingInfoSheet must be within a Group modal, so display differently
-      subDetails = widget.cancelled
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(widget.subtitle, style: subSubStyle),
-                const SizedBox(height: 2),
-                _cancelledLabel(context),
-              ],
-            )
-          : Text.rich(
-              textAlign: TextAlign.right,
-              TextSpan(children: [
-                TextSpan(text: "${widget.subtitle}\n", style: subSubStyle),
-                TextSpan(text: updatedTimes, style: timeStyle),
-              ]));
+      subDetails = Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(widget.subtitle, style: subSubStyle, textAlign: TextAlign.right),
+          if (widget.brickAndMortar) _localBusinessLabel(context) else Text(updatedTimes, style: timeStyle, textAlign: TextAlign.right),
+        ],
+      );
     } else {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
@@ -257,7 +248,19 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 const Expanded(flex: 1, child: SizedBox(width: 2)),
                 Expanded(
                   flex: 6,
-                  child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: subDetails),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: widget.cancelled
+                        ? _cancelledLabel(context)
+                        : widget.brickAndMortar
+                        ? _localBusinessLabel(context)
+                        : Text(
+                      updatedTimes,
+                      style: timeStyle,
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -515,6 +518,24 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 20),
             if (widget.onDetailsTapped != null || widget.location == '') const SizedBox(height: 4),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _localBusinessLabel(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        'Local business',
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onPrimary,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
