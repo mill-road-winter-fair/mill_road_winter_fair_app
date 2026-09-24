@@ -150,6 +150,13 @@ void main() {
     });
 
     testWidgets('search includes hidden listings and restores default pins', (tester) async {
+      final toastCalls = <MethodCall>[];
+      const toastChannel = MethodChannel('PonnamKarthik/fluttertoast');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, (call) async {
+        toastCalls.add(call);
+        return true;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null));
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
       ));
@@ -171,9 +178,12 @@ void main() {
       await tester.enterText(field, 'GLAZED');
       await tester.pumpAndSettle();
       expect(visibleIds(), {'2'});
+      expect(toastCalls, isEmpty);
       await tester.enterText(field, 'no such listing');
       await tester.pumpAndSettle();
       expect(visibleIds(), isEmpty);
+      expect(toastCalls.single.method, 'showToast');
+      expect(toastCalls.single.arguments['msg'], 'No matching listings found');
       await tester.enterText(field, 'fake street');
       await tester.pumpAndSettle();
       expect(visibleIds(), {'1', '2'});
@@ -205,6 +215,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(visibleIds(), {'1', '3'});
       expect(find.byType(SearchBar), findsNothing);
+      expect(toastCalls, hasLength(1));
     });
 
     testWidgets('all map buttons are present', (WidgetTester tester) async {

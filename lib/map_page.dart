@@ -500,7 +500,19 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     await addAllVisibleMarkers();
     if (!mounted || !_isSearching || _searchQuery != value.toLowerCase() || _searchQuery.isEmpty) return;
     final positions = markers.values.map((marker) => marker.position).toList();
-    if (positions.isEmpty || _controller == null) return;
+    if (positions.isEmpty) {
+      Fluttertoast.showToast(
+        msg: 'No matching listings found',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_SHORT,
+        timeInSecForIosWeb: 2,
+      );
+      return;
+    }
+    if (_controller == null) return;
     _moveCameraToBounds(
       LatLng(positions.map((p) => p.latitude).reduce(min), positions.map((p) => p.longitude).reduce(min)),
       LatLng(positions.map((p) => p.latitude).reduce(max), positions.map((p) => p.longitude).reduce(max)),
