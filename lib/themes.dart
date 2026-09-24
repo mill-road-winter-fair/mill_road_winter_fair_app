@@ -45,18 +45,10 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.black,
       onSurfaceVariant: Colors.grey[700]!,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(166, 34, 43, 1),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(166, 34, 43, 1),
-      unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
-    ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(166, 34, 43, 1), foregroundColor: Colors.white),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(166, 34, 43, 1), unselectedItemColor: Colors.grey),
+    drawerTheme: const DrawerThemeData(backgroundColor: Colors.white),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   'dark': ThemeData(
     useMaterial3: true,
@@ -74,24 +66,12 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.white,
       onSurfaceVariant: Colors.grey[300]!,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
-    ),
-    listTileTheme: const ListTileThemeData(
-      tileColor: Color.fromRGBO(44, 44, 44, 1.0),
-    ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(44, 44, 44, 1.0), foregroundColor: Colors.white),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0), unselectedItemColor: Colors.grey),
+    drawerTheme: const DrawerThemeData(backgroundColor: Color.fromRGBO(44, 44, 44, 1.0)),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
+    listTileTheme: const ListTileThemeData(tileColor: Color.fromRGBO(44, 44, 44, 1.0)),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   '2024': ThemeData(
     useMaterial3: true,
@@ -109,18 +89,10 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.black,
       onSurfaceVariant: Colors.grey[700]!,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(37, 63, 128, 1.0),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(37, 63, 128, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
-    ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(37, 63, 128, 1.0), foregroundColor: Colors.white),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(37, 63, 128, 1.0), unselectedItemColor: Colors.grey),
+    drawerTheme: const DrawerThemeData(backgroundColor: Colors.white),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
@@ -138,28 +110,14 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Color.fromRGBO(255, 243, 0, 1.0),
       onSurfaceVariant: Color.fromRGBO(0, 255, 244, 1.0),
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.black,
-      foregroundColor: Color.fromRGBO(255, 243, 0, 1.0),
-    ),
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0),
-      ),
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.black,
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
-    ),
+    appBarTheme: const AppBarTheme(backgroundColor: Colors.black, foregroundColor: Color.fromRGBO(255, 243, 0, 1.0)),
+    iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0))),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0), unselectedItemColor: Colors.grey),
+    drawerTheme: const DrawerThemeData(backgroundColor: Colors.black),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
     listTileTheme: const ListTileThemeData(tileColor: Colors.black),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
-),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
+  ),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme(
@@ -176,19 +134,11 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.black,
       onSurfaceVariant: Colors.grey[700]!,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(102, 55, 133, 1.0),
-      foregroundColor: Colors.white,
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
-    ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
-),
+    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(102, 55, 133, 1.0), foregroundColor: Colors.white),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0), unselectedItemColor: Colors.grey),
+    drawerTheme: const DrawerThemeData(backgroundColor: Colors.white),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
+  ),
 };
 
 // Standard Google Maps themes (designed with https://mapstyle.withgoogle.com/)
@@ -261,22 +211,14 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
   }
   try {
     int markerPixelSize = 288;
-    final ui.Codec backdropCodec = await ui.instantiateImageCodec(
-      backdropData.buffer.asUint8List(),
-      targetWidth: markerPixelSize,
-      targetHeight: markerPixelSize,
-    );
+    final ui.Codec backdropCodec = await ui.instantiateImageCodec(backdropData.buffer.asUint8List(), targetWidth: markerPixelSize, targetHeight: markerPixelSize);
     // The below line does not seem to work at all in the unit tests, it crashes the function without error
     final ui.FrameInfo backdropFrame = await backdropCodec.getNextFrame();
     final ui.Image backdropImage = backdropFrame.image;
 
     // Load the base image (to be colorized)
     final ByteData markerData = await rootBundle.load(assetPath);
-    final ui.Codec markerCodec = await ui.instantiateImageCodec(
-      markerData.buffer.asUint8List(),
-      targetWidth: markerPixelSize,
-      targetHeight: markerPixelSize,
-    );
+    final ui.Codec markerCodec = await ui.instantiateImageCodec(markerData.buffer.asUint8List(), targetWidth: markerPixelSize, targetHeight: markerPixelSize);
     // The below line does not seem to work at all in the unit tests, it crashes the function without error
     final ui.FrameInfo markerFrame = await markerCodec.getNextFrame();
     final ui.Image markerImage = markerFrame.image;
@@ -294,10 +236,7 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
     canvas.drawImage(markerImage, Offset.zero, markerPaint);
 
     // Convert the final image to a BitmapDescriptor
-    final ui.Image finalImage = await recorder.endRecording().toImage(
-          markerImage.width,
-          markerImage.height,
-        );
+    final ui.Image finalImage = await recorder.endRecording().toImage(markerImage.width, markerImage.height);
     final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
 

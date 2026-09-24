@@ -32,15 +32,16 @@ class MapPage extends StatefulWidget {
   final int? nearestMarkerCount; // optional if we'll be zooming in to nearest X markers
   final AnalyticsService analyticsService;
 
-  const MapPage(
-      {super.key,
-      required this.listings,
-      required this.onTabSelected,
-      this.onHomeTapped,
-      this.destinationId,
-      this.destinationLatLng,
-      this.nearestMarkerCount,
-      required this.analyticsService});
+  const MapPage({
+    super.key,
+    required this.listings,
+    required this.onTabSelected,
+    this.onHomeTapped,
+    this.destinationId,
+    this.destinationLatLng,
+    this.nearestMarkerCount,
+    required this.analyticsService,
+  });
 
   @override
   MapPageState createState() => MapPageState();
@@ -51,7 +52,9 @@ class MapPageState extends State<MapPage> with RouteAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // The tab is tracked by HomePage; only subscribe for a separately pushed map.
-    if (widget.destinationId != null) routeObserver.subscribe(this, ModalRoute.of(context)!);
+    if (widget.destinationId != null) {
+      routeObserver.subscribe(this, ModalRoute.of(context)!);
+    }
   }
 
   @override
@@ -84,14 +87,7 @@ class MapPageState extends State<MapPage> with RouteAware {
   bool isRefreshing = false;
   final ScrollController _roadClosuresDialogScrollController = ScrollController();
   // Declare default filters
-  final Map<String, bool> filterSettings = {
-    'Food': true,
-    'Shopping': true,
-    'Charity/Community/Info': true,
-    'Performances': true,
-    'Visits/Experiences': true,
-    'Services': true,
-  };
+  final Map<String, bool> filterSettings = {'Food': true, 'Shopping': true, 'Charity/Community/Info': true, 'Performances': true, 'Visits/Experiences': true, 'Services': true};
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
 
@@ -109,9 +105,13 @@ class MapPageState extends State<MapPage> with RouteAware {
     addAllVisibleMarkers();
     _establishLocationAndRefreshMap();
     establishLocation();
-    if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
+    if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) {
+      doingAPushNavigation = true;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
+      if (preferredRoadClosurePolygonVisible) {
+        _polygons.add(roadClosurePolygon());
+      }
       ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
       if (doingAPushNavigation ?? false) {
         doingAPushNavigation = false;
@@ -135,11 +135,12 @@ class MapPageState extends State<MapPage> with RouteAware {
 
   Polygon roadClosurePolygon() {
     return Polygon(
-        polygonId: const PolygonId('roadClosure'),
-        points: roadClosurePolygonPoints,
-        strokeWidth: 3,
-        strokeColor: Theme.of(context).colorScheme.tertiary,
-        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
+      polygonId: const PolygonId('roadClosure'),
+      points: roadClosurePolygonPoints,
+      strokeWidth: 3,
+      strokeColor: Theme.of(context).colorScheme.tertiary,
+      fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50),
+    );
   }
 
   void updateRoadClosurePolygonVisibility(bool visibleState) {
@@ -183,35 +184,34 @@ class MapPageState extends State<MapPage> with RouteAware {
                         const Text('Road closures', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                         const SizedBox(height: 10),
                         const Text(
-                            style: TextStyle(height: 1.25),
-                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
+                          style: TextStyle(height: 1.25),
+                          'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',
+                        ),
                         const SizedBox(height: 10),
-                        const Text('Pedestrians should exercise particular care before the road is fully closed.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                        const Text('Pedestrians should exercise particular care before the road is fully closed.', style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
                         const SizedBox(height: 10),
-                        const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                        const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.', style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
                         const SizedBox(height: 10),
-                        const Text(
-                            style: TextStyle(height: 1.25),
-                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                        const Text(style: TextStyle(height: 1.25), 'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
                             children: [
                               const TextSpan(
-                                  style: TextStyle(height: 1.25),
-                                  text:
-                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
+                                style: TextStyle(height: 1.25),
+                                text: 'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at ',
+                              ),
                               TextSpan(
-                                  text: 'www.millroadwinterfair.org',
-                                  style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
-                                      launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                                    }),
+                                text: 'www.millroadwinterfair.org',
+                                style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
+                                recognizer:
+                                    TapGestureRecognizer()
+                                      ..onTap = () {
+                                        HapticFeedback.lightImpact();
+                                        widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
+                                        launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                                      },
+                              ),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
                           ),
@@ -230,10 +230,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                   updateRoadClosurePolygonVisibility(false);
                                   Navigator.pop(context);
                                 },
-                                child: Text(
-                                  'Hide road closures',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                                ),
+                                child: Text('Hide road closures', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
                               ),
                               TextButton(
                                 onPressed: () {
@@ -241,10 +238,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                   widget.analyticsService.logButtonTapped('close_road_closures_dialog');
                                   Navigator.pop(context);
                                 },
-                                child: Text(
-                                  'Close',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                                ),
+                                child: Text('Close', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
                               ),
                             ],
                           ),
@@ -268,9 +262,7 @@ class MapPageState extends State<MapPage> with RouteAware {
         final currentMarker = markers[id];
         if (currentMarker == null) continue;
 
-        markers[id] = currentMarker.copyWith(
-          visibleParam: visibleState,
-        );
+        markers[id] = currentMarker.copyWith(visibleParam: visibleState);
       }
     });
   }
@@ -328,12 +320,24 @@ class MapPageState extends State<MapPage> with RouteAware {
     final allListings = listings as List;
     for (var listing in allListings) {
       // Assign markerIds to maps for filtering
-      if (listing['food'] == "TRUE") _foodMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['shopping'] == "TRUE") _shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['charityCommunityInfo'] == "TRUE") _charityCommunityInfoMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['performance'] == "TRUE") _performanceMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['visitExperience'] == "TRUE") _visitExperienceMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['service'] == "TRUE") _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+      if (listing['food'] == "TRUE") {
+        _foodMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
+      if (listing['shopping'] == "TRUE") {
+        _shoppingMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
+      if (listing['charityCommunityInfo'] == "TRUE") {
+        _charityCommunityInfoMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
+      if (listing['performance'] == "TRUE") {
+        _performanceMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
+      if (listing['visitExperience'] == "TRUE") {
+        _visitExperienceMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
+      if (listing['service'] == "TRUE") {
+        _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
+      }
     }
   }
 
@@ -430,15 +434,16 @@ class MapPageState extends State<MapPage> with RouteAware {
 
         // Filter listings where groupID matches the parent listing's groupID,
         // but exclude any listing whose category starts with `Group-`.
-        List<Map<String, dynamic>> relatedListings = listings.where((l) {
-          // Filter out the parent listing itself, as we only want the child listings in the relatedListings list
-          if (l['groupParent'] == 'TRUE') return false;
+        List<Map<String, dynamic>> relatedListings =
+            listings.where((l) {
+              // Filter out the parent listing itself, as we only want the child listings in the relatedListings list
+              if (l['groupParent'] == 'TRUE') return false;
 
-          final listingGroupID = l['groupID'] ?? '';
-          final targetGroupID = parentListing['groupID'] ?? '';
+              final listingGroupID = l['groupID'] ?? '';
+              final targetGroupID = parentListing['groupID'] ?? '';
 
-          return listingGroupID == targetGroupID;
-        }).toList();
+              return listingGroupID == targetGroupID;
+            }).toList();
 
         // Sort listings: startTime → title
         relatedListings.sort((a, b) {
@@ -486,17 +491,12 @@ class MapPageState extends State<MapPage> with RouteAware {
                       // Calculate distance if current location is known
                       var distanceMessage = 'Distance unknown';
                       if (currentLatLng != null) {
-                        int approximateDistanceMetres = asTheCrowFlies(
-                          currentLatLng!,
-                          stringToLatLng(parentListing['latLng']),
-                        );
+                        int approximateDistanceMetres = asTheCrowFlies(currentLatLng!, stringToLatLng(parentListing['latLng']));
                         distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
                       }
 
                       return ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: constraints.maxHeight * 0.90,
-                        ),
+                        constraints: BoxConstraints(maxHeight: constraints.maxHeight * 0.90),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -553,8 +553,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                                             inDialog: false,
                                             analyticsService: widget.analyticsService,
                                           ),
-                                          if (index != relatedListings.length - 1)
-                                            SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                          if (index != relatedListings.length - 1) SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
                                         ],
                                       );
                                     },
@@ -601,102 +600,102 @@ class MapPageState extends State<MapPage> with RouteAware {
     }
 
     Marker newMarker = Marker(
-        markerId: markerId,
-        position: destinationLatLng,
-        icon: customMarker,
-        visible: true,
-        onTap: () {
-          HapticFeedback.lightImpact();
-          widget.analyticsService.logButtonTapped('specific_map_marker');
-          widget.analyticsService.logMapMarkerTapped(listing['title']);
+      markerId: markerId,
+      position: destinationLatLng,
+      icon: customMarker,
+      visible: true,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        widget.analyticsService.logButtonTapped('specific_map_marker');
+        widget.analyticsService.logMapMarkerTapped(listing['title']);
 
-          // Update the current location, do not await as this causes issues with using the context across async gaps
-          establishLocation();
+        // Update the current location, do not await as this causes issues with using the context across async gaps
+        establishLocation();
 
-          // Calculate distance if current location is known
-          var distanceMessage = 'Distance unknown';
-          if (currentLatLng != null) {
-            int approximateDistanceMetres = asTheCrowFlies(
-              currentLatLng!,
-              destinationLatLng,
-            );
-            distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
-          }
+        // Calculate distance if current location is known
+        var distanceMessage = 'Distance unknown';
+        if (currentLatLng != null) {
+          int approximateDistanceMetres = asTheCrowFlies(currentLatLng!, destinationLatLng);
+          distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+        }
 
-          // Show bottom sheet with listing information
-          showModalBottomSheet(
-            context: context,
-            showDragHandle: false,
-            enableDrag: false,
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
-            isScrollControlled: true,
-            useSafeArea: true,
-            builder: (context) {
-              return SafeArea(
-                top: false,
-                left: false,
-                right: false,
-                bottom: Platform.isAndroid && isNavBarVisible(context),
-                child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        // Show bottom sheet with listing information
+        showModalBottomSheet(
+          context: context,
+          showDragHandle: false,
+          enableDrag: false,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
+          isScrollControlled: true,
+          useSafeArea: true,
+          builder: (context) {
+            return SafeArea(
+              top: false,
+              left: false,
+              right: false,
+              bottom: Platform.isAndroid && isNavBarVisible(context),
+              child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
                   final specificSheetModalScrollController = ScrollController();
-                  return StatefulBuilder(builder: (BuildContext context, StateSetter setModalState) {
-                    void favouriteOrNotListing(String listingID) {
-                      setModalState(() {
-                        if (isListingFavourited(listingID)) {
-                          favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
-                        } else {
-                          favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
-                        }
-                        _saveSettings();
-                      });
-                    }
+                  return StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setModalState) {
+                      void favouriteOrNotListing(String listingID) {
+                        setModalState(() {
+                          if (isListingFavourited(listingID)) {
+                            favouriteListingKeys.value = {...favouriteListingKeys.value}..remove(listingID);
+                          } else {
+                            favouriteListingKeys.value = {...favouriteListingKeys.value, listingID};
+                          }
+                          _saveSettings();
+                        });
+                      }
 
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: constraints.maxHeight * 0.90,
-                      ),
-                      child: Scrollbar(
-                        controller: specificSheetModalScrollController,
-                        thumbVisibility: Platform.isIOS ? false : true,
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: SingleChildScrollView(
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(maxHeight: constraints.maxHeight * 0.90),
+                        child: Scrollbar(
                           controller: specificSheetModalScrollController,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-                            child: SpecificListingInfoSheet(
-                              listingId: listing['id'],
-                              cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                              brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                              emoji: listing['emoji'] ?? '',
-                              title: listing['title'],
-                              subtitle: listing['subtitle'],
-                              location: listing['location'],
-                              description: listing['description'],
-                              email: listing['email'] ?? '',
-                              website: listing['website'] ?? '',
-                              phoneNumber: listing['phone'] ?? '',
-                              imageURL: listing['imageURL'] ?? '',
-                              startTime: "${listing['startTime']}",
-                              endTime: "${listing['endTime']}",
-                              approxDistance: distanceMessage,
-                              detailsVisible: true,
-                              listingFavourited: isListingFavourited(listing['id']),
-                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
-                              inDialog: false,
-                              analyticsService: widget.analyticsService,
+                          thumbVisibility: Platform.isIOS ? false : true,
+                          thickness: 4,
+                          radius: const Radius.circular(8),
+                          child: SingleChildScrollView(
+                            controller: specificSheetModalScrollController,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+                              child: SpecificListingInfoSheet(
+                                listingId: listing['id'],
+                                cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                                brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
+                                emoji: listing['emoji'] ?? '',
+                                title: listing['title'],
+                                subtitle: listing['subtitle'],
+                                location: listing['location'],
+                                description: listing['description'],
+                                email: listing['email'] ?? '',
+                                website: listing['website'] ?? '',
+                                phoneNumber: listing['phone'] ?? '',
+                                imageURL: listing['imageURL'] ?? '',
+                                startTime: "${listing['startTime']}",
+                                endTime: "${listing['endTime']}",
+                                approxDistance: distanceMessage,
+                                detailsVisible: true,
+                                listingFavourited: isListingFavourited(listing['id']),
+                                onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                                inDialog: false,
+                                analyticsService: widget.analyticsService,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  });
-                }),
-              );
-            },
-          );
-        });
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
     //setState(() {
     markers[markerId] = newMarker;
     //});
@@ -714,12 +713,7 @@ class MapPageState extends State<MapPage> with RouteAware {
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
     }
 
-    Marker newMarker = Marker(
-      markerId: markerId,
-      position: destinationLatLng,
-      icon: customMarker,
-      visible: true,
-    );
+    Marker newMarker = Marker(markerId: markerId, position: destinationLatLng, icon: customMarker, visible: true);
 
     //setState(() {
     markers[markerId] = newMarker;
@@ -734,10 +728,7 @@ class MapPageState extends State<MapPage> with RouteAware {
     // Update each marker’s icon to the correct color for its type
     setState(() {
       markers.updateAll((id, oldMarker) {
-        final listing = listings.firstWhere(
-          (l) => l['id'].toString() == id.value,
-          orElse: () => {},
-        );
+        final listing = listings.firstWhere((l) => l['id'].toString() == id.value, orElse: () => {});
         if (listing.isEmpty) return oldMarker;
 
         final type = listing['category'];
@@ -756,14 +747,12 @@ class MapPageState extends State<MapPage> with RouteAware {
 
   void hideAllMarkers() {
     debugPrint('MapPageState hideAllMarkers called');
-    updateMarkerVisibilityIgnoringFilters(
-        _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, false);
+    updateMarkerVisibilityIgnoringFilters(_foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, false);
   }
 
   void showAllMarkers() {
     debugPrint('MapPageState showAllMarkers called');
-    updateMarkerVisibilityIgnoringFilters(
-        _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, true);
+    updateMarkerVisibilityIgnoringFilters(_foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, true);
   }
 
   void showFilteredMarkers() {
@@ -791,13 +780,10 @@ class MapPageState extends State<MapPage> with RouteAware {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text(
-                      "Filter map layers",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.left,
-                    )
-                  ]),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [Text("Filter map layers", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), textAlign: TextAlign.left)],
+                  ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Food'),
@@ -1066,10 +1052,7 @@ class MapPageState extends State<MapPage> with RouteAware {
 
     // Remove any markers which are not supposed to be shown from the markers list
     for (var marker in markers.values.toList()) {
-      final listing = listings.firstWhere(
-        (l) => l['id'].toString() == marker.markerId.value,
-        orElse: () => {},
-      );
+      final listing = listings.firstWhere((l) => l['id'].toString() == marker.markerId.value, orElse: () => {});
       if (listing.isEmpty || listing['visibleOnMap'] == 'FALSE') {
         markers.remove(marker.markerId);
       }
@@ -1105,12 +1088,7 @@ class MapPageState extends State<MapPage> with RouteAware {
     _destination = destination;
 
     // Start listening for location updates
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 3,
-      ),
-    ).listen((Position position) async {
+    _positionStream = Geolocator.getPositionStream(locationSettings: const LocationSettings(accuracy: LocationAccuracy.best, distanceFilter: 3)).listen((Position position) async {
       // Update the user's current location
       currentLatLng = LatLng(position.latitude, position.longitude);
 
@@ -1134,15 +1112,10 @@ class MapPageState extends State<MapPage> with RouteAware {
       Map<String, String> headers;
       if (Platform.isAndroid) {
         googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        headers = {
-          "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
-          "X-Android-Cert": androidSigningKey,
-        };
+        headers = {"X-Android-Package": "com.theberridge.mill_road_winter_fair_app", "X-Android-Cert": androidSigningKey};
       } else if (Platform.isIOS) {
         googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        headers = {
-          "X-Ios-Bundle-Identifier": iosBundleId,
-        };
+        headers = {"X-Ios-Bundle-Identifier": iosBundleId};
       } else {
         headers = {};
       }
@@ -1161,9 +1134,7 @@ class MapPageState extends State<MapPage> with RouteAware {
       );
 
       // Get route using Routes API
-      pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(
-        request: request,
-      );
+      pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(request: request);
 
       if (response.routes.isEmpty) {
         throw Exception("No route points returned from Google Routes API. ");
@@ -1223,15 +1194,9 @@ class MapPageState extends State<MapPage> with RouteAware {
     });
     debugPrint('MapPageState _handlePolylineError error: $message');
     // Show a snackbar with the error
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        content: Text(
-          message,
-          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-        ),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(backgroundColor: Theme.of(context).colorScheme.primary, content: Text(message, style: TextStyle(color: Theme.of(context).colorScheme.onPrimary))));
   }
 
   // Save settings to shared preferences
@@ -1263,12 +1228,12 @@ class MapPageState extends State<MapPage> with RouteAware {
 
     final visibleMarkers = markers.values.where((marker) => marker.visible).toList();
     if (visibleMarkers.isEmpty) return;
-    final nearestMarkers = visibleMarkers
-      ..sort((a, b) {
-        final aDistance = asTheCrowFlies(currentLatLng!, a.position);
-        final bDistance = asTheCrowFlies(currentLatLng!, b.position);
-        return aDistance.compareTo(bDistance);
-      });
+    final nearestMarkers =
+        visibleMarkers..sort((a, b) {
+          final aDistance = asTheCrowFlies(currentLatLng!, a.position);
+          final bDistance = asTheCrowFlies(currentLatLng!, b.position);
+          return aDistance.compareTo(bDistance);
+        });
 
     if (nearestMarkers.isEmpty || asTheCrowFlies(currentLatLng!, nearestMarkers.first.position) > 500) {
       Fluttertoast.showToast(
@@ -1284,29 +1249,15 @@ class MapPageState extends State<MapPage> with RouteAware {
     }
 
     final nearbyPoints = [currentLatLng!, ...nearestMarkers.take(nearestMarkerCount).map((marker) => marker.position)];
-    final southWest = LatLng(
-      nearbyPoints.map((p) => p.latitude).reduce(min),
-      nearbyPoints.map((p) => p.longitude).reduce(min),
-    );
-    final northEast = LatLng(
-      nearbyPoints.map((p) => p.latitude).reduce(max),
-      nearbyPoints.map((p) => p.longitude).reduce(max),
-    );
+    final southWest = LatLng(nearbyPoints.map((p) => p.latitude).reduce(min), nearbyPoints.map((p) => p.longitude).reduce(min));
+    final northEast = LatLng(nearbyPoints.map((p) => p.latitude).reduce(max), nearbyPoints.map((p) => p.longitude).reduce(max));
     final padding = preferredMapOrientation == MapOrientation.alwaysNorth ? (mapWidth ?? 800) * 0.12 : (mapHeight ?? 600) * 0.12;
     final rotation = preferredMapOrientation == MapOrientation.alwaysNorth ? 0.0 : 290.0;
     final fitZoom = zoomForBounds(southWest, northEast, Size(mapWidth ?? 800, mapHeight ?? 600), padding: padding, zoomMax: 21.0);
     final targetZoom = fitZoom.clamp(0.0, 21.0);
     final targetCenter = LatLng((southWest.latitude + northEast.latitude) / 2, (southWest.longitude + northEast.longitude) / 2);
 
-    _controller?.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: targetCenter,
-          zoom: targetZoom,
-          bearing: rotation,
-        ),
-      ),
-    );
+    _controller?.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: targetCenter, zoom: targetZoom, bearing: rotation)));
   }
 
   void _setMapCameraToFitMapMarkers() {
@@ -1322,10 +1273,18 @@ class MapPageState extends State<MapPage> with RouteAware {
     if (listings.isNotEmpty) {
       for (var listing in listings) {
         LatLng markerLatLng = stringToLatLng(listing['latLng']);
-        if (markerLatLng.latitude < markerMinLat) markerMinLat = markerLatLng.latitude;
-        if (markerLatLng.latitude > markerMaxLat) markerMaxLat = markerLatLng.latitude;
-        if (markerLatLng.longitude < markerMinLong) markerMinLong = markerLatLng.longitude;
-        if (markerLatLng.longitude > markerMaxLong) markerMaxLong = markerLatLng.longitude;
+        if (markerLatLng.latitude < markerMinLat) {
+          markerMinLat = markerLatLng.latitude;
+        }
+        if (markerLatLng.latitude > markerMaxLat) {
+          markerMaxLat = markerLatLng.latitude;
+        }
+        if (markerLatLng.longitude < markerMinLong) {
+          markerMinLong = markerLatLng.longitude;
+        }
+        if (markerLatLng.longitude > markerMaxLong) {
+          markerMaxLong = markerLatLng.longitude;
+        }
       }
     }
 
@@ -1359,8 +1318,12 @@ class MapPageState extends State<MapPage> with RouteAware {
       for (var point in polyline.points) {
         if (point.latitude < polylineMinLat) polylineMinLat = point.latitude;
         if (point.latitude > polylineMaxLat) polylineMaxLat = point.latitude;
-        if (point.longitude < polylineMinLong) polylineMinLong = point.longitude;
-        if (point.longitude > polylineMaxLong) polylineMaxLong = point.longitude;
+        if (point.longitude < polylineMinLong) {
+          polylineMinLong = point.longitude;
+        }
+        if (point.longitude > polylineMaxLong) {
+          polylineMaxLong = point.longitude;
+        }
       }
     }
 
@@ -1376,8 +1339,7 @@ class MapPageState extends State<MapPage> with RouteAware {
       padding = mapHeight! * (0.10 + extraPaddingForShortTrips); // need a bit more space to avoid navigation distance marker
     }
 
-    _moveCameraToBoundsWithRotation(
-        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
+    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -1393,20 +1355,13 @@ class MapPageState extends State<MapPage> with RouteAware {
 
     _controller?.animateCamera(
       CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          southwest: southwestMin,
-          northeast: northeastMax,
-        ),
+        LatLngBounds(southwest: southwestMin, northeast: northeastMax),
         padding, // Padding around the bounds
       ),
     );
     _controller?.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng((southwestMin.latitude + northeastMax.latitude) / 2, (southwestMin.longitude + northeastMax.longitude) / 2),
-          zoom: theZoom,
-          bearing: rotation,
-        ),
+        CameraPosition(target: LatLng((southwestMin.latitude + northeastMax.latitude) / 2, (southwestMin.longitude + northeastMax.longitude) / 2), zoom: theZoom, bearing: rotation),
       ),
     );
   }
@@ -1507,14 +1462,7 @@ class MapPageState extends State<MapPage> with RouteAware {
 
         if (snapshot.hasError) {
           return Center(
-            child: Text(
-              "Error: ${snapshot.error}",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                backgroundColor: Theme.of(context).colorScheme.error,
-                color: Theme.of(context).colorScheme.onError,
-              ),
-            ),
+            child: Text("Error: ${snapshot.error}", textAlign: TextAlign.center, style: TextStyle(backgroundColor: Theme.of(context).colorScheme.error, color: Theme.of(context).colorScheme.onError)),
           );
         }
 
@@ -1523,23 +1471,19 @@ class MapPageState extends State<MapPage> with RouteAware {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  "Unable to retrieve listings",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                Text("Unable to retrieve listings", textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
                 isRefreshing
                     ? const CircularProgressIndicator()
                     : ElevatedButton.icon(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('refresh_listings_from_error');
-                          refreshListings();
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh listings'),
-                      ),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                        refreshListings();
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Refresh listings'),
+                    ),
               ],
             ),
           );
@@ -1592,9 +1536,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                       mapType: mapType,
                       rotateGesturesEnabled: false,
                       compassEnabled: false,
-                      myLocationEnabled: locationServicesEnabled &&
-                          (locationPermission == LocationPermission.always ||
-                              locationPermission == LocationPermission.whileInUse),
+                      myLocationEnabled: locationServicesEnabled && (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse),
                       myLocationButtonEnabled: false,
                       mapToolbarEnabled: false,
                       onMapCreated: (GoogleMapController controller) {
@@ -1604,11 +1546,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                           _setMapCameraToFitMapMarkers();
                         }
                       },
-                      initialCameraPosition: CameraPosition(
-                        target: const LatLng(52.199174, 0.140929),
-                        zoom: 14.1,
-                        bearing: _mapBearing,
-                      ),
+                      initialCameraPosition: CameraPosition(target: const LatLng(52.199174, 0.140929), zoom: 14.1, bearing: _mapBearing),
                       onCameraMove: (CameraPosition position) {
                         debugPrint('MapPageState onCameraMove called');
                         setState(() {
@@ -1624,7 +1562,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                       },
                       polygons: _polygons,
                       markers: markers.values.toSet(),
-                      polylines: polylines
+                      polylines: polylines,
                     ),
                   );
                 },
@@ -1651,13 +1589,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primary,
                             shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
+                            boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
                           ),
                           child: const Icon(Icons.cancel),
                         ),
@@ -1677,12 +1609,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                               filterSettings['Visits/Experiences'] == false &&
                               filterSettings['Services'] == false) {
                             widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
-                            final idList = _foodMarkerIds +
-                                _shoppingMarkerIds +
-                                _charityCommunityInfoMarkerIds +
-                                _performanceMarkerIds +
-                                _visitExperienceMarkerIds +
-                                _serviceMarkerIds;
+                            final idList = _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds;
                             setState(() {
                               filterSettings['Food'] = true;
                               filterSettings['Shopping'] = true;
@@ -1703,20 +1630,13 @@ class MapPageState extends State<MapPage> with RouteAware {
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primary,
                             shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
+                            boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
                           ),
                           child: const Icon(Icons.home),
                         ),
                       ),
                     // Centre-on-user button (only shown when location services are enabled and permission has been granted)
-                    if (locationServicesEnabled == true &&
-                        (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
+                    if (locationServicesEnabled == true && (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
                         heroTag: 'centreOnUserBtn',
                         onPressed: () async {
@@ -1731,21 +1651,12 @@ class MapPageState extends State<MapPage> with RouteAware {
                             if (currentLatLng != null) {
                               // Move camera to the user's location with a sensible zoom and bearing
                               double currentZoom = await _controller!.getZoomLevel();
-                              _controller?.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
-                                ),
-                              );
+                              _controller?.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing)));
                             }
                           } catch (e) {
                             debugPrint('Centre-on-user failed: $e');
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: Theme.of(context).colorScheme.primary,
-                                  content: Text('Unable to determine your location'),
-                                ),
-                              );
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(backgroundColor: Theme.of(context).colorScheme.primary, content: const Text('Unable to determine your location')));
                             }
                           }
                         },
@@ -1757,13 +1668,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primary,
                             shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
+                            boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
                           ),
                           child: const Icon(Icons.my_location),
                         ),
@@ -1797,13 +1702,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.primary,
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: const Offset(2, 2))
-                          ],
+                          boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
                         ),
                         child: Icon(_layersIcon),
                       ),
@@ -1835,20 +1734,9 @@ class MapPageState extends State<MapPage> with RouteAware {
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primary,
                             shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
+                            boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
                           ),
-                          child: AnimatedRotation(
-                            turns: _compassBearing / 360.0,
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOut,
-                            child: Icon(Icons.assistant_navigation),
-                          ),
+                          child: AnimatedRotation(turns: _compassBearing / 360.0, duration: const Duration(milliseconds: 200), curve: Curves.easeOut, child: const Icon(Icons.assistant_navigation)),
                         ),
                       ),
                     if (navigationInProgress == false)
@@ -1871,17 +1759,11 @@ class MapPageState extends State<MapPage> with RouteAware {
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.primary,
                                   shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(2, 2))
-                                  ],
+                                  boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
                                 ),
                                 child: const Icon(Icons.filter_alt),
                               ),
-                            )
+                            ),
                         ],
                       ),
                   ],
@@ -1894,22 +1776,20 @@ class MapPageState extends State<MapPage> with RouteAware {
                     padding: const EdgeInsets.only(top: 8),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                          iconSize: 30,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        iconSize: 30,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
+                        padding: const EdgeInsets.all(0),
+                        elevation: 3,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         widget.analyticsService.logButtonTapped('distance_to_destination');
                         _setMapCameraToFitPolyline(polylines);
                       },
                       icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
-                      label: Text(
-                        _distanceToDestination!,
-                        style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
-                      ),
+                      label: Text(_distanceToDestination!, style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary)),
                     ),
                   ),
                 ),
@@ -1935,9 +1815,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -1945,31 +1823,19 @@ class MapPageState extends State<MapPage> with RouteAware {
                                 width: 20,
                                 height: 14,
                                 decoration: BoxDecoration(
-                                  color: selectedThemeKey == 'colourBlindFriendly'
-                                      ? const Color.fromRGBO(224, 129, 87, 255)
-                                      : Theme.of(context).colorScheme.tertiary.withAlpha(50),
-                                  border: Border.all(
-                                    color: Theme.of(context).colorScheme.tertiary,
-                                    width: 3,
-                                  ),
+                                  color: selectedThemeKey == 'colourBlindFriendly' ? const Color.fromRGBO(224, 129, 87, 255) : Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                  border: Border.all(color: Theme.of(context).colorScheme.tertiary, width: 3),
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                'Road closures',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context).colorScheme.tertiary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              Text('Road closures', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.tertiary, fontWeight: FontWeight.w600)),
                             ],
                           ),
                         ),
                       ),
                     ),
                   ),
-                )
+                ),
             ],
           ),
           analyticsService: widget.analyticsService,

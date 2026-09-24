@@ -133,12 +133,8 @@ void main() {
     await service.setCurrentScreen('ListingsPage');
     await service.logButtonTapped('visit_listing_website', listingId: 'listing-123', listingName: 'Listing');
     await service.logButtonTapped('visit_listing_website', listingId: 'listing-456', listingName: 'Listing');
-    expect(sdk.events[0]['parameters'], {
-      'button_id': 'visit_listing_website', 'screen_name': 'ListingsPage', 'listing_id': 'listing-123', 'listing_name': 'Listing',
-    });
-    expect(sdk.events[1]['parameters'], {
-      'button_id': 'visit_listing_website', 'screen_name': 'ListingsPage', 'listing_id': 'listing-456', 'listing_name': 'Listing',
-    });
+    expect(sdk.events[0]['parameters'], {'button_id': 'visit_listing_website', 'screen_name': 'ListingsPage', 'listing_id': 'listing-123', 'listing_name': 'Listing'});
+    expect(sdk.events[1]['parameters'], {'button_id': 'visit_listing_website', 'screen_name': 'ListingsPage', 'listing_id': 'listing-456', 'listing_name': 'Listing'});
     await service.logButtonTapped('drawer_open');
     expect(sdk.events.last['parameters'], {'button_id': 'drawer_open', 'screen_name': 'ListingsPage'});
   });
@@ -193,9 +189,7 @@ void main() {
   });
 
   testWidgets('consent dialog saves an opt-in choice', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: Builder(builder: (context) => TextButton(
-      onPressed: () => service.showAnalyticsConsentDialog(context), child: const Text('Prompt'),
-    ))));
+    await tester.pumpWidget(MaterialApp(home: Builder(builder: (context) => TextButton(onPressed: () => service.showAnalyticsConsentDialog(context), child: const Text('Prompt')))));
     await tester.tap(find.text('Prompt'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('I agree'));

@@ -97,8 +97,7 @@ class _TimetablePageState extends State<TimetablePage> {
     if (_deviceOrientationSaved != null && currentOrientation != _deviceOrientationSaved) {
       // i.e. device has been rotated (or this is the first check)
       if (_deviceOrientationSaved != null) {
-        debugPrint(
-            '_TimetablePageState didChangeDependencies: changed orientation, _deviceOrientation=$_deviceOrientationSaved currentOrientation=$currentOrientation');
+        debugPrint('_TimetablePageState didChangeDependencies: changed orientation, _deviceOrientation=$_deviceOrientationSaved currentOrientation=$currentOrientation');
       }
       removeMiniPopup();
       safeRemoveRoute(context, listingDetailsDialogRoute);
@@ -195,15 +194,11 @@ class _TimetablePageState extends State<TimetablePage> {
       }
     }
     preparedEvents.forEach((loc, events) => events.sort((a, b) => a.startTime.compareTo(b.startTime)));
-    return Map.fromEntries(
-      preparedEvents.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
-    );
+    return Map.fromEntries(preparedEvents.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
   }
 
-  Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(
-      Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, bool? filteredMusicOrNot, String searchQuery) {
-    debugPrint(
-        '_TimetablePageState filterEventsAndComputeDefaults called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery');
+  Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, bool? filteredMusicOrNot, String searchQuery) {
+    debugPrint('_TimetablePageState filterEventsAndComputeDefaults called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery');
     timelineMinStart = DateTime(9999);
     timelineMaxEnd = DateTime(0);
     final now = DateTime.now();
@@ -213,9 +208,7 @@ class _TimetablePageState extends State<TimetablePage> {
       for (int i = 0; i < theEventsAtThisLocation.length; i++) {
         final ev = theEventsAtThisLocation[i];
         if (!ev.cancelled &&
-            (!onlyNowOrSoon ||
-                (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) ||
-                (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30))) &&
+            (!onlyNowOrSoon || (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) || (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30))) &&
             (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery)) &&
             (filteredMusicOrNot == null || (filteredMusicOrNot == true && ev.isMusic) || (filteredMusicOrNot == false && !ev.isMusic))) {
           if (theFilteredEvents.keys.contains(location.key)) {
@@ -223,8 +216,12 @@ class _TimetablePageState extends State<TimetablePage> {
           } else {
             theFilteredEvents[location.key] = [ev];
           }
-          if (ev.startTime.difference(timelineMinStart).inMinutes < 0) timelineMinStart = ev.startTime;
-          if (ev.endTime.difference(timelineMaxEnd).inMinutes > 0) timelineMaxEnd = ev.endTime;
+          if (ev.startTime.difference(timelineMinStart).inMinutes < 0) {
+            timelineMinStart = ev.startTime;
+          }
+          if (ev.endTime.difference(timelineMaxEnd).inMinutes > 0) {
+            timelineMaxEnd = ev.endTime;
+          }
         }
       }
     }
@@ -254,29 +251,31 @@ class _TimetablePageState extends State<TimetablePage> {
       // the below minimum of 12 does cause overlap of small events when display scaled right down
       // but it's a trade-off between that and overflow exceptions
       final height = max(12.0, ev.endTime.difference(ev.startTime).inMinutes * pxPerMin);
-      out.add(PositionedEvent(
-        startTime: ev.startTime,
-        endTime: ev.endTime,
-        location: ev.location,
-        name: ev.name,
-        subtitle: ev.subtitle,
-        id: ev.id,
-        cancelled: ev.cancelled,
-        emoji: ev.emoji,
-        description: ev.description,
-        latLng: ev.latLng,
-        imageURL: ev.imageURL,
-        brickAndMortar: ev.brickAndMortar,
-        email: ev.email,
-        website: ev.website,
-        phoneNumber: ev.phoneNumber,
-        isMusic: ev.isMusic,
-        lane: lane,
-        top: top + 2,
-        height: height,
-        left: 0, // will be calculated below
-        width: 0, // will be calculated below
-      ));
+      out.add(
+        PositionedEvent(
+          startTime: ev.startTime,
+          endTime: ev.endTime,
+          location: ev.location,
+          name: ev.name,
+          subtitle: ev.subtitle,
+          id: ev.id,
+          cancelled: ev.cancelled,
+          emoji: ev.emoji,
+          description: ev.description,
+          latLng: ev.latLng,
+          imageURL: ev.imageURL,
+          brickAndMortar: ev.brickAndMortar,
+          email: ev.email,
+          website: ev.website,
+          phoneNumber: ev.phoneNumber,
+          isMusic: ev.isMusic,
+          lane: lane,
+          top: top + 2,
+          height: height,
+          left: 0, // will be calculated below
+          width: 0, // will be calculated below
+        ),
+      );
     }
     // After lanes assigned, compute widths: each event width = columnWidth * (1 / lanes)
     final laneCount = max(1, lanesEnds.length);
@@ -296,67 +295,68 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   Widget eventRect(PositionedEvent pe, ColorScheme colorScheme, bool isLandscape, GlobalKey? possibleKey) {
-    return LayoutBuilder(builder: (context, constraints) {
-      const double minTitleFontSize = 10.5;
-      const double minTimeFontSize = 9.5;
-      const double step = 0.5;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double minTitleFontSize = 10.5;
+        const double minTimeFontSize = 9.5;
+        const double step = 0.5;
 
-      // Snap helper (required by AutoSizeText)
-      double snap(double value, double min) {
-        final steps = ((value - min) / step).floor();
-        return min + steps * step;
-      }
+        // Snap helper (required by AutoSizeText)
+        double snap(double value, double min) {
+          final steps = ((value - min) / step).floor();
+          return min + steps * step;
+        }
 
-      final bool includeDate = (pe.height >= 42 && pe.width >= 80);
+        final bool includeDate = (pe.height >= 42 && pe.width >= 80);
 
-      final rawMaxTitleFontSize = min(
-        pe.height * 0.3,
-        pe.width * 0.3,
-      ).clamp(12.0, isLandscape ? 16.5 : 14.5);
-      final maxTitleFontSize = max(minTitleFontSize, snap(rawMaxTitleFontSize, minTitleFontSize));
-      final maxLines = (pe.height / (minTitleFontSize * 1.1)).floor() - (includeDate ? 1 : 0);
+        final rawMaxTitleFontSize = min(pe.height * 0.3, pe.width * 0.3).clamp(12.0, isLandscape ? 16.5 : 14.5);
+        final maxTitleFontSize = max(minTitleFontSize, snap(rawMaxTitleFontSize, minTitleFontSize));
+        final maxLines = (pe.height / (minTitleFontSize * 1.1)).floor() - (includeDate ? 1 : 0);
 
-      final rawMaxTimeFontSize = (9.0 + 0.7 * (pe.width / 20)).clamp(8.0, 13.0);
-      final maxTimeFontSize = max(minTimeFontSize, snap(rawMaxTimeFontSize, minTimeFontSize));
+        final rawMaxTimeFontSize = (9.0 + 0.7 * (pe.width / 20)).clamp(8.0, 13.0);
+        final maxTimeFontSize = max(minTimeFontSize, snap(rawMaxTimeFontSize, minTimeFontSize));
 
-      return SizedBox(
-        width: constraints.maxWidth,
-        height: pe.height,
-        child: Column(
-          key: possibleKey,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Flexible(
-              fit: FlexFit.loose,
-              child: AutoSizeText('${pe.name}\u{00AD}',
+        return SizedBox(
+          width: constraints.maxWidth,
+          height: pe.height,
+          child: Column(
+            key: possibleKey,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Flexible(
+                fit: FlexFit.loose,
+                child: AutoSizeText(
+                  '${pe.name}\u{00AD}',
                   style: TextStyle(height: 0.95, fontSize: maxTitleFontSize, fontWeight: FontWeight.bold),
                   maxLines: maxLines,
                   minFontSize: minTitleFontSize,
                   maxFontSize: maxTitleFontSize,
                   stepGranularity: step,
                   textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis),
-            ),
-            if (includeDate) SizedBox(height: (pe.height * 0.05).clamp(2, pe.height * 0.25)),
-            if (includeDate)
-              Container(
-                height: 1.1 * maxTimeFontSize,
-                padding: EdgeInsets.symmetric(horizontal: 1),
-                child: AutoSizeText(
-                  formatTimeRange(pe.startTime, pe.endTime),
-                  style: TextStyle(height: 1.1, fontSize: maxTimeFontSize, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant),
-                  maxLines: 1,
-                  minFontSize: minTimeFontSize,
-                  maxFontSize: maxTimeFontSize,
-                  stepGranularity: step,
-                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-          ],
-        ),
-      );
-    });
+              if (includeDate) SizedBox(height: (pe.height * 0.05).clamp(2, pe.height * 0.25)),
+              if (includeDate)
+                Container(
+                  height: 1.1 * maxTimeFontSize,
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
+                  child: AutoSizeText(
+                    formatTimeRange(pe.startTime, pe.endTime),
+                    style: TextStyle(height: 1.1, fontSize: maxTimeFontSize, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant),
+                    maxLines: 1,
+                    minFontSize: minTimeFontSize,
+                    maxFontSize: maxTimeFontSize,
+                    stepGranularity: step,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void scrollToKey(GlobalKey theKey, double alignment) async {
@@ -369,20 +369,10 @@ class _TimetablePageState extends State<TimetablePage> {
     final offset = viewport.getOffsetToReveal(renderObject, alignment).offset;
     if (offset.isFinite) {
       // all good so we've got a proper scroll to do
-      await _verticalScrollController.animateTo(
-        offset,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeIn,
-      );
+      await _verticalScrollController.animateTo(offset, duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
     } else {
       // final attempt - at least we make sure it's somewhere on the screen
-      Scrollable.ensureVisible(
-        alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
-        keyContext,
-        alignment: alignment,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      Scrollable.ensureVisible(alignmentPolicy: ScrollPositionAlignmentPolicy.explicit, keyContext, alignment: alignment, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     }
   }
 
@@ -409,16 +399,17 @@ class _TimetablePageState extends State<TimetablePage> {
     (theMsg, newFilteredMusicOrNot) = switch (widget.filteredMusicOrNot) {
       null => ('Showing only music performances', true),
       true => ('Showing everything but music performances', false),
-      false => ('Showing all performances', null)
+      false => ('Showing all performances', null),
     };
     if (mounted) setState(() {});
     widget.analyticsService.logPreferenceSet(
-        'timetable_category',
-        newFilteredMusicOrNot == null
-            ? 'all'
-            : newFilteredMusicOrNot
-                ? 'music'
-                : 'other');
+      'timetable_category',
+      newFilteredMusicOrNot == null
+          ? 'all'
+          : newFilteredMusicOrNot
+          ? 'music'
+          : 'other',
+    );
     widget.onFilterChange.call(widget.onlyNowOrSoon, newFilteredMusicOrNot);
     Fluttertoast.showToast(
       msg: theMsg,
@@ -435,8 +426,7 @@ class _TimetablePageState extends State<TimetablePage> {
   @override
   Widget build(BuildContext context) {
     if (!scaling) {
-      debugPrint(
-          '_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
+      debugPrint('_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
     }
     if (loading) {
       return FairScaffold(
@@ -458,19 +448,25 @@ class _TimetablePageState extends State<TimetablePage> {
     if (fairDate.difference(DateTime.now()).inDays == 0 && timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now())) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_nowLineTimer == null) startClockUpdates(updateNowLine);
-        if (!widget.onlyNowOrSoon && _searchQuery.isEmpty) scrollToKey(nowLineKey, 0.3);
+        if (!widget.onlyNowOrSoon && _searchQuery.isEmpty) {
+          scrollToKey(nowLineKey, 0.3);
+        }
       });
     } else if (_searchQuery.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _verticalScrollController.animateTo(0, duration: Duration(milliseconds: 100), curve: Curves.easeIn);
+        _verticalScrollController.animateTo(0, duration: const Duration(milliseconds: 100), curve: Curves.easeIn);
       });
     }
 
     String theErrorMessage = '';
     if (spanMinutes == 0 || theFilteredEvents.isEmpty) {
       theErrorMessage = 'Nothing to show.';
-      if (widget.onlyNowOrSoon) theErrorMessage += '\n\nUnselect ‘now or soon’ to see the whole day.';
-      if (_searchQuery != '') theErrorMessage += '\n\nYou can clear your search by tapping the X icon in the search bar.';
+      if (widget.onlyNowOrSoon) {
+        theErrorMessage += '\n\nUnselect ‘now or soon’ to see the whole day.';
+      }
+      if (_searchQuery != '') {
+        theErrorMessage += '\n\nYou can clear your search by tapping the X icon in the search bar.';
+      }
     }
 
     final now = DateTime.now();
@@ -493,40 +489,42 @@ class _TimetablePageState extends State<TimetablePage> {
         IconButton(
           key: subcategoryIconKey,
           color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything',
-              analyticsService: widget.analyticsService),
+          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_category_filter');
             _toggleFilteredMusicOrNot();
             theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
           },
-          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
+          icon: Icon(switch (widget.filteredMusicOrNot) {
+            false => Icons.music_off,
+            true => Icons.music_note,
+            null => Icons.filter_alt,
+          }, size: 26),
         ),
         IconButton(
           key: nowOrSoonIconKey,
-          onLongPress: () => showMiniPopup(
-              context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon',
-              analyticsService: widget.analyticsService),
+          onLongPress:
+              () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_now_or_soon_toggle');
             (isItEventDay())
                 ? _toggleOnlyNowOrSoon()
-                : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway',
-                    fgColour: colorScheme.error, analyticsService: widget.analyticsService);
+                : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
           },
-          icon: Icon(
-            (widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule,
-            color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
-          ),
+          icon: Icon((widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule, color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130)),
         ),
         IconButton(
           key: searchIconKey,
           color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
-          onLongPress: () => showMiniPopup(
-              context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
-              analyticsService: widget.analyticsService),
+          onLongPress:
+              () => showMiniPopup(
+                context,
+                searchIconKey,
+                (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
+                analyticsService: widget.analyticsService,
+              ),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_search_toggle');
@@ -544,11 +542,11 @@ class _TimetablePageState extends State<TimetablePage> {
         ),
       ],
       body: ValueListenableBuilder<Set<String>>(
-          valueListenable: favouriteListingKeys,
-          builder: (context, name, child) {
-            return LayoutBuilder(builder: (context, constraints) {
-              totalWidth = max(MediaQuery.sizeOf(context).width, theFilteredEvents.length * 100.0 + leftColumnWidth) -
-                  2.0; // empirically the min size to fit whole times
+        valueListenable: favouriteListingKeys,
+        builder: (context, name, child) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              totalWidth = max(MediaQuery.sizeOf(context).width, theFilteredEvents.length * 100.0 + leftColumnWidth) - 2.0; // empirically the min size to fit whole times
 
               if (!scaling) {
                 final currentOrientation = MediaQuery.orientationOf(context);
@@ -585,19 +583,11 @@ class _TimetablePageState extends State<TimetablePage> {
               }
 
               // Build time markers (every 30 or 60 minutes depending on span)
-              DateTime t = DateTime(timelineMinStart.year, timelineMinStart.month, timelineMinStart.day, timelineMinStart.hour,
-                  (timelineMinStart.minute ~/ markInterval + 1) * markInterval);
+              DateTime t = DateTime(timelineMinStart.year, timelineMinStart.month, timelineMinStart.day, timelineMinStart.hour, (timelineMinStart.minute ~/ markInterval + 1) * markInterval);
               while (t.isBefore(timelineMaxEnd.add(Duration(minutes: markInterval)))) {
                 final top = max(0.0, t.difference(timelineMinStart).inMinutes * _dayPixelsPerMinute);
                 final timeLabel = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
-                markers.add(
-                  Positioned(
-                    top: top,
-                    left: 0,
-                    right: 0,
-                    child: Container(height: 1, color: colorScheme.surfaceDim),
-                  ),
-                );
+                markers.add(Positioned(top: top, left: 0, right: 0, child: Container(height: 1, color: colorScheme.surfaceDim)));
                 markers.add(
                   Positioned(
                     top: top - 8,
@@ -608,7 +598,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         fontSize: 12.5,
                         fontWeight: FontWeight.bold,
                         color: colorScheme.onSurfaceVariant,
-                        shadows: [Shadow(color: colorScheme.onPrimary, offset: Offset(0, 0), blurRadius: 2)],
+                        shadows: [Shadow(color: colorScheme.onPrimary, offset: const Offset(0, 0), blurRadius: 2)],
                       ),
                     ),
                   ),
@@ -618,63 +608,64 @@ class _TimetablePageState extends State<TimetablePage> {
 
               final nowTop = max(0.0, (now.difference(timelineMinStart).inMinutes) * _dayPixelsPerMinute) - 1.5;
               final timelineHeight = max(constraints.maxHeight - 40, spanMinutes * _dayPixelsPerMinute + 4);
-              final theContent = Column(children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: _isSearching
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              key: const ValueKey('searchBar'),
-                              color: colorScheme.surfaceDim,
-                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
-                              padding: EdgeInsets.all(8),
-                              child: SearchBar(
-                                autoFocus: true,
-                                controller: _searchController,
-                                elevation: const WidgetStatePropertyAll(0),
-                                hintText: 'Search all events...',
-                                leading: const Icon(Icons.search),
-                                trailing: [
-                                  IconButton(
-                                    iconSize: 20,
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () {
-                                      HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('timetable_search_close');
-                                      _searchAnalyticsTimer?.cancel();
+              final theContent = Column(
+                children: [
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child:
+                        _isSearching
+                            ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  key: const ValueKey('searchBar'),
+                                  color: colorScheme.surfaceDim,
+                                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
+                                  padding: const EdgeInsets.all(8),
+                                  child: SearchBar(
+                                    autoFocus: true,
+                                    controller: _searchController,
+                                    elevation: const WidgetStatePropertyAll(0),
+                                    hintText: 'Search all events...',
+                                    leading: const Icon(Icons.search),
+                                    trailing: [
+                                      IconButton(
+                                        iconSize: 20,
+                                        icon: const Icon(Icons.close),
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('timetable_search_close');
+                                          _searchAnalyticsTimer?.cancel();
+                                          setState(() {
+                                            if (_searchQuery.isEmpty) {
+                                              _isSearching = false; // first click clears field; second closes search
+                                            }
+                                            _searchQuery = '';
+                                            _searchController.clear();
+                                            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                    onChanged: (value) {
+                                      _scheduleSearchAnalytics(value);
                                       setState(() {
-                                        if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
-                                        _searchQuery = '';
-                                        _searchController.clear();
-                                        theFilteredEvents =
-                                            filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
+                                        _searchQuery = value.toLowerCase();
+                                        theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
                                       });
                                     },
                                   ),
-                                ],
-                                onChanged: (value) {
-                                  _scheduleSearchAnalytics(value);
-                                  setState(() {
-                                    _searchQuery = value.toLowerCase();
-                                    theFilteredEvents =
-                                        filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        )
-                      : SizedBox.shrink(),
-                ),
-                (theErrorMessage != '')
-                    ? Align(
+                                ),
+                              ],
+                            )
+                            : const SizedBox.shrink(),
+                  ),
+                  (theErrorMessage != '')
+                      ? Align(
                         alignment: Alignment.center,
-                        child: Padding(
-                            padding: EdgeInsetsGeometry.all(60),
-                            child: Text(theErrorMessage, style: const TextStyle(fontSize: 16), textAlign: TextAlign.center)))
-                    : NotificationListener<ScrollNotification>(
+                        child: Padding(padding: const EdgeInsetsGeometry.all(60), child: Text(theErrorMessage, style: const TextStyle(fontSize: 16), textAlign: TextAlign.center)),
+                      )
+                      : NotificationListener<ScrollNotification>(
                         onNotification: (notification) {
                           if (notification is ScrollStartNotification || notification is UserScrollNotification) {
                             removeMiniPopup();
@@ -684,7 +675,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         child: SingleChildScrollView(
                           controller: _horizontalScrollController,
                           scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.only(right: 2), // stop it crashing into edge
+                          padding: const EdgeInsets.only(right: 2), // stop it crashing into edge
                           child: SizedBox(
                             width: totalWidth,
                             child: Column(
@@ -698,35 +689,37 @@ class _TimetablePageState extends State<TimetablePage> {
                                     children: [
                                       Container(width: leftColumnWidth - 2),
                                       for (final location in positioned.entries)
-                                        Builder(builder: (itemContext) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('timetable_location');
-                                              showMiniPopup(itemContext, null, location.key, analyticsService: widget.analyticsService);
-                                            },
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: colorScheme.onSurfaceVariant,
-                                                border: Border.all(width: 0.1),
-                                                borderRadius: BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
+                                        Builder(
+                                          builder: (itemContext) {
+                                            return GestureDetector(
+                                              onTap: () {
+                                                HapticFeedback.lightImpact();
+                                                widget.analyticsService.logButtonTapped('timetable_location');
+                                                showMiniPopup(itemContext, null, location.key, analyticsService: widget.analyticsService);
+                                              },
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: colorScheme.onSurfaceVariant,
+                                                  border: Border.all(width: 0.1),
+                                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
+                                                ),
+                                                width: (totalWidth - leftColumnWidth) / cols - 4,
+                                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                                alignment: AlignmentGeometry.center,
+                                                child: AutoSizeText(
+                                                  location.key,
+                                                  softWrap: true,
+                                                  maxLines: 2,
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.secondary),
+                                                  minFontSize: 11,
+                                                  maxFontSize: 15,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
                                               ),
-                                              width: (totalWidth - leftColumnWidth) / cols - 4,
-                                              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                              alignment: AlignmentGeometry.center,
-                                              child: AutoSizeText(
-                                                location.key,
-                                                softWrap: true,
-                                                maxLines: 2,
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.secondary),
-                                                minFontSize: 11,
-                                                maxFontSize: 15,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          );
-                                        }),
+                                            );
+                                          },
+                                        ),
                                     ],
                                   ),
                                 ),
@@ -735,19 +728,21 @@ class _TimetablePageState extends State<TimetablePage> {
                                   height: constraints.maxHeight - 34 - (_isSearching ? 56 : 0),
                                   child: GestureDetector(
                                     onScaleStart: (details) {
-                                      if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
+                                      if (widget.onlyNowOrSoon || details.pointerCount < 2) {
+                                        return; // ignore drags
+                                      }
                                       scaling = true;
                                       startPixelsPerMinute = _dayPixelsPerMinute;
                                     },
                                     onScaleUpdate: (details) {
-                                      if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
+                                      if (widget.onlyNowOrSoon || details.pointerCount < 2) {
+                                        return; // ignore drags
+                                      }
                                       final dampenedScale = 1 + (details.scale - 1) * 0.5;
-                                      final newdayPixelsPerMinute =
-                                          max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                      final newdayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
                                       if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
                                         setState(() {
-                                          _dayPixelsPerMinute =
-                                              max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                          _dayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
                                         });
                                       }
                                     },
@@ -779,7 +774,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                       controller: _verticalScrollController,
                                       physics: const ClampingScrollPhysics(),
                                       scrollDirection: Axis.vertical,
-                                      key: PageStorageKey('verticalList'),
+                                      key: const PageStorageKey('verticalList'),
                                       child: SizedBox(
                                         width: totalWidth,
                                         height: timelineHeight,
@@ -789,13 +784,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                             ...swimlanes,
                                             // red 'now' line
                                             if (timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now()))
-                                              Positioned(
-                                                key: nowLineKey,
-                                                top: nowTop,
-                                                left: 0,
-                                                right: 0,
-                                                child: Container(height: 3, color: Colors.red),
-                                              ),
+                                              Positioned(key: nowLineKey, top: nowTop, left: 0, right: 0, child: Container(height: 3, color: Colors.red)),
                                             ...markers,
                                             // Event stacks per column
                                             Positioned(
@@ -817,72 +806,68 @@ class _TimetablePageState extends State<TimetablePage> {
                                                             for (var pe in location.value) ...[
                                                               (scaling)
                                                                   ? Positioned(
-                                                                      top: pe.top,
-                                                                      left: pe.left,
-                                                                      width: pe.width,
-                                                                      height: pe.height,
-                                                                      child: Container(
-                                                                          decoration: BoxDecoration(
+                                                                    top: pe.top,
+                                                                    left: pe.left,
+                                                                    width: pe.width,
+                                                                    height: pe.height,
+                                                                    child: Container(
+                                                                      decoration: BoxDecoration(
                                                                         color: colorScheme.secondary,
                                                                         borderRadius: BorderRadius.circular(4),
-                                                                        boxShadow: [
-                                                                          BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)
-                                                                        ],
+                                                                        boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: const Offset(2, 2), blurRadius: 3)],
                                                                         border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
-                                                                      )))
-                                                                  : Positioned(
-                                                                      top: pe.top,
-                                                                      left: pe.left,
-                                                                      width: pe.width,
-                                                                      height: pe.height,
-                                                                      child: GestureDetector(
-                                                                        onTap: () {
-                                                                          HapticFeedback.lightImpact();
-                                                                          widget.analyticsService.logButtonTapped('timetable_listing');
-                                                                          showListingDetailsDialog(
-                                                                            context,
-                                                                            pe,
-                                                                            //alertNoticePeriod,
-                                                                            setState,
-                                                                            () async {
-                                                                              await Navigator.push(
-                                                                                  context,
-                                                                                  MaterialPageRoute(
-                                                                                      builder: (context) => MapPage(
-                                                                                            listings: listings,
-                                                                                            onTabSelected: (_) => {},
-                                                                                            destinationId: pe.id,
-                                                                                            destinationLatLng: pe.latLng,
-                                                                                            analyticsService: widget.analyticsService,
-                                                                                          )));
-                                                                              if (mounted) widget.analyticsService.setCurrentScreen('TimetablePage');
-                                                                            },
-                                                                            analyticsService: widget.analyticsService,
-                                                                          );
-                                                                        },
-                                                                        child: Container(
-                                                                          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
-                                                                          decoration: BoxDecoration(
-                                                                            color: (favouriteListingKeys.value.contains(pe.id))
-                                                                                ? colorScheme.primary.withAlpha(40)
-                                                                                : colorScheme.onPrimary,
-                                                                            borderRadius: BorderRadius.circular(4),
-                                                                            boxShadow: [
-                                                                              BoxShadow(
-                                                                                  color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)
-                                                                            ],
-                                                                            border: Border.all(width: 0.2, color: colorScheme.onSecondary),
-                                                                          ),
-                                                                          child: eventRect(pe, colorScheme, isLandscape, null),
-                                                                        ),
                                                                       ),
                                                                     ),
+                                                                  )
+                                                                  : Positioned(
+                                                                    top: pe.top,
+                                                                    left: pe.left,
+                                                                    width: pe.width,
+                                                                    height: pe.height,
+                                                                    child: GestureDetector(
+                                                                      onTap: () {
+                                                                        HapticFeedback.lightImpact();
+                                                                        widget.analyticsService.logButtonTapped('timetable_listing');
+                                                                        showListingDetailsDialog(
+                                                                          context,
+                                                                          pe,
+                                                                          //alertNoticePeriod,
+                                                                          setState,
+                                                                          () async {
+                                                                            await Navigator.push(
+                                                                              context,
+                                                                              MaterialPageRoute(
+                                                                                builder:
+                                                                                    (context) => MapPage(
+                                                                                      listings: listings,
+                                                                                      onTabSelected: (_) => {},
+                                                                                      destinationId: pe.id,
+                                                                                      destinationLatLng: pe.latLng,
+                                                                                      analyticsService: widget.analyticsService,
+                                                                                    ),
+                                                                              ),
+                                                                            );
+                                                                            if (mounted) {
+                                                                              widget.analyticsService.setCurrentScreen('TimetablePage');
+                                                                            }
+                                                                          },
+                                                                          analyticsService: widget.analyticsService,
+                                                                        );
+                                                                      },
+                                                                      child: Container(
+                                                                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 1),
+                                                                        decoration: BoxDecoration(
+                                                                          color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.primary.withAlpha(40) : colorScheme.onPrimary,
+                                                                          borderRadius: BorderRadius.circular(4),
+                                                                          boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: const Offset(2, 2), blurRadius: 3)],
+                                                                          border: Border.all(width: 0.2, color: colorScheme.onSecondary),
+                                                                        ),
+                                                                        child: eventRect(pe, colorScheme, isLandscape, null),
+                                                                      ),
+                                                                    ),
+                                                                  ),
                                                               if (!scaling && favouriteListingKeys.value.contains(pe.id))
-                                                                Positioned(
-                                                                  top: pe.top + 2,
-                                                                  left: pe.left + pe.width - 18,
-                                                                  child: Icon(Icons.favorite, size: 16, color: Colors.red.withAlpha(120)),
-                                                                ),
+                                                                Positioned(top: pe.top + 2, left: pe.left + pe.width - 18, child: Icon(Icons.favorite, size: 16, color: Colors.red.withAlpha(120))),
                                                             ],
                                                           ],
                                                         ),
@@ -902,10 +887,13 @@ class _TimetablePageState extends State<TimetablePage> {
                           ),
                         ),
                       ),
-              ]);
+                ],
+              );
               return theContent;
-            });
-          }),
+            },
+          );
+        },
+      ),
       analyticsService: widget.analyticsService,
     );
   }

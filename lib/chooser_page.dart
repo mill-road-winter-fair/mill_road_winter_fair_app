@@ -71,78 +71,110 @@ class _ChooserPageState extends State<ChooserPage> {
             controller: _chooserPageScrollController,
             primary: false,
             child: Text.rich(
-              TextSpan(children: [
-                TextSpan(style: bodyStyle, text: 'Test links for plumbing:\n\n'),
-                TextSpan(
+              TextSpan(
+                children: [
+                  TextSpan(style: bodyStyle, text: 'Test links for plumbing:\n\n'),
+                  TextSpan(
                     style: bodyStyle,
                     text: '• Timetable (music only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('chooser_music');
-                      widget.onOpenTimetable(false, true);
-                    }),
-                TextSpan(
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('chooser_music');
+                            widget.onOpenTimetable(false, true);
+                          },
+                  ),
+                  TextSpan(
                     style: bodyStyle,
                     text: '• Timetable (all but music)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('chooser_other');
-                      widget.onOpenTimetable(false, false);
-                    }),
-                TextSpan(
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('chooser_other');
+                            widget.onOpenTimetable(false, false);
+                          },
+                  ),
+                  TextSpan(
                     style: bodyStyle,
                     text: '• Timetable (music on now or soon)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('chooser_music_now');
-                      widget.onOpenTimetable(true, true);
-                    }),
-                TextSpan(
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('chooser_music_now');
+                            widget.onOpenTimetable(true, true);
+                          },
+                  ),
+                  TextSpan(
                     style: bodyStyle,
                     text: '• Timetable (all but music on now or soon)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('chooser_other_now');
-                      widget.onOpenTimetable(true, false);
-                    }),
-                TextSpan(
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('chooser_other_now');
+                            widget.onOpenTimetable(true, false);
+                          },
+                  ),
+                  TextSpan(
                     style: bodyStyle,
                     text: '• Listings (music only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('chooser_listings_music');
-                      widget.onOpenListings('all', 'performanceMusic');
-                    }),
-                TextSpan(
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('chooser_listings_music');
+                            widget.onOpenListings('all', 'performanceMusic');
+                          },
+                  ),
+                  TextSpan(
                     style: bodyStyle,
                     text: '• Listings (other performances only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('chooser_listings_other');
-                      widget.onOpenListings('all', 'performanceOther');
-                    }),
-                TextSpan(
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('chooser_listings_other');
+                            widget.onOpenListings('all', 'performanceOther');
+                          },
+                  ),
+                  TextSpan(
                     style: bodyStyle,
                     text: '• Listings (children’s only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('chooser_listings_children');
-                      widget.onOpenListings('all', 'performanceChildrens');
-                    }),
-                TextSpan(
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('chooser_listings_children');
+                            widget.onOpenListings('all', 'performanceChildrens');
+                          },
+                  ),
+                  TextSpan(
                     style: bodyStyle,
                     text: '• Favourite listings (music only)\n',
-                    recognizer: TapGestureRecognizer()..onTap = () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('chooser_favourites_music');
-                      widget.onOpenListings('favourite', 'performanceMusic');
-                    }),
-                TextSpan(style: bodyStyle, text: '• Map (nearest 10 markers)\n', recognizer: TapGestureRecognizer()..onTap = () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('chooser_map_nearest');
-                      widget.onOpenMap(10);
-                    }),
-              ]),
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('chooser_favourites_music');
+                            widget.onOpenListings('favourite', 'performanceMusic');
+                          },
+                  ),
+                  TextSpan(
+                    style: bodyStyle,
+                    text: '• Map (nearest 10 markers)\n',
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('chooser_map_nearest');
+                            widget.onOpenMap(10);
+                          },
+                  ),
+                ],
+              ),
             ), // Add event details here
           ),
         ),

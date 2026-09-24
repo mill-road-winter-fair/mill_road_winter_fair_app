@@ -35,10 +35,7 @@ Future<void> loadSettings() async {
     preferredRoadClosurePolygonVisible = prefs.getBool('preferredRoadClosurePolygonVisible') ?? true;
 
     // Keep the listings-change notice enabled by default for each fair year.
-    listingUpdateNoticeEnabled = prefs.getBool(
-          'listingUpdateNoticeEnabled${fairDate.year}',
-        ) ??
-        true;
+    listingUpdateNoticeEnabled = prefs.getBool('listingUpdateNoticeEnabled${fairDate.year}') ?? true;
 
     // Set default sorting method as nearest (1 in the index)
     int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 1;
@@ -61,7 +58,9 @@ Future<void> loadSettings() async {
     // Set initial theme and map style to change according to system brightness
     String defaultTheme = 'auto';
     selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme;
-    if (!appThemes.containsKey(selectedThemeKey) && selectedThemeKey != 'auto') selectedThemeKey = defaultTheme;
+    if (!appThemes.containsKey(selectedThemeKey) && selectedThemeKey != 'auto') {
+      selectedThemeKey = defaultTheme;
+    }
     mapStyle = getMapStyleForThemeKey(selectedThemeKey);
 
     // Create a ValueNotifier to hold the current theme
@@ -86,7 +85,6 @@ Future<void> loadSettings() async {
 
     mapStyle = standardMap;
     favouriteListingKeys.value = {};
-
   }
 }
 
@@ -120,10 +118,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    routeObserver.subscribe(
-      this,
-      ModalRoute.of(context)!,
-    );
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
   @override
@@ -136,7 +131,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
     widget.analyticsService.setCurrentScreen('SettingsPage');
   }
 
-// Save settings to shared preferences
+  // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
@@ -146,10 +141,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
-    await prefs.setBool(
-      'listingUpdateNoticeEnabled${fairDate.year}',
-      listingUpdateNoticeEnabled,
-    );
+    await prefs.setBool('listingUpdateNoticeEnabled${fairDate.year}', listingUpdateNoticeEnabled);
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
@@ -167,15 +159,17 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text('Settings'),
-          ),
+          leading:
+              Navigator.canPop(context)
+                  ? BackButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('back');
+                      Navigator.maybePop(context);
+                    },
+                  )
+                  : null,
+          title: const FittedBox(fit: BoxFit.scaleDown, child: Text('Settings')),
         ),
         body: Container(
           padding: EdgeInsets.all(10.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 50).toInt()),
@@ -208,52 +202,33 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                               preferredDistanceUnits = value;
                             });
                             _saveSettings();
-
                           },
                           child: Column(
                             children: [
                               RadioListTile<DistanceUnits>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Metric'),
-                                subtitle: Text(
-                                  'Metres and kilometres',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
+                                subtitle: Text('Metres and kilometres', style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 visualDensity: VisualDensity.compact,
                                 value: DistanceUnits.metric,
                               ),
                               RadioListTile<DistanceUnits>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Imperial'),
-                                subtitle: Text(
-                                  'Feet and miles',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
+                                subtitle: Text('Feet and miles', style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 visualDensity: VisualDensity.compact,
                                 value: DistanceUnits.imperial,
                               ),
                               RadioListTile<DistanceUnits>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Cambridge'),
-                                subtitle: Text(
-                                  'Punt lengths',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
+                                subtitle: Text('Punt lengths', style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 visualDensity: VisualDensity.compact,
                                 value: DistanceUnits.cambridge,
                               ),
                             ],
                           ),
-                        )
+                        ),
                       ],
                     ),
                     Column(
@@ -280,78 +255,42 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Auto'),
-                                subtitle: Text(
-                                  'Follow the device’s light/dark setting',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
+                                subtitle: Text('Follow the device’s light/dark setting', style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 visualDensity: VisualDensity.compact,
                                 value: 'auto',
                               ),
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Light'),
-                                subtitle: Text(
-                                  'A bright theme using white pages',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
+                                subtitle: Text('A bright theme using white pages', style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 visualDensity: VisualDensity.compact,
                                 value: 'light',
                               ),
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Dark'),
-                                subtitle: Text(
-                                  'A subdued theme using black pages',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
+                                subtitle: Text('A subdued theme using black pages', style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 visualDensity: VisualDensity.compact,
                                 value: 'dark',
                               ),
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('2024 light scheme'),
-                                subtitle: Text(
-                                  'For the Fair that blew away',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
+                                subtitle: Text('For the Fair that blew away', style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 visualDensity: VisualDensity.compact,
                                 value: '2024',
                               ),
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('High contrast'),
-                                subtitle: Text(
-                                    'For users with visual accessibility needs',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
+                                subtitle: Text('For users with visual accessibility needs', style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 visualDensity: VisualDensity.compact,
                                 value: 'highContrast',
                               ),
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Colour blind friendly'),
-                                subtitle: Text(
-                                  'For users with colour blindness',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
+                                subtitle: Text('For users with colour blindness', style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 visualDensity: VisualDensity.compact,
                                 value: 'colourBlindFriendly',
                               ),
@@ -373,21 +312,14 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           RichText(
                             text: TextSpan(
                               text: 'What does this mean?',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.tertiary,
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  HapticFeedback.lightImpact();
-                                  widget.analyticsService.logButtonTapped('analytics_explanation_settings');
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
-                                    ),
-                                  );
-                                },
+                              style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
+                              recognizer:
+                                  TapGestureRecognizer()
+                                    ..onTap = () {
+                                      HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService)));
+                                    },
                             ),
                           ),
                         ],
@@ -399,7 +331,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         await widget.analyticsService.setAnalyticsEnabled(value);
                         if (mounted) setState(() {});
                       },
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -416,16 +348,6 @@ class MyAppIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8.0),
-        child: Image.asset(
-          'assets/icons/icon.png',
-          fit: BoxFit.contain,
-        ),
-      ),
-    );
+    return SizedBox(width: 48, height: 48, child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/icons/icon.png', fit: BoxFit.contain)));
   }
 }

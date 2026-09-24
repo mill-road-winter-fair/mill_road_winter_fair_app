@@ -19,11 +19,7 @@ class TextImageRow extends StatelessWidget {
   const TextImageRow({super.key, required this.textSpan, required this.imagePath, required this.textWidthProportion, this.imageOnLeft = false});
 
   double _measureTextHeight(TextSpan textSpan, double maxWidth) {
-    final TextPainter textPainter = TextPainter(
-      text: textSpan,
-      maxLines: null,
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: maxWidth);
+    final TextPainter textPainter = TextPainter(text: textSpan, maxLines: null, textDirection: TextDirection.ltr)..layout(maxWidth: maxWidth);
     return textPainter.size.height;
   }
 
@@ -35,33 +31,18 @@ class TextImageRow extends StatelessWidget {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: imageOnLeft
-              ? [
-                  SizedBox(
-                    height: textHeight,
-                    width: constraints.maxWidth * (1 - textWidthProportion) - 2,
-                    child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerLeft),
-                  ),
-                  const Expanded(child: SizedBox()),
-                  SizedBox(
-                      width: constraints.maxWidth * textWidthProportion,
-                      child: Text.rich(
-                        textSpan,
-                      )),
-                ]
-              : [
-                  SizedBox(
-                      width: constraints.maxWidth * textWidthProportion,
-                      child: Text.rich(
-                        textSpan,
-                      )),
-                  const Expanded(child: SizedBox()),
-                  SizedBox(
-                    height: textHeight,
-                    width: constraints.maxWidth * (1 - textWidthProportion) - 2,
-                    child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerRight),
-                  ),
-                ],
+          children:
+              imageOnLeft
+                  ? [
+                    SizedBox(height: textHeight, width: constraints.maxWidth * (1 - textWidthProportion) - 2, child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerLeft)),
+                    const Expanded(child: SizedBox()),
+                    SizedBox(width: constraints.maxWidth * textWidthProportion, child: Text.rich(textSpan)),
+                  ]
+                  : [
+                    SizedBox(width: constraints.maxWidth * textWidthProportion, child: Text.rich(textSpan)),
+                    const Expanded(child: SizedBox()),
+                    SizedBox(height: textHeight, width: constraints.maxWidth * (1 - textWidthProportion) - 2, child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerRight)),
+                  ],
         );
       },
     );
@@ -86,18 +67,9 @@ TableRow eventRow(BuildContext context, String eventTime, String eventTitle, [Li
     children: <Widget>[
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(eventTime, style: eventsTimeStyle, textAlign: TextAlign.right),
-          ),
-        ),
+        child: Container(padding: const EdgeInsets.fromLTRB(4, 4, 2, 4), child: FittedBox(fit: BoxFit.scaleDown, child: Text(eventTime, style: eventsTimeStyle, textAlign: TextAlign.right))),
       ),
-      TableCell(
-        verticalAlignment: TableCellVerticalAlignment.top,
-        child: Container(padding: const EdgeInsets.fromLTRB(2, 4, 2, 4), child: Text.rich(TextSpan(children: allTitleSpans))),
-      ),
+      TableCell(verticalAlignment: TableCellVerticalAlignment.top, child: Container(padding: const EdgeInsets.fromLTRB(2, 4, 2, 4), child: Text.rich(TextSpan(children: allTitleSpans)))),
     ],
   );
 }
@@ -150,10 +122,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    routeObserver.subscribe(
-      this,
-      ModalRoute.of(context)!,
-    );
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
   @override
@@ -215,15 +184,17 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text('About Mill Road Winter Fair'),
-          ),
+          leading:
+              Navigator.canPop(context)
+                  ? BackButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('back');
+                      Navigator.maybePop(context);
+                    },
+                  )
+                  : null,
+          title: const FittedBox(fit: BoxFit.scaleDown, child: Text('About Mill Road Winter Fair')),
         ),
         body: Container(
           width: min(MediaQuery.of(context).size.width - 8, 500),
@@ -271,10 +242,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                           child: Column(
                             children: [
                               Table(
-                                columnWidths: const <int, TableColumnWidth>{
-                                  0: FixedColumnWidth(150),
-                                  1: FixedColumnWidth(71),
-                                },
+                                columnWidths: const <int, TableColumnWidth>{0: FixedColumnWidth(150), 1: FixedColumnWidth(71)},
                                 defaultVerticalAlignment: TableCellVerticalAlignment.top,
                                 children: <TableRow>[
                                   TableRow(
@@ -284,188 +252,195 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                         verticalAlignment: TableCellVerticalAlignment.middle,
                                         child: Container(
                                           padding: const EdgeInsets.only(left: 4),
-                                          child: Text('Key events',
-                                              style: TextStyle(
-                                                  fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
+                                          child: Text('Key events', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
                                         ),
                                       ),
                                       TableCell(
                                         verticalAlignment: TableCellVerticalAlignment.top,
-                                        child: SizedBox(
-                                          width: 71,
-                                          child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft),
-                                        ),
+                                        child: SizedBox(width: 71, child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft)),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
                               Table(
-                                columnWidths: const <int, TableColumnWidth>{
-                                  0: FixedColumnWidth(44),
-                                  1: FixedColumnWidth(177),
-                                },
+                                columnWidths: const <int, TableColumnWidth>{0: FixedColumnWidth(44), 1: FixedColumnWidth(177)},
                                 defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                                 children: <TableRow>[
                                   eventRow(context, '09:00', 'Road closure starts'),
                                   eventRow(context, '10:30', 'Winter Fair opens'),
-                                  eventRow(
-                                    context,
-                                    '10:30',
-                                    'Fire engine pull\n',
-                                    [
-                                      TextSpan(
-                                          text: 'East Road',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
+                                  eventRow(context, '10:30', 'Fire engine pull\n', [
+                                    TextSpan(
+                                      text: 'East Road',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer:
+                                          TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               widget.analyticsService.logButtonTapped('eastRoad_hyperlink');
                                               Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => MapPage(
-                                                            listings: listings,
-                                                            onTabSelected: (_) => {},
-                                                            destinationId: '$aSimpleMarkerId Visit/Experience',
-                                                            destinationLatLng: const LatLng(52.202488, 0.131207),
-                                                            analyticsService: widget.analyticsService,
-                                                          )));
-                                            }),
-                                      TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                      TextSpan(
-                                          text: 'the bridge',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) => MapPage(
+                                                        listings: listings,
+                                                        onTabSelected: (_) => {},
+                                                        destinationId: '$aSimpleMarkerId Visit/Experience',
+                                                        destinationLatLng: const LatLng(52.202488, 0.131207),
+                                                        analyticsService: widget.analyticsService,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                    ),
+                                    TextSpan(text: ' to ', style: eventsSubtitleStyle),
+                                    TextSpan(
+                                      text: 'the bridge',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer:
+                                          TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               widget.analyticsService.logButtonTapped('theBridge_hyperlink');
                                               Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => MapPage(
-                                                            listings: listings,
-                                                            onTabSelected: (_) => {},
-                                                            destinationId: '$aSimpleMarkerId Visit/Experience',
-                                                            destinationLatLng: const LatLng(52.198682, 0.141051),
-                                                            analyticsService: widget.analyticsService,
-                                                          )));
-                                            }),
-                                    ],
-                                  ),
-                                  eventRow(
-                                    context,
-                                    '10:30',
-                                    'Opening ceremony\n',
-                                    [
-                                      TextSpan(
-                                          text: 'Ditchburn Gardens',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) => MapPage(
+                                                        listings: listings,
+                                                        onTabSelected: (_) => {},
+                                                        destinationId: '$aSimpleMarkerId Visit/Experience',
+                                                        destinationLatLng: const LatLng(52.198682, 0.141051),
+                                                        analyticsService: widget.analyticsService,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                    ),
+                                  ]),
+                                  eventRow(context, '10:30', 'Opening ceremony\n', [
+                                    TextSpan(
+                                      text: 'Ditchburn Gardens',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer:
+                                          TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               widget.analyticsService.logButtonTapped('ditchburnGardens_hyperlink');
                                               Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => MapPage(
-                                                            listings: listings,
-                                                            onTabSelected: (_) => {},
-                                                            destinationId: '$aSimpleMarkerId Performance',
-                                                            destinationLatLng: const LatLng(52.200389, 0.136465),
-                                                            analyticsService: widget.analyticsService,
-                                                          )));
-                                            }),
-                                    ],
-                                  ),
-                                  eventRow(
-                                    context,
-                                    '11:45',
-                                    'Parade\n',
-                                    [
-                                      TextSpan(
-                                          text: 'Salisbury Club',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) => MapPage(
+                                                        listings: listings,
+                                                        onTabSelected: (_) => {},
+                                                        destinationId: '$aSimpleMarkerId Performance',
+                                                        destinationLatLng: const LatLng(52.200389, 0.136465),
+                                                        analyticsService: widget.analyticsService,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                    ),
+                                  ]),
+                                  eventRow(context, '11:45', 'Parade\n', [
+                                    TextSpan(
+                                      text: 'Salisbury Club',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer:
+                                          TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               widget.analyticsService.logButtonTapped('salisburyClub_hyperlink');
                                               Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => MapPage(
-                                                            listings: listings,
-                                                            onTabSelected: (_) => {},
-                                                            destinationId: '$aSimpleMarkerId Performance',
-                                                            destinationLatLng: const LatLng(52.1970778, 0.1472252),
-                                                            analyticsService: widget.analyticsService,
-                                                          )));
-                                            }),
-                                      TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                      TextSpan(
-                                          text: 'Petersfield',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) => MapPage(
+                                                        listings: listings,
+                                                        onTabSelected: (_) => {},
+                                                        destinationId: '$aSimpleMarkerId Performance',
+                                                        destinationLatLng: const LatLng(52.1970778, 0.1472252),
+                                                        analyticsService: widget.analyticsService,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                    ),
+                                    TextSpan(text: ' to ', style: eventsSubtitleStyle),
+                                    TextSpan(
+                                      text: 'Petersfield',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer:
+                                          TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               widget.analyticsService.logButtonTapped('petersfield_hyperlink_1');
                                               Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => MapPage(
-                                                            listings: listings,
-                                                            onTabSelected: (_) => {},
-                                                            destinationId: '$aSimpleMarkerId Performance',
-                                                            destinationLatLng: const LatLng(52.202858, 0.132253),
-                                                            analyticsService: widget.analyticsService,
-                                                          )));
-                                            }),
-                                    ],
-                                  ),
-                                  eventRow(
-                                    context,
-                                    '15:40',
-                                    'Final parade\n',
-                                    [
-                                      TextSpan(
-                                          text: 'Gwydir Street',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) => MapPage(
+                                                        listings: listings,
+                                                        onTabSelected: (_) => {},
+                                                        destinationId: '$aSimpleMarkerId Performance',
+                                                        destinationLatLng: const LatLng(52.202858, 0.132253),
+                                                        analyticsService: widget.analyticsService,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                    ),
+                                  ]),
+                                  eventRow(context, '15:40', 'Final parade\n', [
+                                    TextSpan(
+                                      text: 'Gwydir Street',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer:
+                                          TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               widget.analyticsService.logButtonTapped('gwydirStreet_hyperlink');
                                               Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => MapPage(
-                                                            listings: listings,
-                                                            onTabSelected: (_) => {},
-                                                            destinationId: '$aSimpleMarkerId Performance',
-                                                            destinationLatLng: const LatLng(52.199627, 0.138407),
-                                                            analyticsService: widget.analyticsService,
-                                                          )));
-                                            }),
-                                      TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                      TextSpan(
-                                          text: 'Petersfield',
-                                          style: eventsSubtitleLinkStyle,
-                                          recognizer: TapGestureRecognizer()
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) => MapPage(
+                                                        listings: listings,
+                                                        onTabSelected: (_) => {},
+                                                        destinationId: '$aSimpleMarkerId Performance',
+                                                        destinationLatLng: const LatLng(52.199627, 0.138407),
+                                                        analyticsService: widget.analyticsService,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                    ),
+                                    TextSpan(text: ' to ', style: eventsSubtitleStyle),
+                                    TextSpan(
+                                      text: 'Petersfield',
+                                      style: eventsSubtitleLinkStyle,
+                                      recognizer:
+                                          TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
                                               widget.analyticsService.logButtonTapped('petersfield_hyperlink_2');
                                               Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) => MapPage(
-                                                            listings: listings,
-                                                            onTabSelected: (_) => {},
-                                                            destinationId: '$aSimpleMarkerId Performance',
-                                                            destinationLatLng: const LatLng(52.202858, 0.132253),
-                                                            analyticsService: widget.analyticsService,
-                                                          )));
-                                            }),
-                                    ],
-                                  ),
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder:
+                                                      (context) => MapPage(
+                                                        listings: listings,
+                                                        onTabSelected: (_) => {},
+                                                        destinationId: '$aSimpleMarkerId Performance',
+                                                        destinationLatLng: const LatLng(52.202858, 0.132253),
+                                                        analyticsService: widget.analyticsService,
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                    ),
+                                  ]),
                                   eventRow(context, '16:15', 'All trading ends'),
                                   eventRow(context, '16:30', 'Winter Fair ends'),
                                   eventRow(context, '17:30', 'Roads fully open'),
@@ -475,10 +450,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                           ),
                         ),
                         const Expanded(child: SizedBox()),
-                        SizedBox(
-                          width: 70,
-                          child: Image.asset("assets/aboutPage/MRWF25_trafficlights.png", fit: BoxFit.fill, width: 70),
-                        ),
+                        SizedBox(width: 70, child: Image.asset("assets/aboutPage/MRWF25_trafficlights.png", fit: BoxFit.fill, width: 70)),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -492,9 +464,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                           const TextSpan(text: ''),
                           // Build sponsor spans with separators
                           ...sponsorSpans,
-                          const TextSpan(
-                              text:
-                                  'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
+                          const TextSpan(text: 'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the Mill Road Traders Association.'),
                         ],
                       ),
                       imagePath: "assets/aboutPage/MRWF25_people_juggle.png",
@@ -502,10 +472,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       imageOnLeft: true,
                     ),
                     const SizedBox(height: 12),
-                    FittedBox(
-                      fit: BoxFit.fill,
-                      child: Image.asset("assets/aboutPage/MRWF25_sponsor_logos.png"),
-                    ),
+                    FittedBox(fit: BoxFit.fill, child: Image.asset("assets/aboutPage/MRWF25_sponsor_logos.png")),
                     const SizedBox(height: 16),
                   ],
                 ), // Add event details here

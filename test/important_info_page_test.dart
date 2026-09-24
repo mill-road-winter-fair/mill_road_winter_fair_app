@@ -70,13 +70,10 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
-      await tester.pumpWidget(MyApp(
-        firstExecution: false,
-        analyticsService: FakeAnalyticsService(),
-      ));
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await settle(tester);
 
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
@@ -116,16 +113,9 @@ void main() {
     });
 
     testWidgets('email hyperlink opens the contact dialog', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-          home: ImportantInfoPage(
-        analyticsService: FakeAnalyticsService(),
-      )));
+      await tester.pumpWidget(MaterialApp(home: ImportantInfoPage(analyticsService: FakeAnalyticsService())));
 
-      final emailParagraph = tester.widget<Text>(
-        find.byWidgetPredicate(
-          (widget) => widget is Text && widget.textSpan?.toPlainText().contains('Email addresses for the Fair') == true,
-        ),
-      );
+      final emailParagraph = tester.widget<Text>(find.byWidgetPredicate((widget) => widget is Text && widget.textSpan?.toPlainText().contains('Email addresses for the Fair') == true));
       final paragraphSpan = emailParagraph.textSpan as TextSpan;
       final linkSpan = paragraphSpan.children!.whereType<TextSpan>().singleWhere((span) => span.text == 'here');
 

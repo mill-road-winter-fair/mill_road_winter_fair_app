@@ -83,10 +83,7 @@ List<Map<String, dynamic>> _parseListings(String body) {
       if (cells[i] == null) cells[i] = '';
     }
 
-    return Map<String, dynamic>.fromIterables(
-      headers.cast<String>(),
-      cells.cast<dynamic>(),
-    );
+    return Map<String, dynamic>.fromIterables(headers.cast<String>(), cells.cast<dynamic>());
   }).toList();
 }
 

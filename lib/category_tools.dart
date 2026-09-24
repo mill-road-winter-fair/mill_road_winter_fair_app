@@ -48,8 +48,8 @@ String getCategory(Map<String, dynamic> listing) {
     if (listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') {
       return 'Performance';
     }
-    if ((listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') 
-        && listing['groupParent'] == 'TRUE') {
+    if ((listing['performanceMusic'] == 'TRUE' || listing['performanceChildrens'] == 'TRUE' || listing['performanceDance'] == 'TRUE' || listing['performanceOther'] == 'TRUE') &&
+        listing['groupParent'] == 'TRUE') {
       return 'Group-Performance';
     }
     if (listing['visitExperience'] == 'TRUE') {
