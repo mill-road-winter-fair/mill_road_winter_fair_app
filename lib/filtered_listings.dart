@@ -1050,7 +1050,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Widget _buildSortingDropdown(BuildContext context, bool isPerformance) {
     final colorScheme = Theme.of(context).colorScheme;
     final dropdownStyle = const ButtonStyle(
-      textStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 13)),
+      textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)),
     );
     return Container(
       key: const ValueKey('sortingdropdown'),
@@ -1064,7 +1064,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   : preferredSortingMethod,
           label: const Text(
             "Sort by",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
           leadingIcon: const Icon(Icons.sort),
           textStyle: TextStyle(
@@ -1123,7 +1123,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Widget _buildFilteringDropdown(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final dropdownStyle = const ButtonStyle(
-      textStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 13)),
+      textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)),
     );
     return Container(
       key: const ValueKey('filteringdropdown'),

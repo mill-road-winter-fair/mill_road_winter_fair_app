@@ -499,15 +499,15 @@ void displayAppShareDialog(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
                   'Share this app',
                 ),
                 const Text(
-                  style: const TextStyle(fontSize: 14.0),
+                  style: TextStyle(fontSize: 14.0),
                   'This QR code links to a web page allowing someone to install the iOS or Android version of this app.',
                 ),
                 const Text(
-                  style: const TextStyle(fontSize: 14.0),
+                  style: TextStyle(fontSize: 14.0),
                   'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.',
                 ),
                 Align(

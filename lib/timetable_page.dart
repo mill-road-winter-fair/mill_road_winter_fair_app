@@ -978,9 +978,9 @@ class _TimetablePageState extends State<TimetablePage> {
                                                   borderRadius:
                                                       const BorderRadius.only(
                                                         topLeft:
-                                                            const Radius.circular(4),
+                                                            Radius.circular(4),
                                                         topRight:
-                                                            const Radius.circular(4),
+                                                            Radius.circular(4),
                                                       ),
                                                 ),
                                                 width:
