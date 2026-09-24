@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:mill_road_winter_fair_app/date_time_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
@@ -55,8 +57,12 @@ Future<void> main() async {
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((value) => runApp(RootWidget(firstExecution: firstExecution, analyticsService: analyticsService)));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
+        providers: [
+          Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
+        ],
+        child: RootWidget(firstExecution: firstExecution, analyticsService: analyticsService),
+      )));
 }
 
 FirebaseOptions firebaseOptionsForBuildMode({required bool isRelease}) {

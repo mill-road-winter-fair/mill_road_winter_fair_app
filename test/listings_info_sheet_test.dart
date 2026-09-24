@@ -1,3 +1,4 @@
+import 'package:provider/provider.dart';
 import 'dart:io';
 import 'fixed_date_time_provider.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +12,10 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 
 void main() {
-    // Mocking DateTime.now()
-    final dateTimeProvider = FixedDateTimeProvider(
-      DateTime(2026, 12, 5, 21, 15),
-    );
+  // Mocking DateTime.now()
+  final dateTimeProvider = FixedDateTimeProvider(
+    DateTime(2026, 12, 5, 21, 15),
+  );
 
   LatLng currentLatLng = const LatLng(52.199174, 0.140929);
   LatLng destinationLatLng = const LatLng(52.199687, 0.138813);
@@ -43,32 +44,34 @@ void main() {
     VoidCallback? onFavouriteTapped,
     required DateTimeProvider dateTimeProvider,
   }) {
-    return MaterialApp(
-      home: Scaffold(
-        body: SpecificListingInfoSheet(
-          listingId: 'test-listing',
-          cancelled: cancelled,
-          brickAndMortar: brickAndMortar,
-          emoji: emoji,
-          title: title,
-          subtitle: subtitle,
-          location: location,
-          description: description,
-          email: email,
-          website: website,
-          phoneNumber: phoneNumber,
-          imageURL: imageURL,
-          startTime: startTime,
-          endTime: endTime,
-          approxDistance: approxDistance,
-          detailsVisible: detailsVisible,
-          onGetDirections: onGetDirections,
-          listingFavourited: listingFavourited,
-          onDetailsTapped: onDetailsTapped,
-          onFavouriteTapped: onFavouriteTapped,
-          inDialog: false,
-          analyticsService: FakeAnalyticsService(),
-          dateTimeProvider: dateTimeProvider,
+    return Provider<DateTimeProvider>.value(
+      value: dateTimeProvider,
+      child: MaterialApp(
+        home: Scaffold(
+          body: SpecificListingInfoSheet(
+            listingId: 'test-listing',
+            cancelled: cancelled,
+            brickAndMortar: brickAndMortar,
+            emoji: emoji,
+            title: title,
+            subtitle: subtitle,
+            location: location,
+            description: description,
+            email: email,
+            website: website,
+            phoneNumber: phoneNumber,
+            imageURL: imageURL,
+            startTime: startTime,
+            endTime: endTime,
+            approxDistance: approxDistance,
+            detailsVisible: detailsVisible,
+            onGetDirections: onGetDirections,
+            listingFavourited: listingFavourited,
+            onDetailsTapped: onDetailsTapped,
+            onFavouriteTapped: onFavouriteTapped,
+            inDialog: false,
+            analyticsService: FakeAnalyticsService(),
+          ),
         ),
       ),
     );

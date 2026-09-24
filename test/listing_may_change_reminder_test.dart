@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -55,12 +56,11 @@ void main() {
       onTest = false;
       listingUpdateNoticeEnabled = true;
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: beforeFairDateTimeProvider);
 
       final analytics = RecordingNoticeAnalyticsService();
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
-        dateTimeProvider: beforeFairDateTimeProvider,
         analyticsService: analytics,
       );
       await tester.pumpAndSettle();
@@ -86,10 +86,9 @@ void main() {
       listingUpdateNoticeEnabled = true;
       final analytics = RecordingNoticeAnalyticsService();
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: beforeFairDateTimeProvider);
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
-        dateTimeProvider: beforeFairDateTimeProvider,
         analyticsService: analytics,
       );
       await tester.pumpAndSettle();
@@ -117,16 +116,15 @@ void main() {
         onTest = false;
         listingUpdateNoticeEnabled = false;
 
-        await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
-        final context = tester.element(find.byType(SizedBox));
+        await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: beforeFairDateTimeProvider);
 
         for (final (noticeDate, expectedTitle) in [
           (fairDate, 'It’s the day of the Fair!'),
           (fairDate.add(const Duration(days: 1)), 'Thank you!'),
         ]) {
+          await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: FixedDateTimeProvider(noticeDate));
           final showNotice = ListingUpdateNotifier.maybeShowNotice(
-            context,
-            dateTimeProvider: FixedDateTimeProvider(noticeDate),
+            tester.element(find.byType(SizedBox)),
             analyticsService: FakeAnalyticsService(),
           );
           await tester.pumpAndSettle();
@@ -152,11 +150,10 @@ void main() {
       onTest = false;
       listingUpdateNoticeEnabled = true;
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: beforeFairDateTimeProvider);
 
       await ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
-        dateTimeProvider: FixedDateTimeProvider(noticeDate),
         analyticsService: FakeAnalyticsService(),
       );
       await tester.pumpAndSettle();
@@ -173,13 +170,13 @@ void main() {
       onTest = false;
       listingUpdateNoticeEnabled = true;
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: beforeFairDateTimeProvider);
       final context = tester.element(find.byType(SizedBox));
       final analytics = RecordingNoticeAnalyticsService();
 
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: FixedDateTimeProvider(fairDate));
       final showFairDayNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        dateTimeProvider: FixedDateTimeProvider(fairDate),
         analyticsService: analytics,
       );
       await tester.pumpAndSettle();
@@ -190,9 +187,9 @@ void main() {
       await showFairDayNotice;
 
       final afterFair = fairDate.add(const Duration(days: 1));
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: FixedDateTimeProvider(afterFair));
       final showAfterFairNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        dateTimeProvider: FixedDateTimeProvider(afterFair),
         analyticsService: analytics,
       );
       await tester.pumpAndSettle();

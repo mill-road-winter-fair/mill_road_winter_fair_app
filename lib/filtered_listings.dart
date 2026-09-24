@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -24,7 +25,6 @@ class FilteredListingsPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
   final Function(String?) onSubfilterChange;
-  final DateTimeProvider dateTimeProvider;
 
   const FilteredListingsPage({
     required this.analyticsService,
@@ -33,7 +33,6 @@ class FilteredListingsPage extends StatefulWidget {
     required this.onSubfilterChange,
     required this.listings,
     required this.onTabSelected,
-    this.dateTimeProvider = const SystemDateTimeProvider(),
     super.key,
   });
 
@@ -42,6 +41,14 @@ class FilteredListingsPage extends StatefulWidget {
 }
 
 class FilteredListingsPageState extends State<FilteredListingsPage> {
+  late DateTimeProvider _dateTimeProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _dateTimeProvider = context.watch<DateTimeProvider>();
+  }
+
   List<Map<String, dynamic>> filteredListings = [];
   bool isRefreshing = false;
   bool useFallbackSorting = false;
@@ -280,7 +287,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   int findFirstNextListingIndex(List filteredListings) {
     for (int i = 0; i < filteredListings.length; i++) {
-      if (!hasEventEnded(filteredListings[i]['endTime'], widget.dateTimeProvider)) {
+      if (!hasEventEnded(filteredListings[i]['endTime'], _dateTimeProvider)) {
         return i;
       }
     }
@@ -380,7 +387,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 5: Calculate number of visible listings for scroll thumb
     if (_hidePastListings) {
-      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], widget.dateTimeProvider)).length;
+      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], _dateTimeProvider)).length;
     } else {
       numberOfVisibleListings = filteredListings.length;
     }
@@ -404,7 +411,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             onPressed: () {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('listings_scroll_to_now');
-              if (isItEventDay(widget.dateTimeProvider)) {
+              if (isItEventDay(_dateTimeProvider)) {
                 if (firstNextListingIndex < 0) {
                   // we may not be on Sort by Time, or the Fair may have recently started
                   SortingMethod savedSortingMethod = preferredSortingMethod;
@@ -417,7 +424,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   } else {
                     filteredListings = filteredListingsTemp;
                     if (_hidePastListings) {
-                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], widget.dateTimeProvider)).length;
+                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], _dateTimeProvider)).length;
                     } else {
                       numberOfVisibleListings = filteredListings.length;
                     }
@@ -447,7 +454,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               Icons.update,
-              color: (isItEventDay(widget.dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+              color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         if (isShowingJustPerformance || filterCategory == 'favourite')
@@ -458,7 +465,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             onPressed: () {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
-              if (isItEventDay(widget.dateTimeProvider)) {
+              if (isItEventDay(_dateTimeProvider)) {
                 setState(() {
                   _hidePastListings = !_hidePastListings;
                   widget.analyticsService.logPreferenceSet('listings_hide_past', _hidePastListings.toString());
@@ -480,7 +487,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               (_hidePastListings) ? Icons.free_cancellation : Icons.event_busy,
-              color: (isItEventDay(widget.dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+              color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         IconButton(
@@ -613,13 +620,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                               final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
                               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                              if (!_hidePastListings || !hasEventEnded(listing['endTime'], widget.dateTimeProvider)) {
+                              if (!_hidePastListings || !hasEventEnded(listing['endTime'], _dateTimeProvider)) {
                                 // if this is the first visible item, capture its index
                                 firstVisibleIndex ??= index;
                               }
                               return Column(
                                 children: [
-                                  if (!_hidePastListings || !hasEventEnded(listing['endTime'], widget.dateTimeProvider))
+                                  if (!_hidePastListings || !hasEventEnded(listing['endTime'], _dateTimeProvider))
                                     Container(
                                         width: constraints.maxWidth - 10,
                                         decoration: BoxDecoration(
@@ -662,10 +669,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           },
                                           analyticsService: widget.analyticsService,
                                           inDialog: false,
-                                          dateTimeProvider: widget.dateTimeProvider,
                                         )),
                                   // separator except after last item
-                                  if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime'], widget.dateTimeProvider))) SizedBox(height: 8),
+                                  if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime'], _dateTimeProvider))) SizedBox(height: 8),
                                 ],
                               );
                             },

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -21,7 +22,6 @@ class TimetablePage extends StatefulWidget {
   final bool onlyNowOrSoon;
   final bool? filteredMusicOrNot;
   final AnalyticsService analyticsService;
-  final DateTimeProvider dateTimeProvider;
   const TimetablePage({
     required this.theEvents,
     required this.onTabSelected,
@@ -30,7 +30,6 @@ class TimetablePage extends StatefulWidget {
     required this.onlyNowOrSoon,
     this.filteredMusicOrNot,
     required this.analyticsService,
-    this.dateTimeProvider = const SystemDateTimeProvider(),
     super.key,
   });
   @override
@@ -38,6 +37,7 @@ class TimetablePage extends StatefulWidget {
 }
 
 class _TimetablePageState extends State<TimetablePage> {
+  late DateTimeProvider _dateTimeProvider;
   late ScrollController _horizontalScrollController;
   late ScrollController _verticalScrollController;
   final TextEditingController _searchController = TextEditingController();
@@ -95,6 +95,7 @@ class _TimetablePageState extends State<TimetablePage> {
   @override
   // so app knows if the device has been rotated, and can restore any previous scroll/sizing
   void didChangeDependencies() {
+    _dateTimeProvider = context.watch<DateTimeProvider>();
     debugPrint('_TimetablePageState didChangeDependencies called');
     final Orientation currentOrientation = MediaQuery.orientationOf(context);
     if (_deviceOrientationSaved != null && currentOrientation != _deviceOrientationSaved) {
@@ -140,7 +141,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void startClockUpdates(VoidCallback tick) {
-    final now = widget.dateTimeProvider.now();
+    final now = _dateTimeProvider.now();
     final delay = Duration(seconds: (60 / _dayPixelsPerMinute).toInt());
     final initialDelay = delay - Duration(seconds: now.second, milliseconds: now.millisecond);
     _nowLineTimer?.cancel();
@@ -450,7 +451,7 @@ class _TimetablePageState extends State<TimetablePage> {
       );
     }
 
-    final now = widget.dateTimeProvider.now();
+    final now = _dateTimeProvider.now();
 
     if (widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
       // refilter to whole day or just now or soon; only do this if changed
@@ -502,7 +503,7 @@ class _TimetablePageState extends State<TimetablePage> {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_category_filter');
             _toggleFilteredMusicOrNot();
-            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, widget.dateTimeProvider.now());
+            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
           },
           icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
         ),
@@ -514,14 +515,14 @@ class _TimetablePageState extends State<TimetablePage> {
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_now_or_soon_toggle');
-            (isItEventDay(widget.dateTimeProvider))
+            (isItEventDay(_dateTimeProvider))
                 ? _toggleOnlyNowOrSoon()
                 : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway',
                     fgColour: colorScheme.error, analyticsService: widget.analyticsService);
           },
           icon: Icon(
             (widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule,
-            color: (isItEventDay(widget.dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
+            color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
           ),
         ),
         IconButton(
@@ -539,7 +540,7 @@ class _TimetablePageState extends State<TimetablePage> {
                 _searchAnalyticsTimer?.cancel();
                 _searchQuery = '';
                 _searchController.clear();
-                theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, widget.dateTimeProvider.now());
+                theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
               }
             });
           },
@@ -652,7 +653,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                         _searchQuery = '';
                                         _searchController.clear();
                                         theFilteredEvents = filterEventsAndComputeDefaults(
-                                            thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, widget.dateTimeProvider.now());
+                                            thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
                                       });
                                     },
                                   ),
@@ -662,7 +663,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                   setState(() {
                                     _searchQuery = value.toLowerCase();
                                     theFilteredEvents =
-                                        filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, widget.dateTimeProvider.now());
+                                        filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
                                   });
                                 },
                               ),
@@ -861,7 +862,6 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                               if (mounted) widget.analyticsService.setCurrentScreen('TimetablePage');
                                                                             },
                                                                             analyticsService: widget.analyticsService,
-                                                                            dateTimeProvider: widget.dateTimeProvider,
                                                                           );
                                                                         },
                                                                         child: Container(

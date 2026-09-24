@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/date_time_provider.dart';
@@ -15,7 +16,6 @@ class GroupListingInfoSheet extends StatelessWidget {
   final String startTime;
   final String endTime;
   final String approxDistance;
-  final DateTimeProvider dateTimeProvider;
 
   const GroupListingInfoSheet({
     required this.title,
@@ -23,7 +23,6 @@ class GroupListingInfoSheet extends StatelessWidget {
     required this.startTime,
     required this.endTime,
     required this.approxDistance,
-    this.dateTimeProvider = const SystemDateTimeProvider(),
     super.key,
   });
 
@@ -32,7 +31,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     debugPrint('GroupListingInfoSheet build() called');
 
     // Determine if the event has ended, update text style accordingly
-    final bool ended = hasEventEnded(endTime, dateTimeProvider);
+    final bool ended = hasEventEnded(endTime, context.watch<DateTimeProvider>());
     final timeStyle = TextStyle(
       fontSize: 14,
       color: Theme.of(context).colorScheme.onPrimary,
@@ -136,7 +135,6 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final Function onGetDirections;
   final bool inDialog;
   final AnalyticsService analyticsService;
-  final DateTimeProvider dateTimeProvider;
 
   const SpecificListingInfoSheet({
     required this.listingId,
@@ -161,7 +159,6 @@ class SpecificListingInfoSheet extends StatefulWidget {
     required this.onGetDirections,
     required this.inDialog,
     required this.analyticsService,
-    this.dateTimeProvider = const SystemDateTimeProvider(),
     super.key,
   });
 
@@ -192,7 +189,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     final subSubStyle = subStyle.copyWith(fontWeight: FontWeight.normal);
 
     // Determine if the event has ended, update text style accordingly
-    final bool ended = hasEventEnded(widget.endTime, widget.dateTimeProvider);
+    final bool ended = hasEventEnded(widget.endTime, context.watch<DateTimeProvider>());
     final timeStyle = subSubStyle.copyWith(
       color: ended ? Colors.red : Theme.of(context).colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
@@ -657,7 +654,6 @@ Future<void> showListingDetailsDialog(
   // final int? Function(PositionedEvent, int, int?) toggleAlertAction,
   Future<dynamic> Function() onGetDirections, {
   required AnalyticsService analyticsService,
-  required DateTimeProvider dateTimeProvider,
 }) async {
   debugPrint('showListingDetailsDialog called');
 
@@ -721,7 +717,6 @@ Future<void> showListingDetailsDialog(
                       },
                       inDialog: true,
                       analyticsService: analyticsService,
-                      dateTimeProvider: dateTimeProvider,
                     ),
                   ),
                 ),

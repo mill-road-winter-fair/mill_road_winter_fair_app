@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -65,7 +66,7 @@ void main() {
   });
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
+    await tester.pumpWithClock(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
       0, (index) => analytics.calls.add('navigate:$index'), analyticsService: analytics,
     ))));
     await tester.tap(find.text('Map'));
@@ -78,7 +79,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
+      await tester.pumpWithClock(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
         listingId: 'listing-123',
         cancelled: false, brickAndMortar: false, emoji: '', title: 'Listing', subtitle: '', location: '',
         description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
@@ -98,7 +99,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
+      await tester.pumpWithClock(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
         listingId: 'listing-456', cancelled: false, brickAndMortar: false, emoji: '', title: 'Another listing', subtitle: '', location: '',
         description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
         imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: true,
@@ -130,7 +131,7 @@ void main() {
   }
 
   testWidgets('settings logs taps and the new preference value', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: analytics)));
+    await tester.pumpWithClock(MaterialApp(home: SettingsPage(analyticsService: analytics)));
     analytics.calls.clear();
     await tester.tap(find.text('Imperial'));
     await tester.pumpAndSettle();
@@ -147,7 +148,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWithClock(MaterialApp(
       theme: appThemes['light'],
       home: AnalyticsExplanationPage(analyticsService: analytics),
     ));
@@ -173,7 +174,7 @@ void main() {
   });
 
   testWidgets('only the visible tab is tracked and returning from Settings restores it', (tester) async {
-    await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: analytics));
+    await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: analytics));
     await tester.pumpAndSettle();
     expect(analytics.calls.where((call) => call.startsWith('screen:')), ['screen:ChooserPage']);
     expect(analytics.calls, contains('consent_prompt'));
@@ -188,7 +189,7 @@ void main() {
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(analytics.calls.last, 'screen:MapPage');
-    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWithClock(const SizedBox());
     await tester.pumpAndSettle();
   });
 }

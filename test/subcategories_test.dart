@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -107,7 +108,7 @@ void main() {
         ];
         favouriteListingKeys.value = {...expectedSubcategories.keys, 'parent'};
         String? selected;
-        await tester.pumpWidget(MaterialApp(home: Scaffold(
+        await tester.pumpWithClock(MaterialApp(home: Scaffold(
           body: StatefulBuilder(builder: (context, setState) {
             return FilteredListingsPage(
               filterCategory: page,

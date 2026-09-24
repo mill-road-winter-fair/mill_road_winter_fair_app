@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,7 +29,7 @@ void main() {
 
   group('ImportantInfoPage', () {
     testWidgets('displays expected headings and content', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: ImportantInfoPage(analyticsService: FakeAnalyticsService())));
+      await tester.pumpWithClock(MaterialApp(home: ImportantInfoPage(analyticsService: FakeAnalyticsService())));
 
       // Verify headings
       expect(find.text('Important information'), findsOneWidget);
@@ -73,7 +74,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(
+      await tester.pumpWithClock(MyApp(
         firstExecution: false,
         analyticsService: FakeAnalyticsService(),
       ));
@@ -116,7 +117,7 @@ void main() {
     });
 
     testWidgets('email hyperlink opens the contact dialog', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWithClock(MaterialApp(
           home: ImportantInfoPage(
         analyticsService: FakeAnalyticsService(),
       )));
