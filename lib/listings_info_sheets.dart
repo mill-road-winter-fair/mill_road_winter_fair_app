@@ -433,14 +433,18 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     padding: const EdgeInsets.all(0),
                     elevation: 3,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                onPressed: () => shareListing(
-                  widget.title,
-                  widget.location,
-                  widget.startTime,
-                  widget.endTime,
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  shareListing(
+                    widget.title,
+                    widget.location,
+                    widget.startTime,
+                    widget.endTime,
                   context,
                   cancelled: widget.cancelled,
-                ),
+                );
+                  widget.analyticsService.logButtonTapped('share_listing', listingId: widget.listingId, listingName: widget.title);
+                },
                 child: (Platform.isAndroid)
                     ? const Icon(Icons.share, semanticLabel: 'Share listing')
                     : const Icon(Icons.ios_share, semanticLabel: 'Share listing'),
