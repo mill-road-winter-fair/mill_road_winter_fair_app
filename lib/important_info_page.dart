@@ -81,7 +81,10 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 240),
                   child:
-                      ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/hiVis_cropped.jpg', fit: BoxFit.fitWidth)),
+                      ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.asset('assets/importantInfoPage/hiVis_cropped.jpg',
+                              fit: BoxFit.fitWidth, semanticLabel: 'Mill Road Winter Fair stewards wearing high-visibility jackets')),
                 ),
                 const SizedBox(height: 20),
                 bulletPoint('Stewards wearing hi-vis jackets are available to assist you.'),
@@ -93,7 +96,9 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 250),
                   child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/cautionVehicles_cropped.jpg', fit: BoxFit.fitWidth)),
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.asset('assets/importantInfoPage/cautionVehicles_cropped.jpg',
+                          fit: BoxFit.fitWidth, semanticLabel: 'A caution sign warning that vehicles may be moving through the Fair')),
                 ),
                 const SizedBox(height: 20),
                 const Text('Caution – vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
@@ -111,7 +116,9 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 250),
                   child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/carousel01_cropped.jpg', fit: BoxFit.fitWidth)),
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.asset('assets/importantInfoPage/carousel01_cropped.jpg',
+                          fit: BoxFit.fitWidth, semanticLabel: 'Children riding a carousel at Mill Road Winter Fair')),
                 ),
                 const SizedBox(height: 20),
                 const Text('Coming with children?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),

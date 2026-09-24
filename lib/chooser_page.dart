@@ -52,6 +52,7 @@ class _ChooserPageState extends State<ChooserPage> {
       onTabSelected: widget.onTabSelected,
       appBarActions: [
         IconButton(
+          tooltip: 'About the Fair',
           icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
           onPressed: () {
             HapticFeedback.lightImpact();

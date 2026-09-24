@@ -397,6 +397,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         if (filterCategory == 'favourite' || isShowingJustPerformance)
           IconButton(
             key: nowOrSoonIconKey,
+            tooltip: 'Scroll to what is on now or starting soon',
             onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon', analyticsService: widget.analyticsService),
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -450,6 +451,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         if (isShowingJustPerformance || filterCategory == 'favourite')
           IconButton(
             key: hidePastIconKey,
+            tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
             onLongPress: () => showMiniPopup(context, hidePastIconKey,
                 (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
             onPressed: () {
@@ -482,6 +484,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           ),
         IconButton(
           key: searchIconKey,
+          tooltip: _isSearching ? 'Close listings search' : 'Search listings',
           color: colorScheme.onSecondary,
           onLongPress: () =>
               showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar', analyticsService: widget.analyticsService),
@@ -542,6 +545,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   trailing: [
                                     IconButton(
                                       iconSize: 20,
+                                      tooltip: _searchQuery.isEmpty ? 'Close search' : 'Clear search',
                                       icon: const Icon(Icons.close),
                                       onPressed: () {
                                         HapticFeedback.lightImpact();
