@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750));
+}
 
 void main() {
   // Indicate tests are running
@@ -21,6 +27,9 @@ void main() {
 
   group('AboutTheFairPage', () {
     testWidgets('back button and back gesture return to the last selected HomePage tab', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Minimal listings so pages render correctly
       listings = [
         {
@@ -35,9 +44,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -50,46 +63,46 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await settle(tester);
 
       // Obtain the HomePage state
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
 
       // 1) Select Food tab (index 1)
       await tester.tap(find.text('Listings'));
-      await tester.pumpAndSettle();
-      expect(homePageState.index, 2);
+      await settle(tester);
+      expect(homePageState.index, 3);
 
       // Open drawer and navigate to About the Fair
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('About the Fair'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(find.byType(AboutTheFairPage), findsOneWidget);
 
       // Tap the AppBar back button (leading) and verify we return to the Listings tab
       await tester.tap(find.byTooltip('Back'));
-      await tester.pumpAndSettle();
-      expect(homePageState.index, 2);
+      await settle(tester);
+      expect(homePageState.index, 3);
 
       // 2) Select Stalls tab (index 2)
       await tester.tap(find.text('Listings'));
-      await tester.pumpAndSettle();
-      expect(homePageState.index, 2);
+      await settle(tester);
+      expect(homePageState.index, 3);
 
       // Open drawer and navigate to About the Fair again
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('About the Fair'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(find.byType(AboutTheFairPage), findsOneWidget);
 
       // Simulate system back / back gesture and verify we return to the Stalls tab
       await tester.pageBack();
-      await tester.pumpAndSettle();
-      expect(homePageState.index, 2);
+      await settle(tester);
+      expect(homePageState.index, 3);
     });
   });
 }

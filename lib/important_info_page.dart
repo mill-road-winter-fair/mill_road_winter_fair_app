@@ -3,12 +3,54 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class ImportantInfoPage extends StatelessWidget {
-  const ImportantInfoPage({super.key});
+class ImportantInfoPage extends StatefulWidget {
+  final AnalyticsService analyticsService;
+
+  const ImportantInfoPage({super.key, required this.analyticsService});
+
+  @override
+  State<ImportantInfoPage> createState() => _ImportantInfoPageState();
+}
+
+class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
+  @override
+  void initState() {
+    debugPrint('_ImportantInfoPageState initState() called');
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    debugPrint('_ImportantInfoPageState dispose() called');
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    widget.analyticsService.setCurrentScreen('ImportantInfoPage');
+  }
+
+  @override
+  void didPopNext() {
+    widget.analyticsService.setCurrentScreen('ImportantInfoPage');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +62,11 @@ class ImportantInfoPage extends StatelessWidget {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
+          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
+            HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('back');
+            Navigator.maybePop(context);
+          }) : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Important information'),
@@ -33,10 +80,8 @@ class ImportantInfoPage extends StatelessWidget {
               children: [
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 240),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.asset('assets/importantInfoPage/hiVis_cropped.jpg', fit: BoxFit.fitWidth),
-                  ),
+                  child:
+                      ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/hiVis_cropped.jpg', fit: BoxFit.fitWidth)),
                 ),
                 const SizedBox(height: 20),
                 bulletPoint('Stewards wearing hi-vis jackets are available to assist you.'),
@@ -48,16 +93,13 @@ class ImportantInfoPage extends StatelessWidget {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 250),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.asset('assets/importantInfoPage/cautionVehicles_cropped.jpg', fit: BoxFit.fitWidth),
-                  ),
+                      borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/cautionVehicles_cropped.jpg', fit: BoxFit.fitWidth)),
                 ),
                 const SizedBox(height: 20),
                 const Text('Caution – vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 15),
                 bulletPoint(
-                  'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',
-                ),
+                    'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
                 bulletPoint('Pedestrians should exercise particular care before the road is fully closed.', isBold: true),
                 bulletPoint('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.', isBold: true),
                 bulletPoint('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
@@ -69,9 +111,7 @@ class ImportantInfoPage extends StatelessWidget {
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 250),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.asset('assets/importantInfoPage/carousel01_cropped.jpg', fit: BoxFit.fitWidth),
-                  ),
+                      borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/carousel01_cropped.jpg', fit: BoxFit.fitWidth)),
                 ),
                 const SizedBox(height: 20),
                 const Text('Coming with children?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
@@ -85,18 +125,17 @@ class ImportantInfoPage extends StatelessWidget {
                   TextSpan(
                     children: [
                       const TextSpan(
-                        text:
-                            'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at ',
-                      ),
+                          text:
+                              'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                       TextSpan(
-                        text: 'www.millroadwinterfair.org',
-                        style: const TextStyle(decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            HapticFeedback.lightImpact();
-                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                          },
-                      ),
+                          text: 'www.millroadwinterfair.org',
+                          style: const TextStyle(decoration: TextDecoration.underline),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              HapticFeedback.lightImpact();
+                              widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
+                              launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                            }),
                       const TextSpan(text: '.'),
                     ],
                   ),
@@ -120,19 +159,19 @@ class ImportantInfoPage extends StatelessWidget {
                             children: [
                               const TextSpan(text: 'Email addresses for the Fair can be found '),
                               TextSpan(
-                                text: 'here',
-                                style: const TextStyle(decoration: TextDecoration.underline),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () async {
-                                    HapticFeedback.lightImpact();
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return contactUsDialog(context);
-                                      },
-                                    );
-                                  },
-                              ),
+                                  text: 'here',
+                                  style: const TextStyle(decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () async {
+                                      HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('mrwf_email_hyperlink');
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return contactUsDialog(context, analyticsService: widget.analyticsService);
+                                        },
+                                      );
+                                    }),
                               const TextSpan(text: '.'),
                             ],
                           ),
@@ -153,19 +192,19 @@ class ImportantInfoPage extends StatelessWidget {
                             children: [
                               const TextSpan(text: 'On the day, you can also phone '),
                               TextSpan(
-                                text: '07303 142689',
-                                style: const TextStyle(decoration: TextDecoration.underline),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () async {
-                                    HapticFeedback.lightImpact();
-                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                    if (await canLaunchUrl(phoneUri)) {
-                                      await launchUrl(phoneUri);
-                                    } else {
-                                      throw Exception('Could not dial 07303 142689');
-                                    }
-                                  },
-                              ),
+                                  text: '07303 142689',
+                                  style: const TextStyle(decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () async {
+                                      HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('mrwf_phone_hyperlink');
+                                      final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                      if (await canLaunchUrl(phoneUri)) {
+                                        await launchUrl(phoneUri);
+                                      } else {
+                                        throw Exception('Could not dial 07303 142689');
+                                      }
+                                    }),
                               const TextSpan(text: '.'),
                             ],
                           ),
@@ -178,8 +217,7 @@ class ImportantInfoPage extends StatelessWidget {
                 const Text('Our responsibilities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 10),
                 const Text(
-                  'The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.',
-                ),
+                    'The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
                 const SizedBox(height: 10),
               ],
             ),

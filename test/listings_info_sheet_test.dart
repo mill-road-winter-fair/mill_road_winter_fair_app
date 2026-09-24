@@ -1,10 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mill_road_winter_fair_app/as_the_crow_flies.dart';
-import 'package:mill_road_winter_fair_app/convert_distance_units.dart';
-import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 
 void main() {
   LatLng currentLatLng = const LatLng(52.199174, 0.140929);
@@ -36,6 +39,7 @@ void main() {
     return MaterialApp(
       home: Scaffold(
         body: SpecificListingInfoSheet(
+          listingId: 'test-listing',
           cancelled: cancelled,
           brickAndMortar: brickAndMortar,
           emoji: emoji,
@@ -55,6 +59,8 @@ void main() {
           listingFavourited: listingFavourited,
           onDetailsTapped: onDetailsTapped,
           onFavouriteTapped: onFavouriteTapped,
+          inDialog: false,
+          analyticsService: FakeAnalyticsService(),
         ),
       ),
     );
@@ -62,29 +68,28 @@ void main() {
 
   group('ListingsInfoSheet', () {
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createWidgetUnderTest(
-          cancelled: false,
-          brickAndMortar: false,
-          emoji: '🍩',
-          title: 'Glazed and Confused',
-          subtitle: 'Food • Doughnuts',
-          location: 'Gwydir St Car Park',
-          description: 'Nice buns',
-          email: 'sales@glazedandconfused.com',
-          website: 'https://www.glazedandconfused.com',
-          phoneNumber: '01223 111111',
-          imageURL: '',
-          startTime: '10:30',
-          endTime: '16:30',
-          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-          detailsVisible: true,
-          onGetDirections: () {},
-          listingFavourited: false,
-        ),
-      );
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        detailsVisible: true,
+        onGetDirections: () {},
+        listingFavourited: false,
+      ));
 
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
@@ -92,29 +97,28 @@ void main() {
     });
 
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createWidgetUnderTest(
-          cancelled: false,
-          brickAndMortar: false,
-          emoji: '🍩',
-          title: 'Glazed and Confused',
-          subtitle: 'Food • Doughnuts',
-          location: 'Gwydir St Car Park',
-          description: 'Nice buns',
-          email: 'sales@glazedandconfused.com',
-          website: '',
-          phoneNumber: '01223 111111',
-          imageURL: '',
-          startTime: '10:30',
-          endTime: '16:30',
-          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-          detailsVisible: true,
-          onGetDirections: () {},
-          listingFavourited: false,
-        ),
-      );
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: '',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        detailsVisible: true,
+        onGetDirections: () {},
+        listingFavourited: false,
+      ));
 
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
@@ -127,30 +131,28 @@ void main() {
     testWidgets('calls onFavouriteTapped when heart button is pressed', (WidgetTester tester) async {
       bool favouriteCalled = false;
 
-      await tester.pumpWidget(
-        createWidgetUnderTest(
-          cancelled: false,
-          brickAndMortar: false,
-          emoji: '🍩',
-          title: 'Glazed and Confused',
-          subtitle: 'Food • Doughnuts',
-          location: 'Gwydir St Car Park',
-          description: 'Nice buns',
-          email: 'sales@glazedandconfused.com',
-          website: 'https://www.glazedandconfused.com',
-          phoneNumber: '01223 111111',
-          imageURL: '',
-          startTime: '10:30',
-          endTime: '16:30',
-          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-          detailsVisible: false,
-          onGetDirections: () {},
-          listingFavourited: false,
-          onFavouriteTapped: () {
-            favouriteCalled = true;
-          },
-        ),
-      );
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: false,
+        onFavouriteTapped: () {
+          favouriteCalled = true;
+        },
+      ));
 
       // Find the heart icon button. It's an IconButton containing a FaIcon.
       final heartButton = find.byType(IconButton).first;
@@ -167,36 +169,34 @@ void main() {
       bool detailsToggled = false;
 
       // Initial state: details NOT visible
-      await tester.pumpWidget(
-        createWidgetUnderTest(
-          cancelled: false,
-          brickAndMortar: false,
-          emoji: '🍩',
-          title: 'Glazed and Confused',
-          subtitle: 'Food • Doughnuts',
-          location: 'Gwydir St Car Park',
-          description: 'Nice buns',
-          email: 'sales@glazedandconfused.com',
-          website: 'https://www.glazedandconfused.com',
-          phoneNumber: '01223 111111',
-          imageURL: '',
-          startTime: '10:30',
-          endTime: '16:30',
-          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-          detailsVisible: false,
-          onGetDirections: () {},
-          listingFavourited: false,
-          onDetailsTapped: () {
-            detailsToggled = true;
-          },
-        ),
-      );
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: false,
+        onDetailsTapped: () {
+          detailsToggled = true;
+        },
+      ));
 
       // Extra info should not be present
       expect(find.text('Nice buns'), findsNothing);
 
       // Tap the Details button
-      final detailsButton = find.text('Details');
+      final detailsButton = find.byIcon(Icons.info);
       expect(detailsButton, findsOneWidget);
       await tester.tap(detailsButton);
       await tester.pumpAndSettle();
@@ -205,28 +205,26 @@ void main() {
       expect(detailsToggled, true);
 
       // Now pump with detailsVisible = true to simulate the state change
-      await tester.pumpWidget(
-        createWidgetUnderTest(
-          cancelled: false,
-          brickAndMortar: false,
-          emoji: '🍩',
-          title: 'Glazed and Confused',
-          subtitle: 'Food • Doughnuts',
-          location: 'Gwydir St Car Park',
-          description: 'Nice buns',
-          email: 'sales@glazedandconfused.com',
-          website: 'https://www.glazedandconfused.com',
-          phoneNumber: '01223 111111',
-          imageURL: '',
-          startTime: '10:30',
-          endTime: '16:30',
-          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-          detailsVisible: true,
-          onGetDirections: () {},
-          listingFavourited: false,
-          onDetailsTapped: () {},
-        ),
-      );
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        detailsVisible: true,
+        onGetDirections: () {},
+        listingFavourited: false,
+        onDetailsTapped: () {},
+      ));
 
       // Extra info should now be present
       expect(find.text('Nice buns'), findsOneWidget);
@@ -236,31 +234,29 @@ void main() {
     testWidgets('calls onGetDirections when Get Directions button is pressed', (WidgetTester tester) async {
       bool directionsCalled = false;
 
-      await tester.pumpWidget(
-        createWidgetUnderTest(
-          cancelled: false,
-          brickAndMortar: false,
-          emoji: '🍩',
-          title: 'Glazed and Confused',
-          subtitle: 'Food • Doughnuts',
-          location: 'Gwydir St Car Park',
-          description: 'Nice buns',
-          email: 'sales@glazedandconfused.com',
-          website: 'https://www.glazedandconfused.com',
-          phoneNumber: '01223 111111',
-          imageURL: '',
-          startTime: '10:30',
-          endTime: '16:30',
-          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-          detailsVisible: false,
-          onGetDirections: () {
-            directionsCalled = true;
-          },
-          listingFavourited: false,
-        ),
-      );
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+        detailsVisible: false,
+        onGetDirections: () {
+          directionsCalled = true;
+        },
+        listingFavourited: false,
+      ));
 
-      final getDirectionsButton = find.text('Directions');
+      final getDirectionsButton = find.byIcon(Icons.directions_walk);
       expect(getDirectionsButton, findsOneWidget);
 
       await tester.tap(getDirectionsButton);
@@ -273,27 +269,25 @@ void main() {
     testWidgets('formatted with line-through and red text when endTime has passed', (WidgetTester tester) async {
       // Note: This test assumes hasEventEnded returns true for the given endTime.
       // This will be true if the test is run after the fair date/time.
-      await tester.pumpWidget(
-        createWidgetUnderTest(
-          cancelled: false,
-          brickAndMortar: false,
-          emoji: '🍩',
-          title: 'Glazed and Confused',
-          subtitle: 'Food • Doughnuts',
-          location: 'Gwydir St Car Park',
-          description: 'Nice buns',
-          email: 'sales@glazedandconfused.com',
-          website: 'https://www.glazedandconfused.com',
-          phoneNumber: '01223 111111',
-          imageURL: '',
-          startTime: '09:00',
-          endTime: '10:00', // Set to a time that has likely passed
-          approxDistance: '100m',
-          detailsVisible: false,
-          onGetDirections: () {},
-          listingFavourited: false,
-        ),
-      );
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: false,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '09:00',
+        endTime: '10:00', // Set to a time that has likely passed
+        approxDistance: '100m',
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: false,
+      ));
 
       final timeTextFinder = find.text('09:00—10:00');
       expect(timeTextFinder, findsOneWidget);
@@ -306,43 +300,176 @@ void main() {
       }
     });
 
-    testWidgets('formatted with line-through and red text when listing is cancelled', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        createWidgetUnderTest(
-          cancelled: true,
-          brickAndMortar: false,
-          emoji: '🍩',
-          title: 'Glazed and Confused',
-          subtitle: 'Food • Doughnuts',
-          location: 'Gwydir St Car Park',
-          description: 'Nice buns',
-          email: 'sales@glazedandconfused.com',
-          website: 'https://www.glazedandconfused.com',
-          phoneNumber: '01223 111111',
-          imageURL: '',
-          startTime: '10:30',
-          endTime: '16:30',
-          approxDistance: '100m',
-          detailsVisible: true,
-          onGetDirections: () {},
-          listingFavourited: false,
-        ),
-      );
+    testWidgets('formats cancelled listing with line-through text and a cancelled label', (WidgetTester tester) async {
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: true,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: '100m',
+        detailsVisible: true,
+        onGetDirections: () {},
+        listingFavourited: false,
+      ));
 
       // Title should have line-through
-      final titleFinder = find.text('🍩 Glazed and Confused');
+      final emojiFinder = find.text('🍩 ');
+      expect(emojiFinder, findsOneWidget);
+      expect(find.ancestor(of: emojiFinder, matching: find.byType(ColorFiltered)), findsOneWidget);
+      final Opacity emojiOpacity = tester.widget(find.ancestor(of: emojiFinder, matching: find.byType(Opacity)));
+      expect(emojiOpacity.opacity, 0.5);
+      final titleFinder = find.text('Glazed and Confused');
       expect(titleFinder, findsOneWidget);
       final Text titleWidget = tester.widget(titleFinder);
       expect(titleWidget.style?.decoration, TextDecoration.lineThrough);
 
-      // Times should be replaced by CANCELLED and be red
+      // Subtitle should retain its normal colour and have line-through
+      final Text subtitleWidget = tester.widget(find.text('Food • Doughnuts'));
+      final TextSpan subtitleSpan = subtitleWidget.textSpan! as TextSpan;
+      expect(subtitleSpan.style?.decoration, TextDecoration.lineThrough);
+      expect(subtitleSpan.style?.color, isNot(Colors.red));
+
+      // Times should be replaced by a rounded CANCELLED label using the action-button colours
       final cancelledTextFinder = find.text('CANCELLED');
-      expect(cancelledTextFinder, findsWidgets); // Might be more than one if both subtitle and body use it
+      expect(cancelledTextFinder, findsOneWidget);
       final Text cancelledTextWidget = tester.widget(cancelledTextFinder.first);
-      expect(cancelledTextWidget.style?.color, Colors.red);
+      final colorScheme = Theme.of(tester.element(cancelledTextFinder)).colorScheme;
+      expect(cancelledTextWidget.style?.color, colorScheme.onPrimary);
+      expect(cancelledTextWidget.style?.color, isNot(Colors.red));
+
+      final cancelledLabelFinder = find.ancestor(
+        of: cancelledTextFinder,
+        matching: find.byWidgetPredicate((widget) {
+          if (widget is! Container || widget.decoration is! BoxDecoration) return false;
+          final decoration = widget.decoration! as BoxDecoration;
+          return decoration.color == colorScheme.onSurfaceVariant && decoration.borderRadius == BorderRadius.circular(12);
+        }),
+      );
+      expect(cancelledLabelFinder, findsOneWidget);
+
+      await tester.tap(cancelledTextFinder);
+      await tester.pump();
+
+      expect(find.text('Originally 10:30–16:30'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 4));
+      expect(find.text('Originally 10:30–16:30'), findsNothing);
 
       // Description should have prefix removed
       expect(find.text('Nice buns'), findsOneWidget);
+    });
+
+    testWidgets('disables favourite and directions actions but leaves share enabled when listing is cancelled', (WidgetTester tester) async {
+      bool favouriteCalled = false;
+      bool directionsCalled = false;
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: true,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: '100m',
+        detailsVisible: false,
+        onGetDirections: () {
+          directionsCalled = true;
+        },
+        listingFavourited: false,
+        onFavouriteTapped: () {
+          favouriteCalled = true;
+        },
+      ));
+
+      final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
+      final FaIcon favouriteIcon = tester.widget(find.descendant(
+        of: find.byType(IconButton).first,
+        matching: find.byType(FaIcon),
+      ));
+      final ElevatedButton directionsButton = tester.widget(find.ancestor(
+        of: find.byIcon(Icons.directions_walk),
+        matching: find.byType(ElevatedButton),
+      ));
+      final Finder shareIcon = Platform.isAndroid ? find.byIcon(Icons.share) : find.byIcon(Icons.ios_share);
+      final ElevatedButton shareButton = tester.widget(find.ancestor(
+        of: shareIcon,
+        matching: find.byType(ElevatedButton),
+      ));
+
+      expect(favouriteButton.onPressed, isNull);
+      expect(favouriteIcon.color, Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).disabledColor);
+      expect(directionsButton.onPressed, isNull);
+      expect(shareButton.onPressed, isNotNull);
+
+      await tester.tap(find.byType(IconButton).first);
+      await tester.tap(find.byIcon(Icons.directions_walk));
+      await tester.pump();
+
+      expect(favouriteCalled, isFalse);
+      expect(directionsCalled, isFalse);
+    });
+
+    testWidgets('allows a cancelled listing to be unfavourited', (WidgetTester tester) async {
+      bool favouriteCalled = false;
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: true,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: '100m',
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: true,
+        onFavouriteTapped: () {
+          favouriteCalled = true;
+        },
+      ));
+
+      final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
+      final FaIcon favouriteIcon = tester.widget(find.descendant(
+        of: find.byType(IconButton).first,
+        matching: find.byType(FaIcon),
+      ));
+
+      expect(favouriteButton.onPressed, isNotNull);
+      expect(favouriteIcon.icon?.codePoint, FontAwesomeIcons.solidHeart.codePoint);
+      expect(favouriteIcon.icon?.fontFamily, FontAwesomeIcons.solidHeart.fontFamily);
+      expect(favouriteIcon.icon?.fontPackage, FontAwesomeIcons.solidHeart.fontPackage);
+      expect(
+        favouriteIcon.color,
+        Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).colorScheme.primary,
+      );
+
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pump();
+
+      expect(favouriteCalled, isTrue);
     });
   });
 }

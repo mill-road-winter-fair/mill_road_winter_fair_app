@@ -1,14 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:mill_road_winter_fair_app/important_info_page.dart';
-import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+class FakeUrlLauncher extends UrlLauncherPlatform {
+  final List<String> launchedUrls = [];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    launchedUrls.add(url);
+    return true;
+  }
+}
+
+Finder findDrawerSocialButton(int index) {
+  return find
+      .descendant(
+        of: find.byType(Drawer),
+        matching: find.byType(IconButton),
+      )
+      .at(index);
+}
 
 void main() {
   // We're on test
@@ -25,11 +51,15 @@ void main() {
 
   group('HomePage', () {
     testWidgets('displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -38,9 +68,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -53,9 +87,9 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
-      expect(find.text(fairName), findsOneWidget);
+      expect(find.text('Welcome'), findsOneWidget);
 
       expect(find.text('Home'), findsOneWidget);
       expect(find.text('Map'), findsOneWidget);
@@ -65,12 +99,16 @@ void main() {
     });
 
     testWidgets('Snowflake button in AppBar navigates to About the Fair page', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -79,9 +117,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -99,7 +141,7 @@ void main() {
       await loadSettings();
 
       // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await tester.pumpAndSettle();
 
       // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
@@ -121,11 +163,15 @@ void main() {
     });
 
     testWidgets('drawer displays expected widgets', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -134,9 +180,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -149,13 +199,13 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
 
       expect(find.byType(DrawerHeader), findsOneWidget);
-      expect(find.text(fairName), findsOneWidget);
+      expect(find.text('Welcome'), findsOneWidget);
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
@@ -163,15 +213,120 @@ void main() {
       expect(find.byType(IconButton), findsExactly(6));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('App guide'), findsOneWidget);
-      expect(find.text('About the app'), findsOneWidget);
+      expect(find.text('Share this app'), findsOneWidget);
+      expect(find.text('About this app'), findsOneWidget);
+    });
+
+    group('drawer external links', () {
+      final originalUrlLauncher = UrlLauncherPlatform.instance;
+      late FakeUrlLauncher fakeUrlLauncher;
+
+      setUp(() {
+        fakeUrlLauncher = FakeUrlLauncher();
+        UrlLauncherPlatform.instance = fakeUrlLauncher;
+      });
+
+      tearDown(() {
+        UrlLauncherPlatform.instance = originalUrlLauncher;
+      });
+
+      Future<void> openDrawer(WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: FairScaffold(
+              appBarTitle: 'Test',
+              body: const SizedBox(),
+              currentTab: 0,
+              onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byIcon(Icons.menu));
+        await tester.pumpAndSettle();
+      }
+
+      Future<void> expectButtonLaunches(
+        WidgetTester tester,
+        Finder button,
+        String expectedUrl,
+      ) async {
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+
+        expect(fakeUrlLauncher.launchedUrls, [expectedUrl]);
+      }
+
+      testWidgets(
+        'Visit our website button launches the Fair website',
+        (tester) async {
+          await openDrawer(tester);
+
+          await expectButtonLaunches(
+            tester,
+            find.text('Visit our website'),
+            'https://www.millroadwinterfair.org/',
+          );
+        },
+      );
+
+      testWidgets(
+        'Facebook button launches the Fair Facebook page',
+        (tester) async {
+          await openDrawer(tester);
+
+          await expectButtonLaunches(
+            tester,
+            findDrawerSocialButton(0),
+            'https://www.facebook.com/MillRoadWinterFair/',
+          );
+        },
+      );
+
+      testWidgets('X button launches the Fair X page', (tester) async {
+        await openDrawer(tester);
+
+        await expectButtonLaunches(
+          tester,
+          findDrawerSocialButton(1),
+          'https://x.com/millroadfair',
+        );
+      });
+
+      testWidgets(
+        'Instagram button launches the Fair Instagram page',
+        (tester) async {
+          await openDrawer(tester);
+
+          await expectButtonLaunches(
+            tester,
+            findDrawerSocialButton(2),
+            'https://www.instagram.com/millroadwinterfair/',
+          );
+        },
+      );
+
+      testWidgets('Flickr button launches the Fair Flickr page', (tester) async {
+        await openDrawer(tester);
+
+        await expectButtonLaunches(
+          tester,
+          findDrawerSocialButton(3),
+          'https://www.flickr.com/people/millroadwinterfair/',
+        );
+      });
     });
 
     testWidgets('navigates to AboutTheFairPage when About the Fair in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -180,9 +335,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -195,7 +354,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -207,11 +366,15 @@ void main() {
     });
 
     testWidgets('navigates to ImportantInfoPage when Important information in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -220,9 +383,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -235,7 +402,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -247,11 +414,15 @@ void main() {
     });
 
     testWidgets('navigates to SettingsPage when Settings in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -260,9 +431,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -275,7 +450,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -287,6 +462,9 @@ void main() {
     });
 
     testWidgets('navigates to WelcomeScreen/OnBoardingPage when App guide in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Set a realistic window size to avoid layout overflow in the test
       tester.view.physicalSize = const Size(1080, 2400);
       addTearDown(tester.view.resetPhysicalSize);
@@ -296,6 +474,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -304,9 +483,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -319,7 +502,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
@@ -334,12 +517,16 @@ void main() {
       expect(find.byType(OnBoardingPage), findsOneWidget);
     });
 
-    testWidgets('show aboutDialog when About the app in drawer is tapped', (WidgetTester tester) async {
+    testWidgets('show aboutDialog when About this app in drawer is tapped', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -348,9 +535,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -363,12 +554,12 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('About the app'));
+      await tester.tap(find.text('About this app'));
       await tester.pumpAndSettle();
 
       expect(find.text('Android app by Alexander Berridge'), findsOneWidget);
@@ -376,11 +567,15 @@ void main() {
     });
 
     testWidgets('BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -389,9 +584,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -404,7 +603,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(const MyApp());
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
@@ -413,24 +612,23 @@ void main() {
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
       expect(homePageState.index, 0);
 
-      await tester.tap(find.text('Map'));
+      await tester.tap(find.byIcon(Icons.map).first);
       await tester.pumpAndSettle();
-
       expect(homePageState.index, 1);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.text('Listings'));
+      await tester.tap(find.byIcon(Icons.list).first);
       await tester.pumpAndSettle();
-
-      expect(homePageState.index, 2);
-
-      await tester.tap(find.text('Timetable'));
-      await tester.pumpAndSettle();
-
       expect(homePageState.index, 3);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.text('Favourites'));
+      await tester.tap(find.byIcon(Icons.schedule).first);
       await tester.pumpAndSettle();
+      expect(homePageState.index, 2);
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
 
+      await tester.tap(find.byIcon(Icons.favorite).first);
+      await tester.pumpAndSettle();
       expect(homePageState.index, 4);
     });
 
@@ -438,7 +636,7 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
 
       // show the dialog
-      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context));
+      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context, analyticsService: FakeAnalyticsService()));
       await tester.pumpAndSettle();
 
       // Check for some known email addresses
@@ -460,12 +658,16 @@ void main() {
     });
 
     testWidgets('Favourites button in NavBar navigates to Favourites page', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -474,9 +676,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -493,20 +699,20 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       await loadSettings();
 
-      // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle();
+      // Set the mock listing as a favourite before the widget is built
+      favouriteListingKeys.value = {...favouriteListingKeys.value, '1'};
 
-      // Set the mock listing as a favourite
-      favouriteListingKeys.add('1');
+      // Pump MyApp which contains the AppBar with the snowflake button
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpAndSettle();
 
       // Tap the Favourites button the NavBar
       await tester.tap(find.byIcon(Icons.favorite));
       await tester.pumpAndSettle();
 
-      // Verify that AboutTheFairPage is now displayed
+      // Verify that the favourites page is displayed
       expect(find.byType(FilteredListingsPage), findsOneWidget);
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice (triggered in MapPage initState)
       await tester.pump(const Duration(seconds: 21));

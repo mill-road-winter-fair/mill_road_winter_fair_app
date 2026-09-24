@@ -1,17 +1,22 @@
-import 'dart:ui';
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> loadSettings() async {
   debugPrint('loadSettings called, onTest=$onTest');
   if (onTest == false) {
     // Load settings from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
+
+    // Get analytics preference status
+    usageAnalyticsEnabled = prefs.getBool('usageAnalyticsEnabled');
 
     // Get first execution status, default to true
     firstExecution = prefs.getBool('firstExecution') ?? true;
@@ -29,6 +34,12 @@ Future<void> loadSettings() async {
     // Set default road closure polygon as visible
     preferredRoadClosurePolygonVisible = prefs.getBool('preferredRoadClosurePolygonVisible') ?? true;
 
+    // Keep the listings-change notice enabled by default for each fair year.
+    listingUpdateNoticeEnabled = prefs.getBool(
+          'listingUpdateNoticeEnabled${fairDate.year}',
+        ) ??
+        true;
+
     // Set default sorting method as nearest (1 in the index)
     int savedSortingIndex = prefs.getInt('preferredSortingMethod') ?? 1;
     // Load preferred sorting method from shared preferences
@@ -42,40 +53,16 @@ Future<void> loadSettings() async {
     // Get the list of favourited listings
     final favouriteListingStrings = prefs.getStringList('favouritesList');
     if (favouriteListingStrings != null) {
-      favouriteListingKeys = favouriteListingStrings.toSet();
+      favouriteListingKeys.value = favouriteListingStrings.toSet();
     } else {
-      favouriteListingKeys = {};
+      favouriteListingKeys.value = {};
     }
 
-    // Detect system brightness
-    Brightness systemBrightness = PlatformDispatcher.instance.platformBrightness;
-
-    // Set initial theme and map style according to system brightness
-    String defaultTheme = systemBrightness == Brightness.light ? 'light' : 'dark';
-    String defaultMapStyle = systemBrightness == Brightness.dark ? darkMap : standardMap;
+    // Set initial theme and map style to change according to system brightness
+    String defaultTheme = 'auto';
     selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme;
-    mapStyle = prefs.getString('selectedMapStyle') ?? defaultMapStyle;
-
-    // We're currently storing the mapStyle as a string in SharedPreferences
-    // If we update the mapStyles at any point the user will not get the updated styles unless they change theme
-    // To get around this, whenever we load the settings we re-apply the map style
-    switch (selectedThemeKey) {
-      case 'light':
-        mapStyle = standardMap;
-        break;
-      case 'dark':
-        mapStyle = darkMap;
-        break;
-      case '2024':
-        mapStyle = retroMap;
-        break;
-      case 'highContrast':
-        mapStyle = darkMap;
-        break;
-      case 'colourBlindFriendly':
-        mapStyle = colourBlindMap;
-        break;
-    }
+    if (!appThemes.containsKey(selectedThemeKey) && selectedThemeKey != 'auto') selectedThemeKey = defaultTheme;
+    mapStyle = getMapStyleForThemeKey(selectedThemeKey);
 
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
@@ -91,24 +78,28 @@ Future<void> loadSettings() async {
     int savedMapStyleTypeIndex = 0;
     preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
     preferredRoadClosurePolygonVisible = true;
+    listingUpdateNoticeEnabled = true;
 
     selectedThemeKey = 'light';
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
 
     mapStyle = standardMap;
-    favouriteListingKeys = {};
+    favouriteListingKeys.value = {};
+
   }
 }
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final AnalyticsService analyticsService;
+
+  const SettingsPage({super.key, required this.analyticsService});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends State<SettingsPage> with RouteAware {
   // Scroll controller for the page's scrollable content so we can attach a visible scrollbar
   late ScrollController _settingsPageScrollController;
 
@@ -121,17 +112,45 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void dispose() {
     _settingsPageScrollController.dispose();
+    routeObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
+  }
+
+  @override
+  void didPush() {
+    widget.analyticsService.setCurrentScreen('SettingsPage');
+  }
+
+  @override
+  void didPopNext() {
+    widget.analyticsService.setCurrentScreen('SettingsPage');
   }
 
 // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
+    if (usageAnalyticsEnabled != null) {
+      await prefs.setBool('usageAnalyticsEnabled', usageAnalyticsEnabled!);
+    }
     await prefs.setString('selectedTheme', themeNotifier.value);
     await prefs.setString('selectedMapStyle', mapStyle);
     await prefs.setBool('preferredRoadClosurePolygonVisible', preferredRoadClosurePolygonVisible);
-    await prefs.setStringList('favouritesList', favouriteListingKeys.toList());
+    await prefs.setBool(
+      'listingUpdateNoticeEnabled${fairDate.year}',
+      listingUpdateNoticeEnabled,
+    );
+    await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
   Future<void> _changeTheme(String themeKey) async {
@@ -140,6 +159,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final settingLabelStyle = Theme.of(context).textTheme.titleMedium;
     return SafeArea(
       top: false,
       left: false,
@@ -147,6 +167,11 @@ class _SettingsPageState extends State<SettingsPage> {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
+          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
+            HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('back');
+            Navigator.maybePop(context);
+          }) : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Settings'),
@@ -171,15 +196,19 @@ class _SettingsPageState extends State<SettingsPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Distance units', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                        Text('Distance units', style: settingLabelStyle),
                         RadioGroup<DistanceUnits>(
                           groupValue: preferredDistanceUnits,
                           onChanged: (DistanceUnits? value) {
+                            if (value == null) return;
+                            HapticFeedback.selectionClick();
+                            widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
+                            widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
                             setState(() {
-                              HapticFeedback.selectionClick();
-                              preferredDistanceUnits = value!;
+                              preferredDistanceUnits = value;
                             });
                             _saveSettings();
+
                           },
                           child: Column(
                             children: [
@@ -224,37 +253,24 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                             ],
                           ),
-                        ),
+                        )
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Theme', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                        Text('Theme', style: settingLabelStyle),
                         RadioGroup<String>(
                           groupValue: themeNotifier.value,
                           onChanged: (value) {
                             HapticFeedback.selectionClick();
-                            selectedThemeKey = value!;
+                            widget.analyticsService.logButtonTapped('theme_preference_option');
+                            if (value == null) return;
+                            widget.analyticsService.logThemePreferenceSet(value);
+                            selectedThemeKey = value;
                             setState(() {
                               _changeTheme(value);
-                              switch (value) {
-                                case 'light':
-                                  mapStyle = standardMap;
-                                  break;
-                                case 'dark':
-                                  mapStyle = darkMap;
-                                  break;
-                                case '2024':
-                                  mapStyle = retroMap;
-                                  break;
-                                case 'highContrast':
-                                  mapStyle = darkMap;
-                                  break;
-                                case 'colourBlindFriendly':
-                                  mapStyle = colourBlindMap;
-                                  break;
-                              }
+                              mapStyle = getMapStyleForThemeKey(value);
                             });
                             _saveSettings();
                             mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
@@ -263,9 +279,22 @@ class _SettingsPageState extends State<SettingsPage> {
                             children: [
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
+                                title: const Text('Auto'),
+                                subtitle: Text(
+                                  'Follow the device’s light/dark setting',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                visualDensity: VisualDensity.compact,
+                                value: 'auto',
+                              ),
+                              RadioListTile<String>(
+                                activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Light'),
                                 subtitle: Text(
-                                  'The default for devices set to light mode',
+                                  'A bright theme using white pages',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -278,7 +307,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('Dark'),
                                 subtitle: Text(
-                                  'The default for devices set to dark mode',
+                                  'A subdued theme using black pages',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -289,7 +318,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               RadioListTile<String>(
                                 activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('2024 colour scheme'),
+                                title: const Text('2024 light scheme'),
                                 subtitle: Text(
                                   'For the Fair that blew away',
                                   style: TextStyle(
@@ -304,12 +333,12 @@ class _SettingsPageState extends State<SettingsPage> {
                                 activeColor: Theme.of(context).colorScheme.tertiary,
                                 title: const Text('High contrast'),
                                 subtitle: Text(
-                                  'For users with visual accessibility needs',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    'For users with visual accessibility needs',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
-                                ),
                                 visualDensity: VisualDensity.compact,
                                 value: 'highContrast',
                               ),
@@ -331,6 +360,46 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 16),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      activeThumbColor: Theme.of(context).colorScheme.tertiary,
+                      title: Text('Allow analytics', style: settingLabelStyle),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'),
+                          const SizedBox(height: 4),
+                          RichText(
+                            text: TextSpan(
+                              text: 'What does this mean?',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.tertiary,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
+                                    ),
+                                  );
+                                },
+                            ),
+                          ),
+                        ],
+                      ),
+                      value: usageAnalyticsEnabled ?? false,
+                      onChanged: (bool value) async {
+                        HapticFeedback.selectionClick();
+                        widget.analyticsService.logButtonTapped('analytics_preference_toggle');
+                        await widget.analyticsService.setAnalyticsEnabled(value);
+                        if (mounted) setState(() {});
+                      },
+                    )
                   ],
                 ),
               ),

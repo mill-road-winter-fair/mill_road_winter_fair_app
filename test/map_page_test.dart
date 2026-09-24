@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
@@ -34,9 +35,13 @@ void main() {
         'food': 'TRUE',
         'shopping': 'FALSE',
         'charityCommunityInfo': 'FALSE',
-        'performance': 'FALSE',
+        'performanceMusic': 'FALSE',
+        'performanceChildrens': 'FALSE',
+        'performanceDance': 'FALSE',
+        'performanceOther': 'FALSE',
         'visitExperience': 'FALSE',
         'service': 'FALSE',
+        'business': 'FALSE',
         'location': 'Fake Street',
         'description': '',
         'email': '',
@@ -60,9 +65,13 @@ void main() {
         'food': 'TRUE',
         'shopping': 'FALSE',
         'charityCommunityInfo': 'FALSE',
-        'performance': 'FALSE',
+        'performanceMusic': 'FALSE',
+        'performanceChildrens': 'FALSE',
+        'performanceDance': 'FALSE',
+        'performanceOther': 'FALSE',
         'visitExperience': 'FALSE',
         'service': 'FALSE',
+        'business': 'FALSE',
         'location': 'Fake Street',
         'description': 'Nice buns',
         'email': '',
@@ -86,9 +95,13 @@ void main() {
         'food': 'TRUE',
         'shopping': 'FALSE',
         'charityCommunityInfo': 'FALSE',
-        'performance': 'FALSE',
+        'performanceMusic': 'FALSE',
+        'performanceChildrens': 'FALSE',
+        'performanceDance': 'FALSE',
+        'performanceOther': 'FALSE',
         'visitExperience': 'FALSE',
         'service': 'FALSE',
+        'business': 'FALSE',
         'location': 'Implausible Avenue',
         'description': 'Cold rice',
         'email': '',
@@ -102,19 +115,49 @@ void main() {
     ];
   });
 
+  tearDown(() {
+    locationServicesEnabled = true;
+    locationPermission = LocationPermission.always;
+  });
+
   // Set up mocks
   late MapPageState mapPageState;
   setUp(() {
-    mapPageState = MapPage(listings: listings).createState();
+    mapPageState = MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}).createState();
   });
 
   group('MapPage', () {
+    testWidgets('does not enable the map location layer without permission', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
+      locationPermission = LocationPermission.deniedForever;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(
+              listings: listings,
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).myLocationEnabled, isFalse);
+    });
+
     testWidgets('all map buttons are present', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Build the MapPage widget
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -122,7 +165,7 @@ void main() {
 
       // Check the map buttons
       expect(find.byType(FloatingActionButton), findsExactly(5));
-      expect(find.byIcon(Icons.home), findsOneWidget);
+      expect(find.byIcon(Icons.home), findsExactly(2));
       expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
       expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
       expect(find.byIcon(Icons.filter_alt), findsOneWidget);
@@ -133,6 +176,9 @@ void main() {
     });
 
     testWidgets('Home button centres the map and resets filters if all were off', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Mock the MethodChannel for Google Maps to capture camera movements
       final List<MethodCall> methodCalls = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -147,7 +193,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -168,7 +214,7 @@ void main() {
       methodCalls.clear();
 
       // Tap the Home button to trigger centering and filter reset logic
-      await tester.tap(find.byIcon(Icons.home));
+      await tester.tap(find.byIcon(Icons.home).first);
       await tester.pumpAndSettle();
 
       // Verify that filters were reset to true
@@ -184,11 +230,14 @@ void main() {
     });
 
     testWidgets('map type button changes map type', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Build the MapPage widget
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -205,12 +254,15 @@ void main() {
       expect(mapPageState.mapType, MapType.hybrid);
 
       // Switch the map type back
-      await tester.tap(find.byIcon(Icons.map));
+      await tester.tap(find.byIcon(Icons.map).first);
       await tester.pumpAndSettle();
       expect(mapPageState.mapType, MapType.normal);
     });
 
     testWidgets('Compass button toggles map orientation between Adaptive and North-up', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Ensure we start in a known state before pumping the widget
       preferredMapOrientation = MapOrientation.adaptive;
 
@@ -218,7 +270,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -250,6 +302,9 @@ void main() {
     });
 
     testWidgets('tapping Road Closure legend opens road closures dialog', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Ensure we start in a known state
       preferredRoadClosurePolygonVisible = true;
 
@@ -257,7 +312,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -288,6 +343,9 @@ void main() {
     });
 
     testWidgets('tapping the Hide road closures text in the dialog hides the Road Closure polygon', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Set a realistic window size to avoid the dialog contents being off-screen
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -303,7 +361,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -331,6 +389,9 @@ void main() {
     });
 
     testWidgets('Road Closure filter toggles polygon visibility', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Ensure we start in a known state
       preferredRoadClosurePolygonVisible = true;
 
@@ -338,7 +399,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -372,11 +433,14 @@ void main() {
     });
 
     testWidgets('addMarker filters and adds marker based on filter settings', (tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Build the MapPage widget
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -412,6 +476,9 @@ void main() {
     });
 
     testWidgets('Adds markers, opens modal bottom sheet for group marker, and checks content', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Override user location global
       currentLatLng = const LatLng(52.199174, 0.140929);
 
@@ -419,7 +486,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -442,7 +509,8 @@ void main() {
       expect(find.text('Food'), findsOneWidget);
       expect(find.text('approx. 199 m'), findsOneWidget);
       // Specific marker content
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
@@ -450,6 +518,9 @@ void main() {
     });
 
     testWidgets('Adds markers, opens modal bottom sheet for specific marker, and checks content', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       // Override user location global
       currentLatLng = const LatLng(52.199174, 0.140929);
 
@@ -457,7 +528,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -474,7 +545,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check the text content in the bottom sheet
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
+      expect(find.text('🍣 '), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
@@ -483,6 +555,9 @@ void main() {
     });
 
     testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           "id": "1",
@@ -620,7 +695,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );
@@ -788,6 +863,9 @@ void main() {
     });
 
     testWidgets('hideAllMarkers clears all markers', (tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
@@ -802,9 +880,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -821,7 +903,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MapPage(listings: listings),
+            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
           ),
         ),
       );

@@ -1,33 +1,48 @@
-import 'dart:io';
-import 'dart:math';
-import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:flutter/gestures.dart';
-import 'package:mill_road_winter_fair_app/welcome_screen.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:mill_road_winter_fair_app/about_the_fair.dart';
-import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
+import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
-import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
+import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: ".env");
+  // Release builds always use the production Firebase project. Debug and
+  // profile builds use the development project.
+  try {
+    await Firebase.initializeApp(
+      options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
+    );
+    debugPrint('main(): Firebase initialized successfully');
+  } on FirebaseException catch (e) {
+    if (e.code == 'duplicate-app') {
+      // Firebase was already initialized (e.g., by native side).
+      debugPrint('main(): Firebase already initialized: ${e.message}');
+    } else {
+      rethrow;
+    }
+  }
+
   await loadSettings();
-  debugPrint('Settings loaded');
+  final analyticsService = FirebaseAnalyticsService();
+  await analyticsService.initialize();
 
   listings = await fetchListings(http.Client());
   debugPrint('Listings fetched: count = ${listings.length}');
@@ -40,20 +55,80 @@ Future<void> main() async {
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(const RootWidget()));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((value) => runApp(RootWidget(firstExecution: firstExecution, analyticsService: analyticsService)));
 }
 
-class RootWidget extends StatelessWidget {
-  const RootWidget({super.key});
+FirebaseOptions firebaseOptionsForBuildMode({required bool isRelease}) {
+  return isRelease ? prod.DefaultFirebaseOptions.currentPlatform : dev.DefaultFirebaseOptions.currentPlatform;
+}
+
+class RootWidget extends StatefulWidget {
+  final bool firstExecution;
+  final AnalyticsService analyticsService;
+  const RootWidget({super.key, required this.firstExecution, required this.analyticsService});
+
+  @override
+  State<RootWidget> createState() => _RootWidgetState();
+}
+
+class _RootWidgetState extends State<RootWidget> {
+  late bool _showWelcomeScreen;
+
+  @override
+  void initState() {
+    super.initState();
+    _showWelcomeScreen = widget.firstExecution;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return firstExecution ? const WelcomeScreen() : const MyApp();
+    return _showWelcomeScreen
+        ? WelcomeScreen(
+            analyticsService: widget.analyticsService,
+            onFinished: () => setState(() => _showWelcomeScreen = false),
+          )
+        : MyApp(firstExecution: false, analyticsService: widget.analyticsService);
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  final bool firstExecution;
+  final AnalyticsService analyticsService;
+  const MyApp({
+    super.key,
+    required this.firstExecution,
+    required this.analyticsService,
+  });
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+    if (selectedThemeKey == 'auto') {
+      final newMapStyle = getMapStyleForThemeKey(selectedThemeKey);
+      if (newMapStyle != mapStyle) {
+        mapStyle = newMapStyle;
+        mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
+        if (mounted) setState(() {});
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,510 +136,179 @@ class MyApp extends StatelessWidget {
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
       builder: (context, selectedThemeKey, _) {
-        debugPrint('Theme changed: $selectedThemeKey');
+        debugPrint('MyApp build theme changed: $selectedThemeKey');
+        final bool isAuto = selectedThemeKey == 'auto';
+        final ThemeMode resolvedThemeMode = isAuto
+            ? ThemeMode.system
+            : switch (selectedThemeKey) {
+                'dark' => ThemeMode.dark,
+                _ => ThemeMode.light,
+              };
+        final ThemeData baseTheme = appThemes[getEffectiveThemeKey(selectedThemeKey)] ?? appThemes['light']!;
+        final ThemeData darkTheme = appThemes['dark'] ?? appThemes['light']!;
+        mapStyle = getMapStyleForThemeKey(selectedThemeKey);
         return MaterialApp(
-          title: 'Mill Road Winter Fair',
-          theme: appThemes[selectedThemeKey],
-          home: HomePage(key: homePageKey),
+          title: fairName,
+          themeMode: resolvedThemeMode,
+          theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? baseTheme,
+          darkTheme: isAuto ? appThemes['dark'] : darkTheme,
+          home: HomePage(key: homePageKey, analyticsService: widget.analyticsService),
+          navigatorObservers: [
+            routeObserver,
+          ],
         );
       },
     );
   }
 }
 
-Widget contactUsDialog(BuildContext theBuildContext) {
-  final ScrollController emailDetailsDialogScrollController = ScrollController();
-
-  return Dialog(
-    insetPadding: EdgeInsets.all(10.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth.clamp(300.0, 500.0);
-        return ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: Padding(
-            padding: EdgeInsets.all(16.0 + ((MediaQuery.of(theBuildContext).size.height.toInt() - 500) / 50).toInt()),
-            child: Scrollbar(
-              controller: emailDetailsDialogScrollController,
-              thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
-              thickness: 4,
-              radius: const Radius.circular(8),
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: SingleChildScrollView(
-                  controller: emailDetailsDialogScrollController,
-                  primary: false,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('info@millroadwinterfair.org'),
-                      const SizedBox(height: 15),
-                      const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('volunteers@millroadwinterfair.org'),
-                      const SizedBox(height: 15),
-                      const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('events@millroadwinterfair.org'),
-                      const SizedBox(height: 15),
-                      const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('stalls@millroadwinterfair.org'),
-                      const SizedBox(height: 15),
-                      const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('it@millroadwinterfair.org'),
-                      const SizedBox(height: 15),
-                      const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('app@millroadwinterfair.org'),
-                      const SizedBox(height: 15),
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            const TextSpan(
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                              text: 'For any important enquiries on the day of the Fair please phone ',
-                            ),
-                            TextSpan(
-                              text: '07303\u{00A0}142689',
-                              style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () async {
-                                  final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                  if (await canLaunchUrl(phoneUri)) {
-                                    await launchUrl(phoneUri);
-                                  } else {
-                                    throw Exception('Could not dial 07303 142689');
-                                  }
-                                },
-                            ),
-                            const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 15),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                          },
-                          child: Text(
-                            'Close',
-                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    ),
-  );
-}
-
-Widget _buildEmailLink(String email) {
-  return InkWell(
-    onTap: () async {
-      HapticFeedback.lightImpact();
-      final Uri mailUri = Uri(scheme: 'mailto', path: email);
-      if (await canLaunchUrl(mailUri)) {
-        await launchUrl(mailUri);
-      } else {
-        throw Exception('Could not launch email client');
-      }
-    },
-    child: Text(
-      email,
-      style: const TextStyle(decoration: TextDecoration.underline),
-    ),
-  );
-}
-
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final AnalyticsService analyticsService;
+  const HomePage({super.key, required this.analyticsService});
 
   @override
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> with RouteAware {
   int index = 0;
+  // the following need to be in HomePageState to allow deep linking to configured pages
+  bool timetableOnlyNowOrSoon = false; // toggled on or off to show events now or in next hour
+  bool? timetableFilteredMusicOrNot; // toggled on (just music), off (all but music), null (all)
+  String? listingsSubfilterCategory; // all listings visible (null) or just the one category
+  int? mapNearestMarkerCount; // when opening the map, zoom in to this number nearby
 
-  PackageInfo _packageInfo = PackageInfo(
-    appName: 'Unknown',
-    packageName: 'Unknown',
-    version: 'Unknown',
-    buildNumber: 'Unknown',
-    buildSignature: 'Unknown',
-    installerStore: 'Unknown',
-  );
+  static const screenNames = ['ChooserPage', 'MapPage', 'TimetablePage', 'ListingsPage', 'FavouritesPage'];
+
+  void _trackScreen() => widget.analyticsService.setCurrentScreen(screenNames[index]);
 
   @override
   void initState() {
     super.initState();
-    _initPackageInfo();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.analyticsService.showAnalyticsConsentDialog(context);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPush() => _trackScreen();
+
+  @override
+  void didPopNext() => _trackScreen();
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
   }
 
   void setCurrentIndex(int newIndex) {
     setState(() {
       index = newIndex;
+      _trackScreen();
     });
   }
 
-  // Fetch package information (from pubspec.yaml)
-  Future<void> _initPackageInfo() async {
-    final info = await PackageInfo.fromPlatform();
+  void openTimetable(bool onlyNowOrSoon, bool? filteredMusicOrNot) {
     setState(() {
-      _packageInfo = info;
+      timetableFilteredMusicOrNot = filteredMusicOrNot;
+      timetableOnlyNowOrSoon = onlyNowOrSoon;
+      index = 2;
+      _trackScreen();
+    });
+  }
+
+  void openListings(String filterCategory, String? subfilterCategory) {
+    setState(() {
+      listingsSubfilterCategory = subfilterCategory;
+      index = (filterCategory == 'favourite') ? 4 : 3;
+      _trackScreen();
+    });
+  }
+
+  void openMap(int? nearestMarkerCount) {
+    setState(() {
+      mapNearestMarkerCount = nearestMarkerCount;
+      index = 1;
+      _trackScreen();
+    });
+  }
+
+  void cancelMapNearest() {
+    debugPrint('HomePageState cancelMapNearest called');
+    setState(() {
+      mapNearestMarkerCount = null;
+    });
+  }
+
+  void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
+    debugPrint('HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
+    setState(() {
+      timetableFilteredMusicOrNot = newFilteredMusicOrNot;
+      timetableOnlyNowOrSoon = newOnlyNowOrSoon;
+    });
+  }
+
+  void listingsSubfilterChange(String? newSubfilterCategory) {
+    debugPrint('HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory');
+    setState(() {
+      listingsSubfilterCategory = newSubfilterCategory;
     });
   }
 
   final _allListingsKey = GlobalKey<FilteredListingsPageState>();
   final _savedListingsKey = GlobalKey<FilteredListingsPageState>();
 
-  late final _pages = [
-    const ChooserPage(),
-    MapPage(listings: listings, key: mapPageKey),
-    FilteredListingsPage(filterCategory: "all", listings: listings, key: _allListingsKey, onChangeTitle: onChangeAppBarTitle),
-    const TimetablePage(),
-    FilteredListingsPage(filterCategory: "favourite", listings: listings, key: _savedListingsKey, onChangeTitle: onChangeAppBarTitle),
-  ];
-
-  void aboutDialog() {
-    return showAboutDialog(
-      context: context,
-      applicationName: 'Mill Road\nWinter Fair',
-      applicationVersion: _packageInfo.version,
-      applicationIcon: const MyAppIcon(),
-      children: [
-        ListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.phone_android),
-          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Android app by Alexander Berridge')),
-          subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('https://theberridge.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
-          ),
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('https://theberridge.com'));
-          },
-        ),
-        ListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.phone_iphone),
-          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('iPhone version by Matt Whiting')),
-          subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('http://mattwhiting.com', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
-          ),
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('http://mattwhiting.com'));
-          },
-        ),
-        ListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.palette),
-          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Illustrations by Clare McEwan')),
-          subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('https://www.claremcewan.co.uk', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
-          ),
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
-          },
-        ),
-        ListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.feedback),
-          title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text('Tell us if you like this app')),
-          subtitle: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text('Open a feedback form', style: TextStyle(decoration: TextDecoration.underline, color: Theme.of(context).colorScheme.tertiary)),
-          ),
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
-          },
-        ),
-      ],
-    );
-  }
-
-  void onChangeAppBarTitle(String newTitle) {
-    setState(() => appBarTitle = newTitle);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      left: false,
-      right: false,
-      bottom: Platform.isAndroid && isNavBarVisible(context),
-      child: Scaffold(
-        appBar: AppBar(
-          leading: Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                Scaffold.of(context).openDrawer();
-              },
-            ),
-          ),
-          title: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          ),
-          actions: [
-            IconButton(
-              icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-              },
-            ),
-          ],
-        ),
-        body: IndexedStack(
-          index: index,
-          children: _pages,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          showUnselectedLabels: true,
-          elevation: 0,
-          currentIndex: index,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          iconSize: 30,
-          onTap: (selectedIndex) {
-            HapticFeedback.selectionClick();
-            switch (selectedIndex) {
-              case 0:
-                if (homePageKey.currentState!.index != 0) appBarTitle = fairName;
-              case 1:
-                if (homePageKey.currentState!.index != 0) appBarTitle = 'Map';
-              case 2:
-                _allListingsKey.currentState?.onTabVisible();
-              case 3:
-                if (homePageKey.currentState!.index != 0) appBarTitle = 'Timetable';
-              case 4:
-                _savedListingsKey.currentState?.onTabVisible();
-            }
-            setState(() {
-              index = selectedIndex;
-            });
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-            BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
-            BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
-            BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
-          ],
-        ),
-        drawer: Drawer(
-          child: Column(
-            spacing: 0,
-            children: <Widget>[
-              Expanded(
-                flex: 0,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
-                  child: DrawerHeader(
-                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(flex: 4, child: Container()),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
-                        ),
-                        Expanded(flex: 2, child: Container()),
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            ' $fairDateTimes',
-                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Expanded(flex: 2, child: Container()),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const Icon(Icons.info),
-                  title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const Icon(Icons.warning),
-                  title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const Icon(Icons.public),
-                  title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const Icon(Icons.email),
-                  title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return contactUsDialog(context);
-                      },
-                    );
-                  },
-                ),
-              ),
-              Expanded(
-                // needed as Expanded() is relative and this needs a fixed space on larger screens
-                flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 1),
-                child: const SizedBox.expand(),
-              ),
-              Expanded(
-                flex: 3,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
-                      },
-                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                      padding: EdgeInsets.zero,
-                      icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        launchUrl(Uri.parse('https://x.com/millroadfair'));
-                      },
-                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                      padding: EdgeInsets.zero,
-                      icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
-                      },
-                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                      padding: EdgeInsets.zero,
-                      icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
-                      },
-                      constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                      padding: EdgeInsets.zero,
-                      icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
-                    ),
-                  ],
-                ),
-              ),
-              const Expanded(
-                flex: 2,
-                child: SizedBox.expand(),
-              ),
-              const Expanded(
-                flex: 0,
-                child: Divider(),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const Icon(Icons.settings),
-                  title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const Icon(Icons.menu_book),
-                  title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
-                  },
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: ListTile(
-                  leading: const Icon(Icons.info),
-                  title: const Text('About the app', style: TextStyle(fontWeight: FontWeight.bold)),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.pop(context);
-                    aboutDialog();
-                  },
-                ),
-              ),
-              const Expanded(
-                flex: 2,
-                child: SizedBox(height: 20),
-              ),
-            ],
-          ),
-        ),
-      ),
+    final pages = [
+      ChooserPage(
+          theEvents: listings,
+          onTabSelected: setCurrentIndex,
+          onOpenTimetable: openTimetable,
+          onOpenListings: openListings,
+          onOpenMap: openMap,
+          analyticsService: widget.analyticsService),
+      MapPage(
+          listings: listings,
+          key: mapPageKey,
+          nearestMarkerCount: mapNearestMarkerCount,
+          onTabSelected: setCurrentIndex,
+          onHomeTapped: cancelMapNearest,
+          analyticsService: widget.analyticsService),
+      TimetablePage(
+          theEvents: listings,
+          onTabSelected: setCurrentIndex,
+          filteredMusicOrNot: timetableFilteredMusicOrNot,
+          onlyNowOrSoon: timetableOnlyNowOrSoon,
+          onFilterChange: timetableFilterChange,
+          analyticsService: widget.analyticsService),
+      FilteredListingsPage(
+          filterCategory: "all",
+          subfilterCategory: listingsSubfilterCategory,
+          listings: listings,
+          key: _allListingsKey,
+          onTabSelected: setCurrentIndex,
+          onSubfilterChange: listingsSubfilterChange,
+          analyticsService: widget.analyticsService),
+      FilteredListingsPage(
+          filterCategory: "favourite",
+          subfilterCategory: listingsSubfilterCategory,
+          listings: listings,
+          key: _savedListingsKey,
+          onTabSelected: setCurrentIndex,
+          onSubfilterChange: listingsSubfilterChange,
+          analyticsService: widget.analyticsService),
+    ];
+    return IndexedStack(
+      index: index,
+      children: pages,
     );
   }
 }
