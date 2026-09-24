@@ -115,6 +115,11 @@ void main() {
     ];
   });
 
+  tearDown(() {
+    locationServicesEnabled = true;
+    locationPermission = LocationPermission.always;
+  });
+
   // Set up mocks
   late MapPageState mapPageState;
   setUp(() {
@@ -122,6 +127,28 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('does not enable the map location layer without permission', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
+      locationPermission = LocationPermission.deniedForever;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(
+              listings: listings,
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).myLocationEnabled, isFalse);
+    });
+
     testWidgets('search includes hidden listings and restores default pins', (tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
