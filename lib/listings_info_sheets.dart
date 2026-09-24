@@ -261,10 +261,12 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         opacity: 0.5,
                         child: ColorFiltered(
                           colorFilter: const ColorFilter.matrix(<double>[
+                            // dart format off
                             0.2126, 0.7152, 0.0722, 0, 0,
                             0.2126, 0.7152, 0.0722, 0, 0,
                             0.2126, 0.7152, 0.0722, 0, 0,
                             0, 0, 0, 1, 0,
+                            // dart format on
                           ]),
                           child: Text('${widget.emoji} ', style: TextStyle(fontSize: 30)),
                         ),
