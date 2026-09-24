@@ -118,6 +118,7 @@ class MapPageState extends State<MapPage> with RouteAware {
     _listingLookup = buildListingLookup(listings);
     setVisibleMarkerLists();
     addAllVisibleMarkers();
+    _establishLocationAndRefreshMap();
     establishLocation();
     if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -135,6 +136,18 @@ class MapPageState extends State<MapPage> with RouteAware {
   void didUpdateWidget(covariant MapPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.nearestMarkerCount != null) focusMapOnNearestMarkers(widget.nearestMarkerCount!);
+  }
+
+  Future<void> _establishLocationAndRefreshMap() async {
+    await establishLocation();
+
+    // On first launch Android can create the native map before the location
+    // permission dialog has completed. Rebuilding after the dialog closes lets
+    // GoogleMap observe myLocationEnabled changing from false to true and start
+    // its location layer (the blue dot).
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _ensureDirectionsConfigLoaded() async {
@@ -315,7 +328,7 @@ class MapPageState extends State<MapPage> with RouteAware {
       if (currentMarker == null) continue;
       final listing = _listingLookup[id.value];
       if (listing == null) continue;
-      final shouldBeVisible = _searchQuery.isEmpty 
+      final shouldBeVisible = _searchQuery.isEmpty
           || listing['location'].toString().toLowerCase().contains(_searchQuery)
           || listing['title'].toString().toLowerCase().contains(_searchQuery);
       markers[id] = currentMarker.copyWith(visibleParam: shouldBeVisible);
@@ -530,7 +543,7 @@ class MapPageState extends State<MapPage> with RouteAware {
       onTap: () {
         HapticFeedback.lightImpact();
         // This is the only way to stop auto-move which may hide user's location
-        if (_currentCamera != null) _controller?.moveCamera(CameraUpdate.newCameraPosition(_currentCamera!)); 
+        if (_currentCamera != null) _controller?.moveCamera(CameraUpdate.newCameraPosition(_currentCamera!));
         widget.analyticsService.logButtonTapped('group_map_marker');
         widget.analyticsService.logMapMarkerTapped(parentListing['title'] + ' (Group)');
 
@@ -717,7 +730,7 @@ class MapPageState extends State<MapPage> with RouteAware {
         onTap: () {
           HapticFeedback.lightImpact();
           // This is the only way to stop auto-move which may hide user's location
-          if (_currentCamera != null) _controller?.moveCamera(CameraUpdate.newCameraPosition(_currentCamera!)); 
+          if (_currentCamera != null) _controller?.moveCamera(CameraUpdate.newCameraPosition(_currentCamera!));
           widget.analyticsService.logButtonTapped('specific_map_marker');
           widget.analyticsService.logMapMarkerTapped(listing['title']);
 
@@ -865,7 +878,7 @@ class MapPageState extends State<MapPage> with RouteAware {
   void hideAllMarkers() {
     debugPrint('MapPageState hideAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
-      _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds 
+      _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds
           + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, false
     );
   }
@@ -873,7 +886,7 @@ class MapPageState extends State<MapPage> with RouteAware {
   void showAllMarkers() {
     debugPrint('MapPageState showAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
-      _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds 
+      _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds
           + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, true
     );
   }
@@ -1825,7 +1838,9 @@ class MapPageState extends State<MapPage> with RouteAware {
                       mapType: mapType,
                       rotateGesturesEnabled: false,
                       compassEnabled: false,
-                      myLocationEnabled: true,
+                      myLocationEnabled: locationServicesEnabled &&
+                          (locationPermission == LocationPermission.always ||
+                              locationPermission == LocationPermission.whileInUse),
                       myLocationButtonEnabled: false,
                       mapToolbarEnabled: false,
                       onMapCreated: (GoogleMapController controller) {
@@ -2221,7 +2236,7 @@ class MapPageState extends State<MapPage> with RouteAware {
                               _cameraBeforeSearch ??= _currentCamera;
                               _searchQuery = value.toLowerCase();
                               _isSearchFiltered = true;
-                              final (southwest, northeast) = await filterMarkersIgnoringFiltersAndCalculateBounds(_foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds 
+                              final (southwest, northeast) = await filterMarkersIgnoringFiltersAndCalculateBounds(_foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds
                                   + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds);
                               if (southwest != null && northeast != null ) _moveCameraToBounds(southwest, northeast);
                               setState(() { });
