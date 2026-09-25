@@ -23,6 +23,7 @@ class FilteredListingsPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
   final Function(String?) onSubfilterChange;
+  final DateTime? currentDateTime;
 
   const FilteredListingsPage({
     required this.analyticsService,
@@ -31,6 +32,7 @@ class FilteredListingsPage extends StatefulWidget {
     required this.onSubfilterChange,
     required this.listings,
     required this.onTabSelected,
+    this.currentDateTime,
     super.key,
   });
 
@@ -277,7 +279,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   int findFirstNextListingIndex(List filteredListings) {
     for (int i = 0; i < filteredListings.length; i++) {
-      if (!hasEventEnded(filteredListings[i]['endTime'])) {
+      if (!hasEventEnded(filteredListings[i]['endTime'], widget.currentDateTime)) {
         return i;
       }
     }
@@ -377,7 +379,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 5: Calculate number of visible listings for scroll thumb
     if (_hidePastListings) {
-      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], widget.currentDateTime)).length;
     } else {
       numberOfVisibleListings = filteredListings.length;
     }
@@ -401,7 +403,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             onPressed: () {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('listings_scroll_to_now');
-              if (isItEventDay()) {
+              if (isItEventDay(widget.currentDateTime)) {
                 if (firstNextListingIndex < 0) {
                   // we may not be on Sort by Time, or the Fair may have recently started
                   SortingMethod savedSortingMethod = preferredSortingMethod;
@@ -414,7 +416,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   } else {
                     filteredListings = filteredListingsTemp;
                     if (_hidePastListings) {
-                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], widget.currentDateTime)).length;
                     } else {
                       numberOfVisibleListings = filteredListings.length;
                     }
@@ -444,7 +446,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               Icons.update,
-              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+              color: (isItEventDay(widget.currentDateTime)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         if (isShowingJustPerformance || filterCategory == 'favourite')
@@ -455,7 +457,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             onPressed: () {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
-              if (isItEventDay()) {
+              if (isItEventDay(widget.currentDateTime)) {
                 setState(() {
                   _hidePastListings = !_hidePastListings;
                   widget.analyticsService.logPreferenceSet('listings_hide_past', _hidePastListings.toString());
@@ -477,7 +479,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               (_hidePastListings) ? Icons.free_cancellation : Icons.event_busy,
-              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+              color: (isItEventDay(widget.currentDateTime)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         IconButton(
@@ -610,13 +612,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
                               final approximateDistance = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
                               LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                              if (!_hidePastListings || !hasEventEnded(listing['endTime'])) {
+                              if (!_hidePastListings || !hasEventEnded(listing['endTime'], widget.currentDateTime)) {
                                 // if this is the first visible item, capture its index
                                 firstVisibleIndex ??= index;
                               }
                               return Column(
                                 children: [
-                                  if (!_hidePastListings || !hasEventEnded(listing['endTime']))
+                                  if (!_hidePastListings || !hasEventEnded(listing['endTime'], widget.currentDateTime))
                                     Container(
                                         width: constraints.maxWidth - 10,
                                         decoration: BoxDecoration(
@@ -661,7 +663,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           inDialog: false,
                                         )),
                                   // separator except after last item
-                                  if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime']))) SizedBox(height: 8),
+                                  if (index != filteredListings.length - 1 && (!_hidePastListings || !hasEventEnded(listing['endTime'], widget.currentDateTime))) SizedBox(height: 8),
                                 ],
                               );
                             },
