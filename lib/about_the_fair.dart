@@ -8,6 +8,7 @@ import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TextImageRow extends StatelessWidget {
@@ -103,8 +104,7 @@ TableRow eventRow(BuildContext context, String eventTime, String eventTitle, [Li
 }
 
 class AboutTheFairPage extends StatefulWidget {
-  final AnalyticsService analyticsService;
-  const AboutTheFairPage({super.key, required this.analyticsService});
+  const AboutTheFairPage({super.key});
 
   @override
   State<AboutTheFairPage> createState() => _AboutTheFairPageState();
@@ -158,12 +158,12 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
 
   @override
   void didPush() {
-    widget.analyticsService.setCurrentScreen('AboutPage');
+    context.read<AnalyticsService>().setCurrentScreen('AboutPage');
   }
 
   @override
   void didPopNext() {
-    widget.analyticsService.setCurrentScreen('AboutPage');
+    context.read<AnalyticsService>().setCurrentScreen('AboutPage');
   }
 
   void _onSponsorTap(String name) {
@@ -173,7 +173,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
       return;
     }
     HapticFeedback.lightImpact();
-    widget.analyticsService.logButtonTapped('sponsor_${name.replaceAll(' ', '_')}_hyperlink');
+    context.read<AnalyticsService>().logButtonTapped('sponsor_${name.replaceAll(' ', '_')}_hyperlink');
     launchUrl(Uri.parse(url));
   }
 
@@ -215,11 +215,13 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.read<AnalyticsService>().logButtonTapped('back');
+                  Navigator.maybePop(context);
+                })
+              : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('About Mill Road Winter Fair'),
@@ -320,7 +322,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('eastRoad_hyperlink');
+                                              context.read<AnalyticsService>().logButtonTapped('eastRoad_hyperlink');
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
@@ -329,7 +331,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                                             onTabSelected: (_) => {},
                                                             destinationId: '$aSimpleMarkerId Visit/Experience',
                                                             destinationLatLng: const LatLng(52.202488, 0.131207),
-                                                            analyticsService: widget.analyticsService,
                                                           )));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
@@ -339,7 +340,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('theBridge_hyperlink');
+                                              context.read<AnalyticsService>().logButtonTapped('theBridge_hyperlink');
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
@@ -348,7 +349,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                                             onTabSelected: (_) => {},
                                                             destinationId: '$aSimpleMarkerId Visit/Experience',
                                                             destinationLatLng: const LatLng(52.198682, 0.141051),
-                                                            analyticsService: widget.analyticsService,
                                                           )));
                                             }),
                                     ],
@@ -364,7 +364,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('ditchburnGardens_hyperlink');
+                                              context.read<AnalyticsService>().logButtonTapped('ditchburnGardens_hyperlink');
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
@@ -373,7 +373,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                                             onTabSelected: (_) => {},
                                                             destinationId: '$aSimpleMarkerId Performance',
                                                             destinationLatLng: const LatLng(52.200389, 0.136465),
-                                                            analyticsService: widget.analyticsService,
                                                           )));
                                             }),
                                     ],
@@ -389,7 +388,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('salisburyClub_hyperlink');
+                                              context.read<AnalyticsService>().logButtonTapped('salisburyClub_hyperlink');
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
@@ -398,7 +397,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                                             onTabSelected: (_) => {},
                                                             destinationId: '$aSimpleMarkerId Performance',
                                                             destinationLatLng: const LatLng(52.1970778, 0.1472252),
-                                                            analyticsService: widget.analyticsService,
                                                           )));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
@@ -408,7 +406,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('petersfield_hyperlink_1');
+                                              context.read<AnalyticsService>().logButtonTapped('petersfield_hyperlink_1');
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
@@ -417,7 +415,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                                             onTabSelected: (_) => {},
                                                             destinationId: '$aSimpleMarkerId Performance',
                                                             destinationLatLng: const LatLng(52.202858, 0.132253),
-                                                            analyticsService: widget.analyticsService,
                                                           )));
                                             }),
                                     ],
@@ -433,7 +430,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('gwydirStreet_hyperlink');
+                                              context.read<AnalyticsService>().logButtonTapped('gwydirStreet_hyperlink');
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
@@ -442,7 +439,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                                             onTabSelected: (_) => {},
                                                             destinationId: '$aSimpleMarkerId Performance',
                                                             destinationLatLng: const LatLng(52.199627, 0.138407),
-                                                            analyticsService: widget.analyticsService,
                                                           )));
                                             }),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
@@ -452,7 +448,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('petersfield_hyperlink_2');
+                                              context.read<AnalyticsService>().logButtonTapped('petersfield_hyperlink_2');
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
@@ -461,7 +457,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                                             onTabSelected: (_) => {},
                                                             destinationId: '$aSimpleMarkerId Performance',
                                                             destinationLatLng: const LatLng(52.202858, 0.132253),
-                                                            analyticsService: widget.analyticsService,
                                                           )));
                                             }),
                                     ],

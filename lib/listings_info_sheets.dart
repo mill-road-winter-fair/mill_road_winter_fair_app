@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -158,7 +159,6 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final VoidCallback? onFavouriteTapped;
   final Function onGetDirections;
   final bool inDialog;
-  final AnalyticsService analyticsService;
 
   const SpecificListingInfoSheet({
     required this.listingId,
@@ -182,7 +182,6 @@ class SpecificListingInfoSheet extends StatefulWidget {
     this.onFavouriteTapped,
     required this.onGetDirections,
     required this.inDialog,
-    required this.analyticsService,
     super.key,
   });
 
@@ -252,10 +251,26 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         opacity: 0.5,
                         child: ColorFiltered(
                           colorFilter: const ColorFilter.matrix(<double>[
-                            0.2126, 0.7152, 0.0722, 0, 0,
-                            0.2126, 0.7152, 0.0722, 0, 0,
-                            0.2126, 0.7152, 0.0722, 0, 0,
-                            0, 0, 0, 1, 0,
+                            0.2126,
+                            0.7152,
+                            0.0722,
+                            0,
+                            0,
+                            0.2126,
+                            0.7152,
+                            0.0722,
+                            0,
+                            0,
+                            0.2126,
+                            0.7152,
+                            0.0722,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            1,
+                            0,
                           ]),
                           child: Text('${widget.emoji} ', style: TextStyle(fontSize: 30)),
                         ),
@@ -324,7 +339,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     : () {
                         widget.onFavouriteTapped?.call();
                         HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
+                        context.read<AnalyticsService>().logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
                       },
                 padding: const EdgeInsets.all(0),
                 style: ElevatedButton.styleFrom(
@@ -335,9 +350,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                   (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
                   size: 22,
-                  color: widget.cancelled && !widget.listingFavourited
-                      ? Theme.of(context).disabledColor
-                      : Theme.of(context).colorScheme.primary,
+                  color: widget.cancelled && !widget.listingFavourited ? Theme.of(context).disabledColor : Theme.of(context).colorScheme.primary,
                 ),
               ),
 
@@ -353,8 +366,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     ? null
                     : () {
                         HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
-                        widget.analyticsService.logDirectionsToListingRequested(widget.title);
+                        context.read<AnalyticsService>().logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
+                        context.read<AnalyticsService>().logDirectionsToListingRequested(widget.title);
                         widget.onGetDirections();
                       },
                 child: const Icon(Icons.directions_walk),
@@ -387,7 +400,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
+                    context.read<AnalyticsService>().logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
                     widget.onDetailsTapped?.call();
                   },
                   child: const Icon(Icons.info),
@@ -412,7 +425,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
+                    context.read<AnalyticsService>().logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
                     widget.onDetailsTapped?.call();
                   },
                   child: const Icon(Icons.info),
@@ -448,7 +461,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
+                      context.read<AnalyticsService>().logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
                       launchUrl(Uri.parse(widget.website));
                     },
                     customBorder: const CircleBorder(),
@@ -472,7 +485,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
+                      context.read<AnalyticsService>().logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
                       final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
                       if (await canLaunchUrl(mailUri)) {
                         await launchUrl(mailUri);
@@ -501,7 +514,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: InkWell(
                     onTap: () async {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
+                      context.read<AnalyticsService>().logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
                       final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
                       if (await canLaunchUrl(phoneUri)) {
                         await launchUrl(phoneUri);
@@ -560,7 +573,6 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             context,
             _cancelledLabelKey,
             'Originally ${widget.startTime}–${widget.endTime}',
-            analyticsService: widget.analyticsService,
           );
         },
         child: Container(
@@ -604,7 +616,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
+              context.read<AnalyticsService>().logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
               launchUrl(Uri.parse(widget.website));
             },
             child: Row(
@@ -627,7 +639,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
+              context.read<AnalyticsService>().logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
               if (await canLaunchUrl(mailUri)) {
                 await launchUrl(mailUri);
@@ -655,7 +667,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
+              context.read<AnalyticsService>().logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
               if (await canLaunchUrl(phoneUri)) {
                 await launchUrl(phoneUri);
@@ -690,9 +702,8 @@ Future<void> showListingDetailsDialog(
   //int alertNoticePeriod,
   void Function(VoidCallback) setStateFunction,
   // final int? Function(PositionedEvent, int, int?) toggleAlertAction,
-  Future<dynamic> Function() onGetDirections, {
-  required AnalyticsService analyticsService,
-}) async {
+  Future<dynamic> Function() onGetDirections,
+) async {
   debugPrint('showListingDetailsDialog called');
 
   removeMiniPopup(); // just in case one was opened
@@ -754,7 +765,6 @@ Future<void> showListingDetailsDialog(
                         onGetDirections.call();
                       },
                       inDialog: true,
-                      analyticsService: analyticsService,
                     ),
                   ),
                 ),

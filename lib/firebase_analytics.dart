@@ -33,8 +33,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
     // This can be handy when debugging to see which screen is currently being tracked in analytics, but it can be quite verbose, so it's commented out by default
     // debugPrint('[FIREBASE] Setting currentScreen to $currentScreen');
     await _record(() => analytics.logScreenView(
-      screenName: screenName,
-    ));
+          screenName: screenName,
+        ));
   }
 
   @override
@@ -45,14 +45,14 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
     debugPrint('[FIREBASE] Logging button_click: $buttonName on screen $currentScreen');
     await _record(() => analytics.logEvent(
-      name: 'button_click',
-      parameters: {
-        'button_id': buttonName,
-        'screen_name': currentScreen,
-        if (listingId != null) 'listing_id': listingId,
-        if (listingName != null) 'listing_name': listingName,
-      },
-    ));
+          name: 'button_click',
+          parameters: {
+            'button_id': buttonName,
+            'screen_name': currentScreen,
+            if (listingId != null) 'listing_id': listingId,
+            if (listingName != null) 'listing_name': listingName,
+          },
+        ));
   }
 
   @override
@@ -61,12 +61,12 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
     debugPrint('[FIREBASE] Logging notice_shown: $noticeName on screen $currentScreen');
     await _record(() => analytics.logEvent(
-      name: 'notice_shown',
-      parameters: {
-        'notice_id': noticeName,
-        'screen_name': currentScreen,
-      },
-    ));
+          name: 'notice_shown',
+          parameters: {
+            'notice_id': noticeName,
+            'screen_name': currentScreen,
+          },
+        ));
   }
 
   @override
@@ -76,12 +76,12 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
     debugPrint('[FIREBASE] Logging search in $searchArea: $trimmedSearchTerm');
     await _record(() => analytics.logEvent(
-      name: 'search',
-      parameters: {
-        'search_term': trimmedSearchTerm,
-        'search_area': searchArea,
-      },
-    ));
+          name: 'search',
+          parameters: {
+            'search_term': trimmedSearchTerm,
+            'search_area': searchArea,
+          },
+        ));
   }
 
   @override
@@ -92,11 +92,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
     debugPrint('[FIREBASE] Logging map_marker_tapped: $listingName');
     await _record(() => analytics.logEvent(
-      name: 'map_marker_tapped',
-      parameters: {
-        'listing_name': listingName,
-      },
-    ));
+          name: 'map_marker_tapped',
+          parameters: {
+            'listing_name': listingName,
+          },
+        ));
   }
 
   @override
@@ -108,11 +108,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
     await _record(() => analytics.setUserProperty(name: 'map_type', value: mapType));
     debugPrint('[FIREBASE] Logging map_type_preference_set: $mapType');
     await _record(() => analytics.logEvent(
-      name: 'map_type_preference_set',
-      parameters: {
-        'map_type': mapType,
-      },
-    ));
+          name: 'map_type_preference_set',
+          parameters: {
+            'map_type': mapType,
+          },
+        ));
   }
 
   @override
@@ -124,11 +124,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
     await _record(() => analytics.setUserProperty(name: 'map_orientation', value: mapOrientation));
     debugPrint('[FIREBASE] Logging map_orientation_preference_set: $mapOrientation');
     await _record(() => analytics.logEvent(
-      name: 'map_orientation_preference_set',
-      parameters: {
-        'map_orientation': mapOrientation,
-      },
-    ));
+          name: 'map_orientation_preference_set',
+          parameters: {
+            'map_orientation': mapOrientation,
+          },
+        ));
   }
 
   @override
@@ -151,13 +151,13 @@ class FirebaseAnalyticsService implements AnalyticsService {
     }
     debugPrint('[FIREBASE] Logging filter_changed (map_marker): $category set to $visible');
     await _record(() => analytics.logEvent(
-      name: 'filter_changed',
-      parameters: {
-        'filter_type': 'map_marker',
-        'category': category,
-        'is_enabled': visible ? 1 : 0,
-      },
-    ));
+          name: 'filter_changed',
+          parameters: {
+            'filter_type': 'map_marker',
+            'category': category,
+            'is_enabled': visible ? 1 : 0,
+          },
+        ));
   }
 
   @override
@@ -169,12 +169,12 @@ class FirebaseAnalyticsService implements AnalyticsService {
     await _record(() => analytics.setUserProperty(name: 'road_closure', value: visible.toString()));
     debugPrint('[FIREBASE] Logging filter_changed (road_closure): $visible');
     await _record(() => analytics.logEvent(
-      name: 'filter_changed',
-      parameters: {
-        'filter_type': 'road_closure',
-        'is_enabled': visible ? 1 : 0,
-      },
-    ));
+          name: 'filter_changed',
+          parameters: {
+            'filter_type': 'road_closure',
+            'is_enabled': visible ? 1 : 0,
+          },
+        ));
   }
 
   @override
@@ -186,12 +186,12 @@ class FirebaseAnalyticsService implements AnalyticsService {
     debugPrint('[FIREBASE] Logging preference_set (distance_unit): $distanceUnit');
     await _record(() => analytics.setUserProperty(name: 'distance_unit', value: distanceUnit));
     await _record(() => analytics.logEvent(
-      name: 'preference_set',
-      parameters: {
-        'type': 'distance_unit',
-        'value': distanceUnit,
-      },
-    ));
+          name: 'preference_set',
+          parameters: {
+            'type': 'distance_unit',
+            'value': distanceUnit,
+          },
+        ));
   }
 
   @override
@@ -203,12 +203,12 @@ class FirebaseAnalyticsService implements AnalyticsService {
     debugPrint('[FIREBASE] Logging preference_set (theme): $theme');
     await _record(() => analytics.setUserProperty(name: 'theme', value: theme));
     await _record(() => analytics.logEvent(
-      name: 'preference_set',
-      parameters: {
-        'type': 'theme',
-        'value': theme,
-      },
-    ));
+          name: 'preference_set',
+          parameters: {
+            'type': 'theme',
+            'value': theme,
+          },
+        ));
   }
 
   @override
@@ -219,11 +219,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
     debugPrint('[FIREBASE] Logging listing_saved: $listingName');
     await _record(() => analytics.logEvent(
-      name: 'listing_saved',
-      parameters: {
-        'listing_name': listingName,
-      },
-    ));
+          name: 'listing_saved',
+          parameters: {
+            'listing_name': listingName,
+          },
+        ));
   }
 
   @override
@@ -234,11 +234,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
     debugPrint('[FIREBASE] Logging listing_unsaved: $listingName');
     await _record(() => analytics.logEvent(
-      name: 'listing_unsaved',
-      parameters: {
-        'listing_name': listingName,
-      },
-    ));
+          name: 'listing_unsaved',
+          parameters: {
+            'listing_name': listingName,
+          },
+        ));
   }
 
   @override
@@ -249,11 +249,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
     debugPrint('[FIREBASE] Logging listing_directions_request: $listingName');
     await _record(() => analytics.logEvent(
-      name: 'listing_directions_request',
-      parameters: {
-        'listing_name': listingName,
-      },
-    ));
+          name: 'listing_directions_request',
+          parameters: {
+            'listing_name': listingName,
+          },
+        ));
   }
 
   // Apply saved consent without recording a new choice or marking an unanswered prompt as declined.
@@ -317,9 +317,9 @@ class FirebaseAnalyticsService implements AnalyticsService {
     if (usageAnalyticsEnabled != true) return;
     await _record(() => analytics.setUserProperty(name: preference, value: value));
     await _record(() => analytics.logEvent(name: 'preference_set', parameters: {
-      'type': preference,
-      'value': value,
-    }));
+          'type': preference,
+          'value': value,
+        }));
   }
 
   @override
@@ -335,11 +335,9 @@ class FirebaseAnalyticsService implements AnalyticsService {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '
-              'This includes the pages you view, buttons you tap and preferences you set. '
-              'Also logged are the words and phrases you enter in search queries, as such we ask that you do not enter personal information in those searches. '
-            ),
+            const Text('Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '
+                'This includes the pages you view, buttons you tap and preferences you set. '
+                'Also logged are the words and phrases you enter in search queries, as such we ask that you do not enter personal information in those searches. '),
             const SizedBox(height: 12),
             RichText(
               text: TextSpan(
@@ -356,7 +354,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AnalyticsExplanationPage(analyticsService: this),
+                        builder: (context) => AnalyticsExplanationPage(),
                       ),
                     );
                     if (context.mounted) setCurrentScreen(previousScreen);
@@ -417,6 +415,7 @@ class FakeAnalyticsService implements AnalyticsService {
   Future<void> setAnalyticsEnabled(bool enabled) async {
     usageAnalyticsEnabled = enabled;
   }
+
   @override
   Future<void> logPreferenceSet(String preference, String value) async {}
 

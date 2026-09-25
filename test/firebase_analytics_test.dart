@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RecordingFirebaseAnalytics extends Fake implements FirebaseAnalytics {
@@ -193,14 +195,44 @@ void main() {
   });
 
   testWidgets('consent dialog saves an opt-in choice', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: Builder(builder: (context) => TextButton(
+    await tester.pumpWidget(Provider<AnalyticsService>.value(value: service, child: MaterialApp(home: Builder(builder: (context) => TextButton(
       onPressed: () => service.showAnalyticsConsentDialog(context), child: const Text('Prompt'),
-    ))));
+    )))));
     await tester.tap(find.text('Prompt'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('I agree'));
     await tester.pumpAndSettle();
     expect(usageAnalyticsEnabled, true);
     expect(find.text('I agree'), findsNothing);
+  });
+
+  testWidgets('consent explanation route uses the shared analytics service', (tester) async {
+    await service.setCurrentScreen('ChooserPage');
+    await tester.pumpWidget(Provider<AnalyticsService>.value(
+      value: service,
+      child: MaterialApp(
+        navigatorObservers: [routeObserver],
+        home: Builder(builder: (context) => TextButton(
+          onPressed: () => context.read<AnalyticsService>().showAnalyticsConsentDialog(context),
+          child: const Text('Prompt'),
+        )),
+      ),
+    ));
+    await tester.tap(find.text('Prompt'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('What does this mean?', findRichText: true));
+    await tester.pumpAndSettle();
+
+    final explanationContext = tester.element(find.byType(AnalyticsExplanationPage));
+    expect(explanationContext.read<AnalyticsService>(), same(service));
+    expect(service.currentScreen, 'AnalyticsExplanationPage');
+    expect(sdk.events, isEmpty);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(service.currentScreen, 'ChooserPage');
+    await tester.tap(find.text('No thanks'));
+    await tester.pumpAndSettle();
+    expect(usageAnalyticsEnabled, false);
   });
 }

@@ -7,6 +7,7 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:provider/provider.dart';
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -40,19 +41,18 @@ void main() {
     List<Map<String, dynamic>> listings,
     List<String> favouriteListingKeys,
   ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: FilteredListingsPage(
-            filterCategory: category,
-            listings: listings,
-            onTabSelected: (_) {},
-            onSubfilterChange: (_) {},
-            analyticsService: FakeAnalyticsService(),
+    await tester.pumpWidget(Provider<AnalyticsService>.value(
+        value: FakeAnalyticsService(),
+        child: MaterialApp(
+          home: Scaffold(
+            body: FilteredListingsPage(
+              filterCategory: category,
+              listings: listings,
+              onTabSelected: (_) {},
+              onSubfilterChange: (_) {},
+            ),
           ),
-        ),
-      ),
-    );
+        )));
     await tester.pump();
     await settle(tester);
   }
@@ -522,7 +522,7 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
       await settle(tester);
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
@@ -642,14 +642,13 @@ void main() {
       // Start with a known current location so distance sorting works if required
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FilteredListingsPage(
-                filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(Provider<AnalyticsService>.value(
+          value: analytics,
+          child: MaterialApp(
+            home: Scaffold(
+              body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
+            ),
+          )));
 
       await settle(tester);
 
