@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mill_road_winter_fair_app/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetablePage extends StatefulWidget {
@@ -35,6 +37,7 @@ class TimetablePage extends StatefulWidget {
 }
 
 class _TimetablePageState extends State<TimetablePage> {
+  late DateTimeProvider _dateTimeProvider;
   late ScrollController _horizontalScrollController;
   late ScrollController _verticalScrollController;
   final TextEditingController _searchController = TextEditingController();
@@ -92,6 +95,7 @@ class _TimetablePageState extends State<TimetablePage> {
   @override
   // so app knows if the device has been rotated, and can restore any previous scroll/sizing
   void didChangeDependencies() {
+    _dateTimeProvider = context.watch<DateTimeProvider>();
     debugPrint('_TimetablePageState didChangeDependencies called');
     final Orientation currentOrientation = MediaQuery.orientationOf(context);
     if (_deviceOrientationSaved != null && currentOrientation != _deviceOrientationSaved) {
@@ -137,7 +141,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void startClockUpdates(VoidCallback tick) {
-    final now = DateTime.now();
+    final now = _dateTimeProvider.now();
     final delay = Duration(seconds: (60 / _dayPixelsPerMinute).toInt());
     final initialDelay = delay - Duration(seconds: now.second, milliseconds: now.millisecond);
     _nowLineTimer?.cancel();
@@ -201,12 +205,11 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(
-      Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, bool? filteredMusicOrNot, String searchQuery) {
+      Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, bool? filteredMusicOrNot, String searchQuery, DateTime now) {
     debugPrint(
         '_TimetablePageState filterEventsAndComputeDefaults called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery');
     timelineMinStart = DateTime(9999);
     timelineMaxEnd = DateTime(0);
-    final now = DateTime.now();
     Map<String, List<PositionedEvent>> theFilteredEvents = {};
     for (final location in theEvents.entries) {
       final theEventsAtThisLocation = location.value;
@@ -448,14 +451,16 @@ class _TimetablePageState extends State<TimetablePage> {
       );
     }
 
+    final now = _dateTimeProvider.now();
+
     if (widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
       // refilter to whole day or just now or soon; only do this if changed
       _onlyNowOrSoonSaved = widget.onlyNowOrSoon;
       _filteredMusicOrNotSaved = widget.filteredMusicOrNot;
-      theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
+      theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
     }
     calculateInitialScalesIfNeeded();
-    if (fairDate.difference(DateTime.now()).inDays == 0 && timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now())) {
+    if (fairDate.difference(now).inDays == 0 && timelineMinStart.isBefore(now) && timelineMaxEnd.isAfter(now)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_nowLineTimer == null) startClockUpdates(updateNowLine);
         if (!widget.onlyNowOrSoon && _searchQuery.isEmpty) scrollToKey(nowLineKey, 0.3);
@@ -473,7 +478,6 @@ class _TimetablePageState extends State<TimetablePage> {
       if (_searchQuery != '') theErrorMessage += '\n\nYou can clear your search by tapping the X icon in the search bar.';
     }
 
-    final now = DateTime.now();
     final isLandscape = MediaQuery.orientationOf(context) == Orientation.landscape;
     final colorScheme = Theme.of(context).colorScheme;
     final appBarTheme = Theme.of(context).appBarTheme;
@@ -499,7 +503,7 @@ class _TimetablePageState extends State<TimetablePage> {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_category_filter');
             _toggleFilteredMusicOrNot();
-            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
+            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
           },
           icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
         ),
@@ -511,14 +515,14 @@ class _TimetablePageState extends State<TimetablePage> {
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_now_or_soon_toggle');
-            (isItEventDay())
+            (isItEventDay(_dateTimeProvider))
                 ? _toggleOnlyNowOrSoon()
                 : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway',
                     fgColour: colorScheme.error, analyticsService: widget.analyticsService);
           },
           icon: Icon(
             (widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule,
-            color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
+            color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
           ),
         ),
         IconButton(
@@ -536,7 +540,7 @@ class _TimetablePageState extends State<TimetablePage> {
                 _searchAnalyticsTimer?.cancel();
                 _searchQuery = '';
                 _searchController.clear();
-                theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
+                theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
               }
             });
           },
@@ -648,8 +652,8 @@ class _TimetablePageState extends State<TimetablePage> {
                                         if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
                                         _searchQuery = '';
                                         _searchController.clear();
-                                        theFilteredEvents =
-                                            filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
+                                        theFilteredEvents = filterEventsAndComputeDefaults(
+                                            thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
                                       });
                                     },
                                   ),
@@ -659,7 +663,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                   setState(() {
                                     _searchQuery = value.toLowerCase();
                                     theFilteredEvents =
-                                        filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
+                                        filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
                                   });
                                 },
                               ),
@@ -788,7 +792,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                             // time markers lines and labels and swim lanes
                                             ...swimlanes,
                                             // red 'now' line
-                                            if (timelineMinStart.isBefore(DateTime.now()) && timelineMaxEnd.isAfter(DateTime.now()))
+                                            if (timelineMinStart.isBefore(now) && timelineMaxEnd.isAfter(now))
                                               Positioned(
                                                 key: nowLineKey,
                                                 top: nowTop,

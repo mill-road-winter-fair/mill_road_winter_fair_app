@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mill_road_winter_fair_app/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListingUpdateNotifier {
@@ -78,14 +80,13 @@ class ListingUpdateNotifier {
 
   static Future<void> maybeShowNotice(
     BuildContext context, {
-    DateTime? now,
     required AnalyticsService analyticsService,
   }) async {
     if (onTest) {
       return;
     }
 
-    final noticeDate = now ?? DateTime.now();
+    final noticeDate = context.read<DateTimeProvider>().now();
     final isListingsMayChange = isListingsMayChangeNotice(noticeDate);
 
     // The dismissal preference applies only before the Fair. The notices on
