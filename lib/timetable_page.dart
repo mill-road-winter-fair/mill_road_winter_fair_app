@@ -486,24 +486,17 @@ class _TimetablePageState extends State<TimetablePage> {
     final subcategoryIconKey = GlobalKey();
     final searchIconKey = GlobalKey();
 
+    String appBarTitle = switch(widget.filteredMusicOrNot) {
+      true => 'Timetable (music)',
+      false => 'Timetable (non-music)',
+      _ => 'Timetable'
+    };
+
     return FairScaffold(
-      appBarTitle: "Timetable",
+      appBarTitle: appBarTitle,
       currentTab: 2,
       onTabSelected: widget.onTabSelected,
       appBarActions: [
-        IconButton(
-          key: subcategoryIconKey,
-          color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything',
-              analyticsService: widget.analyticsService),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('timetable_category_filter');
-            _toggleFilteredMusicOrNot();
-            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
-          },
-          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
-        ),
         IconButton(
           key: nowOrSoonIconKey,
           onLongPress: () => showMiniPopup(
@@ -521,6 +514,17 @@ class _TimetablePageState extends State<TimetablePage> {
             (widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule,
             color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
           ),
+        ),
+        IconButton(
+          key: subcategoryIconKey,
+          color: appBarTheme.foregroundColor,
+          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything', analyticsService: widget.analyticsService),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            _toggleFilteredMusicOrNot();
+            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
+          },
+          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
         ),
         IconButton(
           key: searchIconKey,
