@@ -55,10 +55,10 @@ class MapPageState extends State<MapPage> with RouteAware {
   }
 
   @override
-  void didPush() => widget.analyticsService.setCurrentScreen('MapPage');
+  void didPush() => widget.analyticsService.setCurrentScreen(_isDirections ? 'DirectionsPage' : 'MapPage');
 
   @override
-  void didPopNext() => widget.analyticsService.setCurrentScreen('MapPage');
+  void didPopNext() => widget.analyticsService.setCurrentScreen(_isDirections ? 'DirectionsPage' : 'MapPage');
   late Future<List<Map<String, dynamic>>> _fetchListings;
   late List<MarkerId> _foodMarkerIds;
   late List<MarkerId> _shoppingMarkerIds;
@@ -76,11 +76,20 @@ class MapPageState extends State<MapPage> with RouteAware {
   late double _compassBearing;
   double? mapWidth;
   double? mapHeight;
+  final GlobalKey _destinationCardKey = GlobalKey();
+  double _destinationCardHeight = 0;
+
+  void _measureDestinationCard() {
+    final box = _destinationCardKey.currentContext?.findRenderObject() as RenderBox?;
+    final height = box?.size.height ?? 0;
+    if (!mounted || (height - _destinationCardHeight).abs() < 0.5) return;
+    setState(() => _destinationCardHeight = height);
+  }
   String? _distanceToDestination;
+  Map<String, dynamic>? _navigationListing;
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller;
-  IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
   final ScrollController _roadClosuresDialogScrollController = ScrollController();
   // Declare default filters
@@ -93,7 +102,8 @@ class MapPageState extends State<MapPage> with RouteAware {
     'Services': true,
   };
   late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
-  bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
+  bool navigationInProgress = false;
+  bool get _isDirections => widget.destinationId != null || navigationInProgress;
 
   @override
   void initState() {
@@ -109,12 +119,11 @@ class MapPageState extends State<MapPage> with RouteAware {
     addAllVisibleMarkers();
     _establishLocationAndRefreshMap();
     establishLocation();
-    if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
+      if (preferredRoadClosurePolygonVisible && !_isDirections) _polygons.add(roadClosurePolygon());
       ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
-      if (doingAPushNavigation ?? false) {
-        doingAPushNavigation = false;
+      if (widget.destinationId != null && widget.destinationLatLng != null) {
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
       }
     });
@@ -345,7 +354,8 @@ class MapPageState extends State<MapPage> with RouteAware {
       await createAllMarkerBitmaps();
     }
 
-    // Ensure the markers list is empty
+    // Initial bitmap loading must never clear a Directions destination.
+    if (!mounted || _isDirections) return;
     markers.clear();
 
     for (var listing in listings) {
@@ -708,7 +718,7 @@ class MapPageState extends State<MapPage> with RouteAware {
     Color color = getCategoryColor(selectedThemeKey, category);
     late BitmapDescriptor customMarker;
     if (onTest == false) {
-      customMarker = bitmapDescriptors[category]!;
+      customMarker = bitmapDescriptors[category] ?? BitmapDescriptor.defaultMarker;
     } else {
       double hue = HSVColor.fromColor(color).hue;
       customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
@@ -977,55 +987,27 @@ class MapPageState extends State<MapPage> with RouteAware {
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
-    // Cancelling of any previous navigation
-    // Halt the location subscription
-    _positionStream?.cancel();
-    // Clear the polylines
-    polylines.clear();
-    // Clear the polygons if they're shown
-    if (preferredRoadClosurePolygonVisible) _polygons.clear();
-    hideAllMarkers();
-    // Remove any simple marker shown
-    markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
-    // Reset the distance to destination
-    _distanceToDestination = null;
-    // Set navigation as not in progress
-    navigationInProgress = false;
-    setState(() {});
-
-    debugPrint('MapPageState getDirections called for listing ID: $id');
-
-    if (navigatorPop == true) {
-      Navigator.pop(context);
-      // The navigator is only popped when called from the map page, so if this is true set the previousIndex to 0
-      //previousIndex = 0;
-    }
-
-    doTheNavigation(id, destination, navigatorPop);
+    final navigator = Navigator.of(context);
+    if (navigatorPop) navigator.pop();
+    await navigator.push(MaterialPageRoute<void>(
+      builder: (_) => MapPage(
+        listings: widget.listings,
+        onTabSelected: widget.onTabSelected,
+        destinationId: id,
+        destinationLatLng: destination,
+        analyticsService: widget.analyticsService,
+      ),
+    ));
   }
-
   Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
-    // If user has location tracking enabled
-    if (currentLatLng != null) {
-      // Get the user's current location
-      Position position = await getCurrentPosition();
-      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-      await updatePolyline(currentLatLng, destination);
-      // Set the camera position once, at the beginning of the navigation
-      _setMapCameraToFitPolyline(polylines);
-      // Start location updates
-      await startLocationUpdates(destination);
-    } else {
-      Fluttertoast.showToast(
-        msg: 'Location services and permissions are required to determine directions',
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
-        fontSize: 16,
-        toastLength: Toast.LENGTH_LONG,
-        timeInSecForIosWeb: 4,
+    setState(() {
+      navigationInProgress = true;
+      _destination = destination;
+      _navigationListing = listings.cast<Map<String, dynamic>?>().firstWhere(
+        (listing) => listing?['id'].toString() == id,
+        orElse: () => null,
       );
-    }
+    });
 
     // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
     const int aSimpleMarkerIdLen = aSimpleMarkerId.length;
@@ -1042,6 +1024,36 @@ class MapPageState extends State<MapPage> with RouteAware {
       addSpecificMarker(destinationListing);
     }
 
+    setState(() {});
+
+    // If user has location tracking enabled
+    if (currentLatLng != null) {
+      // Get the user's current location
+      Position position = await getCurrentPosition();
+      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
+      if (!mounted) return;
+      await updatePolyline(currentLatLng, destination);
+      if (!mounted) return;
+      // Set the camera position once, at the beginning of the navigation
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && polylines.isNotEmpty) _setMapCameraToFitPolyline(polylines);
+      });
+      // Start location updates
+      await startLocationUpdates(destination);
+    } else {
+      Fluttertoast.showToast(
+        msg: 'Location services and permissions are required to determine directions',
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
+        fontSize: 16,
+        toastLength: Toast.LENGTH_LONG,
+        timeInSecForIosWeb: 4,
+      );
+    }
+
+    if (!mounted) return;
+
     setState(() {
       // Set navigation as in progress; do this late so cancel button isn't available before nav starts
       navigationInProgress = true;
@@ -1050,6 +1062,7 @@ class MapPageState extends State<MapPage> with RouteAware {
 
   void cancelNavigation() {
     debugPrint('MapPageState cancelNavigation called');
+    _navigationListing = null;
     // Halt the location subscription
     _positionStream?.cancel();
 
@@ -1178,6 +1191,7 @@ class MapPageState extends State<MapPage> with RouteAware {
       // Convert to LatLng for Google Maps
       List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
 
+      if (!mounted) return;
       setState(() {
         // Get distance in meters. NB can also get route.durationMinutes which may be useful
         final distanceMetres = route.distanceMeters ?? 0;
@@ -1213,12 +1227,15 @@ class MapPageState extends State<MapPage> with RouteAware {
   }
 
   void _handlePolylineError(String message) {
+    if (!mounted) return;
     setState(() {
       polylines.clear();
       _distanceToDestination = null;
-      hideAllMarkers();
-      addAllVisibleMarkers();
-      _setMapCameraToFitMapMarkers();
+      if (!_isDirections) {
+        hideAllMarkers();
+        addAllVisibleMarkers();
+        _setMapCameraToFitMapMarkers();
+      }
       navigationInProgress = false;
     });
     debugPrint('MapPageState _handlePolylineError error: $message');
@@ -1345,6 +1362,7 @@ class MapPageState extends State<MapPage> with RouteAware {
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
     debugPrint('MapPageState _setMapCameraToFitPolyline called');
+    if (currentLatLng == null || polylines.isEmpty || mapWidth == null || mapHeight == null) return;
 
     double bearing; // the bearing to set the camera to, based on preference
     double padding; // extra space on the map around the polyline and source marker
@@ -1364,20 +1382,27 @@ class MapPageState extends State<MapPage> with RouteAware {
       }
     }
 
+    // The route may stop at a nearby path rather than the exact venue pin.
+    if (_destination != null) {
+      polylineMinLat = min(polylineMinLat, _destination!.latitude);
+      polylineMinLong = min(polylineMinLong, _destination!.longitude);
+      polylineMaxLat = max(polylineMaxLat, _destination!.latitude);
+      polylineMaxLong = max(polylineMaxLong, _destination!.longitude);
+    }
     // add some extra padding, inversely proportional to the distance of the trip, so start/end aren't off screen
     double extraPaddingForShortTrips = (0.00006 / pow(pow(polylineMaxLat - polylineMinLat, 2) + pow(polylineMaxLong - polylineMinLong, 2), 0.5)).clamp(0, 0.1);
 
     //Default bearing and padding
     if (preferredMapOrientation == MapOrientation.alwaysNorth) {
       bearing = 0;
-      padding = mapWidth! * (0.07 + extraPaddingForShortTrips);
+      padding = mapWidth! * (0.08 + extraPaddingForShortTrips);
     } else {
       bearing = 290;
-      padding = mapHeight! * (0.10 + extraPaddingForShortTrips); // need a bit more space to avoid navigation distance marker
+      padding = mapHeight! * (0.16 + extraPaddingForShortTrips); // leave space around the route endpoints
     }
 
     _moveCameraToBoundsWithRotation(
-        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
+        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), max(32.0, padding * (1 + extraPaddingForShortTrips)), bearing);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -1494,6 +1519,49 @@ class MapPageState extends State<MapPage> with RouteAware {
     }
   }
 
+  Widget _buildDestinationCard(BuildContext context, Map<String, dynamic> listing) {
+    final colors = Theme.of(context).colorScheme;
+    String field(String key) => listing[key]?.toString().trim() ?? '';
+    final times = [field('startTime'), field('endTime')].where((time) => time.isNotEmpty).join('–');
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Navigating to', style: TextStyle(fontSize: 11, color: colors.primary)),
+        const SizedBox(height: 4),
+        Text(
+          [field('emoji'), field('title')].where((text) => text.isNotEmpty).join(' '),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: colors.onSurface),
+        ),
+        if (field('subtitle').isNotEmpty)
+          Text(field('subtitle'), style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
+        if (field('location').isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.place_outlined, size: 16, color: colors.onSurfaceVariant),
+              const SizedBox(width: 4),
+              Expanded(child: Text(field('location'), style: TextStyle(fontSize: 12, color: colors.onSurface))),
+            ],
+          ),
+        ],
+        if (times.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.schedule, size: 16, color: colors.onSurfaceVariant),
+              const SizedBox(width: 4),
+              Expanded(child: Text(times, style: TextStyle(fontSize: 12, color: colors.onSurface))),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}');
@@ -1572,296 +1640,86 @@ class MapPageState extends State<MapPage> with RouteAware {
         });
 
         return FairScaffold(
-          appBarTitle: (doingAPushNavigation != null) ? 'Directions' : 'Map',
+          appBarTitle: _isDirections ? 'Directions' : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [],
-          allowBack: (doingAPushNavigation != null),
+          allowBack: _isDirections,
           body: Stack(
             children: [
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  mapWidth = constraints.maxWidth;
-                  mapHeight = constraints.maxHeight;
-                  return PopScope(
-                    onPopInvokedWithResult: (didPop, result) {
-                      if (didPop && navigationInProgress) cancelNavigation();
-                    },
-                    child: GoogleMap(
-                      style: mapStyle,
-                      mapType: mapType,
-                      rotateGesturesEnabled: false,
-                      compassEnabled: false,
-                      myLocationEnabled: locationServicesEnabled &&
-                          (locationPermission == LocationPermission.always ||
-                              locationPermission == LocationPermission.whileInUse),
-                      myLocationButtonEnabled: false,
-                      mapToolbarEnabled: false,
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller = controller;
-                        if (listings.isNotEmpty) {
-                          // We should have listings by this point so set the camera to their bounds
-                          _setMapCameraToFitMapMarkers();
-                        }
-                      },
-                      initialCameraPosition: CameraPosition(
-                        target: const LatLng(52.199174, 0.140929),
-                        zoom: 14.1,
-                        bearing: _mapBearing,
-                      ),
-                      onCameraMove: (CameraPosition position) {
-                        debugPrint('MapPageState onCameraMove called');
-                        setState(() {
-                          switch (preferredMapOrientation) {
-                            case MapOrientation.adaptive:
-                              _compassBearing = 90;
-                              break;
-                            case MapOrientation.alwaysNorth:
-                              _compassBearing = 0;
-                              break;
-                          }
-                        });
-                      },
-                      polygons: _polygons,
-                      markers: markers.values.toSet(),
-                      polylines: polylines
-                    ),
-                  );
-                },
-              ),
-              Positioned(
-                top: 4,
-                left: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (navigationInProgress == true && doingAPushNavigation == null)
-                      FloatingActionButton(
-                        heroTag: 'cancelBtn',
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('cancel_navigation');
-                          cancelNavigation();
-                        },
-                        backgroundColor: Colors.transparent,
-                        mini: true,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
-                          ),
-                          child: const Icon(Icons.cancel),
-                        ),
-                      ),
-                    if (navigationInProgress == false)
-                      FloatingActionButton(
-                        heroTag: 'homeBtn',
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('home');
-                          widget.onHomeTapped?.call();
-                          // Home button resets the filters if they're all toggled off
-                          if (filterSettings['Food'] == false &&
-                              filterSettings['Shopping'] == false &&
-                              filterSettings['Performances'] == false &&
-                              filterSettings['Charity/Community/Info'] == false &&
-                              filterSettings['Visits/Experiences'] == false &&
-                              filterSettings['Services'] == false) {
-                            widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
-                            final idList = _foodMarkerIds +
-                                _shoppingMarkerIds +
-                                _charityCommunityInfoMarkerIds +
-                                _performanceMarkerIds +
-                                _visitExperienceMarkerIds +
-                                _serviceMarkerIds;
-                            setState(() {
-                              filterSettings['Food'] = true;
-                              filterSettings['Shopping'] = true;
-                              filterSettings['Performances'] = true;
-                              filterSettings['Charity/Community/Info'] = true;
-                              filterSettings['Visits/Experiences'] = true;
-                              filterSettings['Services'] = true;
-                              updateMarkerVisibilityIgnoringFilters(idList, true);
-                            });
-                          }
-                          _setMapCameraToFitMapMarkers();
-                        },
-                        backgroundColor: Colors.transparent,
-                        mini: true,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
-                          ),
-                          child: const Icon(Icons.home),
-                        ),
-                      ),
-                    // Centre-on-user button (only shown when location services are enabled and permission has been granted)
-                    if (locationServicesEnabled == true &&
-                        (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
-                      FloatingActionButton(
-                        heroTag: 'centreOnUserBtn',
-                        onPressed: () async {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('centre_on_user');
-                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
-                          try {
-                            if (currentLatLng == null) {
-                              final pos = await getCurrentPosition();
-                              currentLatLng = LatLng(pos.latitude, pos.longitude);
-                            }
-                            if (currentLatLng != null) {
-                              // Move camera to the user's location with a sensible zoom and bearing
-                              double currentZoom = await _controller!.getZoomLevel();
-                              _controller?.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            debugPrint('Centre-on-user failed: $e');
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: Theme.of(context).colorScheme.primary,
-                                  content: Text('Unable to determine your location'),
-                                ),
-                              );
-                            }
-                          }
-                        },
-                        backgroundColor: Colors.transparent,
-                        mini: true,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
-                          ),
-                          child: const Icon(Icons.my_location),
-                        ),
-                      ),
-                    FloatingActionButton(
-                      heroTag: 'mapTypeBtn',
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('map_type_toggle');
-                        setState(() {
-                          if (mapType == MapType.normal) {
-                            mapType = MapType.hybrid;
-                            _layersIcon = Icons.map;
-                            preferredMapStyleType = MapStyleType.hybrid;
-                            _saveSettings();
-                            widget.analyticsService.logMapTypePreferenceSet('hybrid');
-                          } else {
-                            mapType = MapType.normal;
-                            _layersIcon = Icons.satellite_alt;
-                            preferredMapStyleType = MapStyleType.normal;
-                            _saveSettings();
-                            widget.analyticsService.logMapTypePreferenceSet('normal');
-                          }
-                        });
-                      },
-                      backgroundColor: Colors.transparent,
-                      mini: true,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: const Offset(2, 2))
-                          ],
-                        ),
-                        child: Icon(_layersIcon),
-                      ),
-                    ),
-                    if (navigationInProgress == false)
-                      FloatingActionButton(
-                        heroTag: 'mapBearingBtn',
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('map_orientation_toggle');
-                          setState(() {
-                            if (preferredMapOrientation == MapOrientation.adaptive) {
-                              preferredMapOrientation = MapOrientation.alwaysNorth;
-                              _saveSettings();
-                              widget.analyticsService.logMapOrientationPreferenceSet('alwaysNorth');
-                            } else {
-                              preferredMapOrientation = MapOrientation.adaptive;
-                              _saveSettings();
-                              widget.analyticsService.logMapOrientationPreferenceSet('adaptive');
-                            }
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) => _measureDestinationCard());
+                        final usableHeight = max(1.0, constraints.maxHeight - _destinationCardHeight);
+                        final sizeChanged = mapWidth != constraints.maxWidth || mapHeight != usableHeight;
+                        if (sizeChanged && polylines.isNotEmpty) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted && polylines.isNotEmpty) _setMapCameraToFitPolyline(polylines);
                           });
-                          _setMapCameraToFitMapMarkers();
-                        },
-                        backgroundColor: Colors.transparent,
-                        mini: true,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
-                          ),
-                          child: AnimatedRotation(
-                            turns: _compassBearing / 360.0,
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOut,
-                            child: Icon(Icons.assistant_navigation),
-                          ),
-                        ),
-                      ),
-                    if (navigationInProgress == false)
-                      Row(
+                        }
+                        mapWidth = constraints.maxWidth;
+                        mapHeight = usableHeight;
+                        return PopScope(
+                          onPopInvokedWithResult: (didPop, result) {
+                            if (didPop && navigationInProgress) cancelNavigation();
+                          },
+                          child: GoogleMap(
+                              padding: EdgeInsets.only(bottom: _destinationCardHeight),
+                              style: mapStyle,
+                              mapType: mapType,
+                              rotateGesturesEnabled: false,
+                              compassEnabled: false,
+                              myLocationEnabled: locationServicesEnabled &&
+        (locationPermission == LocationPermission.always ||
+        locationPermission == LocationPermission.whileInUse),
+                              myLocationButtonEnabled: false,
+                              mapToolbarEnabled: false,
+                              onMapCreated: (GoogleMapController controller) {
+                                _controller = controller;
+                                if (polylines.isNotEmpty) {
+                                  _setMapCameraToFitPolyline(polylines);
+                                } else if (listings.isNotEmpty) {
+                                  // We should have listings by this point so set the camera to their bounds
+                                  _setMapCameraToFitMapMarkers();
+                                }
+                              },
+                              initialCameraPosition: CameraPosition(
+                                target: const LatLng(52.199174, 0.140929),
+                                zoom: 14.1,
+                                bearing: _mapBearing,
+                              ),
+                              onCameraMove: (CameraPosition position) {
+                                debugPrint('MapPageState onCameraMove called');
+                                setState(() {
+                                  switch (preferredMapOrientation) {
+                                    case MapOrientation.adaptive:
+                                      _compassBearing = 90;
+                                      break;
+                                    case MapOrientation.alwaysNorth:
+                                      _compassBearing = 0;
+                                      break;
+                                  }
+                                });
+                              },
+                              polygons: _polygons,
+                              markers: markers.values.toSet(),
+                              polylines: polylines),
+                        );
+                      },
+                    ),
+                    Positioned(
+                      top: 4,
+                      left: 4,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (navigationInProgress == false)
+                          if (navigationInProgress && widget.destinationId == null)
                             FloatingActionButton(
-                              heroTag: 'filterBtn',
+                              heroTag: 'cancelBtn',
                               onPressed: () {
                                 HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('map_filter');
-                                showFilterMenu();
-                                setVisibleMarkerLists();
+                                widget.analyticsService.logButtonTapped('cancel_navigation');
+                                cancelNavigation();
                               },
                               backgroundColor: Colors.transparent,
                               mini: true,
@@ -1879,102 +1737,384 @@ class MapPageState extends State<MapPage> with RouteAware {
                                         offset: const Offset(2, 2))
                                   ],
                                 ),
-                                child: const Icon(Icons.filter_alt),
+                                child: const Icon(Icons.cancel),
                               ),
-                            )
+                            ),
+                          if (!_isDirections)
+                            FloatingActionButton(
+                              heroTag: 'homeBtn',
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('home');
+                                widget.onHomeTapped?.call();
+                                // Home button resets the filters if they're all toggled off
+                                if (filterSettings['Food'] == false &&
+                                    filterSettings['Shopping'] == false &&
+                                    filterSettings['Performances'] == false &&
+                                    filterSettings['Charity/Community/Info'] == false &&
+                                    filterSettings['Visits/Experiences'] == false &&
+                                    filterSettings['Services'] == false) {
+                                  widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
+                                  final idList = _foodMarkerIds +
+                                      _shoppingMarkerIds +
+                                      _charityCommunityInfoMarkerIds +
+                                      _performanceMarkerIds +
+                                      _visitExperienceMarkerIds +
+                                      _serviceMarkerIds;
+                                  setState(() {
+                                    filterSettings['Food'] = true;
+                                    filterSettings['Shopping'] = true;
+                                    filterSettings['Performances'] = true;
+                                    filterSettings['Charity/Community/Info'] = true;
+                                    filterSettings['Visits/Experiences'] = true;
+                                    filterSettings['Services'] = true;
+                                    updateMarkerVisibilityIgnoringFilters(idList, true);
+                                  });
+                                }
+                                _setMapCameraToFitMapMarkers();
+                              },
+                              backgroundColor: Colors.transparent,
+                              mini: true,
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: const Offset(2, 2))
+                                  ],
+                                ),
+                                child: const Icon(Icons.home),
+                              ),
+                            ),
+                          // Centre-on-user button (only shown when location services are enabled and permission has been granted)
+                          if (locationServicesEnabled == true &&
+                              (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
+                            FloatingActionButton(
+                              heroTag: 'centreOnUserBtn',
+                              onPressed: () async {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('centre_on_user');
+                                // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
+                                try {
+                                  if (currentLatLng == null) {
+                                    final pos = await getCurrentPosition();
+                                    currentLatLng = LatLng(pos.latitude, pos.longitude);
+                                  }
+                                  if (currentLatLng != null) {
+                                    // Move camera to the user's location with a sensible zoom and bearing
+                                    double currentZoom = await _controller!.getZoomLevel();
+                                    _controller?.animateCamera(
+                                      CameraUpdate.newCameraPosition(
+                                        CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  debugPrint('Centre-on-user failed: $e');
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Theme.of(context).colorScheme.primary,
+                                        content: Text('Unable to determine your location'),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                              backgroundColor: Colors.transparent,
+                              mini: true,
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: const Offset(2, 2))
+                                  ],
+                                ),
+                                child: const Icon(Icons.my_location),
+                              ),
+                            ),
+                          FloatingActionButton(
+                            heroTag: 'mapTypeBtn',
+                            tooltip: mapType == MapType.normal ? 'Switch to satellite view' : 'Switch to normal map',
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              widget.analyticsService.logButtonTapped('map_type_toggle');
+                              setState(() {
+                                if (mapType == MapType.normal) {
+                                  mapType = MapType.hybrid;
+                                  preferredMapStyleType = MapStyleType.hybrid;
+                                  _saveSettings();
+                                  widget.analyticsService.logMapTypePreferenceSet('hybrid');
+                                } else {
+                                  mapType = MapType.normal;
+                                  preferredMapStyleType = MapStyleType.normal;
+                                  _saveSettings();
+                                  widget.analyticsService.logMapTypePreferenceSet('normal');
+                                }
+                              });
+                            },
+                            backgroundColor: Colors.transparent,
+                            mini: true,
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                      spreadRadius: 1,
+                                      blurRadius: 3,
+                                      offset: const Offset(2, 2))
+                                ],
+                              ),
+                              child: Icon(mapType == MapType.normal ? Icons.satellite_alt : Icons.map),
+                            ),
+                          ),
+                          if (!_isDirections)
+                            FloatingActionButton(
+                              heroTag: 'mapBearingBtn',
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('map_orientation_toggle');
+                                setState(() {
+                                  if (preferredMapOrientation == MapOrientation.adaptive) {
+                                    preferredMapOrientation = MapOrientation.alwaysNorth;
+                                    _saveSettings();
+                                    widget.analyticsService.logMapOrientationPreferenceSet('alwaysNorth');
+                                  } else {
+                                    preferredMapOrientation = MapOrientation.adaptive;
+                                    _saveSettings();
+                                    widget.analyticsService.logMapOrientationPreferenceSet('adaptive');
+                                  }
+                                });
+                                _setMapCameraToFitMapMarkers();
+                              },
+                              backgroundColor: Colors.transparent,
+                              mini: true,
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: const Offset(2, 2))
+                                  ],
+                                ),
+                                child: AnimatedRotation(
+                                  turns: _compassBearing / 360.0,
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeOut,
+                                  child: Icon(Icons.assistant_navigation),
+                                ),
+                              ),
+                            ),
+                          if (!_isDirections)
+                            Row(
+                              children: [
+                                if (!_isDirections)
+                                  FloatingActionButton(
+                                    heroTag: 'filterBtn',
+                                    onPressed: () {
+                                      HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('map_filter');
+                                      showFilterMenu();
+                                      setVisibleMarkerLists();
+                                    },
+                                    backgroundColor: Colors.transparent,
+                                    mini: true,
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(127),
+                                              spreadRadius: 1,
+                                              blurRadius: 3,
+                                              offset: const Offset(2, 2))
+                                        ],
+                                      ),
+                                      child: const Icon(Icons.filter_alt),
+                                    ),
+                                  )
+                              ],
+                            ),
                         ],
                       ),
-                  ],
-                ),
-              ),
-              if (_distanceToDestination != null)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                          iconSize: 30,
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('distance_to_destination');
-                        _setMapCameraToFitPolyline(polylines);
-                      },
-                      icon: Icon(Icons.directions, color: Theme.of(context).colorScheme.onPrimary),
-                      label: Text(
-                        _distanceToDestination!,
-                        style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.onPrimary),
-                      ),
                     ),
-                  ),
-                ),
-              if (preferredRoadClosurePolygonVisible && navigationInProgress == false)
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 5.0, bottom: 6.0),
-                    child: Material(
-                      elevation: 3,
-                      borderRadius: BorderRadius.circular(8),
-                      color: Theme.of(context).colorScheme.surface,
-                      child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('road_closures_legend');
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return roadClosuresDialog();
-                            },
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
+                    if (preferredRoadClosurePolygonVisible && !_isDirections)
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 5.0, bottom: 6.0),
+                          child: Material(
+                            elevation: 3,
                             borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 14,
+                            color: Theme.of(context).colorScheme.surface,
+                            child: GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('road_closures_legend');
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return roadClosuresDialog();
+                                  },
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: selectedThemeKey == 'colourBlindFriendly'
-                                      ? const Color.fromRGBO(224, 129, 87, 255)
-                                      : Theme.of(context).colorScheme.tertiary.withAlpha(50),
-                                  border: Border.all(
-                                    color: Theme.of(context).colorScheme.tertiary,
-                                    width: 3,
-                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 20,
+                                      height: 14,
+                                      decoration: BoxDecoration(
+                                        color: selectedThemeKey == 'colourBlindFriendly'
+                                            ? const Color.fromRGBO(224, 129, 87, 255)
+                                            : Theme.of(context).colorScheme.tertiary.withAlpha(50),
+                                        border: Border.all(
+                                          color: Theme.of(context).colorScheme.tertiary,
+                                          width: 3,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Road closures',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(context).colorScheme.tertiary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Road closures',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context).colorScheme.tertiary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
+              if (_navigationListing != null || _distanceToDestination != null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: NavigationBottomRow(
+                  key: _destinationCardKey,
+                  destinationCard: _navigationListing == null ? null : _buildDestinationCard(context, _navigationListing!),
+                  distance: _distanceToDestination,
+                  onDistancePressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('distance_to_destination');
+                    _setMapCameraToFitPolyline(polylines);
+                  },
                   ),
-                )
+                ),
             ],
           ),
           analyticsService: widget.analyticsService,
         );
       },
+    );
+  }
+}
+
+// Floating destination card, including the device's bottom safe area.
+class NavigationBottomRow extends StatelessWidget {
+  const NavigationBottomRow({super.key, this.destinationCard, this.distance, required this.onDistancePressed});
+
+  final Widget? destinationCard;
+  final String? distance;
+  final VoidCallback onDistancePressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+        top: false,
+        minimum: const EdgeInsets.all(12),
+        child: Material(
+          elevation: 3,
+          color: Theme.of(context).colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 0.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (destinationCard != null) Expanded(child: destinationCard!),
+                if (destinationCard != null && distance != null) const SizedBox(width: 12),
+                if (distance != null)
+                  SizedBox(
+                    width: 120,
+                    child: NavigationDistanceButton(distance: distance!, onPressed: onDistancePressed),
+                  ),
+              ],
+            ),
+          ),
+        ),
+    );
+  }
+}
+
+// Remaining distance and route overview action within the navigation row.
+class NavigationDistanceButton extends StatelessWidget {
+  const NavigationDistanceButton({super.key, required this.distance, required this.onPressed});
+
+  final String distance;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        elevation: 3,
+      ),
+      onPressed: onPressed,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.directions, size: 16),
+          const SizedBox(width: 4),
+          Flexible(child: Text(distance, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+        ],
+      ),
     );
   }
 }
