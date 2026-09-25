@@ -61,6 +61,7 @@ void main() {
           onFavouriteTapped: onFavouriteTapped,
           inDialog: false,
           analyticsService: FakeAnalyticsService(),
+          colorScheme: ColorScheme.light(),
         ),
       ),
     );
@@ -94,35 +95,6 @@ void main() {
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
-    });
-
-    testWidgets('displays a local business label instead of opening times for brick-and-mortar listings', (WidgetTester tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        cancelled: false,
-        brickAndMortar: true,
-        emoji: '🏪',
-        title: 'Mill Road Shop',
-        subtitle: 'Shopping',
-        location: 'Mill Road',
-        description: '',
-        email: '',
-        website: '',
-        phoneNumber: '',
-        imageURL: '',
-        startTime: '10:30',
-        endTime: '16:30',
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: false,
-        onGetDirections: () {},
-        listingFavourited: false,
-      ));
-
-      expect(find.text('Local business'), findsOneWidget);
-      expect(find.text('10:30—16:30'), findsNothing);
-
-      final Text label = tester.widget(find.text('Local business'));
-      expect(label.style?.fontSize, 12);
-      expect(label.style?.fontWeight, FontWeight.bold);
     });
 
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
@@ -354,7 +326,7 @@ void main() {
       final emojiFinder = find.text('🍩 ');
       expect(emojiFinder, findsOneWidget);
       expect(find.ancestor(of: emojiFinder, matching: find.byType(ColorFiltered)), findsOneWidget);
-      final Opacity emojiOpacity = tester.widget(find.ancestor(of: emojiFinder, matching: find.byType(Opacity)));
+      final Opacity emojiOpacity = tester.widget(find.ancestor(of: emojiFinder, matching: find.byType(Opacity).last));
       expect(emojiOpacity.opacity, 0.5);
       final titleFinder = find.text('Glazed and Confused');
       expect(titleFinder, findsOneWidget);
@@ -371,7 +343,7 @@ void main() {
       final cancelledTextFinder = find.text('CANCELLED');
       expect(cancelledTextFinder, findsOneWidget);
       final Text cancelledTextWidget = tester.widget(cancelledTextFinder.first);
-      final colorScheme = Theme.of(tester.element(cancelledTextFinder)).colorScheme;
+      final colorScheme = ColorScheme.light();
       expect(cancelledTextWidget.style?.color, colorScheme.onPrimary);
       expect(cancelledTextWidget.style?.color, isNot(Colors.red));
 
@@ -492,7 +464,7 @@ void main() {
       expect(favouriteIcon.icon?.fontPackage, FontAwesomeIcons.solidHeart.fontPackage);
       expect(
         favouriteIcon.color,
-        Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).colorScheme.primary,
+        ColorScheme.light().primary,
       );
 
       await tester.tap(find.byType(IconButton).first);

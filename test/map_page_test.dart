@@ -574,7 +574,7 @@ void main() {
       expect(find.text('Food Group'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Food'), findsOneWidget);
-      expect(find.text('approx. 199 m'), findsOneWidget);
+      expect(find.text('~199m away'), findsOneWidget);
       // Specific marker content
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
@@ -615,7 +615,7 @@ void main() {
       expect(find.text('🍣 '), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue (approx. 135 m)'), findsOneWidget);
+      expect(find.text('Implausible Avenue (~135m away)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);

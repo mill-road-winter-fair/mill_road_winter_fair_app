@@ -100,7 +100,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     'Business': true,
     'Services': true,
   };
-  late List<bool> detailsVisibilityList; // for modal bottom sheet group listings
+  int? detailsVisibleIndex; // which listing (if any) on modal bottom sheet has details button selected
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -108,6 +108,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   CameraPosition? _currentCamera; // saves the camera position as it is moved by user or programmatically
   CameraPosition? _cameraBeforeNavigation; // to be able to restore camera position after navigation
   CameraPosition? _cameraBeforeSearch; // to be able to restore camera position after search
+  late ColorScheme colorScheme; // will be set in build
 
   @override
   void initState() {
@@ -614,6 +615,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           return a['title'].compareTo(b['title']);
         });
 
+        final Map<dynamic, GlobalKey> listingKeys = {}; // global key of each listing so we can ensure it's visible
+
         final groupSheetModalScrollController = ScrollController();
         showModalBottomSheet(
           context: context,
@@ -623,13 +626,21 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           isScrollControlled: true,
           useSafeArea: true,
           builder: (context) {
-            detailsVisibilityList = List<bool>.filled(relatedListings.length, false);
+            detailsVisibleIndex = null;
             return StatefulBuilder(
               builder: (context, setModalState) {
+
                 void toggleDetailsRow(int index) {
                   setModalState(() {
-                    detailsVisibilityList[index] = !detailsVisibilityList[index];
+                    detailsVisibleIndex = (detailsVisibleIndex == null || detailsVisibleIndex != index) ? index : null;
                   });
+                  if (detailsVisibleIndex != null ) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) async {
+                      final theKey = listingKeys[index];
+                      if (theKey == null) return;
+                      ensureWidgetFullyVisible(theKey);
+                    });
+                  }
                 }
 
                 void favouriteOrNotListing(String listingID) {
@@ -657,7 +668,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           currentLatLng!,
                           stringToLatLng(parentListing['latLng']),
                         );
-                        distanceMessage = 'approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)}';
+                        distanceMessage = '~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away';
                       }
 
                       return ConstrainedBox(
@@ -676,6 +687,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                 startTime: "${parentListing['startTime']}",
                                 endTime: "${parentListing['endTime']}",
                                 approxDistance: distanceMessage,
+                                colorScheme: colorScheme,
                               ),
                             ),
                             Flexible(
@@ -693,35 +705,46 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                     controller: groupSheetModalScrollController,
                                     itemBuilder: (context, index) {
                                       final rel = relatedListings[index];
-
+                                      final isFavourited = isListingFavourited(rel['id']);
+                                      listingKeys.putIfAbsent(index, () => GlobalKey());
                                       return Column(
+                                        key: listingKeys[index],
                                         children: [
-                                          SpecificListingInfoSheet(
-                                            listingId: rel['id'],
-                                            cancelled: rel['cancelled'] == 'TRUE' ? true : false,
-                                            brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
-                                            emoji: rel['emoji'] ?? '',
-                                            title: rel['title'],
-                                            subtitle: rel['subtitle'],
-                                            location: rel['location'],
-                                            description: rel['description'] ?? '',
-                                            email: rel['email'] ?? '',
-                                            website: rel['website'] ?? '',
-                                            phoneNumber: rel['phone'] ?? '',
-                                            imageURL: rel['imageURL'] ?? '',
-                                            startTime: "${rel['startTime']}",
-                                            endTime: "${rel['endTime']}",
-                                            approxDistance: '',
-                                            detailsVisible: detailsVisibilityList[index],
-                                            onDetailsTapped: () => toggleDetailsRow(index),
-                                            listingFavourited: isListingFavourited(rel['id']),
-                                            onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                            onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                            inDialog: false,
-                                            analyticsService: widget.analyticsService,
+                                          Container(
+                                            width: constraints.maxWidth - 10,
+                                            decoration: BoxDecoration(
+                                              color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
+                                              border: Border.all(color: colorScheme.primary, width: 0.5),
+                                              borderRadius: BorderRadius.circular(8),
+                                              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
+                                            ),
+                                            child: SpecificListingInfoSheet(
+                                              listingId: rel['id'],
+                                              cancelled: rel['cancelled'] == 'TRUE' ? true : false,
+                                              brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
+                                              emoji: rel['emoji'] ?? '',
+                                              title: rel['title'],
+                                              subtitle: rel['subtitle'],
+                                              location: rel['location'],
+                                              description: rel['description'] ?? '',
+                                              email: rel['email'] ?? '',
+                                              website: rel['website'] ?? '',
+                                              phoneNumber: rel['phone'] ?? '',
+                                              imageURL: rel['imageURL'] ?? '',
+                                              startTime: "${rel['startTime']}",
+                                              endTime: "${rel['endTime']}",
+                                              approxDistance: '',
+                                              detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
+                                              onDetailsTapped: () => toggleDetailsRow(index),
+                                              listingFavourited: isFavourited,
+                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                              onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                              inDialog: false,
+                                              analyticsService: widget.analyticsService,
+                                              colorScheme: colorScheme,
+                                            ),
                                           ),
-                                          if (index != relatedListings.length - 1)
-                                            SizedBox(height: 14, child: Divider(color: Theme.of(context).colorScheme.surfaceDim)),
+                                          if (index != relatedListings.length - 1) SizedBox(height: 8),
                                         ],
                                       );
                                     },
@@ -789,7 +812,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               currentLatLng!,
               destinationLatLng,
             );
-            distanceMessage = '(approx. ${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)})';
+            distanceMessage = '(~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
           }
 
           // Show bottom sheet with listing information
@@ -855,6 +878,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
                               inDialog: false,
                               analyticsService: widget.analyticsService,
+                              colorScheme: colorScheme,
                             ),
                           ),
                         ),
@@ -1765,6 +1789,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   @override
   Widget build(BuildContext context) {
     //debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}'); // noisy; uncomment if working on CameraPosition
+
+    colorScheme = Theme.of(context).colorScheme;
 
     return FutureBuilder(
       future: _fetchListings,

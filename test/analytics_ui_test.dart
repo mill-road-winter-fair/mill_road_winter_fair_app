@@ -84,7 +84,7 @@ void main() {
         description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
         imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: false,
         listingFavourited: false, inDialog: false, onGetDirections: () {},
-        onDetailsTapped: () => analytics.calls.add('details'), analyticsService: analytics,
+        onDetailsTapped: () => analytics.calls.add('details'), analyticsService: analytics, colorScheme: ColorScheme.light(),
       ))));
       await tester.tap(find.byIcon(Icons.info));
       expect(analytics.calls, ['haptic', 'tap:listing_details', 'details']);
@@ -103,7 +103,7 @@ void main() {
         description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
         imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: true,
         listingFavourited: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
-        analyticsService: analytics,
+        analyticsService: analytics, colorScheme: ColorScheme.light(),
       ))));
       // The sheet has one IconButton: the favourite control.
       await tester.tap(find.byType(IconButton));
