@@ -94,7 +94,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
   }
   DateTime? startTime;
   try {
-    startTime = DateTime.parse(theEventAlert['eventStartTime'] ?? '');
+    startTime = DateTime.parse(theEventAlert['listingStartTime'] ?? '');
   } catch (e) {
     debugPrint('notificationTapBackground: failed to parse startTime: $e');
     return;
@@ -124,19 +124,20 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
     if (timeToGo <= 0) {
       categoryID = 'UnderwayCategory';
       androidNotificationActions = [AndroidNotificationAction('show', 'Show')];
-      final endTime = DateTime.parse(theEventAlert['eventEndTime']);
-      theMessage = '${theEventAlert['eventName']} underway at ${theEventAlert['eventLocation']} until ${intl.DateFormat('EEEE').format(endTime)}';
+      final endTime = DateTime.parse(theEventAlert['listingEndTime']);
+      theMessage = '${theEventAlert['listingTitle']} underway at ${theEventAlert['listingLocation']} until ${intl.DateFormat('EEEE').format(endTime)}';
       noticePeriod = 0;
     } else {
       (categoryID, androidNotificationActions) = calculateAlertActionCategories(timeToGo);
-      final startTime = DateTime.tryParse(theEventAlert['eventStartTime']);
-      theMessage = '${theEventAlert['eventName']} starting at ${theEventAlert['eventLocation']} in $timeToGo minutes${(startTime != null) ? ' (${intl.DateFormat('EEEE').format(startTime)})' : ''}';
+      final startTime = DateTime.tryParse(theEventAlert['listingStartTime']);
+          debugPrint('MW got ${theEventAlert['listingStartTime']} ${theEventAlert['listingTitle']} ${intl.DateFormat('EEEE').format(startTime!)}');
+      theMessage = '${theEventAlert['listingTitle']} starting at ${theEventAlert['listingLocation']} in $timeToGo minutes${(startTime != null) ? ' (${intl.DateFormat.Hm().format(startTime)})' : ''}';
       noticePeriod = timeToGo;
     }
     flutterLocalNotificationsPlugin.cancel(id: notificationResponse.id!);
     DateTime? endTime;
     try {
-      endTime = DateTime.parse(theEventAlert['eventEndTime'] ?? '');
+      endTime = DateTime.parse(theEventAlert['listingEndTime'] ?? '');
     } catch (e) {
       debugPrint('notificationTapBackground: failed to parse endTime: $e');
       return;
@@ -144,7 +145,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
     final theAlert = AlertSchedule(
       notificationResponse.id!, 
       theEventAlert['listingId'],
-      theEventAlert['listingName'],
+      theEventAlert['listingTitle'],
       theEventAlert['listingLocation'],
       startTime, 
       endTime, 
