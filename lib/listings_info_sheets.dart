@@ -245,6 +245,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
+    final startTime = combineDateAndTime(widget.startTime, fairDate);
+    final endTime = combineDateAndTime(widget.endTime, fairDate);
+    final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
+
     return Container(
       padding: (widget.inDialog)
           ? EdgeInsets.all(0)
@@ -325,7 +329,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             ),
           if (widget.detailsVisible && widget.inDialog) detailsColumn(context),
           const SizedBox(height: 12),
-          Row(
+          Row(spacing: 6,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -351,8 +355,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       : Theme.of(context).colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: 6),
-              IconButton(
+              if (isItAnEvent) IconButton(
                 onPressed: widget.cancelled && !alertsStore.alertExists(widget.listingId)
                     ? null
                     : () {
@@ -375,7 +378,6 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       : Theme.of(context).colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: 6),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     iconSize: 24,
@@ -393,10 +395,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       },
                 child: const Icon(Icons.directions_walk),
               ),
-              // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
-              if (widget.onDetailsTapped != null &&
-                  (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
-                const SizedBox(width: 6),
+              // only display the Details button if there are details to display (and they're not always shown i.e. single bottom modal)
               // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
               if (widget.onDetailsTapped != null &&
                   widget.website.isNotEmpty &&
@@ -451,7 +450,6 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   },
                   child: const Icon(Icons.info),
                 ),
-              const SizedBox(width: 6),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     iconSize: 24,
@@ -470,7 +468,6 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
               ),
               Flexible(flex: 1, child: Container()),
-              if (widget.website.isNotEmpty) const SizedBox(width: 6),
               if (widget.website.isNotEmpty)
                 Material(
                   shape: const CircleBorder(),
@@ -494,7 +491,6 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     ),
                   ),
                 ),
-              if (widget.email.isNotEmpty) const SizedBox(width: 6),
               if (widget.email.isNotEmpty)
                 Material(
                   shape: const CircleBorder(),
@@ -523,7 +519,6 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     ),
                   ),
                 ),
-              if (widget.phoneNumber.isNotEmpty) const SizedBox(width: 6),
               if (widget.phoneNumber.isNotEmpty)
                 Material(
                   shape: const CircleBorder(),
@@ -724,66 +719,66 @@ Future<void> showListingDetailsDialog(
   }
 
   listingDetailsDialogRoute = DialogRoute(
-      context: context,
-      barrierColor: Colors.black38,
-      builder: (_) => StatefulBuilder(
-        builder: (ctx2, setStateDialog) {
-          return Dialog(
-            insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
-            shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
-            backgroundColor: colorScheme.surfaceContainerLowest,
-            shadowColor: colorScheme.surfaceContainerHighest,
-            elevation: 12,
-            child: SingleChildScrollView(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                child: SpecificListingInfoSheet(
-                  listingId: event.id,
-                  cancelled: event.cancelled,
-                  brickAndMortar: event.brickAndMortar,
-                  emoji: event.emoji,
-                  title: event.name,
-                  subtitle: event.subtitle,
-                  location: event.location,
-                  description: event.description,
-                  email: event.email,
-                  website: event.website,
-                  phoneNumber: event.phoneNumber,
-                  imageURL: event.imageURL,
-                  startTime: formatTime(event.startTime),
-                  endTime: formatTime(event.endTime),
-                  approxDistance: distanceMessage,
-                  detailsVisible: true,
-                  listingFavourited: favouriteListingKeys.value.contains(event.id),
-                  listingAlerted: alertsStore.alertExists(event.id),
-                  onFavouriteTapped: () {
-                    HapticFeedback.lightImpact();
-                    favouriteOrNotListing(event);
-                    setStateFunction.call;
-                    setStateDialog(() {});
-                  },
-                  onGetDirections: () async {
-                    HapticFeedback.lightImpact();
-                    safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
-                    onGetDirections.call();
-                  },
-                  onAlertTapped: () async {
-                    HapticFeedback.lightImpact();
-                    onAlertTapped.call();
-                    setStateDialog(() {});
-                  },
-                  inDialog: true,
-                  analyticsService: analyticsService,
-                ),
+    context: context,
+    barrierColor: Colors.black38,
+    builder: (_) => StatefulBuilder(
+      builder: (ctx2, setStateDialog) {
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
+          shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+          backgroundColor: colorScheme.surfaceContainerLowest,
+          shadowColor: colorScheme.surfaceContainerHighest,
+          elevation: 12,
+          child: SingleChildScrollView(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: SpecificListingInfoSheet(
+                listingId: event.id,
+                cancelled: event.cancelled,
+                brickAndMortar: event.brickAndMortar,
+                emoji: event.emoji,
+                title: event.name,
+                subtitle: event.subtitle,
+                location: event.location,
+                description: event.description,
+                email: event.email,
+                website: event.website,
+                phoneNumber: event.phoneNumber,
+                imageURL: event.imageURL,
+                startTime: formatTime(event.startTime),
+                endTime: formatTime(event.endTime),
+                approxDistance: distanceMessage,
+                detailsVisible: true,
+                listingFavourited: favouriteListingKeys.value.contains(event.id),
+                listingAlerted: alertsStore.alertExists(event.id),
+                onFavouriteTapped: () {
+                  HapticFeedback.lightImpact();
+                  favouriteOrNotListing(event);
+                  setStateFunction.call;
+                  setStateDialog(() {});
+                },
+                onGetDirections: () async {
+                  HapticFeedback.lightImpact();
+                  safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                  onGetDirections.call();
+                },
+                onAlertTapped: () async {
+                  HapticFeedback.lightImpact();
+                  onAlertTapped.call();
+                  setStateDialog(() {});
+                },
+                inDialog: true,
+                analyticsService: analyticsService,
               ),
             ),
-          );
-        },
-      )
-    );
+          ),
+        );
+      },
+    )
+  );
   await Navigator.of(context).push(listingDetailsDialogRoute!);
   removeMiniPopup(); // just in case one was opened
 }

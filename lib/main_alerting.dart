@@ -130,7 +130,6 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
     } else {
       (categoryID, androidNotificationActions) = calculateAlertActionCategories(timeToGo);
       final startTime = DateTime.tryParse(theEventAlert['listingStartTime']);
-          debugPrint('MW got ${theEventAlert['listingStartTime']} ${theEventAlert['listingTitle']} ${intl.DateFormat('EEEE').format(startTime!)}');
       theMessage = '${theEventAlert['listingTitle']} starting at ${theEventAlert['listingLocation']} in $timeToGo minutes${(startTime != null) ? ' (${intl.DateFormat.Hm().format(startTime)})' : ''}';
       noticePeriod = timeToGo;
     }
