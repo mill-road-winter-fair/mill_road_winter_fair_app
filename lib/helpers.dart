@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -15,6 +19,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1021,3 +1026,85 @@ String formatFullDate(DateTime date) {
   final suffix = day >= 11 && day <= 13 ? 'th' : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][day % 10];
   return '$dayName $monthName $day$suffix';
 }
+
+void toggleListingAlert(String listingID, int desiredNoticePeriod, BuildContext context) {
+  debugPrint('toggleListingAlert called for $listingID and desiredNoticePeriod=$desiredNoticePeriod');
+  final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
+  if (theListing == null) return;
+  final existingAlert = alertsStore.alertSchedules.firstWhereOrNull((a) => a.listingId == listingID);
+  if (existingAlert != null) {
+    final theAlertId = existingAlert.id;
+    debugPrint('toggleListingAlert removing and cancelling theAlertId=$theAlertId');
+    alertsStore.removeAlertById(theAlertId);
+    flutterLocalNotificationsPlugin.cancel(id: theAlertId);
+    showToast(context, 'Alert for ${theListing['title']} has been cancelled.', false);
+    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.saveAllEventAlerts();
+    return;
+  } else {
+    final theListingStart = combineDateAndTime(theListing['startTime'], fairDate);
+    String? categoryID;
+    List<AndroidNotificationAction> androidNotificationActions;
+    final now = DateTime.now();
+    final timeToGo = theListingStart.difference(now).inMinutes;
+    int theAlertNoticePeriod;
+    if (timeToGo <= 0) {
+      showToast(context, 'No alert set as ${theListing['title']} is already underway.', true);
+      return;
+    } else if (timeToGo < desiredNoticePeriod) {
+      theAlertNoticePeriod = max(timeToGo ~/ 1.5, 1); // arbitrary value if within desiredNoticePeriod of start
+    } else {
+      theAlertNoticePeriod = desiredNoticePeriod;
+    }
+    (categoryID, androidNotificationActions) = calculateAlertActionCategories(theAlertNoticePeriod);
+    final newAlertId = alertsStore.addAlert(listingID, theAlertNoticePeriod, true);
+    final schedTime = theListingStart.subtract(Duration(minutes: theAlertNoticePeriod));
+    flutterLocalNotificationsPlugin.zonedSchedule(
+      id: newAlertId,
+      title: 'Mill Road Winter Fair alert',
+      body: (theAlertNoticePeriod > 0)
+        ? '${theListing['title']} starting at ${theListing['location']} in $theAlertNoticePeriod minutes (${theListing['startTime']})'
+        : '${theListing['title']} underway at ${theListing['location']} until ${theListing['endTime']}',
+      payload: jsonEncode(alertsStore.alertSchedules.firstWhere((a) => a.id == newAlertId)),
+      scheduledDate: tz.TZDateTime.from(schedTime, tz.local),//todo
+      //scheduledDate: tz.TZDateTime.from(now.add(Duration(seconds: 3)), tz.local),
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'org.millroadwinterfair.MRWFapp',
+          'Event alerts',
+          channelDescription: 'Mill Road Winter Fair event alerts',
+          importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
+          actions: androidNotificationActions,
+        ),
+        iOS: DarwinNotificationDetails(
+          threadIdentifier: 'org.millroadwinterfair.MRWFapp',
+          categoryIdentifier: categoryID
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
+    );
+    debugPrint('toggleAlert added new alert with ID $newAlertId');
+    String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
+    if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
+    showToast(context, '$theMessage.', false);
+    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.saveAllEventAlerts();
+    debugPrint('toggleAlert scheduled new alert for $schedTime with message “$theMessage”');
+    return;
+  }
+}
+
+void showToast(BuildContext theContext, String theMessage, bool isError) {
+  Fluttertoast.showToast(
+    msg: theMessage,
+    gravity: ToastGravity.BOTTOM,
+    backgroundColor: (isError) ? Theme.of(theContext).colorScheme.tertiary : Theme.of(theContext).colorScheme.primary,
+    textColor: (isError) ? Theme.of(theContext).colorScheme.onPrimary : Theme.of(theContext).colorScheme.onPrimary,
+    fontSize: 16,
+    toastLength: Toast.LENGTH_LONG,
+    timeInSecForIosWeb: 4,
+  );
+}
+

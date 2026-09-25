@@ -83,7 +83,7 @@ void main() {
         cancelled: false, brickAndMortar: false, emoji: '', title: 'Listing', subtitle: '', location: '',
         description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
         imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: false,
-        listingFavourited: false, inDialog: false, onGetDirections: () {},
+        listingFavourited: false, listingAlerted: false, inDialog: false, onGetDirections: () {},
         onDetailsTapped: () => analytics.calls.add('details'), analyticsService: analytics,
       ))));
       await tester.tap(find.byIcon(Icons.info));
@@ -102,7 +102,7 @@ void main() {
         listingId: 'listing-456', cancelled: false, brickAndMortar: false, emoji: '', title: 'Another listing', subtitle: '', location: '',
         description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
         imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: true,
-        listingFavourited: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
+        listingFavourited: false, listingAlerted: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
         analyticsService: analytics,
       ))));
       // The sheet has one IconButton: the favourite control.

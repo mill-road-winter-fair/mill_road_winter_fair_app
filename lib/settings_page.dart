@@ -58,6 +58,9 @@ Future<void> loadSettings() async {
       favouriteListingKeys.value = {};
     }
 
+    // Get the favoured alert notice period
+    alertNoticePeriod = prefs.getInt('alertNoticePeriod') ?? 15;
+
     // Set initial theme and map style to change according to system brightness
     String defaultTheme = 'auto';
     selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme;
@@ -153,6 +156,13 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
+  void saveAlertNoticePeriod(int theNoticePeriod) async {
+    debugPrint('saveAlertNoticePeriod called with theNoticePeriod=$theNoticePeriod');
+    alertNoticePeriod = theNoticePeriod;
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('alertNoticePeriod', theNoticePeriod);
+  }
+
   Future<void> _changeTheme(String themeKey) async {
     themeNotifier.value = themeKey;
   }
@@ -160,6 +170,8 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     final settingLabelStyle = Theme.of(context).textTheme.titleMedium;
+    final settingValueStyle = Theme.of(context).textTheme.bodyMedium;
+    final dropdownLabelStyle = Theme.of(context).textTheme.bodyMedium;
     return SafeArea(
       top: false,
       left: false,
@@ -361,6 +373,39 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                       ],
                     ),
                     const SizedBox(height: 16),
+                    Row(spacing: 15, children: [
+                      Text('Default alerts', style: settingLabelStyle),
+                      PopupMenuButton<int>(
+                        initialValue: alertNoticePeriod,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 10,
+                        offset: const Offset(0, -56),
+                        onOpened: HapticFeedback.lightImpact,
+                        onSelected: (int newValue) async {
+                          HapticFeedback.mediumImpact();
+                          saveAlertNoticePeriod(newValue);
+                          setState(() { });
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(style: settingValueStyle, (alertNoticePeriod == 0) ? 'At time of event' : '$alertNoticePeriod minutes before'),
+                            const Icon(Icons.arrow_drop_down),
+                          ],
+                        ),
+                        itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                          for (int i=0; i<alertNoticePeriods.length; i++)
+                            PopupMenuItem<int>(value: alertNoticePeriods[i], height: 30.0, 
+                              child: Text(
+                                style: dropdownLabelStyle,
+                                (alertNoticePeriods[i] == 0) ? 'At time of event' : '${alertNoticePeriods[i]} minutes before'
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       activeThumbColor: Theme.of(context).colorScheme.tertiary,

@@ -2,6 +2,7 @@ import Flutter
 import UIKit
 import GoogleMaps
 import FirebaseCore
+import flutter_local_notifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -15,9 +16,14 @@ import FirebaseCore
         print("Couldn't get IOS_GOOGLE_MAPS_SDK_API_KEY via GMSApiKey")
     }
     FirebaseApp.configure()
+    UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    // This is required to make any communication available in the action isolate.
+    FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { (registry) in
+        GeneratedPluginRegistrant.register(with: registry)
+    }
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 }

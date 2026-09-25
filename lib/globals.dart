@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 
 // Consolidated global variables used across the app.
@@ -70,6 +71,11 @@ late bool listingUpdateNoticeEnabled;
 
 // Initialise the list of favourited listings (ValueNotifier as pages need to know when others change these)
 final ValueNotifier<Set<String>> favouriteListingKeys = ValueNotifier<Set<String>>({});
+
+// The favoured, and offered, alert notice periods
+int alertNoticePeriod = 15;
+const alertNoticePeriods = [0, 5, 15, 30, 60]; // the selection of periods in minutes to be offered
+AlertScheduleStore alertsStore = AlertScheduleStore.initial(); // will be read from prefs
 
 // --- Location related globals (moved from get_current_location.dart) ---
 // Whether device location services are enabled and the permission status.
