@@ -149,6 +149,75 @@ void main() {
       expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).myLocationEnabled, isFalse);
     });
 
+    testWidgets('search includes hidden listings and restores default pins', (tester) async {
+      final toastCalls = <MethodCall>[];
+      const toastChannel = MethodChannel('PonnamKarthik/fluttertoast');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, (call) async {
+        toastCalls.add(call);
+        return true;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null));
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+      ));
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      Set<String> visibleIds() => state.markers.values
+          .where((marker) => marker.visible)
+          .map((marker) => marker.markerId.value)
+          .toSet();
+      expect(visibleIds(), {'1', '3'});
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+      final field = find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
+      await tester.enterText(field, 'z');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'2'});
+      await tester.enterText(field, 'GLAZED');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'2'});
+      expect(toastCalls, isEmpty);
+      await tester.enterText(field, 'no such listing');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), isEmpty);
+      expect(toastCalls.single.method, 'showToast');
+      expect(toastCalls.single.arguments['msg'], 'No matching listings found');
+      await tester.enterText(field, 'fake street');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '2'});
+      await tester.enterText(field, '');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+      await tester.enterText(field, 'glazed');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.search_off));
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      await tester.enterText(field, 'glazed');
+      await tester.pumpAndSettle();
+      final clear = find.descendant(of: find.byType(SearchBar), matching: find.byIcon(Icons.close));
+      await tester.tap(clear);
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+      await tester.enterText(field, 'glazed');
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'1', '3'});
+      expect(find.byType(SearchBar), findsNothing);
+      expect(toastCalls, hasLength(1));
+    });
+
     testWidgets('all map buttons are present', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
