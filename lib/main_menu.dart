@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
@@ -13,6 +14,7 @@ class MainMenu extends StatefulWidget {
     required this.onOpenListings,
     required this.onOpenMap,
     required this.onTabSelected,
+    required this.analyticsService,
     super.key,
   });
   final List<Map<String, dynamic>> theEvents;
@@ -20,6 +22,7 @@ class MainMenu extends StatefulWidget {
   final Function(String, String?) onOpenListings;
   final Function(int?) onOpenMap;
   final ValueChanged<int> onTabSelected;
+  final AnalyticsService analyticsService;
   @override
   State<MainMenu> createState() => _MainMenuState();
 }
@@ -95,7 +98,7 @@ class _MainMenuState extends State<MainMenu> {
   }
 
   void _about() => Navigator.push(
-      context, MaterialPageRoute(builder: (_) => const AboutTheFairPage()));
+      context, MaterialPageRoute(builder: (_) => AboutTheFairPage(analyticsService: widget.analyticsService)));
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +140,7 @@ class _MainMenuState extends State<MainMenu> {
             )),
           ],
         ),
-      ),
+      ), analyticsService: widget.analyticsService,
     );
   }
 }

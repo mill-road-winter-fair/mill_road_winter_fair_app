@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/main_menu.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
@@ -25,7 +26,7 @@ void main() {
             calls?.add('music:$favourites:$music'),
         onOpenListings: (scope, category) => calls?.add('$scope:$category'),
         onOpenMap: (id) => calls?.add('map:$id'),
-        onTabSelected: (tab) => calls?.add('tab:$tab'),
+        onTabSelected: (tab) => calls?.add('tab:$tab'), analyticsService: FakeAnalyticsService(),
       ),
     ));
     await tester.pumpAndSettle();
