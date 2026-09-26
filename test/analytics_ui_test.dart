@@ -8,6 +8,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/main_menu.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -70,6 +71,55 @@ void main() {
     ))));
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
+  });
+
+  testWidgets('carousel logs selection and opening once with haptics', (tester) async {
+    tester.view.physicalSize = const Size(402, 874);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(MaterialApp(home: MainMenu(
+      theEvents: const [], analyticsService: analytics,
+      onOpenListings: (_, category) => analytics.calls.add('open:$category'),
+      onOpenTimetable: (_, __) => analytics.calls.add('open:music'),
+      onOpenMap: (_) {}, onTabSelected: (_) {},
+    )));
+    await tester.pumpAndSettle();
+    expect(analytics.calls, isEmpty);
+    await tester.tap(find.byKey(const ValueKey('choice-foodDrink')));
+    expect(analytics.calls, ['haptic', 'tap:carousel_open_foodDrink', 'open:food']);
+    analytics.calls.clear();
+
+    final carousel = find.byType(PageView);
+    await tester.drag(carousel, Offset(-tester.getSize(carousel).width * .56, 0));
+    await tester.pumpAndSettle();
+    expect(analytics.calls, ['haptic', 'tap:carousel_select_music']);
+    await tester.pump(const Duration(seconds: 1));
+    expect(analytics.calls, ['haptic', 'tap:carousel_select_music']);
+    analytics.calls.clear();
+    await tester.tap(find.byKey(const ValueKey('selected-category')));
+    expect(analytics.calls, ['haptic', 'tap:carousel_open_music', 'open:music']);
+    analytics.calls.clear();
+
+    final food = tester.getRect(find.byKey(const ValueKey('choice-foodDrink')))
+        .intersect(tester.getRect(carousel));
+    await tester.tapAt(food.center);
+    await tester.pumpAndSettle();
+    expect(analytics.calls, ['haptic', 'tap:carousel_select_foodDrink']);
+    analytics.calls.clear();
+    await tester.tap(find.bySemanticsLabel('Mill Road Winter Fair. About the Fair'));
+    await tester.pumpAndSettle();
+    expect(analytics.calls.take(2), ['haptic', 'tap:carousel_about_fair']);
+  });
+
+  testWidgets('raised Home logs once before navigating', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: FairScaffold(
+      appBarTitle: 'Fair', body: const SizedBox(), currentTab: 1,
+      onTabSelected: (index) => analytics.calls.add('navigate:$index'),
+      analyticsService: analytics,
+    )));
+    await tester.tap(find.byKey(const ValueKey('home-navigation-button')));
+    expect(analytics.calls, ['haptic', 'tap:navigation_home', 'navigate:0']);
   });
 
   for (final width in [350.0, 500.0]) {

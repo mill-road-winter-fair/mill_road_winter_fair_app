@@ -8,16 +8,19 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 void main() {
   setUp(() {
     onTest = true;
-    staticMainMenuPage.value = false;
   });
 
   Future<void> buildMainMenu(WidgetTester tester,
-      {List<String>? calls, ThemeData? theme, double textScale = 1}) async {
+      {List<String>? calls,
+      ThemeData? theme,
+      double textScale = 1,
+      bool reduceMotion = false}) async {
     await tester.pumpWidget(MaterialApp(
       theme: theme ?? appThemes['light'],
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context)
-            .copyWith(textScaler: TextScaler.linear(textScale)),
+        data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textScale),
+            disableAnimations: reduceMotion),
         child: child!,
       ),
       home: MainMenu(
@@ -26,7 +29,8 @@ void main() {
             calls?.add('music:$favourites:$music'),
         onOpenListings: (scope, category) => calls?.add('$scope:$category'),
         onOpenMap: (id) => calls?.add('map:$id'),
-        onTabSelected: (tab) => calls?.add('tab:$tab'), analyticsService: FakeAnalyticsService(),
+        onTabSelected: (tab) => calls?.add('tab:$tab'),
+        analyticsService: FakeAnalyticsService(),
       ),
     ));
     await tester.pumpAndSettle();
@@ -175,10 +179,9 @@ void main() {
     expect(calls, ['music:false:true']);
   });
 
-  testWidgets('static preference allows immediate category changes',
+  testWidgets('system reduced motion keeps artwork at a constant size',
       (tester) async {
-    staticMainMenuPage.value = true;
-    await buildMainMenu(tester);
+    await buildMainMenu(tester, reduceMotion: true);
     expect(
       tester.getSize(find.byKey(const ValueKey('choice-foodDrink'))).height,
       tester.getSize(find.byKey(const ValueKey('choice-music'))).height,
@@ -188,7 +191,6 @@ void main() {
     expect(find.text('Nearby'), findsOneWidget);
     await move(tester, 'Next');
     expect(find.text('Food & Drink'), findsOneWidget);
-    staticMainMenuPage.value = false;
   });
 
   testWidgets(
@@ -251,7 +253,8 @@ void main() {
         expect(outerScroll.position.maxScrollExtent, 0,
             reason: 'The whole main menu should fit at $size, category $i');
         final next = find.byType(BottomNavigationBar);
-        expect(find.byKey(const ValueKey('home-navigation-button')).hitTestable(),
+        expect(
+            find.byKey(const ValueKey('home-navigation-button')).hitTestable(),
             findsOneWidget);
         final caption = find.byKey(const ValueKey('selected-category'));
         final rect = tester.getRect(caption);

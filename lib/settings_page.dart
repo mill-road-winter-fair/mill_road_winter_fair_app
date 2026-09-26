@@ -67,8 +67,6 @@ Future<void> loadSettings() async {
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
 
-    // Get the choice to have a static main menu page
-    staticMainMenuPage.value = prefs.getBool('staticMainMenuPage') ?? false;
 
     debugPrint('Settings loaded from SharedPreferences');
   } else if (onTest == true) {
@@ -154,7 +152,6 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       listingUpdateNoticeEnabled,
     );
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
-    await prefs.setBool('staticMainMenuPage', staticMainMenuPage.value);
   }
 
   Future<void> _changeTheme(String themeKey) async {
@@ -403,52 +400,6 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         await widget.analyticsService.setAnalyticsEnabled(value);
                         if (mounted) setState(() {});
                       },
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Home page', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                        RadioGroup<bool>(
-                          groupValue: staticMainMenuPage.value,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              HapticFeedback.selectionClick();
-                              staticMainMenuPage.value = value!;
-                            });
-                            _saveSettings();
-                          },
-                          child: Column(
-                            children: [
-                              RadioListTile<bool>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('Animated'),
-                                subtitle: Text(
-                                  'Smooth transitions between carousel categories',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                value: false,
-                              ),
-                              RadioListTile<bool>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('Static'),
-                                subtitle: Text(
-                                  'Change categories without button animations',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                value: true,
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
                     ),
                   ],
                 ),

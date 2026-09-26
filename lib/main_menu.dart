@@ -2,9 +2,10 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
+
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class MainMenu extends StatefulWidget {
@@ -70,7 +71,7 @@ class _MainMenuState extends State<MainMenu> {
 
   void _move(int delta) {
     final target = (_controller.page ?? _origin.toDouble()).round() + delta;
-    if (MediaQuery.disableAnimationsOf(context) || staticMainMenuPage.value) {
+    if (MediaQuery.disableAnimationsOf(context)) {
       _controller.jumpToPage(target);
     } else {
       _controller.animateToPage(target,
@@ -97,8 +98,31 @@ class _MainMenuState extends State<MainMenu> {
     return false;
   }
 
-  void _about() => Navigator.push(
-      context, MaterialPageRoute(builder: (_) => AboutTheFairPage(analyticsService: widget.analyticsService)));
+  void _about() {
+    HapticFeedback.lightImpact();
+    widget.analyticsService.logButtonTapped('carousel_about_fair');
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) =>
+                AboutTheFairPage(analyticsService: widget.analyticsService)));
+  }
+
+  void _selectCategory(int page) {
+    final index = page % _choices.length;
+    // Initial layout, resizing and infinite-scroll rebasing are not user actions.
+    if (index == _selected) return;
+    HapticFeedback.selectionClick();
+    widget.analyticsService
+        .logButtonTapped('carousel_select_${_choices[index].asset}');
+    setState(() => _selected = index);
+  }
+
+  void _openChoice(_FairChoice choice) {
+    HapticFeedback.lightImpact();
+    widget.analyticsService.logButtonTapped('carousel_open_${choice.asset}');
+    choice.onTap();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,33 +138,29 @@ class _MainMenuState extends State<MainMenu> {
           onPressed: _about,
         ),
       ],
-      body: ValueListenableBuilder<bool>(
-        valueListenable: staticMainMenuPage,
-        builder: (context, staticMode, _) => Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-                child: _DiffuseArtwork(
-              asset: choices[_selected].asset,
-              reduceMotion:
-                  staticMode || MediaQuery.disableAnimationsOf(context),
-            )),
-            SafeArea(
-                child: _FairCarousel(
-              controller: _controller,
-              choices: choices,
-              selected: _selected,
-              reduceMotion:
-                  staticMode || MediaQuery.disableAnimationsOf(context),
-              onSelected: (page) =>
-                  setState(() => _selected = page % choices.length),
-              onScrollEnd: _rebase,
-              onMove: _move,
-              onAbout: _about,
-            )),
-          ],
-        ),
-      ), analyticsService: widget.analyticsService,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(
+              child: _DiffuseArtwork(
+            asset: choices[_selected].asset,
+            reduceMotion: MediaQuery.disableAnimationsOf(context),
+          )),
+          SafeArea(
+              child: _FairCarousel(
+            controller: _controller,
+            choices: choices,
+            selected: _selected,
+            reduceMotion: MediaQuery.disableAnimationsOf(context),
+            onSelected: _selectCategory,
+            onOpen: _openChoice,
+            onScrollEnd: _rebase,
+            onMove: _move,
+            onAbout: _about,
+          )),
+        ],
+      ),
+      analyticsService: widget.analyticsService,
     );
   }
 }
@@ -162,6 +182,7 @@ class _FairCarousel extends StatelessWidget {
       required this.selected,
       required this.reduceMotion,
       required this.onSelected,
+      required this.onOpen,
       required this.onScrollEnd,
       required this.onMove,
       required this.onAbout});
@@ -170,6 +191,7 @@ class _FairCarousel extends StatelessWidget {
   final int selected;
   final bool reduceMotion;
   final ValueChanged<int> onSelected;
+  final ValueChanged<_FairChoice> onOpen;
   final bool Function(ScrollEndNotification) onScrollEnd;
   final ValueChanged<int> onMove;
   final VoidCallback onAbout;
@@ -236,7 +258,7 @@ class _FairCarousel extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     key: const ValueKey('selected-category'),
-                    onTap: choices[selected].onTap,
+                    onTap: () => onOpen(choices[selected]),
                     borderRadius: BorderRadius.circular(20),
                     child: Padding(
                       // Keep the caption clear of the floating Home button.
@@ -384,7 +406,7 @@ class _FairCarousel extends StatelessWidget {
                               key: ValueKey('choice-${choice.asset}'),
                               onTap: () {
                                 if (page % choices.length == selected) {
-                                  choice.onTap();
+                                  onOpen(choice);
                                 } else {
                                   onMove(page - position.round());
                                 }

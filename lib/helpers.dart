@@ -100,6 +100,7 @@ class FairScaffold extends StatelessWidget {
                     color: Theme.of(context).colorScheme.surface, width: 3)),
                 onPressed: () {
                   HapticFeedback.selectionClick();
+                  analyticsService.logButtonTapped('navigation_home');
                   onTabSelected(0);
                 },
                 child: SvgPicture.asset('assets/mainMenuPage/snowflake.svg',
@@ -140,9 +141,8 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     iconSize: 30,
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
-      onTabSelected.call(tabOrder[selectedIndex]);
       analyticsService.logButtonTapped('navigation_${const ['map', 'timetable', 'home', 'listings', 'favourites'][selectedIndex]}');
-      onTabSelected.call(selectedIndex);
+      onTabSelected.call(tabOrder[selectedIndex]);
     },
     items: const [
       BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),

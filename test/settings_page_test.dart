@@ -49,6 +49,9 @@ void main() {
       expect(find.text('For users with colour blindness'), findsOneWidget);
 
       // Verify default settings
+      expect(find.text('Home page'), findsNothing);
+      expect(find.text('Animated'), findsNothing);
+      expect(find.text('Static'), findsNothing);
       expect(preferredDistanceUnits, DistanceUnits.metric);
       expect(themeNotifier.value, 'light');
     });
