@@ -63,6 +63,7 @@ void main() {
           onFavouriteTapped: onFavouriteTapped,
           inDialog: false,
           analyticsService: FakeAnalyticsService(),
+          colorScheme: ColorScheme.light(),
         ),
       ),
     );
@@ -335,7 +336,7 @@ void main() {
       final emojiFinder = find.text('🍩 ');
       expect(emojiFinder, findsOneWidget);
       expect(find.ancestor(of: emojiFinder, matching: find.byType(ColorFiltered)), findsOneWidget);
-      final Opacity emojiOpacity = tester.widget(find.ancestor(of: emojiFinder, matching: find.byType(Opacity)));
+      final Opacity emojiOpacity = tester.widget(find.ancestor(of: emojiFinder, matching: find.byType(Opacity).last));
       expect(emojiOpacity.opacity, 0.5);
       final titleFinder = find.text('Glazed and Confused');
       expect(titleFinder, findsOneWidget);
@@ -352,7 +353,7 @@ void main() {
       final cancelledTextFinder = find.text('CANCELLED');
       expect(cancelledTextFinder, findsOneWidget);
       final Text cancelledTextWidget = tester.widget(cancelledTextFinder.first);
-      final colorScheme = Theme.of(tester.element(cancelledTextFinder)).colorScheme;
+      final colorScheme = ColorScheme.light();
       expect(cancelledTextWidget.style?.color, colorScheme.onPrimary);
       expect(cancelledTextWidget.style?.color, isNot(Colors.red));
 
@@ -475,7 +476,7 @@ void main() {
       expect(favouriteIcon.icon?.fontPackage, FontAwesomeIcons.solidHeart.fontPackage);
       expect(
         favouriteIcon.color,
-        Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).colorScheme.primary,
+        ColorScheme.light().primary,
       );
 
       await tester.tap(find.byType(IconButton).first);

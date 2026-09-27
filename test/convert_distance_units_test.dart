@@ -7,13 +7,13 @@ void main() {
     test('convertDistanceUnits returns metres', () {
       final testDistance = convertDistanceUnits(697, DistanceUnits.metric);
 
-      expect(testDistance, "697 m");
+      expect(testDistance, "697m");
     });
 
     test('convertDistanceUnits returns kilometres', () {
       final testDistance = convertDistanceUnits(5248, DistanceUnits.metric);
 
-      expect(testDistance, "5.25 km");
+      expect(testDistance, "5.25km");
     });
 
     test('convertDistanceUnits returns feet', () {
