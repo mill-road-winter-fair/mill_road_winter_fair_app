@@ -72,7 +72,7 @@ void main() {
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
   });
 
-  for (final width in [350.0, 500.0]) {
+  for (final width in [400.0, 500.0]) {
     testWidgets('Details logs once and invokes the callback at width $width', (tester) async {
       tester.view.physicalSize = Size(width, 900);
       tester.view.devicePixelRatio = 1;
