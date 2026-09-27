@@ -127,6 +127,60 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('theme changes refresh existing marker types without resetting the map', (tester) async {
+      final previousTheme = selectedThemeKey;
+      selectedThemeKey = 'light';
+      themeNotifier.value = 'light';
+      addTearDown(() {
+        selectedThemeKey = previousTheme;
+        themeNotifier.value = previousTheme;
+        tester.platformDispatcher.clearPlatformBrightnessTestValue();
+      });
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+      ));
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      state.addSimpleMarker('Service-FirstAid', const LatLng(52.2, 0.14));
+      final base = {...listings.first, 'groupParent': 'FALSE', 'groupID': ''};
+      state.addSpecificMarker({...base, 'id': 'mixed', 'shopping': 'TRUE'});
+      state.addSpecificMarker({...base, 'id': 'performance', 'food': 'FALSE', 'performanceMusic': 'TRUE', 'performanceDance': 'TRUE'});
+      state.hideAllMarkers();
+      final before = Map<MarkerId, Marker>.of(state.markers);
+      final types = {
+        '1': 'Group-Food', '3': 'Food', aSimpleMarkerId: 'Service-FirstAid',
+        'mixed': 'Mixed', 'performance': 'Group-PerformanceEvent',
+      };
+      for (final theme in ['dark', '2024', 'highContrast', 'colourBlindFriendly', 'light']) {
+        selectedThemeKey = theme;
+        themeNotifier.value = theme;
+        await tester.pumpAndSettle();
+        expect(state.markers.keys, unorderedEquals(before.keys));
+        for (final entry in types.entries) {
+          final id = MarkerId(entry.key);
+          final marker = state.markers[id]!;
+          expect(marker.icon.toJson(), BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(theme, entry.value)).hue).toJson(), reason: '$theme: ${entry.value}');
+          expect(marker.visible, before[id]!.visible);
+          expect(marker.position, before[id]!.position);
+          expect(marker.onTap, before[id]!.onTap);
+        }
+      }
+      selectedThemeKey = 'auto';
+      themeNotifier.value = 'auto';
+      for (final brightness in [Brightness.dark, Brightness.light]) {
+        tester.platformDispatcher.platformBrightnessTestValue = brightness;
+        await tester.pumpAndSettle();
+        expect(state.markers[const MarkerId('3')]!.icon.toJson(),
+          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson());
+      }
+      // A queued refresh must not call setState after the map has been removed.
+      selectedThemeKey = 'dark';
+      themeNotifier.value = 'dark';
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('does not enable the map location layer without permission', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;

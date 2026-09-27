@@ -23,7 +23,32 @@ void main() {
     });
 
     test('getCategoryColor returns default for unknown theme', () {
-      expect(getCategoryColor('not-a-theme', 'anything'), const Color.fromRGBO(150, 150, 150, 1.0));
+      expect(getCategoryColor('not-a-theme', 'anything'), const Color.fromRGBO(255, 0, 0, 1));
+    });
+
+    testWidgets('explicit palettes ignore system brightness and Auto follows it', (tester) async {
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+      const foodColours = {
+        'light': Color.fromRGBO(255, 156, 26, 1),
+        'dark': Color.fromRGBO(241, 108, 0, 1),
+        '2024': Color.fromRGBO(216, 114, 50, 1),
+        'highContrast': Color.fromRGBO(255, 115, 0, 1),
+        'colourBlindFriendly': Color.fromRGBO(213, 94, 0, 1),
+      };
+      for (final brightness in Brightness.values) {
+        tester.platformDispatcher.platformBrightnessTestValue = brightness;
+        for (final entry in foodColours.entries) {
+          expect(getCategoryColor(entry.key, 'Food'), entry.value);
+          expect(getCategoryColor(entry.key, 'Group-Food'), entry.value);
+          for (final type in ['Group-Service', 'Service-FirstAid', 'Service-Information', 'Service-Toilet']) {
+            expect(getCategoryColor(entry.key, type), getCategoryColor(entry.key, 'Service'));
+          }
+          for (final type in ['Group-Music', 'Childrens', 'Group-Childrens', 'Dance', 'Group-Dance', 'Other', 'Group-Other', 'Group-PerformanceEvent']) {
+            expect(getCategoryColor(entry.key, type), getCategoryColor(entry.key, 'Music'));
+          }
+        }
+        expect(getCategoryColor('auto', 'Food'), foodColours[brightness == Brightness.dark ? 'dark' : 'light']);
+      }
     });
 
     testWidgets('getColoredMarker exercises multiple category branches', (WidgetTester tester) async {
