@@ -40,10 +40,12 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
 
   AnimationController? _animationController;
   AnimationController? _initialEntranceController;
+  AnimationController? _secondPhaseController;
   Timer? _idleTimer;
   int? _chosenHotspotID;
   List<Hotspot> hotspots = [];
   Future<void>? _hotspotsFuture;
+  final ValueNotifier<double> _secondPhaseProgress = ValueNotifier<double>(0.0);
 
   static const int _idleAnimationSteps = 60; // throttling: larger is smoother but dearer
   static const int _entranceAnimationSteps = 300; // throttling: larger is smoother but dearer
@@ -66,10 +68,15 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     _initialEntranceController = AnimationController(vsync: this, duration: const Duration(seconds: _entranceAnimationPeriod))
       ..addListener(_updateEntranceProgress)
       ..addStatusListener(_entranceStatusChanged);
+    _secondPhaseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _secondPhaseController!.addListener(() {
+      _secondPhaseProgress.value = _secondPhaseController!.value;
+    });
     staticChooserPage.addListener(_staticChooserPageChanged);
     if (staticChooserPage.value) {
       _initialEntranceComplete = true;
       _entranceProgress.value = 1.0;
+      _secondPhaseProgress.value = 1.0;
     }
 }
 
@@ -79,8 +86,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     staticChooserPage.removeListener(_staticChooserPageChanged);
     _animationController?..removeListener(_updatePaintPhase)..dispose();
     _initialEntranceController?..removeListener(_updateEntranceProgress)..removeStatusListener(_entranceStatusChanged)..dispose();
+    _secondPhaseController?..removeListener(_updateSecondPhaseProgress)..dispose();
     _paintPhase.dispose();
     _entranceProgress.dispose();
+    _secondPhaseProgress.dispose();
     _idleTimer?.cancel();
     super.dispose();
   }
@@ -94,6 +103,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
       _initialEntranceController?.stop(canceled: false);
       setState(() { _initialEntranceComplete = true; });
       _entranceProgress.value = 1.0;
+      _secondPhaseProgress.value = 1.0;
       _paintPhase.value = 0.0;
     } else {
       _idleTimer?.cancel();
@@ -102,6 +112,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         _initialEntranceComplete = false;
       });
       _entranceProgress.value = 0.0;
+      _secondPhaseProgress.value = 0.0;
       _lastEntranceStep = -1;
       _initialEntranceController?.forward(from: 0.0);
       _animationController?.repeat();
@@ -124,10 +135,14 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     _entranceProgress.value = step / _entranceAnimationSteps;
   }
 
+  void _updateSecondPhaseProgress() {
+    _secondPhaseProgress.value = _secondPhaseController!.value;
+  }
 
   void _entranceStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.completed && mounted) {
       setState(() { _initialEntranceComplete = true; });
+      _secondPhaseController?.forward(from: 0.0);
     }
   }
 
@@ -364,6 +379,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
                         paintPhase: _paintPhase,
                         staticChooserPage: staticChooserPage.value,
                         entranceProgress: _entranceProgress,
+                        secondPhaseProgress: _secondPhaseProgress,
                         initialEntranceComplete: _initialEntranceComplete,
                         chosenHotspotID: _chosenHotspotID,
                         colourScheme: colourScheme,
@@ -393,6 +409,7 @@ class _ChooserContent extends StatelessWidget {
     required this.paintPhase,
     required this.staticChooserPage,
     required this.entranceProgress,
+    required this.secondPhaseProgress,
     required this.initialEntranceComplete,
     required this.chosenHotspotID,
     required this.colourScheme,
@@ -405,6 +422,7 @@ class _ChooserContent extends StatelessWidget {
   final ValueListenable<double> paintPhase;
   final bool staticChooserPage;
   final ValueListenable<double> entranceProgress;
+  final ValueListenable<double> secondPhaseProgress;
   final bool initialEntranceComplete;
   final int? chosenHotspotID;
   final ColorScheme colourScheme;
@@ -427,6 +445,7 @@ class _ChooserContent extends StatelessWidget {
             visibleCount: visibleCount,
             paintPhase: paintPhase,
             entranceProgress: entranceProgress,
+            secondPhaseProgress: secondPhaseProgress,
             initialEntranceComplete: initialEntranceComplete,
             staticChooserPage: staticChooserPage,
             isSelected: chosenHotspotID == index,
@@ -506,6 +525,7 @@ class _AnimatedHotspot extends StatelessWidget {
     required this.visibleCount,
     required this.paintPhase,
     required this.entranceProgress,
+    required this.secondPhaseProgress,
     required this.initialEntranceComplete,
     required this.staticChooserPage,
     required this.isSelected,
@@ -518,6 +538,7 @@ class _AnimatedHotspot extends StatelessWidget {
   final int visibleCount;
   final ValueListenable<double> paintPhase;
   final ValueListenable<double> entranceProgress;
+  final ValueListenable<double> secondPhaseProgress;
   final bool initialEntranceComplete;
   final bool staticChooserPage;
   final bool isSelected;
@@ -537,6 +558,7 @@ class _AnimatedHotspot extends StatelessWidget {
         visibleCount: visibleCount,
         paintPhase: paintPhase,
         entranceProgress: entranceProgress,
+        secondPhaseProgress: secondPhaseProgress,
         initialEntranceComplete: initialEntranceComplete,
         staticChooserPage: staticChooserPage,
         isSelected: isSelected,
@@ -557,6 +579,7 @@ class _HotspotLayers extends StatelessWidget {
     required this.visibleCount,
     required this.paintPhase,
     required this.entranceProgress,
+    required this.secondPhaseProgress,
     required this.initialEntranceComplete,
     required this.staticChooserPage,
     required this.isSelected,
@@ -569,6 +592,7 @@ class _HotspotLayers extends StatelessWidget {
   final int visibleCount;
   final ValueListenable<double> paintPhase;
   final ValueListenable<double> entranceProgress;
+  final ValueListenable<double> secondPhaseProgress;
   final bool initialEntranceComplete;
   final bool staticChooserPage;
   final bool isSelected;
@@ -577,7 +601,7 @@ class _HotspotLayers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final animation = Listenable.merge([paintPhase, entranceProgress]);
+    final animation = Listenable.merge([paintPhase, entranceProgress, secondPhaseProgress]);
     return AnimatedBuilder(
       animation: animation,
       builder: (context, _) {
@@ -596,6 +620,7 @@ class _HotspotLayers extends StatelessWidget {
         }
         final introProgress = entranceProgress.value;
         final idleProgress = paintPhase.value;
+        final secondPhase = secondPhaseProgress.value;
         final introOpacity = isSelected
             ? 1.0
             : hotspotEntranceOpacityForIndex(
@@ -611,8 +636,9 @@ class _HotspotLayers extends StatelessWidget {
                 visibleCount: visibleCount,
               );
         final imageOpacity = initialEntranceComplete ? 1.0 : introOpacity;
-        final glowOpacity = initialEntranceComplete ? idleOpacity : 0.0;
-        final labelOpacity = initialEntranceComplete ? idleOpacity : 0.0;
+        final phaseFade = initialEntranceComplete ? secondPhase : 0.0;
+        final glowOpacity = initialEntranceComplete ? idleOpacity * phaseFade : 0.0;
+        final labelOpacity = initialEntranceComplete ? idleOpacity * phaseFade : 0.0;
         final shadowedOpacity = imageOpacity * glowOpacity;
         final normalOpacity = imageOpacity * (1.0 - glowOpacity); // so they combine to 100%
         return GestureDetector(
