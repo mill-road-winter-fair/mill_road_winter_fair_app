@@ -126,7 +126,6 @@ class FairScaffold extends StatelessWidget {
   }
 }
 
-
 BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, {required AnalyticsService analyticsService}) {
   // Visual order differs from the stable page indices used throughout the app.
   const tabOrder = [1, 2, 0, 3, 4];

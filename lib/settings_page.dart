@@ -67,7 +67,6 @@ Future<void> loadSettings() async {
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
 
-
     debugPrint('Settings loaded from SharedPreferences');
   } else if (onTest == true) {
     int savedUnitIndex = 0;
