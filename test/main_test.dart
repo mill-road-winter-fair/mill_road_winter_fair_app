@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/about_app_page.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -10,6 +11,7 @@ import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -526,6 +528,8 @@ void main() {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
+      PackageInfo.setMockInitialValues(appName: 'Mill Road Winter Fair', packageName: 'test.mrwf', version: '1.2.3', buildNumber: '42', buildSignature: '');
+
       listings = [
         {
           'id': '1',
@@ -562,15 +566,20 @@ void main() {
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pump(const Duration(milliseconds: 500));
-      final aboutAppFinder = find.text('About this app');
-      expect(aboutAppFinder, findsOneWidget);
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.tap(aboutAppFinder);
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
 
-      expect(find.text('Android app by Alexander Berridge'), findsOneWidget);
-      expect(find.text('iPhone version by Matt Whiting'), findsOneWidget);
+      await tester.tap(find.text('About this app'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
+
+      expect(find.byType(AboutAppPage), findsOneWidget);
+      expect(find.byType(Dialog), findsNothing);
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 750));
+      expect(find.byType(AboutAppPage), findsNothing);
+      expect(find.byType(HomePage), findsOneWidget);
     });
 
     testWidgets('BottomNavigationBar updates currentIndex on tap', (WidgetTester tester) async {
