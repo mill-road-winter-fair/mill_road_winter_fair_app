@@ -335,7 +335,29 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         : widget.colorScheme.primary,
                   ),
                 ),
-
+                if (isItAnEvent) IconButton(
+                  onPressed: widget.cancelled && !alertsStore.alertExists(widget.listingId)
+                      ? null
+                      : () {
+                          HapticFeedback.lightImpact();
+                          widget.onAlertTapped?.call();
+                          setState(() { });
+                          widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
+                        },
+                  padding: const EdgeInsets.all(0),
+                  style: ElevatedButton.styleFrom(
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                      padding: const EdgeInsets.all(0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  icon: FaIcon(
+                    shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                    (widget.listingAlerted) ? FontAwesomeIcons.solidBell : FontAwesomeIcons.bell,
+                    size: 25,
+                    color: widget.cancelled && !widget.listingAlerted
+                        ? Theme.of(context).disabledColor
+                        : Theme.of(context).colorScheme.primary,
+                  ),
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       iconSize: 24,

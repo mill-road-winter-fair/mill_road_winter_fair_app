@@ -1105,8 +1105,8 @@ void showToast(BuildContext theContext, String theMessage, bool isError) {
     backgroundColor: (isError) ? Theme.of(theContext).colorScheme.tertiary : Theme.of(theContext).colorScheme.primary,
     textColor: (isError) ? Theme.of(theContext).colorScheme.onPrimary : Theme.of(theContext).colorScheme.onPrimary,
     fontSize: 16,
-    toastLength: Toast.LENGTH_LONG,
-    timeInSecForIosWeb: 4,
+    toastLength: Toast.LENGTH_SHORT,
+    timeInSecForIosWeb: 2,
   );
 }
 
