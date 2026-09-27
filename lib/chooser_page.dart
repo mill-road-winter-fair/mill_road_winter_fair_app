@@ -5,20 +5,22 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 
-
 class ChooserPage extends StatefulWidget {
 
+  final AnalyticsService analyticsService;
   const ChooserPage({
     required this.theEvents,
     required this.onOpenTimetable,
     required this.onOpenListings,
     required this.onOpenMap,
     required this.onTabSelected,
+    required this.analyticsService,
     super.key,
   });
 
@@ -338,16 +340,17 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
               IconButton(icon: const Icon(Icons.warning, size: 20),
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService,)));
                 },
               ),
               IconButton(icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
                 },
               ),
             ],
+            analyticsService: widget.analyticsService,
             body: RepaintBoundary(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -366,6 +369,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
                         colourScheme: colourScheme,
                         onHotspotTap: _selectHotspot,
                         maxWidth: constraints.maxWidth,
+                        analyticsService: widget.analyticsService,
                       );
                     },
                   );
@@ -394,6 +398,7 @@ class _ChooserContent extends StatelessWidget {
     required this.colourScheme,
     required this.onHotspotTap,
     required this.maxWidth,
+    required this.analyticsService,
   });
 
   final List<Hotspot> hotspots;
@@ -405,6 +410,7 @@ class _ChooserContent extends StatelessWidget {
   final ColorScheme colourScheme;
   final void Function(int index) onHotspotTap;
   final double maxWidth;
+  final AnalyticsService analyticsService;
 
   @override
   Widget build(BuildContext context) {
@@ -433,7 +439,7 @@ class _ChooserContent extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 HapticFeedback.lightImpact();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
               },
               child: const RepaintBoundary(child: _ChooserLogo()),
             ),
