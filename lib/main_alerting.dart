@@ -23,28 +23,28 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
     requestAlertPermission: true,
     notificationCategories: [
       DarwinNotificationCategory('UnderwayCategory', actions: <DarwinNotificationAction>[
-        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('5MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('15MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snooze5mins', 'Snooze for 5 minutes'),
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('30MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snooze10mins', 'Snooze for 10 minutes'),
         DarwinNotificationAction.plain('snooze20mins', 'Snooze for 20 minutes'),
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('60MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snooze15mins', 'Snooze for 15 minutes'),
         DarwinNotificationAction.plain('snooze30mins', 'Snooze for 30 minutes'),
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
     ]
   );
@@ -123,7 +123,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
     int noticePeriod;
     if (timeToGo <= 0) {
       categoryID = 'UnderwayCategory';
-      androidNotificationActions = [AndroidNotificationAction('show', 'Show')];
+      androidNotificationActions = [];//[AndroidNotificationAction('show', 'Show')];
       final endTime = DateTime.parse(theEventAlert['listingEndTime']);
       theMessage = '${theEventAlert['listingTitle']} underway at ${theEventAlert['listingLocation']} until ${intl.DateFormat('EEEE').format(endTime)}';
       noticePeriod = 0;
