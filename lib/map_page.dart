@@ -2058,32 +2058,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         onPressed: () async {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('centre_on_user');
-                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
-                          try {
-                            if (currentLatLng == null) {
-                              final pos = await getCurrentPosition();
-                              currentLatLng = LatLng(pos.latitude, pos.longitude);
-                            }
-                            if (currentLatLng != null) {
-                              // Move camera to the user's location with a sensible zoom and bearing
-                              double currentZoom = await _controller!.getZoomLevel();
-                              _controller?.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            debugPrint('Centre-on-user failed: $e');
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: colorScheme.primary,
-                                  content: Text('Unable to determine your location'),
-                                ),
-                              );
-                            }
-                          }
+                          focusMapOnNearestMarkers(10);
                         },
                         backgroundColor: Colors.transparent,
                         mini: true,
@@ -2101,7 +2076,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   offset: const Offset(2, 2))
                             ],
                           ),
-                          child: const Icon(Icons.my_location),
+                          child: const Icon(Icons.radar),
                         ),
                       ),
                     FloatingActionButton(
