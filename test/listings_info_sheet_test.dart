@@ -91,6 +91,7 @@ void main() {
               approxDistance: '100m',
               detailsVisible: false,
               listingFavourited: false,
+              listingAlerted: false,
               onGetDirections: () {},
             ));
 
@@ -165,6 +166,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
       ));
 
       expect(find.text('Local business'), findsOneWidget);
