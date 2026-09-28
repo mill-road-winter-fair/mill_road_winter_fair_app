@@ -737,9 +737,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
                                               onDetailsTapped: () => toggleDetailsRow(index),
                                               listingFavourited: isFavourited,
-                                              onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
+                                              listingAlerted: alertsStore.alertExists(rel['id']),
+                                            onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                               onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
-                                              inDialog: false,
+                                              onAlertTapped: () {
+                                              HapticFeedback.lightImpact();
+                                              toggleListingAlert(rel['id'], alertNoticePeriod, context);
+                                              setModalState(() { });
+                                            },
+                                            inDialog: false,
                                               analyticsService: widget.analyticsService,
                                               colorScheme: colorScheme,
                                             ),
@@ -874,8 +880,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               approxDistance: distanceMessage,
                               detailsVisible: true,
                               listingFavourited: isListingFavourited(listing['id']),
+                              listingAlerted: alertsStore.alertExists(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                              onAlertTapped: () {
+                                HapticFeedback.lightImpact();
+                                toggleListingAlert(listing['id'], alertNoticePeriod, context);
+                                setModalState(() { });
+                              },
                               inDialog: false,
                               analyticsService: widget.analyticsService,
                               colorScheme: colorScheme,

@@ -6,6 +6,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -13,8 +15,6 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final AnalyticsService analyticsService;
@@ -667,9 +667,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             approxDistance: approximateDistance,
                                             detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
                                             listingFavourited: isFavourited,
-                                            onDetailsTapped: () => toggleDetailsRow(index),
+                                            listingAlerted: alertsStore.alertExists(listing['id']),
+                                          onDetailsTapped: () => toggleDetailsRow(index),
                                             onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                            onGetDirections: () {
+                                            onAlertTapped: () {
+                                            HapticFeedback.lightImpact();
+                                            toggleListingAlert(listing['id'], alertNoticePeriod, context);
+                                            setState(() { });
+                                          },
+                                          onGetDirections: () {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
