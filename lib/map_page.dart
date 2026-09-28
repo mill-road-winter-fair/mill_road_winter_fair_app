@@ -1796,45 +1796,66 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       future: _fetchListings,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return FairScaffold(
+            appBarTitle: 'Map',
+            currentTab: 1,
+            onTabSelected: widget.onTabSelected,
+            allowBack: false,
+            analyticsService: widget.analyticsService,
+            body: const Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              "Error: ${snapshot.error}",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                backgroundColor: Theme.of(context).colorScheme.error,
-                color: Theme.of(context).colorScheme.onError,
+          return FairScaffold(
+            appBarTitle: 'Map',
+            currentTab: 1,
+            onTabSelected: widget.onTabSelected,
+            allowBack: false,
+            analyticsService: widget.analyticsService,
+            body: Center(
+              child: Text(
+                "Error: ${snapshot.error}",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  color: Theme.of(context).colorScheme.onError,
+                ),
               ),
             ),
           );
         }
 
         if (listings.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Unable to retrieve listings",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                isRefreshing
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton.icon(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('refresh_listings_from_error');
-                          refreshListings();
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh listings'),
-                      ),
-              ],
+          return FairScaffold(
+            appBarTitle: 'Map',
+            currentTab: 1,
+            onTabSelected: widget.onTabSelected,
+            allowBack: false,
+            analyticsService: widget.analyticsService,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Unable to retrieve listings",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  isRefreshing
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton.icon(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                            refreshListings();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Refresh listings'),
+                        ),
+                ],
+              ),
             ),
           );
         }
