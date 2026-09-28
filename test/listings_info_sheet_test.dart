@@ -68,6 +68,37 @@ void main() {
   }
 
   group('ListingsInfoSheet', () {
+    testWidgets('AdaptiveImageText reserves space and caps the image height while loading', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: AdaptiveImageText(
+            imageUrl: 'https://example.com/image.jpg',
+            descriptionWidget: const Text('A description'),
+          ),
+        ),
+      ));
+
+      final constrainedBoxes = tester.widgetList<ConstrainedBox>(find.byType(ConstrainedBox));
+      expect(constrainedBoxes.any((box) => box.constraints.maxHeight != null && box.constraints.maxHeight! <= 180), isTrue,
+          reason: 'The image should reserve a maximum-height placeholder while the network image is loading.');
+    });
+
+    testWidgets('AdaptiveImageText keeps the description visible when the image fails to load', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: AdaptiveImageText(
+            imageUrl: 'https://example.com/missing-image.jpg',
+            descriptionWidget: const Text('A description'),
+          ),
+        ),
+      ));
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('A description'), findsOneWidget);
+    });
+
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
