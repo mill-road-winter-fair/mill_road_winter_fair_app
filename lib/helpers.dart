@@ -46,6 +46,7 @@ class FairScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorscheme = Theme.of(context).colorScheme;
     return SafeArea(
         top: false,
         left: false,
@@ -81,30 +82,34 @@ class FairScaffold extends StatelessWidget {
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
-          bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected, analyticsService: analyticsService),
+          bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(colorscheme, currentTab, onTabSelected, analyticsService: analyticsService),
         ));
   }
 }
 
-BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, {required AnalyticsService analyticsService}) {
+BottomNavigationBar fairBottomNavigationBar(ColorScheme colorscheme, int index, ValueChanged<int> onTabSelected, {required AnalyticsService analyticsService}) {
   return BottomNavigationBar(
     type: BottomNavigationBarType.fixed,
     showUnselectedLabels: true,
     elevation: 0,
     currentIndex: index,
-    selectedFontSize: 12,
-    unselectedFontSize: 12,
+    selectedFontSize: 13,
+    unselectedFontSize: 13,
+    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
     iconSize: 30,
+    backgroundColor: colorscheme.primary,
+    selectedItemColor: colorscheme.onPrimary,
+    unselectedItemColor: colorscheme.surfaceDim,
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
       analyticsService.logButtonTapped('navigation_${const ['home', 'map', 'timetable', 'listings', 'favourites'][selectedIndex]}');
       onTabSelected.call(selectedIndex);
     },
-    items: const [
-      BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+    items: [
+      BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/icons/iconTransparent.png'), size: 30), label: "Home"),
       BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-      BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
-      BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
+      BottomNavigationBarItem(icon: Icon(Icons.watch_later), label: "Timetable"),
+      BottomNavigationBarItem(icon: Icon(Icons.format_list_bulleted), label: "Listings"),
       BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
     ],
   );

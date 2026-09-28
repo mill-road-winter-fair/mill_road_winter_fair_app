@@ -110,7 +110,7 @@ void main() {
       expect(find.text('Favourites'), findsOneWidget);
     });
 
-    testWidgets('Snowflake button in AppBar navigates to About the Fair page', (WidgetTester tester) async {
+    testWidgets('About buttons in AppBar navigate to Important Info and About the Fair pages', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -152,18 +152,28 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       await loadSettings();
 
-      // Pump MyApp which contains the AppBar with the snowflake button
+      // Pump MyApp which contains the AppBar with the About buttons
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await tester.pump();
 
-      // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
-      final snowflakeButton = find.byWidgetPredicate(
-        (widget) => widget is IconButton && widget.icon is ImageIcon,
+      // Find the About buttons in the AppBar
+      final aboutButtons = find.byWidgetPredicate(
+        (widget) => widget is IconButton && widget.icon is Icon,
       );
-      expect(snowflakeButton, findsOneWidget);
+      expect(aboutButtons, findsExactly(3));
 
-      // Tap the snowflake button
-      await tester.tap(snowflakeButton);
+      // Tap the first About button (second button after Drawer)
+      await tester.tap(aboutButtons.at(1));
+      await tester.pumpAndSettle();
+
+      // Verify that AboutTheFairPage is now displayed
+      expect(find.byType(ImportantInfoPage), findsOneWidget);
+      expect(find.text('Important information'), findsOneWidget);
+
+      // Tap the second About button
+      await tester.pageBack();
+      await tester.pump();
+      await tester.tap(aboutButtons.at(2));
       await tester.pumpAndSettle();
 
       // Verify that AboutTheFairPage is now displayed
@@ -637,12 +647,12 @@ void main() {
       expect(homePageState.index, 1);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.list).first);
+      await tester.tap(find.byIcon(Icons.format_list_bulleted).first);
       await tester.pump();
       expect(homePageState.index, 3);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.schedule).first);
+      await tester.tap(find.byIcon(Icons.watch_later).first);
       await tester.pump();
       expect(homePageState.index, 2);
       expect(find.byIcon(Icons.favorite), findsOneWidget);

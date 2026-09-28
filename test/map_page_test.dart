@@ -234,7 +234,7 @@ void main() {
 
       // Check the map buttons
       expect(find.byType(FloatingActionButton), findsExactly(4));
-      expect(find.byIcon(Icons.home), findsExactly(2));
+      expect(find.byIcon(Icons.home), findsOneWidget);
       expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
       expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
       expect(find.byIcon(Icons.filter_alt), findsOneWidget);

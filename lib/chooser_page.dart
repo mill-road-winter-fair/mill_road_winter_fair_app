@@ -358,7 +358,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
                   Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService,)));
                 },
               ),
-              IconButton(icon: const ImageIcon(AssetImage('assets/icons/iconTransparent.png')),
+              IconButton(icon: const Icon(Icons.info, size: 20),
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
