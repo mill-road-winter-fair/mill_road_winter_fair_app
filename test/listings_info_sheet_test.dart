@@ -79,7 +79,7 @@ void main() {
       ));
 
       final constrainedBoxes = tester.widgetList<ConstrainedBox>(find.byType(ConstrainedBox));
-      expect(constrainedBoxes.any((box) => box.constraints.maxHeight != null && box.constraints.maxHeight! <= 180), isTrue,
+      expect(constrainedBoxes.any((box) => box.constraints.maxHeight <= 180), isTrue,
           reason: 'The image should reserve a maximum-height placeholder while the network image is loading.');
     });
 
