@@ -13,6 +13,8 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'fakes/fake_analytics_service.dart';
+
 class RecordingAnalyticsService extends FakeAnalyticsService {
   final calls = <String>[];
   final buttonEvents = <Map<String, String?>>[];

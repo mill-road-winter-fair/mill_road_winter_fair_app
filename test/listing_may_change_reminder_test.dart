@@ -6,6 +6,8 @@ import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'fakes/fake_analytics_service.dart';
+
 class RecordingNoticeAnalyticsService extends FakeAnalyticsService {
   final notices = <String>[];
   final buttons = <String>[];

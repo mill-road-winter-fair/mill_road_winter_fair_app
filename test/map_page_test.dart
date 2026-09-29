@@ -10,6 +10,8 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:provider/provider.dart';
 
+import 'fakes/fake_analytics_service.dart';
+
 void main() {
   // We're on test
   onTest = true;

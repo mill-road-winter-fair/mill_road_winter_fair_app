@@ -15,6 +15,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
+import 'fakes/fake_analytics_service.dart';
+
 class FakeUrlLauncher extends UrlLauncherPlatform {
   final List<String> launchedUrls = [];
 

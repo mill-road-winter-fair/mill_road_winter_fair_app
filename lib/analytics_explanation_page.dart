@@ -266,15 +266,3 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
     );
   }
 }
-
-class AnalyticsExplanationPagePreview extends StatelessWidget {
-  const AnalyticsExplanationPagePreview({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Provider<AnalyticsService>(
-      create: (_) => FakeAnalyticsService(),
-      child: const AnalyticsExplanationPage(),
-    );
-  }
-}

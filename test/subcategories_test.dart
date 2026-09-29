@@ -12,6 +12,8 @@ import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:provider/provider.dart';
 
+import 'fakes/fake_analytics_service.dart';
+
 // API column order from the supplied 28-column response.
 const apiHeaders = [
   'id',
