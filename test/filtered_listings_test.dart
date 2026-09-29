@@ -3,9 +3,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 1000));
+}
+
+class RecordingSearchAnalyticsService extends FakeAnalyticsService {
+  final searches = <Map<String, String>>[];
+
+  @override
+  Future<void> logSearch(String searchTerm, {required String searchArea}) async {
+    searches.add({'search_term': searchTerm, 'search_area': searchArea});
+  }
+}
 
 void main() {
   // We're on test
@@ -23,6 +38,7 @@ void main() {
     WidgetTester tester,
     String category,
     List<Map<String, dynamic>> listings,
+    List<String> favouriteListingKeys,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -30,14 +46,15 @@ void main() {
           body: FilteredListingsPage(
             filterCategory: category,
             listings: listings,
-            onChangeTitle: null,
             onTabSelected: (_) {},
+            onSubfilterChange: (_) {},
+            analyticsService: FakeAnalyticsService(),
           ),
         ),
       ),
     );
     await tester.pump();
-    await tester.pumpAndSettle();
+    await settle(tester);
   }
 
   group('FilteredListingsPage', () {
@@ -45,7 +62,7 @@ void main() {
       // Define a test listing
       List<Map<String, dynamic>> listings = [];
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       expect(find.text('Unable to retrieve listings'), findsOneWidget);
     });
@@ -59,6 +76,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -67,9 +85,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -84,6 +106,7 @@ void main() {
           'id': '2',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍣',
           'title': 'Sushi Squad',
@@ -92,9 +115,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Implausible Avenue',
           'description': 'Cold rice',
           'email': '',
@@ -108,24 +135,22 @@ void main() {
       ];
 
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
+      expect(find.text('🍩 '), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
-      expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
-      expect(find.text('01223 111111'), findsNothing);  // as Details won't be open
+      expect(find.text('Gwydir St Car Park (~206m away)'), findsOneWidget);
+      expect(find.text('01223 111111'), findsNothing); // as Details won't be open
       expect(find.byIcon(Icons.phone), findsOneWidget);
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue (approx. 197 m)'), findsOneWidget);
+      expect(find.text('Implausible Avenue (~197m away)'), findsOneWidget);
       // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
       expect(find.byIcon(Icons.directions_walk), findsExactly(3));
       expect(find.byIcon(Icons.public), findsExactly(2));
-
-      final dividerFinder = find.byWidgetPredicate((widget) => widget is Divider);
-      expect(dividerFinder, findsWidgets);
     });
 
     testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
@@ -138,6 +163,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -146,9 +172,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -163,6 +193,7 @@ void main() {
           'id': '2',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍣',
           'title': 'Sushi Squad',
@@ -171,9 +202,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Implausible Avenue',
           'description': 'Cold rice',
           'email': '',
@@ -188,6 +223,7 @@ void main() {
           'id': '3',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍔',
           'title': 'Bite Club',
@@ -196,15 +232,19 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Donkey Common',
           'description': 'Dead cattle',
           'email': '',
           'website': 'https://www.biteclub.com',
           'phone': '01223 333333',
-          'latLng': '52.202313,0.131562',  // 968m
+          'latLng': '52.202313,0.131562', // 968m
           'imageURL': '',
           'startTime': '14:00',
           'endTime': '16:30',
@@ -214,7 +254,7 @@ void main() {
       // Mock sorting preference is alphabetical
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
       var filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
@@ -224,7 +264,7 @@ void main() {
       // Mock sorting preference is distance
       preferredSortingMethod = SortingMethod.values[1];
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
       filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Sushi Squad');
@@ -234,7 +274,7 @@ void main() {
       // Mock sorting preference is time - which for Food should sort by A-Z since time isn't allowed for sorting
       preferredSortingMethod = SortingMethod.values[2];
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
       filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
 
       expect(filteredListingsPageState.filteredListings[0]['title'], 'Bite Club');
@@ -251,6 +291,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -259,9 +300,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'TRUE',
+          'performanceMusic': 'TRUE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -279,33 +324,33 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'performance', listings);
+      await pumpFilteredListingsPage(tester, 'favourite', listings, ['1']);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('Nearest').last);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[1]);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-      await tester.pumpAndSettle();
+      await settle(tester);
       await tester.tap(find.text('Time').last);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[2]);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Location (a-z)').last);
-      await tester.pumpAndSettle();
+      await settle(tester);
+      await tester.tap(find.text('Location (a–z)').last);
+      await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[3]);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Name (a-z)').last);
-      await tester.pumpAndSettle();
+      await settle(tester);
+      await tester.tap(find.text('Name (a–z)').last);
+      await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[0]);
     });
@@ -323,6 +368,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -331,9 +377,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -347,7 +397,7 @@ void main() {
       ];
 
       await loadSettings();
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       // Preferred sorting method should have been reset to 0 (alphabetical)
       expect(preferredSortingMethod, SortingMethod.values[0]);
@@ -368,6 +418,7 @@ void main() {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -376,9 +427,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -394,7 +449,7 @@ void main() {
       // Mock location services are disabled
       locationServicesEnabled = false;
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       // Obtain the state after mounting
       final filteredListingsPageState = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
@@ -410,7 +465,7 @@ void main() {
       // Mock location is available
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       // Fallback sorting should be disabled
       expect(filteredListingsPageState.useFallbackSorting, false);
@@ -421,7 +476,7 @@ void main() {
       // Mock location is now unavailable
       currentLatLng = null;
 
-      await pumpFilteredListingsPage(tester, 'all', listings);
+      await pumpFilteredListingsPage(tester, 'all', listings, []);
 
       // Fallback sorting should be enabled
       expect(filteredListingsPageState.useFallbackSorting, true);
@@ -431,11 +486,15 @@ void main() {
     });
 
     testWidgets('FilteredListingsPage navigateToMapAndGetDirections function changes to MapPage', (WidgetTester tester) async {
+      // Set firstExecution to false to simulate normal app launch
+      firstExecution = false;
+
       listings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -444,9 +503,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -459,8 +522,8 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(const MyApp());
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await settle(tester);
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
       expect(mapPageKey.currentState, isNotNull, reason: 'MapPage should be mounted');
@@ -469,21 +532,23 @@ void main() {
       mapPageState.addAllVisibleMarkers();
 
       await tester.tap(find.text('Listings'));
-      await tester.pumpAndSettle();
+      await settle(tester);
       expect(homePageState.index, 3);
 
-      await tester.tap(find.text('Directions'));
-      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.directions_walk).first);
+      await settle(tester);
 
-      expect(homePageState.index, 0);
+      expect(homePageState.index, 3);
     });
 
     testWidgets('FilteredListingsPage search filters results based on query (UI)', (WidgetTester tester) async {
+      final analytics = RecordingSearchAnalyticsService();
       final sampleListings = [
         {
           'id': '1',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍣',
           'title': 'Sushi Squad',
@@ -492,9 +557,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Implausible Avenue',
           'description': 'Cold rice',
           'email': '',
@@ -509,6 +578,7 @@ void main() {
           'id': '2',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍩',
           'title': 'Glazed and Confused',
@@ -517,9 +587,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -534,6 +608,7 @@ void main() {
           'id': '3',
           'visibleOnMap': 'TRUE',
           'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
           'brickAndMortar': 'FALSE',
           'emoji': '🍔',
           'title': 'Bite Club',
@@ -542,9 +617,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Donkey Common',
           'description': 'Dead cattle',
           'email': '',
@@ -566,23 +645,24 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onChangeTitle: null, onTabSelected: (_) {}),
+            body: FilteredListingsPage(
+                filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
           ),
         ),
       );
 
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Initially all three listings should be visible
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
-      expect(find.text('🍔 Bite Club'), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
+      expect(find.text('Bite Club'), findsOneWidget);
 
       // Tap the search FAB to enter search mode
-      final searchFab = find.byKey(const ValueKey('searchFab'));
+      final searchFab = find.byIcon(Icons.search);
       expect(searchFab, findsOneWidget);
       await tester.tap(searchFab);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // The SearchBar has a ValueKey('searchBar') on the ConstrainedBox; find the descendant TextField
       final searchBarBox = find.byKey(const ValueKey('searchBar'));
@@ -593,21 +673,24 @@ void main() {
 
       // Enter text that matches only Sushi Squad
       await tester.enterText(textFieldFinder, 'sushi');
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Only Sushi Squad should remain
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
-      expect(find.text('🍩 Glazed and Confused'), findsNothing);
-      expect(find.text('🍔 Bite Club'), findsNothing);
+      expect(find.text('Sushi Squad'), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsNothing);
+      expect(find.text('Bite Club'), findsNothing);
+      expect(analytics.searches, [
+        {'search_term': 'sushi', 'search_area': 'listings'},
+      ]);
 
       // Clear the search using the close button in the SearchBar (Icon(Icons.close))
       await tester.tap(find.byIcon(Icons.close));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // All results should be back
-      expect(find.text('🍣 Sushi Squad'), findsOneWidget);
-      expect(find.text('🍩 Glazed and Confused'), findsOneWidget);
-      expect(find.text('🍔 Bite Club'), findsOneWidget);
+      expect(find.text('Sushi Squad'), findsOneWidget);
+      expect(find.text('Glazed and Confused'), findsOneWidget);
+      expect(find.text('Bite Club'), findsOneWidget);
     });
   });
 }

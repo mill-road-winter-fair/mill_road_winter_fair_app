@@ -1,11 +1,17 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart' hide RootWidget;
+import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 750));
+}
 
 void main() {
   // We're on test
@@ -30,7 +36,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget to test that the app correctly chooses the WelcomeScreen
-      await tester.pumpWidget(const RootWidget());
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Verify that the WelcomeScreen is displayed
       expect(find.byType(WelcomeScreen), findsOneWidget);
@@ -62,9 +68,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -78,7 +88,7 @@ void main() {
       ];
 
       // Pump the RootWidget
-      await tester.pumpWidget(const RootWidget());
+      await tester.pumpWidget(RootWidget(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       // Verify that WelcomeScreen is NOT displayed
       expect(find.byType(WelcomeScreen), findsNothing);
@@ -109,9 +119,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -129,19 +143,19 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(const RootWidget());
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Verify the 'Skip' button is present and tap it
       expect(find.text('Skip'), findsOneWidget);
       await tester.tap(find.text('Skip'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
-      // Verify that MyApp is now displayed
+      // Verify that the main themed application shell is now displayed
       expect(find.byType(MyApp), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
       await tester.pump(const Duration(seconds: 21));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Check that shared prefs have been updated
       final prefs = await SharedPreferences.getInstance();
@@ -156,7 +170,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(const RootWidget());
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Verify we are on the first page
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
@@ -166,7 +180,7 @@ void main() {
       final nextButton = find.byIcon(Icons.arrow_forward);
       expect(nextButton, findsOneWidget);
       await tester.tap(nextButton);
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Verify we have advanced to the second page
       expect(find.text('What do the pins mean?'), findsOneWidget);
@@ -191,9 +205,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -211,26 +229,26 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(const RootWidget());
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Advance through the onboarding slides to reach the last page
       final nextButton = find.byIcon(Icons.arrow_forward);
       for (int i = 0; i < 4; i++) {
         await tester.tap(nextButton);
-        await tester.pumpAndSettle();
+        await settle(tester);
       }
 
       // Verify the 'Done' button is present and tap it
       expect(find.text('Done'), findsOneWidget);
       await tester.tap(find.text('Done'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
-      // Verify that MyApp is now displayed
+      // Verify that the main themed application shell is now displayed
       expect(find.byType(MyApp), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
       await tester.pump(const Duration(seconds: 21));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Check that shared prefs have been updated
       final prefs = await SharedPreferences.getInstance();
@@ -267,9 +285,13 @@ void main() {
           'food': 'TRUE',
           'shopping': 'FALSE',
           'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
           'visitExperience': 'FALSE',
           'service': 'FALSE',
+          'business': 'FALSE',
           'location': 'Gwydir St Car Park',
           'description': 'Nice buns',
           'email': '',
@@ -284,25 +306,28 @@ void main() {
 
       // Pump the RootWidget
       firstExecution = true;
-      await tester.pumpWidget(const RootWidget());
+      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // The footer button text should be present
       expect(find.text('Take me straight to the app!'), findsOneWidget);
 
       // Tap the footer button
       await tester.tap(find.text('Take me straight to the app!'));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
-      // Verify that MyApp is now displayed
+      // Verify that the main themed application shell is now displayed
       expect(find.byType(MyApp), findsOneWidget);
 
       // Let the 20s toast timer complete to avoid "Timer still pending" when test disposes widgets
       await tester.pump(const Duration(seconds: 21));
-      await tester.pumpAndSettle();
+      await settle(tester);
 
       // Check that shared prefs have been updated
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('firstExecution'), isFalse);
+
+      // Check that we're now on the Map page
+      expect(find.byType(HomePage), findsOneWidget);
     });
   });
 }
