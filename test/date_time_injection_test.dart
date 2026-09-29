@@ -20,6 +20,7 @@ void main() {
                   startTime: '10:30',
                   endTime: '16:30',
                   approxDistance: '',
+                  colorScheme: ColorScheme.light(),
                 ),
               ),
             ),
