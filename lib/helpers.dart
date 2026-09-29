@@ -53,6 +53,7 @@ class FairScaffold extends StatelessWidget {
         right: false,
         bottom: Platform.isAndroid && isNavBarVisible(context),
         child: Scaffold(
+          backgroundColor: colorScheme.surfaceDim,
           appBar: AppBar(
             titleSpacing: 0,
             leadingWidth: 44,
@@ -82,11 +83,11 @@ class FairScaffold extends StatelessWidget {
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
-          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: 18),
+          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: 20),
           floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
           floatingActionButton: (allowBack ?? false) ? null : SizedBox(
-            width: 64,
-            height: 64,
+            width: 68,
+            height: 68,
             child: Semantics(
               selected: currentTab == 0,
               child: FloatingActionButton(
@@ -96,8 +97,7 @@ class FairScaffold extends StatelessWidget {
                 elevation: 4,
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
-                shape: CircleBorder(side: BorderSide(
-                    color: colorScheme.surface, width: 3)),
+                shape: CircleBorder(),
                 onPressed: () {
                   HapticFeedback.selectionClick();
                   analyticsService.logButtonTapped('navigation_home');
@@ -109,13 +109,13 @@ class FairScaffold extends StatelessWidget {
           ),
           bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
             key: const ValueKey('navigation-bar-surface'),
-            height: 64,
-            padding: EdgeInsets.zero,
+            height: 62,
+            padding: EdgeInsets.only(right: 6), // to stop Favourites hitting edge
             elevation: 0,
             color: colorScheme.primary,
             surfaceTintColor: Colors.transparent,
             shape: const CircularNotchedRectangle(),
-            notchMargin: 5,
+            notchMargin: 4,
             clipBehavior: Clip.antiAlias,
             child: fairBottomNavigationBar(currentTab, onTabSelected, colorScheme, analyticsService: analyticsService),
           ),
@@ -132,8 +132,8 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     showUnselectedLabels: true,
     elevation: 0,
     currentIndex: tabOrder.indexOf(index),
-    selectedFontSize: 12,
-    unselectedFontSize: 12,
+    selectedFontSize: 13,
+    unselectedFontSize: 13,
     iconSize: 30,
     selectedItemColor: colorscheme.onPrimary,
     unselectedItemColor: colorscheme.surfaceDim,

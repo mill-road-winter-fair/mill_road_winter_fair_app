@@ -65,13 +65,13 @@ void main() {
       final button =
           tester.getRect(find.byKey(const ValueKey('home-navigation-button')));
       final bar = tester.getRect(find.byType(BottomNavigationBar));
-      expect(button.width, 64);
-      expect(button.height, 64);
-      expect(button.center.dx, closeTo(bar.center.dx, .01));
-      expect(button.center.dy, closeTo(bar.top + 18, .01));
+      expect(button.width, 68);
+      expect(button.height, 68);
+      expect(button.center.dx, closeTo(bar.center.dx + 3, .01));
+      expect(button.center.dy, closeTo(bar.top + 20, .01));
       final surface = tester.widget<BottomAppBar>(
           find.byKey(const ValueKey('navigation-bar-surface')));
-      expect(surface.height, 64);
+      expect(surface.height, 62);
       expect(surface.shape, isA<CircularNotchedRectangle>());
       expect(surface.clipBehavior, Clip.antiAlias);
       expect(tester.getRect(find.byKey(const ValueKey('page-body'))).bottom,

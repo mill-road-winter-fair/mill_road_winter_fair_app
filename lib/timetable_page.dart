@@ -695,7 +695,8 @@ class _TimetablePageState extends State<TimetablePage> {
                           controller: _horizontalScrollController,
                           scrollDirection: Axis.horizontal,
                           padding: EdgeInsets.only(right: 2), // stop it crashing into edge
-                          child: SizedBox(
+                          child: Container(
+                            color: colorScheme.onPrimary,
                             width: totalWidth,
                             child: Column(
                               children: [
