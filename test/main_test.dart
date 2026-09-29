@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -630,6 +631,12 @@ void main() {
       await tester.tap(find.byIcon(Icons.favorite).first);
       await tester.pumpAndSettle();
       expect(homePageState.index, 4);
+
+      await tester.tap(find.byKey(const ValueKey('home-navigation-button')));
+      await tester.pumpAndSettle();
+      expect(homePageState.index, 0);
+      expect(find.byType(ChooserPage), findsOneWidget);
+      expect(find.text('Welcome'), findsOneWidget);
     });
 
     testWidgets('emailDetailsDialog shows emails and close button', (WidgetTester tester) async {
