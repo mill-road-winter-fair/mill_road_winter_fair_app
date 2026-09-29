@@ -46,7 +46,7 @@ class FairScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorscheme = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     return SafeArea(
         top: false,
         left: false,
@@ -82,34 +82,72 @@ class FairScaffold extends StatelessWidget {
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
-          bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(colorscheme, currentTab, onTabSelected, analyticsService: analyticsService),
+          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: 18),
+          floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+          floatingActionButton: (allowBack ?? false) ? null : SizedBox(
+            width: 64,
+            height: 64,
+            child: Semantics(
+              selected: currentTab == 0,
+              child: FloatingActionButton(
+                key: const ValueKey('home-navigation-button'),
+                heroTag: null,
+                tooltip: 'Home',
+                elevation: 4,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: CircleBorder(side: BorderSide(
+                    color: colorScheme.surface, width: 3)),
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  analyticsService.logButtonTapped('navigation_home');
+                  onTabSelected(0);
+                },
+                child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, color: (currentTab == 0) ? colorScheme.onPrimary : colorScheme.surfaceDim),
+              ),
+            ),
+          ),
+          bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
+            key: const ValueKey('navigation-bar-surface'),
+            height: 64,
+            padding: EdgeInsets.zero,
+            elevation: 0,
+            color: colorScheme.primary,
+            surfaceTintColor: Colors.transparent,
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 5,
+            clipBehavior: Clip.antiAlias,
+            child: fairBottomNavigationBar(currentTab, onTabSelected, colorScheme, analyticsService: analyticsService),
+          ),
         ));
   }
 }
 
-BottomNavigationBar fairBottomNavigationBar(ColorScheme colorscheme, int index, ValueChanged<int> onTabSelected, {required AnalyticsService analyticsService}) {
+BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, ColorScheme colorscheme, {required AnalyticsService analyticsService}) {
+  // Visual order differs from the stable page indices used throughout the app.
+  const tabOrder = [1, 2, 0, 3, 4];
   return BottomNavigationBar(
+    backgroundColor: Colors.transparent,
     type: BottomNavigationBarType.fixed,
     showUnselectedLabels: true,
     elevation: 0,
-    currentIndex: index,
-    selectedFontSize: 13,
-    unselectedFontSize: 13,
-    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+    currentIndex: tabOrder.indexOf(index),
+    selectedFontSize: 12,
+    unselectedFontSize: 12,
     iconSize: 30,
-    backgroundColor: colorscheme.primary,
     selectedItemColor: colorscheme.onPrimary,
     unselectedItemColor: colorscheme.surfaceDim,
+    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
-      analyticsService.logButtonTapped('navigation_${const ['home', 'map', 'timetable', 'listings', 'favourites'][selectedIndex]}');
-      onTabSelected.call(selectedIndex);
+      analyticsService.logButtonTapped('navigation_${const ['map', 'timetable', 'home', 'listings', 'favourites'][selectedIndex]}');
+      onTabSelected.call(tabOrder[selectedIndex]);
     },
-    items: [
-      BottomNavigationBarItem(icon: ImageIcon(AssetImage('assets/icons/iconTransparent.png'), size: 30), label: "Home"),
+    items: const [
       BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-      BottomNavigationBarItem(icon: Icon(Icons.watch_later), label: "Timetable"),
-      BottomNavigationBarItem(icon: Icon(Icons.format_list_bulleted), label: "Listings"),
+      BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
+      BottomNavigationBarItem(icon: SizedBox(width: 30, height: 30), label: ""),
+      BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
       BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
     ],
   );
@@ -405,6 +443,19 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
           ),
         );
       });
+}
+
+class CenterDockedWithOffset extends FloatingActionButtonLocation {
+  final double dyOffset; // positive = lower
+
+  const CenterDockedWithOffset({required this.dyOffset});
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final base = FloatingActionButtonLocation.centerDocked
+        .getOffset(scaffoldGeometry);
+    return Offset(base.dx, base.dy + dyOffset);
+  }
 }
 
 void shareApp(BuildContext context, String msgText) async {
