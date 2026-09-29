@@ -56,7 +56,7 @@ const expectedSubcategories = {
   'performanceOther': 'Other performances',
   'visitExperience': 'Visit & Experience',
   'service': 'Services',
-  'business': 'Business',
+  'business': 'Other business',
 };
 
 Map<String, dynamic> listingFor(String id, String subcategory) => {
@@ -112,19 +112,20 @@ void main() {
   for (final entry in expectedSubcategories.entries) {
     test('${entry.key} is recognised as a single category', () {
       final listing = listingFor('single', entry.key);
-      expect(countCategories(listing), 1);
-      expect(
-          getCategory(listing),
-          entry.key.startsWith('performance')
-              ? 'Performance'
-              : {
-                  'food': 'Food',
-                  'shopping': 'Shopping',
-                  'charityCommunityInfo': 'Charity/Community/Info',
-                  'visitExperience': 'Visit/Experience',
-                  'service': 'Service',
-                  'business': 'Business',
-                }[entry.key]);
+      expect(countCategories(listing), entry.key.startsWith('performance')
+          ? (1, 1)
+          : (1, 0));
+      expect(getCategory(listing), {
+              'food': 'Food', 'shopping': 'Shopping',
+              'charityCommunityInfo': 'Charity/Community/Info',
+              'performanceMusic': 'Music',
+              'performanceChildrens': 'Childrens',
+              'performanceDance': 'Dance',
+              'performanceOther': 'Other',
+              'visitExperience': 'Visit/Experience',
+              'service': 'Service',
+              'business': 'Business',
+            }[entry.key]);
     });
 
     for (final page in ['all', 'favourite']) {
@@ -173,7 +174,7 @@ void main() {
 
   test('business combined with another subcategory is mixed', () {
     final listing = {...listingFor('mixed', 'business'), 'shopping': 'TRUE'};
-    expect(countCategories(listing), 2);
+    expect(countCategories(listing), (2, 0));
     expect(getCategory(listing), 'Mixed');
   });
 }

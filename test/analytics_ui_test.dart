@@ -113,32 +113,16 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(Provider<AnalyticsService>.value(
-          value: analytics,
-          child: MaterialApp(
-              theme: appThemes['light'],
-              home: Scaffold(
-                  body: SpecificListingInfoSheet(
-                listingId: 'listing-123',
-                cancelled: false,
-                brickAndMortar: false,
-                emoji: '',
-                title: 'Listing',
-                subtitle: '',
-                location: '',
-                description: 'Details',
-                email: 'test@example.com',
-                website: 'https://example.com',
-                phoneNumber: '0123456789',
-                imageURL: '',
-                startTime: '10:30',
-                endTime: '16:30',
-                approxDistance: '',
-                detailsVisible: false,
-                listingFavourited: false,
-                inDialog: false,
-                onGetDirections: () {},
-                onDetailsTapped: () => analytics.calls.add('details'),
-              )))));
+        value: analytics,
+        child: MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
+          listingId: 'listing-123',
+          cancelled: false, brickAndMortar: false, emoji: '', title: 'Listing', subtitle: '', location: '',
+          description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
+          imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: false,
+          listingFavourited: false, inDialog: false, onGetDirections: () {},
+          onDetailsTapped: () => analytics.calls.add('details'), colorScheme: ColorScheme.light(),
+        ))),
+      ));
       await tester.tap(find.byIcon(Icons.info));
       expect(analytics.calls, ['haptic', 'tap:listing_details', 'details']);
       expect(analytics.buttonEvents.single, {'button_id': 'listing_details', 'listing_id': 'listing-123', 'listing_name': 'Listing'});
@@ -152,33 +136,14 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(Provider<AnalyticsService>.value(
-          value: analytics,
-          child: MaterialApp(
-              theme: appThemes['light'],
-              home: Scaffold(
-                  body: SpecificListingInfoSheet(
-                listingId: 'listing-456',
-                cancelled: false,
-                brickAndMortar: false,
-                emoji: '',
-                title: 'Another listing',
-                subtitle: '',
-                location: '',
-                description: 'Details',
-                email: 'test@example.com',
-                website: 'https://example.com',
-                phoneNumber: '0123456789',
-                imageURL: '',
-                startTime: '10:30',
-                endTime: '16:30',
-                approxDistance: '',
-                detailsVisible: true,
-                listingFavourited: false,
-                inDialog: inDialog,
-                onGetDirections: () {},
-                onDetailsTapped: () {},
-                onFavouriteTapped: () {},
-              )))));
+        value: analytics,
+        child: MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
+          listingId: 'listing-456', cancelled: false, brickAndMortar: false, emoji: '', title: 'Another listing', subtitle: '', location: '',
+          description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
+          imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: true,
+          listingFavourited: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
+          colorScheme: ColorScheme.light(),
+      )))));
       // The sheet has one IconButton: the favourite control.
       await tester.tap(find.byType(IconButton));
       await tester.tap(find.byIcon(Icons.directions_walk));
