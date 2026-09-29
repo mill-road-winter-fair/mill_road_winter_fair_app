@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:provider/provider.dart';
