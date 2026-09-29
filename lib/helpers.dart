@@ -145,9 +145,9 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     },
     items: const [
       BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-      BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
+      BottomNavigationBarItem(icon: Icon(Icons.watch_later), label: "Timetable"),
       BottomNavigationBarItem(icon: SizedBox(width: 30, height: 30), label: ""),
-      BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
+      BottomNavigationBarItem(icon: Icon(Icons.ballot), label: "Listings"),
       BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
     ],
   );
