@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'fixed_date_time_provider.dart';
+import 'fakes/fixed_date_time_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
