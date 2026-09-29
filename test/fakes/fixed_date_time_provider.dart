@@ -1,4 +1,4 @@
-import 'package:mill_road_winter_fair_app/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 
 // A Date/Time provider for use in tests
 final class FixedDateTimeProvider implements DateTimeProvider {
