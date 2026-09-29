@@ -56,6 +56,20 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
+  Future<void> logNoticeShown(String noticeName) async {
+    if (usageAnalyticsEnabled != true) return;
+
+    debugPrint('[FIREBASE] Logging notice_shown: $noticeName on screen $currentScreen');
+    await _record(() => analytics.logEvent(
+      name: 'notice_shown',
+      parameters: {
+        'notice_id': noticeName,
+        'screen_name': currentScreen,
+      },
+    ));
+  }
+
+  @override
   Future<void> logSearch(String searchTerm, {required String searchArea}) async {
     final trimmedSearchTerm = searchTerm.trim();
     if (trimmedSearchTerm.isEmpty || usageAnalyticsEnabled != true) return;
@@ -383,6 +397,7 @@ abstract class AnalyticsService {
   Future<void> setCurrentScreen(String screenName);
   Future<void> logMapMarkerTapped(String listingName);
   Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName});
+  Future<void> logNoticeShown(String noticeName);
   Future<void> logSearch(String searchTerm, {required String searchArea});
   Future<void> logMapTypePreferenceSet(String mapType);
   Future<void> logMapOrientationPreferenceSet(String mapOrientation);
@@ -415,6 +430,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logNoticeShown(String noticeName) async {
     // Do nothing
   }
   @override
