@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,7 +33,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     debugPrint('GroupListingInfoSheet build() called');
 
     // Determine if the event has ended, update text style accordingly
-    final bool ended = hasEventEnded(endTime);
+    final bool ended = hasEventEnded(endTime, context.watch<DateTimeProvider>());
     final timeStyle = TextStyle(
       fontSize: 14,
       color: colorScheme.onPrimary,
@@ -190,7 +192,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     final subSubStyle = subStyle.copyWith(fontWeight: FontWeight.normal);
 
     // Determine if the event has ended, update text style accordingly
-    final bool ended = hasEventEnded(widget.endTime);
+    final bool ended = hasEventEnded(widget.endTime, context.watch<DateTimeProvider>());
     final timeStyle = subSubStyle.copyWith(
       color: ended ? Colors.red : widget.colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,

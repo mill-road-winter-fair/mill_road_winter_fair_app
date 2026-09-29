@@ -12,6 +12,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
@@ -1026,7 +1027,7 @@ String formatFullDate(DateTime date) {
 
 
 // Function to determine if the event has ended based on endTime string
-bool hasEventEnded(String endTime) {
+bool hasEventEnded(String endTime, DateTimeProvider dateTimeProvider) {
   try {
     final parts = endTime.split(':');
     final endHour = int.parse(parts[0]);
@@ -1040,7 +1041,7 @@ bool hasEventEnded(String endTime) {
       endMinute,
     );
 
-    return DateTime.now().isAfter(endDateTime);
+    return dateTimeProvider.now().isAfter(endDateTime);
   } catch (_) {
     return false; // default to not ended if parsing fails
   }
@@ -1048,8 +1049,11 @@ bool hasEventEnded(String endTime) {
 
 
 // Function to determine if the event is today
-bool isItEventDay() {
-  return DateUtils.isSameDay(fairDate, DateTime.now());
+bool isItEventDay(DateTimeProvider dateTimeProvider) {
+  return DateUtils.isSameDay(
+    fairDate,
+    dateTimeProvider.now(),
+  );
 }
 
 

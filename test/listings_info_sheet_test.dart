@@ -1,15 +1,22 @@
 import 'dart:io';
-
+import 'fakes/fixed_date_time_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:provider/provider.dart';
 
 void main() {
+  // Mocking DateTime.now()
+  final dateTimeProvider = FixedDateTimeProvider(
+    DateTime(2026, 12, 5, 21, 15),
+  );
+
   LatLng currentLatLng = const LatLng(52.199174, 0.140929);
   LatLng destinationLatLng = const LatLng(52.199687, 0.138813);
   int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
@@ -35,33 +42,37 @@ void main() {
     required Function onGetDirections,
     VoidCallback? onDetailsTapped,
     VoidCallback? onFavouriteTapped,
+    required DateTimeProvider dateTimeProvider,
   }) {
-    return MaterialApp(
-      home: Scaffold(
-        body: SpecificListingInfoSheet(
-          listingId: 'test-listing',
-          cancelled: cancelled,
-          brickAndMortar: brickAndMortar,
-          emoji: emoji,
-          title: title,
-          subtitle: subtitle,
-          location: location,
-          description: description,
-          email: email,
-          website: website,
-          phoneNumber: phoneNumber,
-          imageURL: imageURL,
-          startTime: startTime,
-          endTime: endTime,
-          approxDistance: approxDistance,
-          detailsVisible: detailsVisible,
-          onGetDirections: onGetDirections,
-          listingFavourited: listingFavourited,
-          onDetailsTapped: onDetailsTapped,
-          onFavouriteTapped: onFavouriteTapped,
-          inDialog: false,
-          analyticsService: FakeAnalyticsService(),
-          colorScheme: ColorScheme.light(),
+    return Provider<DateTimeProvider>.value(
+      value: dateTimeProvider,
+      child: MaterialApp(
+        home: Scaffold(
+          body: SpecificListingInfoSheet(
+            listingId: 'test-listing',
+            cancelled: cancelled,
+            brickAndMortar: brickAndMortar,
+            emoji: emoji,
+            title: title,
+            subtitle: subtitle,
+            location: location,
+            description: description,
+            email: email,
+            website: website,
+            phoneNumber: phoneNumber,
+            imageURL: imageURL,
+            startTime: startTime,
+            endTime: endTime,
+            approxDistance: approxDistance,
+            detailsVisible: detailsVisible,
+            onGetDirections: onGetDirections,
+            listingFavourited: listingFavourited,
+            onDetailsTapped: onDetailsTapped,
+            onFavouriteTapped: onFavouriteTapped,
+            inDialog: false,
+            analyticsService: FakeAnalyticsService(),
+            colorScheme: ColorScheme.light(),
+          ),
         ),
       ),
     );
@@ -90,6 +101,7 @@ void main() {
               detailsVisible: false,
               listingFavourited: false,
               onGetDirections: () {},
+              dateTimeProvider: dateTimeProvider,
             ));
 
             expect(tester.takeException(), isNull);
@@ -133,6 +145,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       expect(find.text('🍩 '), findsOneWidget);
@@ -162,6 +175,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       expect(find.text('Local business'), findsOneWidget);
@@ -191,6 +205,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       expect(find.text('🍩 '), findsOneWidget);
@@ -228,6 +243,7 @@ void main() {
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
+        dateTimeProvider: dateTimeProvider,
       ));
 
       // Find the heart icon button. It's an IconButton containing a FaIcon.
@@ -266,6 +282,7 @@ void main() {
         onDetailsTapped: () {
           detailsToggled = true;
         },
+        dateTimeProvider: dateTimeProvider,
       ));
 
       // Extra info should not be present
@@ -300,6 +317,7 @@ void main() {
         onGetDirections: () {},
         listingFavourited: false,
         onDetailsTapped: () {},
+        dateTimeProvider: dateTimeProvider,
       ));
 
       // Extra info should now be present
@@ -330,6 +348,7 @@ void main() {
           directionsCalled = true;
         },
         listingFavourited: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       final getDirectionsButton = find.byIcon(Icons.directions_walk);
@@ -343,8 +362,6 @@ void main() {
     });
 
     testWidgets('formatted with line-through and red text when endTime has passed', (WidgetTester tester) async {
-      // Note: This test assumes hasEventEnded returns true for the given endTime.
-      // This will be true if the test is run after the fair date/time.
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
         brickAndMortar: false,
@@ -363,17 +380,15 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       final timeTextFinder = find.text('09:00—10:00');
       expect(timeTextFinder, findsOneWidget);
 
       final Text timeTextWidget = tester.widget(timeTextFinder);
-      // If the event has ended, it should be red and have a line-through decoration
-      if (hasEventEnded('10:00')) {
-        expect(timeTextWidget.style?.color, Colors.red);
-        expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
-      }
+      expect(timeTextWidget.style?.color, Colors.red);
+      expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
     });
 
     testWidgets('formats cancelled listing with line-through text and a cancelled label', (WidgetTester tester) async {
@@ -395,6 +410,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       // Title should have line-through
@@ -471,6 +487,7 @@ void main() {
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
+        dateTimeProvider: dateTimeProvider,
       ));
 
       final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
@@ -525,6 +542,7 @@ void main() {
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
+        dateTimeProvider: dateTimeProvider,
       ));
 
       final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
