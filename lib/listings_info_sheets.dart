@@ -203,7 +203,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     final status = widget.cancelled
         ? _cancelledLabel(context)
         : widget.brickAndMortar
-            ? _localBusinessLabel(context)
+            ? SizedBox.shrink()
             : Text("${widget.startTime}—${widget.endTime}", style: timeStyle, textAlign: TextAlign.end);
 
     if (widget.location == '') {
@@ -223,6 +223,12 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     final startTime = combineDateAndTime(widget.startTime, fairDate);
     final endTime = combineDateAndTime(widget.endTime, fairDate);
     final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
+    List<WidgetSpan>? locationTypeIcon;
+    if (widget.brickAndMortar) {
+      locationTypeIcon = [WidgetSpan(child: SizedBox(width: 6)), WidgetSpan(child: Icon(Icons.business, size: 18))];
+    } else if (!isItAnEvent) {
+      locationTypeIcon = [WidgetSpan(child: SizedBox(width: 6)), WidgetSpan(child: Icon(Icons.storefront, size: 18))];
+    }
 
     return Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
       child: Container(
@@ -285,6 +291,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           children: [
                             TextSpan(style: subSubStyle, text: widget.location),
                             TextSpan(style: subSubStyle.copyWith(fontSize: 12), text: currentLatLng == null ? '' : ' ${widget.approxDistance}'),
+                            if (locationTypeIcon != null) ...locationTypeIcon,
                           ],
                         ),
                       ),
@@ -535,24 +542,6 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             if (widget.onDetailsTapped == null && widget.location != '') const SizedBox(height: 20),
             if (widget.onDetailsTapped != null || widget.location == '') const SizedBox(height: 4),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _localBusinessLabel(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        'Local business',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onPrimary,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
