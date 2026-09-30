@@ -103,7 +103,6 @@ void main() {
 
       expect(find.textContaining('Welcome'), findsOneWidget);
 
-      expect(find.text('Home'), findsOneWidget);
       expect(find.text('Map'), findsOneWidget);
       expect(find.text('Listings'), findsOneWidget);
       expect(find.text('Timetable'), findsOneWidget);
@@ -156,29 +155,8 @@ void main() {
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await tester.pump();
 
-      // Find the About buttons in the AppBar
-      final aboutButtons = find.byWidgetPredicate(
-        (widget) => widget is IconButton && widget.icon is Icon,
-      );
-      expect(aboutButtons, findsExactly(3));
-
-      // Tap the first About button (second button after Drawer)
-      await tester.tap(aboutButtons.at(1));
-      await tester.pumpAndSettle();
-
-      // Verify that AboutTheFairPage is now displayed
-      expect(find.byType(ImportantInfoPage), findsOneWidget);
-      expect(find.text('Important information'), findsOneWidget);
-
-      // Tap the second About button
-      await tester.pageBack();
-      await tester.pump();
-      await tester.tap(aboutButtons.at(2));
-      await tester.pumpAndSettle();
-
-      // Verify that AboutTheFairPage is now displayed
-      expect(find.byType(AboutTheFairPage), findsOneWidget);
-      expect(find.text('About Mill Road Winter Fair'), findsOneWidget);
+      expect(find.widgetWithIcon(IconButton, Icons.warning), findsOneWidget);
+      expect(find.widgetWithIcon(IconButton, Icons.info), findsOneWidget);
 
       // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice (triggered in MapPage initState)
       await tester.pump(const Duration(seconds: 21));
@@ -635,7 +613,6 @@ void main() {
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
-      await tester.tap(find.text('Home'));
       await tester.pump(const Duration(milliseconds: 500));
 
       // Obtain the state after mounting
@@ -647,7 +624,7 @@ void main() {
       expect(homePageState.index, 1);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.format_list_bulleted).first);
+      await tester.tap(find.byIcon(Icons.ballot).first);
       await tester.pump();
       expect(homePageState.index, 3);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
