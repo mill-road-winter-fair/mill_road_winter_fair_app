@@ -1036,7 +1036,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['shopping']!.iconData),
-                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shopping and stalls")),
+                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shopping")),
                     value: filterSettings["Shopping"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
