@@ -130,10 +130,10 @@ void main() {
     testWidgets('persists settings after selection', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
-      // Change distance units to Imperial
-      await tester.tap(find.text('Metric'));
+      // Change distance units to Cambridge
+      await tester.tap(find.text('Imperial').first);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Imperial'));
+      await tester.tap(find.text('Cambridge'));
       await tester.pumpAndSettle();
 
       // Change theme to High Contrast
@@ -143,7 +143,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify SharedPreferences values
-      expect(preferredDistanceUnits, DistanceUnits.imperial);
+      expect(preferredDistanceUnits, DistanceUnits.cambridge);
       expect(themeNotifier.value, 'highContrast');
     });
   });
