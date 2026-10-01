@@ -9,9 +9,10 @@ void main() {
 
   group('Themes', () {
     test('getCategoryColor returns expected colors for light theme', () {
+      expect(getCategoryColor('light', 'Mixed'), const Color.fromRGBO(166, 34, 43, 1));
       expect(getCategoryColor('light', 'Food'), const Color.fromRGBO(255, 156, 26, 1.0));
       expect(getCategoryColor('light', 'Group-Food'), const Color.fromRGBO(255, 156, 26, 1.0));
-      expect(getCategoryColor('light', 'Shopping'), const Color.fromRGBO(209, 81, 85, 1.0));
+      expect(getCategoryColor('light', 'Shopping'), const Color.fromRGBO(209, 85, 89, 1.0));
       expect(getCategoryColor('light', 'Music'), const Color.fromRGBO(190, 110, 230, 1.0));
       expect(getCategoryColor('light', 'Childrens'), const Color.fromRGBO(190, 110, 230, 1.0));
       expect(getCategoryColor('light', 'Dance'), const Color.fromRGBO(190, 110, 230, 1.0));

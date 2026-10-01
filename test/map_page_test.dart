@@ -587,13 +587,15 @@ void main() {
       final charityCommunityInfoColor = getCategoryColor("light", "Charity/Community/Info");
       final visitExperienceColor = getCategoryColor("light", "Visit/Experience");
       final serviceColor = getCategoryColor("light", "Service");
+      final mixedColor = getCategoryColor("light", "Mixed");
 
       expect(foodColor, const Color.fromRGBO(255, 156, 26, 1.0));
-      expect(shoppingColor, const Color.fromRGBO(209, 81, 85, 1.0));
+      expect(shoppingColor, const Color.fromRGBO(209, 85, 89, 1.0));
       expect(performanceColor, const Color.fromRGBO(190, 110, 230, 1.0));
       expect(charityCommunityInfoColor, const Color.fromRGBO(150, 80, 0, 1.0));
       expect(visitExperienceColor, const Color.fromRGBO(79, 184, 75, 1.0));
       expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
+      expect(mixedColor, const Color.fromRGBO(166, 34, 43, 1));
     });
 
     testWidgets('Adds markers, opens modal bottom sheet for group marker, and checks content', (WidgetTester tester) async {
