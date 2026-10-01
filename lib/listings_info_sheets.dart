@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -136,6 +137,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final VoidCallback? onFavouriteTapped;
   final Function onGetDirections;
   final bool inDialog;
+  final ExpandedListingScrollBounds? scrollBounds;
   final AnalyticsService analyticsService;
   final ColorScheme colorScheme;
 
@@ -161,6 +163,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
     this.onFavouriteTapped,
     required this.onGetDirections,
     required this.inDialog,
+    this.scrollBounds,
     required this.analyticsService,
     required this.colorScheme,
     super.key,
@@ -223,7 +226,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
-    return Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
+    final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
       child: Container(
         padding: (widget.inDialog)
             ? EdgeInsets.all(0)
@@ -522,6 +525,11 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           ],
         ),
       ),
+    );
+    return ExpandedListingReveal(
+      expanded: widget.detailsVisible == true && widget.onDetailsTapped != null,
+      bounds: widget.scrollBounds,
+      child: content,
     );
   }
 
