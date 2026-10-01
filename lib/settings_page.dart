@@ -170,8 +170,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     final settingLabelStyle = Theme.of(context).textTheme.titleMedium;
-    final settingValueStyle = Theme.of(context).textTheme.bodyMedium;
-    final dropdownLabelStyle = Theme.of(context).textTheme.bodyMedium;
+    final settingTitleStyle = TextStyle(fontSize: 15);
     return SafeArea(
       top: false,
       left: false,
@@ -372,40 +371,37 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    Row(spacing: 15, children: [
-                      Text('Default alerts', style: settingLabelStyle),
-                      PopupMenuButton<int>(
-                        initialValue: alertNoticePeriod,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 10,
-                        offset: const Offset(0, -56),
-                        onOpened: HapticFeedback.lightImpact,
-                        onSelected: (int newValue) async {
-                          HapticFeedback.mediumImpact();
-                          saveAlertNoticePeriod(newValue);
-                          setState(() { });
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(style: settingValueStyle, (alertNoticePeriod == 0) ? 'At time of event' : '$alertNoticePeriod minutes before'),
-                            const Icon(Icons.arrow_drop_down),
-                          ],
-                        ),
-                        itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                          for (int i=0; i<alertNoticePeriods.length; i++)
-                            PopupMenuItem<int>(value: alertNoticePeriods[i], height: 30.0, 
-                              child: Text(
-                                style: dropdownLabelStyle,
-                                (alertNoticePeriods[i] == 0) ? 'At time of event' : '${alertNoticePeriods[i]} minutes before'
-                              ),
-                            ),
-                        ],
+                    Row(spacing: 12, children: [
+                      Text('Alerts:', style: settingLabelStyle),
+                      Expanded(
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          return DropdownMenu<int>(
+                            initialSelection: alertNoticePeriod,
+                            hintText: 'Select notice period for alerts',
+                            inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
+                            alignmentOffset: const Offset(0, -60),
+                            expandedInsets: EdgeInsets.zero,
+                            trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                            dropdownMenuEntries: alertNoticePeriods.map((opt) {
+                              final theLabel = (opt == 0) ? 'At time of event' : '$opt minutes before';
+                              return DropdownMenuEntry<int>(
+                                value: opt,
+                                label: theLabel,
+                                labelWidget: Text(theLabel, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                              );
+                            }).toList(),
+                            onSelected: (int? value) {
+                              if (value == null) return;
+                              HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('alerts_preference_option');
+                              widget.analyticsService.logDistanceUnitPreferenceSet(value.toString());
+                              saveAlertNoticePeriod(value);
+                              setState(() { });
+                            },
+                          );
+                        }),
                       ),
-                    ],),
+                    ]),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       activeThumbColor: Theme.of(context).colorScheme.tertiary,
@@ -473,4 +469,15 @@ class MyAppIcon extends StatelessWidget {
       ),
     );
   }
+}
+
+class DropdownOption {
+  final String title;
+  final String subtitle;
+  final dynamic value;
+  DropdownOption({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+  });
 }
