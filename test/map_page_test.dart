@@ -238,7 +238,7 @@ void main() {
       expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
       expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
       expect(find.byIcon(Icons.filter_alt), findsOneWidget);
-      expect(find.byIcon(Icons.my_location), findsOneWidget);
+      expect(find.byIcon(Icons.radar), findsOneWidget);
 
       // Check road closure button
       expect(find.text('Road closures'), findsOneWidget);
