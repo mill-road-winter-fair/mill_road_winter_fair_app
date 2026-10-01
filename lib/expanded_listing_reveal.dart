@@ -134,7 +134,7 @@ class _ExpandedListingRevealState extends State<ExpandedListingReveal>
       final delta = box.size.height > height || top < 0
           ? top
           : bottom > height
-              ? bottom - height
+              ? bottom - height + 8.0
               : 0.0;
       // Preserve manual positioning unless a layout change puts it outside the
       // tile's new range (for example after resizing the window).
