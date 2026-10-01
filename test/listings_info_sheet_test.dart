@@ -68,6 +68,43 @@ void main() {
   }
 
   group('ListingsInfoSheet', () {
+    for (final count in [0, 1, 4, 10]) {
+      for (final width in [320.0, 390.0]) {
+        testWidgets('shows $count categories without overflow at width $width', (tester) async {
+          tester.view.physicalSize = Size(width, 800);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          final categories = subfilterCategoryLabels.entries.take(count).toList();
+          await tester.pumpWidget(MaterialApp(home: Scaffold(body: SpecificListingInfoSheet(
+            listingId: 'categories', categoryKeys: categories.map((entry) => entry.key).toList(),
+            cancelled: false, brickAndMortar: false, emoji: '', title: 'Listing', subtitle: '', location: '',
+            description: 'Details', email: 'hello@example.com', website: 'https://example.com', phoneNumber: '01223',
+            imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: false,
+            listingFavourited: false, onGetDirections: () {}, onDetailsTapped: () {}, inDialog: false,
+            analyticsService: FakeAnalyticsService(), colorScheme: const ColorScheme.light(),
+          ))));
+          expect(tester.takeException(), isNull);
+          expect(find.byIcon(Icons.public), findsNothing);
+          expect(find.byIcon(Icons.email), findsNothing);
+          expect(find.byIcon(Icons.phone), findsNothing);
+          expect(find.byIcon(Icons.directions_walk), findsOneWidget);
+          expect(find.byIcon(Icons.info), findsOneWidget);
+          for (final category in categories) {
+            expect(find.byTooltip(category.value.label), findsOneWidget);
+            expect(find.byIcon(category.value.iconData), findsOneWidget);
+            final bounds = tester.getRect(find.byIcon(category.value.iconData));
+            expect(bounds.right, lessThanOrEqualTo(width));
+            expect(bounds.left, greaterThan(tester.getRect(find.byIcon(Platform.isAndroid ? Icons.share : Icons.ios_share)).right));
+          }
+          if (count == 10) {
+            expect(tester.getTopLeft(find.byIcon(categories.last.value.iconData)).dy,
+                greaterThan(tester.getTopLeft(find.byIcon(categories.first.value.iconData)).dy));
+          }
+        });
+      }
+    }
+
     for (final location in ['', 'Mill Road']) {
       for (final cancelled in [false, true]) {
         for (final brickAndMortar in [false, true]) {
@@ -140,7 +177,7 @@ void main() {
       expect(find.text('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-      expect(find.byIcon(Icons.public), findsOneWidget);
+      expect(find.byIcon(Icons.public), findsNothing);
     });
 
     testWidgets('displays a local business label instead of opening times for brick-and-mortar listings', (WidgetTester tester) async {

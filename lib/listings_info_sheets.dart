@@ -112,6 +112,7 @@ class GroupListingInfoSheet extends StatelessWidget {
 
 class SpecificListingInfoSheet extends StatefulWidget {
   final String listingId;
+  final List<String> categoryKeys;
   // From the db
   final bool cancelled;
   final bool brickAndMortar;
@@ -139,6 +140,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
 
   const SpecificListingInfoSheet({
     required this.listingId,
+    this.categoryKeys = const [],
     required this.cancelled,
     required this.brickAndMortar,
     required this.emoji,
@@ -344,36 +346,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 if (widget.onDetailsTapped != null &&
                     (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
                   const SizedBox(width: 6),
-                // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
                 if (widget.onDetailsTapped != null &&
-                    widget.website.isNotEmpty &&
-                    widget.email.isNotEmpty &&
-                    widget.phoneNumber.isNotEmpty &&
-                    MediaQuery.of(context).size.width <= 360)
-                  ElevatedButton(
-                    style: (widget.detailsVisible ?? false)
-                        ? ElevatedButton.styleFrom(
-                            iconSize: 24,
-                            foregroundColor: widget.colorScheme.onPrimary,
-                            backgroundColor: widget.colorScheme.primary,
-                            visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                            padding: const EdgeInsets.all(0),
-                            elevation: 3,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap)
-                        : ElevatedButton.styleFrom(
-                            iconSize: 24,
-                            visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                            padding: const EdgeInsets.all(0),
-                            elevation: 3,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
-                      widget.onDetailsTapped?.call();
-                    },
-                    child: const Icon(Icons.info),
-                  )
-                else if (widget.onDetailsTapped != null &&
                     (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
                   ElevatedButton(
                     style: (widget.detailsVisible ?? false)
@@ -419,89 +392,26 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 },
                   child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
                 ),
-                Flexible(flex: 1, child: Container()),
-                if (widget.website.isNotEmpty) const SizedBox(width: 6),
-                if (widget.website.isNotEmpty)
-                  Material(
-                    shape: const CircleBorder(),
-                    elevation: 3,
-                    color: widget.colorScheme.primary,
-                    child: InkWell(
-                      onTap: () async {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
-                        launchUrl(Uri.parse(widget.website));
-                      },
-                      customBorder: const CircleBorder(),
-                      radius: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: Icon(
-                          Icons.public,
-                          size: 22,
-                          color: widget.colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Wrap(
+                    alignment: WrapAlignment.end,
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final entry in subfilterCategoryLabels.entries)
+                        if (widget.categoryKeys.contains(entry.key))
+                          Tooltip(
+                            message: entry.value.label,
+                            child: SizedBox(
+                              width: 24,
+                              height: 28,
+                              child: Icon(entry.value.iconData, size: 22, color: widget.colorScheme.primary),
+                            ),
+                          ),
+                    ],
                   ),
-                if (widget.email.isNotEmpty) const SizedBox(width: 6),
-                if (widget.email.isNotEmpty)
-                  Material(
-                    shape: const CircleBorder(),
-                    elevation: 3,
-                    color: widget.colorScheme.primary,
-                    child: InkWell(
-                      onTap: () async {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
-                        final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
-                        if (await canLaunchUrl(mailUri)) {
-                          await launchUrl(mailUri);
-                        } else {
-                          throw Exception('Could not launch email client');
-                        }
-                      },
-                      customBorder: const CircleBorder(),
-                      radius: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: Icon(
-                          Icons.email,
-                          size: 22,
-                          color: widget.colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (widget.phoneNumber.isNotEmpty) const SizedBox(width: 6),
-                if (widget.phoneNumber.isNotEmpty)
-                  Material(
-                    shape: const CircleBorder(),
-                    elevation: 3,
-                    color: widget.colorScheme.primary,
-                    child: InkWell(
-                      onTap: () async {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
-                        final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
-                        if (await canLaunchUrl(phoneUri)) {
-                          await launchUrl(phoneUri);
-                        } else {
-                          throw Exception('Could not launch ${widget.phoneNumber}');
-                        }
-                      },
-                      customBorder: const CircleBorder(),
-                      radius: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: Icon(
-                          Icons.phone,
-                          size: 22,
-                          color: widget.colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
-                  ),
+                ),
               ],
             ),
             if ((widget.detailsVisible ?? false) && !widget.inDialog) detailsColumn(context),
@@ -702,6 +612,7 @@ Future<void> showListingDetailsDialog(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                 child: SpecificListingInfoSheet(
                   listingId: event.id,
+                  categoryKeys: event.categoryKeys,
                   cancelled: event.cancelled,
                   brickAndMortar: event.brickAndMortar,
                   emoji: event.emoji,

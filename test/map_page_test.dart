@@ -581,7 +581,7 @@ void main() {
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-      expect(find.byIcon(Icons.public), findsOneWidget);
+      expect(find.byIcon(Icons.public), findsNothing);
     });
 
     testWidgets('Adds markers, opens modal bottom sheet for specific marker, and checks content', (WidgetTester tester) async {
@@ -618,7 +618,7 @@ void main() {
       expect(find.text('Implausible Avenue (~135m away)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-      expect(find.byIcon(Icons.public), findsOneWidget);
+      expect(find.byIcon(Icons.public), findsNothing);
     });
 
     testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {

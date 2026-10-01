@@ -720,6 +720,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                             ),
                                             child: SpecificListingInfoSheet(
                                               listingId: rel['id'],
+                                              categoryKeys: subfilterCategoryLabels.keys.where((key) => rel[key] == 'TRUE').toList(),
                                               cancelled: rel['cancelled'] == 'TRUE' ? true : false,
                                               brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
                                               emoji: rel['emoji'] ?? '',
@@ -858,6 +859,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
                             child: SpecificListingInfoSheet(
                               listingId: listing['id'],
+                              categoryKeys: subfilterCategoryLabels.keys.where((key) => listing[key] == 'TRUE').toList(),
                               cancelled: listing['cancelled'] == 'TRUE' ? true : false,
                               brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
                               emoji: listing['emoji'] ?? '',

@@ -777,6 +777,7 @@ double estimateTextHeight({
 }
 
 class PositionedEvent {
+  final List<String> categoryKeys;
   final DateTime startTime;
   final DateTime endTime;
   final String location;
@@ -799,6 +800,7 @@ class PositionedEvent {
   double left;
   double width;
   PositionedEvent({
+    this.categoryKeys = const [],
     required this.startTime,
     required this.endTime,
     required this.location,

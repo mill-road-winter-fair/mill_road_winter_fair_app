@@ -165,6 +165,7 @@ class _TimetablePageState extends State<TimetablePage> {
           endTime.difference(startTime) < maxDurationToBeEvent) {
         final eventLocation = ev['location'];
         final thePreparedEvent = PositionedEvent(
+          categoryKeys: subfilterCategoryLabels.keys.where((key) => ev[key] == 'TRUE').toList(),
           startTime: startTime,
           endTime: endTime,
           location: ev['location'],
@@ -255,6 +256,7 @@ class _TimetablePageState extends State<TimetablePage> {
       // but it's a trade-off between that and overflow exceptions
       final height = max(12.0, ev.endTime.difference(ev.startTime).inMinutes * pxPerMin);
       out.add(PositionedEvent(
+        categoryKeys: ev.categoryKeys,
         startTime: ev.startTime,
         endTime: ev.endTime,
         location: ev.location,

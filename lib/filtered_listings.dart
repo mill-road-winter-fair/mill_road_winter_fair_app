@@ -651,6 +651,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           ),
                                           child: SpecificListingInfoSheet(
                                             listingId: listing['id'],
+                                            categoryKeys: subfilterCategoryLabels.keys.where((key) => listing[key] == 'TRUE').toList(),
                                             cancelled: listing['cancelled'] == 'TRUE' ? true : false,
                                             brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
                                             emoji: listing['emoji'] ?? '',
