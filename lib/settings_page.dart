@@ -217,26 +217,24 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             child: DropdownButton<String>(
                               value: themeNotifier.value,
                               isExpanded: true,
+                              itemHeight: null,
                               hint: const Text('Select a visual theme'),
                               selectedItemBuilder: (context) {
                                 return themeOptions.map((opt) {
-                                  return Container(alignment: Alignment.centerLeft, height: 56, child: Text(opt.title));
+                                  return Container(alignment: Alignment.centerLeft, child: Text(opt.title));
                                 }).toList();
                               },
                               items: themeOptions.map((opt) {
                                 return DropdownMenuItem<String>(
                                   value: opt.value,
-                                  child: SizedBox(
-                                    width: constraints.maxWidth,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                        Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                        const SizedBox(height: 4),
-                                      ],
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                      Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                      const SizedBox(height: 8),
+                                    ],
                                   ),
                                 );
                               }).toList(),
@@ -267,12 +265,11 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             child: DropdownButton<DistanceUnits>(
                               value: preferredDistanceUnits,
                               isExpanded: true,
+                              itemHeight: null,
                               hint: const Text('Select units for map distances'),
                               selectedItemBuilder: (context) {
                                 return unitsOptions.map((opt) {
-                                  return Container(
-                                    alignment: Alignment.centerLeft, 
-                                    child: Text(opt.title));
+                                  return Container(alignment: Alignment.centerLeft, child: Text(opt.title));
                                 }).toList();
                               },
                               items: unitsOptions.map((opt) {
@@ -282,9 +279,9 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                        Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                        Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                      SizedBox(height: 4),
+                                      Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                      Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                      SizedBox(height: 8),
                                     ],
                                   ),
                                 );
