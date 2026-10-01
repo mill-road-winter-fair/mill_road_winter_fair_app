@@ -499,6 +499,7 @@ class _TimetablePageState extends State<TimetablePage> {
       appBarActions: [
         IconButton(
           key: nowOrSoonIconKey,
+          tooltip: widget.onlyNowOrSoon ? 'Show the full timetable' : 'Show what is on now or starting soon',
           onLongPress: () => showMiniPopup(
               context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon',
               analyticsService: widget.analyticsService),
@@ -528,6 +529,7 @@ class _TimetablePageState extends State<TimetablePage> {
         ),
         IconButton(
           key: searchIconKey,
+          tooltip: _isSearching ? 'Close timetable search' : 'Search the timetable',
           color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
           onLongPress: () => showMiniPopup(
               context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
@@ -649,6 +651,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                 trailing: [
                                   IconButton(
                                     iconSize: 20,
+                                    tooltip: _searchQuery.isEmpty ? 'Close search' : 'Clear search',
                                     icon: const Icon(Icons.close),
                                     onPressed: () {
                                       HapticFeedback.lightImpact();
@@ -709,13 +712,17 @@ class _TimetablePageState extends State<TimetablePage> {
                                       Container(width: leftColumnWidth - 2),
                                       for (final location in positioned.entries)
                                         Builder(builder: (itemContext) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('timetable_location');
-                                              showMiniPopup(itemContext, null, location.key, analyticsService: widget.analyticsService);
-                                            },
-                                            child: Container(
+                                          return Semantics(
+                                            button: true,
+                                            label: '${location.key}. Show full location name',
+                                            excludeSemantics: true,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                HapticFeedback.lightImpact();
+                                                widget.analyticsService.logButtonTapped('timetable_location');
+                                                showMiniPopup(itemContext, null, location.key, analyticsService: widget.analyticsService);
+                                              },
+                                              child: Container(
                                               decoration: BoxDecoration(
                                                 color: colorScheme.onSurfaceVariant,
                                                 border: Border.all(width: 0.1),
@@ -733,6 +740,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                 minFontSize: 11,
                                                 maxFontSize: 15,
                                                 overflow: TextOverflow.ellipsis,
+                                              ),
                                               ),
                                             ),
                                           );
@@ -844,7 +852,12 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                       left: pe.left,
                                                                       width: pe.width,
                                                                       height: pe.height,
-                                                                      child: GestureDetector(
+                                                                      child: Semantics(
+                                                                        button: true,
+                                                                        label:
+                                                                            '${pe.name}, ${pe.location}, ${pe.cancelled ? 'cancelled, ' : ''}${TimeOfDay.fromDateTime(pe.startTime).format(context)} to ${TimeOfDay.fromDateTime(pe.endTime).format(context)}. Show details',
+                                                                        excludeSemantics: true,
+                                                                        child: GestureDetector(
                                                                         onTap: () {
                                                                           HapticFeedback.lightImpact();
                                                                           widget.analyticsService.logButtonTapped('timetable_listing');
@@ -880,6 +893,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                             border: Border.all(width: 0.2, color: colorScheme.onSecondary),
                                                                           ),
                                                                           child: eventRect(pe, colorScheme, isLandscape, null),
+                                                                        ),
                                                                         ),
                                                                       ),
                                                                     ),
