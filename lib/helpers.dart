@@ -86,6 +86,7 @@ class FairScaffold extends StatelessWidget {
           drawer: fairDrawer(context, analyticsService: analyticsService),
           floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: 20),
           floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+          resizeToAvoidBottomInset: false,
           floatingActionButton: (allowBack ?? false) ? null : SizedBox(
             width: 68,
             height: 68,
