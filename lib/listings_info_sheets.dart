@@ -322,6 +322,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   ),
                 ),
 
+                const Spacer(),
                 const SizedBox(width: 6),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -419,89 +420,6 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 },
                   child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
                 ),
-                Flexible(flex: 1, child: Container()),
-                if (widget.website.isNotEmpty) const SizedBox(width: 6),
-                if (widget.website.isNotEmpty)
-                  Material(
-                    shape: const CircleBorder(),
-                    elevation: 3,
-                    color: widget.colorScheme.primary,
-                    child: InkWell(
-                      onTap: () async {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
-                        launchUrl(Uri.parse(widget.website));
-                      },
-                      customBorder: const CircleBorder(),
-                      radius: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: Icon(
-                          Icons.public,
-                          size: 22,
-                          color: widget.colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (widget.email.isNotEmpty) const SizedBox(width: 6),
-                if (widget.email.isNotEmpty)
-                  Material(
-                    shape: const CircleBorder(),
-                    elevation: 3,
-                    color: widget.colorScheme.primary,
-                    child: InkWell(
-                      onTap: () async {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
-                        final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
-                        if (await canLaunchUrl(mailUri)) {
-                          await launchUrl(mailUri);
-                        } else {
-                          throw Exception('Could not launch email client');
-                        }
-                      },
-                      customBorder: const CircleBorder(),
-                      radius: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: Icon(
-                          Icons.email,
-                          size: 22,
-                          color: widget.colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (widget.phoneNumber.isNotEmpty) const SizedBox(width: 6),
-                if (widget.phoneNumber.isNotEmpty)
-                  Material(
-                    shape: const CircleBorder(),
-                    elevation: 3,
-                    color: widget.colorScheme.primary,
-                    child: InkWell(
-                      onTap: () async {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
-                        final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
-                        if (await canLaunchUrl(phoneUri)) {
-                          await launchUrl(phoneUri);
-                        } else {
-                          throw Exception('Could not launch ${widget.phoneNumber}');
-                        }
-                      },
-                      customBorder: const CircleBorder(),
-                      radius: 8,
-                      child: Padding(
-                        padding: const EdgeInsets.all(3),
-                        child: Icon(
-                          Icons.phone,
-                          size: 22,
-                          color: widget.colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
             if ((widget.detailsVisible ?? false) && !widget.inDialog) detailsColumn(context),
