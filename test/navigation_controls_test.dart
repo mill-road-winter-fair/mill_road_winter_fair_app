@@ -37,7 +37,11 @@ void main() {
         'food': 'TRUE',
         'shopping': 'FALSE',
         'charityCommunityInfo': 'FALSE',
-        'performance': 'FALSE',
+        'performanceMusic': 'FALSE',
+        'performanceChildrens': 'FALSE',
+        'performanceDance': 'FALSE',
+        'performanceOther': 'FALSE',
+        'business': 'FALSE',
         'visitExperience': 'FALSE',
         'service': 'FALSE',
       },
@@ -83,9 +87,10 @@ void main() {
 
     expect(find.text('Directions'), findsOneWidget);
     expect(find.byIcon(Icons.filter_alt), findsNothing);
+    expect(find.byIcon(Icons.search), findsNothing);
     expect(find.byIcon(Icons.assistant_navigation), findsNothing);
     expect(find.text('Road closures'), findsNothing);
-    expect(find.byTooltip('Switch to satellite view'), findsOneWidget);
+    expect(find.byTooltip('Switch to satellite map'), findsOneWidget);
     expect(find.byType(BackButton), findsOneWidget);
     expect(original.navigationInProgress, isFalse);
     expect(original.markers, originalMarkers);
@@ -96,6 +101,45 @@ void main() {
     await routeClosed;
     expect(tester.state<MapPageState>(find.byType(MapPage)), same(original));
     expect(find.byIcon(Icons.filter_alt), findsOneWidget);
+    expect(find.text('Navigating to'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('returning from directions preserves the map search and its camera space', (tester) async {
+    firstExecution = false;
+    final original = await openMap(tester);
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    final field = find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
+    await tester.enterText(field, 'glazed');
+    await tester.pumpAndSettle();
+    expect(original.mapHeight, closeTo(tester.getSize(find.byType(GoogleMap)).height - 56, 1));
+    final originalMarkers = Map.of(original.markers);
+
+    final closed = original.getDirections('destination', const LatLng(52.199687, 0.138813), false);
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchBar), findsNothing);
+    expect(find.byIcon(Icons.search), findsNothing);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    await closed;
+    expect(tester.widget<TextField>(field).controller!.text, 'glazed');
+    expect(original.markers, originalMarkers);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('navigation keeps only the destination visible and tolerates a missing listing', (tester) async {
+    firstExecution = false;
+    listings.add({...listings.first, 'id': 'other', 'title': 'Another venue'});
+    final state = await openMap(tester);
+    await navigate(tester, state);
+    expect(state.markers.values.where((marker) => marker.visible).map((marker) => marker.markerId.value), ['destination']);
+    state.cancelNavigation();
+    await tester.pumpAndSettle();
+    currentLatLng = null;
+    await state.doTheNavigation('removed-listing', const LatLng(52.199687, 0.138813), false);
+    await tester.pumpAndSettle();
+    expect(find.text('Directions'), findsOneWidget);
     expect(find.text('Navigating to'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -123,7 +167,7 @@ void main() {
     final padding = tester.widget<GoogleMap>(find.byType(GoogleMap)).padding.bottom;
     expect(padding, greaterThanOrEqualTo(mapBounds.bottom - bounds.top));
     expect(state.mapHeight, closeTo(mapBounds.height - padding, 1));
-    expect(bounds.overlaps(tester.getRect(find.byTooltip('Switch to satellite view'))), isFalse);
+    expect(bounds.overlaps(tester.getRect(find.byTooltip('Switch to satellite map'))), isFalse);
     expect(tester.takeException(), isNull);
 
     // Completing/repeating normal map initialisation must not clear the destination.
@@ -161,12 +205,12 @@ void main() {
     final state = await openMap(tester);
     await navigate(tester, state);
     expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).mapType, MapType.hybrid);
-    expect(find.descendant(of: find.byTooltip('Switch to normal map'), matching: find.byIcon(Icons.map)), findsOneWidget);
-    await tester.tap(find.byTooltip('Switch to normal map'));
+    expect(find.descendant(of: find.byTooltip('Switch to street map'), matching: find.byIcon(Icons.map)), findsOneWidget);
+    await tester.tap(find.byTooltip('Switch to street map'));
     await tester.pumpAndSettle();
     expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).mapType, MapType.normal);
     expect(preferredMapStyleType, MapStyleType.normal);
-    await tester.tap(find.byTooltip('Switch to satellite view'));
+    await tester.tap(find.byTooltip('Switch to satellite map'));
     await tester.pumpAndSettle();
     expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).mapType, MapType.hybrid);
     expect(preferredMapStyleType, MapStyleType.hybrid);
