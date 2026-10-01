@@ -68,6 +68,35 @@ void main() {
   }
 
   group('ListingsInfoSheet', () {
+    for (final location in ['Mill Road', '']) {
+      testWidgets('hides opening times for a brickAndMortar listing ${location.isEmpty ? 'in a group' : 'with a location'}', (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest(
+          cancelled: false,
+          brickAndMortar: true,
+          emoji: '',
+          title: 'Mill Road Shop',
+          subtitle: 'Shopping',
+          location: location,
+          description: '',
+          email: '',
+          website: '',
+          phoneNumber: '',
+          imageURL: '',
+          startTime: '10:30',
+          endTime: '16:30',
+          approxDistance: '',
+          detailsVisible: true,
+          listingFavourited: false,
+          onGetDirections: () {},
+        ));
+
+        expect(find.text('Mill Road Shop'), findsOneWidget);
+        expect(find.text('Shopping', findRichText: true), findsOneWidget);
+        expect(find.textContaining('10:30', findRichText: true), findsNothing);
+        expect(find.textContaining('16:30', findRichText: true), findsNothing);
+      });
+    }
+
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,

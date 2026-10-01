@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class GroupListingInfoSheet extends StatelessWidget {
+  final bool brickAndMortar;
   final String title;
   final String categories;
   final String startTime;
@@ -17,6 +18,7 @@ class GroupListingInfoSheet extends StatelessWidget {
   final ColorScheme colorScheme;
 
   const GroupListingInfoSheet({
+    this.brickAndMortar = false,
     required this.title,
     required this.categories,
     required this.startTime,
@@ -66,8 +68,8 @@ class GroupListingInfoSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              const Expanded(flex: 1, child: SizedBox(width: 2)),
-              Expanded(
+              if (!brickAndMortar) const Expanded(flex: 1, child: SizedBox(width: 2)),
+              if (!brickAndMortar) Expanded(
                 flex: 7,
                 child: Text(
                   "$startTime—$endTime",
@@ -192,7 +194,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     final subSubStyle = subStyle.copyWith(fontWeight: FontWeight.normal);
 
     // Determine if the event has ended, update text style accordingly
-    final bool ended = hasEventEnded(widget.endTime);
+    final bool ended = !widget.brickAndMortar && hasEventEnded(widget.endTime);
     final timeStyle = subSubStyle.copyWith(
       color: ended ? Colors.red : widget.colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
@@ -213,8 +215,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           : Text.rich(
               textAlign: TextAlign.right,
               TextSpan(children: [
-                TextSpan(text: "${widget.subtitle}\n", style: subSubStyle),
-                TextSpan(text: updatedTimes, style: timeStyle),
+                TextSpan(text: widget.subtitle, style: subSubStyle),
+                if (!widget.brickAndMortar)
+                  TextSpan(text: '\n$updatedTimes', style: timeStyle),
               ]));
     } else {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
@@ -282,8 +285,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       ),
                     ),
                   ),
-                  const Expanded(flex: 1, child: SizedBox(width: 2)),
-                  Expanded(
+                  if (widget.cancelled || !widget.brickAndMortar)
+                    const Expanded(flex: 1, child: SizedBox(width: 2)),
+                  if (widget.cancelled || !widget.brickAndMortar) Expanded(
                     flex: 6,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
@@ -421,6 +425,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       widget.endTime,
                       context,
                       cancelled: widget.cancelled,
+                      brickAndMortar: widget.brickAndMortar,
                     );
                 },
                   child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
@@ -522,9 +527,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
 
   Widget _cancelledLabel(BuildContext context) {
     return Semantics(
-      button: true,
+      button: !widget.brickAndMortar,
       child: GestureDetector(
-        onTap: () {
+        onTap: widget.brickAndMortar ? null : () {
           HapticFeedback.lightImpact();
           showMiniPopup(
             context,
