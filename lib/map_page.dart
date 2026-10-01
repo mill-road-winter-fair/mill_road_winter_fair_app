@@ -682,6 +682,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                               child: GroupListingInfoSheet(
+                                brickAndMortar: parentListing['brickAndMortar'] == 'TRUE',
                                 title: parentListing['title'],
                                 categories: "${parentListing['subtitle']}",
                                 startTime: "${parentListing['startTime']}",
