@@ -61,7 +61,7 @@ void main() {
           onFavouriteTapped: onFavouriteTapped,
           inDialog: false,
           analyticsService: FakeAnalyticsService(),
-          colorScheme: ColorScheme.light(),
+          colorScheme: const ColorScheme.light(),
         ),
       ),
     );
@@ -88,7 +88,7 @@ void main() {
           detailsVisible: true,
           listingFavourited: false,
           onGetDirections: () {},
-        ));
+        ),);
 
         expect(find.text('Mill Road Shop'), findsOneWidget);
         expect(find.text('Shopping', findRichText: true), findsOneWidget);
@@ -116,7 +116,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
-      ));
+      ),);
 
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
@@ -145,7 +145,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
-      ));
+      ),);
 
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
@@ -182,7 +182,7 @@ void main() {
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
-      ));
+      ),);
 
       // Find the heart icon button. It's an IconButton containing a FaIcon.
       final heartButton = find.byType(IconButton).first;
@@ -220,7 +220,7 @@ void main() {
         onDetailsTapped: () {
           detailsToggled = true;
         },
-      ));
+      ),);
 
       // Extra info should not be present
       expect(find.text('Nice buns'), findsNothing);
@@ -254,7 +254,7 @@ void main() {
         onGetDirections: () {},
         listingFavourited: false,
         onDetailsTapped: () {},
-      ));
+      ),);
 
       // Extra info should now be present
       expect(find.text('Nice buns'), findsOneWidget);
@@ -284,7 +284,7 @@ void main() {
           directionsCalled = true;
         },
         listingFavourited: false,
-      ));
+      ),);
 
       final getDirectionsButton = find.byIcon(Icons.directions_walk);
       expect(getDirectionsButton, findsOneWidget);
@@ -317,7 +317,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
-      ));
+      ),);
 
       final timeTextFinder = find.text('09:00—10:00');
       expect(timeTextFinder, findsOneWidget);
@@ -349,7 +349,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
-      ));
+      ),);
 
       // Title should have line-through
       final emojiFinder = find.text('🍩 ');
@@ -372,7 +372,7 @@ void main() {
       final cancelledTextFinder = find.text('CANCELLED');
       expect(cancelledTextFinder, findsOneWidget);
       final Text cancelledTextWidget = tester.widget(cancelledTextFinder.first);
-      final colorScheme = ColorScheme.light();
+      final colorScheme = const ColorScheme.light();
       expect(cancelledTextWidget.style?.color, colorScheme.onPrimary);
       expect(cancelledTextWidget.style?.color, isNot(Colors.red));
 
@@ -425,22 +425,22 @@ void main() {
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
-      ));
+      ),);
 
       final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
       final FaIcon favouriteIcon = tester.widget(find.descendant(
         of: find.byType(IconButton).first,
         matching: find.byType(FaIcon),
-      ));
+      ),);
       final ElevatedButton directionsButton = tester.widget(find.ancestor(
         of: find.byIcon(Icons.directions_walk),
         matching: find.byType(ElevatedButton),
-      ));
+      ),);
       final Finder shareIcon = Platform.isAndroid ? find.byIcon(Icons.share) : find.byIcon(Icons.ios_share);
       final ElevatedButton shareButton = tester.widget(find.ancestor(
         of: shareIcon,
         matching: find.byType(ElevatedButton),
-      ));
+      ),);
 
       expect(favouriteButton.onPressed, isNull);
       expect(favouriteIcon.color, Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).disabledColor);
@@ -479,13 +479,13 @@ void main() {
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
-      ));
+      ),);
 
       final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
       final FaIcon favouriteIcon = tester.widget(find.descendant(
         of: find.byType(IconButton).first,
         matching: find.byType(FaIcon),
-      ));
+      ),);
 
       expect(favouriteButton.onPressed, isNotNull);
       expect(favouriteIcon.icon?.codePoint, FontAwesomeIcons.solidHeart.codePoint);
@@ -493,7 +493,7 @@ void main() {
       expect(favouriteIcon.icon?.fontPackage, FontAwesomeIcons.solidHeart.fontPackage);
       expect(
         favouriteIcon.color,
-        ColorScheme.light().primary,
+        const ColorScheme.light().primary,
       );
 
       await tester.tap(find.byType(IconButton).first);

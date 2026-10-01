@@ -149,13 +149,10 @@ void main() {
       addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null));
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      ),);
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
-      Set<String> visibleIds() => state.markers.values
-          .where((marker) => marker.visible)
-          .map((marker) => marker.markerId.value)
-          .toSet();
+      Set<String> visibleIds() => state.markers.values.where((marker) => marker.visible).map((marker) => marker.markerId.value).toSet();
       expect(visibleIds(), {'1', '3'});
 
       await tester.tap(find.byIcon(Icons.search));

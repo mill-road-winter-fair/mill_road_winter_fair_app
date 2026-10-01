@@ -274,7 +274,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
   final lightOrDarkThemeKey = ui.PlatformDispatcher.instance.platformBrightness;
   Color color;
   if (lightOrDarkThemeKey == Brightness.light) {
-    color = switch(category) {
+    color = switch (category) {
       "Food" || "Group-Food" => const Color.fromRGBO(255, 156, 26, 1.0),
       "Shopping" || "Group-Shopping" => const Color.fromRGBO(209, 81, 85, 1.0),
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(190, 110, 230, 1.0),
@@ -285,8 +285,9 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Mixed" => const Color.fromRGBO(0, 100, 0, 1.0), // will become the Fair's colour for this year
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
     };
-  } else { // can only be dark
-    color = switch(category) {
+  } else {
+    // can only be dark
+    color = switch (category) {
       "Food" || "Group-Food" => const Color.fromRGBO(241, 108, 0, 1.0),
       "Shopping" || "Group-Shopping" => const Color.fromRGBO(204, 22, 22, 1.0),
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(183, 13, 204, 1.0),

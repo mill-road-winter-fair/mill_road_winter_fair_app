@@ -159,16 +159,15 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading:
-              Navigator.canPop(context)
-                  ? BackButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('back');
-                      Navigator.maybePop(context);
-                    },
-                  )
-                  : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('back');
+                    Navigator.maybePop(context);
+                  },
+                )
+              : null,
           title: const FittedBox(fit: BoxFit.scaleDown, child: Text('Settings')),
         ),
         body: Container(
@@ -313,13 +312,12 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             text: TextSpan(
                               text: 'What does this mean?',
                               style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
-                              recognizer:
-                                  TapGestureRecognizer()
-                                    ..onTap = () {
-                                      HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('analytics_explanation_settings');
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService)));
-                                    },
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  HapticFeedback.lightImpact();
+                                  widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService)));
+                                },
                             ),
                           ),
                         ],

@@ -59,16 +59,15 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading:
-              Navigator.canPop(context)
-                  ? BackButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('back');
-                      Navigator.maybePop(context);
-                    },
-                  )
-                  : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('back');
+                    Navigator.maybePop(context);
+                  },
+                )
+              : null,
           title: const FittedBox(fit: BoxFit.scaleDown, child: Text('Important information')),
         ),
         body: SingleChildScrollView(
@@ -125,13 +124,12 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                       TextSpan(
                         text: 'www.millroadwinterfair.org',
                         style: const TextStyle(decoration: TextDecoration.underline),
-                        recognizer:
-                            TapGestureRecognizer()
-                              ..onTap = () {
-                                HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
-                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                              },
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
+                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                          },
                       ),
                       const TextSpan(text: '.'),
                     ],
@@ -158,18 +156,17 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                               TextSpan(
                                 text: 'here',
                                 style: const TextStyle(decoration: TextDecoration.underline),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () async {
-                                        HapticFeedback.lightImpact();
-                                        widget.analyticsService.logButtonTapped('mrwf_email_hyperlink');
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return contactUsDialog(context, analyticsService: widget.analyticsService);
-                                          },
-                                        );
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    HapticFeedback.lightImpact();
+                                    widget.analyticsService.logButtonTapped('mrwf_email_hyperlink');
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return contactUsDialog(context, analyticsService: widget.analyticsService);
                                       },
+                                    );
+                                  },
                               ),
                               const TextSpan(text: '.'),
                             ],
@@ -193,18 +190,17 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                               TextSpan(
                                 text: '07303 142689',
                                 style: const TextStyle(decoration: TextDecoration.underline),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () async {
-                                        HapticFeedback.lightImpact();
-                                        widget.analyticsService.logButtonTapped('mrwf_phone_hyperlink');
-                                        final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                        if (await canLaunchUrl(phoneUri)) {
-                                          await launchUrl(phoneUri);
-                                        } else {
-                                          throw Exception('Could not dial 07303 142689');
-                                        }
-                                      },
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    HapticFeedback.lightImpact();
+                                    widget.analyticsService.logButtonTapped('mrwf_phone_hyperlink');
+                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                    if (await canLaunchUrl(phoneUri)) {
+                                      await launchUrl(phoneUri);
+                                    } else {
+                                      throw Exception('Could not dial 07303 142689');
+                                    }
+                                  },
                               ),
                               const TextSpan(text: '.'),
                             ],

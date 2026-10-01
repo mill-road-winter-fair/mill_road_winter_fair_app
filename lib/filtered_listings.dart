@@ -122,8 +122,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     try {
       if (allListings.isEmpty) throw Exception("No listings exist");
 
-      if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
-          preferredSortingMethod == SortingMethod.nearest) {
+      if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) && preferredSortingMethod == SortingMethod.nearest) {
         // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
         preferredSortingMethod = SortingMethod.alphabetical;
       }
@@ -454,8 +453,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         if (isShowingJustPerformance || filterCategory == 'favourite')
           IconButton(
             key: hidePastIconKey,
-            onLongPress: () => showMiniPopup(context, hidePastIconKey,
-                (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
+            onLongPress: () => showMiniPopup(context, hidePastIconKey, (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed',
+                analyticsService: widget.analyticsService,),
             onPressed: () {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
@@ -609,11 +608,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           },
                           child: GestureDetector(
                             onTap: (detailsVisibleIndex == null)
-                              ? null
-                              : () {
-                                detailsVisibleIndex = null;
-                                setState(() { });
-                              },
+                                ? null
+                                : () {
+                                    detailsVisibleIndex = null;
+                                    setState(() {});
+                                  },
                             child: ScrollablePositionedList.builder(
                               itemCount: filteredListings.length,
                               itemScrollController: itemScrollController,
@@ -658,29 +657,31 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             startTime: "${listing['startTime']}",
                                             endTime: "${listing['endTime']}",
                                             approxDistance: approximateDistance,
-                                            detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
+                                            detailsVisible: (detailsVisibleIndex == null)
+                                                ? false
+                                                : (detailsVisibleIndex == index)
+                                                    ? true
+                                                    : null,
                                             listingFavourited: isFavourited,
                                             onDetailsTapped: () => toggleDetailsRow(index),
                                             onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                                             onGetDirections: () {
                                               Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => MapPage(
-                                                    listings: listings,
-                                                    onTabSelected: (_) => {},
-                                                    destinationId: listing['id'],
-                                                    destinationLatLng: destinationLatLng,
-                                                    analyticsService: widget.analyticsService,
-                                                  )
-                                                )
-                                              );
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) => MapPage(
+                                                            listings: listings,
+                                                            onTabSelected: (_) => {},
+                                                            destinationId: listing['id'],
+                                                            destinationLatLng: destinationLatLng,
+                                                            analyticsService: widget.analyticsService,
+                                                          ),),);
                                             },
                                             analyticsService: widget.analyticsService,
                                             inDialog: false,
                                             colorScheme: colorScheme,
-                                          )),
-                                    SizedBox(height: 8),
+                                          ),),
+                                    const SizedBox(height: 8),
                                   ],
                                 );
                               },
@@ -720,17 +721,18 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     curve: Curves.easeOut,
                                     child: GestureDetector(
                                       onVerticalDragStart: (_) => _showThumb(),
-                                      onVerticalDragUpdate: detailsVisibleIndex != null ? null : (details) {
-                                        _showThumb();
-                                        final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
-                                        final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
-                                        final targetIndex =
-                                            (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
-                                        itemScrollController.scrollTo(
-                                          index: targetIndex,
-                                          duration: const Duration(milliseconds: 120),
-                                        );
-                                      },
+                                      onVerticalDragUpdate: detailsVisibleIndex != null
+                                          ? null
+                                          : (details) {
+                                              _showThumb();
+                                              final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
+                                              final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
+                                              final targetIndex = (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
+                                              itemScrollController.scrollTo(
+                                                index: targetIndex,
+                                                duration: const Duration(milliseconds: 120),
+                                              );
+                                            },
                                       child: Container(
                                         width: 2,
                                         decoration: BoxDecoration(
@@ -765,20 +767,20 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 ),
                               )
                             : const SizedBox.shrink(),
-                      ]);
-                    }),
+                      ],);
+                    },),
                   ),
                 ),
               ),
-            ]);
-          }),
+            ],);
+          },),
       analyticsService: widget.analyticsService,
     );
   }
 
   Widget _buildSortingDropdown(BuildContext context, bool isPerformance) {
     final colorScheme = Theme.of(context).colorScheme;
-    final dropdownStyle = ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
+    final dropdownStyle = const ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
     return Container(
       key: const ValueKey('sortingdropdown'),
       color: colorScheme.surfaceDim,
@@ -786,7 +788,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         padding: const EdgeInsets.symmetric(horizontal: 2),
         child: DropdownMenu(
           initialSelection: useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod,
-          label: Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           leadingIcon: const Icon(Icons.sort),
           textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
           inputDecorationTheme: InputDecorationTheme(
@@ -799,8 +801,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             isDense: true,
             visualDensity: const VisualDensity(horizontal: -4),
             contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-            constraints: BoxConstraints(maxHeight: 40),
-            suffixIconConstraints: BoxConstraints(minWidth: 30, maxWidth: 30),
+            constraints: const BoxConstraints(maxHeight: 40),
+            suffixIconConstraints: const BoxConstraints(minWidth: 30, maxWidth: 30),
           ),
           dropdownMenuEntries: [
             if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
@@ -838,7 +840,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   Widget _buildFilteringDropdown(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final dropdownStyle = ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
+    final dropdownStyle = const ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
     return Container(
       key: const ValueKey('filteringdropdown'),
       color: colorScheme.surfaceDim,
@@ -860,8 +862,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             isDense: true,
             visualDensity: const VisualDensity(horizontal: -4),
             contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-            constraints: BoxConstraints(maxHeight: 40),
-            suffixIconConstraints: BoxConstraints(minWidth: 30, maxWidth: 30),
+            constraints: const BoxConstraints(maxHeight: 40),
+            suffixIconConstraints: const BoxConstraints(minWidth: 30, maxWidth: 30),
           ),
           dropdownMenuEntries: [
             DropdownMenuEntry(
@@ -877,12 +879,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 style: dropdownStyle,
                 leadingIcon: Icon(e.value.iconData, size: 20),
               );
-            })
+            }),
           ],
           onSelected: filteringDropdownCallback,
         ),
       ),
     );
   }
-
 }

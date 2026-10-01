@@ -60,7 +60,7 @@ class FairScaffold extends StatelessWidget {
                     HapticFeedback.lightImpact();
                     analyticsService.logButtonTapped('back');
                     Navigator.maybePop(context);
-                  })
+                  },)
                 : Builder(
                     builder: (context) => IconButton(
                       icon: const Icon(Icons.menu),
@@ -77,12 +77,12 @@ class FairScaffold extends StatelessWidget {
             ),
             centerTitle: false,
             actions: appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
-            actionsPadding: EdgeInsets.only(right: 4),
+            actionsPadding: const EdgeInsets.only(right: 4),
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
           bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected, analyticsService: analyticsService),
-        ));
+        ),);
   }
 }
 
@@ -135,7 +135,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                     fit: BoxFit.scaleDown,
                     child: Text(' $fairDateTimes', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
                   ),
-                  Expanded(flex: 2, child: Container())
+                  Expanded(flex: 2, child: Container()),
                 ],
               ),
             ),
@@ -156,7 +156,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   MaterialPageRoute(
                       builder: (context) => AboutTheFairPage(
                             analyticsService: analyticsService,
-                          )));
+                          ),),);
             },
           ),
         ),
@@ -175,7 +175,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   MaterialPageRoute(
                       builder: (context) => ImportantInfoPage(
                             analyticsService: analyticsService,
-                          )));
+                          ),),);
             },
           ),
         ),
@@ -292,7 +292,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   MaterialPageRoute(
                       builder: (context) => SettingsPage(
                             analyticsService: analyticsService,
-                          )));
+                          ),),);
             },
           ),
         ),
@@ -311,7 +311,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   MaterialPageRoute(
                       builder: (context) => WelcomeScreen(
                             analyticsService: analyticsService,
-                          )));
+                          ),),);
             },
           ),
         ),
@@ -359,7 +359,7 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
       context: itemContext,
       builder: (dialogContext) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
+          insetPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
           shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceDim,
@@ -371,9 +371,9 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
               ),
               padding: const EdgeInsets.all(16),
               child: Column(mainAxisSize: MainAxisSize.min, spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
-                Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
-                Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
+                const Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
+                const Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
+                const Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
                 Align(alignment: AlignmentGeometry.center, child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150)),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   TextButton(
@@ -381,8 +381,7 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                       HapticFeedback.lightImpact();
                       analyticsService.logButtonTapped('share_app_share');
                       Navigator.of(dialogContext).pop();
-                      shareApp(itemContext,
-                          'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
+                      shareApp(itemContext, 'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
                     },
                     child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
                   ),
@@ -394,12 +393,12 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                     },
                     child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
                   ),
-                ]),
-              ]),
+                ],),
+              ],),
             ),
           ),
         );
-      });
+      },);
 }
 
 void shareApp(BuildContext context, String msgText) async {
@@ -447,8 +446,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
   final inflater = (MediaQuery.of(context).size.height.toInt() - 600).clamp(0, 250) / 50;
   final colorScheme = Theme.of(context).colorScheme;
   final textStyle = TextStyle(fontSize: 13.0 + inflater / 3);
-  final linkStyle =
-      TextStyle(fontSize: 12.5 + inflater / 3, decoration: TextDecoration.underline, decorationColor: colorScheme.tertiary, color: colorScheme.tertiary);
+  final linkStyle = TextStyle(fontSize: 12.5 + inflater / 3, decoration: TextDecoration.underline, decorationColor: colorScheme.tertiary, color: colorScheme.tertiary);
   final ScrollController aboutDialogScrollController = ScrollController();
 
   if (context.mounted) {
@@ -474,8 +472,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               dense: true,
                               visualDensity: VisualDensity(horizontal: -4 + inflater, vertical: -4),
                               contentPadding: EdgeInsets.zero,
-                              leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(6.0), child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain)),
+                              leading: ClipRRect(borderRadius: BorderRadius.circular(6.0), child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain)),
                               title: Text(fairName, style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold)),
                               subtitle: Text('v${packageInfo.version}', style: textStyle),
                             ),
@@ -562,11 +559,11 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                                 },
                                 child: Text('Close', style: TextStyle(color: colorScheme.tertiary)),
                               ),
-                            ]),
-                          ]),
-                        )));
-              }));
-        });
+                            ],),
+                          ],),
+                        ),),);
+              },),);
+        },);
   }
 }
 
@@ -616,8 +613,7 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                       Text.rich(
                         TextSpan(
                           children: [
-                            const TextSpan(
-                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
+                            const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
                             TextSpan(
                                 text: '07303\u{00A0}142689',
                                 style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
@@ -631,7 +627,7 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                                     } else {
                                       throw Exception('Could not dial 07303 142689');
                                     }
-                                  }),
+                                  },),
                             const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
                           ],
                         ),
@@ -682,8 +678,7 @@ Widget _buildEmailLink(String email, {required AnalyticsService analyticsService
   );
 }
 
-void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage,
-    {required AnalyticsService analyticsService, Color? fgColour, Color? bgColour}) {
+void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage, {required AnalyticsService analyticsService, Color? fgColour, Color? bgColour}) {
   fgColour ??= Theme.of(itemContext).colorScheme.secondary;
   bgColour ??= Theme.of(itemContext).colorScheme.onSecondary;
 
@@ -735,7 +730,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
             decoration: BoxDecoration(
               color: bgColour,
               borderRadius: BorderRadius.circular(4),
-              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
+              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))],
             ),
             child: Text(theMessage, softWrap: true, style: theStyle),
           ),
@@ -767,11 +762,7 @@ double estimateTextHeight({
   int? maxLines,
 }) {
   final tp = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: maxLines,
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
-      strutStyle: StrutStyle.fromTextStyle(style))
+      text: TextSpan(text: text, style: style), maxLines: maxLines, textDirection: TextDirection.ltr, textScaler: MediaQuery.textScalerOf(context), strutStyle: StrutStyle.fromTextStyle(style),)
     ..layout(maxWidth: maxWidth);
   return tp.size.height;
 }
@@ -854,9 +845,7 @@ int asTheCrowFlies(LatLng origin, LatLng destination) {
   const c = cos;
 
   // Haversine formula for calculating the central angle between two points on a sphere
-  var a = 0.5 -
-      c((destination.latitude - origin.latitude) * p) / 2 +
-      c(origin.latitude * p) * c(destination.latitude * p) * (1 - c((destination.longitude - origin.longitude) * p)) / 2;
+  var a = 0.5 - c((destination.latitude - origin.latitude) * p) / 2 + c(origin.latitude * p) * c(destination.latitude * p) * (1 - c((destination.longitude - origin.longitude) * p)) / 2;
 
   // Why have a fudge factor? It's a UX thing
   // Estimating distances usings straight line routes means that the estimation is inevitably shorter than the actual walking route
@@ -1027,7 +1016,6 @@ String formatFullDate(DateTime date) {
   return '$dayName $monthName $day$suffix';
 }
 
-
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime) {
   try {
@@ -1049,12 +1037,10 @@ bool hasEventEnded(String endTime) {
   }
 }
 
-
 // Function to determine if the event is today
 bool isItEventDay() {
   return DateUtils.isSameDay(fairDate, DateTime.now());
 }
-
 
 class AdaptiveImageText extends StatefulWidget {
   const AdaptiveImageText({
@@ -1115,9 +1101,7 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
         final image = snapshot.data!;
         final imageIsLandscape = image.width > image.height;
-        return imageIsLandscape
-            ? _buildVerticalLayout()
-            : _buildHorizontalLayout();
+        return imageIsLandscape ? _buildVerticalLayout() : _buildHorizontalLayout();
       },
     );
   }
@@ -1154,9 +1138,7 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
       },
     );
   }
-
 }
-
 
 Future<void> ensureWidgetFullyVisible(GlobalKey key) async {
   final context = key.currentContext;
@@ -1219,8 +1201,5 @@ bool isWidgetFullyVisible(BuildContext context) {
   final offset = box.localToGlobal(Offset.zero, ancestor: viewport);
   final size = box.size;
   final viewportSize = viewport.paintBounds.size;
-  return offset.dy >= 0 &&
-      offset.dy + size.height <= viewportSize.height &&
-      offset.dx >= 0 &&
-      offset.dx + size.width <= viewportSize.width;
+  return offset.dy >= 0 && offset.dy + size.height <= viewportSize.height && offset.dx >= 0 && offset.dx + size.width <= viewportSize.width;
 }
