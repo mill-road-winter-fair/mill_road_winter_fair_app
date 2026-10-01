@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,6 +43,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   List<Map<String, dynamic>> filteredListings = [];
   bool isRefreshing = false;
   bool useFallbackSorting = false;
+  final _expandedScrollBounds = ExpandedListingScrollBounds();
   final ItemScrollController itemScrollController = ItemScrollController();
   final itemPositionsListener = ItemPositionsListener.create();
   final ValueNotifier<bool> thumbVisible = ValueNotifier<bool>(false);
@@ -52,7 +54,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   int? detailsVisibleIndex; // which listing (if any) has details button selected
-  final Map<dynamic, GlobalKey> _listingKeys = {}; // global key of each listing so we can ensure it's visible
   int firstNextListingIndex = -1; // the first listing that hasn't passed its end time, when sorted by start time
   int numberOfVisibleListings = -1;
   late String filterCategory;
@@ -276,13 +277,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     setState(() {
       detailsVisibleIndex = (detailsVisibleIndex == null || detailsVisibleIndex != index) ? index : null;
     });
-    if (detailsVisibleIndex != null ) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final theKey = _listingKeys[index];
-        if (theKey == null) return;
-        ensureWidgetFullyVisible(theKey);
-      });
-    }
   }
 
   int findFirstNextListingIndex(List filteredListings) {
@@ -351,7 +345,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       );
     }
 
-    _listingKeys.clear();    
     isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0, 11) == 'performance');
 
     // Step 1a: Filter by category
@@ -408,6 +401,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         if (filterCategory == 'favourite' || isShowingJustPerformance)
           IconButton(
             key: nowOrSoonIconKey,
+            tooltip: 'Scroll to what is on now or starting soon',
             onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon', analyticsService: widget.analyticsService),
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -461,6 +455,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         if (isShowingJustPerformance || filterCategory == 'favourite')
           IconButton(
             key: hidePastIconKey,
+            tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
             onLongPress: () => showMiniPopup(context, hidePastIconKey,
                 (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
             onPressed: () {
@@ -493,6 +488,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           ),
         IconButton(
           key: searchIconKey,
+          tooltip: _isSearching ? 'Close listings search' : 'Search listings',
           color: colorScheme.onSecondary,
           onLongPress: () =>
               showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar', analyticsService: widget.analyticsService),
@@ -553,6 +549,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   trailing: [
                                     IconButton(
                                       iconSize: 20,
+                                      tooltip: _searchQuery.isEmpty ? 'Close search' : 'Clear search',
                                       icon: const Icon(Icons.close),
                                       onPressed: () {
                                         HapticFeedback.lightImpact();
@@ -625,7 +622,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               itemCount: filteredListings.length,
                               itemScrollController: itemScrollController,
                               itemPositionsListener: itemPositionsListener,
-                              physics: (detailsVisibleIndex == null) ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+                              physics: ExpandedListingScrollPhysics(bounds: _expandedScrollBounds, parent: const AlwaysScrollableScrollPhysics()),
                               itemBuilder: (context, index) {
                                 final listing = filteredListings[index]; // since index=0 is the sort/search bar
                                 final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
@@ -636,9 +633,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                   // if this is the first visible item, capture its index
                                   firstVisibleIndex ??= index;
                                 }
-                                _listingKeys.putIfAbsent(index, () => GlobalKey());
                                 return Column(
-                                  key: _listingKeys[index],
+                                  key: ValueKey(listing['id']),
                                   children: [
                                     if (!_hidePastListings || !hasEventEnded(listing['endTime']))
                                       Container(
@@ -650,6 +646,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
                                           ),
                                           child: SpecificListingInfoSheet(
+                                            scrollBounds: _expandedScrollBounds,
                                             listingId: listing['id'],
                                             cancelled: listing['cancelled'] == 'TRUE' ? true : false,
                                             brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
@@ -733,7 +730,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     curve: Curves.easeOut,
                                     child: GestureDetector(
                                       onVerticalDragStart: (_) => _showThumb(),
-                                      onVerticalDragUpdate: (details) {
+                                      onVerticalDragUpdate: detailsVisibleIndex != null ? null : (details) {
                                         _showThumb();
                                         final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
                                         final fraction = (localDy / trackHeight).clamp(0.0, 1.0);

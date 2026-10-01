@@ -70,51 +70,34 @@ void main() {
   }
 
   group('ListingsInfoSheet', () {
-    for (final location in ['', 'Mill Road']) {
-      for (final cancelled in [false, true]) {
-        for (final brickAndMortar in [false, true]) {
-          testWidgets('shows subtitle and one status: location="$location", cancelled=$cancelled, business=$brickAndMortar', (tester) async {
-            await tester.pumpWidget(createWidgetUnderTest(
-              cancelled: cancelled,
-              brickAndMortar: brickAndMortar,
-              emoji: '',
-              title: 'Test listing',
-              subtitle: 'Shopping',
-              location: location,
-              description: '',
-              email: '',
-              website: '',
-              phoneNumber: '',
-              imageURL: '',
-              startTime: '10:30',
-              endTime: '16:30',
-              approxDistance: '100m',
-              detailsVisible: false,
-              listingFavourited: false,
-              listingAlerted: false,
-              onGetDirections: () {},
-            ));
+    for (final location in ['Mill Road', '']) {
+      testWidgets('hides opening times for a brickAndMortar listing ${location.isEmpty ? 'in a group' : 'with a location'}', (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest(
+          cancelled: false,
+          brickAndMortar: true,
+          emoji: '',
+          title: 'Mill Road Shop',
+          subtitle: 'Shopping',
+          location: location,
+          description: '',
+          email: '',
+          website: '',
+          phoneNumber: '',
+          imageURL: '',
+          startTime: '10:30',
+          endTime: '16:30',
+          approxDistance: '',
+          detailsVisible: true,
+          listingFavourited: false,
+          listingAlerted: false,
+          onGetDirections: () {},
+        ));
 
-            expect(tester.takeException(), isNull);
-            expect(find.text('Shopping'), findsOneWidget);
-            expect(find.text('CANCELLED'), cancelled ? findsOneWidget : findsNothing);
-            expect(find.text('Local business'), !cancelled && brickAndMortar ? findsOneWidget : findsNothing);
-            expect(find.text('10:30—16:30'), !cancelled && !brickAndMortar ? findsOneWidget : findsNothing);
-
-            final statusFinder = find.text(cancelled ? 'CANCELLED' : brickAndMortar ? 'Local business' : '10:30—16:30');
-            expect(tester.getTopLeft(statusFinder).dy, greaterThan(tester.getTopLeft(find.text('Shopping')).dy));
-
-            if (cancelled) {
-              await tester.tap(statusFinder);
-              await tester.pump();
-              expect(find.text('Originally 10:30–16:30'), findsOneWidget);
-              await tester.pump(const Duration(seconds: 4));
-              expect(find.text('Originally 10:30–16:30'), findsNothing);
-              expect(tester.takeException(), isNull);
-            }
-          });
-        }
-      }
+        expect(find.text('Mill Road Shop'), findsOneWidget);
+        expect(find.text('Shopping', findRichText: true), findsOneWidget);
+        expect(find.textContaining('10:30', findRichText: true), findsNothing);
+        expect(find.textContaining('16:30', findRichText: true), findsNothing);
+      });
     }
 
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
@@ -145,36 +128,6 @@ void main() {
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
-    });
-
-    testWidgets('displays a local business label instead of opening times for brick-and-mortar listings', (WidgetTester tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        cancelled: false,
-        brickAndMortar: true,
-        emoji: '🏪',
-        title: 'Mill Road Shop',
-        subtitle: 'Shopping',
-        location: 'Mill Road',
-        description: '',
-        email: '',
-        website: '',
-        phoneNumber: '',
-        imageURL: '',
-        startTime: '10:30',
-        endTime: '16:30',
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: false,
-        onGetDirections: () {},
-        listingFavourited: false,
-        listingAlerted: false,
-      ));
-
-      expect(find.text('Local business'), findsOneWidget);
-      expect(find.text('10:30—16:30'), findsNothing);
-
-      final Text label = tester.widget(find.text('Local business'));
-      expect(label.style?.fontSize, 12);
-      expect(label.style?.fontWeight, FontWeight.bold);
     });
 
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {

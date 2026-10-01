@@ -69,6 +69,7 @@ class FairScaffold extends StatelessWidget {
                   })
                 : Builder(
                     builder: (context) => IconButton(
+                      tooltip: 'Open navigation menu',
                       icon: const Icon(Icons.menu),
                       onPressed: () {
                         HapticFeedback.lightImpact();
@@ -229,6 +230,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on Facebook',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_facebook');
@@ -240,6 +242,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on X',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_x');
@@ -251,6 +254,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on Instagram',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_instagram');
@@ -262,6 +266,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on Flickr',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_flickr');
@@ -380,7 +385,10 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                 Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
                 Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
                 Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
-                Align(alignment: AlignmentGeometry.center, child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150)),
+                Align(
+                    alignment: AlignmentGeometry.center,
+                    child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png',
+                        width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   TextButton(
                     onPressed: () {
@@ -670,20 +678,25 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
 }
 
 Widget _buildEmailLink(String email, {required AnalyticsService analyticsService}) {
-  return InkWell(
-    onTap: () async {
-      HapticFeedback.lightImpact();
-      analyticsService.logButtonTapped('contact_email');
-      final Uri mailUri = Uri(scheme: 'mailto', path: email);
-      if (await canLaunchUrl(mailUri)) {
-        await launchUrl(mailUri);
-      } else {
-        throw Exception('Could not launch email client');
-      }
-    },
-    child: Text(
-      email,
-      style: const TextStyle(decoration: TextDecoration.underline),
+  return Semantics(
+    button: true,
+    label: 'Email $email',
+    excludeSemantics: true,
+    child: InkWell(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        analyticsService.logButtonTapped('contact_email');
+        final Uri mailUri = Uri(scheme: 'mailto', path: email);
+        if (await canLaunchUrl(mailUri)) {
+          await launchUrl(mailUri);
+        } else {
+          throw Exception('Could not launch email client');
+        }
+      },
+      child: Text(
+        email,
+        style: const TextStyle(decoration: TextDecoration.underline),
+      ),
     ),
   );
 }
@@ -724,14 +737,17 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
     builder: (ctx) => Positioned(
       left: desiredLeft,
       top: desiredTop,
-      child: GestureDetector(
-        // since field may be clipped
-        onTap: () {
-          HapticFeedback.lightImpact();
-          analyticsService.logButtonTapped('tooltip_dismiss');
-          removeMiniPopup();
-        },
-        child: ConstrainedBox(
+      child: Semantics(
+        button: true,
+        label: 'Dismiss message',
+        child: GestureDetector(
+          // since field may be clipped
+          onTap: () {
+            HapticFeedback.lightImpact();
+            analyticsService.logButtonTapped('tooltip_dismiss');
+            removeMiniPopup();
+          },
+          child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: overlayW, // wrapping boundary
           ),
@@ -744,6 +760,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
               boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
             ),
             child: Text(theMessage, softWrap: true, style: theStyle),
+          ),
           ),
         ),
       ),
@@ -923,6 +940,7 @@ void shareListing(
   String theEndTimeString,
   BuildContext context, {
   bool cancelled = false,
+  bool brickAndMortar = false,
 }) async {
   debugPrint('shareEvent called with theEvent=$theTitle theLocation=$theLocation theStartTime=$theStartTimeString theEndTimeString=$theEndTimeString');
   final msgText = buildListingShareText(
@@ -931,6 +949,7 @@ void shareListing(
     theStartTimeString,
     theEndTimeString,
     cancelled: cancelled,
+    brickAndMortar: brickAndMortar,
   );
   final params = ShareParams(
     text: msgText,
@@ -960,6 +979,7 @@ String buildListingShareText(
   String theEndTimeString, {
   required bool cancelled,
   DateTime? currentTime,
+  bool brickAndMortar = false,
 }) {
   if (cancelled) {
     return '$theTitle at $theLocation has been cancelled and will not be appearing at $fairName.\nhttps://www.millroadwinterfair.org/';
@@ -985,7 +1005,7 @@ String buildListingShareText(
     msgText += 'Tomorrow ';
   }
 
-  if (isItAnEvent && whenEventStart.abs() < 6) {
+  if (!brickAndMortar && isItAnEvent && whenEventStart.abs() < 6) {
     msgText += '${msgText == '' ? 'At' : 'at'} ${formatTime(startTime)} ';
   }
 

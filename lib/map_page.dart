@@ -1,3 +1,4 @@
+import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -615,9 +616,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           return a['title'].compareTo(b['title']);
         });
 
-        final Map<dynamic, GlobalKey> listingKeys = {}; // global key of each listing so we can ensure it's visible
 
         final groupSheetModalScrollController = ScrollController();
+        final expandedScrollBounds = ExpandedListingScrollBounds();
         showModalBottomSheet(
           context: context,
           showDragHandle: false,
@@ -634,13 +635,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   setModalState(() {
                     detailsVisibleIndex = (detailsVisibleIndex == null || detailsVisibleIndex != index) ? index : null;
                   });
-                  if (detailsVisibleIndex != null ) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) async {
-                      final theKey = listingKeys[index];
-                      if (theKey == null) return;
-                      ensureWidgetFullyVisible(theKey);
-                    });
-                  }
                 }
 
                 void favouriteOrNotListing(String listingID) {
@@ -682,6 +676,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                               child: GroupListingInfoSheet(
+                                brickAndMortar: parentListing['brickAndMortar'] == 'TRUE',
                                 title: parentListing['title'],
                                 categories: "${parentListing['subtitle']}",
                                 startTime: "${parentListing['startTime']}",
@@ -694,6 +689,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               fit: FlexFit.loose,
                               child: Scrollbar(
                                 controller: groupSheetModalScrollController,
+                                interactive: detailsVisibleIndex == null,
                                 thumbVisibility: Platform.isIOS ? false : true,
                                 thickness: 4,
                                 radius: const Radius.circular(8),
@@ -701,14 +697,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
                                   child: ListView.builder(
                                     itemCount: relatedListings.length,
+                                    physics: ExpandedListingScrollPhysics(bounds: expandedScrollBounds),
                                     shrinkWrap: true,
                                     controller: groupSheetModalScrollController,
                                     itemBuilder: (context, index) {
                                       final rel = relatedListings[index];
                                       final isFavourited = isListingFavourited(rel['id']);
-                                      listingKeys.putIfAbsent(index, () => GlobalKey());
                                       return Column(
-                                        key: listingKeys[index],
+                                        key: ValueKey(rel['id']),
                                         children: [
                                           Container(
                                             width: constraints.maxWidth - 10,
@@ -719,6 +715,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
                                             ),
                                             child: SpecificListingInfoSheet(
+                                              scrollBounds: expandedScrollBounds,
                                               listingId: rel['id'],
                                               cancelled: rel['cancelled'] == 'TRUE' ? true : false,
                                               brickAndMortar: rel['brickAndMortar'] == 'TRUE' ? true : false,
@@ -1975,6 +1972,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == true && doingAPushNavigation == null)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
+                        tooltip: 'Cancel navigation',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('cancel_navigation');
@@ -2002,6 +2000,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'homeBtn',
+                        tooltip: 'Show the whole Fair map',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('home');
@@ -2067,35 +2066,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
                         heroTag: 'centreOnUserBtn',
+                        tooltip: 'Centre map on your location',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('centre_on_user');
-                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
-                          try {
-                            if (currentLatLng == null) {
-                              final pos = await getCurrentPosition();
-                              currentLatLng = LatLng(pos.latitude, pos.longitude);
-                            }
-                            if (currentLatLng != null) {
-                              // Move camera to the user's location with a sensible zoom and bearing
-                              double currentZoom = await _controller!.getZoomLevel();
-                              _controller?.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            debugPrint('Centre-on-user failed: $e');
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: colorScheme.primary,
-                                  content: Text('Unable to determine your location'),
-                                ),
-                              );
-                            }
-                          }
+                          focusMapOnNearestMarkers(10);
                         },
                         backgroundColor: Colors.transparent,
                         mini: true,
@@ -2113,11 +2088,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   offset: const Offset(2, 2))
                             ],
                           ),
-                          child: const Icon(Icons.my_location),
+                          child: const Icon(Icons.radar),
                         ),
                       ),
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
+                      tooltip: mapType == MapType.normal ? 'Switch to satellite map' : 'Switch to street map',
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         widget.analyticsService.logButtonTapped('map_type_toggle');
@@ -2159,6 +2135,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'mapBearingBtn',
+                        tooltip: preferredMapOrientation == MapOrientation.adaptive ? 'Keep north at the top' : 'Use direction of travel',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('map_orientation_toggle');
@@ -2237,6 +2214,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
                       color: colorScheme.surface,
+        child: Semantics(
+        button: true,
+        label: 'Road closures. Show more information',
+        excludeSemantics: true,
                       child: GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
@@ -2279,6 +2260,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                 ),
                               ),
                             ],
+                          ),
                           ),
                         ),
                       ),
