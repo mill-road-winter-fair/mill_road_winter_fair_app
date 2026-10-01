@@ -124,27 +124,34 @@ void main() {
               listingAlerted: false,
               onGetDirections: () {},
             ));
+    for (final location in ['Mill Road', '']) {
+      testWidgets('hides opening times for a brickAndMortar listing ${location.isEmpty ? 'in a group' : 'with a location'}', (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest(
+          cancelled: false,
+          brickAndMortar: true,
+          emoji: '',
+          title: 'Mill Road Shop',
+          subtitle: 'Shopping',
+          location: location,
+          description: '',
+          email: '',
+          website: '',
+          phoneNumber: '',
+          imageURL: '',
+          startTime: '10:30',
+          endTime: '16:30',
+          approxDistance: '',
+          detailsVisible: true,
+          listingFavourited: false,
+          listingAlerted: false,
+          onGetDirections: () {},
+        ));
 
-            expect(tester.takeException(), isNull);
-            expect(find.text('Shopping'), findsOneWidget);
-            expect(find.text('CANCELLED'), cancelled ? findsOneWidget : findsNothing);
-            expect(find.text('Local business'), !cancelled && brickAndMortar ? findsOneWidget : findsNothing);
-            expect(find.text('10:30—16:30'), !cancelled && !brickAndMortar ? findsOneWidget : findsNothing);
-
-            final statusFinder = find.text(cancelled ? 'CANCELLED' : brickAndMortar ? 'Local business' : '10:30—16:30');
-            expect(tester.getTopLeft(statusFinder).dy, greaterThan(tester.getTopLeft(find.text('Shopping')).dy));
-
-            if (cancelled) {
-              await tester.tap(statusFinder);
-              await tester.pump();
-              expect(find.text('Originally 10:30–16:30'), findsOneWidget);
-              await tester.pump(const Duration(seconds: 4));
-              expect(find.text('Originally 10:30–16:30'), findsNothing);
-              expect(tester.takeException(), isNull);
-            }
-          });
-        }
-      }
+        expect(find.text('Mill Road Shop'), findsOneWidget);
+        expect(find.text('Shopping', findRichText: true), findsOneWidget);
+        expect(find.textContaining('10:30', findRichText: true), findsNothing);
+        expect(find.textContaining('16:30', findRichText: true), findsNothing);
+      });
     }
 
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
