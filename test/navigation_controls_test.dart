@@ -108,6 +108,7 @@ void main() {
   testWidgets('returning from directions preserves the map search and its camera space', (tester) async {
     firstExecution = false;
     final original = await openMap(tester);
+    expect(find.byIcon(Icons.radar), findsOneWidget);
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
     final field = find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
@@ -120,6 +121,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(SearchBar), findsNothing);
     expect(find.byIcon(Icons.search), findsNothing);
+    expect(find.byIcon(Icons.radar), findsNothing);
+    expect(find.byIcon(Icons.my_location), findsOneWidget);
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     await closed;
@@ -143,7 +146,7 @@ void main() {
     expect(find.text('Navigating to'), findsNothing);
     expect(tester.takeException(), isNull);
   });
-  testWidgets('destination card floats over the map with camera clearance with matching border and clears on cancel', (tester) async {
+  testWidgets('destination card overlays the map without changing camera space and clears on cancel', (tester) async {
     // Set firstExecution to false to simulate normal app launch
     firstExecution = false;
 
@@ -165,8 +168,8 @@ void main() {
     expect(bounds.left, closeTo(mapBounds.left + 12, 1));
     expect(bounds.bottom, lessThanOrEqualTo(mapBounds.bottom - 12));
     final padding = tester.widget<GoogleMap>(find.byType(GoogleMap)).padding.bottom;
-    expect(padding, greaterThanOrEqualTo(mapBounds.bottom - bounds.top));
-    expect(state.mapHeight, closeTo(mapBounds.height - padding, 1));
+    expect(padding, 0);
+    expect(state.mapHeight, closeTo(mapBounds.height, 1));
     expect(bounds.overlaps(tester.getRect(find.byTooltip('Switch to satellite map'))), isFalse);
     expect(tester.takeException(), isNull);
 
@@ -194,6 +197,46 @@ void main() {
     expect(find.text('11:00'), findsOneWidget);
     expect(find.textContaining('null'), findsNothing);
     expect(find.byIcon(Icons.place_outlined), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('destination details collapse left after five seconds and reopen on tap', (tester) async {
+    var distanceTaps = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Align(
+          alignment: Alignment.bottomCenter,
+          child: NavigationBottomRow(
+            destinationCard: const SizedBox(height: 150, child: Text('Destination details')),
+            distance: '250 m',
+            onDistancePressed: () => distanceTaps++,
+          ),
+        ),
+      ),
+    ));
+    final expandedBounds = tester.getRect(find.byType(AnimatedSize));
+    await tester.pump(const Duration(seconds: 4));
+    expect(find.text('Destination details'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 175));
+    final animatedBounds = tester.getRect(find.byType(AnimatedSize));
+    expect(animatedBounds.width, lessThan(expandedBounds.width));
+    expect(animatedBounds.width, greaterThan(204));
+    await tester.pumpAndSettle();
+    expect(find.text('Destination details'), findsNothing);
+    expect(find.byTooltip('Show destination details'), findsOneWidget);
+    final collapsedBounds = tester.getRect(find.byType(AnimatedSize));
+    expect(collapsedBounds.left, closeTo(expandedBounds.left, 1));
+    expect(collapsedBounds.width, 204);
+    await tester.tap(find.byType(NavigationDistanceButton));
+    expect(distanceTaps, 1);
+
+    await tester.tap(find.byTooltip('Show destination details'));
+    await tester.pumpAndSettle();
+    expect(find.text('Destination details'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Show destination details'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

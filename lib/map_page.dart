@@ -81,15 +81,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   late double _compassBearing;
   double? mapWidth;
   double? mapHeight;
-  final GlobalKey _destinationCardKey = GlobalKey();
-  double _destinationCardHeight = 0;
-
-  void _measureDestinationCard() {
-    final box = _destinationCardKey.currentContext?.findRenderObject() as RenderBox?;
-    final height = box?.size.height ?? 0;
-    if (!mounted || (height - _destinationCardHeight).abs() < 0.5) return;
-    setState(() => _destinationCardHeight = height);
-  }
+  bool _navigationCameraFitted = false;
   String? _distanceToDestination;
   Map<String, dynamic>? _navigationListing;
   StreamSubscription<Position>? _positionStream;
@@ -1284,6 +1276,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
   Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
     if (!mounted) return;
+    _navigationCameraFitted = false;
     _cameraBeforeNavigation = _currentCamera;
     hideAllMarkers();
     _polygons.clear();
@@ -1325,9 +1318,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       await updatePolyline(currentLatLng, destination);
       if (!mounted) return;
       // Set the camera position once, at the beginning of the navigation
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && polylines.isNotEmpty) _setMapCameraToFitPolyline(polylines);
-      });
+      _fitNavigationCameraOnce();
       // Start location updates
       await startLocationUpdates(destination);
     } else {
@@ -1642,6 +1633,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
 
+  void _fitNavigationCameraOnce() {
+    if (_navigationCameraFitted || _controller == null || polylines.isEmpty ||
+        currentLatLng == null || mapWidth == null || mapHeight == null) return;
+    _navigationCameraFitted = true;
+    _setMapCameraToFitPolyline(polylines);
+  }
+
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
     debugPrint('MapPageState _setMapCameraToFitPolyline called');
     if (currentLatLng == null || polylines.isEmpty || mapWidth == null || mapHeight == null) return;
@@ -1664,27 +1662,20 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       }
     }
 
-    // The route may stop at a nearby path rather than the exact venue pin.
-    if (_destination != null) {
-      polylineMinLat = min(polylineMinLat, _destination!.latitude);
-      polylineMinLong = min(polylineMinLong, _destination!.longitude);
-      polylineMaxLat = max(polylineMaxLat, _destination!.latitude);
-      polylineMaxLong = max(polylineMaxLong, _destination!.longitude);
-    }
     // add some extra padding, inversely proportional to the distance of the trip, so start/end aren't off screen
     double extraPaddingForShortTrips = (0.00006 / pow(pow(polylineMaxLat - polylineMinLat, 2) + pow(polylineMaxLong - polylineMinLong, 2), 0.5)).clamp(0, 0.1);
 
     //Default bearing and padding
     if (preferredMapOrientation == MapOrientation.alwaysNorth) {
       bearing = 0;
-      padding = mapWidth! * (0.08 + extraPaddingForShortTrips);
+      padding = mapWidth! * (0.07 + extraPaddingForShortTrips);
     } else {
       bearing = 290;
-      padding = mapHeight! * (0.16 + extraPaddingForShortTrips); // leave space around the route endpoints
+      padding = mapHeight! * (0.10 + extraPaddingForShortTrips);
     }
 
     _moveCameraToBoundsWithRotation(
-        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), max(32.0, padding * (1 + extraPaddingForShortTrips)), bearing);
+        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -1963,22 +1954,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             children: [
               LayoutBuilder(
                 builder: (context, constraints) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) => _measureDestinationCard());
-                  final usableHeight = max(1.0, constraints.maxHeight - _destinationCardHeight - (_isSearching ? 56 : 0));
-                  final sizeChanged = mapWidth != constraints.maxWidth || mapHeight != usableHeight;
-                  if (sizeChanged && polylines.isNotEmpty) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted && polylines.isNotEmpty) _setMapCameraToFitPolyline(polylines);
-                    });
-                  }
                   mapWidth = constraints.maxWidth;
-                  mapHeight = usableHeight;
+                  mapHeight = constraints.maxHeight - (_isSearching ? 56 : 0);
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
                       if (didPop && navigationInProgress) cancelNavigation();
                     },
                     child: GoogleMap(
-                        padding: EdgeInsets.only(bottom: _destinationCardHeight),
                       style: mapStyle,
                       mapType: mapType,
                       rotateGesturesEnabled: false,
@@ -1991,8 +1973,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       onMapCreated: (GoogleMapController controller) {
                         _controller = controller;
                         if (polylines.isNotEmpty) {
-                          _setMapCameraToFitPolyline(polylines);
-                        } else if (listings.isNotEmpty) {
+                          _fitNavigationCameraOnce();
+                        } else if (listings.isNotEmpty && (!_isDirections || currentLatLng == null)) {
                           // We should have listings by this point so set the camera to their bounds
                           _setMapCameraToFitMapMarkers();
                         }
@@ -2130,7 +2112,31 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         onPressed: () async {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('centre_on_user');
-                          focusMapOnNearestMarkers(10);
+                          if (!_isDirections) {
+                            focusMapOnNearestMarkers(10);
+                            return;
+                          }
+                          try {
+                            if (currentLatLng == null) {
+                              final position = await getCurrentPosition();
+                              currentLatLng = LatLng(position.latitude, position.longitude);
+                            }
+                            final controller = _controller;
+                            if (!mounted || controller == null) return;
+                            final zoom = await controller.getZoomLevel();
+                            if (!mounted) return;
+                            await controller.animateCamera(CameraUpdate.newCameraPosition(
+                              CameraPosition(target: currentLatLng!, zoom: zoom, bearing: _mapBearing),
+                            ));
+                          } catch (error) {
+                            debugPrint('Centre-on-user failed: $error');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                backgroundColor: colorScheme.primary,
+                                content: const Text('Unable to determine your location'),
+                              ));
+                            }
+                          }
                         },
                         backgroundColor: Colors.transparent,
                         mini: true,
@@ -2148,7 +2154,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   offset: const Offset(2, 2))
                             ],
                           ),
-                          child: const Icon(Icons.radar),
+                          child: Icon(_isDirections ? Icons.my_location : Icons.radar),
                         ),
                       ),
                     FloatingActionButton(
@@ -2338,7 +2344,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   right: 0,
                   bottom: 0,
                   child: NavigationBottomRow(
-                  key: _destinationCardKey,
+                  key: ValueKey(_navigationListing?['id']),
                   destinationCard: _navigationListing == null ? null : _buildDestinationCard(context, _navigationListing!),
                   distance: _distanceToDestination,
                   onDistancePressed: () {
@@ -2358,7 +2364,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 }
 
 // Floating destination card, including the device's bottom safe area.
-class NavigationBottomRow extends StatelessWidget {
+class NavigationBottomRow extends StatefulWidget {
   const NavigationBottomRow({super.key, this.destinationCard, this.distance, required this.onDistancePressed});
 
   final Widget? destinationCard;
@@ -2366,33 +2372,102 @@ class NavigationBottomRow extends StatelessWidget {
   final VoidCallback onDistancePressed;
 
   @override
+  State<NavigationBottomRow> createState() => _NavigationBottomRowState();
+}
+
+class _NavigationBottomRowState extends State<NavigationBottomRow> {
+  Timer? _collapseTimer;
+  bool _expanded = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleCollapse();
+  }
+
+  @override
+  void didUpdateWidget(NavigationBottomRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.destinationCard == null && widget.destinationCard != null) {
+      _expanded = true;
+      _scheduleCollapse();
+    }
+  }
+
+  void _scheduleCollapse() {
+    _collapseTimer?.cancel();
+    if (widget.destinationCard == null) return;
+    _collapseTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) setState(() => _expanded = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _collapseTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
-        top: false,
-        minimum: const EdgeInsets.all(12),
-        child: Material(
-          elevation: 3,
-          color: Theme.of(context).colorScheme.surface,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 0.5),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (destinationCard != null) Expanded(child: destinationCard!),
-                if (destinationCard != null && distance != null) const SizedBox(width: 12),
-                if (distance != null)
-                  SizedBox(
-                    width: 120,
-                    child: NavigationDistanceButton(distance: distance!, onPressed: onDistancePressed),
+      top: false,
+      minimum: const EdgeInsets.all(12),
+      child: LayoutBuilder(builder: (context, constraints) {
+        final hasDestination = widget.destinationCard != null;
+        final compactWidth = 24.0 + (hasDestination ? 48 : 0) +
+            (hasDestination && widget.distance != null ? 12 : 0) +
+            (widget.distance != null ? 120 : 0);
+        return Align(
+          alignment: Alignment.bottomLeft,
+          heightFactor: 1,
+          child: Material(
+            elevation: 3,
+            color: Theme.of(context).colorScheme.surface,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 0.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOutCubic,
+              alignment: Alignment.bottomLeft,
+              child: SizedBox(
+                width: hasDestination && _expanded ? constraints.maxWidth : min(compactWidth, constraints.maxWidth),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (hasDestination)
+                        Expanded(
+                          child: _expanded ? widget.destinationCard! : IconButton(
+                            tooltip: 'Show destination details',
+                            constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+                            color: Theme.of(context).colorScheme.primary,
+                            icon: const Icon(Icons.location_on),
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              setState(() => _expanded = true);
+                              _scheduleCollapse();
+                            },
+                          ),
+                        ),
+                      if (hasDestination && widget.distance != null) const SizedBox(width: 12),
+                      if (widget.distance != null)
+                        SizedBox(
+                          width: 120,
+                          child: NavigationDistanceButton(distance: widget.distance!, onPressed: widget.onDistancePressed),
+                        ),
+                    ],
                   ),
-              ],
+                ),
+              ),
             ),
           ),
-        ),
+        );
+      }),
     );
   }
 }
