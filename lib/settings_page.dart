@@ -213,43 +213,47 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                       Text('Theme:', style: settingLabelStyle),
                       Expanded(
                         child: LayoutBuilder(builder: (context, constraints) {
-                          return DropdownButton<String>(
-                            menuWidth: constraints.maxWidth,
-                            value: themeNotifier.value,
-                            isExpanded: true,
-                            hint: const Text('Select a visual theme'),
-                            selectedItemBuilder: (context) {
-                              return themeOptions.map((opt) {
-                                return Container(alignment: Alignment.centerLeft, height: 56, child: Text(opt.title));
-                              }).toList();
-                            },
-                            items: themeOptions.map((opt) {
-                              return DropdownMenuItem<String>(
-                                value: opt.value,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(opt.title, style: settingTitleStyle),
-                                    Text(opt.subtitle, style: settingSubtitleStyle),
-                                    SizedBox(height: 4),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              HapticFeedback.selectionClick();
-                              widget.analyticsService.logButtonTapped('theme_preference_option');
-                              if (value == null) return;
-                              widget.analyticsService.logThemePreferenceSet(value);
-                              selectedThemeKey = value;
-                              setState(() {
-                                _changeTheme(value);
-                                mapStyle = getMapStyleForThemeKey(value);
-                              });
-                              _saveSettings();
-                              mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
-                            },
+                          return Padding(padding: const EdgeInsets.only(right: 12),
+                            child: DropdownButton<String>(
+                              value: themeNotifier.value,
+                              isExpanded: true,
+                              hint: const Text('Select a visual theme'),
+                              selectedItemBuilder: (context) {
+                                return themeOptions.map((opt) {
+                                  return Container(alignment: Alignment.centerLeft, height: 56, child: Text(opt.title));
+                                }).toList();
+                              },
+                              items: themeOptions.map((opt) {
+                                return DropdownMenuItem<String>(
+                                  value: opt.value,
+                                  child: SizedBox(
+                                    width: constraints.maxWidth,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                        Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                        const SizedBox(height: 4),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                HapticFeedback.selectionClick();
+                                widget.analyticsService.logButtonTapped('theme_preference_option');
+                                if (value == null) return;
+                                widget.analyticsService.logThemePreferenceSet(value);
+                                selectedThemeKey = value;
+                                setState(() {
+                                  _changeTheme(value);
+                                  mapStyle = getMapStyleForThemeKey(value);
+                                });
+                                _saveSettings();
+                                mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
+                              },
+                            ),
                           );
                         })
                       ),
@@ -259,42 +263,43 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                       Text('Distances:', style: settingLabelStyle),
                       Expanded(
                         child: LayoutBuilder(builder: (context, constraints) {
-                          return DropdownButton<DistanceUnits>(
-                            menuWidth: constraints.maxWidth,
-                            value: preferredDistanceUnits,
-                            isExpanded: true,
-                            hint: const Text('Select units for map distances'),
-                            selectedItemBuilder: (context) {
-                              return unitsOptions.map((opt) {
-                                return Container(
-                                  alignment: Alignment.centerLeft, 
-                                  child: Text(opt.title));
-                              }).toList();
-                            },
-                            items: unitsOptions.map((opt) {
-                              return DropdownMenuItem<DistanceUnits>(
-                                value: opt.value,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(opt.title, style: settingTitleStyle),
-                                    Text(opt.subtitle, style: settingSubtitleStyle),
-                                    SizedBox(height: 4),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (DistanceUnits? value) {
-                              if (value == null) return;
-                              HapticFeedback.selectionClick();
-                              widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
-                              widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
-                              setState(() {
-                                preferredDistanceUnits = value;
-                              });
-                              _saveSettings();
-                            },
+                          return Padding(padding: const EdgeInsets.only(right: 12),
+                            child: DropdownButton<DistanceUnits>(
+                              value: preferredDistanceUnits,
+                              isExpanded: true,
+                              hint: const Text('Select units for map distances'),
+                              selectedItemBuilder: (context) {
+                                return unitsOptions.map((opt) {
+                                  return Container(
+                                    alignment: Alignment.centerLeft, 
+                                    child: Text(opt.title));
+                                }).toList();
+                              },
+                              items: unitsOptions.map((opt) {
+                                return DropdownMenuItem<DistanceUnits>(
+                                  value: opt.value,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                        Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                        Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                      SizedBox(height: 4),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (DistanceUnits? value) {
+                                if (value == null) return;
+                                HapticFeedback.selectionClick();
+                                widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
+                                widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
+                                setState(() {
+                                  preferredDistanceUnits = value;
+                                });
+                                _saveSettings();
+                              },
+                            ),
                           );
                         }),
                       ),
