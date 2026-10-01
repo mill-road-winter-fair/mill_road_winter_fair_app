@@ -1635,7 +1635,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void _fitNavigationCameraOnce() {
     if (_navigationCameraFitted || _controller == null || polylines.isEmpty ||
-        currentLatLng == null || mapWidth == null || mapHeight == null) return;
+        currentLatLng == null || mapWidth == null || mapHeight == null) {
+      return;
+    }
     _navigationCameraFitted = true;
     _setMapCameraToFitPolyline(polylines);
   }
