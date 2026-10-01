@@ -159,7 +159,23 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final settingLabelStyle = Theme.of(context).textTheme.titleMedium;
+    final settingLabelStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+    final settingTitleStyle = TextStyle(fontSize: 15);
+    final settingSubtitleStyle = TextStyle(fontSize: 14,  color: Theme.of(context).colorScheme.onSurfaceVariant);
+    final List<DropdownOption> unitsOptions = [
+      DropdownOption(title: 'Metric', subtitle: 'Metres and kilometres', value: DistanceUnits.metric),
+      DropdownOption(title: 'Imperial', subtitle: 'Feet and miles', value: DistanceUnits.imperial),
+      DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge)
+    ];
+    final List<DropdownOption> themeOptions = [
+      DropdownOption(title: 'Auto', subtitle: 'Follow the device light/dark setting', value: 'auto'),
+      DropdownOption(title: 'Light', subtitle: 'A bright theme using white pages', value: 'light'),
+      DropdownOption(title: 'Dark', subtitle: 'A subdued theme using black pages', value: 'dark'),
+      DropdownOption(title: '2025 Light', subtitle: 'For last year’s Fair', value: '2025'),
+      DropdownOption(title: '2024 Light', subtitle: 'For the Fair that blew away', value: '2024'),
+      DropdownOption(title: 'High contrast', subtitle: 'For visual accessibility needs', value: 'highContrast'),
+      DropdownOption(title: 'Colour blind friendly', subtitle: 'For users with colour blindness', value: 'colourBlindFriendly')
+    ];
     return SafeArea(
       top: false,
       left: false,
@@ -191,206 +207,125 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                 primary: false,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Distance units', style: settingLabelStyle),
-                        RadioGroup<DistanceUnits>(
-                          groupValue: preferredDistanceUnits,
-                          onChanged: (DistanceUnits? value) {
-                            if (value == null) return;
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
-                            widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
-                            setState(() {
-                              preferredDistanceUnits = value;
-                            });
-                            _saveSettings();
-
-                          },
-                          child: Column(
-                            children: [
-                              RadioListTile<DistanceUnits>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('Metric'),
-                                subtitle: Text(
-                                  'Metres and kilometres',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
+                    Row(spacing: 12, children: [
+                      Text('Theme:', style: settingLabelStyle),
+                      Expanded(
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          return DropdownButton<String>(
+                            menuWidth: constraints.maxWidth,
+                            value: themeNotifier.value,
+                            isExpanded: true,
+                            hint: const Text('Select a visual theme'),
+                            selectedItemBuilder: (context) {
+                              return themeOptions.map((opt) {
+                                return Container(alignment: Alignment.centerLeft, height: 56, child: Text(opt.title));
+                              }).toList();
+                            },
+                            items: themeOptions.map((opt) {
+                              return DropdownMenuItem<String>(
+                                value: opt.value,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(opt.title, style: settingTitleStyle),
+                                    Text(opt.subtitle, style: settingSubtitleStyle),
+                                    SizedBox(height: 4),
+                                  ],
                                 ),
-                                visualDensity: VisualDensity.compact,
-                                value: DistanceUnits.metric,
-                              ),
-                              RadioListTile<DistanceUnits>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('Imperial'),
-                                subtitle: Text(
-                                  'Feet and miles',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('theme_preference_option');
+                              if (value == null) return;
+                              widget.analyticsService.logThemePreferenceSet(value);
+                              selectedThemeKey = value;
+                              setState(() {
+                                _changeTheme(value);
+                                mapStyle = getMapStyleForThemeKey(value);
+                              });
+                              _saveSettings();
+                              mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
+                            },
+                          );
+                        })
+                      ),
+                    ]),
+                    Divider(),
+                    Row(spacing: 12, children: [
+                      Text('Distances:', style: settingLabelStyle),
+                      Expanded(
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          return DropdownButton<DistanceUnits>(
+                            menuWidth: constraints.maxWidth,
+                            value: preferredDistanceUnits,
+                            isExpanded: true,
+                            hint: const Text('Select units for map distances'),
+                            selectedItemBuilder: (context) {
+                              return unitsOptions.map((opt) {
+                                return Container(
+                                  alignment: Alignment.centerLeft, 
+                                  child: Text(opt.title));
+                              }).toList();
+                            },
+                            items: unitsOptions.map((opt) {
+                              return DropdownMenuItem<DistanceUnits>(
+                                value: opt.value,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(opt.title, style: settingTitleStyle),
+                                    Text(opt.subtitle, style: settingSubtitleStyle),
+                                    SizedBox(height: 4),
+                                  ],
                                 ),
-                                visualDensity: VisualDensity.compact,
-                                value: DistanceUnits.imperial,
-                              ),
-                              RadioListTile<DistanceUnits>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('Cambridge'),
-                                subtitle: Text(
-                                  'Punt lengths',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                value: DistanceUnits.cambridge,
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Theme', style: settingLabelStyle),
-                        RadioGroup<String>(
-                          groupValue: themeNotifier.value,
-                          onChanged: (value) {
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('theme_preference_option');
-                            if (value == null) return;
-                            widget.analyticsService.logThemePreferenceSet(value);
-                            selectedThemeKey = value;
-                            setState(() {
-                              _changeTheme(value);
-                              mapStyle = getMapStyleForThemeKey(value);
-                            });
-                            _saveSettings();
-                            mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
-                          },
-                          child: Column(
-                            children: [
-                              RadioListTile<String>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('Auto'),
-                                subtitle: Text(
-                                  'Follow the device’s light/dark setting',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                value: 'auto',
-                              ),
-                              RadioListTile<String>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('Light'),
-                                subtitle: Text(
-                                  'A bright theme using white pages',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                value: 'light',
-                              ),
-                              RadioListTile<String>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('Dark'),
-                                subtitle: Text(
-                                  'A subdued theme using black pages',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                value: 'dark',
-                              ),
-                              RadioListTile<String>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('2024 light scheme'),
-                                subtitle: Text(
-                                  'For the Fair that blew away',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                value: '2024',
-                              ),
-                              RadioListTile<String>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('High contrast'),
-                                subtitle: Text(
-                                    'For users with visual accessibility needs',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                visualDensity: VisualDensity.compact,
-                                value: 'highContrast',
-                              ),
-                              RadioListTile<String>(
-                                activeColor: Theme.of(context).colorScheme.tertiary,
-                                title: const Text('Colour blind friendly'),
-                                subtitle: Text(
-                                  'For users with colour blindness',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                value: 'colourBlindFriendly',
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+                              );
+                            }).toList(),
+                            onChanged: (DistanceUnits? value) {
+                              if (value == null) return;
+                              HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
+                              widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
+                              setState(() {
+                                preferredDistanceUnits = value;
+                              });
+                              _saveSettings();
+                            },
+                          );
+                        }),
+                      ),
+                    ]),
+                    Divider(),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       activeThumbColor: Theme.of(context).colorScheme.tertiary,
                       title: Text('Allow analytics', style: settingLabelStyle),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'),
-                          const SizedBox(height: 4),
-                          RichText(
-                            text: TextSpan(
-                              text: 'What does this mean?',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.tertiary,
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  HapticFeedback.lightImpact();
-                                  widget.analyticsService.logButtonTapped('analytics_explanation_settings');
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
-                                    ),
-                                  );
-                                },
-                            ),
+                      subtitle: Text.rich(
+                        TextSpan(children: [
+                        TextSpan(text: 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '),
+                        TextSpan(
+                          text: 'What does this mean?',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.tertiary,
+                            decoration: TextDecoration.underline,
                           ),
-                        ],
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              HapticFeedback.lightImpact();
+                              widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
+                                ),
+                              );
+                            },
+                        ),
+                        ]),
                       ),
                       value: usageAnalyticsEnabled ?? false,
                       onChanged: (bool value) async {
@@ -399,7 +334,8 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         await widget.analyticsService.setAnalyticsEnabled(value);
                         if (mounted) setState(() {});
                       },
-                    )
+                    ),
+                    Divider(),
                   ],
                 ),
               ),
@@ -428,4 +364,15 @@ class MyAppIcon extends StatelessWidget {
       ),
     );
   }
+}
+
+class DropdownOption {
+  final String title;
+  final String subtitle;
+  final dynamic value;
+  DropdownOption({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+  });
 }
