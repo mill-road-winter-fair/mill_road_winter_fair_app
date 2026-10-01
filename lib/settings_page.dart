@@ -58,6 +58,9 @@ Future<void> loadSettings() async {
       favouriteListingKeys.value = {};
     }
 
+    // Get the favoured alert notice period
+    alertNoticePeriod = prefs.getInt('alertNoticePeriod') ?? 15;
+
     // Set initial theme and map style to change according to system brightness
     String defaultTheme = 'auto';
     selectedThemeKey = prefs.getString('selectedTheme') ?? defaultTheme;
@@ -153,6 +156,13 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
   }
 
+  void saveAlertNoticePeriod(int theNoticePeriod) async {
+    debugPrint('saveAlertNoticePeriod called with theNoticePeriod=$theNoticePeriod');
+    alertNoticePeriod = theNoticePeriod;
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('alertNoticePeriod', theNoticePeriod);
+  }
+
   Future<void> _changeTheme(String themeKey) async {
     themeNotifier.value = themeKey;
   }
@@ -160,6 +170,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     final settingLabelStyle = Theme.of(context).textTheme.titleMedium;
+    final settingTitleStyle = TextStyle(fontSize: 15);
     return SafeArea(
       top: false,
       left: false,
@@ -360,7 +371,37 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    Row(spacing: 12, children: [
+                      Text('Alerts:', style: settingLabelStyle),
+                      Expanded(
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          return DropdownMenu<int>(
+                            initialSelection: alertNoticePeriod,
+                            hintText: 'Select notice period for alerts',
+                            inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
+                            alignmentOffset: const Offset(0, -60),
+                            expandedInsets: EdgeInsets.zero,
+                            trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                            dropdownMenuEntries: alertNoticePeriods.map((opt) {
+                              final theLabel = (opt == 0) ? 'At time of event' : '$opt minutes before';
+                              return DropdownMenuEntry<int>(
+                                value: opt,
+                                label: theLabel,
+                                labelWidget: Text(theLabel, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                              );
+                            }).toList(),
+                            onSelected: (int? value) {
+                              if (value == null) return;
+                              HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('alerts_preference_option');
+                              widget.analyticsService.logDistanceUnitPreferenceSet(value.toString());
+                              saveAlertNoticePeriod(value);
+                              setState(() { });
+                            },
+                          );
+                        }),
+                      ),
+                    ]),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       activeThumbColor: Theme.of(context).colorScheme.tertiary,
@@ -428,4 +469,15 @@ class MyAppIcon extends StatelessWidget {
       ),
     );
   }
+}
+
+class DropdownOption {
+  final String title;
+  final String subtitle;
+  final dynamic value;
+  DropdownOption({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+  });
 }

@@ -87,10 +87,12 @@ void main() {
     testWidgets('changes theme to Colour Blind Friendly', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
-      await tester.scrollUntilVisible(find.text('Colour blind friendly'), 50);
+      final colourBlindFinder = find.byType(RadioListTile<String>).at(5);
+      final settingsScrollable = find.byType(Scrollable).last;
+      await tester.scrollUntilVisible(colourBlindFinder, 50, scrollable: settingsScrollable);
 
       // Tap on the Colour Blind Friendly theme radio button
-      await tester.tap(find.text('Colour blind friendly'));
+      await tester.tap(colourBlindFinder);
       await tester.pumpAndSettle();
 
       // Verify the selected theme
@@ -105,8 +107,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Change theme to High Contrast
-      await tester.scrollUntilVisible(find.text('High contrast'), 50);
-      await tester.tap(find.text('High contrast'));
+      final highContrastFinder = find.byType(RadioListTile<String>).at(4);
+      final settingsScrollable = find.byType(Scrollable).last;
+      await tester.scrollUntilVisible(highContrastFinder, 50, scrollable: settingsScrollable);
+      await tester.tap(highContrastFinder);
       await tester.pumpAndSettle();
 
       // Verify SharedPreferences values

@@ -133,8 +133,10 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final String approxDistance;
   final bool? detailsVisible; // true: details open; false: details close; null: all details pale
   final bool listingFavourited;
+  final bool listingAlerted;
   final VoidCallback? onDetailsTapped;
   final VoidCallback? onFavouriteTapped;
+  final VoidCallback? onAlertTapped;
   final Function onGetDirections;
   final bool inDialog;
   final ExpandedListingScrollBounds? scrollBounds;
@@ -159,8 +161,10 @@ class SpecificListingInfoSheet extends StatefulWidget {
     required this.approxDistance,
     required this.detailsVisible,
     required this.listingFavourited,
+    required this.listingAlerted,
     this.onDetailsTapped,
     this.onFavouriteTapped,
+    this.onAlertTapped,
     required this.onGetDirections,
     required this.inDialog,
     this.scrollBounds,
@@ -226,6 +230,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
+    final startTime = combineDateAndTime(widget.startTime, fairDate);
+    final endTime = combineDateAndTime(widget.endTime, fairDate);
+    final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
     final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
       child: Container(
         padding: (widget.inDialog)
@@ -308,7 +315,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               ),
             if ((widget.detailsVisible ?? false) && widget.inDialog) detailsColumn(context),
             const SizedBox(height: 12),
-            Row(
+            Row(spacing: 6,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -317,8 +324,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   onPressed: widget.cancelled && !widget.listingFavourited
                       ? null
                       : () {
-                          widget.onFavouriteTapped?.call();
                           HapticFeedback.lightImpact();
+                          widget.onFavouriteTapped?.call();
                           widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
                         },
                   padding: const EdgeInsets.all(0),
@@ -329,14 +336,35 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   icon: FaIcon(
                     shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                     (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                    size: 22,
+                    size: 25,
                     color: widget.cancelled && !widget.listingFavourited
                         ? Theme.of(context).disabledColor
                         : widget.colorScheme.primary,
                   ),
                 ),
-
-                const SizedBox(width: 6),
+                if (isItAnEvent) IconButton(
+                  onPressed: widget.cancelled && !alertsStore.alertExists(widget.listingId)
+                      ? null
+                      : () {
+                          HapticFeedback.lightImpact();
+                          widget.onAlertTapped?.call();
+                          setState(() { });
+                          widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
+                        },
+                  padding: const EdgeInsets.all(0),
+                  style: ElevatedButton.styleFrom(
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                      padding: const EdgeInsets.all(0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  icon: FaIcon(
+                    shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                    (widget.listingAlerted) ? FontAwesomeIcons.solidBell : FontAwesomeIcons.bell,
+                    size: 25,
+                    color: widget.cancelled && !widget.listingAlerted
+                        ? Theme.of(context).disabledColor
+                        : Theme.of(context).colorScheme.primary,
+                  ),
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       iconSize: 24,
@@ -354,10 +382,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         },
                   child: const Icon(Icons.directions_walk, semanticLabel: 'Get walking directions'),
                 ),
-                // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
-                if (widget.onDetailsTapped != null &&
-                    (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
-                  const SizedBox(width: 6),
+                // only display the Details button if there are details to display (and they're not always shown i.e. single bottom modal)
                 // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
                 if (widget.onDetailsTapped != null &&
                     widget.website.isNotEmpty &&
@@ -687,6 +712,7 @@ Future<void> showListingDetailsDialog(
   //int alertNoticePeriod,
   void Function(VoidCallback) setStateFunction,
   // final int? Function(PositionedEvent, int, int?) toggleAlertAction,
+  void Function() onAlertTapped,
   Future<dynamic> Function() onGetDirections, {
   required AnalyticsService analyticsService,
 }) async {
@@ -744,14 +770,22 @@ Future<void> showListingDetailsDialog(
                   approxDistance: distanceMessage,
                   detailsVisible: true,
                   listingFavourited: favouriteListingKeys.value.contains(event.id),
+                  listingAlerted: alertsStore.alertExists(event.id),
                   onFavouriteTapped: () {
+                    HapticFeedback.lightImpact();
                     favouriteOrNotListing(event);
                     setStateFunction.call;
                     setStateDialog(() {});
                   },
                   onGetDirections: () async {
+                    HapticFeedback.lightImpact();
                     safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
                     onGetDirections.call();
+                  },
+                  onAlertTapped: () async {
+                    HapticFeedback.lightImpact();
+                    onAlertTapped.call();
+                    setStateDialog(() {});
                   },
                   inDialog: true,
                   analyticsService: analyticsService,

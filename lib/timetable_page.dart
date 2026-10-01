@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -329,7 +330,8 @@ class _TimetablePageState extends State<TimetablePage> {
           children: [
             Flexible(
               fit: FlexFit.loose,
-              child: AutoSizeText('${pe.name}\u{00AD}',
+              child: AutoSizeText(
+                '${pe.name}\u{00AD}',
                 style: TextStyle(height: 0.95, fontSize: maxTitleFontSize, fontWeight: FontWeight.bold),
                 maxLines: maxLines,
                 minFontSize: minTitleFontSize,
@@ -864,8 +866,12 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                           showListingDetailsDialog(
                                                                             context,
                                                                             pe,
-                                                                            //alertNoticePeriod,
                                                                             setState,
+                                                                            () async {
+                                                                              HapticFeedback.lightImpact();
+                                                                              await toggleListingAlert(pe.id, alertNoticePeriod, context);
+                                                                              setState(() { });
+                                                                            },
                                                                             () async {
                                                                               await Navigator.push(
                                                                                 context,
@@ -889,7 +895,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                           decoration: BoxDecoration(
                                                                             color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                                                             borderRadius: BorderRadius.circular(4),
-                                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceDim, offset: Offset(2, 2), blurRadius: 3)],
+                                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
                                                                             border: Border.all(width: 0.2, color: colorScheme.onSecondary),
                                                                           ),
                                                                           child: eventRect(pe, colorScheme, isLandscape, null),
@@ -898,9 +904,15 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                       ),
                                                                     ),
                                                               if (!scaling && favouriteListingKeys.value.contains(pe.id)) Positioned(
-                                                                top: pe.top + 2,
-                                                                left: pe.left + pe.width - 18,
-                                                                child: Icon(Icons.favorite, size: 16, color: colorScheme.primary.withAlpha(140)),
+                                                                top: pe.top + 1,
+                                                                left: pe.left + pe.width - 15,
+                                                                child: Icon(Icons.favorite, size: 14, color: Colors.red.withAlpha(120)),
+                                                                ),
+                                                              if (!scaling && alertsStore.alertExists(pe.id))
+                                                                Positioned(
+                                                                  top: pe.top + pe.height - 14,
+                                                                  left: pe.left + pe.width - 15,
+                                                                  child: FaIcon(FontAwesomeIcons.solidBell, size: 14, color: colorScheme.primary.withAlpha(140)),
                                                               ),
                                                             ],
                                                           ],
