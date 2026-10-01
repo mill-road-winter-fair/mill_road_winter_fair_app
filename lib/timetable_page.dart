@@ -856,7 +856,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                             setState,
                                                                             () async {
                                                                               HapticFeedback.lightImpact();
-                                                                              toggleListingAlert(pe.id, alertNoticePeriod, context);
+                                                                              await toggleListingAlert(pe.id, alertNoticePeriod, context);
                                                                               setState(() { });
                                                                             },
                                                                             () async {

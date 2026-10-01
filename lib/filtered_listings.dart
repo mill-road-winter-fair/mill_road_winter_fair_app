@@ -668,14 +668,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
                                             listingFavourited: isFavourited,
                                             listingAlerted: alertsStore.alertExists(listing['id']),
-                                          onDetailsTapped: () => toggleDetailsRow(index),
+                                            onDetailsTapped: () => toggleDetailsRow(index),
                                             onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                            onAlertTapped: () {
-                                            HapticFeedback.lightImpact();
-                                            toggleListingAlert(listing['id'], alertNoticePeriod, context);
-                                            setState(() { });
-                                          },
-                                          onGetDirections: () {
+                                            onAlertTapped: () async {
+                                              HapticFeedback.lightImpact();
+                                              await toggleListingAlert(listing['id'], alertNoticePeriod, context);
+                                              setState(() { });
+                                            },
+                                            onGetDirections: () {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(

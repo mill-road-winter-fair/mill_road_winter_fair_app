@@ -14,6 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -1029,8 +1030,74 @@ String formatFullDate(DateTime date) {
   return '$dayName $monthName $day$suffix';
 }
 
-void toggleListingAlert(String listingID, int desiredNoticePeriod, BuildContext context) {
+Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, BuildContext context) async {
   debugPrint('toggleListingAlert called for $listingID and desiredNoticePeriod=$desiredNoticePeriod');
+  final colorScheme = Theme.of(context).colorScheme;
+  if (settingsOpened) { // button previously tapped when alert permissions weren't given; maybe they are now
+    alertsPermissionGranted = await requestAlertPermissions();
+    settingsOpened = false;
+  }
+  if (!context.mounted) return;
+  if (alertsPermissionGranted) {
+    setTheAlert(context, desiredNoticePeriod, listingID);
+  } else {
+    alertsPermissionGranted = await requestAlertPermissions();
+    if (!alertsPermissionGranted) {
+      settingsOpened = true;
+      if (context.mounted) await showNoPermissionsDialog(context, colorScheme);
+    } else {
+      if (!context.mounted) return;
+      setTheAlert(context, desiredNoticePeriod, listingID);
+    }
+  }
+}
+
+Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme) async {
+  return showDialog<void>(context: context, builder: (BuildContext context) {
+    return Dialog(
+      insetPadding: EdgeInsets.all(8), // margin from screen edges
+      shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+      backgroundColor: colorScheme.surfaceContainerLowest,
+      shadowColor: colorScheme.surfaceDim,
+      elevation: 3,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
+        child: Column(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
+          ListTile(
+            visualDensity: VisualDensity(horizontal: -2, vertical: 2),
+            leading: const Icon(Icons.error, size: 36, color: Colors.red),
+            title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
+            TextButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel')
+            ),
+            TextButton(
+              onPressed: () async {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+                await openAppSettings();
+              },
+              child: Text('Open Settings')
+            ),
+            SizedBox(width: 8),
+          ]),
+        ]),
+      ),
+    );
+  });
+}
+
+
+void setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) {
   final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
   if (theListing == null) return;
   final existingAlert = alertsStore.alertSchedules.firstWhereOrNull((a) => a.listingId == listingID);
