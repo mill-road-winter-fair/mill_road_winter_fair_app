@@ -123,11 +123,12 @@ void main() {
         update(() => expanded = true);
         await tester.pumpAndSettle();
 
-        // A delayed image changes the card's size after expansion.
+        // A delayed image grows the card below the viewport; revealing it
+        // leaves 8 logical pixels of clearance beneath the card.
         update(() => contentHeight = viewport.height * .75);
         await tester.pumpAndSettle();
         expect(tester.getBottomLeft(find.byKey(cardKey)).dy,
-            closeTo(viewport.height, 1));
+            closeTo(viewport.height - 8.0, 1));
         expect(tester.getTopLeft(find.byKey(cardKey)).dy, greaterThan(0));
 
         update(() => contentHeight = viewport.height * 1.5);
