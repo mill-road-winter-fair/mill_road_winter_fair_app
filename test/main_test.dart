@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -10,22 +11,10 @@ import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher_platform_interface/link.dart';
-import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 
-class FakeUrlLauncher extends UrlLauncherPlatform {
-  final List<String> launchedUrls = [];
-
-  @override
-  LinkDelegate? get linkDelegate => null;
-
-  @override
-  Future<bool> launchUrl(String url, LaunchOptions options) async {
-    launchedUrls.add(url);
-    return true;
-  }
-}
+import 'fakes/fake_url_launcher.dart';
 
 Finder findDrawerSocialButton(int index) {
   return find
@@ -218,26 +207,23 @@ void main() {
     });
 
     group('drawer external links', () {
-      final originalUrlLauncher = UrlLauncherPlatform.instance;
       late FakeUrlLauncher fakeUrlLauncher;
 
       setUp(() {
         fakeUrlLauncher = FakeUrlLauncher();
-        UrlLauncherPlatform.instance = fakeUrlLauncher;
-      });
-
-      tearDown(() {
-        UrlLauncherPlatform.instance = originalUrlLauncher;
       });
 
       Future<void> openDrawer(WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: FairScaffold(
-              appBarTitle: 'Test',
-              body: const SizedBox(),
-              currentTab: 0,
-              onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
+          Provider<UrlLauncher>.value(
+            value: fakeUrlLauncher,
+            child: MaterialApp(
+              home: FairScaffold(
+                appBarTitle: 'Test',
+                body: const SizedBox(),
+                currentTab: 0,
+                onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
+              ),
             ),
           ),
         );
@@ -254,7 +240,7 @@ void main() {
         await tester.tap(button);
         await tester.pumpAndSettle();
 
-        expect(fakeUrlLauncher.launchedUrls, [expectedUrl]);
+        expect(fakeUrlLauncher.openedUris, [Uri.parse(expectedUrl)]);
       }
 
       testWidgets(
