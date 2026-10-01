@@ -8,6 +8,15 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
+class NavigationAnalytics extends FakeAnalyticsService {
+  final events = <Map<String, String?>>[];
+
+  @override
+  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
+    events.add({'button': buttonName, 'id': listingId, 'name': listingName});
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -60,12 +69,12 @@ void main() {
     );
   });
 
-  Future<MapPageState> openMap(WidgetTester tester) async {
+  Future<MapPageState> openMap(WidgetTester tester, {AnalyticsService? analytics}) async {
     await tester.pumpWidget(MaterialApp(
         home: MapPage(
       listings: listings,
       onTabSelected: (_) {},
-      analyticsService: FakeAnalyticsService(),
+      analyticsService: analytics ?? FakeAnalyticsService(),
     )));
     await tester.pumpAndSettle();
     return tester.state<MapPageState>(find.byType(MapPage));
@@ -200,8 +209,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('destination details collapse left after five seconds and reopen on tap', (tester) async {
+  testWidgets('destination details initially collapse then stay open until manually minimised', (tester) async {
     var distanceTaps = 0;
+    final actions = <String>[];
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Align(
@@ -210,6 +220,8 @@ void main() {
             destinationCard: const SizedBox(height: 150, child: Text('Destination details')),
             distance: '250 m',
             onDistancePressed: () => distanceTaps++,
+            onDestinationExpanded: () => actions.add('expand'),
+            onDestinationMinimised: () => actions.add('minimise'),
           ),
         ),
       ),
@@ -228,15 +240,44 @@ void main() {
     final collapsedBounds = tester.getRect(find.byType(AnimatedSize));
     expect(collapsedBounds.left, closeTo(expandedBounds.left, 1));
     expect(collapsedBounds.width, 204);
+    final destinationButton = find.byTooltip('Show destination details');
+    expect(tester.getSize(destinationButton), const Size(48, 48));
+    final buttonMaterial = tester.widget<Material>(find.ancestor(of: destinationButton, matching: find.byType(Material)).first);
+    expect(buttonMaterial.shape, isA<CircleBorder>());
+    expect(actions, isEmpty);
     await tester.tap(find.byType(NavigationDistanceButton));
     expect(distanceTaps, 1);
 
     await tester.tap(find.byTooltip('Show destination details'));
     await tester.pumpAndSettle();
     expect(find.text('Destination details'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+    expect(find.text('Destination details'), findsOneWidget);
+    expect(actions, ['expand']);
+    await tester.tap(find.text('Minimise'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Show destination details'), findsOneWidget);
+    expect(actions, ['expand', 'minimise']);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('destination analytics record manual actions with listing context', (tester) async {
+    firstExecution = false;
+    final analytics = NavigationAnalytics();
+    final state = await openMap(tester, analytics: analytics);
+    await navigate(tester, state);
+    // Minimise before the initial timer expires, then reopen and stay open.
+    await tester.tap(find.text('Minimise'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Show destination details'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 10));
+    expect(find.text('Navigating to'), findsOneWidget);
+    expect(analytics.events, [
+      {'button': 'destination_card_minimise', 'id': 'destination', 'name': 'Glazed and Confused'},
+      {'button': 'destination_card_expand', 'id': 'destination', 'name': 'Glazed and Confused'},
+    ]);
     expect(tester.takeException(), isNull);
   });
 
@@ -289,7 +330,10 @@ void main() {
     expect(bounds.bottom, lessThanOrEqualTo(804));
     expect(tester.getRect(find.byType(NavigationBottomRow)).bottom, closeTo(844, 1));
     expect(bounds.height, 48);
-    expect(bounds.top, closeTo(cardBounds.top, 1));
+    final minimiseBounds = tester.getRect(find.widgetWithText(TextButton, 'Minimise'));
+    expect(minimiseBounds.top, greaterThanOrEqualTo(bounds.bottom));
+    expect(minimiseBounds.left, closeTo(bounds.left, 1));
+    expect(minimiseBounds.right, closeTo(bounds.right, 1));
     expect(bounds.right, closeTo(tester.getRect(sharedCard).right - 12, 1));
     expect(tester.widget<Text>(find.text('250 m')).style!.fontSize, 16);
     await tester.tap(button);

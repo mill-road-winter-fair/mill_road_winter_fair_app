@@ -1820,7 +1820,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             ],
           ),
         ],
-        if (times.isNotEmpty) ...[
+        if (listing['brickAndMortar'] != 'TRUE' && times.isNotEmpty) ...[
           const SizedBox(height: 4),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2347,6 +2347,16 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   key: ValueKey(_navigationListing?['id']),
                   destinationCard: _navigationListing == null ? null : _buildDestinationCard(context, _navigationListing!),
                   distance: _distanceToDestination,
+                  onDestinationExpanded: () => widget.analyticsService.logButtonTapped(
+                    'destination_card_expand',
+                    listingId: _navigationListing?['id']?.toString(),
+                    listingName: _navigationListing?['title']?.toString(),
+                  ),
+                  onDestinationMinimised: () => widget.analyticsService.logButtonTapped(
+                    'destination_card_minimise',
+                    listingId: _navigationListing?['id']?.toString(),
+                    listingName: _navigationListing?['title']?.toString(),
+                  ),
                   onDistancePressed: () {
                     HapticFeedback.lightImpact();
                     widget.analyticsService.logButtonTapped('distance_to_destination');
@@ -2365,11 +2375,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
 // Floating destination card, including the device's bottom safe area.
 class NavigationBottomRow extends StatefulWidget {
-  const NavigationBottomRow({super.key, this.destinationCard, this.distance, required this.onDistancePressed});
+  const NavigationBottomRow({super.key, this.destinationCard, this.distance, required this.onDistancePressed,
+    this.onDestinationExpanded, this.onDestinationMinimised});
 
   final Widget? destinationCard;
   final String? distance;
   final VoidCallback onDistancePressed;
+  final VoidCallback? onDestinationExpanded;
+  final VoidCallback? onDestinationMinimised;
 
   @override
   State<NavigationBottomRow> createState() => _NavigationBottomRowState();
@@ -2438,27 +2451,58 @@ class _NavigationBottomRowState extends State<NavigationBottomRow> {
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       if (hasDestination)
                         Expanded(
-                          child: _expanded ? widget.destinationCard! : IconButton(
-                            tooltip: 'Show destination details',
-                            constraints: const BoxConstraints.tightFor(width: 48, height: 48),
-                            color: Theme.of(context).colorScheme.primary,
-                            icon: const Icon(Icons.location_on),
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              setState(() => _expanded = true);
-                              _scheduleCollapse();
-                            },
+                          child: _expanded ? widget.destinationCard! : SizedBox.square(
+                            dimension: 48,
+                            child: Material(
+                              shape: const CircleBorder(),
+                              elevation: 3,
+                              color: Theme.of(context).colorScheme.primary,
+                              clipBehavior: Clip.antiAlias,
+                              child: IconButton(
+                                tooltip: 'Show destination details',
+                                style: IconButton.styleFrom(shape: const CircleBorder()),
+                                onPressed: () {
+                                  _collapseTimer?.cancel();
+                                  HapticFeedback.lightImpact();
+                                  widget.onDestinationExpanded?.call();
+                                  setState(() => _expanded = true);
+                                },
+                                icon: Icon(
+                                  Icons.location_on,
+                                  size: 22,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      if (hasDestination && widget.distance != null) const SizedBox(width: 12),
-                      if (widget.distance != null)
+                      if (hasDestination && (widget.distance != null || _expanded)) const SizedBox(width: 12),
+                      if (widget.distance != null || (hasDestination && _expanded))
                         SizedBox(
                           width: 120,
-                          child: NavigationDistanceButton(distance: widget.distance!, onPressed: widget.onDistancePressed),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (widget.distance != null)
+                                NavigationDistanceButton(distance: widget.distance!, onPressed: widget.onDistancePressed),
+                              if (hasDestination && _expanded)
+                                TextButton.icon(
+                                  onPressed: () {
+                                    _collapseTimer?.cancel();
+                                    HapticFeedback.lightImpact();
+                                    widget.onDestinationMinimised?.call();
+                                    setState(() => _expanded = false);
+                                  },
+                                  icon: const Icon(Icons.chevron_left),
+                                  label: const Text('Minimise'),
+                                ),
+                            ],
+                          ),
                         ),
                     ],
                   ),
