@@ -18,6 +18,7 @@ void main() {
   setUp(() {
     selectedThemeKey = 'light';
     themeNotifier.value = 'light';
+    preferredDistanceUnits = DistanceUnits.metric;
   });
 
   group('SettingsPage', () {
@@ -59,6 +60,7 @@ void main() {
       expect(find.text('For users with colour blindness'), findsOneWidget);
 
       await tester.tap(find.text('2025 Light'));
+      await tester.pumpAndSettle();
 
       // Verify the selected theme
       expect(themeNotifier.value, '2025');
@@ -78,6 +80,7 @@ void main() {
       expect(find.text('Punt lengths'), findsOneWidget);
 
       await tester.tap(find.text('Imperial'));
+      await tester.pumpAndSettle();
 
       // Verify the selected distance unit
       expect(preferredDistanceUnits, DistanceUnits.imperial);
@@ -131,7 +134,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
       // Change distance units to Cambridge
-      await tester.tap(find.text('Imperial').first);
+      await tester.tap(find.text('Metric'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cambridge'));
       await tester.pumpAndSettle();
