@@ -1965,6 +1965,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == true && doingAPushNavigation == null)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
+                        tooltip: 'Cancel navigation',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('cancel_navigation');
@@ -1992,6 +1993,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'homeBtn',
+                        tooltip: 'Show the whole Fair map',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('home');
@@ -2057,6 +2059,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
                         heroTag: 'centreOnUserBtn',
+                        tooltip: 'Centre map on your location',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('centre_on_user');
@@ -2108,6 +2111,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       ),
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
+                      tooltip: mapType == MapType.normal ? 'Switch to satellite map' : 'Switch to street map',
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         widget.analyticsService.logButtonTapped('map_type_toggle');
@@ -2149,6 +2153,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'mapBearingBtn',
+                        tooltip: preferredMapOrientation == MapOrientation.adaptive ? 'Keep north at the top' : 'Use direction of travel',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('map_orientation_toggle');
@@ -2227,6 +2232,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
                       color: colorScheme.surface,
+        child: Semantics(
+        button: true,
+        label: 'Road closures. Show more information',
+        excludeSemantics: true,
                       child: GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
@@ -2269,6 +2278,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                 ),
                               ),
                             ],
+                          ),
                           ),
                         ),
                       ),
