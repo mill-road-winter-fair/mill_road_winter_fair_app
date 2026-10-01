@@ -201,8 +201,6 @@ void main() {
       expect(find.byIcon(Icons.public), findsNothing);
     });
 
-    // TODO: Add test for tapping on phone numbers (will need to find a way of mocking launchUrl)
-    // TODO: Add test for tapping on "Open Website" button (will need to find a way of mocking launchUrl)
 
     testWidgets('calls onFavouriteTapped when heart button is pressed', (WidgetTester tester) async {
       bool favouriteCalled = false;
