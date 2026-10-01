@@ -973,6 +973,7 @@ void shareListing(
   String theEndTimeString,
   BuildContext context, {
   bool cancelled = false,
+  bool brickAndMortar = false,
 }) async {
   debugPrint('shareEvent called with theEvent=$theTitle theLocation=$theLocation theStartTime=$theStartTimeString theEndTimeString=$theEndTimeString');
   final msgText = buildListingShareText(
@@ -981,6 +982,7 @@ void shareListing(
     theStartTimeString,
     theEndTimeString,
     cancelled: cancelled,
+    brickAndMortar: brickAndMortar,
   );
   final params = ShareParams(
     text: msgText,
@@ -1010,6 +1012,7 @@ String buildListingShareText(
   String theEndTimeString, {
   required bool cancelled,
   DateTime? currentTime,
+  bool brickAndMortar = false,
 }) {
   if (cancelled) {
     return '$theTitle at $theLocation has been cancelled and will not be appearing at $fairName.\nhttps://www.millroadwinterfair.org/';
@@ -1035,7 +1038,7 @@ String buildListingShareText(
     msgText += 'Tomorrow ';
   }
 
-  if (isItAnEvent && whenEventStart.abs() < 6) {
+  if (!brickAndMortar && isItAnEvent && whenEventStart.abs() < 6) {
     msgText += '${msgText == '' ? 'At' : 'at'} ${formatTime(startTime)} ';
   }
 

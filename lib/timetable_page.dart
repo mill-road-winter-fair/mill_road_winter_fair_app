@@ -307,7 +307,7 @@ class _TimetablePageState extends State<TimetablePage> {
         return min + steps * step;
       }
 
-      final bool includeDate = (pe.height >= 42 && pe.width >= 80);
+      final bool includeDate = !pe.brickAndMortar && (pe.height >= 42 && pe.width >= 80);
 
       final rawMaxTitleFontSize = min(
         pe.height * 0.3,

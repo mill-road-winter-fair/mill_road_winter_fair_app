@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class GroupListingInfoSheet extends StatelessWidget {
+  final bool brickAndMortar;
   final String title;
   final String categories;
   final String startTime;
@@ -17,6 +19,7 @@ class GroupListingInfoSheet extends StatelessWidget {
   final ColorScheme colorScheme;
 
   const GroupListingInfoSheet({
+    this.brickAndMortar = false,
     required this.title,
     required this.categories,
     required this.startTime,
@@ -66,8 +69,8 @@ class GroupListingInfoSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              const Expanded(flex: 1, child: SizedBox(width: 2)),
-              Expanded(
+              if (!brickAndMortar) const Expanded(flex: 1, child: SizedBox(width: 2)),
+              if (!brickAndMortar) Expanded(
                 flex: 7,
                 child: Text(
                   "$startTime—$endTime",
@@ -134,6 +137,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final VoidCallback? onFavouriteTapped;
   final Function onGetDirections;
   final bool inDialog;
+  final ExpandedListingScrollBounds? scrollBounds;
   final AnalyticsService analyticsService;
   final ColorScheme colorScheme;
 
@@ -159,6 +163,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
     this.onFavouriteTapped,
     required this.onGetDirections,
     required this.inDialog,
+    this.scrollBounds,
     required this.analyticsService,
     required this.colorScheme,
     super.key,
@@ -175,6 +180,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
   @override
   Widget build(BuildContext context) {
     //debugPrint('SpecificListingInfoSheet build() called');
+    String updatedTimes; // replaced with CANCELLED if appropriate
     Widget subDetails; // calculated subtitle/details field
 
     // Determine if the event has been cancelled, update text style accordingly
@@ -185,38 +191,42 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none,
     );
     final titleStyle = basicTitleStyle.copyWith(decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none);
+    updatedTimes = widget.cancelled ? 'CANCELLED' : "${widget.startTime}—${widget.endTime}";
 
     final subStyle = titleStyle.copyWith(fontSize: 14);
     final subSubStyle = subStyle.copyWith(fontWeight: FontWeight.normal);
 
     // Determine if the event has ended, update text style accordingly
-    final bool ended = hasEventEnded(widget.endTime);
+    final bool ended = !widget.brickAndMortar && hasEventEnded(widget.endTime);
     final timeStyle = subSubStyle.copyWith(
       color: ended ? Colors.red : widget.colorScheme.onSurface,
       decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
     );
 
-    final status = widget.cancelled
-        ? _cancelledLabel(context)
-        : widget.brickAndMortar
-            ? _localBusinessLabel(context)
-            : Text("${widget.startTime}—${widget.endTime}", style: timeStyle, textAlign: TextAlign.end);
-
     if (widget.location == '') {
       // this SpecificListingInfoSheet must be within a Group modal, so display differently
-      subDetails = Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(widget.subtitle, style: subSubStyle, textAlign: TextAlign.right),
-          status,
-        ],
-      );
+      subDetails = widget.cancelled
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(widget.subtitle, style: subSubStyle),
+                const SizedBox(height: 2),
+                _cancelledLabel(context),
+              ],
+            )
+          : Text.rich(
+              textAlign: TextAlign.right,
+              TextSpan(children: [
+                TextSpan(text: widget.subtitle, style: subSubStyle),
+                if (!widget.brickAndMortar)
+                  TextSpan(text: '\n$updatedTimes', style: timeStyle),
+              ]));
     } else {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
-    return Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
+    final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
       child: Container(
         padding: (widget.inDialog)
             ? EdgeInsets.all(0)
@@ -253,11 +263,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 const Expanded(flex: 1, child: SizedBox(width: 2)),
                 Expanded(
                   flex: 6,
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: subDetails,
-                  ),
+                  child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: subDetails),
                 ),
               ],
             ),
@@ -282,13 +288,20 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       ),
                     ),
                   ),
-                  const Expanded(flex: 1, child: SizedBox(width: 2)),
-                  Expanded(
+                  if (widget.cancelled || !widget.brickAndMortar)
+                    const Expanded(flex: 1, child: SizedBox(width: 2)),
+                  if (widget.cancelled || !widget.brickAndMortar) Expanded(
                     flex: 6,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerRight,
-                      child: status,
+                      child: widget.cancelled
+                          ? _cancelledLabel(context)
+                          : Text(
+                              updatedTimes,
+                              style: timeStyle,
+                              textAlign: TextAlign.end,
+                            ),
                     ),
                   ),
                 ],
@@ -415,6 +428,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       widget.endTime,
                       context,
                       cancelled: widget.cancelled,
+                      brickAndMortar: widget.brickAndMortar,
                     );
                 },
                   child: (Platform.isAndroid) ? const Icon(Icons.share) : const Icon(Icons.ios_share),
@@ -512,31 +526,18 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
         ),
       ),
     );
-  }
-
-  Widget _localBusinessLabel(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        'Local business',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onPrimary,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+    return ExpandedListingReveal(
+      expanded: widget.detailsVisible == true && widget.onDetailsTapped != null,
+      bounds: widget.scrollBounds,
+      child: content,
     );
   }
 
   Widget _cancelledLabel(BuildContext context) {
     return Semantics(
-      button: true,
+      button: !widget.brickAndMortar,
       child: GestureDetector(
-        onTap: () {
+        onTap: widget.brickAndMortar ? null : () {
           HapticFeedback.lightImpact();
           showMiniPopup(
             context,
