@@ -273,7 +273,6 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                               mapStyle = getMapStyleForThemeKey(value);
                             });
                             _saveSettings();
-                            mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
                           },
                           child: Column(
                             children: [
