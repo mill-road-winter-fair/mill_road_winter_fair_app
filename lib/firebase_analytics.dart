@@ -249,57 +249,59 @@ class FirebaseAnalyticsService implements AnalyticsService {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Share anonymous usage data?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '
-              'This includes the pages you view, buttons you tap and preferences you set. '
-              'Also logged are the words and phrases you enter in search queries, as such we ask that you do not enter personal information in those searches. ',
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Share anonymous usage data?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '
+                  'This includes the pages you view, buttons you tap and preferences you set. '
+                  'Also logged are the words and phrases you enter in search queries, as such we ask that you do not enter personal information in those searches. ',
+                ),
+                const SizedBox(height: 12),
+                RichText(
+                  text: TextSpan(
+                    text: 'What does this mean?',
+                    style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () async {
+                            HapticFeedback.lightImpact();
+                            logButtonTapped('analytics_explanation_consent_dialog');
+                            final previousScreen = currentScreen;
+                            await Navigator.push(context, MaterialPageRoute(builder: (context) => AnalyticsExplanationPage(analyticsService: this)));
+                            if (context.mounted) {
+                              setCurrentScreen(previousScreen);
+                            }
+                          },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            RichText(
-              text: TextSpan(
-                text: 'What does this mean?',
-                style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () async {
-                    HapticFeedback.lightImpact();
-                    logButtonTapped('analytics_explanation_consent_dialog');
-                    final previousScreen = currentScreen;
-                    await Navigator.push(context, MaterialPageRoute(builder: (context) => AnalyticsExplanationPage(analyticsService: this)));
-                    if (context.mounted) {
-                      setCurrentScreen(previousScreen);
-                    }
-                  },
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  HapticFeedback.lightImpact();
+                  logButtonTapped('analytics_consent_decline');
+                  await setAnalyticsEnabled(false);
+                  if (context.mounted) Navigator.pop(context);
+                },
+                child: const Text('No thanks'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              HapticFeedback.lightImpact();
-              logButtonTapped('analytics_consent_decline');
-              await setAnalyticsEnabled(false);
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('No thanks'),
+              TextButton(
+                onPressed: () async {
+                  HapticFeedback.lightImpact();
+                  logButtonTapped('analytics_consent_accept');
+                  await setAnalyticsEnabled(true);
+                  if (context.mounted) Navigator.pop(context);
+                },
+                child: const Text('I agree'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              HapticFeedback.lightImpact();
-              logButtonTapped('analytics_consent_accept');
-              await setAnalyticsEnabled(true);
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('I agree'),
-          ),
-        ],
-      ),
     );
   }
 }

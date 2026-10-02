@@ -31,16 +31,11 @@ void main() {
         'latLng': '52.199687,0.138813',
         'startTime': '10:00',
         'endTime': '23:59',
-      }
+      },
     ];
-    await tester.pumpWidget(MaterialApp(
-        home: FilteredListingsPage(
-      filterCategory: 'all',
-      listings: listings,
-      onTabSelected: (_) {},
-      onSubfilterChange: (_) {},
-      analyticsService: FakeAnalyticsService(),
-    ),),);
+    await tester.pumpWidget(
+      MaterialApp(home: FilteredListingsPage(filterCategory: 'all', listings: listings, onTabSelected: (_) {}, onSubfilterChange: (_) {}, analyticsService: FakeAnalyticsService())),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.info));
     await tester.pumpAndSettle();
@@ -63,23 +58,25 @@ void main() {
         var contentHeight = 60.0;
         late StateSetter update;
         const cardKey = ValueKey('card');
-        await tester.pumpWidget(MaterialApp(home: Scaffold(body: StatefulBuilder(
-          builder: (context, setState) {
-            update = setState;
-            final children = [
-              SizedBox(height: viewport.height / 2),
-              ExpandedListingReveal(
-                expanded: expanded,
-                bounds: bounds,
-                child: SizedBox(key: cardKey, height: contentHeight, child: const Text('Details')),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  update = setState;
+                  final children = [
+                    SizedBox(height: viewport.height / 2),
+                    ExpandedListingReveal(expanded: expanded, bounds: bounds, child: SizedBox(key: cardKey, height: contentHeight, child: const Text('Details'))),
+                    SizedBox(height: viewport.height * 2),
+                  ];
+                  return positioned
+                      ? ScrollablePositionedList.builder(physics: ExpandedListingScrollPhysics(bounds: bounds), itemCount: children.length, itemBuilder: (_, i) => children[i])
+                      : ListView(physics: ExpandedListingScrollPhysics(bounds: bounds, parent: const BouncingScrollPhysics()), children: children);
+                },
               ),
-              SizedBox(height: viewport.height * 2),
-            ];
-            return positioned
-                ? ScrollablePositionedList.builder(physics: ExpandedListingScrollPhysics(bounds: bounds), itemCount: children.length, itemBuilder: (_, i) => children[i])
-                : ListView(physics: ExpandedListingScrollPhysics(bounds: bounds, parent: const BouncingScrollPhysics()), children: children);
-          },
-        ),),),);
+            ),
+          ),
+        );
         await tester.pumpAndSettle();
         final originalTop = tester.getTopLeft(find.byKey(cardKey)).dy;
         update(() => expanded = true);

@@ -53,15 +53,16 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context)
-              ? BackButton(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('back');
-                    Navigator.maybePop(context);
-                  },
-                )
-              : null,
+          leading:
+              Navigator.canPop(context)
+                  ? BackButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('back');
+                      Navigator.maybePop(context);
+                    },
+                  )
+                  : null,
           title: const FittedBox(fit: BoxFit.scaleDown, child: Text('Analytics Information')),
         ),
         body: Container(
@@ -89,12 +90,13 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                           TextSpan(
                             text: 'Firebase',
                             style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('firebase_info_link');
-                                launchUrl(Uri.parse('https://firebase.google.com/'));
-                              },
+                            recognizer:
+                                TapGestureRecognizer()
+                                  ..onTap = () {
+                                    HapticFeedback.lightImpact();
+                                    widget.analyticsService.logButtonTapped('firebase_info_link');
+                                    launchUrl(Uri.parse('https://firebase.google.com/'));
+                                  },
                           ),
                           const TextSpan(
                             text:
@@ -177,23 +179,25 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                           TextSpan(
                             text: 'here',
                             style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('google_partner_sites_link');
-                                launchUrl(Uri.parse('https://policies.google.com/technologies/partner-sites'));
-                              },
+                            recognizer:
+                                TapGestureRecognizer()
+                                  ..onTap = () {
+                                    HapticFeedback.lightImpact();
+                                    widget.analyticsService.logButtonTapped('google_partner_sites_link');
+                                    launchUrl(Uri.parse('https://policies.google.com/technologies/partner-sites'));
+                                  },
                           ),
                           const TextSpan(text: ' and in the '),
                           TextSpan(
                             text: 'Firebase Privacy and Security documentation',
                             style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('firebase_privacy_link');
-                                launchUrl(Uri.parse('https://firebase.google.com/support/privacy'));
-                              },
+                            recognizer:
+                                TapGestureRecognizer()
+                                  ..onTap = () {
+                                    HapticFeedback.lightImpact();
+                                    widget.analyticsService.logButtonTapped('firebase_privacy_link');
+                                    launchUrl(Uri.parse('https://firebase.google.com/support/privacy'));
+                                  },
                           ),
                           const TextSpan(text: '.'),
                         ],
@@ -208,12 +212,13 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                           TextSpan(
                             text: 'Mill Road Winter Fair App Privacy Policy',
                             style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('app_privacy_policy_link');
-                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf'));
-                              },
+                            recognizer:
+                                TapGestureRecognizer()
+                                  ..onTap = () {
+                                    HapticFeedback.lightImpact();
+                                    widget.analyticsService.logButtonTapped('app_privacy_policy_link');
+                                    launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf'));
+                                  },
                           ),
                           const TextSpan(text: '.'),
                         ],

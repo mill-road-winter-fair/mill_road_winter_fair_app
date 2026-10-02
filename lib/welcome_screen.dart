@@ -29,12 +29,13 @@ class WelcomeScreen extends StatelessWidget {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent));
 
     final bool isAuto = selectedThemeKey == 'auto';
-    final ThemeMode resolvedThemeMode = isAuto
-        ? ThemeMode.system
-        : switch (selectedThemeKey) {
-            'dark' => ThemeMode.dark,
-            _ => ThemeMode.light,
-          };
+    final ThemeMode resolvedThemeMode =
+        isAuto
+            ? ThemeMode.system
+            : switch (selectedThemeKey) {
+              'dark' => ThemeMode.dark,
+              _ => ThemeMode.light,
+            };
     mapStyle = getMapStyleForThemeKey(selectedThemeKey);
 
     return MaterialApp(
@@ -494,12 +495,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                                 TextSpan(
                                   text: "important information",
                                   style: bodyStyle.copyWith(decoration: TextDecoration.underline),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
-                                    },
+                                  recognizer:
+                                      TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
+                                        },
                                 ),
                                 TextSpan(text: "\nabout the Fair", style: bodyStyle),
                               ],
@@ -519,12 +521,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                                 TextSpan(
                                   text: "website",
                                   style: bodyStyle.copyWith(decoration: TextDecoration.underline),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
-                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
-                                    },
+                                  recognizer:
+                                      TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
+                                          launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                                        },
                                 ),
                               ],
                             ),
@@ -543,12 +546,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                                 TextSpan(
                                   text: "this form",
                                   style: bodyStyle.copyWith(decoration: TextDecoration.underline),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
-                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
-                                    },
+                                  recognizer:
+                                      TapGestureRecognizer()
+                                        ..onTap = () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
+                                          launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                                        },
                                 ),
                               ],
                             ),
@@ -586,16 +590,18 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       showBackButton: false,
       back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
       skip: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
-      overrideNext: (context, onPressed) => TextButton(
-        onPressed: onPressed == null
-            ? null
-            : () {
-                HapticFeedback.lightImpact();
-                widget.analyticsService.logButtonTapped('next_WelcomeScreen');
-                onPressed();
-              },
-        child: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.tertiary),
-      ),
+      overrideNext:
+          (context, onPressed) => TextButton(
+            onPressed:
+                onPressed == null
+                    ? null
+                    : () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('next_WelcomeScreen');
+                      onPressed();
+                    },
+            child: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.tertiary),
+          ),
       done: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
       curve: Curves.fastLinearToSlowEaseIn,
       controlsMargin: const EdgeInsets.all(16),

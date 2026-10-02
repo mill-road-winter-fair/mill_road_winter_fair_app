@@ -57,20 +57,20 @@ const expectedSubcategories = {
 };
 
 Map<String, dynamic> listingFor(String id, String subcategory) => {
-      for (final header in apiHeaders) header: '',
-      for (final key in expectedSubcategories.keys) key: 'FALSE',
-      'id': id,
-      'title': id,
-      'visibleOnMap': 'TRUE',
-      'cancelled': 'FALSE',
-      'groupParent': 'FALSE',
-      'brickAndMortar': 'FALSE',
-      subcategory: 'TRUE',
-      'location': 'Mill Road',
-      'latLng': '52.199687,0.138813',
-      'startTime': '10:30',
-      'endTime': '16:30',
-    };
+  for (final header in apiHeaders) header: '',
+  for (final key in expectedSubcategories.keys) key: 'FALSE',
+  'id': id,
+  'title': id,
+  'visibleOnMap': 'TRUE',
+  'cancelled': 'FALSE',
+  'groupParent': 'FALSE',
+  'brickAndMortar': 'FALSE',
+  subcategory: 'TRUE',
+  'location': 'Mill Road',
+  'latLng': '52.199687,0.138813',
+  'startTime': '10:30',
+  'endTime': '16:30',
+};
 
 void main() {
   setUp(() async {
@@ -91,7 +91,8 @@ void main() {
 
   test('API preserves each subcategory and the columns following business', () async {
     final expected = expectedSubcategories.keys.map((key) => listingFor(key, key)).toList();
-    final client = MockClient((_) async => http.Response(
+    final client = MockClient(
+      (_) async => http.Response(
         jsonEncode({
           'range': "'2025'!A1:AB350",
           'majorDimension': 'ROWS',
@@ -100,7 +101,9 @@ void main() {
             for (final listing in expected) [for (final header in apiHeaders) listing[header]],
           ],
         }),
-        200,),);
+        200,
+      ),
+    );
     addTearDown(client.close);
 
     expect(await fetchListings(client), expected);
@@ -111,19 +114,20 @@ void main() {
       final listing = listingFor('single', entry.key);
       expect(countCategories(listing), entry.key.startsWith('performance') ? (1, 1) : (1, 0));
       expect(
-          getCategory(listing),
-          {
-            'food': 'Food',
-            'shopping': 'Shopping',
-            'charityCommunityInfo': 'Charity/Community/Info',
-            'performanceMusic': 'Music',
-            'performanceChildrens': 'Childrens',
-            'performanceDance': 'Dance',
-            'performanceOther': 'Other',
-            'visitExperience': 'Visit/Experience',
-            'service': 'Service',
-            'business': 'Business',
-          }[entry.key],);
+        getCategory(listing),
+        {
+          'food': 'Food',
+          'shopping': 'Shopping',
+          'charityCommunityInfo': 'Charity/Community/Info',
+          'performanceMusic': 'Music',
+          'performanceChildrens': 'Childrens',
+          'performanceDance': 'Dance',
+          'performanceOther': 'Other',
+          'visitExperience': 'Visit/Experience',
+          'service': 'Service',
+          'business': 'Business',
+        }[entry.key],
+      );
     });
 
     for (final page in ['all', 'favourite']) {
@@ -135,24 +139,27 @@ void main() {
         ];
         favouriteListingKeys.value = {...expectedSubcategories.keys, 'parent'};
         String? selected;
-        await tester.pumpWidget(MaterialApp(home: Scaffold(
-          body: StatefulBuilder(builder: (context, setState) {
-            return FilteredListingsPage(
-              filterCategory: page,
-              subfilterCategory: selected,
-              listings: listings,
-              onTabSelected: (_) {},
-              onSubfilterChange: (value) => setState(() => selected = value),
-              analyticsService: FakeAnalyticsService(),
-            );
-          },),
-        ),),);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: StatefulBuilder(
+                builder: (context, setState) {
+                  return FilteredListingsPage(
+                    filterCategory: page,
+                    subfilterCategory: selected,
+                    listings: listings,
+                    onTabSelected: (_) {},
+                    onSubfilterChange: (value) => setState(() => selected = value),
+                    analyticsService: FakeAnalyticsService(),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
         await tester.pumpAndSettle();
 
-        final dropdownFinder = find.descendant(
-          of: find.byKey(const ValueKey('filteringdropdown')),
-          matching: find.byType(DropdownMenu<String?>),
-        );
+        final dropdownFinder = find.descendant(of: find.byKey(const ValueKey('filteringdropdown')), matching: find.byType(DropdownMenu<String?>));
         final dropdown = tester.widget<DropdownMenu<String?>>(dropdownFinder);
         expect({for (final option in dropdown.dropdownMenuEntries) option.value: option.label}, {null: 'All', ...expectedSubcategories});
         dropdown.onSelected!(entry.key);

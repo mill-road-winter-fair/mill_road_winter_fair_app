@@ -65,7 +65,7 @@ void main() {
         'imageURL': '',
         'startTime': '10:30',
         'endTime': '16:30',
-      }
+      },
     ];
     locationServicesEnabled = true;
     locationPermission = LocationPermission.always;
@@ -74,28 +74,16 @@ void main() {
       if (call.method == 'HapticFeedback.vibrate') analytics.calls.add('haptic');
       return null;
     });
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/url_launcher'),
-      (call) async => true,
-    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/url_launcher'), (call) async => true);
   });
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/url_launcher'),
-      null,
-    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/url_launcher'), null);
   });
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-            bottomNavigationBar: fairBottomNavigationBar(
-      0,
-      (index) => analytics.calls.add('navigate:$index'),
-      analyticsService: analytics,
-    ),),),);
+    await tester.pumpWidget(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(0, (index) => analytics.calls.add('navigate:$index'), analyticsService: analytics))));
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
   });
@@ -106,33 +94,37 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(
+        MaterialApp(
           theme: appThemes['light'],
           home: Scaffold(
-              body: SpecificListingInfoSheet(
-            listingId: 'listing-123',
-            cancelled: false,
-            brickAndMortar: false,
-            emoji: '',
-            title: 'Listing',
-            subtitle: '',
-            location: '',
-            description: 'Details',
-            email: 'test@example.com',
-            website: 'https://example.com',
-            phoneNumber: '0123456789',
-            imageURL: '',
-            startTime: '10:30',
-            endTime: '16:30',
-            approxDistance: '',
-            detailsVisible: false,
-            listingFavourited: false,
-            inDialog: false,
-            onGetDirections: () {},
-            onDetailsTapped: () => analytics.calls.add('details'),
-            analyticsService: analytics,
-            colorScheme: const ColorScheme.light(),
-          ),),),);
+            body: SpecificListingInfoSheet(
+              listingId: 'listing-123',
+              cancelled: false,
+              brickAndMortar: false,
+              emoji: '',
+              title: 'Listing',
+              subtitle: '',
+              location: '',
+              description: 'Details',
+              email: 'test@example.com',
+              website: 'https://example.com',
+              phoneNumber: '0123456789',
+              imageURL: '',
+              startTime: '10:30',
+              endTime: '16:30',
+              approxDistance: '',
+              detailsVisible: false,
+              listingFavourited: false,
+              inDialog: false,
+              onGetDirections: () {},
+              onDetailsTapped: () => analytics.calls.add('details'),
+              analyticsService: analytics,
+              colorScheme: const ColorScheme.light(),
+            ),
+          ),
+        ),
+      );
       await tester.tap(find.byIcon(Icons.info));
       expect(analytics.calls, ['haptic', 'tap:listing_details', 'details']);
       expect(analytics.buttonEvents.single, {'button_id': 'listing_details', 'listing_id': 'listing-123', 'listing_name': 'Listing'});
@@ -145,34 +137,38 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(
+        MaterialApp(
           theme: appThemes['light'],
           home: Scaffold(
-              body: SpecificListingInfoSheet(
-            listingId: 'listing-456',
-            cancelled: false,
-            brickAndMortar: false,
-            emoji: '',
-            title: 'Another listing',
-            subtitle: '',
-            location: '',
-            description: 'Details',
-            email: 'test@example.com',
-            website: 'https://example.com',
-            phoneNumber: '0123456789',
-            imageURL: '',
-            startTime: '10:30',
-            endTime: '16:30',
-            approxDistance: '',
-            detailsVisible: true,
-            listingFavourited: false,
-            inDialog: inDialog,
-            onGetDirections: () {},
-            onDetailsTapped: () {},
-            onFavouriteTapped: () {},
-            analyticsService: analytics,
-            colorScheme: const ColorScheme.light(),
-          ),),),);
+            body: SpecificListingInfoSheet(
+              listingId: 'listing-456',
+              cancelled: false,
+              brickAndMortar: false,
+              emoji: '',
+              title: 'Another listing',
+              subtitle: '',
+              location: '',
+              description: 'Details',
+              email: 'test@example.com',
+              website: 'https://example.com',
+              phoneNumber: '0123456789',
+              imageURL: '',
+              startTime: '10:30',
+              endTime: '16:30',
+              approxDistance: '',
+              detailsVisible: true,
+              listingFavourited: false,
+              inDialog: inDialog,
+              onGetDirections: () {},
+              onDetailsTapped: () {},
+              onFavouriteTapped: () {},
+              analyticsService: analytics,
+              colorScheme: const ColorScheme.light(),
+            ),
+          ),
+        ),
+      );
       // The sheet has one IconButton: the favourite control.
       await tester.tap(find.byType(IconButton));
       await tester.tap(find.byIcon(Icons.directions_walk));
@@ -225,28 +221,17 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(MaterialApp(
-      theme: appThemes['light'],
-      home: AnalyticsExplanationPage(analyticsService: analytics),
-    ),);
+    await tester.pumpWidget(MaterialApp(theme: appThemes['light'], home: AnalyticsExplanationPage(analyticsService: analytics)));
 
     expect(find.text('What do we track?'), findsOneWidget);
     expect(find.text('• Words and phrases you enter in in-app searches.'), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.text('What don\'t we track?'),
-      300,
-      scrollable: find.byType(Scrollable),
-    );
+    await tester.scrollUntilVisible(find.text('What don\'t we track?'), 300, scrollable: find.byType(Scrollable));
     expect(find.text('What don\'t we track?'), findsOneWidget);
     expect(find.text('• Your exact GPS location.'), findsOneWidget);
     expect(find.text('• Data for personalised advertising.'), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.textContaining('Mill Road Winter Fair App Privacy Policy'),
-      300,
-      scrollable: find.byType(Scrollable),
-    );
+    await tester.scrollUntilVisible(find.textContaining('Mill Road Winter Fair App Privacy Policy'), 300, scrollable: find.byType(Scrollable));
     expect(find.textContaining('Mill Road Winter Fair App Privacy Policy'), findsOneWidget);
   });
 

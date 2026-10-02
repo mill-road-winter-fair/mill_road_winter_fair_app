@@ -120,16 +120,18 @@ class _ExpandedListingRevealState extends State<ExpandedListingReveal> with Auto
         bounds.max = ((start > end ? start : end) + leeway).clamp(position.minScrollExtent, position.maxScrollExtent);
       }
       // Oversized cards start at the top; the remaining content scrolls normally.
-      final delta = box.size.height > height || top < 0
-          ? top
-          : bottom > height
+      final delta =
+          box.size.height > height || top < 0
+              ? top
+              : bottom > height
               ? bottom - height + 8.0
               : 0.0;
       // Preserve manual positioning unless a layout change puts it outside the
       // tile's new range (for example after resizing the window).
-      final target = _userHasScrolled
-          ? position.pixels.clamp(bounds?.min ?? position.pixels, bounds?.max ?? position.pixels)
-          : (position.pixels + delta).clamp(position.minScrollExtent, position.maxScrollExtent);
+      final target =
+          _userHasScrolled
+              ? position.pixels.clamp(bounds?.min ?? position.pixels, bounds?.max ?? position.pixels)
+              : (position.pixels + delta).clamp(position.minScrollExtent, position.maxScrollExtent);
       if ((target - position.pixels).abs() < 1) return;
       position.animateTo(target, duration: const Duration(milliseconds: 180), curve: Curves.easeInOut);
     });
@@ -150,9 +152,7 @@ class _ExpandedListingRevealState extends State<ExpandedListingReveal> with Auto
         _scheduleReveal();
         return false;
       },
-      child: SizeChangedLayoutNotifier(
-        child: SizedBox(key: _contentKey, child: widget.child),
-      ),
+      child: SizeChangedLayoutNotifier(child: SizedBox(key: _contentKey, child: widget.child)),
     );
   }
 }

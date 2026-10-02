@@ -136,9 +136,7 @@ void main() {
         themeNotifier.value = previousTheme;
         tester.platformDispatcher.clearPlatformBrightnessTestValue();
       });
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()))));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       state.addSimpleMarker('Service-FirstAid', const LatLng(52.2, 0.14));
@@ -147,10 +145,7 @@ void main() {
       state.addSpecificMarker({...base, 'id': 'performance', 'food': 'FALSE', 'performanceMusic': 'TRUE', 'performanceDance': 'TRUE'});
       state.hideAllMarkers();
       final before = Map<MarkerId, Marker>.of(state.markers);
-      final types = {
-        '1': 'Group-Food', '3': 'Food', aSimpleMarkerId: 'Service-FirstAid',
-        'mixed': 'Mixed', 'performance': 'Group-PerformanceEvent',
-      };
+      final types = {'1': 'Group-Food', '3': 'Food', aSimpleMarkerId: 'Service-FirstAid', 'mixed': 'Mixed', 'performance': 'Group-PerformanceEvent'};
       for (final theme in ['dark', '2024', 'highContrast', 'colourBlindFriendly', 'light']) {
         selectedThemeKey = theme;
         themeNotifier.value = theme;
@@ -170,8 +165,10 @@ void main() {
       for (final brightness in [Brightness.dark, Brightness.light]) {
         tester.platformDispatcher.platformBrightnessTestValue = brightness;
         await tester.pumpAndSettle();
-        expect(state.markers[const MarkerId('3')]!.icon.toJson(),
-          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson());
+        expect(
+          state.markers[const MarkerId('3')]!.icon.toJson(),
+          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson(),
+        );
       }
       // A queued refresh must not call setState after the map has been removed.
       selectedThemeKey = 'dark';
@@ -201,9 +198,7 @@ void main() {
         return true;
       });
       addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null));
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ),);
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()))));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       Set<String> visibleIds() => state.markers.values.where((marker) => marker.visible).map((marker) => marker.markerId.value).toSet();
