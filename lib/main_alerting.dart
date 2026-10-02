@@ -125,7 +125,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       categoryID = 'UnderwayCategory';
       androidNotificationActions = [];//[AndroidNotificationAction('show', 'Show')];
       final endTime = DateTime.parse(theEventAlert['listingEndTime']);
-      theMessage = '${theEventAlert['listingTitle']} underway at ${theEventAlert['listingLocation']} until ${intl.DateFormat('EEEE').format(endTime)}';
+      theMessage = '${theEventAlert['listingTitle']} underway at ${theEventAlert['listingLocation']} until ${intl.DateFormat.Hm().format(endTime)}';
       noticePeriod = 0;
     } else {
       (categoryID, androidNotificationActions) = calculateAlertActionCategories(timeToGo);
