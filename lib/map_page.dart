@@ -1851,6 +1851,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           );
         }
 
+        if (_listingLookup.isEmpty) { // if another page did a refresh
+          _listingLookup = buildListingLookup(listings); 
+          setVisibleMarkerLists();
+          addAllVisibleMarkers();
+        }
+
         switch (preferredMapOrientation) {
           case MapOrientation.adaptive:
             _mapBearing = 290;
