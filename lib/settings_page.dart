@@ -159,8 +159,8 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final settingLabelStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-    final settingTitleStyle = TextStyle(fontSize: 15);
+    final settingLabelStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+    final settingTitleStyle = const TextStyle(fontSize: 15);
     final settingSubtitleStyle = TextStyle(fontSize: 14,  color: Theme.of(context).colorScheme.onSurfaceVariant);
     final List<DropdownOption> unitsOptions = [
       DropdownOption(title: 'Metric', subtitle: 'Metres and kilometres', value: DistanceUnits.metric),
@@ -214,10 +214,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         return DropdownMenu<String>(
                           initialSelection: themeNotifier.value,
                           hintText: 'Select a visual theme',
-                          inputDecorationTheme: InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
+                          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: themeOptions.map((opt) {
                             return DropdownMenuEntry<String>(
                               value: opt.value,
@@ -256,7 +256,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: unitsOptions.map((opt) {
                             return DropdownMenuEntry<DistanceUnits>(
                               value: opt.value,
@@ -289,7 +289,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     title: Text('Allow analytics', style: settingLabelStyle),
                     subtitle: Text.rich(
                       TextSpan(children: [
-                      TextSpan(text: 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '),
+                      const TextSpan(text: 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '),
                       TextSpan(
                         text: 'What does this mean?',
                         style: TextStyle(

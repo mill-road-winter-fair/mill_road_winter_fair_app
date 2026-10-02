@@ -229,7 +229,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
       child: Container(
         padding: (widget.inDialog)
-            ? EdgeInsets.all(0)
+            ? const EdgeInsets.all(0)
             : EdgeInsets.fromLTRB(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 8,
                 4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 12),
         child: Column(
@@ -252,7 +252,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                               0.2126, 0.7152, 0.0722, 0, 0,
                               0, 0, 0, 1, 0,
                             ]),
-                            child: Text('${widget.emoji} ', style: TextStyle(fontSize: 30)),
+                            child: Text('${widget.emoji} ', style: const TextStyle(fontSize: 30)),
                           ),
                         )
                       : Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
@@ -712,7 +712,7 @@ Future<void> showListingDetailsDialog(
     builder: (_) => StatefulBuilder(
       builder: (ctx2, setStateDialog) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
+          insetPadding: const EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
           shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,

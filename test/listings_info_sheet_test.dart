@@ -97,11 +97,11 @@ void main() {
     }
 
     testWidgets('AdaptiveImageText reserves space and caps the image height while loading', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: AdaptiveImageText(
             imageUrl: 'https://example.com/image.jpg',
-            descriptionWidget: const Text('A description'),
+            descriptionWidget: Text('A description'),
           ),
         ),
       ));
@@ -112,11 +112,11 @@ void main() {
     });
 
     testWidgets('AdaptiveImageText keeps the description visible when the image fails to load', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: AdaptiveImageText(
             imageUrl: 'https://example.com/missing-image.jpg',
-            descriptionWidget: const Text('A description'),
+            descriptionWidget: Text('A description'),
           ),
         ),
       ));

@@ -347,7 +347,7 @@ class _TimetablePageState extends State<TimetablePage> {
             if (includeDate)
               Container(
                 height: 1.1 * maxTimeFontSize,
-                padding: EdgeInsets.symmetric(horizontal: 1),
+                padding: const EdgeInsets.symmetric(horizontal: 1),
                 child: AutoSizeText(
                   formatTimeRange(pe.startTime, pe.endTime),
                   style: TextStyle(height: 1.1, fontSize: maxTimeFontSize, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant),
@@ -376,7 +376,7 @@ class _TimetablePageState extends State<TimetablePage> {
       // all good so we've got a proper scroll to do
       await _verticalScrollController.animateTo(
         offset,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
       );
     } else {
@@ -506,7 +506,7 @@ class _TimetablePageState extends State<TimetablePage> {
       });
     } else if (_searchQuery.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _verticalScrollController.animateTo(0, duration: Duration(milliseconds: 100), curve: Curves.easeIn);
+        _verticalScrollController.animateTo(0, duration: const Duration(milliseconds: 100), curve: Curves.easeIn);
       });
     }
 
@@ -658,7 +658,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         fontSize: 12.5,
                         fontWeight: FontWeight.bold,
                         color: colorScheme.onSurfaceVariant,
-                        shadows: [Shadow(color: colorScheme.onPrimary, offset: Offset(0, 0), blurRadius: 2)],
+                        shadows: [Shadow(color: colorScheme.onPrimary, offset: const Offset(0, 0), blurRadius: 2)],
                       ),
                     ),
                   ),
@@ -684,7 +684,7 @@ class _TimetablePageState extends State<TimetablePage> {
                               key: const ValueKey('searchBar'),
                               color: colorScheme.surfaceDim,
                               constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
-                              padding: EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(8),
                               child: SearchBar(
                                 autoFocus: true,
                                 controller: _searchController,
@@ -722,13 +722,13 @@ class _TimetablePageState extends State<TimetablePage> {
                             ),
                           ],
                         )
-                      : SizedBox.shrink(),
+                      : const SizedBox.shrink(),
                 ),
                 (theErrorMessage != '')
                     ? Align(
                         alignment: Alignment.center,
                         child: Padding(
-                            padding: EdgeInsetsGeometry.all(60),
+                            padding: const EdgeInsetsGeometry.all(60),
                             child: Text(theErrorMessage, style: const TextStyle(fontSize: 16), textAlign: TextAlign.center)))
                     : NotificationListener<ScrollNotification>(
                         onNotification: (notification) {
@@ -740,7 +740,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         child: SingleChildScrollView(
                           controller: _horizontalScrollController,
                           scrollDirection: Axis.horizontal,
-                          padding: EdgeInsets.only(right: 2), // stop it crashing into edge
+                          padding: const EdgeInsets.only(right: 2), // stop it crashing into edge
                           child: SizedBox(
                             width: totalWidth,
                             child: Column(
@@ -769,10 +769,10 @@ class _TimetablePageState extends State<TimetablePage> {
                                               decoration: BoxDecoration(
                                                 color: colorScheme.onSurfaceVariant,
                                                 border: Border.all(width: 0.1),
-                                                borderRadius: BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
+                                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
                                               ),
                                               width: (totalWidth - leftColumnWidth) / cols - 4,
-                                              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                                               alignment: AlignmentGeometry.center,
                                               child: AutoSizeText(
                                                 location.key,
@@ -840,7 +840,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                       controller: _verticalScrollController,
                                       physics: const ClampingScrollPhysics(),
                                       scrollDirection: Axis.vertical,
-                                      key: PageStorageKey('verticalList'),
+                                      key: const PageStorageKey('verticalList'),
                                       child: SizedBox(
                                         width: totalWidth,
                                         height: timelineHeight,
@@ -886,7 +886,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                         decoration: BoxDecoration(
                                                                           color: colorScheme.secondary,
                                                                           borderRadius: BorderRadius.circular(4),
-                                                                          boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
+                                                                          boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: const Offset(2, 2), blurRadius: 3)],
                                                                           border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
                                                                         ),
                                                                       ))
@@ -928,11 +928,11 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                           );
                                                                         },
                                                                         child: Container(
-                                                                          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
+                                                                          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 1),
                                                                           decoration: BoxDecoration(
                                                                             color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                                                             borderRadius: BorderRadius.circular(4),
-                                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceDim, offset: Offset(2, 2), blurRadius: 3)],
+                                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceDim, offset: const Offset(2, 2), blurRadius: 3)],
                                                                             border: Border.all(width: 0.2, color: colorScheme.onSecondary),
                                                                           ),
                                                                           child: eventRect(pe, colorScheme, isLandscape, null),

@@ -78,7 +78,7 @@ class FairScaffold extends StatelessWidget {
             ),
             centerTitle: false,
             actions: appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
-            actionsPadding: EdgeInsets.only(right: 4),
+            actionsPadding: const EdgeInsets.only(right: 4),
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
@@ -364,7 +364,7 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
       context: itemContext,
       builder: (dialogContext) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
+          insetPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
           shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceDim,
@@ -376,9 +376,9 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
               ),
               padding: const EdgeInsets.all(16),
               child: Column(mainAxisSize: MainAxisSize.min, spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
-                Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
-                Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
+                const Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
+                const Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
+                const Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
                 Align(
                     alignment: AlignmentGeometry.center,
                     child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png',
@@ -751,7 +751,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
             decoration: BoxDecoration(
               color: bgColour,
               borderRadius: BorderRadius.circular(4),
-              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
+              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))],
             ),
             child: Text(theMessage, softWrap: true, style: theStyle),
           ),
