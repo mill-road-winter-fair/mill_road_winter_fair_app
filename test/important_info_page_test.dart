@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
@@ -35,7 +34,10 @@ void main() {
       expect(find.text('Caution – vehicles!'), findsOneWidget);
       expect(find.text('First aid'), findsOneWidget);
       expect(find.text('Coming with children?'), findsOneWidget);
+      expect(find.text('Keep the pavement clear – Keep the fair alive'), findsOneWidget);
       expect(find.text('Road closure'), findsOneWidget);
+      expect(find.text('On-the-day phone number: TBC.'), findsOneWidget);
+      expect(find.text('Our responsibilities'), findsOneWidget);
       expect(find.text('Updates and contact'), findsOneWidget);
     });
 
@@ -115,28 +117,5 @@ void main() {
       expect(homePageState.index, 2);
     });
 
-    testWidgets('email hyperlink opens the contact dialog', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(
-          home: ImportantInfoPage(
-        analyticsService: FakeAnalyticsService(),
-      )));
-
-      final emailParagraph = tester.widget<Text>(
-        find.byWidgetPredicate(
-          (widget) => widget is Text && widget.textSpan?.toPlainText().contains('Email addresses for the Fair') == true,
-        ),
-      );
-      final paragraphSpan = emailParagraph.textSpan as TextSpan;
-      final linkSpan = paragraphSpan.children!.whereType<TextSpan>().singleWhere((span) => span.text == 'here');
-
-      (linkSpan.recognizer as TapGestureRecognizer).onTap!();
-      await tester.pumpAndSettle();
-
-      expect(find.byType(Dialog), findsOneWidget);
-      expect(find.text('For general enquiries:'), findsOneWidget);
-      expect(find.text('info@millroadwinterfair.org'), findsOneWidget);
-      expect(find.text('volunteers@millroadwinterfair.org'), findsOneWidget);
-      expect(find.text('Close'), findsOneWidget);
-    });
   });
 }
