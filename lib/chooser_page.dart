@@ -357,12 +357,14 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
                   HapticFeedback.lightImpact();
                   Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService,)));
                 },
+                tooltip: 'Important Information',
               ),
               IconButton(icon: const Icon(Icons.info, size: 20),
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
                 },
+                tooltip: 'About the Fair',
               ),
             ],
             analyticsService: widget.analyticsService,
