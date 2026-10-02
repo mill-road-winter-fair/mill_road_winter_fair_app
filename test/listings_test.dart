@@ -10,7 +10,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 
 @GenerateMocks([http.Client, SharedPreferences])
-import 'listings_test.mocks.dart';
+import 'mocks/listings_test.mocks.dart';
 
 void main() {
   late MockClient mockClient;
