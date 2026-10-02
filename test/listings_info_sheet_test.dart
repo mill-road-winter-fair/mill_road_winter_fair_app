@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -68,6 +67,35 @@ void main() {
   }
 
   group('ListingsInfoSheet', () {
+    for (final location in ['Mill Road', '']) {
+      testWidgets('hides opening times for a brickAndMortar listing ${location.isEmpty ? 'in a group' : 'with a location'}', (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest(
+          cancelled: false,
+          brickAndMortar: true,
+          emoji: '',
+          title: 'Mill Road Shop',
+          subtitle: 'Shopping',
+          location: location,
+          description: '',
+          email: '',
+          website: '',
+          phoneNumber: '',
+          imageURL: '',
+          startTime: '10:30',
+          endTime: '16:30',
+          approxDistance: '',
+          detailsVisible: true,
+          listingFavourited: false,
+          onGetDirections: () {},
+        ));
+
+        expect(find.text('Mill Road Shop'), findsOneWidget);
+        expect(find.text('Shopping', findRichText: true), findsOneWidget);
+        expect(find.textContaining('10:30', findRichText: true), findsNothing);
+        expect(find.textContaining('16:30', findRichText: true), findsNothing);
+      });
+    }
+
     testWidgets('AdaptiveImageText reserves space and caps the image height while loading', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -79,7 +107,7 @@ void main() {
       ));
 
       final constrainedBoxes = tester.widgetList<ConstrainedBox>(find.byType(ConstrainedBox));
-      expect(constrainedBoxes.any((box) => box.constraints.maxHeight != null && box.constraints.maxHeight! <= 180), isTrue,
+      expect(constrainedBoxes.any((box) => box.constraints.maxHeight <= 180), isTrue,
           reason: 'The image should reserve a maximum-height placeholder while the network image is loading.');
     });
 
