@@ -246,6 +246,7 @@ final List<LatLng> roadClosurePolygonPoints = [
 // Map defaults and markers
 const centreOfFair = LatLng(52.199174, 0.140929);
 const mapInitialZoom = 14.1;
+String? bitmapDescriptorsThemeKey;
 Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // single cache of custom BitmapDescriptors to use as map markers
 
 // Listings subfilter keywords to labels and icons

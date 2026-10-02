@@ -319,28 +319,35 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     debugPrint('FilteredListingsPageState build() called with filterCategory=$filterCategory and subfilterCategory=${widget.subfilterCategory}');
     // Show error if there are no listings
     if (listings.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Unable to retrieve listings",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            isRefreshing
-                ? const CircularProgressIndicator()
-                : ElevatedButton.icon(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('refresh_listings_from_error');
-                      refreshListings();
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Refresh listings'),
-                  ),
-          ],
+      return FairScaffold(
+        appBarTitle: calculateAppBarTitle(),
+        currentTab: switch (filterCategory) { 'favourite' => 4, _ => 3 },
+        onTabSelected: widget.onTabSelected,
+        allowBack: false,
+        analyticsService: widget.analyticsService,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Unable to retrieve listings",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              isRefreshing
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton.icon(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                        refreshListings();
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Refresh listings'),
+                    ),
+            ],
+          ),
         ),
       );
     }
