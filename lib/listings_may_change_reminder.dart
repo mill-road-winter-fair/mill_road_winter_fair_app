@@ -12,9 +12,10 @@ class ListingUpdateNotifier {
   static String get preferenceKey => 'listingUpdateNoticeEnabled${fairDate.year}';
 
   static String lastShownKeyFor(DateTime now) {
-    final noticeName = DateUtils.isSameDay(fairDate, now)
-        ? 'fair_day'
-        : now.isAfter(fairDate)
+    final noticeName =
+        DateUtils.isSameDay(fairDate, now)
+            ? 'fair_day'
+            : now.isAfter(fairDate)
             ? 'after_fair'
             : 'before_fair';
 
@@ -76,11 +77,7 @@ class ListingUpdateNotifier {
     return !DateUtils.isSameDay(fairDate, now) && now.isBefore(fairDate);
   }
 
-  static Future<void> maybeShowNotice(
-    BuildContext context, {
-    DateTime? now,
-    required AnalyticsService analyticsService,
-  }) async {
+  static Future<void> maybeShowNotice(BuildContext context, {DateTime? now, required AnalyticsService analyticsService}) async {
     if (onTest) {
       return;
     }
@@ -120,45 +117,44 @@ class ListingUpdateNotifier {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(titleFor(noticeDate)),
-          content: Text(messageFor(noticeDate)),
-          actions: [
-            if (isListingsMayChange)
-              CheckboxListTile(
-                value: dontShowAgain,
-                onChanged: (value) {
-                  HapticFeedback.selectionClick();
-                  analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
-                  setState(() => dontShowAgain = value ?? false);
-                },
-                title: const Text("Don't show this again"),
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-              ),
-            TextButton(
-              onPressed: () async {
-                HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('${analyticsId}_ok');
-                if (isListingsMayChange) {
-                  listingUpdateNoticeEnabled = !dontShowAgain;
-                  await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
-                  await analyticsService.logPreferenceSet(
-                    'listing_update_notice',
-                    listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
-                  );
-                }
-                if (dialogContext.mounted) {
-                  Navigator.of(dialogContext).pop();
-                }
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      ),
+      builder:
+          (dialogContext) => StatefulBuilder(
+            builder:
+                (context, setState) => AlertDialog(
+                  title: Text(titleFor(noticeDate)),
+                  content: Text(messageFor(noticeDate)),
+                  actions: [
+                    if (isListingsMayChange)
+                      CheckboxListTile(
+                        value: dontShowAgain,
+                        onChanged: (value) {
+                          HapticFeedback.selectionClick();
+                          analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
+                          setState(() => dontShowAgain = value ?? false);
+                        },
+                        title: const Text("Don't show this again"),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                      ),
+                    TextButton(
+                      onPressed: () async {
+                        HapticFeedback.lightImpact();
+                        analyticsService.logButtonTapped('${analyticsId}_ok');
+                        if (isListingsMayChange) {
+                          listingUpdateNoticeEnabled = !dontShowAgain;
+                          await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
+                          await analyticsService.logPreferenceSet('listing_update_notice', listingUpdateNoticeEnabled ? 'enabled' : 'disabled');
+                        }
+                        if (dialogContext.mounted) {
+                          Navigator.of(dialogContext).pop();
+                        }
+                      },
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+          ),
     );
   }
 }

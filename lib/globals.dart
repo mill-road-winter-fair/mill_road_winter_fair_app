@@ -259,7 +259,7 @@ const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer, false),
   'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism, false),
   'business': SubfilterLabel('Other business', Icons.business, false),
-  'service': SubfilterLabel('Services', Icons.family_restroom, false)
+  'service': SubfilterLabel('Services', Icons.family_restroom, false),
 };
 
 // Initialize user's analytics preference (null means they haven't been asked yet)

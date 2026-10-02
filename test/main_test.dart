@@ -28,12 +28,7 @@ class FakeUrlLauncher extends UrlLauncherPlatform {
 }
 
 Finder findDrawerSocialButton(int index) {
-  return find
-      .descendant(
-        of: find.byType(Drawer),
-        matching: find.byType(IconButton),
-      )
-      .at(index);
+  return find.descendant(of: find.byType(Drawer), matching: find.byType(IconButton)).at(index);
 }
 
 void main() {
@@ -84,7 +79,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -133,7 +128,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Provide initial mock values for shared preferences
@@ -145,9 +140,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
-      final snowflakeButton = find.byWidgetPredicate(
-        (widget) => widget is IconButton && widget.icon is ImageIcon,
-      );
+      final snowflakeButton = find.byWidgetPredicate((widget) => widget is IconButton && widget.icon is ImageIcon);
       expect(snowflakeButton, findsOneWidget);
 
       // Tap the snowflake button
@@ -196,7 +189,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -231,89 +224,47 @@ void main() {
       });
 
       Future<void> openDrawer(WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: FairScaffold(
-              appBarTitle: 'Test',
-              body: const SizedBox(),
-              currentTab: 0,
-              onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
-            ),
-          ),
-        );
+        await tester.pumpWidget(MaterialApp(home: FairScaffold(appBarTitle: 'Test', body: const SizedBox(), currentTab: 0, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())));
 
         await tester.tap(find.byIcon(Icons.menu));
         await tester.pumpAndSettle();
       }
 
-      Future<void> expectButtonLaunches(
-        WidgetTester tester,
-        Finder button,
-        String expectedUrl,
-      ) async {
+      Future<void> expectButtonLaunches(WidgetTester tester, Finder button, String expectedUrl) async {
         await tester.tap(button);
         await tester.pumpAndSettle();
 
         expect(fakeUrlLauncher.launchedUrls, [expectedUrl]);
       }
 
-      testWidgets(
-        'Visit our website button launches the Fair website',
-        (tester) async {
-          await openDrawer(tester);
+      testWidgets('Visit our website button launches the Fair website', (tester) async {
+        await openDrawer(tester);
 
-          await expectButtonLaunches(
-            tester,
-            find.text('Visit our website'),
-            'https://www.millroadwinterfair.org/',
-          );
-        },
-      );
+        await expectButtonLaunches(tester, find.text('Visit our website'), 'https://www.millroadwinterfair.org/');
+      });
 
-      testWidgets(
-        'Facebook button launches the Fair Facebook page',
-        (tester) async {
-          await openDrawer(tester);
+      testWidgets('Facebook button launches the Fair Facebook page', (tester) async {
+        await openDrawer(tester);
 
-          await expectButtonLaunches(
-            tester,
-            findDrawerSocialButton(0),
-            'https://www.facebook.com/MillRoadWinterFair/',
-          );
-        },
-      );
+        await expectButtonLaunches(tester, findDrawerSocialButton(0), 'https://www.facebook.com/MillRoadWinterFair/');
+      });
 
       testWidgets('X button launches the Fair X page', (tester) async {
         await openDrawer(tester);
 
-        await expectButtonLaunches(
-          tester,
-          findDrawerSocialButton(1),
-          'https://x.com/millroadfair',
-        );
+        await expectButtonLaunches(tester, findDrawerSocialButton(1), 'https://x.com/millroadfair');
       });
 
-      testWidgets(
-        'Instagram button launches the Fair Instagram page',
-        (tester) async {
-          await openDrawer(tester);
+      testWidgets('Instagram button launches the Fair Instagram page', (tester) async {
+        await openDrawer(tester);
 
-          await expectButtonLaunches(
-            tester,
-            findDrawerSocialButton(2),
-            'https://www.instagram.com/millroadwinterfair/',
-          );
-        },
-      );
+        await expectButtonLaunches(tester, findDrawerSocialButton(2), 'https://www.instagram.com/millroadwinterfair/');
+      });
 
       testWidgets('Flickr button launches the Fair Flickr page', (tester) async {
         await openDrawer(tester);
 
-        await expectButtonLaunches(
-          tester,
-          findDrawerSocialButton(3),
-          'https://www.flickr.com/people/millroadwinterfair/',
-        );
+        await expectButtonLaunches(tester, findDrawerSocialButton(3), 'https://www.flickr.com/people/millroadwinterfair/');
       });
     });
 
@@ -351,7 +302,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -399,7 +350,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -447,7 +398,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -499,7 +450,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -551,7 +502,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -600,7 +551,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -646,11 +597,7 @@ void main() {
 
       // Tap Close button and verify dialog is dismissed
       final close = find.text("Close");
-      await tester.dragUntilVisible(
-        close,
-        find.byType(SingleChildScrollView),
-        const Offset(0, 50),
-      );
+      await tester.dragUntilVisible(close, find.byType(SingleChildScrollView), const Offset(0, 50));
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
 
@@ -692,7 +639,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Provide initial mock values for shared preferences

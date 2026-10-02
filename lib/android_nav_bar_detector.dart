@@ -11,4 +11,3 @@ bool isNavBarVisible(BuildContext context) {
   // 3-button navigation bar is >= 48px.
   return bottomInset >= 48; // threshold chosen from Android spec
 }
-

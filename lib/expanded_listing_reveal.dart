@@ -20,9 +20,7 @@ class ExpandedListingScrollPhysics extends ScrollPhysics {
   final ExpandedListingScrollBounds bounds;
 
   @override
-  ExpandedListingScrollPhysics applyTo(ScrollPhysics? ancestor) =>
-      ExpandedListingScrollPhysics(
-          bounds: bounds, parent: buildParent(ancestor));
+  ExpandedListingScrollPhysics applyTo(ScrollPhysics? ancestor) => ExpandedListingScrollPhysics(bounds: bounds, parent: buildParent(ancestor));
 
   @override
   double applyBoundaryConditions(ScrollMetrics position, double value) {
@@ -42,8 +40,7 @@ class ExpandedListingScrollPhysics extends ScrollPhysics {
 
 /// Reveals expanded content without taking control back after manual scrolling.
 class ExpandedListingReveal extends StatefulWidget {
-  const ExpandedListingReveal(
-      {super.key, required this.expanded, required this.child, this.bounds});
+  const ExpandedListingReveal({super.key, required this.expanded, required this.child, this.bounds});
 
   final bool expanded;
   final Widget child;
@@ -53,8 +50,7 @@ class ExpandedListingReveal extends StatefulWidget {
   State<ExpandedListingReveal> createState() => _ExpandedListingRevealState();
 }
 
-class _ExpandedListingRevealState extends State<ExpandedListingReveal>
-    with AutomaticKeepAliveClientMixin {
+class _ExpandedListingRevealState extends State<ExpandedListingReveal> with AutomaticKeepAliveClientMixin {
   final _contentKey = GlobalKey();
   ScrollPosition? _position;
   bool _userHasScrolled = false;
@@ -91,8 +87,7 @@ class _ExpandedListingRevealState extends State<ExpandedListingReveal>
   }
 
   void _onScroll() {
-    if (widget.expanded &&
-        _position?.userScrollDirection != ScrollDirection.idle) {
+    if (widget.expanded && _position?.userScrollDirection != ScrollDirection.idle) {
       _userHasScrolled = true;
     }
   }
@@ -105,9 +100,7 @@ class _ExpandedListingRevealState extends State<ExpandedListingReveal>
       if (!mounted || !widget.expanded) return;
       final box = _contentKey.currentContext?.findRenderObject();
       final position = _position;
-      if (box is! RenderBox ||
-          position == null ||
-          !position.hasContentDimensions) {
+      if (box is! RenderBox || position == null || !position.hasContentDimensions) {
         return;
       }
       final viewport = RenderAbstractViewport.maybeOf(box);
@@ -121,31 +114,26 @@ class _ExpandedListingRevealState extends State<ExpandedListingReveal>
       if (bounds != null) {
         // Give the user room beyond either edge without letting a short tile
         // disappear. Scale to the viewport, with a cap for larger screens.
-        final leeway = (height * 0.2)
-            .clamp(0.0, 120.0)
-            .clamp(0.0, box.size.height / 2);
+        final leeway = (height * 0.2).clamp(0.0, 120.0).clamp(0.0, box.size.height / 2);
         bounds._owner = this;
-        bounds.min = ((start < end ? start : end) - leeway)
-            .clamp(position.minScrollExtent, position.maxScrollExtent);
-        bounds.max = ((start > end ? start : end) + leeway)
-            .clamp(position.minScrollExtent, position.maxScrollExtent);
+        bounds.min = ((start < end ? start : end) - leeway).clamp(position.minScrollExtent, position.maxScrollExtent);
+        bounds.max = ((start > end ? start : end) + leeway).clamp(position.minScrollExtent, position.maxScrollExtent);
       }
       // Oversized cards start at the top; the remaining content scrolls normally.
-      final delta = box.size.height > height || top < 0
-          ? top
-          : bottom > height
+      final delta =
+          box.size.height > height || top < 0
+              ? top
+              : bottom > height
               ? bottom - height + 8.0
               : 0.0;
       // Preserve manual positioning unless a layout change puts it outside the
       // tile's new range (for example after resizing the window).
-      final target = _userHasScrolled
-          ? position.pixels.clamp(
-              bounds?.min ?? position.pixels, bounds?.max ?? position.pixels)
-          : (position.pixels + delta)
-              .clamp(position.minScrollExtent, position.maxScrollExtent);
+      final target =
+          _userHasScrolled
+              ? position.pixels.clamp(bounds?.min ?? position.pixels, bounds?.max ?? position.pixels)
+              : (position.pixels + delta).clamp(position.minScrollExtent, position.maxScrollExtent);
       if ((target - position.pixels).abs() < 1) return;
-      position.animateTo(target,
-          duration: const Duration(milliseconds: 180), curve: Curves.easeInOut);
+      position.animateTo(target, duration: const Duration(milliseconds: 180), curve: Curves.easeInOut);
     });
   }
 
@@ -164,9 +152,7 @@ class _ExpandedListingRevealState extends State<ExpandedListingReveal>
         _scheduleReveal();
         return false;
       },
-      child: SizeChangedLayoutNotifier(
-        child: SizedBox(key: _contentKey, child: widget.child),
-      ),
+      child: SizeChangedLayoutNotifier(child: SizedBox(key: _contentKey, child: widget.child)),
     );
   }
 }

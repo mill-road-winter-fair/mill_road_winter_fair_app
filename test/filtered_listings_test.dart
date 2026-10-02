@@ -34,24 +34,9 @@ void main() {
   });
 
   // Build widget tree helper
-  Future<void> pumpFilteredListingsPage(
-    WidgetTester tester,
-    String category,
-    List<Map<String, dynamic>> listings,
-    List<String> favouriteListingKeys,
-  ) async {
+  Future<void> pumpFilteredListingsPage(WidgetTester tester, String category, List<Map<String, dynamic>> listings, List<String> favouriteListingKeys) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: FilteredListingsPage(
-            filterCategory: category,
-            listings: listings,
-            onTabSelected: (_) {},
-            onSubfilterChange: (_) {},
-            analyticsService: FakeAnalyticsService(),
-          ),
-        ),
-      ),
+      MaterialApp(home: Scaffold(body: FilteredListingsPage(filterCategory: category, listings: listings, onTabSelected: (_) {}, onSubfilterChange: (_) {}, analyticsService: FakeAnalyticsService()))),
     );
     await tester.pump();
     await settle(tester);
@@ -643,12 +628,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FilteredListingsPage(
-                filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
-          ),
-        ),
+        MaterialApp(home: Scaffold(body: FilteredListingsPage(filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}))),
       );
 
       await settle(tester);
