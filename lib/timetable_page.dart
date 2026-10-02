@@ -44,7 +44,8 @@ class _TimetablePageState extends State<TimetablePage> {
   Timer? _searchAnalyticsTimer;
   final nowLineKey = GlobalKey();
   late double _dayPixelsPerMinute; // scale for the current day view, whatever its orientation
-  late double pixelsPerMinuteL, pixelsPerMinuteP; // orientation-specific scales
+  double pixelsPerMinuteP = 0.0; // orientation-specific scales
+  double pixelsPerMinuteL = 0.0; // orientation-specific scales
   Orientation? _deviceOrientationSaved; // to track if this has changed
   bool scaling = false; // tracks whether user is re-scaling the view
   bool? _onlyNowOrSoonSaved; // to track if this has changed
@@ -117,6 +118,7 @@ class _TimetablePageState extends State<TimetablePage> {
   void loadScales() async {
     debugPrint('_TimetablePageState loadScales called');
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     pixelsPerMinuteL = prefs.getDouble('pixelsPerMinuteL') ?? 0;
     pixelsPerMinuteP = prefs.getDouble('pixelsPerMinuteP') ?? 0;
     setState(() => loading = false); // this should be the last instruction of the last part of async initialisations
