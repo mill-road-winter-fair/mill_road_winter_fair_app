@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "MRWF: no analytics",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "toolArgs": ["--dart-define-from-file=.env"]
+    },
+    {
+      "name": "MRWF: dev analytics",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "preLaunchTask": "Firebase Debug Mode",
+      "toolArgs": [
+        "--dart-define-from-file=.env",
+        "--dart-define=DEV_ANALYTICS=true"
+      ]
+    },
+    {
+      "name": "MRWF: production release",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "toolArgs": ["--dart-define-from-file=.env"]
+    }
+  ]
+}
