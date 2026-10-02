@@ -488,6 +488,8 @@ class _TimetablePageState extends State<TimetablePage> {
       );
     }
 
+    if (thePreparedEvents.isEmpty) thePreparedEvents = prepareEvents(widget.theEvents); // if another page did a refresh
+
     if (widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
       // refilter to whole day or just now or soon; only do this if changed
       _onlyNowOrSoonSaved = widget.onlyNowOrSoon;
