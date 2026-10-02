@@ -108,7 +108,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       final newMapStyle = getMapStyleForThemeKey(selectedThemeKey);
       if (newMapStyle != mapStyle) {
         mapStyle = newMapStyle;
-        mapPageKey.currentState?.updateMarkersAndPolygonsForTheme();
         if (mounted) setState(() {});
       }
     }

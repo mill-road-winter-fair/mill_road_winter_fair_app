@@ -36,7 +36,10 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    routeObserver.subscribe(this, ModalRoute.of(context)!);
+    routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)!,
+    );
   }
 
   @override
@@ -59,16 +62,15 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context)
-              ? BackButton(
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    widget.analyticsService.logButtonTapped('back');
-                    Navigator.maybePop(context);
-                  },
-                )
-              : null,
-          title: const FittedBox(fit: BoxFit.scaleDown, child: Text('Important information')),
+          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
+            HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('back');
+            Navigator.maybePop(context);
+          }) : null,
+          title: const FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('Important information'),
+          ),
         ),
         body: SingleChildScrollView(
           child: Container(
@@ -78,7 +80,11 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
               children: [
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 240),
-                  child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/hiVis_cropped.jpg', fit: BoxFit.fitWidth)),
+                  child:
+                      ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.asset('assets/importantInfoPage/hiVis_cropped.jpg',
+                              fit: BoxFit.fitWidth, semanticLabel: 'Mill Road Winter Fair stewards wearing high-visibility jackets')),
                 ),
                 const SizedBox(height: 20),
                 bulletPoint('Stewards wearing hi-vis jackets are available to assist you.'),
@@ -89,14 +95,16 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 const SizedBox(height: 20),
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 250),
-                  child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/cautionVehicles_cropped.jpg', fit: BoxFit.fitWidth)),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.asset('assets/importantInfoPage/cautionVehicles_cropped.jpg',
+                          fit: BoxFit.fitWidth, semanticLabel: 'A caution sign warning that vehicles may be moving through the Fair')),
                 ),
                 const SizedBox(height: 20),
                 const Text('Caution – vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 15),
                 bulletPoint(
-                  'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',
-                ),
+                    'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
                 bulletPoint('Pedestrians should exercise particular care before the road is fully closed.', isBold: true),
                 bulletPoint('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.', isBold: true),
                 bulletPoint('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
@@ -107,7 +115,10 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 const SizedBox(height: 20),
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 250),
-                  child: ClipRRect(borderRadius: BorderRadius.circular(8.0), child: Image.asset('assets/importantInfoPage/carousel01_cropped.jpg', fit: BoxFit.fitWidth)),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.asset('assets/importantInfoPage/carousel01_cropped.jpg',
+                          fit: BoxFit.fitWidth, semanticLabel: 'Children riding a carousel at Mill Road Winter Fair')),
                 ),
                 const SizedBox(height: 20),
                 const Text('Coming with children?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
@@ -120,17 +131,18 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 Text.rich(
                   TextSpan(
                     children: [
-                      const TextSpan(text: 'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
+                      const TextSpan(
+                          text:
+                              'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                       TextSpan(
-                        text: 'www.millroadwinterfair.org',
-                        style: const TextStyle(decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
-                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                          },
-                      ),
+                          text: 'www.millroadwinterfair.org',
+                          style: const TextStyle(decoration: TextDecoration.underline),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              HapticFeedback.lightImpact();
+                              widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
+                              launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                            }),
                       const TextSpan(text: '.'),
                     ],
                   ),
@@ -154,20 +166,19 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                             children: [
                               const TextSpan(text: 'Email addresses for the Fair can be found '),
                               TextSpan(
-                                text: 'here',
-                                style: const TextStyle(decoration: TextDecoration.underline),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () async {
-                                    HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped('mrwf_email_hyperlink');
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return contactUsDialog(context, analyticsService: widget.analyticsService);
-                                      },
-                                    );
-                                  },
-                              ),
+                                  text: 'here',
+                                  style: const TextStyle(decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () async {
+                                      HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('mrwf_email_hyperlink');
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return contactUsDialog(context, analyticsService: widget.analyticsService);
+                                        },
+                                      );
+                                    }),
                               const TextSpan(text: '.'),
                             ],
                           ),
@@ -188,20 +199,19 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                             children: [
                               const TextSpan(text: 'On the day, you can also phone '),
                               TextSpan(
-                                text: '07303 142689',
-                                style: const TextStyle(decoration: TextDecoration.underline),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () async {
-                                    HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped('mrwf_phone_hyperlink');
-                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                    if (await canLaunchUrl(phoneUri)) {
-                                      await launchUrl(phoneUri);
-                                    } else {
-                                      throw Exception('Could not dial 07303 142689');
-                                    }
-                                  },
-                              ),
+                                  text: '07303 142689',
+                                  style: const TextStyle(decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () async {
+                                      HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('mrwf_phone_hyperlink');
+                                      final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                      if (await canLaunchUrl(phoneUri)) {
+                                        await launchUrl(phoneUri);
+                                      } else {
+                                        throw Exception('Could not dial 07303 142689');
+                                      }
+                                    }),
                               const TextSpan(text: '.'),
                             ],
                           ),
@@ -214,8 +224,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 const Text('Our responsibilities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 10),
                 const Text(
-                  'The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.',
-                ),
+                    'The Fair (MRWF) is run by a voluntary Committee and key organisers, who plan stalls and activities at set locations within the road closure, Donkey Common, Petersfield Green, Ditchburn Gardens and Gywdir Street Car Park. Official MRWF stalls are given certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
                 const SizedBox(height: 10),
               ],
             ),
@@ -230,7 +239,15 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
       padding: const EdgeInsets.symmetric(vertical: 2.0), // tighten spacing
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [const Text('• ', style: TextStyle(height: 1.3)), Expanded(child: Text(theText, style: TextStyle(height: 1.3, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)))],
+        children: [
+          const Text('• ', style: TextStyle(height: 1.3)),
+          Expanded(
+            child: Text(
+              theText,
+              style: TextStyle(height: 1.3, fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+            ),
+          ),
+        ],
       ),
     );
   }

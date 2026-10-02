@@ -34,7 +34,14 @@ class MapPage extends StatefulWidget {
   final AnalyticsService analyticsService;
 
   const MapPage(
-      {super.key, required this.listings, required this.onTabSelected, this.onHomeTapped, this.destinationId, this.destinationLatLng, this.nearestMarkerCount, required this.analyticsService,});
+      {super.key,
+      required this.listings,
+      required this.onTabSelected,
+      this.onHomeTapped,
+      this.destinationId,
+      this.destinationLatLng,
+      this.nearestMarkerCount,
+      required this.analyticsService});
 
   @override
   MapPageState createState() => MapPageState();
@@ -65,6 +72,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   late List<MarkerId> _businessMarkerIds;
   late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
+  final Map<MarkerId, String> _markerTypes = {};
+  int _themeRefreshVersion = 0;
   final Set<Polygon> _polygons = {}; // For displaying the road closure polygon
   final Set<Polyline> polylines = {}; // For displaying the route polyline
   late pl.PolylinePoints _polylinePoints; // For decoding points
@@ -107,6 +116,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    themeNotifier.addListener(_onThemeChanged);
     debugPrint('MapPageState initState() called with destinationId=${widget.destinationId}');
     _ensureDirectionsConfigLoaded();
     _fetchListings = fetchExistingListings(http.Client());
@@ -172,7 +182,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         points: roadClosurePolygonPoints,
         strokeWidth: 3,
         strokeColor: Theme.of(context).colorScheme.tertiary,
-        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50),);
+        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
   }
 
   void updateRoadClosurePolygonVisibility(bool visibleState) {
@@ -217,20 +227,25 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         const SizedBox(height: 10),
                         const Text(
                             style: TextStyle(height: 1.25),
-                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',),
+                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
                         const SizedBox(height: 10),
-                        const Text('Pedestrians should exercise particular care before the road is fully closed.', style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                        const Text('Pedestrians should exercise particular care before the road is fully closed.',
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
                         const SizedBox(height: 10),
-                        const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.', style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                        const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
                         const SizedBox(height: 10),
-                        const Text(style: TextStyle(height: 1.25), 'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                        const Text(
+                            style: TextStyle(height: 1.25),
+                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
                             children: [
                               const TextSpan(
                                   style: TextStyle(height: 1.25),
-                                  text: 'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at ',),
+                                  text:
+                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                               TextSpan(
                                   text: 'www.millroadwinterfair.org',
                                   style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
@@ -239,7 +254,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                       HapticFeedback.lightImpact();
                                       widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
                                       launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                                    },),
+                                    }),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
                           ),
@@ -318,7 +333,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       if (currentMarker == null) continue;
       final listing = _listingLookup[id.value];
       if (listing == null) continue;
-      final shouldBeVisible = _searchQuery.isEmpty || listing['location'].toString().toLowerCase().contains(_searchQuery) || listing['title'].toString().toLowerCase().contains(_searchQuery);
+      final shouldBeVisible = _searchQuery.isEmpty
+          || listing['location'].toString().toLowerCase().contains(_searchQuery)
+          || listing['title'].toString().toLowerCase().contains(_searchQuery);
       markers[id] = currentMarker.copyWith(visibleParam: shouldBeVisible);
       if (shouldBeVisible) {
         found = true;
@@ -347,11 +364,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Map<String, dynamic>? getListingById(String id) {
-    return _listingLookup[id] ??
-        listings.firstWhere(
-          (listing) => listing['id']?.toString() == id,
-          orElse: () => <String, dynamic>{},
-        );
+    return _listingLookup[id] ?? listings.firstWhere(
+      (listing) => listing['id']?.toString() == id,
+      orElse: () => <String, dynamic>{},
+    );
   }
 
   void filterMarkersIgnoringFilters(List<MarkerId> idList) {
@@ -448,12 +464,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
     // Create all marker bitmaps first, but only if not onTest
     if (onTest == false) {
-      if (bitmapDescriptors.isEmpty) await createAllMarkerBitmaps();
+      if (bitmapDescriptors.isEmpty || bitmapDescriptorsThemeKey != getEffectiveThemeKey(selectedThemeKey)) {
+        await createAllMarkerBitmaps();
+      }
     }
     if (!mounted) return;
 
     // Ensure the markers list is empty
     markers.clear();
+    _markerTypes.clear();
 
     for (var listing in listings) {
       final matchesSearch = ['title', 'location'].any(
@@ -510,49 +529,26 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_isSearching && (state == AppLifecycleState.hidden || state == AppLifecycleState.paused || state == AppLifecycleState.detached)) {
+    if (_isSearching && (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused || state == AppLifecycleState.detached)) {
       _resetSearch();
     }
   }
 
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('MapPageState createAllMarkerBitmaps called');
-    const listingTypes = [
-      'Food',
-      'Shopping',
-      'Charity/Community/Info',
-      'Music',
-      'Childrens',
-      'Dance',
-      'Other',
-      'Visit/Experience',
-      'Service',
-      'Business',
-      'Service-FirstAid',
-      'Service-Information',
-      'Service-Toilet',
-      'Group-Food',
-      'Group-Shopping',
-      'Group-Charity/Community/Info',
-      'Group-Music',
-      'Group-Childrens',
-      'Group-Dance',
-      'Group-Other',
-      'Group-Visit/Experience',
-      'Group-Service',
-      'Mixed',
-      'Group-PerformanceEvent',
-    ];
+    const listingTypes = ['Food', 'Shopping', 'Charity/Community/Info', 'Music', 'Childrens', 'Dance', 'Other', 'Visit/Experience', 'Service', 'Business', 'Service-FirstAid', 'Service-Information', 'Service-Toilet',
+            'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-PerformanceEvent'];
+    final themeKey = getEffectiveThemeKey(selectedThemeKey);
+    final descriptors = <String, BitmapDescriptor>{};
     for (var listingType in listingTypes) {
-      BitmapDescriptor newBitmapDescriptor = await getColoredMarker(listingType, getCategoryColor(selectedThemeKey, listingType));
-      bitmapDescriptors[listingType] = newBitmapDescriptor;
+      descriptors[listingType] = await getColoredMarker(listingType, getCategoryColor(themeKey, listingType));
     }
-    if (bitmapDescriptors.isEmpty) {
-      debugPrint('MapPageState error: created zero bitmap descriptors');
-      return false;
-    } else {
-      return true;
-    }
+    // Publish a complete palette together; a theme may change while images render.
+    if (themeKey != getEffectiveThemeKey(selectedThemeKey)) return createAllMarkerBitmaps();
+    bitmapDescriptors = descriptors;
+    bitmapDescriptorsThemeKey = themeKey;
+    return descriptors.isNotEmpty;
   }
 
   // Function to toggle a listing's presence in the list of favourites
@@ -576,24 +572,17 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     //debugPrint('MapPageState addGroupMarker called for ${parentListing['title']}');
     LatLng destinationLatLng = stringToLatLng(parentListing['latLng']);
     MarkerId markerId = MarkerId(parentListing['id'].toString());
-    Color color = getCategoryColor(selectedThemeKey, getCategory(parentListing));
-    late BitmapDescriptor customMarker;
-
-    if (onTest == false) {
-      final (catCount, perfOrEventCount) = countCategories(parentListing);
-      if (catCount > 1 && catCount == perfOrEventCount) {
-        customMarker = bitmapDescriptors['Group-PerformanceEvent']!;
-      } else if ((catCount != 1) || (isGroupSingleCategory(parentListing['groupID'], listings) == false)) {
-        // If the group has multiple categories, or none, or its contents are mixed, use the "mixed" marker
-        customMarker = bitmapDescriptors['Mixed']!;
-      } else {
-        // If the group has only one category, use the specific category marker
-        customMarker = bitmapDescriptors['Group-${getCategory(parentListing)}'] ?? BitmapDescriptor.defaultMarker;
-      }
+    final (catCount, perfOrEventCount) = countCategories(parentListing);
+    final String type;
+    if (catCount > 1 && catCount == perfOrEventCount) {
+      type = 'Group-PerformanceEvent';
+    } else if (catCount != 1 || !isGroupSingleCategory(parentListing['groupID'], listings)) {
+      type = 'Mixed';
     } else {
-      double hue = HSVColor.fromColor(color).hue;
-      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
+      type = 'Group-${getCategory(parentListing)}';
     }
+    _markerTypes[markerId] = type;
+    final customMarker = _iconForMarkerType(type);
 
     Marker newMarker = Marker(
       markerId: markerId,
@@ -626,6 +615,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           return a['title'].compareTo(b['title']);
         });
 
+
         final groupSheetModalScrollController = ScrollController();
         final expandedScrollBounds = ExpandedListingScrollBounds();
         showModalBottomSheet(
@@ -639,6 +629,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             detailsVisibleIndex = null;
             return StatefulBuilder(
               builder: (context, setModalState) {
+
                 void toggleDetailsRow(int index) {
                   setModalState(() {
                     detailsVisibleIndex = (detailsVisibleIndex == null || detailsVisibleIndex != index) ? index : null;
@@ -739,11 +730,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               startTime: "${rel['startTime']}",
                                               endTime: "${rel['endTime']}",
                                               approxDistance: '',
-                                              detailsVisible: (detailsVisibleIndex == null)
-                                                  ? false
-                                                  : (detailsVisibleIndex == index)
-                                                      ? true
-                                                      : null,
+                                              detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
                                               onDetailsTapped: () => toggleDetailsRow(index),
                                               listingFavourited: isFavourited,
                                               onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
@@ -753,7 +740,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               colorScheme: colorScheme,
                                             ),
                                           ),
-                                          if (index != relatedListings.length - 1) const SizedBox(height: 8),
+                                          if (index != relatedListings.length - 1) SizedBox(height: 8),
                                         ],
                                       );
                                     },
@@ -783,24 +770,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     //debugPrint('MapPageState addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
-    Color color = getCategoryColor(selectedThemeKey, getCategory(listing));
-    late BitmapDescriptor customMarker;
-
-    if (onTest == false) {
-      final (catCount, perfOrEventCount) = countCategories(listing);
-      if (catCount == 1) {
-        // If the listing has only one category, use the specific category marker
-        customMarker = bitmapDescriptors[getCategory(listing)]!;
-      } else if (catCount == perfOrEventCount) {
-        customMarker = bitmapDescriptors['Group-PerformanceEvent']!;
-      } else {
-        // If the listing has multiple categories, or none, or its contents are mixed, use the "mixed" marker
-        customMarker = bitmapDescriptors['Mixed']!;
-      }
-    } else {
-      double hue = HSVColor.fromColor(color).hue;
-      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
-    }
+    final (catCount, perfOrEventCount) = countCategories(listing);
+    final type = catCount == 1
+        ? getCategory(listing)
+        : catCount == perfOrEventCount ? 'Group-PerformanceEvent' : 'Mixed';
+    _markerTypes[markerId] = type;
+    final customMarker = _iconForMarkerType(type);
 
     Marker newMarker = Marker(
         markerId: markerId,
@@ -893,12 +868,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         ),
                       ),
                     );
-                  },);
-                },),
+                  });
+                }),
               );
             },
           );
-        },);
+        });
     //setState(() {
     markers[markerId] = newMarker;
     //});
@@ -907,14 +882,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   void addSimpleMarker(String category, destinationLatLng) async {
     //debugPrint('MapPageState addSimpleMarker called for category: $category');
     const MarkerId markerId = MarkerId(aSimpleMarkerId);
-    Color color = getCategoryColor(selectedThemeKey, category);
-    late BitmapDescriptor customMarker;
-    if (onTest == false) {
-      customMarker = bitmapDescriptors[category]!;
-    } else {
-      double hue = HSVColor.fromColor(color).hue;
-      customMarker = BitmapDescriptor.defaultMarkerWithHue(hue);
-    }
+    _markerTypes[markerId] = category;
+    final customMarker = _iconForMarkerType(category);
 
     Marker newMarker = Marker(
       markerId: markerId,
@@ -928,24 +897,36 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     //});
   }
 
-  Future<void> updateMarkersAndPolygonsForTheme() async {
-    debugPrint('MapPageState updateMarkersAndPolygonsForTheme called');
-    // Recreate marker bitmaps for the new theme colors
-    await createAllMarkerBitmaps();
+  BitmapDescriptor _iconForMarkerType(String type) {
+    if (onTest) {
+      return BitmapDescriptor.defaultMarkerWithHue(
+        HSVColor.fromColor(getCategoryColor(selectedThemeKey, type)).hue,
+      );
+    }
+    return bitmapDescriptors[type] ?? BitmapDescriptor.defaultMarker;
+  }
 
-    // Update each marker’s icon to the correct color for its type
+  void _onThemeChanged() {
+    updateMarkersAndPolygonsForTheme();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    if (selectedThemeKey == 'auto') _onThemeChanged();
+  }
+
+  Future<void> updateMarkersAndPolygonsForTheme() async {
+    final version = ++_themeRefreshVersion;
+    if (!onTest) await createAllMarkerBitmaps();
+    // Wait for the inherited theme to update before recolouring the polygon.
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted || version != _themeRefreshVersion) return;
+
     setState(() {
       markers.updateAll((id, oldMarker) {
-        final listing = listings.firstWhere(
-          (l) => l['id'].toString() == id.value,
-          orElse: () => {},
-        );
-        if (listing.isEmpty) return oldMarker;
-
-        final type = listing['category'];
-        final newIcon = bitmapDescriptors[type] ?? oldMarker.icon;
-
-        return oldMarker.copyWith(iconParam: newIcon);
+        final type = _markerTypes[id];
+        if (type == null) return oldMarker;
+        return oldMarker.copyWith(iconParam: _iconForMarkerType(type));
       });
 
       // Update polygon colour to match theme, if filtered-in
@@ -959,33 +940,17 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   void hideAllMarkers() {
     debugPrint('MapPageState hideAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
-        _foodMarkerIds +
-            _shoppingMarkerIds +
-            _charityCommunityInfoMarkerIds +
-            _performanceMusicMarkerIds +
-            _performanceChildrensMarkerIds +
-            _performanceDanceMarkerIds +
-            _performanceOtherMarkerIds +
-            _visitExperienceMarkerIds +
-            _businessMarkerIds +
-            _serviceMarkerIds,
-        false,);
+      _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds
+          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, false
+    );
   }
 
   void showAllMarkers() {
     debugPrint('MapPageState showAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
-        _foodMarkerIds +
-            _shoppingMarkerIds +
-            _charityCommunityInfoMarkerIds +
-            _performanceMusicMarkerIds +
-            _performanceChildrensMarkerIds +
-            _performanceDanceMarkerIds +
-            _performanceOtherMarkerIds +
-            _visitExperienceMarkerIds +
-            _businessMarkerIds +
-            _serviceMarkerIds,
-        true,);
+      _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds
+          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, true
+    );
   }
 
   void showFilteredMarkers() {
@@ -1022,12 +987,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       "Filter map layers",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.left,
-                    ),
-                  ],),
+                    )
+                  ]),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Food'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['food']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Food and drink")),
@@ -1046,7 +1011,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['shopping']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shopping and stalls")),
@@ -1065,10 +1030,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Charity/Community/Info'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['charityCommunityInfo']!.iconData),
-                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Charity, Community, Info")),
+                    title:  const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Charity, Community, Info")),
                     value: filterSettings["Charity/Community/Info"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
@@ -1084,7 +1049,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Music'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['performanceMusic']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Music performances")),
@@ -1103,7 +1068,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Childrens'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['performanceChildrens']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Children’s performances")),
@@ -1120,7 +1085,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Dance'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['performanceDance']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Dance performances")),
@@ -1137,7 +1102,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Other'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['performanceOther']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Other performances")),
@@ -1154,7 +1119,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Visit/Experience'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['visitExperience']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Visits and experiences")),
@@ -1173,7 +1138,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Business'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['business']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Other businesses")),
@@ -1190,7 +1155,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Service'),
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['service']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Services")),
@@ -1210,7 +1175,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: Theme.of(context).colorScheme.tertiary,
-                    contentPadding: const EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.all(0),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade road closures")),
                     value: preferredRoadClosurePolygonVisible,
                     onChanged: (value) {
@@ -1223,8 +1188,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       widget.analyticsService.logRoadClosurePolygonPreferenceSet(value);
                     },
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
                         child: FittedBox(
@@ -1374,6 +1338,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     });
   }
 
+
   void cancelNavigation() async {
     debugPrint('MapPageState cancelNavigation called');
     // Halt the location subscription
@@ -1422,6 +1387,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   void dispose() {
     routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
+    themeNotifier.removeListener(_onThemeChanged);
     _searchController.dispose();
     debugPrint('MapPageState dispose() called');
     // Cancel the location subscription when the page is disposed
@@ -1642,6 +1608,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     _moveCameraToBounds(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong));
   }
 
+
   void _moveCameraToBounds(LatLng southwest, LatLng northeast) {
     debugPrint('MapPageState moveCameraToBounds called with southwest=$southwest northeast=$northeast');
     switch (preferredMapOrientation) {
@@ -1657,6 +1624,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         break;
     }
   }
+
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
     debugPrint('MapPageState _setMapCameraToFitPolyline called');
@@ -1691,7 +1659,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       padding = mapHeight! * (0.10 + extraPaddingForShortTrips); // need a bit more space to avoid navigation distance marker
     }
 
-    _moveCameraToBoundsWithRotation(LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
+    _moveCameraToBoundsWithRotation(
+        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -1818,47 +1787,74 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       future: _fetchListings,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return FairScaffold(
+            appBarTitle: 'Map',
+            currentTab: 1,
+            onTabSelected: widget.onTabSelected,
+            allowBack: false,
+            analyticsService: widget.analyticsService,
+            body: const Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              "Error: ${snapshot.error}",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                backgroundColor: Theme.of(context).colorScheme.error,
-                color: Theme.of(context).colorScheme.onError,
+          return FairScaffold(
+            appBarTitle: 'Map',
+            currentTab: 1,
+            onTabSelected: widget.onTabSelected,
+            allowBack: false,
+            analyticsService: widget.analyticsService,
+            body: Center(
+              child: Text(
+                "Error: ${snapshot.error}",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  color: Theme.of(context).colorScheme.onError,
+                ),
               ),
             ),
           );
         }
 
         if (listings.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Unable to retrieve listings",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                isRefreshing
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton.icon(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('refresh_listings_from_error');
-                          refreshListings();
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh listings'),
-                      ),
-              ],
+          return FairScaffold(
+            appBarTitle: 'Map',
+            currentTab: 1,
+            onTabSelected: widget.onTabSelected,
+            allowBack: false,
+            analyticsService: widget.analyticsService,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Unable to retrieve listings",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  isRefreshing
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton.icon(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                            refreshListings();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Refresh listings'),
+                        ),
+                ],
+              ),
             ),
           );
+        }
+
+        if (_listingLookup.isEmpty) { // if another page did a refresh
+          _listingLookup = buildListingLookup(listings); 
+          setVisibleMarkerLists();
+          addAllVisibleMarkers();
         }
 
         switch (preferredMapOrientation) {
@@ -1887,47 +1883,40 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         final appBarTheme = Theme.of(context).appBarTheme;
 
         return FairScaffold(
-          appBarTitle: (navigationInProgress || doingAPushNavigation != null)
-              ? 'Directions'
-              : (widget.nearestMarkerCount != null)
-                  ? 'Nearby attractions'
-                  : 'Map',
+          appBarTitle: (navigationInProgress || doingAPushNavigation != null) ? 'Directions' : (widget.nearestMarkerCount != null) ? 'Nearby attractions' : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
-            if (navigationInProgress == false)
-              IconButton(
-                key: filterIconKey,
-                color: appBarTheme.foregroundColor,
-                onLongPress: () => showMiniPopup(context, filterIconKey, 'Tap to choose which map markers to show or hide', analyticsService: widget.analyticsService),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  showFilterMenu();
-                  setVisibleMarkerLists();
-                },
-                icon: const Icon(Icons.filter_alt, size: 26),
-              ),
-            if (doingAPushNavigation == null)
-              IconButton(
-                key: searchIconKey,
-                color: appBarTheme.foregroundColor,
-                onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
-                    analyticsService: widget.analyticsService,),
-                onPressed: () async {
-                  HapticFeedback.lightImpact();
-                  if (_isSearching) {
-                    final camera = _cameraBeforeSearch;
-                    _resetSearch();
-                    if (camera != null) {
-                      await _controller?.animateCamera(CameraUpdate.newCameraPosition(camera));
-                    }
-                  } else {
-                    _cameraBeforeSearch = _currentCamera;
-                    setState(() => _isSearching = true);
+            if (navigationInProgress == false) IconButton(
+              key: filterIconKey,
+              color: appBarTheme.foregroundColor,
+              onLongPress: () => showMiniPopup(context, filterIconKey, 'Tap to choose which map markers to show or hide', analyticsService: widget.analyticsService),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                showFilterMenu();
+                setVisibleMarkerLists();
+              },
+              icon: const Icon(Icons.filter_alt, size: 26),
+            ),
+            if (doingAPushNavigation == null) IconButton(
+              key: searchIconKey,
+              color: appBarTheme.foregroundColor,
+              onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar', analyticsService: widget.analyticsService),
+              onPressed: () async {
+                HapticFeedback.lightImpact();
+                if (_isSearching) {
+                  final camera = _cameraBeforeSearch;
+                  _resetSearch();
+                  if (camera != null) {
+                    await _controller?.animateCamera(CameraUpdate.newCameraPosition(camera));
                   }
-                },
-                icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26),
-              ),
+                } else {
+                  _cameraBeforeSearch = _currentCamera;
+                  setState(() => _isSearching = true);
+                }
+              },
+              icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26),
+            ),
           ],
           allowBack: (doingAPushNavigation != null),
           body: Stack(
@@ -1941,42 +1930,45 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       if (didPop && navigationInProgress) cancelNavigation();
                     },
                     child: GoogleMap(
-                        style: mapStyle,
-                        mapType: mapType,
-                        rotateGesturesEnabled: false,
-                        compassEnabled: false,
-                        myLocationEnabled: locationServicesEnabled && (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse),
-                        myLocationButtonEnabled: false,
-                        mapToolbarEnabled: false,
-                        onMapCreated: (GoogleMapController controller) {
-                          _controller = controller;
-                          if (listings.isNotEmpty) {
-                            // We should have listings by this point so set the camera to their bounds
-                            _setMapCameraToFitMapMarkers();
+                      style: mapStyle,
+                      mapType: mapType,
+                      rotateGesturesEnabled: false,
+                      compassEnabled: false,
+                      myLocationEnabled: locationServicesEnabled &&
+                          (locationPermission == LocationPermission.always ||
+                              locationPermission == LocationPermission.whileInUse),
+                      myLocationButtonEnabled: false,
+                      mapToolbarEnabled: false,
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller = controller;
+                        if (listings.isNotEmpty) {
+                          // We should have listings by this point so set the camera to their bounds
+                          _setMapCameraToFitMapMarkers();
+                        }
+                      },
+                      initialCameraPosition: CameraPosition(
+                        target: centreOfFair,
+                        zoom: mapInitialZoom,
+                        bearing: _mapBearing,
+                      ),
+                      onCameraMove: (CameraPosition position) {
+                        //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
+                        _currentCamera = position;
+                        setState(() {
+                          switch (preferredMapOrientation) {
+                            case MapOrientation.adaptive:
+                              _compassBearing = 90;
+                              break;
+                            case MapOrientation.alwaysNorth:
+                              _compassBearing = 0;
+                              break;
                           }
-                        },
-                        initialCameraPosition: CameraPosition(
-                          target: centreOfFair,
-                          zoom: mapInitialZoom,
-                          bearing: _mapBearing,
-                        ),
-                        onCameraMove: (CameraPosition position) {
-                          //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
-                          _currentCamera = position;
-                          setState(() {
-                            switch (preferredMapOrientation) {
-                              case MapOrientation.adaptive:
-                                _compassBearing = 90;
-                                break;
-                              case MapOrientation.alwaysNorth:
-                                _compassBearing = 0;
-                                break;
-                            }
-                          });
-                        },
-                        polygons: _polygons,
-                        markers: markers.values.toSet(),
-                        polylines: polylines,),
+                        });
+                      },
+                      polygons: _polygons,
+                      markers: markers.values.toSet(),
+                      polylines: polylines
+                    ),
                   );
                 },
               ),
@@ -1989,6 +1981,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == true && doingAPushNavigation == null)
                       FloatingActionButton(
                         heroTag: 'cancelBtn',
+                        tooltip: 'Cancel navigation',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('cancel_navigation');
@@ -2002,7 +1995,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           decoration: BoxDecoration(
                             color: colorScheme.primary,
                             shape: BoxShape.circle,
-                            boxShadow: [BoxShadow(color: colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
+                            boxShadow: [
+                              BoxShadow(
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
                           ),
                           child: const Icon(Icons.cancel),
                         ),
@@ -2010,6 +2009,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'homeBtn',
+                        tooltip: 'Show the whole Fair map',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('home');
@@ -2059,44 +2059,27 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           decoration: BoxDecoration(
                             color: colorScheme.primary,
                             shape: BoxShape.circle,
-                            boxShadow: [BoxShadow(color: colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
+                            boxShadow: [
+                              BoxShadow(
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
                           ),
                           child: const Icon(Icons.home),
                         ),
                       ),
                     // Centre-on-user button (only shown when location services are enabled and permission has been granted)
-                    if (locationServicesEnabled == true && (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
+                    if (locationServicesEnabled == true &&
+                        (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
                         heroTag: 'centreOnUserBtn',
+                        tooltip: 'Centre map on your location',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('centre_on_user');
-                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
-                          try {
-                            if (currentLatLng == null) {
-                              final pos = await getCurrentPosition();
-                              currentLatLng = LatLng(pos.latitude, pos.longitude);
-                            }
-                            if (currentLatLng != null) {
-                              // Move camera to the user's location with a sensible zoom and bearing
-                              double currentZoom = await _controller!.getZoomLevel();
-                              _controller?.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            debugPrint('Centre-on-user failed: $e');
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: colorScheme.primary,
-                                  content: const Text('Unable to determine your location'),
-                                ),
-                              );
-                            }
-                          }
+                          focusMapOnNearestMarkers(10);
                         },
                         backgroundColor: Colors.transparent,
                         mini: true,
@@ -2106,13 +2089,20 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           decoration: BoxDecoration(
                             color: colorScheme.primary,
                             shape: BoxShape.circle,
-                            boxShadow: [BoxShadow(color: colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
+                            boxShadow: [
+                              BoxShadow(
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
                           ),
-                          child: const Icon(Icons.my_location),
+                          child: const Icon(Icons.radar),
                         ),
                       ),
                     FloatingActionButton(
                       heroTag: 'mapTypeBtn',
+                      tooltip: mapType == MapType.normal ? 'Switch to satellite map' : 'Switch to street map',
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         widget.analyticsService.logButtonTapped('map_type_toggle');
@@ -2140,7 +2130,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         decoration: BoxDecoration(
                           color: colorScheme.primary,
                           shape: BoxShape.circle,
-                          boxShadow: [BoxShadow(color: colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
+                          boxShadow: [
+                            BoxShadow(
+                                color: colorScheme.onSurfaceVariant.withAlpha(127),
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                                offset: const Offset(2, 2))
+                          ],
                         ),
                         child: Icon(_layersIcon),
                       ),
@@ -2148,6 +2144,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'mapBearingBtn',
+                        tooltip: preferredMapOrientation == MapOrientation.adaptive ? 'Keep north at the top' : 'Use direction of travel',
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('map_orientation_toggle');
@@ -2172,13 +2169,19 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           decoration: BoxDecoration(
                             color: colorScheme.primary,
                             shape: BoxShape.circle,
-                            boxShadow: [BoxShadow(color: colorScheme.onSurfaceVariant.withAlpha(127), spreadRadius: 1, blurRadius: 3, offset: const Offset(2, 2))],
+                            boxShadow: [
+                              BoxShadow(
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
                           ),
                           child: AnimatedRotation(
                             turns: _compassBearing / 360.0,
                             duration: const Duration(milliseconds: 200),
                             curve: Curves.easeOut,
-                            child: const Icon(Icons.assistant_navigation),
+                            child: Icon(Icons.assistant_navigation),
                           ),
                         ),
                       ),
@@ -2197,7 +2200,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
                           padding: const EdgeInsets.all(0),
                           elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         widget.analyticsService.logButtonTapped('distance_to_destination');
@@ -2220,6 +2223,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
                       color: colorScheme.surface,
+        child: Semantics(
+        button: true,
+        label: 'Road closures. Show more information',
+        excludeSemantics: true,
                       child: GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
@@ -2243,7 +2250,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                 width: 20,
                                 height: 14,
                                 decoration: BoxDecoration(
-                                  color: selectedThemeKey == 'colourBlindFriendly' ? const Color.fromRGBO(224, 129, 87, 255) : colorScheme.tertiary.withAlpha(50),
+                                  color: selectedThemeKey == 'colourBlindFriendly'
+                                      ? const Color.fromRGBO(224, 129, 87, 255)
+                                      : colorScheme.tertiary.withAlpha(50),
                                   border: Border.all(
                                     color: colorScheme.tertiary,
                                     width: 3,
@@ -2261,49 +2270,45 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               ),
                             ],
                           ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              Positioned(
-                top: 0,
-                left: 0,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: _isSearching
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              key: const ValueKey('searchBar'),
-                              color: colorScheme.surfaceDim,
-                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
-                              padding: const EdgeInsets.all(8),
-                              child: SearchBar(
-                                autoFocus: true,
-                                controller: _searchController,
-                                elevation: const WidgetStatePropertyAll(0),
-                                hintText: 'Search all locations...',
-                                leading: const Icon(Icons.search),
-                                trailing: [
-                                  IconButton(
-                                      iconSize: 20,
-                                      icon: const Icon(Icons.close),
-                                      onPressed: () async {
-                                        HapticFeedback.lightImpact();
-                                        widget.analyticsService.logButtonTapped('map_search_clear');
-                                        _resetSearch(close: false);
-                                      },),
-                                ],
-                                onChanged: _searchListings,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
+                Positioned(top: 0, left: 0, child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _isSearching ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          key: const ValueKey('searchBar'),
+                          color: colorScheme.surfaceDim,
+                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
+                          padding: EdgeInsets.all(8),
+                          child: SearchBar(
+                            autoFocus: true,
+                            controller: _searchController,
+                            elevation: const WidgetStatePropertyAll(0),
+                            hintText: 'Search all locations...',
+                            leading: const Icon(Icons.search),
+                            trailing: [
+                              IconButton(
+                                  iconSize: 20,
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () async {
+                                    HapticFeedback.lightImpact();
+                                    widget.analyticsService.logButtonTapped('map_search_clear');
+                                    _resetSearch(close: false);
+                                  })
+                            ],
+                            onChanged: _searchListings,
+                          ),
+                        ),
+                      ],
+                    ) : SizedBox.shrink(),
+                  ),
                 ),
-              ),
             ],
           ),
           analyticsService: widget.analyticsService,

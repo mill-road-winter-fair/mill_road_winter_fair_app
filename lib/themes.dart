@@ -7,7 +7,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 
 String getEffectiveThemeKey(String themeKey, [Brightness? brightness]) {
   if (themeKey != 'auto') return themeKey;
-  final currentBrightness = brightness ?? ui.PlatformDispatcher.instance.platformBrightness;
+  final currentBrightness = brightness ?? WidgetsBinding.instance.platformDispatcher.platformBrightness;
   return currentBrightness == Brightness.dark ? 'dark' : 'light';
 }
 
@@ -46,10 +46,18 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.black,
       onSurfaceVariant: Colors.grey[700]!,
     ),
-    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(166, 34, 43, 1), foregroundColor: Colors.white),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(166, 34, 43, 1), unselectedItemColor: Colors.grey),
-    drawerTheme: const DrawerThemeData(backgroundColor: Colors.white),
-    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color.fromRGBO(166, 34, 43, 1),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      selectedItemColor: Color.fromRGBO(166, 34, 43, 1),
+      unselectedItemColor: Colors.grey,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Colors.white,
+    ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   'dark': ThemeData(
     useMaterial3: true,
@@ -68,12 +76,24 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.white,
       onSurfaceVariant: Colors.grey[300]!,
     ),
-    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(44, 44, 44, 1.0), foregroundColor: Colors.white),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0), unselectedItemColor: Colors.grey),
-    drawerTheme: const DrawerThemeData(backgroundColor: Color.fromRGBO(44, 44, 44, 1.0)),
-    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
-    listTileTheme: const ListTileThemeData(tileColor: Color.fromRGBO(44, 44, 44, 1.0)),
-    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
+      unselectedItemColor: Colors.grey,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
+    ),
+    listTileTheme: const ListTileThemeData(
+      tileColor: Color.fromRGBO(44, 44, 44, 1.0),
+    ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   '2024': ThemeData(
     useMaterial3: true,
@@ -92,10 +112,18 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.black,
       onSurfaceVariant: Colors.grey[700]!,
     ),
-    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(37, 63, 128, 1.0), foregroundColor: Colors.white),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(37, 63, 128, 1.0), unselectedItemColor: Colors.grey),
-    drawerTheme: const DrawerThemeData(backgroundColor: Colors.white),
-    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color.fromRGBO(37, 63, 128, 1.0),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      selectedItemColor: Color.fromRGBO(37, 63, 128, 1.0),
+      unselectedItemColor: Colors.grey,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Colors.white,
+    ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
@@ -114,14 +142,28 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Color.fromRGBO(255, 243, 0, 1.0),
       onSurfaceVariant: Color.fromRGBO(0, 255, 244, 1.0),
     ),
-    appBarTheme: const AppBarTheme(backgroundColor: Colors.black, foregroundColor: Color.fromRGBO(255, 243, 0, 1.0)),
-    iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0))),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0), unselectedItemColor: Colors.grey),
-    drawerTheme: const DrawerThemeData(backgroundColor: Colors.black),
-    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.black,
+      foregroundColor: Color.fromRGBO(255, 243, 0, 1.0),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0),
+      ),
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0),
+      unselectedItemColor: Colors.grey,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Colors.black,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
+    ),
     listTileTheme: const ListTileThemeData(tileColor: Colors.black),
-    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
-  ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme(
@@ -139,11 +181,19 @@ final Map<String, ThemeData> appThemes = {
       onSurface: Colors.black,
       onSurfaceVariant: Colors.grey[700]!,
     ),
-    appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(102, 55, 133, 1.0), foregroundColor: Colors.white),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0), unselectedItemColor: Colors.grey),
-    drawerTheme: const DrawerThemeData(backgroundColor: Colors.white),
-    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
-  ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color.fromRGBO(102, 55, 133, 1.0),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0),
+      unselectedItemColor: Colors.grey,
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Colors.white,
+    ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+),
 };
 
 // Standard Google Maps themes (designed with https://mapstyle.withgoogle.com/)
@@ -234,14 +284,22 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
   }
   try {
     int markerPixelSize = 288;
-    final ui.Codec backdropCodec = await ui.instantiateImageCodec(backdropData.buffer.asUint8List(), targetWidth: markerPixelSize, targetHeight: markerPixelSize);
+    final ui.Codec backdropCodec = await ui.instantiateImageCodec(
+      backdropData.buffer.asUint8List(),
+      targetWidth: markerPixelSize,
+      targetHeight: markerPixelSize,
+    );
     // The below line does not seem to work at all in the unit tests, it crashes the function without error
     final ui.FrameInfo backdropFrame = await backdropCodec.getNextFrame();
     final ui.Image backdropImage = backdropFrame.image;
 
     // Load the base image (to be colorized)
     final ByteData markerData = await rootBundle.load(assetPath);
-    final ui.Codec markerCodec = await ui.instantiateImageCodec(markerData.buffer.asUint8List(), targetWidth: markerPixelSize, targetHeight: markerPixelSize);
+    final ui.Codec markerCodec = await ui.instantiateImageCodec(
+      markerData.buffer.asUint8List(),
+      targetWidth: markerPixelSize,
+      targetHeight: markerPixelSize,
+    );
     // The below line does not seem to work at all in the unit tests, it crashes the function without error
     final ui.FrameInfo markerFrame = await markerCodec.getNextFrame();
     final ui.Image markerImage = markerFrame.image;
@@ -259,7 +317,10 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
     canvas.drawImage(markerImage, Offset.zero, markerPaint);
 
     // Convert the final image to a BitmapDescriptor
-    final ui.Image finalImage = await recorder.endRecording().toImage(markerImage.width, markerImage.height);
+    final ui.Image finalImage = await recorder.endRecording().toImage(
+          markerImage.width,
+          markerImage.height,
+        );
     final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
@@ -271,33 +332,70 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
 }
 
 Color getCategoryColor(String selectedThemeKey, String category) {
-  final lightOrDarkThemeKey = ui.PlatformDispatcher.instance.platformBrightness;
+  final effectiveThemeKey = getEffectiveThemeKey(selectedThemeKey);
   Color color;
-  if (lightOrDarkThemeKey == Brightness.light) {
-    color = switch (category) {
+  if (effectiveThemeKey == "light") {
+    color = switch(category) {
       "Food" || "Group-Food" => const Color.fromRGBO(255, 156, 26, 1.0),
-      "Shopping" || "Group-Shopping" => const Color.fromRGBO(209, 81, 85, 1.0),
+      "Shopping" || "Group-Shopping" => const Color.fromRGBO(209, 85, 89, 1.0),
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(190, 110, 230, 1.0),
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(150, 80, 0, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(79, 184, 75, 1.0),
       "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
-      "Service" || "Group-Service" => const Color.fromRGBO(84, 145, 245, 1.0),
-      "Mixed" => const Color.fromRGBO(0, 100, 0, 1.0), // will become the Fair's colour for this year
+      final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(84, 145, 245, 1.0),
+      "Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
     };
-  } else {
-    // can only be dark
-    color = switch (category) {
+  } else if (effectiveThemeKey == "dark") {
+    color = switch(category) {
       "Food" || "Group-Food" => const Color.fromRGBO(241, 108, 0, 1.0),
-      "Shopping" || "Group-Shopping" => const Color.fromRGBO(204, 22, 22, 1.0),
+      "Shopping" || "Group-Shopping" => const Color.fromRGBO(138, 57, 58, 1.0),
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(183, 13, 204, 1.0),
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(150, 80, 0, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(7, 128, 0, 1.0),
       "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
-      "Service" || "Group-Service" => const Color.fromRGBO(29, 112, 198, 1.0),
-      "Mixed" => const Color.fromRGBO(0, 100, 0, 1.0), // will become the Fair's colour for this year
+      final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(29, 112, 198, 1.0),
+      "Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
     };
+  } else if (effectiveThemeKey == "2024") {
+    color = switch (category) {
+      "Food" || "Group-Food" => const Color.fromRGBO(216, 114, 50, 1.0),
+      "Shopping" || "Group-Shopping" => const Color.fromRGBO(200, 0, 10, 1),
+      "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(175, 98, 214, 1.0),
+      "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(204, 161, 51, 1.0),
+      "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 115, 37, 1.0),
+      final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(37, 63, 128, 1.0),
+      "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
+      "Mixed" => const Color.fromRGBO(37, 63, 128, 1.0),
+      _ => const Color.fromRGBO(0, 0, 0, 1.0),
+    };
+  } else if (effectiveThemeKey == "highContrast") {
+    color = switch (category) {
+      "Food" || "Group-Food" => const Color.fromRGBO(255, 115, 0, 1.0),
+      "Shopping" || "Group-Shopping" => const Color.fromRGBO(255, 0, 0, 1.0),
+      "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(228, 0, 255, 1.0),
+      "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(237, 201, 0, 1.0),
+      "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(28, 213, 0, 1.0),
+      final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 187, 255, 1.0),
+      "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
+      "Mixed" => const Color.fromRGBO(0, 51, 255, 1.0),
+      _ => const Color.fromRGBO(0, 0, 0, 1.0),
+    };
+  } else if (effectiveThemeKey == "colourBlindFriendly") {
+    color = switch (category) {
+      "Food" || "Group-Food" => const Color.fromRGBO(213, 94, 0, 1.0),
+      "Shopping" || "Group-Shopping" => const Color.fromRGBO(230, 159, 0, 1.0),
+      "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(204, 121, 167, 1.0),
+      "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(240, 228, 66, 1.0),
+      "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 158, 115, 1.0),
+      final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 114, 178, 1.0),
+      "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
+      "Mixed" => const Color.fromRGBO(102, 55, 133, 1.0),
+      _ => const Color.fromRGBO(255, 0, 0, 1.0),
+    };
+  } else {
+    color = const Color.fromRGBO(255, 0, 0, 1.0);
   }
   return color;
 }
