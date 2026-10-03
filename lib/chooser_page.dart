@@ -9,7 +9,6 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
-import 'package:mill_road_winter_fair_app/important_info_page.dart';
 
 class ChooserPage extends StatefulWidget {
 
@@ -351,22 +350,6 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
             appBarTitle: 'Welcome to the 2026 Fair! ', // deliberate space
             currentTab: 0,
             onTabSelected: widget.onTabSelected,
-            appBarActions: [
-              IconButton(icon: const Icon(Icons.warning, size: 20),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService,)));
-                },
-                tooltip: 'Important Information',
-              ),
-              IconButton(icon: const Icon(Icons.info, size: 20),
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: widget.analyticsService)));
-                },
-                tooltip: 'About the Fair',
-              ),
-            ],
             analyticsService: widget.analyticsService,
             body: RepaintBoundary(
               child: LayoutBuilder(
