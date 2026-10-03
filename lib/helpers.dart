@@ -1145,6 +1145,10 @@ class AdaptiveImageText extends StatefulWidget {
 }
 
 class _AdaptiveImageTextState extends State<AdaptiveImageText> {
+  static const double _inlineImageWidth = 160;
+  static const double _maxImageHeight = 180;
+  static const double _loadingImageHeight = 120;
+
   Future<ui.Image>? _imageFuture;
 
   @override
@@ -1185,14 +1189,60 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
     return FutureBuilder<ui.Image>(
       future: _imageFuture,
       builder: (context, snapshot) {
-        if (snapshot.hasError) return const Text('Could not load image');
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (snapshot.hasError) return _buildFallbackLayout(showErrorText: true);
+        if (!snapshot.hasData) return _buildLoadingLayout();
         final image = snapshot.data!;
         final imageIsLandscape = image.width > image.height;
-        return imageIsLandscape
-            ? _buildVerticalLayout()
-            : _buildHorizontalLayout();
+        return imageIsLandscape ? _buildVerticalLayout() : _buildHorizontalLayout();
       },
+    );
+  }
+
+  Widget _buildFallbackLayout({bool showErrorText = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: widget.descriptionWidget),
+        const SizedBox(width: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: SizedBox(
+            width: _inlineImageWidth,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.broken_image, size: 32),
+                if (showErrorText) const SizedBox(height: 4),
+                if (showErrorText) const Text('Could not load image', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadingLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: widget.descriptionWidget),
+        const SizedBox(width: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: SizedBox(
+            width: _inlineImageWidth,
+            height: _loadingImageHeight,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1202,7 +1252,10 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
       children: [
         Expanded(child: widget.descriptionWidget),
         const SizedBox(width: 12),
-        _buildImage(width: 160),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: _buildImage(width: _inlineImageWidth),
+        ),
       ],
     );
   }
@@ -1211,7 +1264,13 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Align(alignment: AlignmentGeometry.center, child: _buildImage()),
+        Align(
+          alignment: AlignmentGeometry.center,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+            child: _buildImage(),
+          ),
+        ),
         const SizedBox(height: 12),
         widget.descriptionWidget,
       ],
@@ -1219,16 +1278,21 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
   }
 
   Widget _buildImage({double? width}) {
-    return Image.network(
-      widget.imageUrl,
+    return SizedBox(
       width: width,
-      fit: BoxFit.scaleDown,
-      errorBuilder: (context, error, stackTrace) {
-        return const Icon(Icons.broken_image);
-      },
+      height: width == null ? _maxImageHeight : null,
+      child: Image.network(
+        widget.imageUrl,
+        width: width,
+        height: width == null ? _maxImageHeight : null,
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.broken_image);
+        },
+      ),
     );
   }
-
 }
 
 
