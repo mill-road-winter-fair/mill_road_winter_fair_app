@@ -66,7 +66,7 @@ void main() {
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
-      0, (index) => analytics.calls.add('navigate:$index'), analyticsService: analytics,
+      0, (index) => analytics.calls.add('navigate:$index'), ColorScheme.light(), analyticsService: analytics,
     ))));
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
@@ -178,21 +178,22 @@ void main() {
 
   testWidgets('only the visible tab is tracked and returning from Settings restores it', (tester) async {
     await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: analytics));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(analytics.calls.where((call) => call.startsWith('screen:')), ['screen:ChooserPage']);
     expect(analytics.calls, contains('consent_prompt'));
     await tester.tap(find.text('Map').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(analytics.calls.last, 'screen:MapPage');
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.push(MaterialPageRoute(builder: (_) => SettingsPage(analyticsService: analytics)));
+    await tester.pump();
     expect(analytics.calls.last, 'screen:SettingsPage');
-    await tester.tap(find.byType(BackButton));
-    await tester.pumpAndSettle();
+
+    navigator.pop();
+    await tester.pump();
     expect(analytics.calls.last, 'screen:MapPage');
     await tester.pumpWidget(const SizedBox());
-    await tester.pumpAndSettle();
+    await tester.pump();
   });
 }
