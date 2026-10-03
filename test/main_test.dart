@@ -109,59 +109,6 @@ void main() {
       expect(find.text('Favourites'), findsOneWidget);
     });
 
-    testWidgets('About buttons in AppBar navigate to Important Info and About the Fair pages', (WidgetTester tester) async {
-      // Set firstExecution to false to simulate normal app launch
-      firstExecution = false;
-
-      // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
-      listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
-      ];
-
-      // Provide initial mock values for shared preferences
-      SharedPreferences.setMockInitialValues({});
-      await loadSettings();
-
-      // Pump MyApp which contains the AppBar with the About buttons
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
-      await tester.pump();
-
-      expect(find.widgetWithIcon(IconButton, Icons.warning), findsOneWidget);
-      expect(find.widgetWithIcon(IconButton, Icons.info), findsOneWidget);
-
-      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice (triggered in MapPage initState)
-      await tester.pump(const Duration(seconds: 21));
-    });
-
     testWidgets('drawer displays expected widgets', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
@@ -209,7 +156,7 @@ void main() {
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
       expect(find.text('Contact us'), findsOneWidget);
-      expect(find.byType(IconButton), findsExactly(7));
+      expect(find.byType(IconButton), findsExactly(5));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('App guide'), findsOneWidget);
       expect(find.text('Share this app'), findsOneWidget);
