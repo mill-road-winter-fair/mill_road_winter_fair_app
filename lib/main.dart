@@ -269,6 +269,7 @@ class HomePageState extends State<HomePage> with RouteAware {
     final pages = [
       ChooserPage(
           theEvents: listings,
+          isVisible: index == 0,
           onTabSelected: setCurrentIndex,
           onOpenTimetable: openTimetable,
           onOpenListings: openListings,

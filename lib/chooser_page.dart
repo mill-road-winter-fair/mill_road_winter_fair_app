@@ -20,6 +20,7 @@ class ChooserPage extends StatefulWidget {
     required this.onOpenMap,
     required this.onTabSelected,
     required this.analyticsService,
+    this.isVisible = true,
     super.key,
   });
 
@@ -28,6 +29,7 @@ class ChooserPage extends StatefulWidget {
   final Function(String, String?) onOpenListings;
   final Function(int?) onOpenMap;
   final ValueChanged<int> onTabSelected;
+  final bool isVisible;
 
   @override
   State<ChooserPage> createState() => _ChooserPageState();
@@ -91,6 +93,17 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     _secondPhaseProgress.dispose();
     _idleTimer?.cancel();
     super.dispose();
+  }
+
+
+  @override
+  void didUpdateWidget(covariant ChooserPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.isVisible && widget.isVisible && !staticChooserPage.value) {
+      _idleTimer?.cancel();
+      _chosenHotspotID = null;
+      _animationController?.repeat();
+    }
   }
 
 
