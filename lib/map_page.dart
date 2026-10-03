@@ -140,7 +140,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   @override
   void didUpdateWidget(covariant MapPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.nearestMarkerCount != null) focusMapOnNearestMarkers(widget.nearestMarkerCount!);
+    final nearestMarkerCount = widget.nearestMarkerCount;
+    if (nearestMarkerCount != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || widget.nearestMarkerCount != nearestMarkerCount) return;
+        focusMapOnNearestMarkers(nearestMarkerCount);
+      });
+    }
   }
 
   Future<void> _establishLocationAndRefreshMap() async {

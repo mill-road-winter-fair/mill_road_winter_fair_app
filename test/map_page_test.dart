@@ -181,6 +181,48 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('clears a nearby request after build when no markers are visible', (tester) async {
+      final previousLocation = currentLatLng;
+      addTearDown(() => currentLatLng = previousLocation);
+      locationPermission = LocationPermission.deniedForever;
+      currentLatLng = const LatLng(52.2, 0.14);
+      int? nearestMarkerCount;
+
+      await tester.pumpWidget(MaterialApp(
+        home: StatefulBuilder(
+          builder: (context, setState) => Scaffold(
+            body: Column(
+              children: [
+                TextButton(
+                  onPressed: () => setState(() => nearestMarkerCount = 10),
+                  child: const Text('Show nearby'),
+                ),
+                Expanded(
+                  child: MapPage(
+                    listings: listings,
+                    nearestMarkerCount: nearestMarkerCount,
+                    cancelMapNearest: () => setState(() => nearestMarkerCount = null),
+                    onTabSelected: (_) {},
+                    analyticsService: FakeAnalyticsService(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      tester.state<MapPageState>(find.byType(MapPage)).hideAllMarkers();
+      await tester.pump();
+
+      await tester.tap(find.text('Show nearby'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(nearestMarkerCount, isNull);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('does not enable the map location layer without permission', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
