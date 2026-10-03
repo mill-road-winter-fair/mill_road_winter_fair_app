@@ -28,13 +28,14 @@ void main() {
       expect(hotspotEntranceOpacityForIndex(0, 0.5, totalHotspots: 0), 1.0);
     });
 
-    test('hotspotLabelOpacityForPhase stays within the valid opacity range', () {
+    test('hotspotLabelOpacityForPhase stays between 30% and 100%', () {
       for (var index = 0; index < 5; index++) {
         for (var phase = 0.0; phase <= 1.0; phase += 0.1) {
           final opacity = hotspotLabelOpacityForPhase(index, phase, visibleCount: 3);
-          expect(opacity, inInclusiveRange(0.0, 1.0));
+          expect(opacity, inInclusiveRange(0.3, 1.0));
         }
       }
+      expect(hotspotLabelOpacityForPhase(0, 0.5, visibleCount: 3), 0.3);
     });
 
     test('hotspotLabelOpacityForPhase produces different values for different slots', () {

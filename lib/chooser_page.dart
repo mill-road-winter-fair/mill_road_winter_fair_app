@@ -789,7 +789,7 @@ double hotspotLabelOpacityForPhase(
   final slot = index % visibleCount;
   final normalized = (progress + (slot / visibleCount)) % 1.0;
   final wave = 0.5 + (0.5 * cos(2 * pi * normalized));
-  return wave.clamp(0.0, 1.0);
+  return 0.3 + (0.7 * wave.clamp(0.0, 1.0));
 
 }
 
