@@ -549,7 +549,7 @@ class _TimetablePageState extends State<TimetablePage> {
             false => Icons.music_off,
             true => Icons.music_note,
             null => Icons.filter_alt,
-          }, size: 26),
+          }, size: 26,),
         ),
         IconButton(
           key: searchIconKey,
