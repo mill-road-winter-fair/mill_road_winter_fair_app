@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:fluttertoast/fluttertoast.dart';
@@ -61,6 +63,7 @@ class FairScaffold extends StatelessWidget {
                   })
                 : Builder(
                     builder: (context) => IconButton(
+                      tooltip: 'Open navigation menu',
                       icon: const Icon(Icons.menu),
                       onPressed: () {
                         HapticFeedback.lightImpact();
@@ -221,6 +224,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on Facebook',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_facebook');
@@ -232,6 +236,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on X',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_x');
@@ -243,6 +248,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on Instagram',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_instagram');
@@ -254,6 +260,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on Flickr',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_flickr');
@@ -372,7 +379,10 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                 Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
                 Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
                 Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
-                Align(alignment: AlignmentGeometry.center, child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150)),
+                Align(
+                    alignment: AlignmentGeometry.center,
+                    child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png',
+                        width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   TextButton(
                     onPressed: () {
@@ -662,20 +672,25 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
 }
 
 Widget _buildEmailLink(String email, {required AnalyticsService analyticsService}) {
-  return InkWell(
-    onTap: () async {
-      HapticFeedback.lightImpact();
-      analyticsService.logButtonTapped('contact_email');
-      final Uri mailUri = Uri(scheme: 'mailto', path: email);
-      if (await canLaunchUrl(mailUri)) {
-        await launchUrl(mailUri);
-      } else {
-        throw Exception('Could not launch email client');
-      }
-    },
-    child: Text(
-      email,
-      style: const TextStyle(decoration: TextDecoration.underline),
+  return Semantics(
+    button: true,
+    label: 'Email $email',
+    excludeSemantics: true,
+    child: InkWell(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        analyticsService.logButtonTapped('contact_email');
+        final Uri mailUri = Uri(scheme: 'mailto', path: email);
+        if (await canLaunchUrl(mailUri)) {
+          await launchUrl(mailUri);
+        } else {
+          throw Exception('Could not launch email client');
+        }
+      },
+      child: Text(
+        email,
+        style: const TextStyle(decoration: TextDecoration.underline),
+      ),
     ),
   );
 }
@@ -716,14 +731,17 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
     builder: (ctx) => Positioned(
       left: desiredLeft,
       top: desiredTop,
-      child: GestureDetector(
-        // since field may be clipped
-        onTap: () {
-          HapticFeedback.lightImpact();
-          analyticsService.logButtonTapped('tooltip_dismiss');
-          removeMiniPopup();
-        },
-        child: ConstrainedBox(
+      child: Semantics(
+        button: true,
+        label: 'Dismiss message',
+        child: GestureDetector(
+          // since field may be clipped
+          onTap: () {
+            HapticFeedback.lightImpact();
+            analyticsService.logButtonTapped('tooltip_dismiss');
+            removeMiniPopup();
+          },
+          child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: overlayW, // wrapping boundary
           ),
@@ -736,6 +754,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
               boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
             ),
             child: Text(theMessage, softWrap: true, style: theStyle),
+          ),
           ),
         ),
       ),
@@ -878,10 +897,10 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
 
   if (preferredDistanceUnits == DistanceUnits.metric) {
     if (distanceMetres <= 999) {
-      distanceToDestination = '$distanceMetres m';
+      distanceToDestination = '${distanceMetres}m';
     } else {
       final distanceKilometresRounded = (distanceMetres / 1000).toStringAsFixed(2);
-      distanceToDestination = '$distanceKilometresRounded km';
+      distanceToDestination = '${distanceKilometresRounded}km';
     }
   } else if (preferredDistanceUnits == DistanceUnits.imperial) {
     if (distanceMetres <= 161) {
@@ -915,6 +934,7 @@ void shareListing(
   String theEndTimeString,
   BuildContext context, {
   bool cancelled = false,
+  bool brickAndMortar = false,
 }) async {
   debugPrint('shareEvent called with theEvent=$theTitle theLocation=$theLocation theStartTime=$theStartTimeString theEndTimeString=$theEndTimeString');
   final msgText = buildListingShareText(
@@ -923,6 +943,7 @@ void shareListing(
     theStartTimeString,
     theEndTimeString,
     cancelled: cancelled,
+    brickAndMortar: brickAndMortar,
   );
   final params = ShareParams(
     text: msgText,
@@ -952,6 +973,7 @@ String buildListingShareText(
   String theEndTimeString, {
   required bool cancelled,
   DateTime? currentTime,
+  bool brickAndMortar = false,
 }) {
   if (cancelled) {
     return '$theTitle at $theLocation has been cancelled and will not be appearing at $fairName.\nhttps://www.millroadwinterfair.org/';
@@ -977,7 +999,7 @@ String buildListingShareText(
     msgText += 'Tomorrow ';
   }
 
-  if (isItAnEvent && whenEventStart.abs() < 6) {
+  if (!brickAndMortar && isItAnEvent && whenEventStart.abs() < 6) {
     msgText += '${msgText == '' ? 'At' : 'at'} ${formatTime(startTime)} ';
   }
 
@@ -1020,4 +1042,266 @@ String formatFullDate(DateTime date) {
   final day = date.day;
   final suffix = day >= 11 && day <= 13 ? 'th' : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][day % 10];
   return '$dayName $monthName $day$suffix';
+}
+
+
+// Function to determine if the event has ended based on endTime string
+bool hasEventEnded(String endTime) {
+  try {
+    final parts = endTime.split(':');
+    final endHour = int.parse(parts[0]);
+    final endMinute = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+    final endDateTime = DateTime(
+      fairDate.year,
+      fairDate.month,
+      fairDate.day,
+      endHour,
+      endMinute,
+    );
+
+    return DateTime.now().isAfter(endDateTime);
+  } catch (_) {
+    return false; // default to not ended if parsing fails
+  }
+}
+
+
+// Function to determine if the event is today
+bool isItEventDay() {
+  return DateUtils.isSameDay(fairDate, DateTime.now());
+}
+
+
+class AdaptiveImageText extends StatefulWidget {
+  const AdaptiveImageText({
+    super.key,
+    required this.imageUrl,
+    required this.descriptionWidget,
+  });
+
+  final String imageUrl;
+  final Widget descriptionWidget;
+
+  @override
+  State<AdaptiveImageText> createState() => _AdaptiveImageTextState();
+}
+
+class _AdaptiveImageTextState extends State<AdaptiveImageText> {
+  static const double _inlineImageWidth = 160;
+  static const double _maxImageHeight = 180;
+  static const double _loadingImageHeight = 120;
+
+  Future<ui.Image>? _imageFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageFuture = _resolveImage(NetworkImage(widget.imageUrl));
+  }
+
+  @override
+  void didUpdateWidget(covariant AdaptiveImageText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.imageUrl != widget.imageUrl) {
+      _imageFuture = _resolveImage(NetworkImage(widget.imageUrl));
+    }
+  }
+
+  Future<ui.Image> _resolveImage(ImageProvider provider) {
+    final completer = Completer<ui.Image>();
+    final stream = provider.resolve(ImageConfiguration.empty);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (ImageInfo info, bool synchronousCall) {
+        if (!completer.isCompleted) completer.complete(info.image);
+        stream.removeListener(listener);
+      },
+      onError: (Object error, StackTrace? stackTrace) {
+        if (!completer.isCompleted) completer.completeError(error, stackTrace ?? StackTrace.current);
+        stream.removeListener(listener);
+      },
+    );
+    stream.addListener(listener);
+    return completer.future;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ui.Image>(
+      future: _imageFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return _buildFallbackLayout(showErrorText: true);
+        if (!snapshot.hasData) return _buildLoadingLayout();
+        final image = snapshot.data!;
+        final imageIsLandscape = image.width > image.height;
+        return imageIsLandscape ? _buildVerticalLayout() : _buildHorizontalLayout();
+      },
+    );
+  }
+
+  Widget _buildFallbackLayout({bool showErrorText = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: widget.descriptionWidget),
+        const SizedBox(width: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: SizedBox(
+            width: _inlineImageWidth,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.broken_image, size: 32),
+                if (showErrorText) const SizedBox(height: 4),
+                if (showErrorText) const Text('Could not load image', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadingLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: widget.descriptionWidget),
+        const SizedBox(width: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: SizedBox(
+            width: _inlineImageWidth,
+            height: _loadingImageHeight,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHorizontalLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: widget.descriptionWidget),
+        const SizedBox(width: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: _buildImage(width: _inlineImageWidth),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVerticalLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: AlignmentGeometry.center,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+            child: _buildImage(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        widget.descriptionWidget,
+      ],
+    );
+  }
+
+  Widget _buildImage({double? width}) {
+    return SizedBox(
+      width: width,
+      height: width == null ? _maxImageHeight : null,
+      child: Image.network(
+        widget.imageUrl,
+        width: width,
+        height: width == null ? _maxImageHeight : null,
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.broken_image);
+        },
+      ),
+    );
+  }
+}
+
+
+Future<void> ensureWidgetFullyVisible(GlobalKey key) async {
+  final context = key.currentContext;
+  if (context == null) return;
+  if (isWidgetFullyVisible(context)) return;
+  // First attempt with ensureVisible
+  Scrollable.ensureVisible(
+    context,
+    alignment: 1.0,
+    duration: const Duration(milliseconds: 150),
+    curve: Curves.easeInOut,
+  );
+  // Let that animation finish
+  await Future.delayed(const Duration(milliseconds: 160));
+  if (!context.mounted) return;
+  if (isWidgetFullyVisible(context)) return;
+  // Still not fully visible -> manually adjust scroll offset
+  final renderObject = context.findRenderObject();
+  if (renderObject == null || renderObject is! RenderBox) return;
+  final box = renderObject;
+  final viewport = RenderAbstractViewport.maybeOf(box);
+  if (viewport == null) return;
+  final scrollable = Scrollable.of(context);
+  final position = scrollable.position;
+  // Global offset of the box relative to the viewport
+  final offsetInViewport = box.localToGlobal(Offset.zero, ancestor: viewport);
+  final top = offsetInViewport.dy;
+  final bottom = top + box.size.height;
+  final viewportHeight = viewport.paintBounds.size.height;
+  double targetScrollOffset = position.pixels;
+  if (top < 0) {
+    // Top is above viewport -> scroll up so top aligns with 0
+    targetScrollOffset = position.pixels + top; // top is negative
+  } else if (bottom > viewportHeight) {
+    // Bottom is below viewport -> scroll down so bottom aligns with viewportHeight
+    targetScrollOffset = position.pixels + (bottom - viewportHeight);
+  } else {
+    // Already fully inside vertically; nothing to do
+    return;
+  }
+  // Clamp to valid scroll range
+  targetScrollOffset = targetScrollOffset.clamp(
+    position.minScrollExtent,
+    position.maxScrollExtent,
+  );
+  if (targetScrollOffset == position.pixels) return;
+  await position.animateTo(
+    targetScrollOffset,
+    duration: const Duration(milliseconds: 200),
+    curve: Curves.easeInOut,
+  );
+}
+
+bool isWidgetFullyVisible(BuildContext context) {
+  final renderObject = context.findRenderObject();
+  if (renderObject == null || renderObject is! RenderBox) return false;
+  final box = renderObject;
+  final viewport = RenderAbstractViewport.maybeOf(box);
+  if (viewport == null) return false;
+  final offset = box.localToGlobal(Offset.zero, ancestor: viewport);
+  final size = box.size;
+  final viewportSize = viewport.paintBounds.size;
+  return offset.dy >= 0 &&
+      offset.dy + size.height <= viewportSize.height &&
+      offset.dx >= 0 &&
+      offset.dx + size.width <= viewportSize.width;
 }

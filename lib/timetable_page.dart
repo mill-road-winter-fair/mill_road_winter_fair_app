@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetablePage extends StatefulWidget {
@@ -42,7 +44,8 @@ class _TimetablePageState extends State<TimetablePage> {
   Timer? _searchAnalyticsTimer;
   final nowLineKey = GlobalKey();
   late double _dayPixelsPerMinute; // scale for the current day view, whatever its orientation
-  late double pixelsPerMinuteL, pixelsPerMinuteP; // orientation-specific scales
+  double pixelsPerMinuteP = 0.0; // orientation-specific scales
+  double pixelsPerMinuteL = 0.0; // orientation-specific scales
   Orientation? _deviceOrientationSaved; // to track if this has changed
   bool scaling = false; // tracks whether user is re-scaling the view
   bool? _onlyNowOrSoonSaved; // to track if this has changed
@@ -115,6 +118,7 @@ class _TimetablePageState extends State<TimetablePage> {
   void loadScales() async {
     debugPrint('_TimetablePageState loadScales called');
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     pixelsPerMinuteL = prefs.getDouble('pixelsPerMinuteL') ?? 0;
     pixelsPerMinuteP = prefs.getDouble('pixelsPerMinuteP') ?? 0;
     setState(() => loading = false); // this should be the last instruction of the last part of async initialisations
@@ -179,7 +183,7 @@ class _TimetablePageState extends State<TimetablePage> {
           brickAndMortar: ((ev['brickAndMortar'] ?? '') == 'TRUE'),
           email: ev['email'] ?? '',
           website: ev['website'] ?? '',
-          phoneNumber: ev['phoneNumber'] ?? '',
+          phoneNumber: ev['phone'] ?? '',
           isMusic: ((ev['performanceMusic'] ?? '') == 'TRUE'),
           lane: 0, // will be computed later
           top: 0, // will be computed later
@@ -307,7 +311,7 @@ class _TimetablePageState extends State<TimetablePage> {
         return min + steps * step;
       }
 
-      final bool includeDate = (pe.height >= 42 && pe.width >= 80);
+      final bool includeDate = !pe.brickAndMortar && (pe.height >= 42 && pe.width >= 80);
 
       final rawMaxTitleFontSize = min(
         pe.height * 0.3,
@@ -330,13 +334,14 @@ class _TimetablePageState extends State<TimetablePage> {
             Flexible(
               fit: FlexFit.loose,
               child: AutoSizeText('${pe.name}\u{00AD}',
-                  style: TextStyle(height: 0.95, fontSize: maxTitleFontSize, fontWeight: FontWeight.bold),
-                  maxLines: maxLines,
-                  minFontSize: minTitleFontSize,
-                  maxFontSize: maxTitleFontSize,
-                  stepGranularity: step,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis),
+                style: TextStyle(height: 0.95, fontSize: maxTitleFontSize, fontWeight: FontWeight.bold),
+                maxLines: maxLines,
+                minFontSize: minTitleFontSize,
+                maxFontSize: maxTitleFontSize,
+                stepGranularity: step,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis
+              ),
             ),
             if (includeDate) SizedBox(height: (pe.height * 0.05).clamp(2, pe.height * 0.25)),
             if (includeDate)
@@ -432,21 +437,60 @@ class _TimetablePageState extends State<TimetablePage> {
     debugPrint('_TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
   }
 
+  Future<void> refreshListings() async {
+    debugPrint('_TimetablePageState refreshListings called');
+    setState(() {
+      loading = true;
+    });
+    try {
+      listings = await fetchListings(http.Client());
+      thePreparedEvents = prepareEvents(listings);
+      loadScales();
+    } finally {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (!scaling) {
-      debugPrint(
-          '_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
-    }
-    if (loading) {
+    if (!scaling) debugPrint('_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
+    if (listings.isEmpty) {
       return FairScaffold(
         appBarTitle: 'Timetable',
         currentTab: 2,
         onTabSelected: widget.onTabSelected,
-        body: const Center(child: CircularProgressIndicator()),
+        allowBack: false,
         analyticsService: widget.analyticsService,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Unable to retrieve listings",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              loading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton.icon(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                        refreshListings();
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Refresh listings'),
+                    ),
+            ],
+          ),
+        ),
       );
     }
+
+    if (thePreparedEvents.isEmpty) thePreparedEvents = prepareEvents(widget.theEvents); // if another page did a refresh
 
     if (widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
       // refilter to whole day or just now or soon; only do this if changed
@@ -485,26 +529,20 @@ class _TimetablePageState extends State<TimetablePage> {
     final subcategoryIconKey = GlobalKey();
     final searchIconKey = GlobalKey();
 
+    String appBarTitle = switch(widget.filteredMusicOrNot) {
+      true => 'Timetable (music)',
+      false => 'Timetable (non-music)',
+      _ => 'Timetable'
+    };
+
     return FairScaffold(
-      appBarTitle: "Timetable",
+      appBarTitle: appBarTitle,
       currentTab: 2,
       onTabSelected: widget.onTabSelected,
       appBarActions: [
         IconButton(
-          key: subcategoryIconKey,
-          color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything',
-              analyticsService: widget.analyticsService),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('timetable_category_filter');
-            _toggleFilteredMusicOrNot();
-            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
-          },
-          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
-        ),
-        IconButton(
           key: nowOrSoonIconKey,
+          tooltip: widget.onlyNowOrSoon ? 'Show the full timetable' : 'Show what is on now or starting soon',
           onLongPress: () => showMiniPopup(
               context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon',
               analyticsService: widget.analyticsService),
@@ -522,7 +560,19 @@ class _TimetablePageState extends State<TimetablePage> {
           ),
         ),
         IconButton(
+          key: subcategoryIconKey,
+          color: appBarTheme.foregroundColor,
+          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything', analyticsService: widget.analyticsService),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            _toggleFilteredMusicOrNot();
+            theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery);
+          },
+          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
+        ),
+        IconButton(
           key: searchIconKey,
+          tooltip: _isSearching ? 'Close timetable search' : 'Search the timetable',
           color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
           onLongPress: () => showMiniPopup(
               context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
@@ -618,6 +668,11 @@ class _TimetablePageState extends State<TimetablePage> {
 
               final nowTop = max(0.0, (now.difference(timelineMinStart).inMinutes) * _dayPixelsPerMinute) - 1.5;
               final timelineHeight = max(constraints.maxHeight - 40, spanMinutes * _dayPixelsPerMinute + 4);
+              final hintTextSnippet = switch (widget.filteredMusicOrNot) {
+                null => 'all',
+                true => 'music',
+                false => 'non-music'
+              };
               final theContent = Column(children: [
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
@@ -634,11 +689,12 @@ class _TimetablePageState extends State<TimetablePage> {
                                 autoFocus: true,
                                 controller: _searchController,
                                 elevation: const WidgetStatePropertyAll(0),
-                                hintText: 'Search all events...',
+                                hintText: 'Search $hintTextSnippet events...',
                                 leading: const Icon(Icons.search),
                                 trailing: [
                                   IconButton(
                                     iconSize: 20,
+                                    tooltip: _searchQuery.isEmpty ? 'Close search' : 'Clear search',
                                     icon: const Icon(Icons.close),
                                     onPressed: () {
                                       HapticFeedback.lightImpact();
@@ -699,13 +755,17 @@ class _TimetablePageState extends State<TimetablePage> {
                                       Container(width: leftColumnWidth - 2),
                                       for (final location in positioned.entries)
                                         Builder(builder: (itemContext) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('timetable_location');
-                                              showMiniPopup(itemContext, null, location.key, analyticsService: widget.analyticsService);
-                                            },
-                                            child: Container(
+                                          return Semantics(
+                                            button: true,
+                                            label: '${location.key}. Show full location name',
+                                            excludeSemantics: true,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                HapticFeedback.lightImpact();
+                                                widget.analyticsService.logButtonTapped('timetable_location');
+                                                showMiniPopup(itemContext, null, location.key, analyticsService: widget.analyticsService);
+                                              },
+                                              child: Container(
                                               decoration: BoxDecoration(
                                                 color: colorScheme.onSurfaceVariant,
                                                 border: Border.all(width: 0.1),
@@ -723,6 +783,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                 minFontSize: 11,
                                                 maxFontSize: 15,
                                                 overflow: TextOverflow.ellipsis,
+                                              ),
                                               ),
                                             ),
                                           );
@@ -822,20 +883,24 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                       width: pe.width,
                                                                       height: pe.height,
                                                                       child: Container(
-                                                                          decoration: BoxDecoration(
-                                                                        color: colorScheme.secondary,
-                                                                        borderRadius: BorderRadius.circular(4),
-                                                                        boxShadow: [
-                                                                          BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)
-                                                                        ],
-                                                                        border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
-                                                                      )))
+                                                                        decoration: BoxDecoration(
+                                                                          color: colorScheme.secondary,
+                                                                          borderRadius: BorderRadius.circular(4),
+                                                                          boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)],
+                                                                          border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
+                                                                        ),
+                                                                      ))
                                                                   : Positioned(
                                                                       top: pe.top,
                                                                       left: pe.left,
                                                                       width: pe.width,
                                                                       height: pe.height,
-                                                                      child: GestureDetector(
+                                                                      child: Semantics(
+                                                                        button: true,
+                                                                        label:
+                                                                            '${pe.name}, ${pe.location}, ${pe.cancelled ? 'cancelled, ' : ''}${TimeOfDay.fromDateTime(pe.startTime).format(context)} to ${TimeOfDay.fromDateTime(pe.endTime).format(context)}. Show details',
+                                                                        excludeSemantics: true,
+                                                                        child: GestureDetector(
                                                                         onTap: () {
                                                                           HapticFeedback.lightImpact();
                                                                           widget.analyticsService.logButtonTapped('timetable_listing');
@@ -846,15 +911,17 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                             setState,
                                                                             () async {
                                                                               await Navigator.push(
-                                                                                  context,
-                                                                                  MaterialPageRoute(
-                                                                                      builder: (context) => MapPage(
-                                                                                            listings: listings,
-                                                                                            onTabSelected: (_) => {},
-                                                                                            destinationId: pe.id,
-                                                                                            destinationLatLng: pe.latLng,
-                                                                                            analyticsService: widget.analyticsService,
-                                                                                          )));
+                                                                                context,
+                                                                                MaterialPageRoute(
+                                                                                  builder: (context) => MapPage(
+                                                                                    listings: listings,
+                                                                                    onTabSelected: (_) => {},
+                                                                                    destinationId: pe.id,
+                                                                                    destinationLatLng: pe.latLng,
+                                                                                    analyticsService: widget.analyticsService,
+                                                                                  )
+                                                                                )
+                                                                              );
                                                                               if (mounted) widget.analyticsService.setCurrentScreen('TimetablePage');
                                                                             },
                                                                             analyticsService: widget.analyticsService,
@@ -863,26 +930,21 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                         child: Container(
                                                                           padding: EdgeInsets.symmetric(vertical: 0, horizontal: 1),
                                                                           decoration: BoxDecoration(
-                                                                            color: (favouriteListingKeys.value.contains(pe.id))
-                                                                                ? colorScheme.primary.withAlpha(40)
-                                                                                : colorScheme.onPrimary,
+                                                                            color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                                                             borderRadius: BorderRadius.circular(4),
-                                                                            boxShadow: [
-                                                                              BoxShadow(
-                                                                                  color: colorScheme.surfaceContainerLow, offset: Offset(2, 2), blurRadius: 3)
-                                                                            ],
+                                                                            boxShadow: [BoxShadow(color: colorScheme.surfaceDim, offset: Offset(2, 2), blurRadius: 3)],
                                                                             border: Border.all(width: 0.2, color: colorScheme.onSecondary),
                                                                           ),
                                                                           child: eventRect(pe, colorScheme, isLandscape, null),
                                                                         ),
+                                                                        ),
                                                                       ),
                                                                     ),
-                                                              if (!scaling && favouriteListingKeys.value.contains(pe.id))
-                                                                Positioned(
-                                                                  top: pe.top + 2,
-                                                                  left: pe.left + pe.width - 18,
-                                                                  child: Icon(Icons.favorite, size: 16, color: Colors.red.withAlpha(120)),
-                                                                ),
+                                                              if (!scaling && favouriteListingKeys.value.contains(pe.id)) Positioned(
+                                                                top: pe.top + 2,
+                                                                left: pe.left + pe.width - 18,
+                                                                child: Icon(Icons.favorite, size: 16, color: colorScheme.primary.withAlpha(140)),
+                                                              ),
                                                             ],
                                                           ],
                                                         ),
