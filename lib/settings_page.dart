@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> loadSettings() async {
@@ -86,14 +87,11 @@ Future<void> loadSettings() async {
 
     mapStyle = standardMap;
     favouriteListingKeys.value = {};
-
   }
 }
 
 class SettingsPage extends StatefulWidget {
-  final AnalyticsService analyticsService;
-
-  const SettingsPage({super.key, required this.analyticsService});
+  const SettingsPage({super.key});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -128,12 +126,12 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
 
   @override
   void didPush() {
-    widget.analyticsService.setCurrentScreen('SettingsPage');
+    context.read<AnalyticsService>().setCurrentScreen('SettingsPage');
   }
 
   @override
   void didPopNext() {
-    widget.analyticsService.setCurrentScreen('SettingsPage');
+    context.read<AnalyticsService>().setCurrentScreen('SettingsPage');
   }
 
 // Save settings to shared preferences
@@ -183,11 +181,13 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.read<AnalyticsService>().logButtonTapped('back');
+                  Navigator.maybePop(context);
+                })
+              : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Settings'),
@@ -232,9 +232,9 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           }).toList(),
                           onSelected: (value) {
                             HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('theme_preference_option');
+                            context.read<AnalyticsService>().logButtonTapped('theme_preference_option');
                             if (value == null) return;
-                            widget.analyticsService.logThemePreferenceSet(value);
+                            context.read<AnalyticsService>().logThemePreferenceSet(value);
                             selectedThemeKey = value;
                             setState(() {
                               _changeTheme(value);
@@ -272,8 +272,8 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           onSelected: (DistanceUnits? value) {
                             if (value == null) return;
                             HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
-                            widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
+                            context.read<AnalyticsService>().logButtonTapped('distanceUnit_preference_option');
+                            context.read<AnalyticsService>().logDistanceUnitPreferenceSet(value.name);
                             setState(() {
                               preferredDistanceUnits = value;
                             });
@@ -299,11 +299,11 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                            context.read<AnalyticsService>().logButtonTapped('analytics_explanation_settings');
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
+                                builder: (context) => AnalyticsExplanationPage(),
                               ),
                             );
                           },
@@ -313,8 +313,8 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     value: usageAnalyticsEnabled ?? false,
                     onChanged: (bool value) async {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('analytics_preference_toggle');
-                      await widget.analyticsService.setAnalyticsEnabled(value);
+                      context.read<AnalyticsService>().logButtonTapped('analytics_preference_toggle');
+                      await context.read<AnalyticsService>().setAnalyticsEnabled(value);
                       if (mounted) setState(() {});
                     },
                   ),

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:provider/provider.dart';
+
+import 'fakes/fake_analytics_service.dart';
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -63,7 +66,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
       await settle(tester);
 
       // Obtain the HomePage state

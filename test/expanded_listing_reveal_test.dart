@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+
+import 'fakes/fake_analytics_service.dart';
 
 void main() {
   testWidgets(
@@ -35,14 +38,13 @@ void main() {
         'endTime': '23:59',
       }
     ];
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(
         home: FilteredListingsPage(
       filterCategory: 'all',
       listings: listings,
       onTabSelected: (_) {},
       onSubfilterChange: (_) {},
-      analyticsService: FakeAnalyticsService(),
-    )));
+    ))));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.info));
     await tester.pumpAndSettle();

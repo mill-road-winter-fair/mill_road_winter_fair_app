@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'fakes/fake_analytics_service.dart';
 
 class RecordingNoticeAnalyticsService extends FakeAnalyticsService {
   final notices = <String>[];
@@ -52,11 +55,10 @@ void main() {
       onTest = false;
       listingUpdateNoticeEnabled = true;
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
-
       final analytics = RecordingNoticeAnalyticsService();
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: analytics, child: const MaterialApp(home: Scaffold(body: SizedBox()))));
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
-        tester.element(find.byType(SizedBox)), analyticsService: analytics,
+        tester.element(find.byType(SizedBox)),
       );
       await tester.pumpAndSettle();
 
@@ -81,10 +83,9 @@ void main() {
       listingUpdateNoticeEnabled = true;
       final analytics = RecordingNoticeAnalyticsService();
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: analytics, child: const MaterialApp(home: Scaffold(body: SizedBox()))));
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
-        analyticsService: analytics,
       );
       await tester.pumpAndSettle();
 
@@ -111,7 +112,7 @@ void main() {
         onTest = false;
         listingUpdateNoticeEnabled = false;
 
-        await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+        await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: Scaffold(body: SizedBox()))));
         final context = tester.element(find.byType(SizedBox));
 
         for (final (noticeDate, expectedTitle) in [
@@ -120,7 +121,7 @@ void main() {
         ]) {
           final showNotice = ListingUpdateNotifier.maybeShowNotice(
             context,
-            now: noticeDate, analyticsService: FakeAnalyticsService(),
+            now: noticeDate,
           );
           await tester.pumpAndSettle();
 
@@ -145,11 +146,11 @@ void main() {
       onTest = false;
       listingUpdateNoticeEnabled = true;
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: Scaffold(body: SizedBox()))));
 
       await ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
-        now: noticeDate, analyticsService: FakeAnalyticsService(),
+        now: noticeDate,
       );
       await tester.pumpAndSettle();
 
@@ -165,13 +166,13 @@ void main() {
       onTest = false;
       listingUpdateNoticeEnabled = true;
 
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
-      final context = tester.element(find.byType(SizedBox));
       final analytics = RecordingNoticeAnalyticsService();
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: analytics, child: const MaterialApp(home: Scaffold(body: SizedBox()))));
+      final context = tester.element(find.byType(SizedBox));
 
       final showFairDayNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        now: fairDate, analyticsService: analytics,
+        now: fairDate,
       );
       await tester.pumpAndSettle();
 
@@ -183,7 +184,7 @@ void main() {
       final afterFair = fairDate.add(const Duration(days: 1));
       final showAfterFairNotice = ListingUpdateNotifier.maybeShowNotice(
         context,
-        now: afterFair, analyticsService: analytics,
+        now: afterFair,
       );
       await tester.pumpAndSettle();
 

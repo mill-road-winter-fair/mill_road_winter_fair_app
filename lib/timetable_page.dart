@@ -6,12 +6,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetablePage extends StatefulWidget {
@@ -21,7 +22,6 @@ class TimetablePage extends StatefulWidget {
   final String? listingToShow;
   final bool onlyNowOrSoon;
   final bool? filteredMusicOrNot;
-  final AnalyticsService analyticsService;
   const TimetablePage({
     required this.theEvents,
     required this.onTabSelected,
@@ -29,7 +29,6 @@ class TimetablePage extends StatefulWidget {
     this.listingToShow,
     required this.onlyNowOrSoon,
     this.filteredMusicOrNot,
-    required this.analyticsService,
     super.key,
   });
   @override
@@ -88,7 +87,7 @@ class _TimetablePageState extends State<TimetablePage> {
     final trimmedSearchTerm = searchTerm.trim();
     if (trimmedSearchTerm.isEmpty) return;
     _searchAnalyticsTimer = Timer(const Duration(milliseconds: 750), () {
-      widget.analyticsService.logSearch(trimmedSearchTerm, searchArea: 'timetable');
+      context.read<AnalyticsService>().logSearch(trimmedSearchTerm, searchArea: 'timetable');
     });
   }
 
@@ -393,7 +392,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
   void _toggleOnlyNowOrSoon() {
     final newonlyNowOrSoon = !widget.onlyNowOrSoon;
-    widget.analyticsService.logPreferenceSet('timetable_now_or_soon', newonlyNowOrSoon.toString());
+    context.read<AnalyticsService>().logPreferenceSet('timetable_now_or_soon', newonlyNowOrSoon.toString());
     widget.onFilterChange.call(newonlyNowOrSoon, widget.filteredMusicOrNot);
     if (mounted) setState(() {});
     Fluttertoast.showToast(
@@ -417,7 +416,7 @@ class _TimetablePageState extends State<TimetablePage> {
       false => ('Showing all performances', null)
     };
     if (mounted) setState(() {});
-    widget.analyticsService.logPreferenceSet(
+    context.read<AnalyticsService>().logPreferenceSet(
         'timetable_category',
         newFilteredMusicOrNot == null
             ? 'all'
@@ -462,7 +461,6 @@ class _TimetablePageState extends State<TimetablePage> {
         currentTab: 2,
         onTabSelected: widget.onTabSelected,
         allowBack: false,
-        analyticsService: widget.analyticsService,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -478,7 +476,7 @@ class _TimetablePageState extends State<TimetablePage> {
                   : ElevatedButton.icon(
                       onPressed: () {
                         HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                        context.read<AnalyticsService>().logButtonTapped('refresh_listings_from_error');
                         refreshListings();
                       },
                       icon: const Icon(Icons.refresh),
@@ -544,15 +542,13 @@ class _TimetablePageState extends State<TimetablePage> {
           key: nowOrSoonIconKey,
           tooltip: widget.onlyNowOrSoon ? 'Show the full timetable' : 'Show what is on now or starting soon',
           onLongPress: () => showMiniPopup(
-              context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon',
-              analyticsService: widget.analyticsService),
+              context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon',),
           onPressed: () {
             HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('timetable_now_or_soon_toggle');
+            context.read<AnalyticsService>().logButtonTapped('timetable_now_or_soon_toggle');
             (isItEventDay())
                 ? _toggleOnlyNowOrSoon()
-                : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway',
-                    fgColour: colorScheme.error, analyticsService: widget.analyticsService);
+                : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway', fgColour: colorScheme.error);
           },
           icon: Icon(
             (widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule,
@@ -562,7 +558,7 @@ class _TimetablePageState extends State<TimetablePage> {
         IconButton(
           key: subcategoryIconKey,
           color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything', analyticsService: widget.analyticsService),
+          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything'),
           onPressed: () {
             HapticFeedback.lightImpact();
             _toggleFilteredMusicOrNot();
@@ -574,12 +570,11 @@ class _TimetablePageState extends State<TimetablePage> {
           key: searchIconKey,
           tooltip: _isSearching ? 'Close timetable search' : 'Search the timetable',
           color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
-          onLongPress: () => showMiniPopup(
-              context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
-              analyticsService: widget.analyticsService),
+          onLongPress: () =>
+              showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
           onPressed: () {
             HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('timetable_search_toggle');
+            context.read<AnalyticsService>().logButtonTapped('timetable_search_toggle');
             setState(() {
               _isSearching = !_isSearching;
               if (!_isSearching) {
@@ -698,7 +693,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                     icon: const Icon(Icons.close),
                                     onPressed: () {
                                       HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('timetable_search_close');
+                                      context.read<AnalyticsService>().logButtonTapped('timetable_search_close');
                                       _searchAnalyticsTimer?.cancel();
                                       setState(() {
                                         if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
@@ -762,8 +757,8 @@ class _TimetablePageState extends State<TimetablePage> {
                                             child: GestureDetector(
                                               onTap: () {
                                                 HapticFeedback.lightImpact();
-                                                widget.analyticsService.logButtonTapped('timetable_location');
-                                                showMiniPopup(itemContext, null, location.key, analyticsService: widget.analyticsService);
+                                                context.read<AnalyticsService>().logButtonTapped('timetable_location');
+                                                showMiniPopup(itemContext, null, location.key);
                                               },
                                               child: Container(
                                               decoration: BoxDecoration(
@@ -820,14 +815,18 @@ class _TimetablePageState extends State<TimetablePage> {
                                           if (MediaQuery.orientationOf(context) == Orientation.landscape) {
                                             if (_dayPixelsPerMinute != pixelsPerMinuteL) {
                                               // only saved if genuinely changed
-                                              widget.analyticsService.logPreferenceSet('timetable_scale_landscape', _dayPixelsPerMinute.toStringAsFixed(2));
+                                              context
+                                                  .read<AnalyticsService>()
+                                                  .logPreferenceSet('timetable_scale_landscape', _dayPixelsPerMinute.toStringAsFixed(2));
                                               pixelsPerMinuteL = _dayPixelsPerMinute;
                                               saveScales();
                                             }
                                           } else {
                                             if (_dayPixelsPerMinute != pixelsPerMinuteP) {
                                               // only saved if genuinely changed
-                                              widget.analyticsService.logPreferenceSet('timetable_scale_portrait', _dayPixelsPerMinute.toStringAsFixed(2));
+                                              context
+                                                  .read<AnalyticsService>()
+                                                  .logPreferenceSet('timetable_scale_portrait', _dayPixelsPerMinute.toStringAsFixed(2));
                                               pixelsPerMinuteP = _dayPixelsPerMinute;
                                               saveScales();
                                             }
@@ -903,7 +902,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                         child: GestureDetector(
                                                                         onTap: () {
                                                                           HapticFeedback.lightImpact();
-                                                                          widget.analyticsService.logButtonTapped('timetable_listing');
+                                                                          context.read<AnalyticsService>().logButtonTapped('timetable_listing');
                                                                           showListingDetailsDialog(
                                                                             context,
                                                                             pe,
@@ -918,13 +917,11 @@ class _TimetablePageState extends State<TimetablePage> {
                                                                                     onTabSelected: (_) => {},
                                                                                     destinationId: pe.id,
                                                                                     destinationLatLng: pe.latLng,
-                                                                                    analyticsService: widget.analyticsService,
                                                                                   )
                                                                                 )
                                                                               );
-                                                                              if (mounted) widget.analyticsService.setCurrentScreen('TimetablePage');
+                                                                              if (context.mounted) context.read<AnalyticsService>().setCurrentScreen('TimetablePage');
                                                                             },
-                                                                            analyticsService: widget.analyticsService,
                                                                           );
                                                                         },
                                                                         child: Container(
@@ -968,7 +965,6 @@ class _TimetablePageState extends State<TimetablePage> {
               return theContent;
             });
           }),
-      analyticsService: widget.analyticsService,
     );
   }
 }
