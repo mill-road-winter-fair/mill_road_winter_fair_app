@@ -55,27 +55,25 @@ class FairScaffold extends StatelessWidget {
         appBar: AppBar(
           titleSpacing: 0,
           leadingWidth: 44,
-          leading:
-              (allowBack ?? false)
-                  ? BackButton(
+          leading: (allowBack ?? false)
+              ? BackButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    analyticsService.logButtonTapped('back');
+                    Navigator.maybePop(context);
+                  },
+                )
+              : Builder(
+                  builder: (context) => IconButton(
+                    tooltip: 'Open navigation menu',
+                    icon: const Icon(Icons.menu),
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      analyticsService.logButtonTapped('back');
-                      Navigator.maybePop(context);
+                      analyticsService.logButtonTapped('drawer_open');
+                      Scaffold.of(context).openDrawer();
                     },
-                  )
-                  : Builder(
-                    builder:
-                        (context) => IconButton(
-                          tooltip: 'Open navigation menu',
-                          icon: const Icon(Icons.menu),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            analyticsService.logButtonTapped('drawer_open');
-                            Scaffold.of(context).openDrawer();
-                          },
-                        ),
                   ),
+                ),
           title: FittedBox(fit: BoxFit.scaleDown, child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
           centerTitle: false,
           actions: appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
@@ -605,18 +603,17 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                             TextSpan(
                               text: '07303\u{00A0}142689',
                               style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-                              recognizer:
-                                  TapGestureRecognizer()
-                                    ..onTap = () async {
-                                      HapticFeedback.lightImpact();
-                                      analyticsService.logButtonTapped('contact_phone');
-                                      final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                      if (await canLaunchUrl(phoneUri)) {
-                                        await launchUrl(phoneUri);
-                                      } else {
-                                        throw Exception('Could not dial 07303 142689');
-                                      }
-                                    },
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  HapticFeedback.lightImpact();
+                                  analyticsService.logButtonTapped('contact_phone');
+                                  final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                  if (await canLaunchUrl(phoneUri)) {
+                                    await launchUrl(phoneUri);
+                                  } else {
+                                    throw Exception('Could not dial 07303 142689');
+                                  }
+                                },
                             ),
                             const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
                           ],
@@ -699,34 +696,33 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
   if (desiredLeft < 4) desiredLeft = 4;
   if (desiredLeft + overlayW > screenWidth - 4) desiredLeft = screenWidth - overlayW - 4;
   _miniPopupOverlayEntry = OverlayEntry(
-    builder:
-        (ctx) => Positioned(
-          left: desiredLeft,
-          top: desiredTop,
-          child: Semantics(
-            button: true,
-            label: 'Dismiss message',
-            child: GestureDetector(
-              // since field may be clipped
-              onTap: () {
-                HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('tooltip_dismiss');
-                removeMiniPopup();
-              },
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: overlayW, // wrapping boundary
-                ),
-                child: Container(
-                  alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(color: bgColour, borderRadius: BorderRadius.circular(4), boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))]),
-                  child: Text(theMessage, softWrap: true, style: theStyle),
-                ),
-              ),
+    builder: (ctx) => Positioned(
+      left: desiredLeft,
+      top: desiredTop,
+      child: Semantics(
+        button: true,
+        label: 'Dismiss message',
+        child: GestureDetector(
+          // since field may be clipped
+          onTap: () {
+            HapticFeedback.lightImpact();
+            analyticsService.logButtonTapped('tooltip_dismiss');
+            removeMiniPopup();
+          },
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: overlayW, // wrapping boundary
+            ),
+            child: Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(color: bgColour, borderRadius: BorderRadius.circular(4), boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))]),
+              child: Text(theMessage, softWrap: true, style: theStyle),
             ),
           ),
         ),
+      ),
+    ),
   );
 
   overlay.insert(_miniPopupOverlayEntry!);

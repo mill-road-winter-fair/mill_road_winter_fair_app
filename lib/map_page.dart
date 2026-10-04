@@ -243,13 +243,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               TextSpan(
                                 text: 'www.millroadwinterfair.org',
                                 style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
-                                recognizer:
-                                    TapGestureRecognizer()
-                                      ..onTap = () {
-                                        HapticFeedback.lightImpact();
-                                        widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
-                                        launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                                      },
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    HapticFeedback.lightImpact();
+                                    widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
+                                    launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                                  },
                               ),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
@@ -600,16 +599,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
         // Filter listings where groupID matches the parent listing's groupID,
         // but exclude any listing whose category starts with `Group-`.
-        List<Map<String, dynamic>> relatedListings =
-            listings.where((l) {
-              // Filter out the parent listing itself, as we only want the child listings in the relatedListings list
-              if (l['groupParent'] == 'TRUE') return false;
+        List<Map<String, dynamic>> relatedListings = listings.where((l) {
+          // Filter out the parent listing itself, as we only want the child listings in the relatedListings list
+          if (l['groupParent'] == 'TRUE') return false;
 
-              final listingGroupID = l['groupID'] ?? '';
-              final targetGroupID = parentListing['groupID'] ?? '';
+          final listingGroupID = l['groupID'] ?? '';
+          final targetGroupID = parentListing['groupID'] ?? '';
 
-              return listingGroupID == targetGroupID;
-            }).toList();
+          return listingGroupID == targetGroupID;
+        }).toList();
 
         // Sort listings: startTime → title
         relatedListings.sort((a, b) {
@@ -726,10 +724,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               startTime: "${rel['startTime']}",
                                               endTime: "${rel['endTime']}",
                                               approxDistance: '',
-                                              detailsVisible:
-                                                  (detailsVisibleIndex == null)
-                                                      ? false
-                                                      : (detailsVisibleIndex == index)
+                                              detailsVisible: (detailsVisibleIndex == null)
+                                                  ? false
+                                                  : (detailsVisibleIndex == index)
                                                       ? true
                                                       : null,
                                               onDetailsTapped: () => toggleDetailsRow(index),
@@ -772,10 +769,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
     MarkerId markerId = MarkerId(listing['id'].toString());
     final (catCount, perfOrEventCount) = countCategories(listing);
-    final type =
-        catCount == 1
-            ? getCategory(listing)
-            : catCount == perfOrEventCount
+    final type = catCount == 1
+        ? getCategory(listing)
+        : catCount == perfOrEventCount
             ? 'Group-PerformanceEvent'
             : 'Mixed';
     _markerTypes[markerId] = type;
@@ -1539,12 +1535,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
     final visibleMarkers = markers.values.where((marker) => marker.visible).toList();
     if (visibleMarkers.isEmpty) return;
-    final nearestMarkers =
-        visibleMarkers..sort((a, b) {
-          final aDistance = asTheCrowFlies(currentLatLng!, a.position);
-          final bDistance = asTheCrowFlies(currentLatLng!, b.position);
-          return aDistance.compareTo(bDistance);
-        });
+    final nearestMarkers = visibleMarkers
+      ..sort((a, b) {
+        final aDistance = asTheCrowFlies(currentLatLng!, a.position);
+        final bDistance = asTheCrowFlies(currentLatLng!, b.position);
+        return aDistance.compareTo(bDistance);
+      });
 
     if (nearestMarkers.isEmpty || asTheCrowFlies(currentLatLng!, nearestMarkers.first.position) > 500) {
       Fluttertoast.showToast(
@@ -1805,14 +1801,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   isRefreshing
                       ? const CircularProgressIndicator()
                       : ElevatedButton.icon(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('refresh_listings_from_error');
-                          refreshListings();
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh listings'),
-                      ),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('refresh_listings_from_error');
+                            refreshListings();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Refresh listings'),
+                        ),
                 ],
               ),
             ),
@@ -1852,10 +1848,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         final appBarTheme = Theme.of(context).appBarTheme;
 
         return FairScaffold(
-          appBarTitle:
-              (navigationInProgress || doingAPushNavigation != null)
-                  ? 'Directions'
-                  : (widget.nearestMarkerCount != null)
+          appBarTitle: (navigationInProgress || doingAPushNavigation != null)
+              ? 'Directions'
+              : (widget.nearestMarkerCount != null)
                   ? 'Nearby attractions'
                   : 'Map',
           currentTab: 1,
@@ -1877,13 +1872,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               IconButton(
                 key: searchIconKey,
                 color: appBarTheme.foregroundColor,
-                onLongPress:
-                    () => showMiniPopup(
-                      context,
-                      searchIconKey,
-                      (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
-                      analyticsService: widget.analyticsService,
-                    ),
+                onLongPress: () => showMiniPopup(
+                  context,
+                  searchIconKey,
+                  (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
+                  analyticsService: widget.analyticsService,
+                ),
                 onPressed: () async {
                   HapticFeedback.lightImpact();
                   if (_isSearching) {
@@ -1996,8 +1990,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               filterSettings['Business'] == false &&
                               filterSettings['Services'] == false) {
                             widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
-                            final idList =
-                                _foodMarkerIds +
+                            final idList = _foodMarkerIds +
                                 _shoppingMarkerIds +
                                 _charityCommunityInfoMarkerIds +
                                 _performanceMusicMarkerIds +
@@ -2206,39 +2199,38 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 left: 0,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child:
-                      _isSearching
-                          ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                key: const ValueKey('searchBar'),
-                                color: colorScheme.surfaceDim,
-                                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
-                                padding: const EdgeInsets.all(8),
-                                child: SearchBar(
-                                  autoFocus: true,
-                                  controller: _searchController,
-                                  elevation: const WidgetStatePropertyAll(0),
-                                  hintText: 'Search all locations...',
-                                  leading: const Icon(Icons.search),
-                                  trailing: [
-                                    IconButton(
-                                      iconSize: 20,
-                                      icon: const Icon(Icons.close),
-                                      onPressed: () async {
-                                        HapticFeedback.lightImpact();
-                                        widget.analyticsService.logButtonTapped('map_search_clear');
-                                        _resetSearch(close: false);
-                                      },
-                                    ),
-                                  ],
-                                  onChanged: _searchListings,
-                                ),
+                  child: _isSearching
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              key: const ValueKey('searchBar'),
+                              color: colorScheme.surfaceDim,
+                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
+                              padding: const EdgeInsets.all(8),
+                              child: SearchBar(
+                                autoFocus: true,
+                                controller: _searchController,
+                                elevation: const WidgetStatePropertyAll(0),
+                                hintText: 'Search all locations...',
+                                leading: const Icon(Icons.search),
+                                trailing: [
+                                  IconButton(
+                                    iconSize: 20,
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () async {
+                                      HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('map_search_clear');
+                                      _resetSearch(close: false);
+                                    },
+                                  ),
+                                ],
+                                onChanged: _searchListings,
                               ),
-                            ],
-                          )
-                          : const SizedBox.shrink(),
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ),
             ],

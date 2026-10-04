@@ -57,20 +57,20 @@ const expectedSubcategories = {
 };
 
 Map<String, dynamic> listingFor(String id, String subcategory) => {
-  for (final header in apiHeaders) header: '',
-  for (final key in expectedSubcategories.keys) key: 'FALSE',
-  'id': id,
-  'title': id,
-  'visibleOnMap': 'TRUE',
-  'cancelled': 'FALSE',
-  'groupParent': 'FALSE',
-  'brickAndMortar': 'FALSE',
-  subcategory: 'TRUE',
-  'location': 'Mill Road',
-  'latLng': '52.199687,0.138813',
-  'startTime': '10:30',
-  'endTime': '16:30',
-};
+      for (final header in apiHeaders) header: '',
+      for (final key in expectedSubcategories.keys) key: 'FALSE',
+      'id': id,
+      'title': id,
+      'visibleOnMap': 'TRUE',
+      'cancelled': 'FALSE',
+      'groupParent': 'FALSE',
+      'brickAndMortar': 'FALSE',
+      subcategory: 'TRUE',
+      'location': 'Mill Road',
+      'latLng': '52.199687,0.138813',
+      'startTime': '10:30',
+      'endTime': '16:30',
+    };
 
 void main() {
   setUp(() async {

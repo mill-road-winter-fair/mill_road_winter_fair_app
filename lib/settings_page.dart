@@ -173,16 +173,15 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading:
-              Navigator.canPop(context)
-                  ? BackButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('back');
-                      Navigator.maybePop(context);
-                    },
-                  )
-                  : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('back');
+                    Navigator.maybePop(context);
+                  },
+                )
+              : null,
           title: const FittedBox(fit: BoxFit.scaleDown, child: Text('Settings')),
         ),
         body: Container(
@@ -213,22 +212,21 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                               alignmentOffset: const Offset(0, -60),
                               expandedInsets: EdgeInsets.zero,
                               trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                              dropdownMenuEntries:
-                                  themeOptions.map((opt) {
-                                    return DropdownMenuEntry<String>(
-                                      value: opt.value,
-                                      label: opt.title,
-                                      labelWidget: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(height: 4),
-                                          Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                          Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                          const SizedBox(height: 4),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
+                              dropdownMenuEntries: themeOptions.map((opt) {
+                                return DropdownMenuEntry<String>(
+                                  value: opt.value,
+                                  label: opt.title,
+                                  labelWidget: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const SizedBox(height: 4),
+                                      Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                      Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                      const SizedBox(height: 4),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
                               onSelected: (value) {
                                 HapticFeedback.selectionClick();
                                 widget.analyticsService.logButtonTapped('theme_preference_option');
@@ -261,22 +259,21 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                               alignmentOffset: const Offset(0, -60),
                               expandedInsets: EdgeInsets.zero,
                               trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                              dropdownMenuEntries:
-                                  unitsOptions.map((opt) {
-                                    return DropdownMenuEntry<DistanceUnits>(
-                                      value: opt.value,
-                                      label: opt.title,
-                                      labelWidget: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(height: 4),
-                                          Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                          Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                          const SizedBox(height: 4),
-                                        ],
-                                      ),
-                                    );
-                                  }).toList(),
+                              dropdownMenuEntries: unitsOptions.map((opt) {
+                                return DropdownMenuEntry<DistanceUnits>(
+                                  value: opt.value,
+                                  label: opt.title,
+                                  labelWidget: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const SizedBox(height: 4),
+                                      Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                      Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                      const SizedBox(height: 4),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
                               onSelected: (DistanceUnits? value) {
                                 if (value == null) return;
                                 HapticFeedback.selectionClick();
@@ -304,13 +301,12 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           TextSpan(
                             text: 'What does this mean?',
                             style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
-                            recognizer:
-                                TapGestureRecognizer()
-                                  ..onTap = () {
-                                    HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped('analytics_explanation_settings');
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService)));
-                                  },
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService)));
+                              },
                           ),
                         ],
                       ),
