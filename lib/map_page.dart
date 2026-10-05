@@ -1933,12 +1933,44 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             ),
           ],
           allowBack: (doingAPushNavigation != null),
-          body: Stack(
-            children: [
+          body: Column(children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _isSearching ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    key: const ValueKey('searchBar'),
+                    color: colorScheme.surfaceDim,
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
+                    padding: EdgeInsets.all(8),
+                    child: SearchBar(
+                      autoFocus: true,
+                      controller: _searchController,
+                      elevation: const WidgetStatePropertyAll(0),
+                      hintText: 'Search all locations...',
+                      leading: const Icon(Icons.search),
+                      trailing: [
+                        IconButton(
+                            iconSize: 20,
+                            icon: const Icon(Icons.close),
+                            onPressed: () async {
+                              HapticFeedback.lightImpact();
+                              widget.analyticsService.logButtonTapped('map_search_clear');
+                              _resetSearch(close: false);
+                            })
+                      ],
+                      onChanged: _searchListings,
+                    ),
+                  ),
+                ],
+              ) : SizedBox.shrink(),
+            ),
+            Expanded(child: Stack(fit: StackFit.expand, children: [
               LayoutBuilder(
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
-                  mapHeight = constraints.maxHeight - (_isSearching ? 112 : 0); // double search bar height as it pads top&bottom
+                  mapHeight = constraints.maxHeight;
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
                       if (didPop && navigationInProgress) cancelNavigation();
@@ -2290,41 +2322,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     ),
                   ),
                 ),
-                Positioned(top: 0, left: 0, child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: _isSearching ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          key: const ValueKey('searchBar'),
-                          color: colorScheme.surfaceDim,
-                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
-                          padding: EdgeInsets.all(8),
-                          child: SearchBar(
-                            autoFocus: true,
-                            controller: _searchController,
-                            elevation: const WidgetStatePropertyAll(0),
-                            hintText: 'Search all locations...',
-                            leading: const Icon(Icons.search),
-                            trailing: [
-                              IconButton(
-                                  iconSize: 20,
-                                  icon: const Icon(Icons.close),
-                                  onPressed: () async {
-                                    HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped('map_search_clear');
-                                    _resetSearch(close: false);
-                                  })
-                            ],
-                            onChanged: _searchListings,
-                          ),
-                        ),
-                      ],
-                    ) : SizedBox.shrink(),
-                  ),
-                ),
-            ],
-          ),
+            ])),
+          ]),
           analyticsService: widget.analyticsService,
         );
       },
