@@ -877,7 +877,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           dropdownMenuEntries: [
             DropdownMenuEntry(
               value: null,
-              label: "All",
+              label: "Everything",
               style: dropdownStyle,
               leadingIcon: const Icon(Icons.all_inclusive, size: 20),
             ),
