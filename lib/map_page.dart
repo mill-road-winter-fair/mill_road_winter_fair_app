@@ -1938,7 +1938,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               LayoutBuilder(
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
-                  mapHeight = constraints.maxHeight - (_isSearching ? 56 : 0);
+                  mapHeight = constraints.maxHeight - (_isSearching ? 112 : 0); // double search bar height as it pads top&bottom
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
                       if (didPop && navigationInProgress) cancelNavigation();
