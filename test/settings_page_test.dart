@@ -118,12 +118,6 @@ void main() {
     testWidgets('changes theme to Colour Blind Friendly', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
 
-      final colourBlindFinder = find.byType(RadioListTile<String>).at(5);
-      final settingsScrollable = find.byType(Scrollable).last;
-      await tester.scrollUntilVisible(colourBlindFinder, 50, scrollable: settingsScrollable);
-
-      // Tap on the Colour Blind Friendly theme radio button
-      await tester.tap(colourBlindFinder);
       // Tap on dropdown to open it
       await tester.tap(find.text('Light'));
       await tester.pumpAndSettle();
@@ -146,10 +140,6 @@ void main() {
       await tester.pumpAndSettle();
 
       // Change theme to High Contrast
-      final highContrastFinder = find.byType(RadioListTile<String>).at(4);
-      final settingsScrollable = find.byType(Scrollable).last;
-      await tester.scrollUntilVisible(highContrastFinder, 50, scrollable: settingsScrollable);
-      await tester.tap(highContrastFinder);
       await tester.tap(find.text('Light'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('High contrast'));
