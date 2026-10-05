@@ -107,6 +107,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  final Map<String, int> _markerPositionCounts = <String, int>{};
   bool _isSearching = false; // true when the search bar is open (with/without text)
   CameraPosition? _currentCamera; // saves the camera position as it is moved by user or programmatically
   CameraPosition? _cameraBeforeNavigation; // to be able to restore camera position after navigation
@@ -318,7 +319,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<(LatLng?, LatLng?)> filterMarkersIgnoringFiltersAndCalculateBounds(List<MarkerId> idList) async {
-    debugPrint('MapPageState filterMarkersIgnoringFilters called');
+    debugPrint('MapPageState filterMarkersIgnoringFiltersAndCalculateBounds called');
     Position position = await getCurrentPosition();
     // Set default LatLngs bounds from current position to ensure it's included
     // southwest
@@ -473,6 +474,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     // Ensure the markers list is empty
     markers.clear();
     _markerTypes.clear();
+    _markerPositionCounts.clear();
 
     for (var listing in listings) {
       final matchesSearch = ['title', 'location'].any(
@@ -503,10 +505,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<void> _searchListings(String value) async {
+    final normalisedValue = value.toLowerCase();
     _cameraBeforeSearch ??= _currentCamera;
-    _searchQuery = value.toLowerCase();
+    _searchQuery = normalisedValue;
     await addAllVisibleMarkers();
-    if (!mounted || !_isSearching || _searchQuery != value.toLowerCase() || _searchQuery.isEmpty) return;
+    if (!mounted || !_isSearching || _searchQuery != normalisedValue || _searchQuery.isEmpty) return;
     final positions = markers.values.map((marker) => marker.position).toList();
     if (positions.isEmpty) {
       Fluttertoast.showToast(
@@ -568,9 +571,22 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     return favouriteListingKeys.value.contains(listingID);
   }
 
+  LatLng _positionForMarker(LatLng candidate) {
+    final key = '${candidate.latitude.toStringAsFixed(6)}:${candidate.longitude.toStringAsFixed(6)}';
+    final duplicateIndex = _markerPositionCounts[key] ?? 0;
+    _markerPositionCounts[key] = duplicateIndex + 1;
+
+    if (duplicateIndex == 0) return candidate;
+
+    const double offset = 0.00004; // ~4.4m at the equator; enough to separate stacked pins visually.
+    final latOffset = ((duplicateIndex % 3) - 1) * offset;
+    final lngOffset = ((duplicateIndex ~/ 3) % 3 - 1) * offset;
+    return LatLng(candidate.latitude + latOffset, candidate.longitude + lngOffset);
+  }
+
   void addGroupMarker(Map<String, dynamic> parentListing) async {
     //debugPrint('MapPageState addGroupMarker called for ${parentListing['title']}');
-    LatLng destinationLatLng = stringToLatLng(parentListing['latLng']);
+    LatLng destinationLatLng = _positionForMarker(stringToLatLng(parentListing['latLng']));
     MarkerId markerId = MarkerId(parentListing['id'].toString());
     final (catCount, perfOrEventCount) = countCategories(parentListing);
     final String type;
@@ -774,7 +790,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void addSpecificMarker(Map<String, dynamic> listing) async {
     //debugPrint('MapPageState addSpecificMarker called for marker ID: ${listing['id']}');
-    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+    LatLng destinationLatLng = _positionForMarker(stringToLatLng(listing['latLng']));
     MarkerId markerId = MarkerId(listing['id'].toString());
     final (catCount, perfOrEventCount) = countCategories(listing);
     final type = catCount == 1
@@ -886,9 +902,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             },
           );
         });
-    //setState(() {
     markers[markerId] = newMarker;
-    //});
   }
 
   void addSimpleMarker(String category, destinationLatLng) async {
@@ -1565,7 +1579,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
     if (nearestMarkers.isEmpty || asTheCrowFlies(currentLatLng!, nearestMarkers.first.position) > 500) {
       Fluttertoast.showToast(
-        msg: 'Nearest attractions are more than 500m away, so please try again when you’re at the Fair.',
+        msg: (_isSearching)
+          ? 'Nearest search results are more than 500m away, so please change or cancel your search and try again.'
+          : 'Nearest venues are more than 500m away, so please try again when you’re at the Fair.',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
         textColor: Theme.of(context).colorScheme.onPrimary,
@@ -1936,12 +1952,44 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             ),
           ],
           allowBack: (doingAPushNavigation != null),
-          body: Stack(
-            children: [
+          body: Column(children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _isSearching ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    key: const ValueKey('searchBar'),
+                    color: colorScheme.surfaceDim,
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
+                    padding: EdgeInsets.all(8),
+                    child: SearchBar(
+                      autoFocus: true,
+                      controller: _searchController,
+                      elevation: const WidgetStatePropertyAll(0),
+                      hintText: 'Search all locations...',
+                      leading: const Icon(Icons.search),
+                      trailing: [
+                        IconButton(
+                            iconSize: 20,
+                            icon: const Icon(Icons.close),
+                            onPressed: () async {
+                              HapticFeedback.lightImpact();
+                              widget.analyticsService.logButtonTapped('map_search_clear');
+                              _resetSearch(close: false);
+                            })
+                      ],
+                      onChanged: _searchListings,
+                    ),
+                  ),
+                ],
+              ) : SizedBox.shrink(),
+            ),
+            Expanded(child: Stack(fit: StackFit.expand, children: [
               LayoutBuilder(
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
-                  mapHeight = constraints.maxHeight - (_isSearching ? 56 : 0);
+                  mapHeight = constraints.maxHeight;
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
                       if (didPop && navigationInProgress) cancelNavigation();
@@ -2240,94 +2288,61 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
                       color: colorScheme.surface,
-        child: Semantics(
-        button: true,
-        label: 'Road closures. Show more information',
-        excludeSemantics: true,
-                      child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('road_closures_legend');
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return roadClosuresDialog();
-                            },
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 14,
-                                decoration: BoxDecoration(
-                                  color: selectedThemeKey == 'colourBlindFriendly'
-                                      ? const Color.fromRGBO(224, 129, 87, 255)
-                                      : colorScheme.tertiary.withAlpha(50),
-                                  border: Border.all(
-                                    color: colorScheme.tertiary,
-                                    width: 3,
+                      child: Semantics(
+                        button: true,
+                        label: 'Road closures. Show more information',
+                        excludeSemantics: true,
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('road_closures_legend');
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return roadClosuresDialog();
+                              },
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    color: selectedThemeKey == 'colourBlindFriendly'
+                                        ? const Color.fromRGBO(224, 129, 87, 255)
+                                        : colorScheme.tertiary.withAlpha(50),
+                                    border: Border.all(
+                                      color: colorScheme.tertiary,
+                                      width: 3,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Road closures',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: colorScheme.tertiary,
-                                  fontWeight: FontWeight.w600,
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Road closures',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorScheme.tertiary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-                Positioned(top: 0, left: 0, child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: _isSearching ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          key: const ValueKey('searchBar'),
-                          color: colorScheme.surfaceDim,
-                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
-                          padding: EdgeInsets.all(8),
-                          child: SearchBar(
-                            autoFocus: true,
-                            controller: _searchController,
-                            elevation: const WidgetStatePropertyAll(0),
-                            hintText: 'Search all locations...',
-                            leading: const Icon(Icons.search),
-                            trailing: [
-                              IconButton(
-                                  iconSize: 20,
-                                  icon: const Icon(Icons.close),
-                                  onPressed: () async {
-                                    HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped('map_search_clear');
-                                    _resetSearch(close: false);
-                                  })
-                            ],
-                            onChanged: _searchListings,
-                          ),
-                        ),
-                      ],
-                    ) : SizedBox.shrink(),
-                  ),
-                ),
-            ],
-          ),
+            ])),
+          ]),
           analyticsService: widget.analyticsService,
         );
       },
