@@ -859,13 +859,14 @@ void main() {
 
       // Verify all checkboxes are present
       expect(find.widgetWithText(CheckboxListTile, "Food and drink"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Shopping and stalls"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Charity, Community, Info"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Shopping"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Charity, community, info"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Music performances"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Children’s performances"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Children’s entertainment"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Dance performances"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Other performances"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Visits and experiences"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Other businesses"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
 
       // Test Food checkbox
@@ -889,7 +890,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Shopping checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping and stalls"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -898,7 +899,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping and stalls"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -929,7 +930,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Events checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, Community, Info"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, community, info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -938,7 +939,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, Community, Info"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, community, info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
