@@ -176,6 +176,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
 
 class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
   final GlobalKey _cancelledLabelKey = GlobalKey();
+  final GlobalKey brickAndMortarIconKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -303,6 +304,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                               textAlign: TextAlign.end,
                             ),
                     ),
+                  ) else if (widget.brickAndMortar) GestureDetector(
+                    onTap: () => showMiniPopup(context, brickAndMortarIconKey, 'A permanent shop or office building', analyticsService: widget.analyticsService),
+                    key: brickAndMortarIconKey,
+                    child: Icon(Icons.store),
                   ),
                 ],
               ),
