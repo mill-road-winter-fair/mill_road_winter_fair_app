@@ -203,6 +203,88 @@ void main() {
       expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).myLocationEnabled, isFalse);
     });
 
+    testWidgets('search keeps distinct markers apart when multiple matches share the same location', (tester) async {
+      final sharedLocationListings = [
+        {
+          'id': 'sea-group',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'groupParent': 'TRUE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '',
+          'title': 'Seafood Group',
+          'subtitle': 'Food',
+          'groupID': 'sea-group',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'business': 'FALSE',
+          'location': 'Harbour Lane',
+          'description': '',
+          'email': '',
+          'website': '',
+          'phone': '',
+          'latLng': '52.199838,0.139016',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        },
+        {
+          'id': 'sea-specific',
+          'visibleOnMap': 'TRUE',
+          'cancelled': 'FALSE',
+          'groupParent': 'FALSE',
+          'brickAndMortar': 'FALSE',
+          'emoji': '',
+          'title': 'Seabreeze Stall',
+          'subtitle': 'Food',
+          'groupID': 'sea-group',
+          'food': 'TRUE',
+          'shopping': 'FALSE',
+          'charityCommunityInfo': 'FALSE',
+          'performanceMusic': 'FALSE',
+          'performanceChildrens': 'FALSE',
+          'performanceDance': 'FALSE',
+          'performanceOther': 'FALSE',
+          'visitExperience': 'FALSE',
+          'service': 'FALSE',
+          'business': 'FALSE',
+          'location': 'Harbour Lane',
+          'description': '',
+          'email': '',
+          'website': '',
+          'phone': '',
+          'latLng': '52.199838,0.139016',
+          'imageURL': '',
+          'startTime': '10:30',
+          'endTime': '16:30',
+        },
+      ];
+
+      final originalListings = [...listings];
+      addTearDown(() => listings = originalListings);
+      listings = sharedLocationListings;
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+      ));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      final field = find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
+      await tester.enterText(field, 'sea');
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      expect(state.markers.length, 2);
+      expect(state.markers.values.map((m) => m.position).toSet().length, 2,
+          reason: 'Two matching markers at the same lat/lng should be visually offset to avoid overlap.');
+    });
+
     testWidgets('search includes hidden listings and restores default pins', (tester) async {
       final toastCalls = <MethodCall>[];
       const toastChannel = MethodChannel('PonnamKarthik/fluttertoast');
