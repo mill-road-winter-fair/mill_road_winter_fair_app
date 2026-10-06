@@ -328,9 +328,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         },
                   padding: const EdgeInsets.all(0),
                   style: ElevatedButton.styleFrom(
-                      visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                      padding: const EdgeInsets.all(0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                    padding: const EdgeInsets.all(0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   icon: FaIcon(
                     shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                     (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
@@ -343,11 +343,11 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 Spacer(),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      iconSize: 24,
-                      visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                      padding: const EdgeInsets.all(0),
-                      elevation: 3,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                    iconSize: 24,
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                    padding: const EdgeInsets.all(0),
+                    elevation: 3,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: widget.cancelled
                       ? null
                       : () {
@@ -385,11 +385,11 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      iconSize: 24,
-                      visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                      padding: const EdgeInsets.all(0),
-                      elevation: 3,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                    iconSize: 24,
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                    padding: const EdgeInsets.all(0),
+                    elevation: 3,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     shareListing(
@@ -406,7 +406,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: (Platform.isAndroid)
                       ? const Icon(Icons.share, semanticLabel: 'Share listing')
                       : const Icon(Icons.ios_share, semanticLabel: 'Share listing'),
-                ),
+                  ),
               ],
             ),
             if ((widget.detailsVisible ?? false) && !widget.inDialog) detailsColumn(context),
@@ -427,7 +427,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
   Widget _cancelledLabel(BuildContext context) {
     return Semantics(
       button: !widget.brickAndMortar,
-      label: 'Cancelled. Show original time',
+      label: widget.brickAndMortar ? 'Cancelled' : 'Cancelled. Show original time',
       excludeSemantics: true,
       child: GestureDetector(
         onTap: widget.brickAndMortar ? null : () {
@@ -482,7 +482,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
         ],
         if (widget.website.isNotEmpty) ...[
           const SizedBox(height: 8),
-          GestureDetector(
+          Semantics(
+            link: true,
+            child: GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
@@ -496,6 +498,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 ],
               ),
             ),
+          ),
           ),
         ],
         if (widget.email.isNotEmpty) ...[
@@ -592,45 +595,54 @@ Future<void> showListingDetailsDialog(
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,
           elevation: 12,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => Navigator.of(ctx2).pop(),
-            child: SingleChildScrollView(
-            child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                child: SpecificListingInfoSheet(
-                  listingId: event.id,
-                  cancelled: event.cancelled,
-                  brickAndMortar: event.brickAndMortar,
-                  emoji: event.emoji,
-                  title: event.name,
-                  subtitle: event.subtitle,
-                  location: event.location,
-                  description: event.description,
-                  email: event.email,
-                  website: event.website,
-                  phoneNumber: event.phoneNumber,
-                  imageURL: event.imageURL,
-                  startTime: formatTime(event.startTime),
-                  endTime: formatTime(event.endTime),
-                  approxDistance: distanceMessage,
-                  detailsVisible: true,
-                  listingFavourited: favouriteListingKeys.value.contains(event.id),
-                  onFavouriteTapped: () {
-                    favouriteOrNotListing(event);
-                    setStateFunction.call;
-                    setStateDialog(() {});
-                  },
-                  onGetDirections: () async {
-                    safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
-                    onGetDirections.call();
-                  },
-                  inDialog: true,
-                  analyticsService: analyticsService,
-                  colorScheme: colorScheme,
+          child: Semantics(
+            container: true,
+            explicitChildNodes: true,
+            button: true,
+            label: 'Dismiss listing details',
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => {
+                HapticFeedback.lightImpact(),
+                Navigator.of(ctx2).pop(),
+              },
+              child: SingleChildScrollView(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                  child: SpecificListingInfoSheet(
+                    listingId: event.id,
+                    cancelled: event.cancelled,
+                    brickAndMortar: event.brickAndMortar,
+                    emoji: event.emoji,
+                    title: event.name,
+                    subtitle: event.subtitle,
+                    location: event.location,
+                    description: event.description,
+                    email: event.email,
+                    website: event.website,
+                    phoneNumber: event.phoneNumber,
+                    imageURL: event.imageURL,
+                    startTime: formatTime(event.startTime),
+                    endTime: formatTime(event.endTime),
+                    approxDistance: distanceMessage,
+                    detailsVisible: true,
+                    listingFavourited: favouriteListingKeys.value.contains(event.id),
+                    onFavouriteTapped: () {
+                      favouriteOrNotListing(event);
+                      setStateFunction.call;
+                      setStateDialog(() {});
+                    },
+                    onGetDirections: () async {
+                      safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                      onGetDirections.call();
+                    },
+                    inDialog: true,
+                    analyticsService: analyticsService,
+                    colorScheme: colorScheme,
+                  ),
                 ),
               ),
             ),
