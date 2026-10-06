@@ -154,7 +154,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
     );
     flutterLocalNotificationsPlugin.zonedSchedule(
       id: notificationResponse.id!,
-      title: 'Clashfinder Pal',
+      title: fairName,
       body: theMessage,
       payload: jsonEncode(theAlert),
       scheduledDate: tz.TZDateTime.from(newAlertTime, tz.local),

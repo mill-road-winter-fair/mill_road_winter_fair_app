@@ -1150,7 +1150,7 @@ void setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID
     final schedTime = theListingStart.subtract(Duration(minutes: theAlertNoticePeriod));
     flutterLocalNotificationsPlugin.zonedSchedule(
       id: newAlertId,
-      title: 'Mill Road Winter Fair alert',
+      title: fairName,
       body: (theAlertNoticePeriod > 0)
         ? '${theListing['title']} starting at ${theListing['location']} in $theAlertNoticePeriod minutes (${theListing['startTime']})'
         : '${theListing['title']} underway at ${theListing['location']} until ${theListing['endTime']}',
