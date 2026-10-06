@@ -106,6 +106,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   int? detailsVisibleIndex; // which listing (if any) on modal bottom sheet has details button selected
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchAnalyticsTimer;
   String _searchQuery = '';
   bool _isSearching = false; // true when the search bar is open (with/without text)
   CameraPosition? _currentCamera; // saves the camera position as it is moved by user or programmatically
@@ -493,6 +494,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   void _resetSearch({bool close = true}) {
+    _searchAnalyticsTimer?.cancel();
     setState(() {
       if (close) _isSearching = false;
       _searchQuery = '';
@@ -503,6 +505,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<void> _searchListings(String value) async {
+    _searchAnalyticsTimer?.cancel();
+    final trimmedSearchTerm = value.trim();
+    if (trimmedSearchTerm.isNotEmpty) {
+      _searchAnalyticsTimer = Timer(const Duration(milliseconds: 750), () {
+        widget.analyticsService.logSearch(trimmedSearchTerm, searchArea: 'map');
+      });
+    }
     _cameraBeforeSearch ??= _currentCamera;
     _searchQuery = value.toLowerCase();
     await addAllVisibleMarkers();
@@ -1075,11 +1084,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Childrens"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('childrens_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Childrens"] = value!;
                       });
                       final idList = _performanceChildrensMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('performanceChildrens', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1092,11 +1103,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Dance"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('dance_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Dance"] = value!;
                       });
                       final idList = _performanceDanceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('performanceDance', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1109,11 +1122,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Other"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('other_performances_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Other"] = value!;
                       });
                       final idList = _performanceOtherMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('performanceOther', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1145,11 +1160,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Business"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('business_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Business"] = value!;
                       });
                       final idList = _businessMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('business', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1255,6 +1272,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    _searchAnalyticsTimer?.cancel();
     // Navigation must start with the default marker set so it can restore it later.
     _isSearching = false;
     _searchQuery = '';
@@ -1388,6 +1406,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     themeNotifier.removeListener(_onThemeChanged);
+    _searchAnalyticsTimer?.cancel();
     _searchController.dispose();
     debugPrint('MapPageState dispose() called');
     // Cancel the location subscription when the page is disposed
@@ -1893,6 +1912,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               onLongPress: () => showMiniPopup(context, filterIconKey, 'Tap to choose which map markers to show or hide', analyticsService: widget.analyticsService),
               onPressed: () {
                 HapticFeedback.lightImpact();
+                widget.analyticsService.logButtonTapped('map_filter_open');
                 showFilterMenu();
                 setVisibleMarkerLists();
               },
@@ -1904,6 +1924,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar', analyticsService: widget.analyticsService),
               onPressed: () async {
                 HapticFeedback.lightImpact();
+                widget.analyticsService.logButtonTapped('map_search_toggle');
                 if (_isSearching) {
                   final camera = _cameraBeforeSearch;
                   _resetSearch();

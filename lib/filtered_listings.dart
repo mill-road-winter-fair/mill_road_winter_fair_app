@@ -622,6 +622,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             onTap: (detailsVisibleIndex == null)
                               ? null
                               : () {
+                                final listing = filteredListings[detailsVisibleIndex!];
+                                widget.analyticsService.logButtonTapped('listing_details_dismiss', listingId: listing['id'], listingName: listing['title']);
                                 detailsVisibleIndex = null;
                                 setState(() { });
                               },
