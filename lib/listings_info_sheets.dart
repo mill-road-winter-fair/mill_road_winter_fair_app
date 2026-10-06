@@ -712,7 +712,7 @@ Future<void> showListingDetailsDialog(
   //int alertNoticePeriod,
   void Function(VoidCallback) setStateFunction,
   // final int? Function(PositionedEvent, int, int?) toggleAlertAction,
-  void Function() onAlertTapped,
+  Future<void> Function() onAlertTapped,
   Future<dynamic> Function() onGetDirections, {
   required AnalyticsService analyticsService,
 }) async {
@@ -784,8 +784,9 @@ Future<void> showListingDetailsDialog(
                   },
                   onAlertTapped: () async {
                     HapticFeedback.lightImpact();
-                    onAlertTapped.call();
-                    setStateDialog(() {});
+                    analyticsService.logButtonTapped('alert_tapped', listingId: event.id, listingName: event.name);
+                    await onAlertTapped();
+                    if (context.mounted) setStateDialog(() {});
                   },
                   inDialog: true,
                   analyticsService: analyticsService,
