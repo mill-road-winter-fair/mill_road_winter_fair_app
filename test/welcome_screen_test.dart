@@ -28,6 +28,30 @@ void main() {
   });
 
   group('WelcomeScreen', () {
+    testWidgets('background stays fixed while panels are swiped', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      final background = find.image(const AssetImage('assets/welcomeScreen/chooserPage_background.jpg'));
+      expect(background, findsOneWidget);
+      expect(find.ancestor(of: background, matching: find.byType(PageView)), findsNothing);
+      final backgroundRect = tester.getRect(background);
+      final title = find.text('Welcome to the official\nMill Road Winter Fair app!');
+      final titlePosition = tester.getTopLeft(title);
+
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
+      await gesture.moveBy(const Offset(-200, 0));
+      await tester.pump();
+      expect(tester.getTopLeft(title).dx, lessThan(titlePosition.dx));
+      expect(tester.getRect(background), backgroundRect);
+      await gesture.up();
+      await settle(tester);
+      expect(tester.getRect(background), backgroundRect);
+      expect(tester.takeException(), isNull);
+    });
+
     for (final configuration in [
       (size: const Size(320, 568), textScale: 1.0),
       (size: const Size(320, 568), textScale: 2.0),
