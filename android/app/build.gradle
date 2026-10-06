@@ -27,7 +27,7 @@ android {
     }
 
     namespace = "com.theberridge.mill_road_winter_fair_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = "28.2.13676358"
 
     compileOptions {
