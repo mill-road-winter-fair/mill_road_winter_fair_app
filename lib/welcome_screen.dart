@@ -201,220 +201,233 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       );
     }
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset(
-          'assets/welcomeScreen/chooserPage_background.jpg',
-          fit: BoxFit.cover,
-          excludeFromSemantics: true,
+    final pages = [
+      guidePage('Welcome to the official\nMill Road Winter Fair app!', [
+        tip(Icons.home,
+            'Using our new homepage, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
+        tip(Icons.music_note, 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
+        tip(Icons.map,
+            'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and Favourites you\'ve saved.'),
+        tip(Icons.menu,
+            'Use the menu in the top-right for important information, settings and to share this app. You can read this App Guide again there too.'),
+      ]),
+      guidePage('What do the map pins mean?', [
+        for (final key in subfilterCategoryLabels.keys)
+          category(
+              key,
+              const {
+                'food': 'Food',
+                'shopping': 'Shopping',
+                'charityCommunityInfo': 'Charity/Community/Info',
+                'performanceMusic': 'Music',
+                'performanceChildrens': 'Childrens',
+                'performanceDance': 'Dance',
+                'performanceOther': 'Other',
+                'visitExperience': 'Visit/Experience',
+                'business': 'Business',
+                'service': 'Service',
+              }[key]!),
+        guideRow(
+          Image.asset('assets/mapMarkers/mixedMarker.png', height: 40, width: 40, color: getCategoryColor(selectedThemeKey, 'Mixed')),
+          Text('A mix of any of these categories', style: bodyStyle),
         ),
-        IntroductionScreen(
-          key: introKey,
-          safeAreaList: [false, false, false, Platform.isAndroid && isNavBarVisible(context)],
-          autoScrollDuration: onTest ? null : 150000,
-          infiniteAutoScroll: onTest ? false : true,
-          globalBackgroundColor: Colors.transparent,
-          allowImplicitScrolling: true,
-          globalFooter: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text('Take me straight to the app!',
-                      style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
-                ),
-                onPressed: () {
-                  HapticFeedback.heavyImpact();
-                  widget.analyticsService.logButtonTapped('skip_WelcomeScreen');
-                  _onIntroEnd(context);
-                },
-              ),
-            ),
-          ),
-          pages: [
-            guidePage('Welcome to the official\nMill Road Winter Fair app!', [
-              tip(Icons.home,
-                  'Using our new homepage, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
-              tip(Icons.music_note, 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
-              tip(Icons.map,
-                  'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and Favourites you\'ve saved.'),
-              tip(Icons.menu,
-                  'Use the menu in the top-right for important information, settings and to share this app. You can read this App Guide again there too.'),
-            ]),
-            guidePage('What do the map pins mean?', [
-              for (final key in subfilterCategoryLabels.keys)
-                category(
-                    key,
-                    const {
-                      'food': 'Food',
-                      'shopping': 'Shopping',
-                      'charityCommunityInfo': 'Charity/Community/Info',
-                      'performanceMusic': 'Music',
-                      'performanceChildrens': 'Childrens',
-                      'performanceDance': 'Dance',
-                      'performanceOther': 'Other',
-                      'visitExperience': 'Visit/Experience',
-                      'business': 'Business',
-                      'service': 'Service',
-                    }[key]!),
-              guideRow(
-                Image.asset('assets/mapMarkers/mixedMarker.png', height: 40, width: 40, color: getCategoryColor(selectedThemeKey, 'Mixed')),
-                Text('A mix of any of these categories', style: bodyStyle),
-              ),
-            ]),
-            guidePage('Explore the map', [
-              tip(Icons.home, 'Tap the Home button on the map to zoom to the Fair.'),
-              tip(Icons.radar, 'Tap the radar button to see your location and nearby pins.'),
-              tip(Icons.satellite_alt, 'Switch between street and satellite maps as you prefer.'),
-              tip(Icons.directions_walk, 'Open a listing and tap the walking icon for directions.'),
-              tip(Icons.search, 'Search for stalls and events on the map.'),
-              tip(Icons.filter_alt, 'Choose which types of attraction you want to appear on the map.'),
-            ]),
-            guidePage('Find what brings you to the Fair', [
-              tip(Icons.ballot, 'Tap Listings to browse everything at the Fair.'),
-              tip(Icons.sort, 'Sort by name or location, or by Nearest. Time sorting is also available for performances.'),
-              tip(Icons.info, 'Tap the info button to find out more about any listing.'),
-              tip(Icons.favorite, 'Tap a listing’s heart icon to save it. It will then appear in your Favourites.'),
-              tip(Icons.share, 'Share a listing with friends to tell them where you\'re headed.'),
-              tip(Icons.event_busy,
-                  'On the day of the Fair, performance lists and Favourites let you hide finished events or jump to what’s on now.'),
-            ]),
-            guidePage('Plan your day with the timetable', [
-              tip(Icons.watch_later, 'See performances and shorter visits and experiences by time and location.'),
-              tip(Icons.pinch, 'Scroll across locations and up or down through the day. Pinch to adjust the timetable’s scale.'),
-              tip(Icons.filter_alt, 'Tap the filter icon to cycle between music, non-music and everything.'),
-              tip(Icons.schedule, 'On the day, tap the clock to show what’s on now or starting soon.'),
-              tip(Icons.info, 'Tap an event for more details, or to save it as a Favourite.'),
-            ]),
-            guidePage('Make the app your own', [
-              tip(Icons.palette, 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
-              tip(Icons.straighten, 'Choose the units used for distances in Settings.'),
-              tip(Icons.privacy_tip, 'You choose whether to allow anonymous usage analytics in Settings.'),
-            ]),
-            guidePage('A few final things…', [
-              tip(Icons.favorite, 'Thank you for visiting Mill Road Winter Fair and using our app.'),
-              tip(Icons.update, 'Listings may change before the Fair, so check back for the latest details.'),
-              guideRow(
-                Icon(Icons.report, size: 40, color: colourScheme.onSecondary),
-                Text.rich(
-                    TextSpan(children: [
-                      const TextSpan(text: 'Please read the '),
-                      TextSpan(
-                        text: 'important information',
-                        style: const TextStyle(decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
-                            Navigator.push(
-                                context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
-                          },
-                      ),
-                      const TextSpan(text: ' about the Fair and its facilities.'),
-                    ]),
-                    style: bodyStyle),
-              ),
-              guideRow(
-                Icon(Icons.diversity_1, size: 40, color: colourScheme.onSecondary),
-                Text.rich(
-                    TextSpan(children: [
-                      const TextSpan(text: 'The Fair is run entirely by volunteers. To get involved, visit our '),
-                      TextSpan(
-                        text: 'website',
-                        style: const TextStyle(decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
-                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
-                          },
-                      ),
-                      const TextSpan(text: '.'),
-                    ]),
-                    style: bodyStyle),
-              ),
-              guideRow(
-                Icon(Icons.feedback, size: 40, color: colourScheme.onSecondary),
-                Text.rich(
-                    TextSpan(children: [
-                      const TextSpan(text: 'We’d love to hear your feedback about the app. Just fill in '),
-                      TextSpan(
-                        text: 'this form',
-                        style: const TextStyle(decoration: TextDecoration.underline),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
-                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
-                          },
-                      ),
-                      const TextSpan(text: '.'),
-                    ]),
-                    style: bodyStyle),
-              ),
-            ]),
-          ],
-          onDone: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('done_WelcomeScreen');
-            _onIntroEnd(context);
-          },
-          onSkip: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('skip_text_WelcomeScreen');
-            _onIntroEnd(context);
-          },
-          showSkipButton: true,
-          skipOrBackFlex: 1,
-          dotsFlex: 2,
-          nextFlex: 1,
-          showBackButton: false,
-          back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
-          skip: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
-          overrideNext: (context, onPressed) => Tooltip(
-            message: 'Next page',
-            excludeFromSemantics: true,
-            child: TextButton(
-              onPressed: onPressed == null
-                  ? null
-                  : () {
+      ]),
+      guidePage('Explore the map', [
+        tip(Icons.home, 'Tap the Home button on the map to zoom to the Fair.'),
+        tip(Icons.radar, 'Tap the radar button to see your location and nearby pins.'),
+        tip(Icons.satellite_alt, 'Switch between street and satellite maps as you prefer.'),
+        tip(Icons.directions_walk, 'Open a listing and tap the walking icon for directions.'),
+        tip(Icons.search, 'Search for stalls and events on the map.'),
+        tip(Icons.filter_alt, 'Choose which types of attraction you want to appear on the map.'),
+      ]),
+      guidePage('Find what brings you to the Fair', [
+        tip(Icons.ballot, 'Tap Listings to browse everything at the Fair.'),
+        tip(Icons.sort, 'Sort by name or location, or by Nearest. Time sorting is also available for performances.'),
+        tip(Icons.info, 'Tap the info button to find out more about any listing.'),
+        tip(Icons.favorite, 'Tap a listing’s heart icon to save it. It will then appear in your Favourites.'),
+        tip(Icons.share, 'Share a listing with friends to tell them where you\'re headed.'),
+        tip(Icons.event_busy, 'On the day of the Fair, performance lists and Favourites let you hide finished events or jump to what’s on now.'),
+      ]),
+      guidePage('Plan your day with the timetable', [
+        tip(Icons.watch_later, 'See performances and shorter visits and experiences by time and location.'),
+        tip(Icons.pinch, 'Scroll across locations and up or down through the day. Pinch to adjust the timetable’s scale.'),
+        tip(Icons.filter_alt, 'Tap the filter icon to cycle between music, non-music and everything.'),
+        tip(Icons.schedule, 'On the day, tap the clock to show what’s on now or starting soon.'),
+        tip(Icons.info, 'Tap an event for more details, or to save it as a Favourite.'),
+      ]),
+      guidePage('Make the app your own', [
+        tip(Icons.palette, 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
+        tip(Icons.straighten, 'Choose the units used for distances in Settings.'),
+        tip(Icons.privacy_tip, 'You choose whether to allow anonymous usage analytics in Settings.'),
+      ]),
+      guidePage('A few final things…', [
+        tip(Icons.favorite, 'Thank you for visiting Mill Road Winter Fair and using our app.'),
+        tip(Icons.update, 'Listings may change before the Fair, so check back for the latest details.'),
+        guideRow(
+          Icon(Icons.report, size: 40, color: colourScheme.onSecondary),
+          Text.rich(
+              TextSpan(children: [
+                const TextSpan(text: 'Please read the '),
+                TextSpan(
+                  text: 'important information',
+                  style: const TextStyle(decoration: TextDecoration.underline),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('next_WelcomeScreen');
-                      onPressed();
+                      widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
                     },
-              child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
-            ),
-          ),
-          done: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
-          curve: Curves.fastLinearToSlowEaseIn,
-          controlsMargin: const EdgeInsets.all(16),
-          controlsPadding: kIsWeb ? const EdgeInsets.all(12.0) : const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
-          dotsDecorator: const DotsDecorator(
-            size: Size(6.0, 6.0),
-            spacing: EdgeInsets.symmetric(horizontal: 2),
-            color: Color(0xFFBDBDBD),
-            activeSize: Size(14.0, 6.0),
-            activeShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(25.0)),
-            ),
-          ),
-          dotsContainerDecorator: const ShapeDecoration(
-            color: Colors.black87,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-            ),
-          ),
+                ),
+                const TextSpan(text: ' about the Fair and its facilities.'),
+              ]),
+              style: bodyStyle),
         ),
-      ],
-    );
+        guideRow(
+          Icon(Icons.diversity_1, size: 40, color: colourScheme.onSecondary),
+          Text.rich(
+              TextSpan(children: [
+                const TextSpan(text: 'The Fair is run entirely by volunteers. To get involved, visit our '),
+                TextSpan(
+                  text: 'website',
+                  style: const TextStyle(decoration: TextDecoration.underline),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
+                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                    },
+                ),
+                const TextSpan(text: '.'),
+              ]),
+              style: bodyStyle),
+        ),
+        guideRow(
+          Icon(Icons.feedback, size: 40, color: colourScheme.onSecondary),
+          Text.rich(
+              TextSpan(children: [
+                const TextSpan(text: 'We’d love to hear your feedback about the app. Just fill in '),
+                TextSpan(
+                  text: 'this form',
+                  style: const TextStyle(decoration: TextDecoration.underline),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      HapticFeedback.lightImpact();
+                      widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
+                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                    },
+                ),
+                const TextSpan(text: '.'),
+              ]),
+              style: bodyStyle),
+        ),
+      ]),
+    ];
+
+    const controlsMargin = EdgeInsets.all(16);
+    const controlsPadding = kIsWeb ? EdgeInsets.all(12.0) : EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0);
+    const buttonFlex = 1;
+    const dotsFlex = 2;
+    return LayoutBuilder(builder: (context, constraints) {
+      final controlsWidth = (constraints.maxWidth - controlsMargin.horizontal - controlsPadding.horizontal).clamp(0.0, double.infinity);
+      final dotsWidth = controlsWidth * dotsFlex / (buttonFlex * 2 + dotsFlex);
+      final dotShapesWidth = (pages.length - 1) * 12.0 + 20.0;
+      final dotSpacing = ((dotsWidth - dotShapesWidth) / (pages.length * 2)).clamp(0.0, 6.0);
+      // Keep the larger dots; reduce their gaps first. Scale only if even the
+      // dot shapes alone cannot fit in an exceptionally narrow viewport.
+      final dotScale = (dotsWidth / dotShapesWidth).clamp(0.0, 1.0);
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/welcomeScreen/chooserPage_background.jpg',
+            fit: BoxFit.cover,
+            excludeFromSemantics: true,
+          ),
+          IntroductionScreen(
+            key: introKey,
+            safeAreaList: [false, false, false, Platform.isAndroid && isNavBarVisible(context)],
+            autoScrollDuration: onTest ? null : 150000,
+            infiniteAutoScroll: onTest ? false : true,
+            globalBackgroundColor: Colors.transparent,
+            allowImplicitScrolling: true,
+            globalFooter: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Take me straight to the app!',
+                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
+                  ),
+                  onPressed: () {
+                    HapticFeedback.heavyImpact();
+                    widget.analyticsService.logButtonTapped('skip_WelcomeScreen');
+                    _onIntroEnd(context);
+                  },
+                ),
+              ),
+            ),
+            pages: pages,
+            onDone: () {
+              HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('done_WelcomeScreen');
+              _onIntroEnd(context);
+            },
+            onSkip: () {
+              HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('skip_text_WelcomeScreen');
+              _onIntroEnd(context);
+            },
+            showSkipButton: true,
+            skipOrBackFlex: buttonFlex,
+            dotsFlex: dotsFlex,
+            nextFlex: buttonFlex,
+            showBackButton: false,
+            back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
+            skip: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
+            overrideNext: (context, onPressed) => Tooltip(
+              message: 'Next page',
+              excludeFromSemantics: true,
+              child: TextButton(
+                onPressed: onPressed == null
+                    ? null
+                    : () {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('next_WelcomeScreen');
+                        onPressed();
+                      },
+                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
+              ),
+            ),
+            done: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
+            curve: Curves.fastLinearToSlowEaseIn,
+            controlsMargin: controlsMargin,
+            controlsPadding: controlsPadding,
+            dotsDecorator: DotsDecorator(
+              size: Size(12.0 * dotScale, 12.0 * dotScale),
+              spacing: EdgeInsets.symmetric(horizontal: dotSpacing),
+              color: Color(0xFFBDBDBD),
+              activeSize: Size(20.0 * dotScale, 10.0 * dotScale),
+              activeShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25.0)),
+              ),
+            ),
+            dotsContainerDecorator: const ShapeDecoration(
+              color: Colors.black87,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }

@@ -28,6 +28,31 @@ void main() {
   });
 
   group('WelcomeScreen', () {
+    testWidgets('larger dots adapt their spacing when the screen is resized', (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(MaterialApp(
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      var dots = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).dotsDecorator;
+      expect(dots.size, const Size(12, 12));
+      expect(dots.activeSize, const Size(20, 10));
+      expect(dots.spacing.horizontal, lessThan(12));
+      expect(tester.takeException(), isNull);
+
+      tester.view.physicalSize = const Size(480, 800);
+      await settle(tester);
+      dots = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).dotsDecorator;
+      expect(dots.size, const Size(12, 12));
+      expect(dots.activeSize, const Size(20, 10));
+      expect(dots.spacing, const EdgeInsets.symmetric(horizontal: 6));
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('background stays fixed while panels are swiped', (tester) async {
       await tester.pumpWidget(MaterialApp(
         home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
