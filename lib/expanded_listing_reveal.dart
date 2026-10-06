@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-/// The scroll range in which the expanded tile remains in view.
+// The scroll range in which the expanded tile remains in view.
 class ExpandedListingScrollBounds {
   Object? _owner;
   double? min;
@@ -38,7 +38,7 @@ class ExpandedListingScrollPhysics extends ScrollPhysics {
   }
 }
 
-/// Reveals expanded content without taking control back after manual scrolling.
+// Reveals expanded content without taking control back after manual scrolling.
 class ExpandedListingReveal extends StatefulWidget {
   const ExpandedListingReveal({super.key, required this.expanded, required this.child, this.bounds});
 
