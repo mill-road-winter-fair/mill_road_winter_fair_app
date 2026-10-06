@@ -12,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 class GroupListingInfoSheet extends StatelessWidget {
   final bool brickAndMortar;
   final String title;
-  final String categories;
+  final List<String> categories;
   final String startTime;
   final String endTime;
   final String approxDistance;
@@ -35,10 +35,18 @@ class GroupListingInfoSheet extends StatelessWidget {
 
     // Determine if the event has ended, update text style accordingly
     final bool ended = hasEventEnded(endTime);
-    final timeStyle = TextStyle(fontSize: 14, color: colorScheme.onPrimary, decoration: ended ? TextDecoration.lineThrough : TextDecoration.none);
+    final timeStyle = TextStyle(
+      fontSize: 14,
+      color: colorScheme.onPrimary,
+      decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
+    );
 
     return Container(
-      decoration: BoxDecoration(color: colorScheme.primary, borderRadius: BorderRadius.circular(12), border: BoxBorder.all(width: 1, color: colorScheme.onSurfaceVariant)),
+      decoration: BoxDecoration(
+        color: colorScheme.primary,
+        borderRadius: BorderRadius.circular(12),
+        border: BoxBorder.all(width: 1, color: colorScheme.onSurfaceVariant),
+      ),
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -54,12 +62,22 @@ class GroupListingInfoSheet extends StatelessWidget {
                   child: FittedBox(
                     alignment: Alignment.centerLeft,
                     fit: BoxFit.scaleDown,
-                    child: Text(title, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: colorScheme.onPrimary)),
+                    child: Text(
+                      title,
+                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
+                    ),
                   ),
                 ),
               ),
               if (!brickAndMortar) const Expanded(flex: 1, child: SizedBox(width: 2)),
-              if (!brickAndMortar) Expanded(flex: 7, child: Text("$startTime—$endTime", style: timeStyle, textAlign: TextAlign.end)),
+              if (!brickAndMortar) Expanded(
+                flex: 7,
+                child: Text(
+                  "$startTime—$endTime",
+                  style: timeStyle,
+                  textAlign: TextAlign.end,
+                ),
+              ),
             ],
           ),
           // const SizedBox(height: 8),
@@ -71,11 +89,21 @@ class GroupListingInfoSheet extends StatelessWidget {
                 child: FittedBox(
                   alignment: Alignment.centerLeft,
                   fit: BoxFit.scaleDown,
-                  child: Text(categories, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onPrimary)),
+                  child: Row(spacing: 8, children:[
+                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: colorScheme.onPrimary, semanticLabel: subfilterCategoryLabels[c]?.label)
+                  ]),
                 ),
               ),
               const Expanded(flex: 1, child: SizedBox(width: 2)),
-              if (currentLatLng != null) Expanded(flex: 10, child: Text(approxDistance, style: TextStyle(fontSize: 14, color: colorScheme.onPrimary), textAlign: TextAlign.end)),
+              if (currentLatLng != null)
+                Expanded(
+                  flex: 10,
+                  child: Text(
+                    approxDistance,
+                    style: TextStyle(fontSize: 14, color: colorScheme.onPrimary),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
             ],
           ),
         ],
@@ -144,8 +172,10 @@ class SpecificListingInfoSheet extends StatefulWidget {
   State<SpecificListingInfoSheet> createState() => _SpecificListingInfoSheetState();
 }
 
+
 class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
   final GlobalKey _cancelledLabelKey = GlobalKey();
+  final GlobalKey brickAndMortarIconKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +184,12 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     Widget subDetails; // calculated subtitle/details field
 
     // Determine if the event has been cancelled, update text style accordingly
-    final basicTitleStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: widget.colorScheme.onSurface, decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none);
+    final basicTitleStyle = TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: widget.colorScheme.onSurface,
+      decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none,
+    );
     final titleStyle = basicTitleStyle.copyWith(decoration: widget.cancelled ? TextDecoration.lineThrough : TextDecoration.none);
     updatedTimes = widget.cancelled ? 'CANCELLED' : "${widget.startTime}—${widget.endTime}";
 
@@ -163,7 +198,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
 
     // Determine if the event has ended, update text style accordingly
     final bool ended = !widget.brickAndMortar && hasEventEnded(widget.endTime);
-    final timeStyle = subSubStyle.copyWith(color: ended ? Colors.red : widget.colorScheme.onSurface, decoration: ended ? TextDecoration.lineThrough : TextDecoration.none);
+    final timeStyle = subSubStyle.copyWith(
+      color: ended ? Colors.red : widget.colorScheme.onSurface,
+      decoration: ended ? TextDecoration.lineThrough : TextDecoration.none,
+    );
 
     if (widget.location == '') {
       // this SpecificListingInfoSheet must be within a Group modal, so display differently
@@ -171,22 +209,29 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
           ? Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: [Text(widget.subtitle, style: subSubStyle), const SizedBox(height: 2), _cancelledLabel(context)],
+              children: [
+                Text(widget.subtitle, style: subSubStyle),
+                const SizedBox(height: 2),
+                _cancelledLabel(context),
+              ],
             )
           : Text.rich(
               textAlign: TextAlign.right,
-              TextSpan(children: [TextSpan(text: widget.subtitle, style: subSubStyle), if (!widget.brickAndMortar) TextSpan(text: '\n$updatedTimes', style: timeStyle)]),
-            );
+              TextSpan(children: [
+                TextSpan(text: widget.subtitle, style: subSubStyle),
+                if (!widget.brickAndMortar)
+                  TextSpan(text: '\n$updatedTimes', style: timeStyle),
+              ]));
     } else {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
-    final content = Opacity(
-      opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
+    final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
       child: Container(
         padding: (widget.inDialog)
-            ? const EdgeInsets.all(0)
-            : EdgeInsets.fromLTRB(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 8, 4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 12),
+            ? EdgeInsets.all(0)
+            : EdgeInsets.fromLTRB(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 8,
+                4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,14 +246,25 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       ? Opacity(
                           opacity: 0.5,
                           child: ColorFiltered(
-                            colorFilter: const ColorFilter.matrix(<double>[0.2126, 0.7152, 0.0722, 0, 0, 0.2126, 0.7152, 0.0722, 0, 0, 0.2126, 0.7152, 0.0722, 0, 0, 0, 0, 0, 1, 0]),
-                            child: Text('${widget.emoji} ', style: const TextStyle(fontSize: 30)),
+                            colorFilter: const ColorFilter.matrix(<double>[
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0.2126, 0.7152, 0.0722, 0, 0,
+                              0, 0, 0, 1, 0,
+                            ]),
+                            child: Text('${widget.emoji} ', style: TextStyle(fontSize: 30)),
                           ),
                         )
                       : Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
-                Expanded(flex: 14, child: Text(widget.title, style: titleStyle)),
+                Expanded(
+                  flex: 14,
+                  child: Text(widget.title, style: titleStyle),
+                ),
                 const Expanded(flex: 1, child: SizedBox(width: 2)),
-                Expanded(flex: 6, child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: subDetails)),
+                Expanded(
+                  flex: 6,
+                  child: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerRight, child: subDetails),
+                ),
               ],
             ),
             // add location (and space before) unless it's blank (which means it's a bottom modal group list)
@@ -232,21 +288,32 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       ),
                     ),
                   ),
-                  if (widget.cancelled || !widget.brickAndMortar) const Expanded(flex: 1, child: SizedBox(width: 2)),
                   if (widget.cancelled || !widget.brickAndMortar)
-                    Expanded(
-                      flex: 6,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerRight,
-                        child: widget.cancelled ? _cancelledLabel(context) : Text(updatedTimes, style: timeStyle, textAlign: TextAlign.end),
-                      ),
+                    const Expanded(flex: 1, child: SizedBox(width: 2)),
+                  if (widget.cancelled || !widget.brickAndMortar) Expanded(
+                    flex: 6,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: widget.cancelled
+                          ? _cancelledLabel(context)
+                          : Text(
+                              updatedTimes,
+                              style: timeStyle,
+                              textAlign: TextAlign.end,
+                            ),
                     ),
+                  ) else if (widget.brickAndMortar) GestureDetector(
+                    onTap: () => showMiniPopup(context, brickAndMortarIconKey, 'A permanent shop or office building', analyticsService: widget.analyticsService),
+                    key: brickAndMortarIconKey,
+                    child: Icon(Icons.store),
+                  ),
                 ],
               ),
             if ((widget.detailsVisible ?? false) && widget.inDialog) detailsColumn(context),
             const SizedBox(height: 12),
             Row(
+              spacing: 12,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -260,24 +327,27 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
                         },
                   padding: const EdgeInsets.all(0),
-                  style: ElevatedButton.styleFrom(visualDensity: const VisualDensity(horizontal: -4, vertical: -2), padding: const EdgeInsets.all(0), tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  style: ElevatedButton.styleFrom(
+                    visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                    padding: const EdgeInsets.all(0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   icon: FaIcon(
                     shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                     (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
                     size: 22,
-                    color: widget.cancelled && !widget.listingFavourited ? Theme.of(context).disabledColor : widget.colorScheme.primary,
+                    color: widget.cancelled && !widget.listingFavourited
+                        ? Theme.of(context).disabledColor
+                        : widget.colorScheme.primary,
                   ),
                 ),
-
-                const SizedBox(width: 6),
+                Spacer(),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     iconSize: 24,
                     visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                     padding: const EdgeInsets.all(0),
                     elevation: 3,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: widget.cancelled
                       ? null
                       : () {
@@ -288,11 +358,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         },
                   child: const Icon(Icons.directions_walk, semanticLabel: 'Get walking directions'),
                 ),
-                // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
+                // only display the Details button if there are details to display (and they're not always shown i.e. single bottom modal)
                 if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
-                  const SizedBox(width: 6),
-                // below is safeguard in case a listing has Email+Phone+Website on a small screen: do icon-only Details button
-                if (widget.onDetailsTapped != null && widget.website.isNotEmpty && widget.email.isNotEmpty && widget.phoneNumber.isNotEmpty && MediaQuery.of(context).size.width <= 360)
                   ElevatedButton(
                     style: (widget.detailsVisible ?? false)
                         ? ElevatedButton.styleFrom(
@@ -302,41 +369,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                             visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                             padding: const EdgeInsets.all(0),
                             elevation: 3,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          )
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap)
                         : ElevatedButton.styleFrom(
                             iconSize: 24,
                             visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                             padding: const EdgeInsets.all(0),
                             elevation: 3,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
-                      widget.onDetailsTapped?.call();
-                    },
-                    child: Icon(Icons.info, semanticLabel: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details'),
-                  )
-                else if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
-                  ElevatedButton(
-                    style: (widget.detailsVisible ?? false)
-                        ? ElevatedButton.styleFrom(
-                            iconSize: 24,
-                            foregroundColor: widget.colorScheme.onPrimary,
-                            backgroundColor: widget.colorScheme.primary,
-                            visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                            padding: const EdgeInsets.all(0),
-                            elevation: 3,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          )
-                        : ElevatedButton.styleFrom(
-                            iconSize: 24,
-                            visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-                            padding: const EdgeInsets.all(0),
-                            elevation: 3,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                     onPressed: () {
                       HapticFeedback.lightImpact();
                       widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
@@ -344,95 +383,29 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     },
                     child: Icon(Icons.info, semanticLabel: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details'),
                   ),
-                const SizedBox(width: 6),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     iconSize: 24,
                     visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                     padding: const EdgeInsets.all(0),
                     elevation: 3,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    shareListing(widget.title, widget.location, widget.startTime, widget.endTime, context, cancelled: widget.cancelled, brickAndMortar: widget.brickAndMortar);
-                    widget.analyticsService.logButtonTapped('share_listing', listingId: widget.listingId, listingName: widget.title);
+                    shareListing(
+                        widget.title,
+                        widget.location,
+                        widget.startTime,
+                        widget.endTime,
+                        context,
+                        cancelled: widget.cancelled,
+                        brickAndMortar: widget.brickAndMortar,
+                      );
+                      widget.analyticsService.logButtonTapped('share_listing', listingId: widget.listingId, listingName: widget.title);
                   },
-                  child: (Platform.isAndroid) ? const Icon(Icons.share, semanticLabel: 'Share listing') : const Icon(Icons.ios_share, semanticLabel: 'Share listing'),
-                ),
-                Flexible(flex: 1, child: Container()),
-                if (widget.website.isNotEmpty) const SizedBox(width: 6),
-                if (widget.website.isNotEmpty)
-                  Semantics(
-                    button: true,
-                    label: 'Open listing website',
-                    child: Material(
-                      shape: const CircleBorder(),
-                      elevation: 3,
-                      color: widget.colorScheme.primary,
-                      child: InkWell(
-                        onTap: () async {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
-                          launchUrl(Uri.parse(widget.website));
-                        },
-                        customBorder: const CircleBorder(),
-                        radius: 8,
-                        child: Padding(padding: const EdgeInsets.all(3), child: Icon(Icons.public, size: 22, color: widget.colorScheme.onPrimary)),
-                      ),
-                    ),
-                  ),
-                if (widget.email.isNotEmpty) const SizedBox(width: 6),
-                if (widget.email.isNotEmpty)
-                  Semantics(
-                    button: true,
-                    label: 'Email listing',
-                    child: Material(
-                      shape: const CircleBorder(),
-                      elevation: 3,
-                      color: widget.colorScheme.primary,
-                      child: InkWell(
-                        onTap: () async {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
-                          final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
-                          if (await canLaunchUrl(mailUri)) {
-                            await launchUrl(mailUri);
-                          } else {
-                            throw Exception('Could not launch email client');
-                          }
-                        },
-                        customBorder: const CircleBorder(),
-                        radius: 8,
-                        child: Padding(padding: const EdgeInsets.all(3), child: Icon(Icons.email, size: 22, color: widget.colorScheme.onPrimary)),
-                      ),
-                    ),
-                  ),
-                if (widget.phoneNumber.isNotEmpty) const SizedBox(width: 6),
-                if (widget.phoneNumber.isNotEmpty)
-                  Semantics(
-                    button: true,
-                    label: 'Call listing',
-                    child: Material(
-                      shape: const CircleBorder(),
-                      elevation: 3,
-                      color: widget.colorScheme.primary,
-                      child: InkWell(
-                        onTap: () async {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
-                          final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
-                          if (await canLaunchUrl(phoneUri)) {
-                            await launchUrl(phoneUri);
-                          } else {
-                            throw Exception('Could not launch ${widget.phoneNumber}');
-                          }
-                        },
-                        customBorder: const CircleBorder(),
-                        radius: 8,
-                        child: Padding(padding: const EdgeInsets.all(3), child: Icon(Icons.phone, size: 22, color: widget.colorScheme.onPrimary)),
-                      ),
-                    ),
+                  child: (Platform.isAndroid)
+                      ? const Icon(Icons.share, semanticLabel: 'Share listing')
+                      : const Icon(Icons.ios_share, semanticLabel: 'Share listing'),
                   ),
               ],
             ),
@@ -444,26 +417,43 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
         ),
       ),
     );
-    return ExpandedListingReveal(expanded: widget.detailsVisible == true && widget.onDetailsTapped != null, bounds: widget.scrollBounds, child: content);
+    return ExpandedListingReveal(
+      expanded: widget.detailsVisible == true && widget.onDetailsTapped != null,
+      bounds: widget.scrollBounds,
+      child: content,
+    );
   }
 
   Widget _cancelledLabel(BuildContext context) {
     return Semantics(
       button: !widget.brickAndMortar,
-      label: 'Cancelled. Show original time',
+      label: widget.brickAndMortar ? 'Cancelled' : 'Cancelled. Show original time',
       excludeSemantics: true,
       child: GestureDetector(
-        onTap: widget.brickAndMortar
-            ? null
-            : () {
-                HapticFeedback.lightImpact();
-                showMiniPopup(context, _cancelledLabelKey, 'Originally ${widget.startTime}–${widget.endTime}', analyticsService: widget.analyticsService);
-              },
+        onTap: widget.brickAndMortar ? null : () {
+          HapticFeedback.lightImpact();
+          showMiniPopup(
+            context,
+            _cancelledLabelKey,
+            'Originally ${widget.startTime}–${widget.endTime}',
+            analyticsService: widget.analyticsService,
+          );
+        },
         child: Container(
           key: _cancelledLabelKey,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(color: widget.colorScheme.onSurfaceVariant, borderRadius: BorderRadius.circular(12)),
-          child: Text('CANCELLED', style: TextStyle(color: widget.colorScheme.onPrimary, fontSize: 12, fontWeight: FontWeight.bold)),
+          decoration: BoxDecoration(
+            color: widget.colorScheme.onSurfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            'CANCELLED',
+            style: TextStyle(
+              color: widget.colorScheme.onPrimary,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ),
     );
@@ -478,26 +468,23 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
         if (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty) const SizedBox(height: 8),
         if (widget.description.isNotEmpty) ...[
           const SizedBox(height: 8),
-          if (widget.imageURL.isNotEmpty)
-            AdaptiveImageText(descriptionWidget: Text(style: TextStyle(fontSize: 13, color: widget.colorScheme.onSurfaceVariant), widget.description), imageUrl: widget.imageURL)
-          else
-            Text(style: TextStyle(fontSize: 13, color: widget.colorScheme.onSurfaceVariant), widget.description),
+          if (widget.imageURL.isNotEmpty) AdaptiveImageText(
+            descriptionWidget: Text(style: TextStyle(fontSize: 13, color: widget.colorScheme.onSurfaceVariant), widget.description),
+            imageUrl: widget.imageURL,
+          ) else Text(style: TextStyle(fontSize: 13, color: widget.colorScheme.onSurfaceVariant), widget.description),
         ] else if (widget.imageURL.isNotEmpty) ...[
           const SizedBox(height: 8),
-          Align(
-            alignment: AlignmentGeometry.center,
-            child: Image.network(
-              widget.imageURL,
-              fit: BoxFit.scaleDown,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.broken_image);
-              },
-            ),
-          ),
+          Align(alignment: AlignmentGeometry.center, child: Image.network(
+            widget.imageURL,
+            fit: BoxFit.scaleDown,
+            errorBuilder: (context, error, stackTrace) { return const Icon(Icons.broken_image); },
+          )),
         ],
         if (widget.website.isNotEmpty) ...[
           const SizedBox(height: 8),
-          GestureDetector(
+          Semantics(
+            link: true,
+            child: GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
@@ -512,60 +499,60 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               ),
             ),
           ),
+          ),
         ],
         if (widget.email.isNotEmpty) ...[
           const SizedBox(height: 8),
-          Semantics(
-            button: true,
-            label: 'Email ${widget.email}',
-            child: GestureDetector(
-              onTap: () async {
-                HapticFeedback.lightImpact();
-                widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
-                final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
-                if (await canLaunchUrl(mailUri)) {
-                  await launchUrl(mailUri);
-                } else {
-                  throw Exception('Could not launch email client');
-                }
-              },
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Email: '),
-                    TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.email),
-                  ],
-                ),
+    Semantics(
+    button: true,
+    label: 'Email ${widget.email}',
+    child: GestureDetector(
+            onTap: () async {
+              HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
+              final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
+              if (await canLaunchUrl(mailUri)) {
+                await launchUrl(mailUri);
+              } else {
+                throw Exception('Could not launch email client');
+              }
+            },
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Email: '),
+                  TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.email),
+                ],
               ),
             ),
           ),
-        ],
+    )],
         if (widget.phoneNumber.isNotEmpty) ...[
           const SizedBox(height: 8),
-          Semantics(
-            button: true,
-            label: 'Call ${widget.phoneNumber}',
-            child: GestureDetector(
-              onTap: () async {
-                HapticFeedback.lightImpact();
-                widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
-                final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
-                if (await canLaunchUrl(phoneUri)) {
-                  await launchUrl(phoneUri);
-                } else {
-                  throw Exception('Could not launch ${widget.phoneNumber}');
-                }
-              },
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Telephone: '),
-                    TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.phoneNumber),
-                  ],
-                ),
+    Semantics(
+    button: true,
+    label: 'Call ${widget.phoneNumber}',
+    child: GestureDetector(
+            onTap: () async {
+              HapticFeedback.lightImpact();
+              widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
+              final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
+              if (await canLaunchUrl(phoneUri)) {
+                await launchUrl(phoneUri);
+              } else {
+                throw Exception('Could not launch ${widget.phoneNumber}');
+              }
+            },
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Telephone: '),
+                  TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.phoneNumber),
+                ],
               ),
             ),
           ),
+        ),
         ],
       ],
     );
@@ -590,7 +577,10 @@ Future<void> showListingDetailsDialog(
 
   var distanceMessage = 'Distance unknown';
   if (currentLatLng != null) {
-    int approximateDistanceMetres = asTheCrowFlies(currentLatLng!, event.latLng);
+    int approximateDistanceMetres = asTheCrowFlies(
+      currentLatLng!,
+      event.latLng,
+    );
     distanceMessage = '(~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
   }
 
@@ -600,55 +590,66 @@ Future<void> showListingDetailsDialog(
     builder: (_) => StatefulBuilder(
       builder: (ctx2, setStateDialog) {
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
+          insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
           shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,
           elevation: 12,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => Navigator.of(ctx2).pop(),
-            child: SingleChildScrollView(
-              child: Container(
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                child: SpecificListingInfoSheet(
-                  listingId: event.id,
-                  cancelled: event.cancelled,
-                  brickAndMortar: event.brickAndMortar,
-                  emoji: event.emoji,
-                  title: event.name,
-                  subtitle: event.subtitle,
-                  location: event.location,
-                  description: event.description,
-                  email: event.email,
-                  website: event.website,
-                  phoneNumber: event.phoneNumber,
-                  imageURL: event.imageURL,
-                  startTime: formatTime(event.startTime),
-                  endTime: formatTime(event.endTime),
-                  approxDistance: distanceMessage,
-                  detailsVisible: true,
-                  listingFavourited: favouriteListingKeys.value.contains(event.id),
-                  onFavouriteTapped: () {
-                    favouriteOrNotListing(event);
-                    setStateFunction.call;
-                    setStateDialog(() {});
-                  },
-                  onGetDirections: () async {
-                    safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
-                    onGetDirections.call();
-                  },
-                  inDialog: true,
-                  analyticsService: analyticsService,
-                  colorScheme: colorScheme,
+          child: Semantics(
+            container: true,
+            explicitChildNodes: true,
+            button: true,
+            label: 'Dismiss listing details',
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => {
+                HapticFeedback.lightImpact(),
+                Navigator.of(ctx2).pop(),
+              },
+              child: SingleChildScrollView(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                  child: SpecificListingInfoSheet(
+                    listingId: event.id,
+                    cancelled: event.cancelled,
+                    brickAndMortar: event.brickAndMortar,
+                    emoji: event.emoji,
+                    title: event.name,
+                    subtitle: event.subtitle,
+                    location: event.location,
+                    description: event.description,
+                    email: event.email,
+                    website: event.website,
+                    phoneNumber: event.phoneNumber,
+                    imageURL: event.imageURL,
+                    startTime: formatTime(event.startTime),
+                    endTime: formatTime(event.endTime),
+                    approxDistance: distanceMessage,
+                    detailsVisible: true,
+                    listingFavourited: favouriteListingKeys.value.contains(event.id),
+                    onFavouriteTapped: () {
+                      favouriteOrNotListing(event);
+                      setStateFunction.call;
+                      setStateDialog(() {});
+                    },
+                    onGetDirections: () async {
+                      safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                      onGetDirections.call();
+                    },
+                    inDialog: true,
+                    analyticsService: analyticsService,
+                    colorScheme: colorScheme,
+                  ),
                 ),
               ),
             ),
           ),
         );
       },
-    ),
+    )
   );
   await Navigator.of(context).push(listingDetailsDialogRoute!);
   removeMiniPopup(); // just in case one was opened

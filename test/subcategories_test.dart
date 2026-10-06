@@ -13,64 +13,42 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 // API column order from the supplied 28-column response.
 const apiHeaders = [
-  'id',
-  'visibleOnMap',
-  'cancelled',
-  'groupParent',
-  'brickAndMortar',
-  'emoji',
-  'title',
-  'subtitle',
-  'groupID',
-  'food',
-  'shopping',
-  'charityCommunityInfo',
-  'performanceMusic',
-  'performanceChildrens',
-  'performanceDance',
-  'performanceOther',
-  'visitExperience',
-  'service',
-  'business',
-  'location',
-  'description',
-  'email',
-  'website',
-  'phone',
-  'latLng',
-  'imageURL',
-  'startTime',
-  'endTime',
+  'id', 'visibleOnMap', 'cancelled', 'groupParent', 'brickAndMortar',
+  'emoji', 'title', 'subtitle', 'groupID', 'food', 'shopping',
+  'charityCommunityInfo', 'performanceMusic', 'performanceChildrens',
+  'performanceDance', 'performanceOther', 'visitExperience', 'service',
+  'business', 'location', 'description', 'email', 'website', 'phone',
+  'latLng', 'imageURL', 'startTime', 'endTime',
 ];
 
 const expectedSubcategories = {
-  'food': 'Food & Drink',
-  'shopping': 'Shopping & Stalls',
-  'charityCommunityInfo': 'Charity, Community, Info',
+  'food': 'Food & drink',
+  'shopping': 'Shopping',
+  'charityCommunityInfo': 'Charity, community, info',
   'performanceMusic': 'Music',
-  'performanceChildrens': 'Children’s',
+  'performanceChildrens': 'Children’s entertainment',
   'performanceDance': 'Dance',
   'performanceOther': 'Other performances',
-  'visitExperience': 'Visit & Experience',
+  'visitExperience': 'Visits & experiences',
   'service': 'Services',
-  'business': 'Other business',
+  'business': 'Other businesses',
 };
 
 Map<String, dynamic> listingFor(String id, String subcategory) => {
-      for (final header in apiHeaders) header: '',
-      for (final key in expectedSubcategories.keys) key: 'FALSE',
-      'id': id,
-      'title': id,
-      'visibleOnMap': 'TRUE',
-      'cancelled': 'FALSE',
-      'groupParent': 'FALSE',
-      'brickAndMortar': 'FALSE',
-      subcategory: 'TRUE',
-      'location': 'Mill Road',
-      'latLng': '52.199687,0.138813',
-      'startTime': '10:30',
-      'endTime': '16:30',
-    };
+  for (final header in apiHeaders) header: '',
+  for (final key in expectedSubcategories.keys) key: 'FALSE',
+  'id': id,
+  'title': id,
+  'visibleOnMap': 'TRUE',
+  'cancelled': 'FALSE',
+  'groupParent': 'FALSE',
+  'brickAndMortar': 'FALSE',
+  subcategory: 'TRUE',
+  'location': 'Mill Road',
+  'latLng': '52.199687,0.138813',
+  'startTime': '10:30',
+  'endTime': '16:30',
+};
 
 void main() {
   setUp(() async {
@@ -90,20 +68,17 @@ void main() {
   });
 
   test('API preserves each subcategory and the columns following business', () async {
-    final expected = expectedSubcategories.keys.map((key) => listingFor(key, key)).toList();
-    final client = MockClient(
-      (_) async => http.Response(
-        jsonEncode({
-          'range': "'2025'!A1:AB350",
-          'majorDimension': 'ROWS',
-          'values': [
-            apiHeaders,
-            for (final listing in expected) [for (final header in apiHeaders) listing[header]],
-          ],
-        }),
-        200,
-      ),
-    );
+    final expected = expectedSubcategories.keys
+        .map((key) => listingFor(key, key)).toList();
+    final client = MockClient((_) async => http.Response(jsonEncode({
+      'range': "'2025'!A1:AB350",
+      'majorDimension': 'ROWS',
+      'values': [
+        apiHeaders,
+        for (final listing in expected)
+          [for (final header in apiHeaders) listing[header]],
+      ],
+    }), 200));
     addTearDown(client.close);
 
     expect(await fetchListings(client), expected);
@@ -112,22 +87,20 @@ void main() {
   for (final entry in expectedSubcategories.entries) {
     test('${entry.key} is recognised as a single category', () {
       final listing = listingFor('single', entry.key);
-      expect(countCategories(listing), entry.key.startsWith('performance') ? (1, 1) : (1, 0));
-      expect(
-        getCategory(listing),
-        {
-          'food': 'Food',
-          'shopping': 'Shopping',
-          'charityCommunityInfo': 'Charity/Community/Info',
-          'performanceMusic': 'Music',
-          'performanceChildrens': 'Childrens',
-          'performanceDance': 'Dance',
-          'performanceOther': 'Other',
-          'visitExperience': 'Visit/Experience',
-          'service': 'Service',
-          'business': 'Business',
-        }[entry.key],
-      );
+      expect(countCategories(listing), entry.key.startsWith('performance')
+          ? (1, 1)
+          : (1, 0));
+      expect(getCategory(listing), {
+              'food': 'Food', 'shopping': 'Shopping',
+              'charityCommunityInfo': 'Charity/Community/Info',
+              'performanceMusic': 'Music',
+              'performanceChildrens': 'Childrens',
+              'performanceDance': 'Dance',
+              'performanceOther': 'Other',
+              'visitExperience': 'Visit/Experience',
+              'service': 'Service', 
+              'business': 'Business',
+            }[entry.key]);
     });
 
     for (final page in ['all', 'favourite']) {
@@ -139,34 +112,33 @@ void main() {
         ];
         favouriteListingKeys.value = {...expectedSubcategories.keys, 'parent'};
         String? selected;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: StatefulBuilder(
-                builder: (context, setState) {
-                  return FilteredListingsPage(
-                    filterCategory: page,
-                    subfilterCategory: selected,
-                    listings: listings,
-                    onTabSelected: (_) {},
-                    onSubfilterChange: (value) => setState(() => selected = value),
-                    analyticsService: FakeAnalyticsService(),
-                  );
-                },
-              ),
-            ),
-          ),
-        );
+        await tester.pumpWidget(MaterialApp(home: Scaffold(
+          body: StatefulBuilder(builder: (context, setState) {
+            return FilteredListingsPage(
+              filterCategory: page,
+              subfilterCategory: selected,
+              listings: listings,
+              onTabSelected: (_) {},
+              onSubfilterChange: (value) => setState(() => selected = value),
+              analyticsService: FakeAnalyticsService(),
+            );
+          }),
+        )));
         await tester.pumpAndSettle();
 
-        final dropdownFinder = find.descendant(of: find.byKey(const ValueKey('filteringdropdown')), matching: find.byType(DropdownMenu<String?>));
+        final dropdownFinder = find.descendant(
+          of: find.byKey(const ValueKey('filteringdropdown')),
+          matching: find.byType(DropdownMenu<String?>),
+        );
         final dropdown = tester.widget<DropdownMenu<String?>>(dropdownFinder);
-        expect({for (final option in dropdown.dropdownMenuEntries) option.value: option.label}, {null: 'All', ...expectedSubcategories});
+        expect({for (final option in dropdown.dropdownMenuEntries)
+          option.value: option.label}, {null: 'Everything', ...expectedSubcategories});
         dropdown.onSelected!(entry.key);
         await tester.pumpAndSettle();
 
         final state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
-        expect(state.filteredListings.map((listing) => listing['id']), unorderedEquals([entry.key, if (page == 'all') 'not-favourited']));
+        expect(state.filteredListings.map((listing) => listing['id']),
+            unorderedEquals([entry.key, if (page == 'all') 'not-favourited']));
         expect(state.isShowingJustPerformance, entry.key.startsWith('performance'));
 
         tester.widget<DropdownMenu<String?>>(dropdownFinder).onSelected!(null);

@@ -172,45 +172,33 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
 
   switch (category) {
     case 'Group-Food':
-      assetPath = 'assets/mapMarkers/foodGroupMarker.png';
     case 'Food':
       assetPath = 'assets/mapMarkers/foodMarker.png';
     case 'Group-Shopping':
-      assetPath = 'assets/mapMarkers/stallsGroupMarker.png';
     case 'Shopping':
       assetPath = 'assets/mapMarkers/stallsMarker.png';
     case 'Group-Music':
-      assetPath = 'assets/mapMarkers/musicGroupMarker.png';
     case 'Music':
       assetPath = 'assets/mapMarkers/musicMarker.png';
     case 'Group-Childrens':
-      assetPath = 'assets/mapMarkers/childrensGroupMarker.png';
     case 'Childrens':
       assetPath = 'assets/mapMarkers/childrensMarker.png';
     case 'Group-Dance':
-      assetPath = 'assets/mapMarkers/danceGroupMarker.png';
     case 'Dance':
       assetPath = 'assets/mapMarkers/danceMarker.png';
     case 'Group-Other':
-      assetPath = 'assets/mapMarkers/otherGroupMarker.png';
     case 'Other':
       assetPath = 'assets/mapMarkers/otherMarker.png';
     case 'Group-Charity/Community/Info':
-      assetPath = 'assets/mapMarkers/charityCommunityInfoGroupMarker.png';
     case 'Charity/Community/Info':
       assetPath = 'assets/mapMarkers/charityCommunityInfoMarker.png';
     case 'Group-Visit/Experience':
-      assetPath = 'assets/mapMarkers/visitExperienceGroupMarker.png';
     case 'Visit/Experience':
       assetPath = 'assets/mapMarkers/visitExperienceMarker.png';
     case 'Group-Service':
-      assetPath = 'assets/mapMarkers/servicesGroupMarker.png';
     case 'Service-Information':
-      assetPath = 'assets/mapMarkers/servicesInformationMarker.png';
     case 'Service-FirstAid':
-      assetPath = 'assets/mapMarkers/servicesFirstAidMarker.png';
     case 'Service-Toilet':
-      assetPath = 'assets/mapMarkers/servicesToiletsMarker.png';
     case 'Service':
       assetPath = 'assets/mapMarkers/servicesMarker.png';
     case 'Business':
@@ -218,12 +206,12 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
     case 'Group-PerformanceEvent':
       assetPath = 'assets/mapMarkers/performanceEventGroupMarker.png';
     case 'Mixed':
-      assetPath = 'assets/mapMarkers/mixedMarker.png';
+      assetPath = 'assets/mapMarkers/mixedGroupMarker.png';
   }
 
   // Adjust the asset path if this is a group and load the relevant backdrop image (frame)
-  if (category.contains('Group-')) {
-    backdropData = await rootBundle.load("assets/mapMarkers/groupMarkerIconFrame.png");
+  if (category == 'Group-PerformanceEvent' || category == 'Mixed') {
+    backdropData = await rootBundle.load("assets/mapMarkers/groupMarkerIconFrameThin.png");
   } else {
     backdropData = await rootBundle.load("assets/mapMarkers/markerIconFrame.png");
   }

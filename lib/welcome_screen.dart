@@ -415,7 +415,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(Icons.update, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          Icon(Icons.access_time, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           Text("Tap this button to jump to the\ncurrent time in the list", style: bodyStyle.copyWith(height: 1.2)),
                         ],
@@ -423,7 +423,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(Icons.event_busy, size: 40, color: Theme.of(context).colorScheme.onSecondary),
+                          Icon(Icons.history_toggle_off, size: 40, color: Theme.of(context).colorScheme.onSecondary),
                           const SizedBox(width: 8),
                           Text("This button hides all the listings\nthat have finished", style: bodyStyle.copyWith(height: 1.2)),
                         ],
@@ -586,7 +586,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       showBackButton: false,
       back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
       skip: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
-      overrideNext: (context, onPressed) => TextButton(
+      overrideNext: (context, onPressed) => Tooltip(
+        message: 'Next page',
+        excludeFromSemantics: true,
+        child: TextButton(
         onPressed: onPressed == null
             ? null
             : () {
@@ -594,7 +597,8 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 widget.analyticsService.logButtonTapped('next_WelcomeScreen');
                 onPressed();
               },
-        child: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.tertiary),
+        child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
+        ),
       ),
       done: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
       curve: Curves.fastLinearToSlowEaseIn,
