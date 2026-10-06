@@ -90,7 +90,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   fit: BoxFit.scaleDown,
                   child: Row(spacing: 8, children:[
-                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: colorScheme.onPrimary)
+                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: colorScheme.onPrimary, semanticLabel: subfilterCategoryLabels[c]?.label)
                   ]),
                 ),
               ),
