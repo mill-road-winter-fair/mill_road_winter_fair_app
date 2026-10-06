@@ -84,7 +84,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Pump the RootWidget
@@ -135,7 +135,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Set a realistic window size to avoid layout overflow in the test
@@ -221,7 +221,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Set a realistic window size to avoid layout overflow in the test
@@ -301,7 +301,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Pump the RootWidget

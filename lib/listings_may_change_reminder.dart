@@ -76,11 +76,7 @@ class ListingUpdateNotifier {
     return !DateUtils.isSameDay(fairDate, now) && now.isBefore(fairDate);
   }
 
-  static Future<void> maybeShowNotice(
-    BuildContext context, {
-    DateTime? now,
-    required AnalyticsService analyticsService,
-  }) async {
+  static Future<void> maybeShowNotice(BuildContext context, {DateTime? now, required AnalyticsService analyticsService}) async {
     if (onTest) {
       return;
     }
@@ -145,10 +141,7 @@ class ListingUpdateNotifier {
                 if (isListingsMayChange) {
                   listingUpdateNoticeEnabled = !dontShowAgain;
                   await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
-                  await analyticsService.logPreferenceSet(
-                    'listing_update_notice',
-                    listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
-                  );
+                  await analyticsService.logPreferenceSet('listing_update_notice', listingUpdateNoticeEnabled ? 'enabled' : 'disabled');
                 }
                 if (dialogContext.mounted) {
                   Navigator.of(dialogContext).pop();

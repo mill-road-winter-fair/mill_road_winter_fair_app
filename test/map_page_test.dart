@@ -136,9 +136,7 @@ void main() {
         themeNotifier.value = previousTheme;
         tester.platformDispatcher.clearPlatformBrightnessTestValue();
       });
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()))));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       state.addSimpleMarker('Service-FirstAid', const LatLng(52.2, 0.14));
@@ -147,10 +145,7 @@ void main() {
       state.addSpecificMarker({...base, 'id': 'performance', 'food': 'FALSE', 'performanceMusic': 'TRUE', 'performanceDance': 'TRUE'});
       state.hideAllMarkers();
       final before = Map<MarkerId, Marker>.of(state.markers);
-      final types = {
-        '1': 'Group-Food', '3': 'Food', aSimpleMarkerId: 'Service-FirstAid',
-        'mixed': 'Mixed', 'performance': 'Group-PerformanceEvent',
-      };
+      final types = {'1': 'Group-Food', '3': 'Food', aSimpleMarkerId: 'Service-FirstAid', 'mixed': 'Mixed', 'performance': 'Group-PerformanceEvent'};
       for (final theme in ['dark', '2024', 'highContrast', 'colourBlindFriendly', 'light']) {
         selectedThemeKey = theme;
         themeNotifier.value = theme;
@@ -170,8 +165,10 @@ void main() {
       for (final brightness in [Brightness.dark, Brightness.light]) {
         tester.platformDispatcher.platformBrightnessTestValue = brightness;
         await tester.pumpAndSettle();
-        expect(state.markers[const MarkerId('3')]!.icon.toJson(),
-          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson());
+        expect(
+          state.markers[const MarkerId('3')]!.icon.toJson(),
+          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson(),
+        );
       }
       // A queued refresh must not call setState after the map has been removed.
       selectedThemeKey = 'dark';
@@ -187,17 +184,7 @@ void main() {
 
       locationPermission = LocationPermission.deniedForever;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(
-              listings: listings,
-              onTabSelected: (_) {},
-              analyticsService: FakeAnalyticsService(),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()))));
       await tester.pump();
 
       expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).myLocationEnabled, isFalse);
@@ -211,15 +198,10 @@ void main() {
         return true;
       });
       addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null));
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()))));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
-      Set<String> visibleIds() => state.markers.values
-          .where((marker) => marker.visible)
-          .map((marker) => marker.markerId.value)
-          .toSet();
+      Set<String> visibleIds() => state.markers.values.where((marker) => marker.visible).map((marker) => marker.markerId.value).toSet();
       expect(visibleIds(), {'1', '3'});
 
       await tester.tap(find.byIcon(Icons.search));
@@ -277,13 +259,7 @@ void main() {
       firstExecution = false;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Check the map buttons
@@ -304,22 +280,13 @@ void main() {
 
       // Mock the MethodChannel for Google Maps to capture camera movements
       final List<MethodCall> methodCalls = <MethodCall>[];
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        const MethodChannel('plugins.flutter.io/google_maps_0'),
-        (MethodCall methodCall) async {
-          methodCalls.add(methodCall);
-          return null;
-        },
-      );
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel('plugins.flutter.io/google_maps_0'), (MethodCall methodCall) async {
+        methodCalls.add(methodCall);
+        return null;
+      });
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
@@ -357,13 +324,7 @@ void main() {
       firstExecution = false;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
@@ -390,13 +351,7 @@ void main() {
       preferredMapOrientation = MapOrientation.adaptive;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Find the compass button by its icon
@@ -432,13 +387,7 @@ void main() {
       preferredRoadClosurePolygonVisible = true;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Find the "Road closures" legend at the bottom left
@@ -455,9 +404,11 @@ void main() {
       // The dialog has a title "Road closures" and specific body text.
       expect(find.byType(Dialog), findsOneWidget);
       expect(
-          find.text(
-              'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
-          findsOneWidget);
+        find.text(
+          'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',
+        ),
+        findsOneWidget,
+      );
 
       // Verify "Close" button exists to dismiss the dialog
       expect(find.text('Close'), findsOneWidget);
@@ -479,13 +430,7 @@ void main() {
       preferredRoadClosurePolygonVisible = true;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Find the "Road closures" legend at the bottom left
@@ -517,13 +462,7 @@ void main() {
       preferredRoadClosurePolygonVisible = true;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Verify initial state: polygon should be present
@@ -558,13 +497,7 @@ void main() {
       firstExecution = false;
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
@@ -606,13 +539,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
@@ -647,13 +574,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
@@ -824,17 +745,11 @@ void main() {
           'imageURL': '',
           "startTime": "10:30",
           "endTime": "16:30",
-        }
+        },
       ];
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
@@ -971,11 +886,7 @@ void main() {
 
       // Verify "Show All" button works
       final showAll = find.text("Show all");
-      await tester.dragUntilVisible(
-        showAll,
-        find.byType(SingleChildScrollView),
-        const Offset(0, 50),
-      );
+      await tester.dragUntilVisible(showAll, find.byType(SingleChildScrollView), const Offset(0, 50));
       await tester.tap(showAll);
       await tester.pumpAndSettle();
       expect(find.text("Filter map layers"), findsOne);
@@ -987,11 +898,7 @@ void main() {
 
       // Verify "Hide All" button works
       final hideAll = find.text("Hide all");
-      await tester.dragUntilVisible(
-        showAll,
-        find.byType(SingleChildScrollView),
-        const Offset(0, 50),
-      );
+      await tester.dragUntilVisible(showAll, find.byType(SingleChildScrollView), const Offset(0, 50));
       await tester.tap(hideAll);
       await tester.pumpAndSettle();
       expect(find.text("Filter map layers"), findsOne);
@@ -1036,17 +943,11 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Build the MapPage widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWidget(MaterialApp(home: Scaffold(body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}))));
       await tester.pumpAndSettle();
 
       // Obtain the state after mounting
@@ -1071,11 +972,7 @@ void main() {
               double compassBearing = (preferredMapOrientation == MapOrientation.adaptive) ? 90 : 0;
               return Column(
                 children: [
-                  AnimatedRotation(
-                    turns: compassBearing / 360.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: const Icon(Icons.navigation),
-                  ),
+                  AnimatedRotation(turns: compassBearing / 360.0, duration: const Duration(milliseconds: 200), child: const Icon(Icons.navigation)),
                   IconButton(
                     icon: const Icon(Icons.assistant_navigation),
                     onPressed: () {
@@ -1083,7 +980,7 @@ void main() {
                         preferredMapOrientation = (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
                       });
                     },
-                  )
+                  ),
                 ],
               );
             },

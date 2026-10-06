@@ -26,9 +26,7 @@ class WelcomeScreen extends StatelessWidget {
     if (Navigator.maybeOf(context) != null) {
       return OnBoardingPage(analyticsService: analyticsService);
     }
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
-    );
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent));
 
     final bool isAuto = selectedThemeKey == 'auto';
     final ThemeMode resolvedThemeMode = isAuto
@@ -75,11 +73,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       widget.onFinished!();
       return;
     }
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => HomePage(analyticsService: widget.analyticsService),
-      ),
-    );
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomePage(analyticsService: widget.analyticsService)));
   }
 
   @override
@@ -99,10 +93,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    routeObserver.subscribe(
-      this,
-      ModalRoute.of(context)!,
-    );
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
 
   @override
@@ -144,8 +135,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text('Take me straight to the app!',
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
+              child: Text('Take me straight to the app!', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
             ),
             onPressed: () {
               HapticFeedback.heavyImpact();
@@ -177,8 +167,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("What can I do with the app?",
-                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
+                      Text("What can I do with the app?", style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
                       const SizedBox(height: 16),
                       Row(
                         children: [
@@ -198,23 +187,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          SizedBox(
-                              width: 40,
-                              child: Align(
-                                  alignment: Alignment.center,
-                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
+                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
                           Text("Get full details for all of these,\nand save your favourites", style: bodyStyle),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(Icons.radar, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("See what’s on nearby or soon", style: bodyStyle),
-                        ],
-                      ),
+                      Row(children: [Icon(Icons.radar, size: 40, color: Theme.of(context).colorScheme.onSecondary), const SizedBox(width: 8), Text("See what’s on nearby or soon", style: bodyStyle)]),
                       const SizedBox(height: 16),
                       Row(
                         children: [
@@ -240,11 +219,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork01.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text('What do the pins mean?', style: titleStyle, textAlign: TextAlign.center),
-          ),
+          titleWidget: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text('What do the pins mean?', style: titleStyle, textAlign: TextAlign.center)),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -330,11 +305,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork02.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text('Choosing what’s shown', style: titleStyle, textAlign: TextAlign.center),
-          ),
+          titleWidget: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text('Choosing what’s shown', style: titleStyle, textAlign: TextAlign.center)),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -404,11 +375,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork03.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text('What’s on and when', style: titleStyle, textAlign: TextAlign.center),
-          ),
+          titleWidget: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text('What’s on and when', style: titleStyle, textAlign: TextAlign.center)),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -472,11 +439,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          SizedBox(
-                              width: 40,
-                              child: Align(
-                                  alignment: Alignment.center,
-                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
+                          SizedBox(width: 40, child: Align(alignment: Alignment.center, child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
                           const SizedBox(width: 8),
                           Text("Save your favourite listings, and\nview these from the main menu", style: bodyStyle),
                         ],
@@ -498,11 +461,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         PageViewModel(
           useScrollView: false,
           backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork04.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text('A few final things…', style: titleStyle, textAlign: TextAlign.center),
-          ),
+          titleWidget: FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.center, child: Text('A few final things…', style: titleStyle, textAlign: TextAlign.center)),
           bodyWidget: LayoutBuilder(
             builder: (context, constraints) {
               return ConstrainedBox(
@@ -539,8 +498,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
                                       widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
-                                      Navigator.push(
-                                          context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
                                     },
                                 ),
                                 TextSpan(text: "\nabout the Fair", style: bodyStyle),
@@ -632,14 +590,14 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         message: 'Next page',
         excludeFromSemantics: true,
         child: TextButton(
-        onPressed: onPressed == null
-            ? null
-            : () {
-                HapticFeedback.lightImpact();
-                widget.analyticsService.logButtonTapped('next_WelcomeScreen');
-                onPressed();
-              },
-        child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
+          onPressed: onPressed == null
+              ? null
+              : () {
+                  HapticFeedback.lightImpact();
+                  widget.analyticsService.logButtonTapped('next_WelcomeScreen');
+                  onPressed();
+                },
+          child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
         ),
       ),
       done: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
@@ -650,16 +608,9 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         size: Size(10.0, 10.0),
         color: Color(0xFFBDBDBD),
         activeSize: Size(22.0, 10.0),
-        activeShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(25.0)),
-        ),
+        activeShape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(25.0))),
       ),
-      dotsContainerDecorator: const ShapeDecoration(
-        color: Colors.black87,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
-        ),
-      ),
+      dotsContainerDecorator: const ShapeDecoration(color: Colors.black87, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0)))),
     );
   }
 }

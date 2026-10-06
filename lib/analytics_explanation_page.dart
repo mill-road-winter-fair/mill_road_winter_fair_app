@@ -53,15 +53,16 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
-          title: const FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text('Analytics Information'),
-          ),
+          leading: Navigator.canPop(context)
+              ? BackButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('back');
+                    Navigator.maybePop(context);
+                  },
+                )
+              : null,
+          title: const FittedBox(fit: BoxFit.scaleDown, child: Text('Analytics Information')),
         ),
         body: Container(
           padding: const EdgeInsets.all(16.0),
@@ -79,10 +80,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'What is Firebase?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Text('What is Firebase?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Text.rich(
                       TextSpan(
@@ -90,10 +88,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                         children: [
                           TextSpan(
                             text: 'Firebase',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
@@ -109,14 +104,9 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'What are we using it for?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Text('What are we using it for?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    const Text(
-                      'We use this anonymous data to:',
-                    ),
+                    const Text('We use this anonymous data to:'),
                     const SizedBox(height: 8),
                     const Padding(
                       padding: EdgeInsets.only(left: 16.0),
@@ -134,10 +124,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'What do we track?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Text('What do we track?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     const Padding(
                       padding: EdgeInsets.only(left: 16.0),
@@ -157,10 +144,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'What don\'t we track?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Text('What don\'t we track?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     const Padding(
                       padding: EdgeInsets.only(left: 16.0),
@@ -180,10 +164,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
-                      'How does Google use this data?',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
+                    Text('How does Google use this data?', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
                     Text.rich(
                       TextSpan(
@@ -195,10 +176,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                           ),
                           TextSpan(
                             text: 'here',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
@@ -209,10 +187,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                           const TextSpan(text: ' and in the '),
                           TextSpan(
                             text: 'Firebase Privacy and Security documentation',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
@@ -232,17 +207,12 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                           const TextSpan(text: 'For full details, read the '),
                           TextSpan(
                             text: 'Mill Road Winter Fair App Privacy Policy',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary, decoration: TextDecoration.underline),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('app_privacy_policy_link');
-                                launchUrl(Uri.parse(
-                                  'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf',
-                                ));
+                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf'));
                               },
                           ),
                           const TextSpan(text: '.'),
