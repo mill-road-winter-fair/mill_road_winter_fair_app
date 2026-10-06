@@ -590,14 +590,14 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         message: 'Next page',
         excludeFromSemantics: true,
         child: TextButton(
-        onPressed: onPressed == null
-            ? null
-            : () {
-                HapticFeedback.lightImpact();
-                widget.analyticsService.logButtonTapped('next_WelcomeScreen');
-                onPressed();
-              },
-        child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
+          onPressed: onPressed == null
+              ? null
+              : () {
+                  HapticFeedback.lightImpact();
+                  widget.analyticsService.logButtonTapped('next_WelcomeScreen');
+                  onPressed();
+                },
+          child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
         ),
       ),
       done: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
