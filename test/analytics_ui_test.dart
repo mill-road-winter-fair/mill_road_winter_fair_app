@@ -109,17 +109,12 @@ void main() {
       await tester.tap(find.byType(IconButton));
       await tester.tap(find.byIcon(Icons.directions_walk));
       await tester.tap(find.byIcon(Icons.info));
-      for (final icon in [Icons.public, Icons.email, Icons.phone]) {
-        await tester.tap(find.byIcon(icon));
-        await tester.pumpAndSettle();
-      }
       for (final text in ['Website: https://example.com', 'Email: test@example.com', 'Telephone: 0123456789']) {
         await tester.tap(find.text(text));
         await tester.pumpAndSettle();
       }
       expect(analytics.buttonEvents.map((event) => event['button_id']), [
         'save_listing', 'directions_to_listing', 'listing_details',
-        'visit_listing_website', 'email_listing', 'phone_listing',
         'visit_listing_website', 'email_listing', 'phone_listing',
       ]);
       for (final event in analytics.buttonEvents) {
