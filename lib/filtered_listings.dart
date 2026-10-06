@@ -623,6 +623,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               ? null
                               : () {
                                 detailsVisibleIndex = null;
+                                HapticFeedback.lightImpact();
                                 setState(() { });
                               },
                             child: ScrollablePositionedList.builder(
