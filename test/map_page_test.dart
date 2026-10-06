@@ -629,7 +629,7 @@ void main() {
       // Group marker content
       expect(find.text('Food Group'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
-      expect(find.text('Food'), findsOneWidget);
+      expect(find.byIcon(Icons.fastfood), findsOneWidget);
       expect(find.text('~199m away'), findsOneWidget);
       // Specific marker content
       expect(find.text('🍩 '), findsOneWidget);
