@@ -250,8 +250,8 @@ class SubfilterLabel {
 }
 
 const Map<String, SubfilterLabel> subfilterCategoryLabels = {
-  'performanceMusic': SubfilterLabel('Music performances', Icons.music_note, true),
-  'performanceDance': SubfilterLabel('Dance performances', Icons.emoji_people, true),
+  'performanceMusic': SubfilterLabel('Music', Icons.music_note, true),
+  'performanceDance': SubfilterLabel('Dance', Icons.emoji_people, true),
   'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy, true),
   'performanceChildrens': SubfilterLabel('Children’s entertainment', Icons.escalator_warning, true),
   'visitExperience': SubfilterLabel('Visits & experiences', Icons.attractions, false),
