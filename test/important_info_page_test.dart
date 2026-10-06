@@ -7,6 +7,28 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+class FakeUrlLauncher extends UrlLauncherPlatform {
+  final List<String> checkedUrls = [];
+  final List<String> launchedUrls = [];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> canLaunch(String url) async {
+    checkedUrls.add(url);
+    return true;
+  }
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    launchedUrls.add(url);
+    return true;
+  }
+}
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -137,6 +159,76 @@ void main() {
       expect(find.text('info@millroadwinterfair.org'), findsOneWidget);
       expect(find.text('volunteers@millroadwinterfair.org'), findsOneWidget);
       expect(find.text('Close'), findsOneWidget);
+    });
+
+    group('external hyperlinks', () {
+      final originalUrlLauncher = UrlLauncherPlatform.instance;
+      late FakeUrlLauncher fakeUrlLauncher;
+
+      setUp(() {
+        fakeUrlLauncher = FakeUrlLauncher();
+        UrlLauncherPlatform.instance = fakeUrlLauncher;
+      });
+
+      tearDown(() {
+        UrlLauncherPlatform.instance = originalUrlLauncher;
+      });
+
+      Future<void> pumpPage(WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: ImportantInfoPage(
+            analyticsService: FakeAnalyticsService(),
+          ),
+        ));
+      }
+
+      TextSpan findLinkSpan(
+        WidgetTester tester, {
+        required String paragraphText,
+        required String linkText,
+      }) {
+        final paragraph = tester.widget<Text>(
+          find.byWidgetPredicate(
+            (widget) => widget is Text && widget.textSpan?.toPlainText().contains(paragraphText) == true,
+          ),
+        );
+        final paragraphSpan = paragraph.textSpan as TextSpan;
+        return paragraphSpan.children!.whereType<TextSpan>().singleWhere((span) => span.text == linkText);
+      }
+
+      testWidgets('website hyperlink launches the road closure notice', (WidgetTester tester) async {
+        await pumpPage(tester);
+
+        final linkSpan = findLinkSpan(
+          tester,
+          paragraphText: 'Road Closure Notice',
+          linkText: 'www.millroadwinterfair.org',
+        );
+
+        (linkSpan.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pumpAndSettle();
+
+        expect(
+          fakeUrlLauncher.launchedUrls,
+          ['https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'],
+        );
+      });
+
+      testWidgets('phone hyperlink launches the telephone dialler', (WidgetTester tester) async {
+        await pumpPage(tester);
+
+        final linkSpan = findLinkSpan(
+          tester,
+          paragraphText: 'On the day, you can also phone',
+          linkText: '07303 142689',
+        );
+
+        (linkSpan.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pumpAndSettle();
+
+        expect(fakeUrlLauncher.checkedUrls, ['tel:07303%20142689']);
+        expect(fakeUrlLauncher.launchedUrls, ['tel:07303%20142689']);
+      });
     });
   });
 }
