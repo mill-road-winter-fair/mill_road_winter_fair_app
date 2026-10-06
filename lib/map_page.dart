@@ -679,6 +679,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         );
                         distanceMessage = '~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away';
                       }
+                      final categories = subfilterCategoryLabels.keys.where((l) => parentListing[l] == 'TRUE').toList();
 
                       return ConstrainedBox(
                         constraints: BoxConstraints(
@@ -693,7 +694,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               child: GroupListingInfoSheet(
                                 brickAndMortar: parentListing['brickAndMortar'] == 'TRUE',
                                 title: parentListing['title'],
-                                categories: "${parentListing['subtitle']}",
+                                categories: categories,
                                 startTime: "${parentListing['startTime']}",
                                 endTime: "${parentListing['endTime']}",
                                 approxDistance: distanceMessage,

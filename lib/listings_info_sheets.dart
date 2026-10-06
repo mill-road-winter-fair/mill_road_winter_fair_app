@@ -12,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 class GroupListingInfoSheet extends StatelessWidget {
   final bool brickAndMortar;
   final String title;
-  final String categories;
+  final List<String> categories;
   final String startTime;
   final String endTime;
   final String approxDistance;
@@ -89,10 +89,9 @@ class GroupListingInfoSheet extends StatelessWidget {
                 child: FittedBox(
                   alignment: Alignment.centerLeft,
                   fit: BoxFit.scaleDown,
-                  child: Text(
-                    categories,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
-                  ),
+                  child: Row(spacing: 8, children:[
+                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: colorScheme.onPrimary)
+                  ]),
                 ),
               ),
               const Expanded(flex: 1, child: SizedBox(width: 2)),
