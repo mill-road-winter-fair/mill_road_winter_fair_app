@@ -455,7 +455,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               }
             },
             icon: Icon(
-              Icons.update,
+              Icons.access_time,
               color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
@@ -489,7 +489,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               }
             },
             icon: Icon(
-              (_hidePastListings) ? Icons.free_cancellation : Icons.event_busy,
+              (_hidePastListings) ? Icons.free_cancellation : Icons.history_toggle_off,
               color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
@@ -884,7 +884,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           dropdownMenuEntries: [
             DropdownMenuEntry(
               value: null,
-              label: "All",
+              label: "Everything",
               style: dropdownStyle,
               leadingIcon: const Icon(Icons.all_inclusive, size: 20),
             ),
