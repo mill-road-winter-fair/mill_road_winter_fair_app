@@ -755,7 +755,10 @@ Future<void> showListingDetailsDialog(
             label: 'Dismiss listing details',
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => Navigator.of(ctx2).pop(),
+            onTap: () => {
+              HapticFeedback.lightImpact(),
+              Navigator.of(ctx2).pop(),
+            },
             child: SingleChildScrollView(
             child: Container(
                 decoration: BoxDecoration(
