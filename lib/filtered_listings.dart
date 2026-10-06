@@ -618,7 +618,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                             }
                             return false;
                           },
-                          child: GestureDetector(
+                          child: Semantics(
+                            container: true,
+                            explicitChildNodes: true,
+                            button: detailsVisibleIndex != null,
+                            label: detailsVisibleIndex == null ? null : 'Hide listing details',
+                            child: GestureDetector(
                             onTap: (detailsVisibleIndex == null)
                               ? null
                               : () {
@@ -697,6 +702,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               },
                             ),
                           ),
+                        ),
                         ),
                         ValueListenableBuilder<Iterable<ItemPosition>>(
                           valueListenable: itemPositionsListener.itemPositions,

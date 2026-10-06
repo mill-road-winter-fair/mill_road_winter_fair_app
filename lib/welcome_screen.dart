@@ -628,7 +628,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       showBackButton: false,
       back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
       skip: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
-      overrideNext: (context, onPressed) => TextButton(
+      overrideNext: (context, onPressed) => Tooltip(
+        message: 'Next page',
+        excludeFromSemantics: true,
+        child: TextButton(
         onPressed: onPressed == null
             ? null
             : () {
@@ -636,7 +639,8 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 widget.analyticsService.logButtonTapped('next_WelcomeScreen');
                 onPressed();
               },
-        child: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.tertiary),
+        child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
+        ),
       ),
       done: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
       curve: Curves.fastLinearToSlowEaseIn,

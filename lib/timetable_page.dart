@@ -561,6 +561,11 @@ class _TimetablePageState extends State<TimetablePage> {
         ),
         IconButton(
           key: subcategoryIconKey,
+          tooltip: switch (widget.filteredMusicOrNot) {
+            null => 'Showing all performances. Show only music',
+            true => 'Showing only music. Show everything except music',
+            false => 'Showing everything except music. Show all performances',
+          },
           color: appBarTheme.foregroundColor,
           onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything', analyticsService: widget.analyticsService),
           onPressed: () {

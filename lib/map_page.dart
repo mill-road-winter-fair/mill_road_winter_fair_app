@@ -1889,6 +1889,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           appBarActions: [
             if (navigationInProgress == false) IconButton(
               key: filterIconKey,
+              tooltip: 'Choose which map markers to show',
               color: appBarTheme.foregroundColor,
               onLongPress: () => showMiniPopup(context, filterIconKey, 'Tap to choose which map markers to show or hide', analyticsService: widget.analyticsService),
               onPressed: () {
@@ -1900,6 +1901,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             ),
             if (doingAPushNavigation == null) IconButton(
               key: searchIconKey,
+              tooltip: _isSearching ? 'Close map search' : 'Search the map',
               color: appBarTheme.foregroundColor,
               onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar', analyticsService: widget.analyticsService),
               onPressed: () async {
@@ -2296,6 +2298,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               IconButton(
                                   iconSize: 20,
                                   icon: const Icon(Icons.close),
+                                  tooltip: 'Clear map search',
                                   onPressed: () async {
                                     HapticFeedback.lightImpact();
                                     widget.analyticsService.logButtonTapped('map_search_clear');
