@@ -337,7 +337,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 ),
 
                 const SizedBox(width: 6),
-                ElevatedButton(
+                Tooltip(
+                  message: 'Get walking directions',
+                  excludeFromSemantics: true,
+                  child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       iconSize: 24,
                       visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
@@ -353,6 +356,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           widget.onGetDirections();
                         },
                   child: const Icon(Icons.directions_walk, semanticLabel: 'Get walking directions'),
+                  ),
                 ),
                 // only display the Details button and spacer before it if there are details to display (and they're not always shown i.e. single bottom modal)
                 if (widget.onDetailsTapped != null &&
@@ -364,7 +368,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     widget.email.isNotEmpty &&
                     widget.phoneNumber.isNotEmpty &&
                     MediaQuery.of(context).size.width <= 360)
-                  ElevatedButton(
+                  Tooltip(
+                    message: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details',
+                    excludeFromSemantics: true,
+                    child: ElevatedButton(
                     style: (widget.detailsVisible ?? false)
                         ? ElevatedButton.styleFrom(
                             iconSize: 24,
@@ -386,10 +393,14 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       widget.onDetailsTapped?.call();
                     },
                     child: Icon(Icons.info, semanticLabel: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details'),
+                    ),
                   )
                 else if (widget.onDetailsTapped != null &&
                     (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
-                  ElevatedButton(
+                  Tooltip(
+                    message: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details',
+                    excludeFromSemantics: true,
+                    child: ElevatedButton(
                     style: (widget.detailsVisible ?? false)
                         ? ElevatedButton.styleFrom(
                             iconSize: 24,
@@ -411,9 +422,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       widget.onDetailsTapped?.call();
                     },
                     child: Icon(Icons.info, semanticLabel: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details'),
+                    ),
                   ),
                 const SizedBox(width: 6),
-                ElevatedButton(
+                Tooltip(
+                  message: 'Share listing',
+                  excludeFromSemantics: true,
+                  child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       iconSize: 24,
                       visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
@@ -436,6 +451,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: (Platform.isAndroid)
                       ? const Icon(Icons.share, semanticLabel: 'Share listing')
                       : const Icon(Icons.ios_share, semanticLabel: 'Share listing'),
+                  ),
                 ),
                 Flexible(flex: 1, child: Container()),
                 if (widget.website.isNotEmpty) const SizedBox(width: 6),
@@ -443,6 +459,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   Semantics(
                       button: true,
                       label: 'Open listing website',
+                      child: Tooltip(
+                        message: 'Open listing website',
+                        excludeFromSemantics: true,
                       child: Material(
                     shape: const CircleBorder(),
                     elevation: 3,
@@ -466,11 +485,15 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       ),
                     ),
                   ),
+                  ),
                 if (widget.email.isNotEmpty) const SizedBox(width: 6),
                 if (widget.email.isNotEmpty)
                   Semantics(
                       button: true,
                       label: 'Email listing',
+                      child: Tooltip(
+                        message: 'Email listing',
+                        excludeFromSemantics: true,
                       child: Material(
                     shape: const CircleBorder(),
                     elevation: 3,
@@ -499,11 +522,15 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     ),
                   ),
                   ),
+                  ),
                 if (widget.phoneNumber.isNotEmpty) const SizedBox(width: 6),
                 if (widget.phoneNumber.isNotEmpty)
     Semantics(
     button: true,
     label: 'Call listing',
+    child: Tooltip(
+      message: 'Call listing',
+      excludeFromSemantics: true,
     child: Material(
                     shape: const CircleBorder(),
                     elevation: 3,
@@ -532,6 +559,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     ),
                   ),
     ),
+    ),
               ],
             ),
             if ((widget.detailsVisible ?? false) && !widget.inDialog) detailsColumn(context),
@@ -552,7 +580,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
   Widget _cancelledLabel(BuildContext context) {
     return Semantics(
       button: !widget.brickAndMortar,
-      label: 'Cancelled. Show original time',
+      label: widget.brickAndMortar ? 'Cancelled' : 'Cancelled. Show original time',
       excludeSemantics: true,
       child: GestureDetector(
         onTap: widget.brickAndMortar ? null : () {
@@ -607,7 +635,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
         ],
         if (widget.website.isNotEmpty) ...[
           const SizedBox(height: 8),
-          GestureDetector(
+          Semantics(
+            link: true,
+            child: GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
@@ -621,6 +651,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                 ],
               ),
             ),
+          ),
           ),
         ],
         if (widget.email.isNotEmpty) ...[
@@ -717,9 +748,17 @@ Future<void> showListingDetailsDialog(
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,
           elevation: 12,
+          child: Semantics(
+            container: true,
+            explicitChildNodes: true,
+            button: true,
+            label: 'Dismiss listing details',
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () => Navigator.of(ctx2).pop(),
+            onTap: () => {
+              HapticFeedback.lightImpact(),
+              Navigator.of(ctx2).pop(),
+            },
             child: SingleChildScrollView(
             child: Container(
                 decoration: BoxDecoration(
@@ -759,6 +798,7 @@ Future<void> showListingDetailsDialog(
                 ),
               ),
             ),
+          ),
           ),
         );
       },
