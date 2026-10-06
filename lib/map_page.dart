@@ -1093,23 +1093,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
-                    activeColor: getCategoryColor(selectedThemeKey, 'Childrens'),
-                    contentPadding: EdgeInsets.all(0),
-                    horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['performanceChildrens']!.iconData),
-                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Children’s performances")),
-                    value: filterSettings["Childrens"],
-                    onChanged: (value) {
-                      HapticFeedback.selectionClick();
-                      setState(() {
-                        filterSettings["Childrens"] = value!;
-                      });
-                      final idList = _performanceChildrensMarkerIds;
-                      updateMarkerVisibilityRespectingFilters(idList, value!);
-                    },
-                  ),
-                  CheckboxListTile(
-                    visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Dance'),
                     contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
@@ -1144,6 +1127,23 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
+                    activeColor: getCategoryColor(selectedThemeKey, 'Childrens'),
+                    contentPadding: EdgeInsets.all(0),
+                    horizontalTitleGap: 18,
+                    secondary: Icon(subfilterCategoryLabels['performanceChildrens']!.iconData),
+                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Children’s entertainment")),
+                    value: filterSettings["Childrens"],
+                    onChanged: (value) {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                        filterSettings["Childrens"] = value!;
+                      });
+                      final idList = _performanceChildrensMarkerIds;
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
+                    },
+                  ),
+                  CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Visit/Experience'),
                     contentPadding: EdgeInsets.all(0),
                     horizontalTitleGap: 18,
@@ -1159,6 +1159,63 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       final idList = _visitExperienceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
                       widget.analyticsService.logMapMarkerFilterPreferenceSet('visitsExperiences', value);
+                    },
+                  ),
+                  CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
+                    activeColor: getCategoryColor(selectedThemeKey, 'Food'),
+                    contentPadding: EdgeInsets.all(0),
+                    horizontalTitleGap: 18,
+                    secondary: Icon(subfilterCategoryLabels['food']!.iconData),
+                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Food and drink")),
+                    value: filterSettings["Food"],
+                    onChanged: (value) {
+                      HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('food_mapMarker_filter_toggle');
+                      setState(() {
+                        filterSettings["Food"] = value!;
+                      });
+                      final idList = _foodMarkerIds;
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('food', value);
+                    },
+                  ),
+                  CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
+                    activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
+                    contentPadding: EdgeInsets.all(0),
+                    horizontalTitleGap: 18,
+                    secondary: Icon(subfilterCategoryLabels['shopping']!.iconData),
+                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shopping")),
+                    value: filterSettings["Shopping"],
+                    onChanged: (value) {
+                      HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('shopping_mapMarker_filter_toggle');
+                      setState(() {
+                        filterSettings["Shopping"] = value!;
+                      });
+                      final idList = _shoppingMarkerIds;
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('shopping', value);
+                    },
+                  ),
+                  CheckboxListTile(
+                    visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
+                    activeColor: getCategoryColor(selectedThemeKey, 'Charity/Community/Info'),
+                    contentPadding: EdgeInsets.all(0),
+                    horizontalTitleGap: 18,
+                    secondary: Icon(subfilterCategoryLabels['charityCommunityInfo']!.iconData),
+                    title:  const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Charity, community, info")),
+                    value: filterSettings["Charity/Community/Info"],
+                    onChanged: (value) {
+                      HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('charity_community_info_mapMarker_filter_toggle');
+                      setState(() {
+                        filterSettings["Charity/Community/Info"] = value!;
+                      });
+                      final idList = _charityCommunityInfoMarkerIds;
+                      updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('charityCommunityInfo', value);
                     },
                   ),
                   CheckboxListTile(

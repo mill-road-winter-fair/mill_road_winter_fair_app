@@ -260,15 +260,15 @@ class SubfilterLabel {
 }
 
 const Map<String, SubfilterLabel> subfilterCategoryLabels = {
-  'performanceMusic': SubfilterLabel('Music', Icons.music_note, true),
-  'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free, true),
-  'performanceDance': SubfilterLabel('Dance', Icons.emoji_people, true),
+  'performanceMusic': SubfilterLabel('Music performances', Icons.music_note, true),
+  'performanceDance': SubfilterLabel('Dance performances', Icons.emoji_people, true),
   'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy, true),
-  'visitExperience': SubfilterLabel('Visit & Experience', Icons.attractions, false),
-  'food': SubfilterLabel('Food & Drink', Icons.fastfood, false),
+  'performanceChildrens': SubfilterLabel('Children’s entertainment', Icons.escalator_warning, true),
+  'visitExperience': SubfilterLabel('Visits & experiences', Icons.attractions, false),
+  'food': SubfilterLabel('Food & drink', Icons.fastfood, false),
   'shopping': SubfilterLabel('Shopping', Icons.local_offer, false),
-  'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism, false),
-  'business': SubfilterLabel('Other business', Icons.work_outline, false),
+  'charityCommunityInfo': SubfilterLabel('Charity, community, info', Icons.volunteer_activism, false),
+  'business': SubfilterLabel('Other businesses', Icons.business, false),
   'service': SubfilterLabel('Services', Icons.family_restroom, false)
 };
 
