@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -118,15 +117,89 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     debugPrint('OnBoardingPageState build() called');
-    var bodyStyle = TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary, height: 1.4);
-    var titleStyle = TextStyle(fontSize: 21, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary);
-
-    var pageDecoration = PageDecoration(
-      titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary),
-      bodyTextStyle: TextStyle(fontSize: 19, color: Theme.of(context).colorScheme.onSecondary),
-      bodyPadding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
-      pageColor: Theme.of(context).colorScheme.secondary,
+    final colourScheme = Theme.of(context).colorScheme;
+    final bodyStyle = TextStyle(fontSize: 19, color: colourScheme.onSecondary, height: 1.4);
+    final titleStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(fontSize: 21, fontWeight: FontWeight.bold, color: colourScheme.onSecondary);
+    final pageDecoration = PageDecoration(
+      titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: colourScheme.onSecondary),
+      bodyTextStyle: TextStyle(fontSize: 19, color: colourScheme.onSecondary),
+      bodyPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
+      contentMargin: const EdgeInsets.symmetric(horizontal: 16),
+      bodyFlex: 0,
+      safeArea: 160,
+      pageColor: colourScheme.secondary.withValues(alpha: 0.8),
     );
+    Widget guideRow(Widget icon, Widget content) => Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(width: 40, child: Center(child: icon)),
+              const SizedBox(width: 8),
+              Expanded(child: content),
+            ],
+          ),
+        );
+
+    Widget tip(IconData icon, String text) => guideRow(
+          Icon(icon, size: 40, color: colourScheme.onSecondary),
+          Text(text, style: bodyStyle),
+        );
+
+    Widget category(String key, String colourKey) => guideRow(
+          Icon(subfilterCategoryLabels[key]!.iconData, size: 40, color: getCategoryColor(selectedThemeKey, colourKey)),
+          Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
+        );
+
+    PageViewModel guidePage(String title, int artwork, List<Widget> children) {
+      // The original non-scrolling page gives its body unbounded height. Reserve
+      // room for its fitted title and controls before scaling the updated copy.
+      final titlePainter = TextPainter(
+        text: TextSpan(text: title, style: titleStyle),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout();
+      final titleWidth = MediaQuery.sizeOf(context).width - pageDecoration.contentMargin.horizontal;
+      final titleScale = (titleWidth / titlePainter.width).clamp(0.0, 1.0);
+      final bodyHeight = (MediaQuery.sizeOf(context).height -
+              MediaQuery.paddingOf(context).vertical -
+              pageDecoration.safeArea -
+              pageDecoration.titlePadding.vertical -
+              pageDecoration.bodyPadding!.vertical -
+              titlePainter.height * titleScale)
+          .clamp(0.0, double.infinity);
+      titlePainter.dispose();
+      return PageViewModel(
+        useScrollView: false,
+        backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork0$artwork.jpg',
+        titleWidget: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.center,
+          child: Text(title, style: titleStyle, textAlign: TextAlign.center),
+        ),
+        bodyWidget: LayoutBuilder(
+          builder: (context, constraints) => ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: bodyHeight.toDouble()),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.topCenter,
+              // Wrap the updated copy before fitting the whole page, as with the
+              // original guide's manually wrapped rows.
+              child: SizedBox(
+                width: 380,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: children,
+                ),
+              ),
+            ),
+          ),
+        ),
+        decoration: pageDecoration,
+      );
+    }
 
     return IntroductionScreen(
       key: introKey,
@@ -156,461 +229,120 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         ),
       ),
       pages: [
-        PageViewModel(
-          useScrollView: false,
-          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork00.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text('Welcome to the official\nMill Road Winter Fair app!', style: titleStyle, textAlign: TextAlign.center),
+        guidePage('Welcome to the official\nMill Road Winter Fair app!', 0, [
+          tip(Icons.home,
+              'Using our new homepage, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
+          tip(Icons.music_note, 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
+          tip(Icons.map, 'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and your Favourites.'),
+          tip(Icons.menu,
+              'Use the menu in the top-right for important information, settings and to share this app. You can read this App Guide again there too.'),
+        ]),
+        guidePage('What do the map pins mean?', 1, [
+          category('food', 'Food'),
+          category('shopping', 'Shopping'),
+          category('charityCommunityInfo', 'Charity/Community/Info'),
+          category('performanceMusic', 'Music'),
+          category('performanceChildrens', 'Childrens'),
+          category('performanceDance', 'Dance'),
+          category('performanceOther', 'Other'),
+          category('visitExperience', 'Visit/Experience'),
+          category('business', 'Business'),
+          category('service', 'Service'),
+          guideRow(
+            Image.asset('assets/mapMarkers/mixedMarker.png', height: 40, width: 40, color: getCategoryColor(selectedThemeKey, 'Mixed')),
+            Text('A mix of any of these categories', style: bodyStyle),
           ),
-          bodyWidget: LayoutBuilder(
-            builder: (context, constraints) {
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: constraints.maxHeight, // respect available space
-                ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown, // shrink contents if needed
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("What can I do with the app?",
-                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondary)),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Use our interactive map to help\nyou navigate the Fair", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_month, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("See listings for stalls, events,\nmusic, food and venues", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          SizedBox(
-                              width: 40,
-                              child: Align(
-                                  alignment: Alignment.center,
-                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
-                          const SizedBox(width: 8),
-                          Text("Get full details for all of these,\nand save your favourites", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(Icons.radar, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("See what’s on nearby or soon", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(Icons.info, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Find important information about\nthe Fair and its facilities", style: bodyStyle),
-                        ],
-                      ),
-                    ],
+        ]),
+        guidePage('Explore the map', 2, [
+          tip(Icons.home, 'Tap the Home button on the map to zoom to the Fair.'),
+          tip(Icons.radar, 'Tap the radar button to see your location and nearby pins.'),
+          tip(Icons.satellite_alt, 'Switch between street and satellite maps as you prefer.'),
+          tip(Icons.directions_walk, 'Open a listing and tap the walking icon for directions.'),
+          tip(Icons.search, 'Search for stalls and events on the map.'),
+          tip(Icons.filter_alt, 'Choose which types of attraction you want to appear on the map.'),
+        ]),
+        guidePage('Find what brings you to the Fair', 3, [
+          tip(Icons.ballot, 'Tap Listings to browse everything at the Fair.'),
+          tip(Icons.sort, 'Sort by name or location, or by Nearest. Time sorting is also available for performances.'),
+          tip(Icons.info, 'Tap the info button to find out more about any listing.'),
+          tip(Icons.favorite, 'Tap a listing’s heart icon to save it. It will then appear in your Favourites.'),
+          tip(Icons.share, 'Share a listing with friends to tell them where you\'re headed.'),
+          tip(Icons.event_busy, 'On the day of the Fair, performance lists and Favourites let you hide finished events or jump to what’s on now.'),
+        ]),
+        guidePage('Plan your day with the timetable', 3, [
+          tip(Icons.watch_later, 'See performances and shorter visits and experiences by time and location.'),
+          tip(Icons.pinch, 'Scroll across locations and up or down through the day. Pinch to adjust the timetable’s scale.'),
+          tip(Icons.filter_alt, 'Tap the filter icon to cycle between music, non-music and everything.'),
+          tip(Icons.schedule, 'On the day, tap the clock to show what’s on now or starting soon.'),
+          tip(Icons.info, 'Tap an event for more details, or to save it.'),
+        ]),
+        guidePage('Make the app your own', 2, [
+          tip(Icons.palette, 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
+          tip(Icons.straighten, 'Choose the units used for distances in Settings.'),
+          tip(Icons.privacy_tip, 'You choose whether to allow anonymous usage analytics in Settings.'),
+        ]),
+        guidePage('A few final things…', 4, [
+          tip(Icons.favorite, 'Thank you for visiting Mill Road Winter Fair and using our app.'),
+          tip(Icons.update, 'Listings may change before the Fair, so check back for the latest details.'),
+          guideRow(
+            Icon(Icons.report, size: 40, color: colourScheme.onSecondary),
+            Text.rich(
+                TextSpan(children: [
+                  const TextSpan(text: 'Please read the '),
+                  TextSpan(
+                    text: 'important information',
+                    style: const TextStyle(decoration: TextDecoration.underline),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
+                        Navigator.push(
+                            context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
+                      },
                   ),
-                ),
-              );
-            },
+                  const TextSpan(text: ' about the Fair and its facilities.'),
+                ]),
+                style: bodyStyle),
           ),
-          decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
-            contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 0,
-            safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
-          ),
-        ),
-        PageViewModel(
-          useScrollView: false,
-          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork01.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text('What do the pins mean?', style: titleStyle, textAlign: TextAlign.center),
-          ),
-          bodyWidget: LayoutBuilder(
-            builder: (context, constraints) {
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: constraints.maxHeight, // respect available space
-                ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown, // shrink contents if needed
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.fastfood, size: 40, color: getCategoryColor(selectedThemeKey, "Food")),
-                          const SizedBox(width: 8),
-                          Text("Our delicious ready-to-eat food\nand drink stalls and trucks", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 9),
-                      Row(
-                        children: [
-                          Icon(Icons.storefront, size: 40, color: getCategoryColor(selectedThemeKey, "Shopping")),
-                          const SizedBox(width: 8),
-                          Text("Stalls with arts, crafts and goodies;\ncharities and other organisations", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 9),
-                      Row(
-                        children: [
-                          Icon(Icons.music_note, size: 40, color: getCategoryColor(selectedThemeKey, "Music")),
-                          const SizedBox(width: 8),
-                          Text("The Fair’s amazing and talented\nmusicians, buskers and bands", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 9),
-                      Row(
-                        children: [
-                          Icon(Icons.event, size: 40, color: getCategoryColor(selectedThemeKey, "Event")),
-                          const SizedBox(width: 8),
-                          Text("Our exciting events, such as\nSanta’s Grotto and the parade", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 9),
-                      Row(
-                        children: [
-                          Icon(Icons.home_work, size: 40, color: getCategoryColor(selectedThemeKey, "Place")),
-                          const SizedBox(width: 8),
-                          Text("Venues or other organisations with\nactivities, events, food and drinks", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 9),
-                      Row(
-                        children: [
-                          Icon(Icons.wheelchair_pickup, size: 40, color: getCategoryColor(selectedThemeKey, "Service")),
-                          const SizedBox(width: 8),
-                          Text("Other important services, such\nas toilets, info and first aid points", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 9),
-                      Row(
-                        children: [
-                          Image.asset('assets/mapMarkers/genericGroupMarker.png', height: 40, width: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Wide pins show where there’s\nmore than one thing at a location", style: bodyStyle),
-                        ],
-                      ),
-                    ],
+          guideRow(
+            Icon(Icons.diversity_1, size: 40, color: colourScheme.onSecondary),
+            Text.rich(
+                TextSpan(children: [
+                  const TextSpan(text: 'The Fair is run entirely by volunteers. To get involved, visit our '),
+                  TextSpan(
+                    text: 'website',
+                    style: const TextStyle(decoration: TextDecoration.underline),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
+                        launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                      },
                   ),
-                ),
-              );
-            },
+                  const TextSpan(text: '.'),
+                ]),
+                style: bodyStyle),
           ),
-          decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
-            contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 0,
-            safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
-          ),
-        ),
-        PageViewModel(
-          useScrollView: false,
-          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork02.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text('Choosing what’s shown', style: titleStyle, textAlign: TextAlign.center),
-          ),
-          bodyWidget: LayoutBuilder(
-            builder: (context, constraints) {
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: constraints.maxHeight, // respect available space
-                ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown, // shrink contents if needed
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.filter_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("First tap the filter icon on\nthe map page", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Icon(Icons.check_box_outlined, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Then simply select the marker\ncategories you want to see", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Icon(Icons.no_transfer, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Choose whether or not to see\nour road closure", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Icon(Icons.map, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("When you tap back on the map\nonly those will be showing", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Icon(Icons.assistant_navigation, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Other buttons change the map’s\norientation and display style", style: bodyStyle),
-                        ],
-                      ),
-                    ],
+          guideRow(
+            Icon(Icons.feedback, size: 40, color: colourScheme.onSecondary),
+            Text.rich(
+                TextSpan(children: [
+                  const TextSpan(text: 'We’d love to hear your feedback about the app. Just fill in '),
+                  TextSpan(
+                    text: 'this form',
+                    style: const TextStyle(decoration: TextDecoration.underline),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        HapticFeedback.lightImpact();
+                        widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
+                        launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                      },
                   ),
-                ),
-              );
-            },
+                  const TextSpan(text: '.'),
+                ]),
+                style: bodyStyle),
           ),
-          decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
-            contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 0,
-            safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
-          ),
-        ),
-        PageViewModel(
-          useScrollView: false,
-          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork03.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text('What’s on and when', style: titleStyle, textAlign: TextAlign.center),
-          ),
-          bodyWidget: LayoutBuilder(
-            builder: (context, constraints) {
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: constraints.maxHeight, // respect available space
-                ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown, // shrink contents if needed
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.smart_button, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("There’s a button for each listings\ncategory at the bottom of the app", style: bodyStyle.copyWith(height: 1.2)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.list_alt, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Tap on these to see everything\nthat’s on in that category", style: bodyStyle.copyWith(height: 1.2)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.sort, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Sort the list by location,\nnearest, name or time", style: bodyStyle.copyWith(height: 1.2)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.update, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Tap this button to jump to the\ncurrent time in the list", style: bodyStyle.copyWith(height: 1.2)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.event_busy, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("This button hides all the listings\nthat have finished", style: bodyStyle.copyWith(height: 1.2)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.search, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Tap the search button and type\nto find specific listings", style: bodyStyle.copyWith(height: 1.2)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          SizedBox(
-                              width: 40,
-                              child: Align(
-                                  alignment: Alignment.center,
-                                  child: FaIcon(FontAwesomeIcons.heart, size: 32, color: Theme.of(context).colorScheme.onSecondary))),
-                          const SizedBox(width: 8),
-                          Text("Save your favourite listings, and\nview these from the main menu", style: bodyStyle),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
-            contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 0,
-            safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
-          ),
-        ),
-        PageViewModel(
-          useScrollView: false,
-          backgroundImage: 'assets/welcomeScreen/clareMcEwan_artwork04.jpg',
-          titleWidget: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.center,
-            child: Text('A few final things…', style: titleStyle, textAlign: TextAlign.center),
-          ),
-          bodyWidget: LayoutBuilder(
-            builder: (context, constraints) {
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: constraints.maxHeight, // respect available space
-                ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown, // shrink contents if needed
-                  alignment: Alignment.topCenter,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.favorite, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          Text("Thank you for visiting Mill\nRoad Winter Fair and using\nour new app", style: bodyStyle),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(Icons.report, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(text: "Please make sure you’ve read\nthe ", style: bodyStyle),
-                                TextSpan(
-                                  text: "important information",
-                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
-                                      Navigator.push(
-                                          context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
-                                    },
-                                ),
-                                TextSpan(text: "\nabout the Fair", style: bodyStyle),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(Icons.diversity_1, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(text: "Did you know the Fair is run\nentirely by volunteers? To get\ninvolved, just visit our ", style: bodyStyle),
-                                TextSpan(
-                                  text: "website",
-                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
-                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
-                                    },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(Icons.feedback, size: 40, color: Theme.of(context).colorScheme.onSecondary),
-                          const SizedBox(width: 8),
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(text: "If you have feedback about\nthe app we’d love to hear from\nyou! Just fill in ", style: bodyStyle),
-                                TextSpan(
-                                  text: "this form",
-                                  style: bodyStyle.copyWith(decoration: TextDecoration.underline),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      HapticFeedback.lightImpact();
-                                      widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
-                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
-                                    },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          decoration: pageDecoration.copyWith(
-            titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
-            contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-            bodyFlex: 0,
-            safeArea: 160, // padding at bottom to avoid nav bar
-            pageColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.8),
-          ),
-        ),
+        ]),
       ],
       onDone: () {
         HapticFeedback.lightImpact();
@@ -623,11 +355,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         _onIntroEnd(context);
       },
       showSkipButton: true,
-      skipOrBackFlex: 0,
-      nextFlex: 0,
+      skipOrBackFlex: 1,
+      dotsFlex: 2,
+      nextFlex: 1,
       showBackButton: false,
       back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
-      skip: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
+      skip: FittedBox(
+          fit: BoxFit.scaleDown, child: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
       overrideNext: (context, onPressed) => TextButton(
         onPressed: onPressed == null
             ? null
@@ -638,14 +372,16 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
               },
         child: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.tertiary),
       ),
-      done: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
+      done: FittedBox(
+          fit: BoxFit.scaleDown, child: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
       curve: Curves.fastLinearToSlowEaseIn,
       controlsMargin: const EdgeInsets.all(16),
       controlsPadding: kIsWeb ? const EdgeInsets.all(12.0) : const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
       dotsDecorator: const DotsDecorator(
-        size: Size(10.0, 10.0),
+        size: Size(6.0, 6.0),
+        spacing: EdgeInsets.symmetric(horizontal: 2),
         color: Color(0xFFBDBDBD),
-        activeSize: Size(22.0, 10.0),
+        activeSize: Size(14.0, 6.0),
         activeShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(25.0)),
         ),
