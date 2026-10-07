@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart' as intl;
@@ -164,6 +163,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
     );
+    await updateAlertNoticePeriodById(notificationResponse.id!, noticePeriod);
     debugPrint('onDidReceiveBackgroundNotificationResponse scheduled new alert for $newAlertTime with message “$theMessage”');
   }
 }
@@ -182,13 +182,13 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
     case <= 19:
       return('15MinsCategory', [
         AndroidNotificationAction('snooze5mins', 'Snooze 5'),
-        AndroidNotificationAction('snoozeStart', 'Snooze to start'),
+        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
     case <= 35:
       return('30MinsCategory', [
         AndroidNotificationAction('snooze10mins', 'Snooze 10'),
         AndroidNotificationAction('snooze20mins', 'Snooze 20'),
-        AndroidNotificationAction('snoozeStart', 'Snooze to start'),
+        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
     default:
       return('60MinsCategory',[
@@ -235,6 +235,19 @@ Future<bool> requestAlertPermissions() async {
     computeAlertsPermissionGranted = false;
    }
    return computeAlertsPermissionGranted;
+}
+
+
+Future<void> updateAlertNoticePeriodById(int id, int noticePeriod) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.reload(); // since it may be cached
+  final jsonString = prefs.getString('alertsStore');
+  if (jsonString == null) return;
+  final store = AlertScheduleStore.fromJson(jsonDecode(jsonString));
+  final theAlert = store.alertSchedules.firstWhereOrNull((a) => a.id == id);
+  if (theAlert == null) return;
+  theAlert.noticePeriod = noticePeriod;
+  await prefs.setString('alertsStore', jsonEncode(store));
 }
 
 
@@ -320,22 +333,6 @@ class AlertScheduleStore {
   void removeAlertById(int theId) {
     debugPrint('AlertScheduleStore removeAlertById removing alert with theId=$theId');
     alertSchedules.removeWhere((a) => a.id == theId);
-  }
-
-  bool updateAlertById(int theId, int? newTimeOffset) {
-    final theAlert = alertSchedules.firstWhereOrNull((a) => a.id == theId);
-    debugPrint('AlertScheduleStore updateAlertById looking for id=$theId in list of length ${alertSchedules.length} came up with $theAlert');
-    if (theAlert != null) {
-      if (newTimeOffset == null) { // we're just setting alert for start time
-        theAlert.noticePeriod = 0;
-      } else { // may not be quite right, but doesn't matter atm
-        theAlert.noticePeriod = max(0, theAlert.noticePeriod - newTimeOffset);
-      }
-      return true;
-    } else {
-      return false;
-    }
-    
   }
 
   void removePastEventAlerts() {

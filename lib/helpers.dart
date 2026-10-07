@@ -1123,7 +1123,7 @@ void setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID
   final existingAlert = alertsStore.alertSchedules.firstWhereOrNull((a) => a.listingId == listingID);
   if (existingAlert != null) {
     final theAlertId = existingAlert.id;
-    debugPrint('toggleListingAlert removing and cancelling theAlertId=$theAlertId');
+    debugPrint('setTheAlert removing and cancelling theAlertId=$theAlertId');
     alertsStore.removeAlertById(theAlertId);
     flutterLocalNotificationsPlugin.cancel(id: theAlertId);
     showToast(context, 'Alert for ${theListing['title']} has been cancelled.', false);
@@ -1174,16 +1174,16 @@ void setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
     );
-    debugPrint('toggleAlert added new alert with ID $newAlertId');
     String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
     if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
     showToast(context, '$theMessage.', false);
     alertsStore.removePastEventAlerts(); // hygiene
     alertsStore.saveAllEventAlerts();
-    debugPrint('toggleAlert scheduled new alert for $schedTime with message “$theMessage”');
+    debugPrint('setTheAlert scheduled new alert with ID $newAlertId in $theAlertNoticePeriod minutes at $schedTime with message “$theMessage”');
     return;
   }
 }
+
 
 void showToast(BuildContext theContext, String theMessage, bool isError) {
   Fluttertoast.showToast(
@@ -1198,14 +1198,12 @@ void showToast(BuildContext theContext, String theMessage, bool isError) {
 }
 
 
-
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime) {
   try {
     final parts = endTime.split(':');
     final endHour = int.parse(parts[0]);
     final endMinute = parts.length > 1 ? int.parse(parts[1]) : 0;
-
     final endDateTime = DateTime(
       fairDate.year,
       fairDate.month,
@@ -1213,7 +1211,6 @@ bool hasEventEnded(String endTime) {
       endHour,
       endMinute,
     );
-
     return DateTime.now().isAfter(endDateTime);
   } catch (_) {
     return false; // default to not ended if parsing fails
