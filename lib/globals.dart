@@ -23,7 +23,7 @@ bool navigationInProgress = false;
 // Identifier for a simple (non-group) marker.
 const String aSimpleMarkerId = 'SIMPLE';
 
-// API keys and headers for Google Maps Directions. Populated once at runtime from dotenv.
+// API keys and headers for Google Maps Directions. Populated once from AppConfig compile-time declarations.
 String googleMapsDirectionsApiKey = "";
 Map<String, String>? googleMapsDirectionsHeaders;
 

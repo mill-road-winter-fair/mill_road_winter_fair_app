@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mill_road_winter_fair_app/app_config.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -157,17 +157,16 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   Future<void> _ensureDirectionsConfigLoaded() async {
     if (googleMapsDirectionsHeaders == null || googleMapsDirectionsHeaders!.isEmpty) {
-      await dotenv.load(fileName: ".env");
       if (Platform.isAndroid) {
-        googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        final androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
+        googleMapsDirectionsApiKey = AppConfig.androidDirectionsApiKey;
+        final androidSigningKey = AppConfig.androidCertificateFingerprint;
         googleMapsDirectionsHeaders = {
           "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
           "X-Android-Cert": androidSigningKey,
         };
       } else if (Platform.isIOS) {
-        googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        final iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
+        googleMapsDirectionsApiKey = AppConfig.iosDirectionsApiKey;
+        final iosBundleId = AppConfig.iosBundleId;
         googleMapsDirectionsHeaders = {
           "X-Ios-Bundle-Identifier": iosBundleId,
         };
@@ -1422,7 +1421,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
     debugPrint('MapPageState updatePolyline called');
     try {
-      // Load environment variables
       await _ensureDirectionsConfigLoaded();
 
       if (googleMapsDirectionsApiKey.isEmpty) {
