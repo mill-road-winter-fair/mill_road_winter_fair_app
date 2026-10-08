@@ -110,7 +110,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 const Text('Caution – vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 15),
                 bulletPoint(
-                    'Whilst roads (as shown on the map) will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm, there will be some vehicle movement.'),
+                    'Whilst certain roads (as shown on the map) will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm, there will be some vehicle movement.'),
                 bulletPoint('Pedestrians should exercise particular care before the road is fully closed.', isBold: true),
                 bulletPoint('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.', isBold: true),
                 bulletPoint('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
@@ -132,14 +132,14 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 bulletPoint('Please arrange your own family meeting point in case you become separated.'),
                 bulletPoint('Report missing children to any steward.'),
                 const SizedBox(height: 15),
-                const Text('Keep the pavement clear – Keep the fair alive', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                const Text('Keep the pavement clear! Keep the Fair alive!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 10),
                 Text.rich(
                   TextSpan(
                     children: [
                       const TextSpan(
                           text:
-                              'If your business is within the road closure, please read the Important Safety Guidelines for Local Businesses you have been sent or available at '),
+                              'If your business is within the road closure, please read the Important Safety Guidelines for Local Businesses you have been sent or available at: '),
                       TextSpan(
                           text: 'www.millroadwinterfair.org',
                           style: const TextStyle(decoration: TextDecoration.underline),
@@ -149,7 +149,6 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                               widget.analyticsService.logButtonTapped('mrwf_business_safety_hyperlink');
                               launchUrl(Uri.parse('https://www.millroadwinterfair.org'));
                             }),
-                      const TextSpan(text: '.'),
                     ],
                   ),
                 ),
@@ -161,7 +160,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                     children: [
                       const TextSpan(
                           text:
-                              'To find out more about the road closure, please read the Road Closure Notice distributed separately or available at '),
+                              'To find out more about the road closure, please read the Road Closure Notice distributed separately or available at: '),
                       TextSpan(
                           text: 'www.millroadwinterfair.org',
                           style: const TextStyle(decoration: TextDecoration.underline),
@@ -171,27 +170,31 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                               widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
                               launchUrl(Uri.parse('https://www.millroadwinterfair.org'));
                             }),
-                      const TextSpan(text: '.'),
                     ],
                   ),
                 ),
                 const SizedBox(height: 15),
                 const Text('Updates and contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 10),
-                bulletPoint('Follow Mill Road Winter Fair on social media for the latest news and updates and check this app for the latest listings.'),
+                bulletPoint('Follow Mill Road Winter Fair on social media for the latest news and updates, and download the app for the latest listings.'),
                 bulletPoint(
-                  'On-the-day phone number: ',
+                  'On the day, you can also phone ',
                   link: TextSpan(
-                    text: '07486 398744',
-                    style: const TextStyle(decoration: TextDecoration.underline),
-                    recognizer: _phoneLinkRecognizer,
+                    children: [
+                      TextSpan(
+                        text: '07486 398744',
+                        style: const TextStyle(decoration: TextDecoration.underline),
+                        recognizer: _phoneLinkRecognizer,
+                      ),
+                      const TextSpan(text: '.'),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 15),
                 const Text('Our responsibilities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 10),
                 const Text(
-                    'The Fair (MRWF) is organised by unpaid volunteers, constituted as Mill Road Winter Fair CIC, who plan stalls, activities and entertainment at designated locations throughout the road closure and Donkey Common, Petersfield, Ditchburn Gardens and Gwydir Street Car Park. Official MRWF stalls will be issued with certificates to display. MRWF makes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
+                    'The Fair (MRWF) is organised by unpaid volunteers, constituted as Mill Road Winter Fair CIC, who plan stalls, activities and entertainment at designated locations throughout the road closure and Donkey Common, Petersfield Green, Ditchburn Gardens and Gwydir Street Car Park. Official MRWF stalls are issued with certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
                 const SizedBox(height: 10),
               ],
             ),

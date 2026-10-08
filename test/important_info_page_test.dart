@@ -34,9 +34,9 @@ void main() {
       expect(find.text('Caution – vehicles!'), findsOneWidget);
       expect(find.text('First aid'), findsOneWidget);
       expect(find.text('Coming with children?'), findsOneWidget);
-      expect(find.text('Keep the pavement clear – Keep the fair alive'), findsOneWidget);
+      expect(find.text('Keep the pavement clear! Keep the Fair alive!'), findsOneWidget);
       expect(find.text('Road closure'), findsOneWidget);
-      expect(find.text('On-the-day phone number: 07486 398744'), findsOneWidget);
+      expect(find.text('On the day, you can also phone 07486 398744.'), findsOneWidget);
       expect(find.text('Our responsibilities'), findsOneWidget);
       expect(find.text('Updates and contact'), findsOneWidget);
     });
