@@ -212,12 +212,13 @@ Future<bool> requestAlertPermissions() async {
     }
     if (plugin == null) return false; // give up
     await plugin.requestExactAlarmsPermission();
-    bool? areNotificationsEnabled = await plugin.areNotificationsEnabled();
-    if (areNotificationsEnabled == null || !areNotificationsEnabled) {
+    final bool exactAlarmsGranted = await plugin.requestExactAlarmsPermission() ?? false;
+    bool notificationsGranted = await plugin.areNotificationsEnabled() ?? false;
+    if (!notificationsGranted) {
       await plugin.requestNotificationsPermission();
-      areNotificationsEnabled = await plugin.areNotificationsEnabled();
+      notificationsGranted = await plugin.areNotificationsEnabled() ?? false;
     }
-    computeAlertsPermissionGranted = (areNotificationsEnabled ?? false);
+    computeAlertsPermissionGranted = exactAlarmsGranted && notificationsGranted;    
     debugPrint('requestAlertPermissions Android returning with computeAlertsPermissionGranted=$computeAlertsPermissionGranted');
    } else if (Platform.isIOS) {
     final plugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
