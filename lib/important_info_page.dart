@@ -18,6 +18,13 @@ class ImportantInfoPage extends StatefulWidget {
 }
 
 class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
+  late final TapGestureRecognizer _phoneLinkRecognizer = TapGestureRecognizer()
+    ..onTap = () {
+      HapticFeedback.lightImpact();
+      widget.analyticsService.logButtonTapped('contact_phone');
+      launchUrl(Uri(scheme: 'tel', path: '07486398744'));
+    };
+
   @override
   void initState() {
     debugPrint('_ImportantInfoPageState initState() called');
@@ -28,6 +35,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
   void dispose() {
     debugPrint('_ImportantInfoPageState dispose() called');
     routeObserver.unsubscribe(this);
+    _phoneLinkRecognizer.dispose();
     super.dispose();
   }
 
@@ -171,7 +179,14 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                 const Text('Updates and contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 10),
                 bulletPoint('Follow Mill Road Winter Fair on social media for the latest news and updates and check this app for the latest listings.'),
-                bulletPoint('On-the-day phone number: TBC.'),
+                bulletPoint(
+                  'On-the-day phone number: ',
+                  link: TextSpan(
+                    text: '07486 398744',
+                    style: const TextStyle(decoration: TextDecoration.underline),
+                    recognizer: _phoneLinkRecognizer,
+                  ),
+                ),
                 const SizedBox(height: 15),
                 const Text('Our responsibilities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
                 const SizedBox(height: 10),
@@ -186,7 +201,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
     );
   }
 
-  Widget bulletPoint(String theText, {isBold = false}) {
+  Widget bulletPoint(String theText, {isBold = false, TextSpan? link}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0), // tighten spacing
       child: Row(
@@ -194,8 +209,8 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
         children: [
           const Text('• ', style: TextStyle(height: 1.3)),
           Expanded(
-            child: Text(
-              theText,
+            child: Text.rich(
+              TextSpan(text: theText, children: [if (link != null) link]),
               style: TextStyle(height: 1.3, fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
             ),
           ),
