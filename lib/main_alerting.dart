@@ -339,7 +339,7 @@ class AlertScheduleStore {
   void removePastEventAlerts() {
     debugPrint('AlertScheduleStore removePastEventAlerts called');
     final now = DateTime.now();
-    alertSchedules.removeWhere((a) => a.listingStartTime.subtract(Duration(minutes: a.noticePeriod)).isBefore(now));//todo test vs +1
+    alertSchedules.removeWhere((a) => a.listingStartTime.subtract(Duration(minutes: a.noticePeriod)).isBefore(now));
   }
 
   void saveAllEventAlerts() async {
@@ -354,6 +354,18 @@ class AlertScheduleStore {
     final jsonString = prefs.getString('alertsStore');
     if (jsonString != null) {
       alertsStore = AlertScheduleStore.fromJson(jsonDecode(jsonString));
+    }
+  }
+
+  Future<void> refreshEventAlertSchedules() async {
+    debugPrint('AlertScheduleStore refreshEventAlertSchedules called');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload(); // since they may be cached
+    final jsonString = prefs.getString('alertsStore');
+    if (jsonString != null) {
+      final refreshedAlertsStore = AlertScheduleStore.fromJson(jsonDecode(jsonString));
+      alertsStore.alertSchedules.clear();
+      alertsStore.alertSchedules.addAll(refreshedAlertsStore.alertSchedules);
     }
   }
 

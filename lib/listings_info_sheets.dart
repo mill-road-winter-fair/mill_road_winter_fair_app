@@ -673,7 +673,7 @@ Future<void> showListingDetailsDialog(
                     },
                     onAlertTapped: () async {
                       HapticFeedback.lightImpact();
-                      onAlertTapped.call();
+                      await onAlertTapped.call();
                       setStateDialog(() {});
                     },
                     inDialog: true,

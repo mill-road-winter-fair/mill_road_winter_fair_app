@@ -1117,7 +1117,9 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
 }
 
 
-void setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) {
+void setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) async {
+  await alertsStore.refreshEventAlertSchedules(); // since snooze may have updated these
+  if (!context.mounted) return;
   final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
   if (theListing == null) return;
   final existingAlert = alertsStore.alertSchedules.firstWhereOrNull((a) => a.listingId == listingID);
