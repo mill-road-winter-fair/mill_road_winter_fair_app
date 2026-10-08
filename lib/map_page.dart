@@ -1938,50 +1938,57 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               LayoutBuilder(
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
-                  mapHeight = constraints.maxHeight - (_isSearching ? 56 : 0);
+                  final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+                  final furnitureHeight = 98.0;
+                  final contentHeight = constraints.maxHeight - (keyboardHeight - furnitureHeight).clamp(0.0, double.infinity);
+                  mapHeight = contentHeight - (_isSearching ? 56 : 0);
+
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
                       if (didPop && navigationInProgress) cancelNavigation();
                     },
-                    child: GoogleMap(
-                      style: mapStyle,
-                      mapType: mapType,
-                      rotateGesturesEnabled: false,
-                      compassEnabled: false,
-                      myLocationEnabled: locationServicesEnabled &&
-                          (locationPermission == LocationPermission.always ||
-                              locationPermission == LocationPermission.whileInUse),
-                      myLocationButtonEnabled: false,
-                      mapToolbarEnabled: false,
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller = controller;
-                        if (listings.isNotEmpty) {
-                          // We should have listings by this point so set the camera to their bounds
-                          _setMapCameraToFitMapMarkers();
-                        }
-                      },
-                      initialCameraPosition: CameraPosition(
-                        target: centreOfFair,
-                        zoom: mapInitialZoom,
-                        bearing: _mapBearing,
-                      ),
-                      onCameraMove: (CameraPosition position) {
-                        //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
-                        _currentCamera = position;
-                        setState(() {
-                          switch (preferredMapOrientation) {
-                            case MapOrientation.adaptive:
-                              _compassBearing = 90;
-                              break;
-                            case MapOrientation.alwaysNorth:
-                              _compassBearing = 0;
-                              break;
+                    child: SizedBox(
+                      height: contentHeight,
+                      child: GoogleMap(
+                        style: mapStyle,
+                        mapType: mapType,
+                        rotateGesturesEnabled: false,
+                        compassEnabled: false,
+                        myLocationEnabled: locationServicesEnabled &&
+                            (locationPermission == LocationPermission.always ||
+                                locationPermission == LocationPermission.whileInUse),
+                        myLocationButtonEnabled: false,
+                        mapToolbarEnabled: false,
+                        onMapCreated: (GoogleMapController controller) {
+                          _controller = controller;
+                          if (listings.isNotEmpty) {
+                            // We should have listings by this point so set the camera to their bounds
+                            _setMapCameraToFitMapMarkers();
                           }
-                        });
-                      },
-                      polygons: _polygons,
-                      markers: markers.values.toSet(),
-                      polylines: polylines
+                        },
+                        initialCameraPosition: CameraPosition(
+                          target: centreOfFair,
+                          zoom: mapInitialZoom,
+                          bearing: _mapBearing,
+                        ),
+                        onCameraMove: (CameraPosition position) {
+                          //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
+                          _currentCamera = position;
+                          setState(() {
+                            switch (preferredMapOrientation) {
+                              case MapOrientation.adaptive:
+                                _compassBearing = 90;
+                                break;
+                              case MapOrientation.alwaysNorth:
+                                _compassBearing = 0;
+                                break;
+                            }
+                          });
+                        },
+                        polygons: _polygons,
+                        markers: markers.values.toSet(),
+                        polylines: polylines
+                      ),
                     ),
                   );
                 },
@@ -2146,10 +2153,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                                color: colorScheme.onSurfaceVariant.withAlpha(127),
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: const Offset(2, 2))
+                              color: colorScheme.onSurfaceVariant.withAlpha(127),
+                              spreadRadius: 1,
+                              blurRadius: 3,
+                              offset: const Offset(2, 2))
                           ],
                         ),
                         child: Icon(_layersIcon),
@@ -2209,12 +2216,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     padding: const EdgeInsets.only(top: 8),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                          iconSize: 30,
-                          backgroundColor: colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        iconSize: 30,
+                        backgroundColor: colorScheme.primary,
+                        visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
+                        padding: const EdgeInsets.all(0),
+                        elevation: 3,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         widget.analyticsService.logButtonTapped('distance_to_destination');
@@ -2237,53 +2244,53 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
                       color: colorScheme.surface,
-        child: Semantics(
-        button: true,
-        label: 'Road closures. Show more information',
-        excludeSemantics: true,
-                      child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('road_closures_legend');
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return roadClosuresDialog();
-                            },
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 14,
-                                decoration: BoxDecoration(
-                                  color: selectedThemeKey == 'colourBlindFriendly'
-                                      ? const Color.fromRGBO(224, 129, 87, 255)
-                                      : colorScheme.tertiary.withAlpha(50),
-                                  border: Border.all(
-                                    color: colorScheme.tertiary,
-                                    width: 3,
+                      child: Semantics(
+                        button: true,
+                        label: 'Road closures. Show more information',
+                        excludeSemantics: true,
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('road_closures_legend');
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return roadClosuresDialog();
+                              },
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    color: selectedThemeKey == 'colourBlindFriendly'
+                                        ? const Color.fromRGBO(224, 129, 87, 255)
+                                        : colorScheme.tertiary.withAlpha(50),
+                                    border: Border.all(
+                                      color: colorScheme.tertiary,
+                                      width: 3,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Road closures',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: colorScheme.tertiary,
-                                  fontWeight: FontWeight.w600,
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Road closures',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorScheme.tertiary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
