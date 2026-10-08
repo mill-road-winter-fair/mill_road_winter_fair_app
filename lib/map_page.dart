@@ -1789,6 +1789,43 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     }
   }
 
+  void enableAllFiltersIfAllOff() {
+    if (filterSettings['Food'] == false &&
+        filterSettings['Shopping'] == false &&
+        filterSettings['Music'] == false &&
+        filterSettings['Childrens'] == false &&
+        filterSettings['Dance'] == false &&
+        filterSettings['Other'] == false &&
+        filterSettings['Charity/Community/Info'] == false &&
+        filterSettings['Visits/Experiences'] == false &&
+        filterSettings['Business'] == false &&
+        filterSettings['Services'] == false) {
+      widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
+      final idList = _foodMarkerIds +
+          _shoppingMarkerIds +
+          _charityCommunityInfoMarkerIds +
+          _performanceMusicMarkerIds +
+          _performanceChildrensMarkerIds +
+          _performanceDanceMarkerIds +
+          _performanceOtherMarkerIds +
+          _visitExperienceMarkerIds +
+          _serviceMarkerIds;
+      setState(() {
+        filterSettings['Food'] = true;
+        filterSettings['Shopping'] = true;
+        filterSettings['Music'] = true;
+        filterSettings['Childrens'] = true;
+        filterSettings['Dance'] = true;
+        filterSettings['Other'] = true;
+        filterSettings['Charity/Community/Info'] = true;
+        filterSettings['Visits/Experiences'] = true;
+        filterSettings['Business'] = true;
+        filterSettings['Services'] = true;
+        updateMarkerVisibilityIgnoringFilters(idList, true);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     //debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}'); // noisy; uncomment if working on CameraPosition
@@ -2035,41 +2072,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('home');
                           widget.cancelMapNearest?.call();
-                          // Home button resets the filters if they're all toggled off
-                          if (filterSettings['Food'] == false &&
-                              filterSettings['Shopping'] == false &&
-                              filterSettings['Music'] == false &&
-                              filterSettings['Childrens'] == false &&
-                              filterSettings['Dance'] == false &&
-                              filterSettings['Other'] == false &&
-                              filterSettings['Charity/Community/Info'] == false &&
-                              filterSettings['Visits/Experiences'] == false &&
-                              filterSettings['Business'] == false &&
-                              filterSettings['Services'] == false) {
-                            widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
-                            final idList = _foodMarkerIds +
-                                _shoppingMarkerIds +
-                                _charityCommunityInfoMarkerIds +
-                                _performanceMusicMarkerIds +
-                                _performanceChildrensMarkerIds +
-                                _performanceDanceMarkerIds +
-                                _performanceOtherMarkerIds +
-                                _visitExperienceMarkerIds +
-                                _serviceMarkerIds;
-                            setState(() {
-                              filterSettings['Food'] = true;
-                              filterSettings['Shopping'] = true;
-                              filterSettings['Music'] = true;
-                              filterSettings['Childrens'] = true;
-                              filterSettings['Dance'] = true;
-                              filterSettings['Other'] = true;
-                              filterSettings['Charity/Community/Info'] = true;
-                              filterSettings['Visits/Experiences'] = true;
-                              filterSettings['Business'] = true;
-                              filterSettings['Services'] = true;
-                              updateMarkerVisibilityIgnoringFilters(idList, true);
-                            });
-                          }
+                          enableAllFiltersIfAllOff();
                           _setMapCameraToFitMapMarkers();
                         },
                         backgroundColor: Colors.transparent,
@@ -2100,6 +2103,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         onPressed: () async {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('centre_on_user');
+                          enableAllFiltersIfAllOff();
                           focusMapOnNearestMarkers(10);
                         },
                         backgroundColor: Colors.transparent,
