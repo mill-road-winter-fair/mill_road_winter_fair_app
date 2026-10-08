@@ -671,6 +671,11 @@ Future<void> showListingDetailsDialog(
                       safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
                       onGetDirections.call();
                     },
+                    onAlertTapped: () async {
+                      HapticFeedback.lightImpact();
+                      onAlertTapped.call();
+                      setStateDialog(() {});
+                    },
                     inDialog: true,
                     analyticsService: analyticsService,
                     colorScheme: colorScheme,
