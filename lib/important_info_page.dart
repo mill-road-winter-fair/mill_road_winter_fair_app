@@ -141,13 +141,13 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                           text:
                               'If your business is within the road closure, please read the Important Safety Guidelines for Local Businesses you have been sent or available at: '),
                       TextSpan(
-                          text: 'www.millroadwinterfair.org',
+                          text: 'www.millroadwinterfair.org/businesses-info',
                           style: const TextStyle(decoration: TextDecoration.underline),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               HapticFeedback.lightImpact();
                               widget.analyticsService.logButtonTapped('mrwf_business_safety_hyperlink');
-                              launchUrl(Uri.parse('https://www.millroadwinterfair.org'));
+                              launchUrl(Uri.parse('https://www.millroadwinterfair.org/businesses-info'));
                             }),
                     ],
                   ),
