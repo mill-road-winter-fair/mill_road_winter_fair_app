@@ -285,6 +285,41 @@ void main() {
           reason: 'Two matching markers at the same lat/lng should be visually offset to avoid overlap.');
     });
 
+    testWidgets('cancelNavigation restores markers matching any selected category', (tester) async {
+      final originalListings = listings;
+      addTearDown(() => listings = originalListings);
+      listings = [{...originalListings[2], 'business': 'TRUE'}];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(
+              listings: listings,
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      const markerId = MarkerId('3');
+      expect(state.markers[markerId]?.visible, isTrue);
+
+      state.filterSettings['Business'] = false;
+      state.hideAllMarkers();
+      navigationInProgress = true;
+      state.cancelNavigation();
+      await tester.pumpAndSettle();
+
+      expect(
+        state.markers[markerId]?.visible,
+        isTrue,
+        reason: 'Food remains selected, so disabling Business must not hide a Food+Business marker.',
+      );
+    });
+
     testWidgets('search includes hidden listings and restores default pins', (tester) async {
       final toastCalls = <MethodCall>[];
       const toastChannel = MethodChannel('PonnamKarthik/fluttertoast');

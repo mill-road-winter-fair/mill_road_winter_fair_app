@@ -970,16 +970,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void showFilteredMarkers() {
     debugPrint('MapPageState showFilteredMarkers called');
-    updateMarkerVisibilityIgnoringFilters(_foodMarkerIds, filterSettings['Food']!);
-    updateMarkerVisibilityIgnoringFilters(_shoppingMarkerIds, filterSettings['Shopping']!);
-    updateMarkerVisibilityIgnoringFilters(_charityCommunityInfoMarkerIds, filterSettings['Charity/Community/Info']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceMusicMarkerIds, filterSettings['Music']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceChildrensMarkerIds, filterSettings['Childrens']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceDanceMarkerIds, filterSettings['Dance']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceOtherMarkerIds, filterSettings['Other']!);
-    updateMarkerVisibilityIgnoringFilters(_visitExperienceMarkerIds, filterSettings['Visits/Experiences']!);
-    updateMarkerVisibilityIgnoringFilters(_businessMarkerIds, filterSettings['Business']!);
-    updateMarkerVisibilityIgnoringFilters(_serviceMarkerIds, filterSettings['Services']!);
+    updateMarkerVisibilityRespectingFilters(markers.keys.toList(), true);
   }
 
   void showFilterMenu() {
@@ -1275,7 +1266,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     _searchQuery = '';
     _searchController.clear();
     _cameraBeforeSearch = null;
-    await addAllVisibleMarkers();
     if (!mounted) return;
     // Save the current view
     _cameraBeforeNavigation = _currentCamera;
@@ -1286,7 +1276,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     polylines.clear();
     // Clear the polygons if they're shown
     if (preferredRoadClosurePolygonVisible) _polygons.clear();
-    hideAllMarkers();
     // Remove any simple marker shown
     markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
     // Reset the distance to destination
