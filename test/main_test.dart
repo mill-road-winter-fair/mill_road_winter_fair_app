@@ -9,6 +9,7 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
@@ -47,6 +48,17 @@ void main() {
 
     // Mock user settings
     await loadSettings();
+  });
+
+  group('Chooser page entrance animation', () {
+    test('hotspots reveal in sequence and reach full opacity by the end of the five second entrance', () {
+      expect(hotspotEntranceOpacityForIndex(0, 0.0, totalHotspots: 8), 0.0);
+      expect(hotspotEntranceOpacityForIndex(0, 0.09, totalHotspots: 8), 0.0);
+      expect(hotspotEntranceOpacityForIndex(0, 0.2, totalHotspots: 8), greaterThan(0.0));
+      expect(hotspotEntranceOpacityForIndex(1, 0.2, totalHotspots: 8), 0.0);
+      expect(hotspotEntranceOpacityForIndex(1, 0.4, totalHotspots: 8), greaterThan(0.0));
+      expect(hotspotEntranceOpacityForIndex(7, 1.0, totalHotspots: 8), 1.0);
+    });
   });
 
   group('HomePage', () {
@@ -89,77 +101,12 @@ void main() {
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
-      expect(find.text('Welcome'), findsOneWidget);
+      expect(find.textContaining('Welcome'), findsOneWidget);
 
-      expect(find.text('Home'), findsOneWidget);
       expect(find.text('Map'), findsOneWidget);
       expect(find.text('Listings'), findsOneWidget);
       expect(find.text('Timetable'), findsOneWidget);
       expect(find.text('Favourites'), findsOneWidget);
-    });
-
-    testWidgets('Snowflake button in AppBar navigates to About the Fair page', (WidgetTester tester) async {
-      // Set firstExecution to false to simulate normal app launch
-      firstExecution = false;
-
-      // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
-      listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
-      ];
-
-      // Provide initial mock values for shared preferences
-      SharedPreferences.setMockInitialValues({});
-      await loadSettings();
-
-      // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
-      await tester.pumpAndSettle();
-
-      // Find the snowflake button in the AppBar (it's an IconButton with an ImageIcon)
-      final snowflakeButton = find.byWidgetPredicate(
-        (widget) => widget is IconButton && widget.icon is ImageIcon,
-      );
-      expect(snowflakeButton, findsOneWidget);
-
-      // Tap the snowflake button
-      await tester.tap(snowflakeButton);
-      await tester.pumpAndSettle();
-
-      // Verify that AboutTheFairPage is now displayed
-      expect(find.byType(AboutTheFairPage), findsOneWidget);
-      expect(find.text('About Mill Road Winter Fair'), findsOneWidget);
-
-      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice (triggered in MapPage initState)
-      await tester.pump(const Duration(seconds: 21));
     });
 
     testWidgets('drawer displays expected widgets', (WidgetTester tester) async {
@@ -202,15 +149,14 @@ void main() {
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(find.byType(DrawerHeader), findsOneWidget);
-      expect(find.text('Welcome'), findsOneWidget);
       expect(find.text('About the Fair'), findsOneWidget);
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
       expect(find.text('Contact us'), findsOneWidget);
-      expect(find.byType(IconButton), findsExactly(6));
+      expect(find.byType(IconButton), findsExactly(5));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('App guide'), findsOneWidget);
       expect(find.text('Share this app'), findsOneWidget);
@@ -357,11 +303,12 @@ void main() {
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump(const Duration(milliseconds: 500));
+      final aboutFinder = find.text('About the Fair');
+      expect(aboutFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(aboutFinder);
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text('About the Fair'));
-      await tester.pumpAndSettle();
-
       expect(find.byType(AboutTheFairPage), findsOneWidget);
     });
 
@@ -402,14 +349,17 @@ void main() {
         }
       ];
 
+
+
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump(const Duration(milliseconds: 500));
+      final impInfoFinder = find.text('Important information');
+      expect(impInfoFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(impInfoFinder);
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Important information'));
-      await tester.pumpAndSettle();
-
       expect(find.byType(ImportantInfoPage), findsOneWidget);
     });
 
@@ -453,11 +403,12 @@ void main() {
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
+      await tester.pump(const Duration(milliseconds: 500));
+      final settingsFinder = find.text('Settings');
+      expect(settingsFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(settingsFinder);
       await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Settings'));
-      await tester.pumpAndSettle();
-
       expect(find.byType(SettingsPage), findsOneWidget);
     });
 
@@ -505,9 +456,11 @@ void main() {
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('App guide'));
+      await tester.pump(const Duration(milliseconds: 500));
+      final appGuideFinder = find.text('App guide');
+      expect(appGuideFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(appGuideFinder);
       await tester.pumpAndSettle();
 
       // Verify that the WelcomeScreen is displayed
@@ -557,10 +510,12 @@ void main() {
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('About this app'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+      final aboutAppFinder = find.text('About this app');
+      expect(aboutAppFinder, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(aboutAppFinder);
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('Android app by Alexander Berridge'), findsOneWidget);
       expect(find.text('iPhone version by Matt Whiting'), findsOneWidget);
@@ -605,30 +560,29 @@ void main() {
 
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
-      await tester.tap(find.text('Home'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Obtain the state after mounting
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
       expect(homePageState.index, 0);
 
       await tester.tap(find.byIcon(Icons.map).first);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(homePageState.index, 1);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.list).first);
-      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.ballot).first);
+      await tester.pump();
       expect(homePageState.index, 3);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.schedule).first);
-      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.watch_later).first);
+      await tester.pump();
       expect(homePageState.index, 2);
       expect(find.byIcon(Icons.favorite), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.favorite).first);
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(homePageState.index, 4);
     });
 
@@ -704,11 +658,11 @@ void main() {
 
       // Pump MyApp which contains the AppBar with the snowflake button
       await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Tap the Favourites button the NavBar
       await tester.tap(find.byIcon(Icons.favorite));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Verify that the favourites page is displayed
       expect(find.byType(FilteredListingsPage), findsOneWidget);

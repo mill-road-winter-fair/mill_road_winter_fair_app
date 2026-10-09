@@ -27,7 +27,7 @@ import 'package:url_launcher/url_launcher.dart';
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
-  final void Function()? onHomeTapped;
+  final void Function()? cancelMapNearest;
   final String? destinationId; // optional if we'll be showing directions to somewhere
   final LatLng? destinationLatLng; // optional if we'll be showing directions to somewhere
   final int? nearestMarkerCount; // optional if we'll be zooming in to nearest X markers
@@ -37,7 +37,7 @@ class MapPage extends StatefulWidget {
       {super.key,
       required this.listings,
       required this.onTabSelected,
-      this.onHomeTapped,
+      this.cancelMapNearest,
       this.destinationId,
       this.destinationLatLng,
       this.nearestMarkerCount,
@@ -142,9 +142,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   @override
   void didUpdateWidget(covariant MapPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.nearestMarkerCount != null) {
-      if (navigationInProgress) cancelNavigation();
-      focusMapOnNearestMarkers(widget.nearestMarkerCount!);
+    final nearestMarkerCount = widget.nearestMarkerCount;
+    if (nearestMarkerCount != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || widget.nearestMarkerCount != nearestMarkerCount) return;
+        enableAllFiltersIfAllOff();
+        focusMapOnNearestMarkers(nearestMarkerCount);
+      });
     }
   }
 
@@ -1540,11 +1544,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
       );
+      widget.cancelMapNearest?.call();
       return;
     }
 
     final visibleMarkers = markers.values.where((marker) => marker.visible).toList();
-    if (visibleMarkers.isEmpty) return;
+    if (visibleMarkers.isEmpty) {
+      widget.cancelMapNearest?.call();
+      return;
+    }
     final nearestMarkers = visibleMarkers
       ..sort((a, b) {
         final aDistance = asTheCrowFlies(currentLatLng!, a.position);
@@ -1564,6 +1572,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
       );
+      widget.cancelMapNearest?.call();
       return;
     }
 
@@ -1784,6 +1793,43 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     }
   }
 
+  void enableAllFiltersIfAllOff() {
+    if (filterSettings['Food'] == false &&
+        filterSettings['Shopping'] == false &&
+        filterSettings['Music'] == false &&
+        filterSettings['Childrens'] == false &&
+        filterSettings['Dance'] == false &&
+        filterSettings['Other'] == false &&
+        filterSettings['Charity/Community/Info'] == false &&
+        filterSettings['Visits/Experiences'] == false &&
+        filterSettings['Business'] == false &&
+        filterSettings['Services'] == false) {
+      widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
+      final idList = _foodMarkerIds +
+          _shoppingMarkerIds +
+          _charityCommunityInfoMarkerIds +
+          _performanceMusicMarkerIds +
+          _performanceChildrensMarkerIds +
+          _performanceDanceMarkerIds +
+          _performanceOtherMarkerIds +
+          _visitExperienceMarkerIds +
+          _serviceMarkerIds;
+      setState(() {
+        filterSettings['Food'] = true;
+        filterSettings['Shopping'] = true;
+        filterSettings['Music'] = true;
+        filterSettings['Childrens'] = true;
+        filterSettings['Dance'] = true;
+        filterSettings['Other'] = true;
+        filterSettings['Charity/Community/Info'] = true;
+        filterSettings['Visits/Experiences'] = true;
+        filterSettings['Business'] = true;
+        filterSettings['Services'] = true;
+        updateMarkerVisibilityIgnoringFilters(idList, true);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     //debugPrint('MapPageState build() called with widget.nearestMarkerCount=${widget.nearestMarkerCount}'); // noisy; uncomment if working on CameraPosition
@@ -1970,50 +2016,57 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               LayoutBuilder(
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
-                  mapHeight = constraints.maxHeight;
+                  final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+                  final furnitureHeight = 98.0;
+                  final contentHeight = constraints.maxHeight - (keyboardHeight - furnitureHeight).clamp(0.0, double.infinity);
+                  mapHeight = contentHeight - (_isSearching ? 56 : 0);
+
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
                       if (didPop && navigationInProgress) cancelNavigation();
                     },
-                    child: GoogleMap(
-                      style: mapStyle,
-                      mapType: mapType,
-                      rotateGesturesEnabled: false,
-                      compassEnabled: false,
-                      myLocationEnabled: locationServicesEnabled &&
-                          (locationPermission == LocationPermission.always ||
-                              locationPermission == LocationPermission.whileInUse),
-                      myLocationButtonEnabled: false,
-                      mapToolbarEnabled: false,
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller = controller;
-                        if (listings.isNotEmpty) {
-                          // We should have listings by this point so set the camera to their bounds
-                          _setMapCameraToFitMapMarkers();
-                        }
-                      },
-                      initialCameraPosition: CameraPosition(
-                        target: centreOfFair,
-                        zoom: mapInitialZoom,
-                        bearing: _mapBearing,
-                      ),
-                      onCameraMove: (CameraPosition position) {
-                        //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
-                        _currentCamera = position;
-                        setState(() {
-                          switch (preferredMapOrientation) {
-                            case MapOrientation.adaptive:
-                              _compassBearing = 90;
-                              break;
-                            case MapOrientation.alwaysNorth:
-                              _compassBearing = 0;
-                              break;
+                    child: SizedBox(
+                      height: contentHeight,
+                      child: GoogleMap(
+                        style: mapStyle,
+                        mapType: mapType,
+                        rotateGesturesEnabled: false,
+                        compassEnabled: false,
+                        myLocationEnabled: locationServicesEnabled &&
+                            (locationPermission == LocationPermission.always ||
+                                locationPermission == LocationPermission.whileInUse),
+                        myLocationButtonEnabled: false,
+                        mapToolbarEnabled: false,
+                        onMapCreated: (GoogleMapController controller) {
+                          _controller = controller;
+                          if (listings.isNotEmpty) {
+                            // We should have listings by this point so set the camera to their bounds
+                            _setMapCameraToFitMapMarkers();
                           }
-                        });
-                      },
-                      polygons: _polygons,
-                      markers: markers.values.toSet(),
-                      polylines: polylines
+                        },
+                        initialCameraPosition: CameraPosition(
+                          target: centreOfFair,
+                          zoom: mapInitialZoom,
+                          bearing: _mapBearing,
+                        ),
+                        onCameraMove: (CameraPosition position) {
+                          //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
+                          _currentCamera = position;
+                          setState(() {
+                            switch (preferredMapOrientation) {
+                              case MapOrientation.adaptive:
+                                _compassBearing = 90;
+                                break;
+                              case MapOrientation.alwaysNorth:
+                                _compassBearing = 0;
+                                break;
+                            }
+                          });
+                        },
+                        polygons: _polygons,
+                        markers: markers.values.toSet(),
+                        polylines: polylines
+                      ),
                     ),
                   );
                 },
@@ -2059,42 +2112,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         onPressed: () {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('home');
-                          widget.onHomeTapped?.call();
-                          // Home button resets the filters if they're all toggled off
-                          if (filterSettings['Food'] == false &&
-                              filterSettings['Shopping'] == false &&
-                              filterSettings['Music'] == false &&
-                              filterSettings['Childrens'] == false &&
-                              filterSettings['Dance'] == false &&
-                              filterSettings['Other'] == false &&
-                              filterSettings['Charity/Community/Info'] == false &&
-                              filterSettings['Visits/Experiences'] == false &&
-                              filterSettings['Business'] == false &&
-                              filterSettings['Services'] == false) {
-                            widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
-                            final idList = _foodMarkerIds +
-                                _shoppingMarkerIds +
-                                _charityCommunityInfoMarkerIds +
-                                _performanceMusicMarkerIds +
-                                _performanceChildrensMarkerIds +
-                                _performanceDanceMarkerIds +
-                                _performanceOtherMarkerIds +
-                                _visitExperienceMarkerIds +
-                                _serviceMarkerIds;
-                            setState(() {
-                              filterSettings['Food'] = true;
-                              filterSettings['Shopping'] = true;
-                              filterSettings['Music'] = true;
-                              filterSettings['Childrens'] = true;
-                              filterSettings['Dance'] = true;
-                              filterSettings['Other'] = true;
-                              filterSettings['Charity/Community/Info'] = true;
-                              filterSettings['Visits/Experiences'] = true;
-                              filterSettings['Business'] = true;
-                              filterSettings['Services'] = true;
-                              updateMarkerVisibilityIgnoringFilters(idList, true);
-                            });
-                          }
+                          widget.cancelMapNearest?.call();
+                          enableAllFiltersIfAllOff();
                           _setMapCameraToFitMapMarkers();
                         },
                         backgroundColor: Colors.transparent,
@@ -2125,6 +2144,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         onPressed: () async {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('centre_on_user');
+                          enableAllFiltersIfAllOff();
                           focusMapOnNearestMarkers(10);
                         },
                         backgroundColor: Colors.transparent,
@@ -2178,10 +2198,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                                color: colorScheme.onSurfaceVariant.withAlpha(127),
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: const Offset(2, 2))
+                              color: colorScheme.onSurfaceVariant.withAlpha(127),
+                              spreadRadius: 1,
+                              blurRadius: 3,
+                              offset: const Offset(2, 2))
                           ],
                         ),
                         child: Icon(_layersIcon),
@@ -2241,12 +2261,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     padding: const EdgeInsets.only(top: 8),
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                          iconSize: 30,
-                          backgroundColor: colorScheme.primary,
-                          visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
-                          padding: const EdgeInsets.all(0),
-                          elevation: 3,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        iconSize: 30,
+                        backgroundColor: colorScheme.primary,
+                        visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
+                        padding: const EdgeInsets.all(0),
+                        elevation: 3,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         widget.analyticsService.logButtonTapped('distance_to_destination');
