@@ -2122,7 +2122,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         ),
                       ),
                     // Centre-on-user button (only shown when location services are enabled and permission has been granted)
-                    if (locationServicesEnabled == true &&
+                    if (navigationInProgress == false && locationServicesEnabled == true &&
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
                         heroTag: 'centreOnUserBtn',
