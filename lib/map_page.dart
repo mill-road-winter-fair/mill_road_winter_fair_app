@@ -477,10 +477,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     _markerPositionCounts.clear();
 
     for (var listing in listings) {
-      final matchesSearch = ['title', 'location'].any(
-        (field) => (listing[field] ?? '').toString().toLowerCase().contains(_searchQuery),
-      );
-      if (_searchQuery.isEmpty ? listing['visibleOnMap'] == 'TRUE' : matchesSearch) {
+      if (_searchQuery.isEmpty
+          ? listing['visibleOnMap'] == 'TRUE' 
+          : ['title', 'location'].any((field) => (listing[field] ?? '').toString().toLowerCase().contains(_searchQuery)) 
+      ) {
         // Add Group markers
         if (listing['groupParent'] == 'TRUE' && listing['cancelled'] == 'FALSE') {
           addGroupMarker(listing);
@@ -1946,13 +1946,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       leading: const Icon(Icons.search),
                       trailing: [
                         IconButton(
-                            iconSize: 20,
-                            icon: const Icon(Icons.close),
-                            onPressed: () async {
-                              HapticFeedback.lightImpact();
-                              widget.analyticsService.logButtonTapped('map_search_clear');
-                              _resetSearch(close: false);
-                            })
+                          iconSize: 20,
+                          icon: const Icon(Icons.close),
+                          onPressed: () async {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('map_search_clear');
+                            _resetSearch(close: false);
+                          },
+                        ),
                       ],
                       onChanged: _searchListings,
                     ),
