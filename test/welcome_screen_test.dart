@@ -2,6 +2,7 @@ import 'pump_with_clock.dart';
 import 'package:flutter/material.dart' hide RootWidget;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
@@ -28,6 +29,107 @@ void main() {
   });
 
   group('WelcomeScreen', () {
+    testWidgets('larger dots adapt their spacing when the screen is resized', (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(MaterialApp(
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      var dots = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).dotsDecorator;
+      expect(dots.size, const Size(12, 12));
+      expect(dots.activeSize, const Size(20, 10));
+      expect(dots.spacing.horizontal, lessThan(12));
+      expect(tester.takeException(), isNull);
+
+      tester.view.physicalSize = const Size(480, 800);
+      await settle(tester);
+      dots = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).dotsDecorator;
+      expect(dots.size, const Size(12, 12));
+      expect(dots.activeSize, const Size(20, 10));
+      expect(dots.spacing, const EdgeInsets.symmetric(horizontal: 6));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('background stays fixed while panels are swiped', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      final background = find.image(const AssetImage('assets/welcomeScreen/chooserPage_background.jpg'));
+      expect(background, findsOneWidget);
+      expect(find.ancestor(of: background, matching: find.byType(PageView)), findsNothing);
+      final backgroundRect = tester.getRect(background);
+      final title = find.text('Welcome to the official\nMill Road Winter Fair app!');
+      final titlePosition = tester.getTopLeft(title);
+
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
+      await gesture.moveBy(const Offset(-200, 0));
+      await tester.pump();
+      expect(tester.getTopLeft(title).dx, lessThan(titlePosition.dx));
+      expect(tester.getRect(background), backgroundRect);
+      await gesture.up();
+      await settle(tester);
+      expect(tester.getRect(background), backgroundRect);
+      expect(tester.takeException(), isNull);
+    });
+
+    for (final configuration in [
+      (size: const Size(320, 568), textScale: 1.0),
+      (size: const Size(320, 568), textScale: 2.0),
+      (size: const Size(667, 375), textScale: 1.0),
+    ]) {
+      testWidgets('guide fits and completes at $configuration', (tester) async {
+        tester.view.physicalSize = configuration.size;
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        SharedPreferences.setMockInitialValues({});
+        var finished = false;
+        await tester.pumpWidget(MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(configuration.textScale)),
+            child: child!,
+          ),
+          home: OnBoardingPage(analyticsService: FakeAnalyticsService(), onFinished: () => finished = true),
+        ));
+        await settle(tester);
+
+        final pages = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).pages!;
+        for (var index = 0; index < pages.length; index++) {
+          expect(find.byWidget(pages[index].titleWidget!), findsOneWidget);
+          expect(pages[index].useScrollView, isFalse);
+          expect(tester.takeException(), isNull);
+
+          // All content fits above the controls without vertical scrolling.
+          final lastRow = find.descendant(of: find.byWidget(pages[index].bodyWidget!), matching: find.byType(Row)).last;
+          final rowBottom = tester.getBottomLeft(lastRow).dy;
+          expect(rowBottom, greaterThan(0));
+          expect(
+              rowBottom,
+              lessThan(tester
+                  .getTopLeft(find.byIcon(Icons.arrow_forward).evaluate().isNotEmpty ? find.byIcon(Icons.arrow_forward) : find.text('Done'))
+                  .dy));
+          expect(tester.takeException(), isNull);
+          expect(find.text('Take me straight to the app!').hitTestable(), findsOneWidget);
+
+          if (index < pages.length - 1) {
+            await tester.tap(find.byIcon(Icons.arrow_forward));
+            await settle(tester);
+          }
+        }
+        await tester.tap(find.text('Done'));
+        await settle(tester);
+        expect(finished, isTrue);
+        expect((await SharedPreferences.getInstance()).getBool('firstExecution'), isFalse);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
     testWidgets('displays welcome screen on first app execution', (WidgetTester tester) async {
       // Set firstExecution to true to simulate first time app launch
       firstExecution = true;
@@ -175,7 +277,7 @@ void main() {
 
       // Verify we are on the first page
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
-      expect(find.text('What do the pins mean?'), findsNothing);
+      expect(find.text('What do the map pins mean?'), findsNothing);
 
       // Find and tap the 'Next' button (the arrow forward icon)
       final nextButton = find.byIcon(Icons.arrow_forward);
@@ -184,7 +286,7 @@ void main() {
       await settle(tester);
 
       // Verify we have advanced to the second page
-      expect(find.text('What do the pins mean?'), findsOneWidget);
+      expect(find.text('What do the map pins mean?'), findsOneWidget);
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsNothing);
     });
 
@@ -234,7 +336,8 @@ void main() {
 
       // Advance through the onboarding slides to reach the last page
       final nextButton = find.byIcon(Icons.arrow_forward);
-      for (int i = 0; i < 4; i++) {
+      final pageCount = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).pages!.length;
+      for (int i = 1; i < pageCount; i++) {
         await tester.tap(nextButton);
         await settle(tester);
       }

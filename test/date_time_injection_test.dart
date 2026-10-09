@@ -16,7 +16,7 @@ void main() {
               builder: (_) => const Dialog(
                 child: GroupListingInfoSheet(
                   title: 'Performances',
-                  categories: 'Music',
+                  categories: ['Music'],
                   startTime: '10:30',
                   endTime: '16:30',
                   approxDistance: '',

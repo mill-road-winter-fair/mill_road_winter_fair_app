@@ -56,6 +56,7 @@ dependencies:
   share_plus: ^13.3.0
   intl: ^0.20.3
   provider: ^6.1.5+1
+  simple_shadow: ^0.3.1
 
 dev_dependencies:
   flutter_test:
@@ -90,6 +91,7 @@ flutter:
     - assets/importantInfoPage/
     - assets/mapMarkers/
     - assets/welcomeScreen/
+    - assets/chooserPage/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -128,6 +128,102 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('theme changes refresh existing marker types without resetting the map', (tester) async {
+      final previousTheme = selectedThemeKey;
+      selectedThemeKey = 'light';
+      themeNotifier.value = 'light';
+      addTearDown(() {
+        selectedThemeKey = previousTheme;
+        themeNotifier.value = previousTheme;
+        tester.platformDispatcher.clearPlatformBrightnessTestValue();
+      });
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+      ));
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      state.addSimpleMarker('Service-FirstAid', const LatLng(52.2, 0.14));
+      final base = {...listings.first, 'groupParent': 'FALSE', 'groupID': ''};
+      state.addSpecificMarker({...base, 'id': 'mixed', 'shopping': 'TRUE'});
+      state.addSpecificMarker({...base, 'id': 'performance', 'food': 'FALSE', 'performanceMusic': 'TRUE', 'performanceDance': 'TRUE'});
+      state.hideAllMarkers();
+      final before = Map<MarkerId, Marker>.of(state.markers);
+      final types = {
+        '1': 'Group-Food', '3': 'Food', aSimpleMarkerId: 'Service-FirstAid',
+        'mixed': 'Mixed', 'performance': 'Group-PerformanceEvent',
+      };
+      for (final theme in ['dark', '2024', 'highContrast', 'colourBlindFriendly', 'light']) {
+        selectedThemeKey = theme;
+        themeNotifier.value = theme;
+        await tester.pumpAndSettle();
+        expect(state.markers.keys, unorderedEquals(before.keys));
+        for (final entry in types.entries) {
+          final id = MarkerId(entry.key);
+          final marker = state.markers[id]!;
+          expect(marker.icon.toJson(), BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(theme, entry.value)).hue).toJson(), reason: '$theme: ${entry.value}');
+          expect(marker.visible, before[id]!.visible);
+          expect(marker.position, before[id]!.position);
+          expect(marker.onTap, before[id]!.onTap);
+        }
+      }
+      selectedThemeKey = 'auto';
+      themeNotifier.value = 'auto';
+      for (final brightness in [Brightness.dark, Brightness.light]) {
+        tester.platformDispatcher.platformBrightnessTestValue = brightness;
+        await tester.pumpAndSettle();
+        expect(state.markers[const MarkerId('3')]!.icon.toJson(),
+          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson());
+      }
+      // A queued refresh must not call setState after the map has been removed.
+      selectedThemeKey = 'dark';
+      themeNotifier.value = 'dark';
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('clears a nearby request after build when no markers are visible', (tester) async {
+      final previousLocation = currentLatLng;
+      addTearDown(() => currentLatLng = previousLocation);
+      locationPermission = LocationPermission.deniedForever;
+      currentLatLng = const LatLng(52.2, 0.14);
+      int? nearestMarkerCount;
+
+      await tester.pumpWidget(MaterialApp(
+        home: StatefulBuilder(
+          builder: (context, setState) => Scaffold(
+            body: Column(
+              children: [
+                TextButton(
+                  onPressed: () => setState(() => nearestMarkerCount = 10),
+                  child: const Text('Show nearby'),
+                ),
+                Expanded(
+                  child: MapPage(
+                    listings: listings,
+                    nearestMarkerCount: nearestMarkerCount,
+                    cancelMapNearest: () => setState(() => nearestMarkerCount = null),
+                    onTabSelected: (_) {},
+                    analyticsService: FakeAnalyticsService(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      tester.state<MapPageState>(find.byType(MapPage)).hideAllMarkers();
+      await tester.pump();
+
+      await tester.tap(find.text('Show nearby'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(nearestMarkerCount, isNull);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('does not enable the map location layer without permission', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
@@ -234,12 +330,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check the map buttons
-      expect(find.byType(FloatingActionButton), findsExactly(4));
-      expect(find.byIcon(Icons.home), findsExactly(2));
+      expect(find.byType(FloatingActionButton), findsExactly(5));
+      expect(find.byIcon(Icons.home), findsExactly(1));
+      expect(find.byIcon(Icons.radar), findsOneWidget);
       expect(find.byIcon(Icons.satellite_alt), findsOneWidget);
       expect(find.byIcon(Icons.assistant_navigation), findsOneWidget);
       expect(find.byIcon(Icons.filter_alt), findsOneWidget);
-      expect(find.byIcon(Icons.my_location), findsOneWidget);
+      expect(find.byIcon(Icons.radar), findsOneWidget);
 
       // Check road closure button
       expect(find.text('Road closures'), findsOneWidget);
@@ -534,13 +631,15 @@ void main() {
       final charityCommunityInfoColor = getCategoryColor("light", "Charity/Community/Info");
       final visitExperienceColor = getCategoryColor("light", "Visit/Experience");
       final serviceColor = getCategoryColor("light", "Service");
+      final mixedColor = getCategoryColor("light", "Mixed");
 
       expect(foodColor, const Color.fromRGBO(255, 156, 26, 1.0));
-      expect(shoppingColor, const Color.fromRGBO(209, 81, 85, 1.0));
+      expect(shoppingColor, const Color.fromRGBO(209, 85, 89, 1.0));
       expect(performanceColor, const Color.fromRGBO(190, 110, 230, 1.0));
       expect(charityCommunityInfoColor, const Color.fromRGBO(150, 80, 0, 1.0));
       expect(visitExperienceColor, const Color.fromRGBO(79, 184, 75, 1.0));
       expect(serviceColor, const Color.fromRGBO(84, 145, 245, 1.0));
+      expect(mixedColor, const Color.fromRGBO(166, 34, 43, 1));
     });
 
     testWidgets('Adds markers, opens modal bottom sheet for group marker, and checks content', (WidgetTester tester) async {
@@ -574,7 +673,7 @@ void main() {
       // Group marker content
       expect(find.text('Food Group'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
-      expect(find.text('Food'), findsOneWidget);
+      expect(find.byIcon(Icons.fastfood), findsOneWidget);
       expect(find.text('~199m away'), findsOneWidget);
       // Specific marker content
       expect(find.text('🍩 '), findsOneWidget);
@@ -582,7 +681,6 @@ void main() {
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-      expect(find.byIcon(Icons.public), findsOneWidget);
     });
 
     testWidgets('Adds markers, opens modal bottom sheet for specific marker, and checks content', (WidgetTester tester) async {
@@ -619,7 +717,6 @@ void main() {
       expect(find.text('Implausible Avenue (~135m away)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-      expect(find.byIcon(Icons.public), findsOneWidget);
     });
 
     testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
@@ -806,13 +903,14 @@ void main() {
 
       // Verify all checkboxes are present
       expect(find.widgetWithText(CheckboxListTile, "Food and drink"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Shopping and stalls"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Charity, Community, Info"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Music performances"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Children’s performances"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Dance performances"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Shopping"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Charity, community, info"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Music"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Children’s entertainment"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Dance"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Other performances"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Visits and experiences"), findsOneWidget);
+      expect(find.widgetWithText(CheckboxListTile, "Other businesses"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
 
       // Test Food checkbox
@@ -836,7 +934,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Shopping checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping and stalls"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -845,7 +943,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping and stalls"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Shopping"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -856,7 +954,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Music checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Music performances"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -865,7 +963,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Music performances"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Music"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -876,7 +974,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
 
       // Test Events checkbox
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, Community, Info"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, community, info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);
@@ -885,7 +983,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('3')]?.visible, true);
       expect(mapPageState.markers[const MarkerId('4')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('5')]?.visible, true);
-      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, Community, Info"));
+      await tester.tap(find.widgetWithText(CheckboxListTile, "Charity, community, info"));
       await tester.pumpAndSettle();
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers.length, 5);

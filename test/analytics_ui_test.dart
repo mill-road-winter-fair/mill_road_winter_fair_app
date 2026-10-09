@@ -67,7 +67,7 @@ void main() {
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
     await tester.pumpWithClock(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
-      0, (index) => analytics.calls.add('navigate:$index'), analyticsService: analytics,
+      0, (index) => analytics.calls.add('navigate:$index'), ColorScheme.light(), analyticsService: analytics,
     ))));
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
@@ -110,17 +110,12 @@ void main() {
       await tester.tap(find.byType(IconButton));
       await tester.tap(find.byIcon(Icons.directions_walk));
       await tester.tap(find.byIcon(Icons.info));
-      for (final icon in [Icons.public, Icons.email, Icons.phone]) {
-        await tester.tap(find.byIcon(icon));
-        await tester.pumpAndSettle();
-      }
       for (final text in ['Website: https://example.com', 'Email: test@example.com', 'Telephone: 0123456789']) {
         await tester.tap(find.text(text));
         await tester.pumpAndSettle();
       }
       expect(analytics.buttonEvents.map((event) => event['button_id']), [
         'save_listing', 'directions_to_listing', 'listing_details',
-        'visit_listing_website', 'email_listing', 'phone_listing',
         'visit_listing_website', 'email_listing', 'phone_listing',
       ]);
       for (final event in analytics.buttonEvents) {
@@ -133,10 +128,14 @@ void main() {
   testWidgets('settings logs taps and the new preference value', (tester) async {
     await tester.pumpWithClock(MaterialApp(home: SettingsPage(analyticsService: analytics)));
     analytics.calls.clear();
+    await tester.tap(find.text('Metric'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Imperial'));
     await tester.pumpAndSettle();
     expect(analytics.calls, ['haptic', 'tap:distanceUnit_preference_option', 'unit:imperial']);
     analytics.calls.clear();
+    await tester.tap(find.text('Light'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Dark'));
     await tester.pumpAndSettle();
     expect(analytics.calls, ['haptic', 'tap:theme_preference_option', 'theme:dark']);
@@ -175,19 +174,22 @@ void main() {
 
   testWidgets('only the visible tab is tracked and returning from Settings restores it', (tester) async {
     await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: analytics));
-    await tester.pumpAndSettle();
+    // The chooser loads images and animates continuously; navigation tracking
+    // only needs the initial post-frame callbacks to complete.
+    await tester.pump();
     expect(analytics.calls.where((call) => call.startsWith('screen:')), ['screen:ChooserPage']);
     expect(analytics.calls, contains('consent_prompt'));
     await tester.tap(find.text('Map').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(analytics.calls.last, 'screen:MapPage');
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.push(MaterialPageRoute(builder: (_) => SettingsPage(analyticsService: analytics)));
+    await tester.pump();
     expect(analytics.calls.last, 'screen:SettingsPage');
-    await tester.tap(find.byType(BackButton));
-    await tester.pumpAndSettle();
+
+    navigator.pop();
+    await tester.pump();
     expect(analytics.calls.last, 'screen:MapPage');
     await tester.pumpWithClock(const SizedBox());
     await tester.pumpAndSettle();

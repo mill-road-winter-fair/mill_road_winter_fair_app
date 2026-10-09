@@ -83,6 +83,9 @@ int promptedUserToEnableLocationServices = 0;
 // Cached user location used by the map and listings pages.
 LatLng? currentLatLng;
 
+// Whether to have a static chooser page
+ValueNotifier<bool> staticChooserPage = ValueNotifier(onTest);
+
 // Fair date (and times) for this year
 // Also used by the listing-update notifier.
 final fairDate = DateTime(2026, 12, 5);
@@ -237,6 +240,7 @@ final List<LatLng> roadClosurePolygonPoints = [
 // Map defaults and markers
 const centreOfFair = LatLng(52.199174, 0.140929);
 const mapInitialZoom = 14.1;
+String? bitmapDescriptorsThemeKey;
 Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // single cache of custom BitmapDescriptors to use as map markers
 
 // Listings subfilter keywords to labels and icons
@@ -250,14 +254,14 @@ class SubfilterLabel {
 
 const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'performanceMusic': SubfilterLabel('Music', Icons.music_note, true),
-  'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free, true),
   'performanceDance': SubfilterLabel('Dance', Icons.emoji_people, true),
   'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy, true),
-  'visitExperience': SubfilterLabel('Visit & Experience', Icons.attractions, false),
-  'food': SubfilterLabel('Food & Drink', Icons.fastfood, false),
-  'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer, false),
-  'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism, false),
-  'business': SubfilterLabel('Other business', Icons.business, false),
+  'performanceChildrens': SubfilterLabel('Children’s entertainment', Icons.escalator_warning, true),
+  'visitExperience': SubfilterLabel('Visits & experiences', Icons.attractions, false),
+  'food': SubfilterLabel('Food & drink', Icons.fastfood, false),
+  'shopping': SubfilterLabel('Shopping', Icons.local_offer, false),
+  'charityCommunityInfo': SubfilterLabel('Charity, community, info', Icons.volunteer_activism, false),
+  'business': SubfilterLabel('Other businesses', Icons.business, false),
   'service': SubfilterLabel('Services', Icons.family_restroom, false)
 };
 
