@@ -144,6 +144,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     if (nearestMarkerCount != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || widget.nearestMarkerCount != nearestMarkerCount) return;
+        enableAllFiltersIfAllOff();
         focusMapOnNearestMarkers(nearestMarkerCount);
       });
     }
