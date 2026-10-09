@@ -1465,7 +1465,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       pl.Route route = response.routes.first;
 
       // Get polyline points
-      List<pl.PointLatLng> points = route.polylinePoints ?? [];
+      List<pl.PointLatLng> points = [pl.PointLatLng(origin.latitude, origin.longitude), ...(route.polylinePoints ?? [])];
 
       // Convert to LatLng for Google Maps
       List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
