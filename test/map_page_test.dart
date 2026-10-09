@@ -415,6 +415,48 @@ void main() {
       expect(find.text('Road closures'), findsOneWidget);
     });
 
+    testWidgets('cancelling search reapplies the selected marker filters', (tester) async {
+      final originalListings = listings;
+      addTearDown(() => listings = originalListings);
+      listings = [
+        originalListings[2],
+        {
+          ...originalListings[2],
+          'id': '4',
+          'title': 'Information Point',
+          'food': 'FALSE',
+          'service': 'TRUE',
+        },
+      ];
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      Set<String> visibleIds() => state.markers.values
+          .where((marker) => marker.visible)
+          .map((marker) => marker.markerId.value)
+          .toSet();
+      state.filterSettings['Food'] = false;
+      state.showFilteredMarkers();
+      expect(visibleIds(), {'4'});
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      final field = find.descendant(of: find.byType(SearchBar), matching: find.byType(TextField));
+      await tester.enterText(field, 'sushi');
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'3'});
+
+      await tester.tap(find.byIcon(Icons.search_off));
+      await tester.pumpAndSettle();
+      expect(visibleIds(), {'4'});
+    });
+
     testWidgets('Home button centres the map and resets filters if all were off', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;

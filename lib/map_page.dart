@@ -494,13 +494,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     setState(() {});
   }
 
-  void _resetSearch({bool close = true}) {
+  Future<void> _resetSearch({bool close = true}) async {
     setState(() {
       if (close) _isSearching = false;
       _searchQuery = '';
       _searchController.clear();
     });
-    addAllVisibleMarkers();
+    await addAllVisibleMarkers();
+    if (!mounted) return;
+    showFilteredMarkers();
     if (close) _cameraBeforeSearch = null;
   }
 
@@ -534,7 +536,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_isSearching && (state == AppLifecycleState.hidden ||
         state == AppLifecycleState.paused || state == AppLifecycleState.detached)) {
-      _resetSearch();
+      unawaited(_resetSearch());
     }
   }
 
@@ -1914,7 +1916,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 HapticFeedback.lightImpact();
                 if (_isSearching) {
                   final camera = _cameraBeforeSearch;
-                  _resetSearch();
+                  await _resetSearch();
                   if (camera != null) {
                     await _controller?.animateCamera(CameraUpdate.newCameraPosition(camera));
                   }
@@ -1951,7 +1953,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           onPressed: () async {
                             HapticFeedback.lightImpact();
                             widget.analyticsService.logButtonTapped('map_search_clear');
-                            _resetSearch(close: false);
+                            await _resetSearch(close: false);
                           },
                         ),
                       ],
