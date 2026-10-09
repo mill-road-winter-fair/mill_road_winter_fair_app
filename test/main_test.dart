@@ -657,7 +657,7 @@ void main() {
 
       // Pump MyApp which contains the AppBar with the snowflake button
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Tap the Favourites button the NavBar
       await tester.tap(find.byIcon(Icons.favorite));
