@@ -1267,11 +1267,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
-    // Navigation must start with the default marker set so it can restore it later.
-    _isSearching = false;
-    _searchQuery = '';
-    _searchController.clear();
-    _cameraBeforeSearch = null;
     if (!mounted) return;
     // Save the current view
     _cameraBeforeNavigation = _currentCamera;
@@ -1915,7 +1910,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               },
               icon: const Icon(Icons.filter_alt, size: 26),
             ),
-            if (doingAPushNavigation == null) IconButton(
+            if (doingAPushNavigation == null && !navigationInProgress) IconButton(
               key: searchIconKey,
               tooltip: _isSearching ? 'Close map search' : 'Search the map',
               color: appBarTheme.foregroundColor,
