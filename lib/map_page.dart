@@ -107,11 +107,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  final Map<String, int> _markerPositionCounts = <String, int>{};
   bool _isSearching = false; // true when the search bar is open (with/without text)
   CameraPosition? _currentCamera; // saves the camera position as it is moved by user or programmatically
   CameraPosition? _cameraBeforeNavigation; // to be able to restore camera position after navigation
   CameraPosition? _cameraBeforeSearch; // to be able to restore camera position after search
   late ColorScheme colorScheme; // will be set in build
+  bool get hasActiveMarkerFilters => filterSettings.values.any((isEnabled) => !isEnabled);
 
   @override
   void initState() {
@@ -325,7 +327,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<(LatLng?, LatLng?)> filterMarkersIgnoringFiltersAndCalculateBounds(List<MarkerId> idList) async {
-    debugPrint('MapPageState filterMarkersIgnoringFilters called');
+    debugPrint('MapPageState filterMarkersIgnoringFiltersAndCalculateBounds called');
     Position position = await getCurrentPosition();
     // Set default LatLngs bounds from current position to ensure it's included
     // southwest
@@ -480,12 +482,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     // Ensure the markers list is empty
     markers.clear();
     _markerTypes.clear();
+    _markerPositionCounts.clear();
 
     for (var listing in listings) {
-      final matchesSearch = ['title', 'location'].any(
-        (field) => (listing[field] ?? '').toString().toLowerCase().contains(_searchQuery),
-      );
-      if (_searchQuery.isEmpty ? listing['visibleOnMap'] == 'TRUE' : matchesSearch) {
+      if (_searchQuery.isEmpty
+          ? listing['visibleOnMap'] == 'TRUE' 
+          : ['title', 'location'].any((field) => (listing[field] ?? '').toString().toLowerCase().contains(_searchQuery)) 
+      ) {
         // Add Group markers
         if (listing['groupParent'] == 'TRUE' && listing['cancelled'] == 'FALSE') {
           addGroupMarker(listing);
@@ -499,21 +502,24 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     setState(() {});
   }
 
-  void _resetSearch({bool close = true}) {
+  Future<void> _resetSearch({bool close = true}) async {
     setState(() {
       if (close) _isSearching = false;
       _searchQuery = '';
       _searchController.clear();
     });
-    addAllVisibleMarkers();
+    await addAllVisibleMarkers();
+    if (!mounted) return;
+    showFilteredMarkers();
     if (close) _cameraBeforeSearch = null;
   }
 
   Future<void> _searchListings(String value) async {
+    final normalisedValue = value.toLowerCase();
     _cameraBeforeSearch ??= _currentCamera;
-    _searchQuery = value.toLowerCase();
+    _searchQuery = normalisedValue;
     await addAllVisibleMarkers();
-    if (!mounted || !_isSearching || _searchQuery != value.toLowerCase() || _searchQuery.isEmpty) return;
+    if (!mounted || !_isSearching || _searchQuery != normalisedValue || _searchQuery.isEmpty) return;
     final positions = markers.values.map((marker) => marker.position).toList();
     if (positions.isEmpty) {
       Fluttertoast.showToast(
@@ -538,7 +544,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_isSearching && (state == AppLifecycleState.hidden ||
         state == AppLifecycleState.paused || state == AppLifecycleState.detached)) {
-      _resetSearch();
+      unawaited(_resetSearch());
     }
   }
 
@@ -575,9 +581,22 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     return favouriteListingKeys.value.contains(listingID);
   }
 
+  LatLng _positionForMarker(LatLng candidate) {
+    final key = '${candidate.latitude.toStringAsFixed(6)}:${candidate.longitude.toStringAsFixed(6)}';
+    final duplicateIndex = _markerPositionCounts[key] ?? 0;
+    _markerPositionCounts[key] = duplicateIndex + 1;
+
+    if (duplicateIndex == 0) return candidate;
+
+    const double offset = 0.00004; // ~4.4m at the equator; enough to separate stacked pins visually.
+    final latOffset = ((duplicateIndex % 3) - 1) * offset;
+    final lngOffset = ((duplicateIndex ~/ 3) % 3 - 1) * offset;
+    return LatLng(candidate.latitude + latOffset, candidate.longitude + lngOffset);
+  }
+
   void addGroupMarker(Map<String, dynamic> parentListing) async {
     //debugPrint('MapPageState addGroupMarker called for ${parentListing['title']}');
-    LatLng destinationLatLng = stringToLatLng(parentListing['latLng']);
+    LatLng destinationLatLng = _positionForMarker(stringToLatLng(parentListing['latLng']));
     MarkerId markerId = MarkerId(parentListing['id'].toString());
     final (catCount, perfOrEventCount) = countCategories(parentListing);
     final String type;
@@ -776,7 +795,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void addSpecificMarker(Map<String, dynamic> listing) async {
     //debugPrint('MapPageState addSpecificMarker called for marker ID: ${listing['id']}');
-    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+    LatLng destinationLatLng = _positionForMarker(stringToLatLng(listing['latLng']));
     MarkerId markerId = MarkerId(listing['id'].toString());
     final (catCount, perfOrEventCount) = countCategories(listing);
     final type = catCount == 1
@@ -882,9 +901,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             },
           );
         });
-    //setState(() {
     markers[markerId] = newMarker;
-    //});
   }
 
   void addSimpleMarker(String category, destinationLatLng) async {
@@ -963,16 +980,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void showFilteredMarkers() {
     debugPrint('MapPageState showFilteredMarkers called');
-    updateMarkerVisibilityIgnoringFilters(_foodMarkerIds, filterSettings['Food']!);
-    updateMarkerVisibilityIgnoringFilters(_shoppingMarkerIds, filterSettings['Shopping']!);
-    updateMarkerVisibilityIgnoringFilters(_charityCommunityInfoMarkerIds, filterSettings['Charity/Community/Info']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceMusicMarkerIds, filterSettings['Music']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceChildrensMarkerIds, filterSettings['Childrens']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceDanceMarkerIds, filterSettings['Dance']!);
-    updateMarkerVisibilityIgnoringFilters(_performanceOtherMarkerIds, filterSettings['Other']!);
-    updateMarkerVisibilityIgnoringFilters(_visitExperienceMarkerIds, filterSettings['Visits/Experiences']!);
-    updateMarkerVisibilityIgnoringFilters(_businessMarkerIds, filterSettings['Business']!);
-    updateMarkerVisibilityIgnoringFilters(_serviceMarkerIds, filterSettings['Services']!);
+    updateMarkerVisibilityRespectingFilters(markers.keys.toList(), true);
   }
 
   void showFilterMenu() {
@@ -1263,12 +1271,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
-    // Navigation must start with the default marker set so it can restore it later.
-    _isSearching = false;
-    _searchQuery = '';
-    _searchController.clear();
-    _cameraBeforeSearch = null;
-    await addAllVisibleMarkers();
     if (!mounted) return;
     // Save the current view
     _cameraBeforeNavigation = _currentCamera;
@@ -1279,7 +1281,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     polylines.clear();
     // Clear the polygons if they're shown
     if (preferredRoadClosurePolygonVisible) _polygons.clear();
-    hideAllMarkers();
     // Remove any simple marker shown
     markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
     // Reset the distance to destination
@@ -1458,7 +1459,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       pl.Route route = response.routes.first;
 
       // Get polyline points
-      List<pl.PointLatLng> points = route.polylinePoints ?? [];
+      List<pl.PointLatLng> points = [pl.PointLatLng(origin.latitude, origin.longitude), ...(route.polylinePoints ?? [])];
 
       // Convert to LatLng for Google Maps
       List<LatLng> polylineCoordinates = points.map((point) => LatLng(point.latitude, point.longitude)).toList();
@@ -1561,7 +1562,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
     if (nearestMarkers.isEmpty || asTheCrowFlies(currentLatLng!, nearestMarkers.first.position) > 500) {
       Fluttertoast.showToast(
-        msg: 'Nearest attractions are more than 500m away, so please try again when you’re at the Fair.',
+        msg: (_isSearching)
+          ? 'Nearest search results are more than 500m away, so please change or cancel your search and try again.'
+          : 'Nearest venues are more than 500m away, so please try again when you’re at the Fair.',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
         textColor: Theme.of(context).colorScheme.onPrimary,
@@ -1933,7 +1936,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         final appBarTheme = Theme.of(context).appBarTheme;
 
         return FairScaffold(
-          appBarTitle: (navigationInProgress || doingAPushNavigation != null) ? 'Directions' : (widget.nearestMarkerCount != null) ? 'Nearby attractions' : 'Map',
+          appBarTitle: 
+              (navigationInProgress || doingAPushNavigation != null) ? 'Directions'
+              : (widget.nearestMarkerCount != null) ? 'Nearby attractions'
+              : (hasActiveMarkerFilters) ? 'Map (filtered)'
+              : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
@@ -1949,7 +1956,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               },
               icon: const Icon(Icons.filter_alt, size: 26),
             ),
-            if (doingAPushNavigation == null) IconButton(
+            if (doingAPushNavigation == null && !navigationInProgress) IconButton(
               key: searchIconKey,
               tooltip: _isSearching ? 'Close map search' : 'Search the map',
               color: appBarTheme.foregroundColor,
@@ -1958,7 +1965,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 HapticFeedback.lightImpact();
                 if (_isSearching) {
                   final camera = _cameraBeforeSearch;
-                  _resetSearch();
+                  await _resetSearch();
                   if (camera != null) {
                     await _controller?.animateCamera(CameraUpdate.newCameraPosition(camera));
                   }
@@ -1971,8 +1978,41 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             ),
           ],
           allowBack: (doingAPushNavigation != null),
-          body: Stack(
-            children: [
+          body: Column(children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _isSearching ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    key: const ValueKey('searchBar'),
+                    color: colorScheme.surfaceDim,
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
+                    padding: EdgeInsets.all(8),
+                    child: SearchBar(
+                      autoFocus: true,
+                      controller: _searchController,
+                      elevation: const WidgetStatePropertyAll(0),
+                      hintText: 'Search all locations...',
+                      leading: const Icon(Icons.search),
+                      trailing: [
+                        IconButton(
+                          iconSize: 20,
+                          icon: const Icon(Icons.close),
+                          onPressed: () async {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('map_search_clear');
+                            await _resetSearch(close: false);
+                          },
+                        ),
+                      ],
+                      onChanged: _searchListings,
+                    ),
+                  ),
+                ],
+              ) : SizedBox.shrink(),
+            ),
+            Expanded(child: Stack(fit: StackFit.expand, children: [
               LayoutBuilder(
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
@@ -2096,7 +2136,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         ),
                       ),
                     // Centre-on-user button (only shown when location services are enabled and permission has been granted)
-                    if (locationServicesEnabled == true &&
+                    if (navigationInProgress == false && locationServicesEnabled == true &&
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
                         heroTag: 'centreOnUserBtn',
@@ -2302,42 +2342,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     ),
                   ),
                 ),
-                Positioned(top: 0, left: 0, child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: _isSearching ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          key: const ValueKey('searchBar'),
-                          color: colorScheme.surfaceDim,
-                          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
-                          padding: EdgeInsets.all(8),
-                          child: SearchBar(
-                            autoFocus: true,
-                            controller: _searchController,
-                            elevation: const WidgetStatePropertyAll(0),
-                            hintText: 'Search all locations...',
-                            leading: const Icon(Icons.search),
-                            trailing: [
-                              IconButton(
-                                  iconSize: 20,
-                                  icon: const Icon(Icons.close),
-                                  tooltip: 'Clear map search',
-                                  onPressed: () async {
-                                    HapticFeedback.lightImpact();
-                                    widget.analyticsService.logButtonTapped('map_search_clear');
-                                    _resetSearch(close: false);
-                                  })
-                            ],
-                            onChanged: _searchListings,
-                          ),
-                        ),
-                      ],
-                    ) : SizedBox.shrink(),
-                  ),
-                ),
-            ],
-          ),
+            ])),
+          ]),
           analyticsService: widget.analyticsService,
         );
       },

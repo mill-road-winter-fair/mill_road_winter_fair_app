@@ -99,12 +99,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   String calculateAppBarTitle() {
     String appBarTitle = '';
-    if (widget.subfilterCategory != null) appBarTitle += 'Filtered';
     if (filterCategory == 'favourite') {
-      appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites'; // 'filtered favourite listings' doesn't fit!
+      appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites';
     } else {
       appBarTitle += (appBarTitle.isEmpty) ? 'All listings' : ' listings';
     }
+    if (widget.subfilterCategory != null) appBarTitle += ' (filtered)';
     return appBarTitle;
   }
 
