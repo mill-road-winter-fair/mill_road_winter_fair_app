@@ -4,7 +4,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -396,15 +395,7 @@ class _TimetablePageState extends State<TimetablePage> {
     widget.analyticsService.logPreferenceSet('timetable_now_or_soon', newonlyNowOrSoon.toString());
     widget.onFilterChange.call(newonlyNowOrSoon, widget.filteredMusicOrNot);
     if (mounted) setState(() {});
-    Fluttertoast.showToast(
-      msg: (newonlyNowOrSoon) ? 'Only showing what’s on now or starting soon' : 'Showing everything',
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      textColor: Theme.of(context).colorScheme.onPrimary,
-      fontSize: 16,
-      toastLength: Toast.LENGTH_SHORT,
-      timeInSecForIosWeb: 2,
-    );
+    showInfoToast(context, (newonlyNowOrSoon) ? 'Only showing what’s on now or starting soon' : 'Showing everything');
   }
 
   void _toggleFilteredMusicOrNot() {
@@ -425,15 +416,7 @@ class _TimetablePageState extends State<TimetablePage> {
                 ? 'music'
                 : 'other');
     widget.onFilterChange.call(widget.onlyNowOrSoon, newFilteredMusicOrNot);
-    Fluttertoast.showToast(
-      msg: theMsg,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      textColor: Theme.of(context).colorScheme.onPrimary,
-      fontSize: 16,
-      toastLength: Toast.LENGTH_SHORT,
-      timeInSecForIosWeb: 2,
-    );
+    showInfoToast(context, theMsg);
     debugPrint('_TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
   }
 
