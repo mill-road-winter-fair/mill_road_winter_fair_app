@@ -329,37 +329,47 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     contentPadding: EdgeInsets.zero,
                     activeThumbColor: Theme.of(context).colorScheme.tertiary,
                     title: Text('Allow analytics', style: settingLabelStyle),
-                    subtitle: Text.rich(
-                      TextSpan(children: [
-                      TextSpan(text: 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '),
-                      TextSpan(
-                        text: 'What does this mean?',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.tertiary,
-                          decoration: TextDecoration.underline,
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          analyticsEnabledForBuild
+                              ? 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'
+                              : 'Analytics is disabled for this development run.',
                         ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped('analytics_explanation_settings');
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
-                              ),
-                            );
-                          },
-                      ),
-                      ]),
+                        const SizedBox(height: 4),
+                        RichText(
+                          text: TextSpan(
+                            text: 'What does this mean?',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.tertiary,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
+                                  ),
+                                );
+                              },
+                          ),
+                        ),
+                      ],
                     ),
-                    value: usageAnalyticsEnabled ?? false,
-                    onChanged: (bool value) async {
+                    value: analyticsEnabledForBuild ? usageAnalyticsEnabled ?? false : false,
+                    onChanged: analyticsEnabledForBuild
+                        ? (bool value) async {
                       HapticFeedback.selectionClick();
                       widget.analyticsService.logButtonTapped('analytics_preference_toggle');
                       await widget.analyticsService.setAnalyticsEnabled(value);
                       if (mounted) setState(() {});
-                    },
-                  ),
+                    }
+                        : null,
+                  )
                 ],
               ),
             ),

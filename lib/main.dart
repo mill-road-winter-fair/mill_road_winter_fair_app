@@ -24,25 +24,35 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
-  // Release builds always use the production Firebase project. Debug and
-  // profile builds use the development project.
-  try {
-    await Firebase.initializeApp(
-      options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
-    );
-    debugPrint('main(): Firebase initialized successfully');
-  } on FirebaseException catch (e) {
-    if (e.code == 'duplicate-app') {
-      // Firebase was already initialized (e.g., by native side).
-      debugPrint('main(): Firebase already initialized: ${e.message}');
-    } else {
-      rethrow;
+  if (analyticsEnabledForBuild) {
+    // Release builds use the production Firebase project. Debug and profile
+    // builds with DEV_ANALYTICS=true use the development project.
+    try {
+      await Firebase.initializeApp(
+        options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
+      );
+      debugPrint('main(): Firebase initialized successfully');
+    } on FirebaseException catch (e) {
+      if (e.code == 'duplicate-app') {
+        // Firebase was already initialized (e.g., by native side).
+        debugPrint('main(): Firebase already initialized: ${e.message}');
+      } else {
+        rethrow;
+      }
     }
+  } else {
+    debugPrint('main(): Firebase analytics disabled for this build');
   }
 
   await loadSettings();
-  final analyticsService = FirebaseAnalyticsService();
-  await analyticsService.initialize();
+  final AnalyticsService analyticsService;
+  if (analyticsEnabledForBuild) {
+    final firebaseAnalyticsService = FirebaseAnalyticsService();
+    await firebaseAnalyticsService.initialize();
+    analyticsService = firebaseAnalyticsService;
+  } else {
+    analyticsService = DisabledAnalyticsService();
+  }
 
   listings = await fetchListings(http.Client());
   debugPrint('Listings fetched: count = ${listings.length}');
