@@ -475,15 +475,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   numberOfVisibleListings = -1;
                   firstVisibleIndex = null;
                 });
-                Fluttertoast.showToast(
-                  msg: (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances',
-                  gravity: ToastGravity.BOTTOM,
-                  backgroundColor: colorScheme.primary,
-                  textColor: colorScheme.onPrimary,
-                  fontSize: 16,
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                );
+                showInfoToast(context, (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances');
               } else {
                 showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
               }

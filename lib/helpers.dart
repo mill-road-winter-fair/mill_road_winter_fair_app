@@ -26,6 +26,10 @@ Timer? _miniPopupTimer; // times how long the above stays on screen
 Route? listingDetailsDialogRoute; // to keep track of dialog so it can be closed if needed. This will move to main if we enter the app from an alert
 
 class FairScaffold extends StatelessWidget {
+  static const navigationBarHeight = 62.0;
+  static const homeButtonSize = 68.0;
+  static const homeButtonOffset = 20.0;
+
   const FairScaffold({
     super.key,
     required this.appBarTitle,
@@ -84,12 +88,12 @@ class FairScaffold extends StatelessWidget {
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
-          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: 20),
+          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: homeButtonOffset),
           floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
           resizeToAvoidBottomInset: false,
           floatingActionButton: (allowBack ?? false) ? null : SizedBox(
-            width: 68,
-            height: 68,
+            width: homeButtonSize,
+            height: homeButtonSize,
             child: Semantics(
               selected: currentTab == 0,
               child: FloatingActionButton(
@@ -111,7 +115,7 @@ class FairScaffold extends StatelessWidget {
           ),
           bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
             key: const ValueKey('navigation-bar-surface'),
-            height: 62,
+            height: navigationBarHeight,
             padding: EdgeInsets.only(right: 6), // to stop Favourites hitting edge
             elevation: 0,
             color: colorScheme.primary,
@@ -123,6 +127,43 @@ class FairScaffold extends StatelessWidget {
           ),
         ));
   }
+}
+
+// We typically use this for non-error toasts as it not in the centre of the screen, but also avoids the navbar
+void showInfoToast(BuildContext context, String message) {
+  final theme = Theme.of(context);
+  final colours = theme.colorScheme;
+  final toast = FToast().init(context);
+  // Replace stale feedback when filters change rapidly.
+  toast.removeQueuedCustomToasts();
+  toast.showToast(
+    ignorePointer: true,
+    toastDuration: const Duration(seconds: 2),
+    positionedToastBuilder: (context, child, gravity) {
+      final media = MediaQuery.of(context);
+      const navigationHeight = FairScaffold.navigationBarHeight +
+          FairScaffold.homeButtonSize / 2 - FairScaffold.homeButtonOffset;
+      return Positioned(
+        bottom: max(media.padding.bottom + navigationHeight, media.viewInsets.bottom) + 16,
+        left: 24,
+        right: 24,
+        child: child,
+      );
+    },
+    child: Semantics(
+      liveRegion: true,
+      child: Container(
+        key: const ValueKey('filter-toast'),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: colours.primary,
+          borderRadius: BorderRadius.circular(theme.platform == TargetPlatform.iOS ? 10 : 40),
+        ),
+        child: Text(message, textAlign: TextAlign.center,
+            style: TextStyle(color: colours.onPrimary, fontSize: 16)),
+      ),
+    ),
+  );
 }
 
 BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, ColorScheme colorscheme, {required AnalyticsService analyticsService}) {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
@@ -58,6 +60,46 @@ void main() {
   }
 
   group('FilteredListingsPage', () {
+    testWidgets('filter feedback clears navigation in portrait and landscape', (tester) async {
+      onTest = true;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(() => FToast().removeQueuedCustomToasts());
+
+      for (final size in [const Size(320, 568), const Size(844, 390)]) {
+        for (final inset in [0.0, 34.0, 48.0]) {
+          tester.view.physicalSize = size;
+          tester.view.padding = FakeViewPadding(bottom: inset);
+          await tester.pumpWidget(MaterialApp(
+            home: Builder(builder: (context) => FairScaffold(
+              appBarTitle: 'Fair',
+              currentTab: 3,
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
+              body: TextButton(
+                onPressed: () => showInfoToast(context, 'Hiding all events and performances that have passed'),
+                child: const Text('Change filter'),
+              ),
+            )),
+          ));
+          await tester.tap(find.text('Change filter'));
+          await tester.pump(const Duration(milliseconds: 400));
+          final toast = tester.getRect(find.byKey(const ValueKey('filter-toast')));
+          final home = tester.getRect(find.byKey(const ValueKey('home-navigation-button')));
+          expect(home.top - toast.bottom, closeTo(16, 0.01));
+          expect(toast.left, greaterThanOrEqualTo(24));
+          expect(toast.right, lessThanOrEqualTo(size.width - 24));
+
+          await tester.pump(const Duration(seconds: 2));
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+        }
+      }
+    });
+
     testWidgets('displays error text when fetchFilteredListings fails', (WidgetTester tester) async {
       // Define a test listing
       List<Map<String, dynamic>> listings = [];
