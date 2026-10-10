@@ -70,6 +70,9 @@ Future<void> loadSettings() async {
     // Create a ValueNotifier to hold the current theme
     themeNotifier = ValueNotifier(selectedThemeKey);
 
+    // Get the choice to have a static chooser page
+    staticChooserPage.value = prefs.getBool('staticChooserPage') ?? false;
+
     debugPrint('Settings loaded from SharedPreferences');
   } else if (onTest == true) {
     int savedUnitIndex = 0;
@@ -154,6 +157,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       listingUpdateNoticeEnabled,
     );
     await prefs.setStringList('favouritesList', favouriteListingKeys.value.toList());
+    await prefs.setBool('staticChooserPage', staticChooserPage.value);
   }
 
   void saveAlertNoticePeriod(int theNoticePeriod) async {
@@ -185,6 +189,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       DropdownOption(title: '2024 Light', subtitle: 'For the Fair that blew away', value: '2024'),
       DropdownOption(title: 'High contrast', subtitle: 'For visual accessibility needs', value: 'highContrast'),
       DropdownOption(title: 'Colour blind friendly', subtitle: 'For users with colour blindness', value: 'colourBlindFriendly')
+    ];
+    final List<DropdownOption> homePageOptions = [
+      DropdownOption(title: 'Animated', subtitle: 'Spotlights the Fair’s offerings', value: false),
+      DropdownOption(title: 'Static', subtitle: 'Stays boringly fixed', value: true),
     ];
     return SafeArea(
       top: false,
@@ -317,6 +325,40 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
                             setState(() {
                               preferredDistanceUnits = value;
+                            });
+                            _saveSettings();
+                          },
+                        );
+                      }),
+                    ),
+                  ]),
+                  Row(spacing: 12, children: [
+                    Text('Home page:', style: settingLabelStyle),
+                    Expanded(
+                      child: LayoutBuilder(builder: (context, constraints) {
+                        return DropdownMenu<bool>(
+                          initialSelection: staticChooserPage.value,
+                          hintText: 'Select style of home page',
+                          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
+                          alignmentOffset: const Offset(0, -60),
+                          expandedInsets: EdgeInsets.zero,
+                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          dropdownMenuEntries: homePageOptions.map((opt) {
+                            return DropdownMenuEntry<bool>(
+                              value: opt.value,
+                              label: opt.title,
+                              labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                const SizedBox(height: 4),
+                                Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                const SizedBox(height: 4),
+                              ]),
+                            );
+                          }).toList(),
+                          onSelected: (bool? value) {
+                            setState(() {
+                              HapticFeedback.selectionClick();
+                              staticChooserPage.value = value!;
                             });
                             _saveSettings();
                           },

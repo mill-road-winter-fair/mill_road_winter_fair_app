@@ -674,6 +674,9 @@ class _TimetablePageState extends State<TimetablePage> {
               }
 
               final nowTop = max(0.0, (now.difference(timelineMinStart).inMinutes) * _dayPixelsPerMinute) - 1.5;
+              final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+              final furnitureHeight = 98.0;
+              final contentHeight = constraints.maxHeight - 34 - (_isSearching ? 52 : 0) - (keyboardHeight - furnitureHeight).clamp(0.0, double.infinity);
               final timelineHeight = max(constraints.maxHeight - 40, spanMinutes * _dayPixelsPerMinute + 4);
               final hintTextSnippet = switch (widget.filteredMusicOrNot) {
                 null => 'all',
@@ -748,7 +751,8 @@ class _TimetablePageState extends State<TimetablePage> {
                           controller: _horizontalScrollController,
                           scrollDirection: Axis.horizontal,
                           padding: EdgeInsets.only(right: 2), // stop it crashing into edge
-                          child: SizedBox(
+                          child: Container(
+                            color: colorScheme.onPrimary,
                             width: totalWidth,
                             child: Column(
                               children: [
@@ -800,7 +804,7 @@ class _TimetablePageState extends State<TimetablePage> {
                                 ),
                                 // Scrollable timeline content
                                 SizedBox(
-                                  height: constraints.maxHeight - 34 - (_isSearching ? 56 : 0),
+                                  height: contentHeight,
                                   child: GestureDetector(
                                     onScaleStart: (details) {
                                       if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
