@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -17,6 +18,7 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -39,8 +41,10 @@ Future<void> main() async {
       rethrow;
     }
   }
-
+  tz.initializeTimeZones();
+  await initialiseFlutterLocalNotificationsPlugin();
   await loadSettings();
+  alertsStore.loadEventAlerts();
   final analyticsService = FirebaseAnalyticsService();
   await analyticsService.initialize();
 

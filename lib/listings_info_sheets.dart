@@ -132,8 +132,10 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final String approxDistance;
   final bool? detailsVisible; // true: details open; false: details close; null: all details pale
   final bool listingFavourited;
+  final bool listingAlerted;
   final VoidCallback? onDetailsTapped;
   final VoidCallback? onFavouriteTapped;
+  final VoidCallback? onAlertTapped;
   final Function onGetDirections;
   final bool inDialog;
   final ExpandedListingScrollBounds? scrollBounds;
@@ -158,8 +160,10 @@ class SpecificListingInfoSheet extends StatefulWidget {
     required this.approxDistance,
     required this.detailsVisible,
     required this.listingFavourited,
+    required this.listingAlerted,
     this.onDetailsTapped,
     this.onFavouriteTapped,
+    this.onAlertTapped,
     required this.onGetDirections,
     required this.inDialog,
     this.scrollBounds,
@@ -225,6 +229,12 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     } else {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
+
+    final startTime = combineDateAndTime(widget.startTime, fairDate);
+    final endTime = combineDateAndTime(widget.endTime, fairDate);
+    final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
+    final isItAlertable = startTime.difference(DateTime.now()).inDays < 7;
+    final alertIconKey = GlobalKey();
 
     final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
       child: Container(
@@ -322,8 +332,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   onPressed: widget.cancelled && !widget.listingFavourited
                       ? null
                       : () {
-                          widget.onFavouriteTapped?.call();
                           HapticFeedback.lightImpact();
+                          widget.onFavouriteTapped?.call();
                           widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
                         },
                   padding: const EdgeInsets.all(0),
@@ -334,10 +344,36 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   icon: FaIcon(
                     shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                     (widget.listingFavourited) ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                    size: 22,
+                    size: 25,
                     color: widget.cancelled && !widget.listingFavourited
                         ? Theme.of(context).disabledColor
                         : widget.colorScheme.primary,
+                  ),
+                ),
+                if (isItAnEvent) IconButton(
+                  onPressed: (widget.cancelled && !alertsStore.alertExists(widget.listingId))
+                      ? null
+                      : (isItAlertable)
+                      ? () {
+                          HapticFeedback.lightImpact();
+                          widget.onAlertTapped?.call();
+                          setState(() { });
+                          widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
+                        }
+                      : () => showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance', analyticsService: widget.analyticsService),
+                  padding: const EdgeInsets.all(0),
+                  key: alertIconKey,
+                  style: ElevatedButton.styleFrom(
+                      visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
+                      padding: const EdgeInsets.all(0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                  icon: FaIcon(
+                    shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
+                    (widget.listingAlerted) ? FontAwesomeIcons.solidBell : FontAwesomeIcons.bell,
+                    size: 25,
+                    color: (widget.cancelled && !widget.listingAlerted || !isItAlertable)
+                        ? Theme.of(context).disabledColor
+                        : Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 Spacer(),
@@ -565,6 +601,7 @@ Future<void> showListingDetailsDialog(
   //int alertNoticePeriod,
   void Function(VoidCallback) setStateFunction,
   // final int? Function(PositionedEvent, int, int?) toggleAlertAction,
+  Future<void> Function() onAlertTapped,
   Future<dynamic> Function() onGetDirections, {
   required AnalyticsService analyticsService,
 }) async {
@@ -630,6 +667,7 @@ Future<void> showListingDetailsDialog(
                     approxDistance: distanceMessage,
                     detailsVisible: true,
                     listingFavourited: favouriteListingKeys.value.contains(event.id),
+                    listingAlerted: alertsStore.alertExists(event.id),
                     onFavouriteTapped: () {
                       favouriteOrNotListing(event);
                       setStateFunction.call;
@@ -638,6 +676,11 @@ Future<void> showListingDetailsDialog(
                     onGetDirections: () async {
                       safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
                       onGetDirections.call();
+                    },
+                    onAlertTapped: () async {
+                      HapticFeedback.lightImpact();
+                      await onAlertTapped.call();
+                      setStateDialog(() {});
                     },
                     inDialog: true,
                     analyticsService: analyticsService,

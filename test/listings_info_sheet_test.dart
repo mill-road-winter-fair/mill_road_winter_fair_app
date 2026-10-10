@@ -31,6 +31,7 @@ void main() {
     required String approxDistance,
     required bool detailsVisible,
     required bool listingFavourited,
+    required bool listingAlerted,
     required Function onGetDirections,
     VoidCallback? onDetailsTapped,
     VoidCallback? onFavouriteTapped,
@@ -56,6 +57,7 @@ void main() {
           detailsVisible: detailsVisible,
           onGetDirections: onGetDirections,
           listingFavourited: listingFavourited,
+          listingAlerted: listingAlerted,
           onDetailsTapped: onDetailsTapped,
           onFavouriteTapped: onFavouriteTapped,
           inDialog: false,
@@ -86,6 +88,7 @@ void main() {
           approxDistance: '',
           detailsVisible: true,
           listingFavourited: false,
+          listingAlerted: false,
           onGetDirections: () {},
         ));
 
@@ -146,6 +149,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
       ));
 
       expect(find.text('🍩 '), findsOneWidget);
@@ -174,6 +178,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
       ));
 
       expect(find.text('🍩 '), findsOneWidget);
@@ -208,6 +213,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
@@ -246,6 +252,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         onDetailsTapped: () {
           detailsToggled = true;
         },
@@ -282,6 +289,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         onDetailsTapped: () {},
       ));
 
@@ -313,6 +321,7 @@ void main() {
           directionsCalled = true;
         },
         listingFavourited: false,
+        listingAlerted: false,
       ));
 
       final getDirectionsButton = find.byIcon(Icons.directions_walk);
@@ -346,6 +355,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
       ));
 
       final timeTextFinder = find.text('09:00—10:00');
@@ -378,6 +388,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
       ));
 
       // Title should have line-through
@@ -451,6 +462,7 @@ void main() {
           directionsCalled = true;
         },
         listingFavourited: false,
+        listingAlerted: false,
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
@@ -505,6 +517,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: true,
+        listingAlerted: false,
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
