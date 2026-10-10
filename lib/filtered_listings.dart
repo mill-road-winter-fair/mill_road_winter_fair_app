@@ -654,7 +654,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     return Column(
                                       key: ValueKey(listing['id']),
                                       children: [
-                                        if (!_hidePastListings || !hasEventEnded(listing['endTime']))
+                                        if (!_hidePastListings || !hasEventEnded(listing['endTime'])) ...[
                                           Container(
                                             width: constraints.maxWidth - 10,
                                             decoration: BoxDecoration(
@@ -703,7 +703,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                               colorScheme: colorScheme,
                                             )
                                           ),
-                                        SizedBox(height: 8),
+                                          const SizedBox(height: 8),
+                                        ],
                                       ],
                                     );
                                   },
