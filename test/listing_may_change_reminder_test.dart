@@ -57,6 +57,7 @@ void main() {
       final analytics = RecordingNoticeAnalyticsService();
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)), analyticsService: analytics,
+        now: fairDate.subtract(const Duration(days: 1)),
       );
       await tester.pumpAndSettle();
 
@@ -85,6 +86,7 @@ void main() {
       final showNotice = ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
         analyticsService: analytics,
+        now: fairDate.subtract(const Duration(days: 1)),
       );
       await tester.pumpAndSettle();
 
