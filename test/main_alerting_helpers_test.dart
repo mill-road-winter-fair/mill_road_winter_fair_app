@@ -599,7 +599,7 @@ void main() {
         ], 67);
 
         await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
-        setTheAlert(tester.element(find.byType(SizedBox)), 15, listingId);
+        await setTheAlert(tester.element(find.byType(SizedBox)), 15, listingId);
         await tester.pump(const Duration(seconds: 3));
 
         expect(alertsStore.alertSchedules, isEmpty);
@@ -610,7 +610,7 @@ void main() {
     testWidgets('setTheAlert creates a new alert and persists it', (tester) async {
       await _withAndroidPlatform(() async {
         await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
-        setTheAlert(tester.element(find.byType(SizedBox)), 15, 'listing-1');
+        await setTheAlert(tester.element(find.byType(SizedBox)), 15, 'listing-1');
         await tester.pump(const Duration(seconds: 3));
 
         expect(alertsStore.alertSchedules, isNotEmpty);
@@ -622,7 +622,7 @@ void main() {
 
     testWidgets('setTheAlert leaves alerts unchanged when the listing does not exist', (tester) async {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
-      setTheAlert(tester.element(find.byType(SizedBox)), 15, 'missing-listing');
+      await setTheAlert(tester.element(find.byType(SizedBox)), 15, 'missing-listing');
       await tester.pump();
 
       expect(alertsStore.alertSchedules, isEmpty);

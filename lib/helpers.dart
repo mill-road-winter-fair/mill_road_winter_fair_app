@@ -1059,7 +1059,7 @@ Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, Build
   }
   if (!context.mounted) return;
   if (alertsPermissionGranted) {
-    setTheAlert(context, desiredNoticePeriod, listingID);
+    await setTheAlert(context, desiredNoticePeriod, listingID);
   } else {
     alertsPermissionGranted = await requestAlertPermissions();
     if (!alertsPermissionGranted) {
@@ -1067,7 +1067,7 @@ Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, Build
       if (context.mounted) await showNoPermissionsDialog(context, colorScheme);
     } else {
       if (!context.mounted) return;
-      setTheAlert(context, desiredNoticePeriod, listingID);
+      await setTheAlert(context, desiredNoticePeriod, listingID);
     }
   }
 }
@@ -1117,7 +1117,7 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
 }
 
 
-void setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) async {
+Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) async {
   await alertsStore.refreshEventAlertSchedules(); // since snooze may have updated these
   if (!context.mounted) return;
   final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
