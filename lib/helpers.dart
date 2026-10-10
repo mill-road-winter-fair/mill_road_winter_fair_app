@@ -129,8 +129,7 @@ class FairScaffold extends StatelessWidget {
   }
 }
 
-// Show filter feedback above the navigation bar and its raised Home button.
-// We typically use this for non-error toasts
+// We typically use this for non-error toasts as it not in the centre of the screen, but also avoids the navbar
 void showInfoToast(BuildContext context, String message) {
   final theme = Theme.of(context);
   final colours = theme.colorScheme;
