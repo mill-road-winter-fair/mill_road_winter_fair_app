@@ -317,6 +317,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called with filterCategory=$filterCategory and subfilterCategory=${widget.subfilterCategory}');
+    isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0, 11) == 'performance');
+    // Clear the hide-past filter whenever its control is unavailable.
+    if (!isShowingJustPerformance && filterCategory != 'favourite') {
+      _hidePastListings = false;
+    }
+
     // Show error if there are no listings
     if (listings.isEmpty) {
       return FairScaffold(
@@ -351,8 +357,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         ),
       );
     }
-
-    isShowingJustPerformance = (widget.subfilterCategory != null && widget.subfilterCategory!.length > 11 && widget.subfilterCategory!.substring(0, 11) == 'performance');
 
     // Step 1a: Filter by category
     List<Map<String, dynamic>> categoryFiltered = [];
