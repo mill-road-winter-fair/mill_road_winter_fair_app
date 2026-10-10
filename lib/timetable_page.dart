@@ -861,14 +861,14 @@ class _TimetablePageState extends State<TimetablePage> {
                                           children: [
                                             // time markers lines and labels and swim lanes
                                             ...swimlanes,
-                                            // red 'now' line
+                                            // theme appropriate 'now' line
                                             if (timelineMinStart.isBefore(now) && timelineMaxEnd.isAfter(now))
                                               Positioned(
                                                 key: nowLineKey,
                                                 top: nowTop,
                                                 left: 0,
                                                 right: 0,
-                                                child: Container(height: 3, color: Colors.red),
+                                                child: Container(height: 3, color: Theme.of(context).colorScheme.primary),
                                               ),
                                             ...markers,
                                             // Event stacks per column
