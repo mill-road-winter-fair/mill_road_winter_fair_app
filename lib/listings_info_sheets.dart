@@ -233,6 +233,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     final startTime = combineDateAndTime(widget.startTime, fairDate);
     final endTime = combineDateAndTime(widget.endTime, fairDate);
     final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
+    final isItAlertable = startTime.difference(DateTime.now()).inDays < 7;
+    final alertIconKey = GlobalKey();
+
     final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
       child: Container(
         padding: (widget.inDialog)
@@ -348,15 +351,18 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   ),
                 ),
                 if (isItAnEvent) IconButton(
-                  onPressed: widget.cancelled && !alertsStore.alertExists(widget.listingId)
+                  onPressed: (widget.cancelled && !alertsStore.alertExists(widget.listingId))
                       ? null
-                      : () {
+                      : (isItAlertable)
+                      ? () {
                           HapticFeedback.lightImpact();
                           widget.onAlertTapped?.call();
                           setState(() { });
                           widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
-                        },
+                        }
+                      : () => showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance', analyticsService: widget.analyticsService),
                   padding: const EdgeInsets.all(0),
+                  key: alertIconKey,
                   style: ElevatedButton.styleFrom(
                       visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
                       padding: const EdgeInsets.all(0),
@@ -365,7 +371,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     shadows: [Shadow(color: Theme.of(context).shadowColor, offset: const Offset(1, 3), blurRadius: 5)],
                     (widget.listingAlerted) ? FontAwesomeIcons.solidBell : FontAwesomeIcons.bell,
                     size: 25,
-                    color: widget.cancelled && !widget.listingAlerted
+                    color: (widget.cancelled && !widget.listingAlerted || !isItAlertable)
                         ? Theme.of(context).disabledColor
                         : Theme.of(context).colorScheme.primary,
                   ),
