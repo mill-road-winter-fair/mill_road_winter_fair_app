@@ -13,13 +13,37 @@ if (project.hasProperty('dart-defines')) {
     dartDefines = dartDefines + project.property('dart-defines')
             .split(',')
             .collectEntries { entry ->
-                def pair = new String(entry.decodeBase64(), 'UTF-8').split('=')
+                def pair = new String(entry.decodeBase64(), 'UTF-8').split('=', 2)
                 pair.length == 2 ? [(pair[0]): pair[1]] : [:]
             }
 }
 
-def iosDartDefines = dartDefines.collect { k, v -> "${k}=${v}" }.join(",")
-project.ext.set("dart-defines-ios", iosDartDefines)
+// Signing credentials are build-only inputs, never Dart defines or app assets.
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+def signingKeys = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword']
+def missingSigningKeys = signingKeys.findAll { !keystoreProperties.getProperty(it)?.trim() }
+def releaseKeystore = keystoreProperties.getProperty('storeFile')?.trim()
+
+def validateReleaseCredentials = tasks.register('validateReleaseCredentials') {
+    doLast {
+        if (!missingSigningKeys.isEmpty()) {
+            throw new GradleException("Android release signing requires android/key.properties. Missing: ${missingSigningKeys.join(', ')}. See android/key.properties.example. Debug/profile builds do not require release credentials.")
+        }
+        if (!rootProject.file(releaseKeystore).isFile()) {
+            throw new GradleException("The storeFile in android/key.properties does not point to an existing keystore.")
+        }
+    }
+}
+// Validate only when a release build is actually executed, not during IDE sync.
+tasks.configureEach { task ->
+    if (task.name == 'preReleaseBuild' || task.name == 'validateSigningRelease') {
+        task.dependsOn(validateReleaseCredentials)
+    }
+}
 
 android {
     buildFeatures {
@@ -44,40 +68,18 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Check for dartDefines in case the key is not set
-        if (dartDefines.containsKey('HEROKU_API')) {
-            resValue "string", "HEROKU_API", dartDefines['HEROKU_API']
-        } else {
-            throw new GradleException("HEROKU_API is missing from dart-defines.")
-        }
-        if (dartDefines.containsKey('HEROKU_API_KEY')) {
-            resValue "string", "HEROKU_API_KEY", dartDefines['HEROKU_API_KEY']
-        } else {
-            throw new GradleException("HEROKU_API_KEY is missing from dart-defines.")
-        }
-        if (dartDefines.containsKey('ANDROID_GOOGLE_MAPS_SDK_API_KEY')) {
-            resValue "string", "ANDROID_GOOGLE_MAPS_SDK_API_KEY", dartDefines['ANDROID_GOOGLE_MAPS_SDK_API_KEY']
-        } else {
-            throw new GradleException("ANDROID_GOOGLE_MAPS_SDK_API_KEY is missing from dart-defines.")
-        }
-        if (dartDefines.containsKey('ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY')) {
-            resValue "string", "ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY", dartDefines['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY']
-        } else {
-            throw new GradleException("ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY is missing from dart-defines.")
-        }
-        if (dartDefines.containsKey('SIGNING_KEY')) {
-            resValue "string", "SIGNING_KEY", dartDefines['SIGNING_KEY']
-        } else {
-            throw new GradleException("SIGNING_KEY is missing from dart-defines.")
-        }
+        // Only the native Maps SDK needs an Android resource. All other app
+        // settings are read directly from compile-time declarations in Dart.
+        resValue "string", "ANDROID_GOOGLE_MAPS_SDK_API_KEY",
+                dartDefines['ANDROID_GOOGLE_MAPS_SDK_API_KEY'] ?: ""
     }
 
     signingConfigs {
         release {
-            storeFile file(System.getenv("KEYSTORE_FILE"))
-            storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
-            keyPassword System.getenv("KEY_PASSWORD")
+            storeFile releaseKeystore ? rootProject.file(releaseKeystore) : null
+            storePassword keystoreProperties.getProperty('storePassword')
+            keyAlias keystoreProperties.getProperty('keyAlias')
+            keyPassword keystoreProperties.getProperty('keyPassword')
         }
     }
 
