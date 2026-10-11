@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
@@ -40,7 +41,7 @@ void main() {
     List<Map<String, dynamic>> listings,
     List<String> favouriteListingKeys,
   ) async {
-    await tester.pumpWidget(
+    await tester.pumpWithClock(
       MaterialApp(
         home: Scaffold(
           body: FilteredListingsPage(
@@ -520,7 +521,7 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await settle(tester);
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
@@ -640,7 +641,7 @@ void main() {
       // Start with a known current location so distance sorting works if required
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await tester.pumpWidget(
+      await tester.pumpWithClock(
         MaterialApp(
           home: Scaffold(
             body: FilteredListingsPage(
