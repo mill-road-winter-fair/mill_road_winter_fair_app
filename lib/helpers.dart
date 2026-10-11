@@ -80,8 +80,8 @@ class FairScaffold extends StatelessWidget {
               child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ),
             centerTitle: false,
-            actions: appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
-            actionsPadding: EdgeInsets.only(right: 4),
+            actions: appBarActions.map((a) => SizedBox(width: 42, child: a)).toList(),
+            actionsPadding: EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
