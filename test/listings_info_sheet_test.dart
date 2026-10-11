@@ -39,6 +39,7 @@ void main() {
     required String approxDistance,
     required bool detailsVisible,
     required bool listingFavourited,
+    required bool listingAlerted,
     required Function onGetDirections,
     VoidCallback? onDetailsTapped,
     VoidCallback? onFavouriteTapped,
@@ -67,6 +68,7 @@ void main() {
             detailsVisible: detailsVisible,
             onGetDirections: onGetDirections,
             listingFavourited: listingFavourited,
+            listingAlerted: listingAlerted,
             onDetailsTapped: onDetailsTapped,
             onFavouriteTapped: onFavouriteTapped,
             inDialog: false,
@@ -98,6 +100,7 @@ void main() {
           approxDistance: '',
           detailsVisible: true,
           listingFavourited: false,
+          listingAlerted: false,
           onGetDirections: () {},
           dateTimeProvider: dateTimeProvider,
         ));
@@ -159,6 +162,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         dateTimeProvider: dateTimeProvider,
       ));
 
@@ -188,6 +192,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         dateTimeProvider: dateTimeProvider,
       ));
 
@@ -223,6 +228,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
@@ -262,6 +268,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         onDetailsTapped: () {
           detailsToggled = true;
         },
@@ -299,6 +306,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         onDetailsTapped: () {},
         dateTimeProvider: dateTimeProvider,
       ));
@@ -331,6 +339,7 @@ void main() {
           directionsCalled = true;
         },
         listingFavourited: false,
+        listingAlerted: false,
         dateTimeProvider: dateTimeProvider,
       ));
 
@@ -363,6 +372,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         dateTimeProvider: dateTimeProvider,
       ));
 
@@ -393,6 +403,7 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         dateTimeProvider: dateTimeProvider,
       ));
 
@@ -467,6 +478,7 @@ void main() {
           directionsCalled = true;
         },
         listingFavourited: false,
+        listingAlerted: false,
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
@@ -522,6 +534,7 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: true,
+        listingAlerted: false,
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
