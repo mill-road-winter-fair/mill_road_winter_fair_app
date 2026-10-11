@@ -287,7 +287,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             if (value == null) return;
                             HapticFeedback.selectionClick();
                             widget.analyticsService.logButtonTapped('alerts_preference_option');
-                            widget.analyticsService.logDistanceUnitPreferenceSet(value.toString());
+                            widget.analyticsService.logAlertNoticePeriodPreferenceSet(value);
                             saveAlertNoticePeriod(value);
                             setState(() { });
                           },
