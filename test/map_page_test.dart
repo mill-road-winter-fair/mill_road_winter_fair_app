@@ -406,7 +406,7 @@ void main() {
       expect(visibleIds(), {'1', '3'});
       await tester.enterText(field, 'glazed');
       await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.search_off));
+      await tester.tap(find.byIcon(Icons.search).last);
       await tester.pumpAndSettle();
       expect(visibleIds(), {'1', '3'});
 
@@ -496,7 +496,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(visibleIds(), {'3'});
 
-      await tester.tap(find.byIcon(Icons.search_off));
+      await tester.tap(find.byIcon(Icons.search).last);
       await tester.pumpAndSettle();
       expect(visibleIds(), {'4'});
     });
