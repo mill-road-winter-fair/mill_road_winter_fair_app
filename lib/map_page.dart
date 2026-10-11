@@ -112,6 +112,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   CameraPosition? _cameraBeforeNavigation; // to be able to restore camera position after navigation
   CameraPosition? _cameraBeforeSearch; // to be able to restore camera position after search
   late ColorScheme colorScheme; // will be set in build
+  bool get hasActiveMarkerFilters => filterSettings.values.any((isEnabled) => !isEnabled);
 
   @override
   void initState() {
@@ -1959,6 +1960,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 showFilterMenu();
                 setVisibleMarkerLists();
               },
+              style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((hasActiveMarkerFilters) ? Colors.white.withAlpha(30) : null)),
               icon: const Icon(Icons.filter_alt, size: 26),
             ),
             if (doingAPushNavigation == null) IconButton(
@@ -1979,6 +1981,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   setState(() => _isSearching = true);
                 }
               },
+              style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_isSearching) ? Colors.white.withAlpha(30) : null)),
               icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26),
             ),
           ],

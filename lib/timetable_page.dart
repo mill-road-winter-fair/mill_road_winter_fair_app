@@ -560,8 +560,10 @@ class _TimetablePageState extends State<TimetablePage> {
                 : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway',
                     fgColour: colorScheme.error, analyticsService: widget.analyticsService);
           },
+          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((widget.onlyNowOrSoon) ? Colors.white.withAlpha(30) : null)),
           icon: Icon(
-            (widget.onlyNowOrSoon) ? Icons.schedule : Icons.schedule,
+            Icons.schedule,
+            size: 24,
             color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor!.withAlpha(130),
           ),
         ),
@@ -579,6 +581,7 @@ class _TimetablePageState extends State<TimetablePage> {
             _toggleFilteredMusicOrNot();
             theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
           },
+          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((widget.filteredMusicOrNot != null) ? Colors.white.withAlpha(30) : null)),
           icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
         ),
         IconButton(
@@ -601,7 +604,8 @@ class _TimetablePageState extends State<TimetablePage> {
               }
             });
           },
-          icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
+          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_isSearching) ? Colors.white.withAlpha(30) : null)),
+          icon: Icon(Icons.search, size: 26, color: appBarTheme.foregroundColor),
         ),
       ],
       body: ValueListenableBuilder<Set<String>>(

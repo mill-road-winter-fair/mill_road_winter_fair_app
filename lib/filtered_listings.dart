@@ -466,6 +466,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               Icons.access_time,
+              size: 24,
               color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
@@ -498,8 +499,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
               }
             },
+            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_hidePastListings) ? Colors.white.withAlpha(30) : null)),
             icon: Icon(
-              (_hidePastListings) ? Icons.free_cancellation : Icons.history_toggle_off,
+              Icons.history_toggle_off,
+              size:24,
               color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
@@ -522,7 +525,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               }
             });
           },
-          icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
+          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_isSearching) ? Colors.white.withAlpha(30) : null)),
+          icon: Icon(Icons.search, size: 26, color: appBarTheme.foregroundColor),
         ),
       ],
       body: ValueListenableBuilder<Set<String>>(
