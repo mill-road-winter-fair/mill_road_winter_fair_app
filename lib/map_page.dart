@@ -760,8 +760,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
                                               onDetailsTapped: () => toggleDetailsRow(index),
                                               listingFavourited: isFavourited,
+                                              listingAlerted: alertsStore.alertExists(rel['id']),
                                               onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
                                               onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                              onAlertTapped: () async {
+                                                HapticFeedback.lightImpact();
+                                                await toggleListingAlert(rel['id'], alertNoticePeriod, context);
+                                                setModalState(() { });
+                                              },
                                               inDialog: false,
                                               analyticsService: widget.analyticsService,
                                               colorScheme: colorScheme,
@@ -885,8 +891,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               approxDistance: distanceMessage,
                               detailsVisible: true,
                               listingFavourited: isListingFavourited(listing['id']),
+                              listingAlerted: alertsStore.alertExists(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                               onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                              onAlertTapped: () async {
+                                HapticFeedback.lightImpact();
+                                await toggleListingAlert(listing['id'], alertNoticePeriod, context);
+                                setModalState(() { });
+                              },
                               inDialog: false,
                               analyticsService: widget.analyticsService,
                               colorScheme: colorScheme,
@@ -1954,6 +1966,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 showFilterMenu();
                 setVisibleMarkerLists();
               },
+              style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((hasActiveMarkerFilters) ? Colors.white.withAlpha(30) : null)),
               icon: const Icon(Icons.filter_alt, size: 26),
             ),
             if (doingAPushNavigation == null && !navigationInProgress) IconButton(
@@ -1974,6 +1987,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   setState(() => _isSearching = true);
                 }
               },
+              style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_isSearching) ? Colors.white.withAlpha(30) : null)),
               icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26),
             ),
           ],
