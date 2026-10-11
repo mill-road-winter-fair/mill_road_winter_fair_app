@@ -1988,7 +1988,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 }
               },
               style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_isSearching) ? Colors.white.withAlpha(30) : null)),
-              icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26),
+              icon: Icon(Icons.search, size: 26),
             ),
           ],
           allowBack: (doingAPushNavigation != null),
