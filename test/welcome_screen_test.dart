@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart' hide RootWidget;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
@@ -138,7 +139,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget to test that the app correctly chooses the WelcomeScreen
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Verify that the WelcomeScreen is displayed
       expect(find.byType(WelcomeScreen), findsOneWidget);
@@ -190,7 +191,7 @@ void main() {
       ];
 
       // Pump the RootWidget
-      await tester.pumpWidget(RootWidget(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(RootWidget(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       // Verify that WelcomeScreen is NOT displayed
       expect(find.byType(WelcomeScreen), findsNothing);
@@ -245,7 +246,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Verify the 'Skip' button is present and tap it
       expect(find.text('Skip'), findsOneWidget);
@@ -272,7 +273,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Verify we are on the first page
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
@@ -331,7 +332,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // Advance through the onboarding slides to reach the last page
       final nextButton = find.byIcon(Icons.arrow_forward);
@@ -370,7 +371,7 @@ void main() {
       addTearDown(() async {
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
-        await tester.pumpWidget(Container());
+        await tester.pumpWithClock(Container());
         await tester.pump(); // allow disposal to complete
       });
 
@@ -409,7 +410,7 @@ void main() {
 
       // Pump the RootWidget
       firstExecution = true;
-      await tester.pumpWidget(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // The footer button text should be present
       expect(find.text('Take me straight to the app!'), findsOneWidget);
