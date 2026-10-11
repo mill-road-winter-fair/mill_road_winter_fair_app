@@ -1376,14 +1376,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     // Reset the distance to destination
     _distanceToDestination = null;
 
-    // Remove any markers which are not supposed to be shown from the markers list (using efficient lookup)
-    for (var marker in markers.values.toList()) {
-      final listing = _listingLookup[marker.markerId.value];
-      if (listing == null || listing['visibleOnMap'] == 'FALSE') {
-        markers.remove(marker.markerId);
-      }
-    }
-
     // Remove any simple marker shown
     markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
 
@@ -2034,7 +2026,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   final furnitureHeight = 98.0;
                   final contentHeight = constraints.maxHeight - (keyboardHeight - furnitureHeight).clamp(0.0, double.infinity);
                   mapHeight = contentHeight - (_isSearching ? 56 : 0);
-
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
                       if (didPop && navigationInProgress) cancelNavigation();
