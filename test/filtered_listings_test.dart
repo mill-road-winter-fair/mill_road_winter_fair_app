@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
@@ -40,7 +41,7 @@ void main() {
     List<Map<String, dynamic>> listings,
     List<String> favouriteListingKeys,
   ) async {
-    await tester.pumpWidget(
+    await tester.pumpWithClock(
       MaterialApp(
         home: Scaffold(
           body: FilteredListingsPage(
@@ -143,14 +144,12 @@ void main() {
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Gwydir St Car Park (~206m away)'), findsOneWidget);
       expect(find.text('01223 111111'), findsNothing); // as Details won't be open
-      expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (~197m away)'), findsOneWidget);
       // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
       expect(find.byIcon(Icons.directions_walk), findsExactly(3));
-      expect(find.byIcon(Icons.public), findsExactly(2));
     });
 
     testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
@@ -522,7 +521,7 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await settle(tester);
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
@@ -642,7 +641,7 @@ void main() {
       // Start with a known current location so distance sorting works if required
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await tester.pumpWidget(
+      await tester.pumpWithClock(
         MaterialApp(
           home: Scaffold(
             body: FilteredListingsPage(

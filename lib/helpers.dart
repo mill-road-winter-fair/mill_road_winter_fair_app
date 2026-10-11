@@ -2,21 +2,28 @@ import 'dart:async';
 import 'dart:ui' as ui;
 import 'dart:io';
 import 'dart:math';
+import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -46,12 +53,14 @@ class FairScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SafeArea(
         top: false,
         left: false,
         right: false,
         bottom: Platform.isAndroid && isNavBarVisible(context),
         child: Scaffold(
+          backgroundColor: colorScheme.surfaceDim,
           appBar: AppBar(
             titleSpacing: 0,
             leadingWidth: 44,
@@ -77,35 +86,77 @@ class FairScaffold extends StatelessWidget {
               child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ),
             centerTitle: false,
-            actions: appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
-            actionsPadding: EdgeInsets.only(right: 4),
+            actions: appBarActions.map((a) => SizedBox(width: 42, child: a)).toList(),
+            actionsPadding: EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
-          bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected, analyticsService: analyticsService),
+          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: 20),
+          floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+          resizeToAvoidBottomInset: false,
+          floatingActionButton: (allowBack ?? false) ? null : SizedBox(
+            width: 68,
+            height: 68,
+            child: Semantics(
+              selected: currentTab == 0,
+              child: FloatingActionButton(
+                key: const ValueKey('home-navigation-button'),
+                heroTag: null,
+                tooltip: 'Home',
+                elevation: 4,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: CircleBorder(),
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  analyticsService.logButtonTapped('navigation_home');
+                  onTabSelected(0);
+                },
+                child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, color: (currentTab == 0) ? colorScheme.onPrimary : colorScheme.surfaceDim),
+              ),
+            ),
+          ),
+          bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
+            key: const ValueKey('navigation-bar-surface'),
+            height: 62,
+            padding: EdgeInsets.only(right: 6), // to stop Favourites hitting edge
+            elevation: 0,
+            color: colorScheme.primary,
+            surfaceTintColor: Colors.transparent,
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 4,
+            clipBehavior: Clip.antiAlias,
+            child: fairBottomNavigationBar(currentTab, onTabSelected, colorScheme, analyticsService: analyticsService),
+          ),
         ));
   }
 }
 
-BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, {required AnalyticsService analyticsService}) {
+BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, ColorScheme colorscheme, {required AnalyticsService analyticsService}) {
+  // Visual order differs from the stable page indices used throughout the app.
+  const tabOrder = [1, 2, 0, 3, 4];
   return BottomNavigationBar(
+    backgroundColor: Colors.transparent,
     type: BottomNavigationBarType.fixed,
     showUnselectedLabels: true,
     elevation: 0,
-    currentIndex: index,
-    selectedFontSize: 12,
-    unselectedFontSize: 12,
+    currentIndex: tabOrder.indexOf(index),
+    selectedFontSize: 13,
+    unselectedFontSize: 13,
     iconSize: 30,
+    selectedItemColor: colorscheme.onPrimary,
+    unselectedItemColor: colorscheme.surfaceDim,
+    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
-      analyticsService.logButtonTapped('navigation_${const ['home', 'map', 'timetable', 'listings', 'favourites'][selectedIndex]}');
-      onTabSelected.call(selectedIndex);
+      analyticsService.logButtonTapped('navigation_${const ['map', 'timetable', 'home', 'listings', 'favourites'][selectedIndex]}');
+      onTabSelected.call(tabOrder[selectedIndex]);
     },
     items: const [
-      BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
       BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-      BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
-      BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
+      BottomNavigationBarItem(icon: Icon(Icons.watch_later), label: "Timetable"),
+      BottomNavigationBarItem(icon: SizedBox(width: 30, height: 30), label: ""),
+      BottomNavigationBarItem(icon: Icon(Icons.ballot), label: "Listings"),
       BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
     ],
   );
@@ -408,6 +459,19 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
           ),
         );
       });
+}
+
+class CenterDockedWithOffset extends FloatingActionButtonLocation {
+  final double dyOffset; // positive = lower
+
+  const CenterDockedWithOffset({required this.dyOffset});
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final base = FloatingActionButtonLocation.centerDocked
+        .getOffset(scaffoldGeometry);
+    return Offset(base.dx, base.dy + dyOffset);
+  }
 }
 
 void shareApp(BuildContext context, String msgText) async {
@@ -1044,14 +1108,162 @@ String formatFullDate(DateTime date) {
   return '$dayName $monthName $day$suffix';
 }
 
+Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, BuildContext context) async {
+  debugPrint('toggleListingAlert called for $listingID and desiredNoticePeriod=$desiredNoticePeriod');
+  final colorScheme = Theme.of(context).colorScheme;
+  if (settingsOpened) { // button previously tapped when alert permissions weren't given; maybe they are now
+    alertsPermissionGranted = await requestAlertPermissions();
+    settingsOpened = false;
+  }
+  if (!context.mounted) return;
+  if (alertsPermissionGranted) {
+    await setTheAlert(context, desiredNoticePeriod, listingID);
+  } else {
+    alertsPermissionGranted = await requestAlertPermissions();
+    if (!alertsPermissionGranted) {
+      settingsOpened = true;
+      if (context.mounted) await showNoPermissionsDialog(context, colorScheme);
+    } else {
+      if (!context.mounted) return;
+      await setTheAlert(context, desiredNoticePeriod, listingID);
+    }
+  }
+}
+
+Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme) async {
+  return showDialog<void>(context: context, builder: (BuildContext context) {
+    return Dialog(
+      insetPadding: EdgeInsets.all(8), // margin from screen edges
+      shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+      backgroundColor: colorScheme.surfaceContainerLowest,
+      shadowColor: colorScheme.surfaceDim,
+      elevation: 3,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
+        child: Column(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
+          ListTile(
+            visualDensity: VisualDensity(horizontal: -2, vertical: 2),
+            leading: const Icon(Icons.error, size: 36, color: Colors.red),
+            title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
+            TextButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel')
+            ),
+            TextButton(
+              onPressed: () async {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+                await openAppSettings();
+              },
+              child: Text('Open Settings')
+            ),
+            SizedBox(width: 8),
+          ]),
+        ]),
+      ),
+    );
+  });
+}
+
+
+Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) async {
+  await alertsStore.refreshEventAlertSchedules(); // since snooze may have updated these
+  if (!context.mounted) return;
+  final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
+  if (theListing == null) return;
+  final existingAlert = alertsStore.alertSchedules.firstWhereOrNull((a) => a.listingId == listingID);
+  if (existingAlert != null) {
+    final theAlertId = existingAlert.id;
+    debugPrint('setTheAlert removing and cancelling theAlertId=$theAlertId');
+    alertsStore.removeAlertById(theAlertId);
+    flutterLocalNotificationsPlugin.cancel(id: theAlertId);
+    showToast(context, 'Alert for ${theListing['title']} has been cancelled.', false);
+    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.saveAllEventAlerts();
+    return;
+  } else {
+    final theListingStart = combineDateAndTime(theListing['startTime'], fairDate);
+    String? categoryID;
+    List<AndroidNotificationAction> androidNotificationActions;
+    final now = DateTime.now();
+    final timeToGo = theListingStart.difference(now).inMinutes;
+    int theAlertNoticePeriod;
+    if (timeToGo <= 0) {
+      showToast(context, 'No alert set as ${theListing['title']} is already underway.', true);
+      return;
+    } else if (timeToGo < desiredNoticePeriod) {
+      theAlertNoticePeriod = max(timeToGo ~/ 1.5, 1); // arbitrary value if within desiredNoticePeriod of start
+    } else {
+      theAlertNoticePeriod = desiredNoticePeriod;
+    }
+    (categoryID, androidNotificationActions) = calculateAlertActionCategories(theAlertNoticePeriod);
+    final newAlertId = alertsStore.addAlert(listingID, theAlertNoticePeriod, true);
+    final schedTime = theListingStart.subtract(Duration(minutes: theAlertNoticePeriod));
+    flutterLocalNotificationsPlugin.zonedSchedule(
+      id: newAlertId,
+      title: fairName,
+      body: (theAlertNoticePeriod > 0)
+        ? '${theListing['title']} starting at ${theListing['location']} in $theAlertNoticePeriod minutes (${theListing['startTime']})'
+        : '${theListing['title']} underway at ${theListing['location']} until ${theListing['endTime']}',
+      payload: jsonEncode(alertsStore.alertSchedules.firstWhere((a) => a.id == newAlertId)),
+      scheduledDate: tz.TZDateTime.from(schedTime, tz.local),//todo
+      //scheduledDate: tz.TZDateTime.from(now.add(Duration(seconds: 3)), tz.local),
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'org.millroadwinterfair.MRWFapp',
+          'Event alerts',
+          channelDescription: 'Mill Road Winter Fair event alerts',
+          importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
+          actions: androidNotificationActions,
+        ),
+        iOS: DarwinNotificationDetails(
+          threadIdentifier: 'org.millroadwinterfair.MRWFapp',
+          categoryIdentifier: categoryID
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
+    );
+    String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
+    if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
+    showToast(context, '$theMessage.', false);
+    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.saveAllEventAlerts();
+    debugPrint('setTheAlert scheduled new alert with ID $newAlertId in $theAlertNoticePeriod minutes at $schedTime with message “$theMessage”');
+    return;
+  }
+}
+
+
+void showToast(BuildContext theContext, String theMessage, bool isError) {
+  Fluttertoast.showToast(
+    msg: theMessage,
+    gravity: ToastGravity.BOTTOM,
+    backgroundColor: (isError) ? Theme.of(theContext).colorScheme.tertiary : Theme.of(theContext).colorScheme.primary,
+    textColor: (isError) ? Theme.of(theContext).colorScheme.onPrimary : Theme.of(theContext).colorScheme.onPrimary,
+    fontSize: 16,
+    toastLength: Toast.LENGTH_SHORT,
+    timeInSecForIosWeb: 2,
+  );
+}
+
 
 // Function to determine if the event has ended based on endTime string
-bool hasEventEnded(String endTime) {
+bool hasEventEnded(String endTime, DateTimeProvider dateTimeProvider) {
   try {
     final parts = endTime.split(':');
     final endHour = int.parse(parts[0]);
     final endMinute = parts.length > 1 ? int.parse(parts[1]) : 0;
-
     final endDateTime = DateTime(
       fairDate.year,
       fairDate.month,
@@ -1059,8 +1271,7 @@ bool hasEventEnded(String endTime) {
       endHour,
       endMinute,
     );
-
-    return DateTime.now().isAfter(endDateTime);
+    return dateTimeProvider.now().isAfter(endDateTime);
   } catch (_) {
     return false; // default to not ended if parsing fails
   }
@@ -1068,8 +1279,11 @@ bool hasEventEnded(String endTime) {
 
 
 // Function to determine if the event is today
-bool isItEventDay() {
-  return DateUtils.isSameDay(fairDate, DateTime.now());
+bool isItEventDay(DateTimeProvider dateTimeProvider) {
+  return DateUtils.isSameDay(
+    fairDate,
+    dateTimeProvider.now(),
+  );
 }
 
 
