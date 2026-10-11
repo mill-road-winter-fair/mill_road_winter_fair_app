@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'pump_with_clock.dart';
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -27,7 +29,7 @@ void main() {
 
   group('ImportantInfoPage', () {
     testWidgets('displays expected headings and content', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: ImportantInfoPage(analyticsService: FakeAnalyticsService())));
+      await tester.pumpWithClock(MaterialApp(home: ImportantInfoPage(analyticsService: FakeAnalyticsService())));
 
       // Verify headings
       expect(find.text('Important information'), findsOneWidget);
@@ -75,7 +77,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(
+      await tester.pumpWithClock(MyApp(
         firstExecution: false,
         analyticsService: FakeAnalyticsService(),
       ));
@@ -117,5 +119,30 @@ void main() {
       expect(homePageState.index, 2);
     });
 
+    testWidgets('Contact us in the drawer opens and closes the contact dialog', (WidgetTester tester) async {
+      await tester.pumpWithClock(MaterialApp(
+          home: ChooserPage(
+        analyticsService: FakeAnalyticsService(),
+        theEvents: [],
+        onOpenTimetable: (bool p1, bool? p2) {},
+        onOpenListings: (String p1, String? p2) {},
+        onOpenMap: (int? p1) {},
+        onTabSelected: (int value) {},
+      )));
+
+      await tester.tap(find.byIcon(Icons.menu));
+      await settle(tester);
+      await tester.tap(find.text('Contact us'));
+      await settle(tester);
+
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.text('For general enquiries:'), findsOneWidget);
+      expect(find.text('info@millroadwinterfair.org'), findsOneWidget);
+      expect(find.text('volunteers@millroadwinterfair.org'), findsOneWidget);
+      expect(find.text('Close'), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await settle(tester);
+      expect(find.byType(Dialog), findsNothing);
+    });
   });
 }

@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
@@ -99,7 +100,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       expect(find.textContaining('Welcome'), findsOneWidget);
 
@@ -146,7 +147,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
@@ -177,7 +178,7 @@ void main() {
       });
 
       Future<void> openDrawer(WidgetTester tester) async {
-        await tester.pumpWidget(
+        await tester.pumpWithClock(
           MaterialApp(
             home: FairScaffold(
               appBarTitle: 'Test',
@@ -300,7 +301,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -349,9 +350,7 @@ void main() {
         }
       ];
 
-
-
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -400,7 +399,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -453,7 +452,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -507,7 +506,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -558,7 +557,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -587,7 +586,7 @@ void main() {
     });
 
     testWidgets('emailDetailsDialog shows emails and close button', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())));
 
       // show the dialog
       showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context, analyticsService: FakeAnalyticsService()));
@@ -657,7 +656,7 @@ void main() {
       favouriteListingKeys.value = {...favouriteListingKeys.value, '1'};
 
       // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await tester.pump();
 
       // Tap the Favourites button the NavBar
