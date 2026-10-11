@@ -1995,7 +1995,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           body: Column(children: [
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
-              child: _isSearching ? Row(
+              child: (_isSearching && !navigationInProgress) ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
