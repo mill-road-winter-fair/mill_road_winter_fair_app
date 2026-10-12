@@ -762,7 +762,20 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               listingFavourited: isFavourited,
                                               listingAlerted: alertsStore.alertExists(rel['id']),
                                               onFavouriteTapped: () => favouriteOrNotListing(rel['id']),
-                                              onGetDirections: () => getDirections(rel['id'], stringToLatLng(rel['latLng']), true),
+                                              onGetDirections: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => MapPage(
+                                                      listings: listings,
+                                                      onTabSelected: (_) => {},
+                                                      destinationId: rel['id'],
+                                                      destinationLatLng: stringToLatLng(rel['latLng']),
+                                                      analyticsService: widget.analyticsService,
+                                                    )
+                                                  )
+                                                );
+                                              },
                                               onAlertTapped: () async {
                                                 HapticFeedback.lightImpact();
                                                 await toggleListingAlert(rel['id'], alertNoticePeriod, context);
@@ -893,7 +906,20 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               listingFavourited: isListingFavourited(listing['id']),
                               listingAlerted: alertsStore.alertExists(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                              onGetDirections: () => getDirections(listing['id'], destinationLatLng, true),
+                              onGetDirections: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MapPage(
+                                      listings: listings,
+                                      onTabSelected: (_) => {},
+                                      destinationId: listing['id'],
+                                      destinationLatLng: destinationLatLng,
+                                      analyticsService: widget.analyticsService,
+                                    )
+                                  )
+                                );
+                              },
                               onAlertTapped: () async {
                                 HapticFeedback.lightImpact();
                                 await toggleListingAlert(listing['id'], alertNoticePeriod, context);
@@ -1280,36 +1306,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         );
       },
     );
-  }
-
-  Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
-    if (!mounted) return;
-    // Save the current view
-    _cameraBeforeNavigation = _currentCamera;
-    // Cancelling of any previous navigation
-    // Halt the location subscription
-    _positionStream?.cancel();
-    // Clear the polylines
-    polylines.clear();
-    // Clear the polygons if they're shown
-    if (preferredRoadClosurePolygonVisible) _polygons.clear();
-    // Remove any simple marker shown
-    markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
-    // Reset the distance to destination
-    _distanceToDestination = null;
-    // Set navigation as not in progress
-    navigationInProgress = false;
-    setState(() {});
-
-    debugPrint('MapPageState getDirections called for listing ID: $id');
-
-    if (navigatorPop == true) {
-      Navigator.pop(context);
-      // The navigator is only popped when called from the map page, so if this is true set the previousIndex to 0
-      //previousIndex = 0;
-    }
-
-    doTheNavigation(id, destination, navigatorPop);
   }
 
   Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
@@ -2082,34 +2078,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (navigationInProgress == true && doingAPushNavigation == null)
-                      FloatingActionButton(
-                        heroTag: 'cancelBtn',
-                        tooltip: 'Cancel navigation',
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('cancel_navigation');
-                          cancelNavigation();
-                        },
-                        backgroundColor: Colors.transparent,
-                        mini: true,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: const Offset(2, 2))
-                            ],
-                          ),
-                          child: const Icon(Icons.cancel),
-                        ),
-                      ),
                     if (navigationInProgress == false)
                       FloatingActionButton(
                         heroTag: 'homeBtn',
