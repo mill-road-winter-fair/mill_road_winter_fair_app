@@ -2004,7 +2004,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           onPressed: () async {
                             HapticFeedback.lightImpact();
                             widget.analyticsService.logButtonTapped('map_search_clear');
-                            await _resetSearch(close: false);
+                            await _resetSearch(close: (_searchQuery.isEmpty));
                           },
                         ),
                       ],
