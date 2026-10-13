@@ -1048,13 +1048,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Music"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      context.read<AnalyticsService>().logButtonTapped('performances_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('music_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Music"] = value!;
                       });
                       final idList = _performanceMusicMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('performances', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('performanceMusic', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1067,13 +1067,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Dance"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      context.read<AnalyticsService>().logButtonTapped('shopping_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('dance_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Dance"] = value!;
                       });
                       final idList = _performanceDanceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('shopping', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('performanceDance', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1086,13 +1086,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Other"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      context.read<AnalyticsService>().logButtonTapped('charity_community_info_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('other_performances_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Other"] = value!;
                       });
                       final idList = _performanceOtherMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('charityCommunityInfo', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('performanceOther', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1105,13 +1105,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Childrens"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      context.read<AnalyticsService>().logButtonTapped('performances_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('childrens_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Childrens"] = value!;
                       });
                       final idList = _performanceChildrensMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('performances', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('performanceChildrens', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1200,11 +1200,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Business"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      context.read<AnalyticsService>().logButtonTapped('business_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Business"] = value!;
                       });
                       final idList = _businessMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('business', value);
                     },
                   ),
                   CheckboxListTile(
