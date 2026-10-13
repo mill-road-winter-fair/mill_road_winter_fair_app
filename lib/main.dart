@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -52,6 +53,7 @@ Future<void> main() async {
   await analyticsService.initialize();
 
   listings = await loadListingsFromCache();
+  final startupCacheFallback = Completer<bool>();
   debugPrint('Cached listings loaded: count = ${listings.length}');
 
   // Check whether location services are enabled and permissions are granted to the app
@@ -67,27 +69,39 @@ Future<void> main() async {
         providers: [
           Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
         ],
-        child: RootWidget(firstExecution: firstExecution, analyticsService: analyticsService),
+        child: RootWidget(firstExecution: firstExecution, analyticsService: analyticsService, startupCacheFallback: startupCacheFallback.future),
       )));
 
   // Refresh after rendering so a slow or unavailable network cannot block startup.
-  unawaited(_refreshListingsAfterStartup());
+  startupCacheFallback.complete(await _refreshListingsAfterStartup());
 }
 
 FirebaseOptions firebaseOptionsForBuildMode({required bool isRelease}) {
   return isRelease ? prod.DefaultFirebaseOptions.currentPlatform : dev.DefaultFirebaseOptions.currentPlatform;
 }
 
-Future<void> _refreshListingsAfterStartup() async {
-  final refreshedListings = await fetchListings(http.Client());
+Future<bool> _refreshListingsAfterStartup() async {
+  var usedCache = false;
+  final client = http.Client();
+  late List<Map<String, dynamic>> refreshedListings;
+  try {
+    refreshedListings = await fetchListings(
+      client,
+      onCacheFallback: () => usedCache = true,
+    );
+  } finally {
+    client.close();
+  }
   debugPrint('Listings refreshed: count = ${refreshedListings.length}');
   homePageKey.currentState?.listingsUpdated();
+  return usedCache;
 }
 
 class RootWidget extends StatefulWidget {
   final bool firstExecution;
   final AnalyticsService analyticsService;
-  const RootWidget({super.key, required this.firstExecution, required this.analyticsService});
+  final Future<bool>? startupCacheFallback;
+  const RootWidget({super.key, required this.firstExecution, required this.analyticsService, this.startupCacheFallback});
 
   @override
   State<RootWidget> createState() => _RootWidgetState();
@@ -109,17 +123,19 @@ class _RootWidgetState extends State<RootWidget> {
             analyticsService: widget.analyticsService,
             onFinished: () => setState(() => _showWelcomeScreen = false),
           )
-        : MyApp(firstExecution: false, analyticsService: widget.analyticsService);
+        : MyApp(firstExecution: false, analyticsService: widget.analyticsService, startupCacheFallback: widget.startupCacheFallback);
   }
 }
 
 class MyApp extends StatefulWidget {
   final bool firstExecution;
   final AnalyticsService analyticsService;
+  final Future<bool>? startupCacheFallback;
   const MyApp({
     super.key,
     required this.firstExecution,
     required this.analyticsService,
+    this.startupCacheFallback,
   });
   @override
   State<MyApp> createState() => _MyAppState();
@@ -174,7 +190,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ? appThemes['light']
               : appThemes[selectedThemeKey] ?? baseTheme,
           darkTheme: isAuto ? appThemes['dark'] : darkTheme,
-          home: HomePage(key: homePageKey, analyticsService: widget.analyticsService),
+          home: HomePage(key: homePageKey, analyticsService: widget.analyticsService, startupCacheFallback: widget.startupCacheFallback),
           navigatorObservers: [
             routeObserver,
           ],
@@ -186,7 +202,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
 class HomePage extends StatefulWidget {
   final AnalyticsService analyticsService;
-  const HomePage({super.key, required this.analyticsService});
+  final Future<bool>? startupCacheFallback;
+  const HomePage({super.key, required this.analyticsService, this.startupCacheFallback});
 
   @override
   HomePageState createState() => HomePageState();
@@ -211,8 +228,31 @@ class HomePageState extends State<HomePage> with RouteAware {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) widget.analyticsService.showAnalyticsConsentDialog(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      widget.analyticsService.showAnalyticsConsentDialog(context);
+      final usedCache = await widget.startupCacheFallback;
+      if (!mounted) return;
+      if (usedCache == true) {
+        final colours = Theme.of(context).colorScheme;
+        FToast().init(context).showToast(
+          gravity: ToastGravity.CENTER,
+          ignorePointer: true,
+          toastDuration: const Duration(seconds: 5),
+          child: Material(
+            color: colours.primary,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Text(
+                'Unable to fetch listings. Showing cached listings instead, these may not be up to date.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colours.onPrimary, fontSize: 16),
+              ),
+            ),
+          ),
+        );
+      }
     });
   }
 

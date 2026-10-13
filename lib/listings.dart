@@ -44,7 +44,10 @@ Future<List<Map<String, dynamic>>> loadListingsFromCache() async {
 }
 
 // Fetch listings from Heroku caching layer
-Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
+Future<List<Map<String, dynamic>>> fetchListings(
+  http.Client client, {
+  VoidCallback? onCacheFallback,
+}) async {
   debugPrint('fetchListings called');
   try {
     // Load environment variables
@@ -93,34 +96,23 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
   } on SocketException catch (_) {
     debugPrint(
         '\u26a0\ufe0f Network error: unable to reach server, trying cache.');
-    // Try to load from persistent cache
-    if (listings.isEmpty) {
-      listings = await loadListingsFromCache();
-    }
-    return listings.isNotEmpty ? listings : [];
   } on HttpException catch (e) {
     debugPrint('\u26a0\ufe0f Server responded with an error: $e');
-    // Try to load from persistent cache
-    if (listings.isEmpty) {
-      listings = await loadListingsFromCache();
-    }
-    return listings.isNotEmpty ? listings : [];
   } on FormatException catch (e) {
     debugPrint('\u26a0\ufe0f Bad response format: $e');
-    // Try to load from persistent cache
-    if (listings.isEmpty) {
-      listings = await loadListingsFromCache();
-    }
-    return listings.isNotEmpty ? listings : [];
   } catch (e, stack) {
     debugPrint('\u26a0\ufe0f Unexpected error fetching listings: $e');
     debugPrint(stack.toString());
-    // Try to load from persistent cache
-    if (listings.isEmpty) {
-      listings = await loadListingsFromCache();
-    }
-    return listings.isNotEmpty ? listings : [];
   }
+
+  // Only report a fallback once the API request (including retries) has failed.
+  if (listings.isEmpty) {
+    listings = await loadListingsFromCache();
+  }
+  if (listings.isNotEmpty) {
+    onCacheFallback?.call();
+  }
+  return listings;
 }
 
 // Helper to parse JSON into the app’s listing structure
