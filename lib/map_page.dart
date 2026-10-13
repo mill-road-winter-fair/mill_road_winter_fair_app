@@ -2027,13 +2027,19 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 ],
               ) : SizedBox.shrink(),
             ),
-            Expanded(child: Stack(fit: StackFit.expand, children: [
+            // Let the map use its keyboard-adjusted height within the full-size stack.
+            Expanded(child: Stack(fit: StackFit.loose, children: [
               LayoutBuilder(
                 builder: (context, constraints) {
                   mapWidth = constraints.maxWidth;
                   final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-                  final furnitureHeight = 98.0;
-                  final contentHeight = constraints.maxHeight - (keyboardHeight - furnitureHeight).clamp(0.0, double.infinity);
+                  // The non-resizing scaffold keeps the bottom navigation's safe
+                  // area while the keyboard is open, so it is already excluded.
+                  final furnitureHeight = doingAPushNavigation != null
+                      ? 0.0
+                      : FairScaffold.navigationBarHeight + MediaQuery.of(context).viewPadding.bottom;
+                  final contentHeight = (constraints.maxHeight - (keyboardHeight - furnitureHeight).clamp(0.0, double.infinity))
+                      .clamp(0.0, constraints.maxHeight);
                   mapHeight = contentHeight - (_isSearching ? 56 : 0);
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
