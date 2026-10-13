@@ -57,6 +57,10 @@ class FakeAnalyticsService implements AnalyticsService {
     // Do nothing
   }
   @override
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes) async {
+    // Do nothing
+  }
+  @override
   Future<void> logListingSaved(String listingName) async {
     // Do nothing
   }

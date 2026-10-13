@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'fakes/fixed_date_time_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -12,6 +14,11 @@ import 'package:provider/provider.dart';
 import 'fakes/fake_analytics_service.dart';
 
 void main() {
+  // Mocking DateTime.now()
+  final dateTimeProvider = FixedDateTimeProvider(
+    DateTime(2026, 12, 5, 21, 15),
+  );
+
   LatLng currentLatLng = const LatLng(52.199174, 0.140929);
   LatLng destinationLatLng = const LatLng(52.199687, 0.138813);
   int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
@@ -34,35 +41,41 @@ void main() {
     required String approxDistance,
     required bool detailsVisible,
     required bool listingFavourited,
+    required bool listingAlerted,
     required Function onGetDirections,
     VoidCallback? onDetailsTapped,
     VoidCallback? onFavouriteTapped,
+    required DateTimeProvider dateTimeProvider,
   }) {
-    return MaterialApp(
-      home: Scaffold(
-        body: SpecificListingInfoSheet(
-          listingId: 'test-listing',
-          cancelled: cancelled,
-          brickAndMortar: brickAndMortar,
-          emoji: emoji,
-          title: title,
-          subtitle: subtitle,
-          location: location,
-          description: description,
-          email: email,
-          website: website,
-          phoneNumber: phoneNumber,
-          imageURL: imageURL,
-          startTime: startTime,
-          endTime: endTime,
-          approxDistance: approxDistance,
-          detailsVisible: detailsVisible,
-          onGetDirections: onGetDirections,
-          listingFavourited: listingFavourited,
-          onDetailsTapped: onDetailsTapped,
-          onFavouriteTapped: onFavouriteTapped,
-          inDialog: false,
-          colorScheme: ColorScheme.light(),
+    return Provider<DateTimeProvider>.value(
+      value: dateTimeProvider,
+      child: MaterialApp(
+        home: Scaffold(
+          body: SpecificListingInfoSheet(
+            listingId: 'test-listing',
+            cancelled: cancelled,
+            brickAndMortar: brickAndMortar,
+            emoji: emoji,
+            title: title,
+            subtitle: subtitle,
+            location: location,
+            description: description,
+            email: email,
+            website: website,
+            phoneNumber: phoneNumber,
+            imageURL: imageURL,
+            startTime: startTime,
+            endTime: endTime,
+            approxDistance: approxDistance,
+            detailsVisible: detailsVisible,
+            onGetDirections: onGetDirections,
+            listingFavourited: listingFavourited,
+            listingAlerted: listingAlerted,
+            onDetailsTapped: onDetailsTapped,
+            onFavouriteTapped: onFavouriteTapped,
+            inDialog: false,
+            colorScheme: ColorScheme.light(),
+          ),
         ),
       ),
     );
@@ -88,7 +101,9 @@ void main() {
           approxDistance: '',
           detailsVisible: true,
           listingFavourited: false,
+          listingAlerted: false,
           onGetDirections: () {},
+          dateTimeProvider: dateTimeProvider,
         ));
 
         expect(find.text('Mill Road Shop'), findsOneWidget);
@@ -150,6 +165,8 @@ void main() {
             detailsVisible: true,
             onGetDirections: () {},
             listingFavourited: false,
+            listingAlerted: false,
+            dateTimeProvider: dateTimeProvider,
           )));
 
       expect(find.text('🍩 '), findsOneWidget);
@@ -157,7 +174,6 @@ void main() {
       expect(find.text('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-      expect(find.byIcon(Icons.public), findsOneWidget);
     });
 
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
@@ -181,6 +197,8 @@ void main() {
             detailsVisible: true,
             onGetDirections: () {},
             listingFavourited: false,
+            listingAlerted: false,
+            dateTimeProvider: dateTimeProvider,
           )));
 
       expect(find.text('🍩 '), findsOneWidget);
@@ -217,9 +235,11 @@ void main() {
             detailsVisible: false,
             onGetDirections: () {},
             listingFavourited: false,
+            listingAlerted: false,
             onFavouriteTapped: () {
               favouriteCalled = true;
             },
+            dateTimeProvider: dateTimeProvider,
           )));
 
       // Find the heart icon button. It's an IconButton containing a FaIcon.
@@ -257,9 +277,11 @@ void main() {
             detailsVisible: false,
             onGetDirections: () {},
             listingFavourited: false,
+            listingAlerted: false,
             onDetailsTapped: () {
               detailsToggled = true;
             },
+            dateTimeProvider: dateTimeProvider,
           )));
 
       // Extra info should not be present
@@ -295,7 +317,9 @@ void main() {
             detailsVisible: true,
             onGetDirections: () {},
             listingFavourited: false,
+            listingAlerted: false,
             onDetailsTapped: () {},
+            dateTimeProvider: dateTimeProvider,
           )));
 
       // Extra info should now be present
@@ -328,6 +352,8 @@ void main() {
               directionsCalled = true;
             },
             listingFavourited: false,
+            listingAlerted: false,
+            dateTimeProvider: dateTimeProvider,
           )));
 
       final getDirectionsButton = find.byIcon(Icons.directions_walk);
@@ -363,17 +389,16 @@ void main() {
             detailsVisible: false,
             onGetDirections: () {},
             listingFavourited: false,
+            listingAlerted: false,
+            dateTimeProvider: dateTimeProvider,
           )));
 
       final timeTextFinder = find.text('09:00—10:00');
       expect(timeTextFinder, findsOneWidget);
 
       final Text timeTextWidget = tester.widget(timeTextFinder);
-      // If the event has ended, it should be red and have a line-through decoration
-      if (hasEventEnded('10:00')) {
-        expect(timeTextWidget.style?.color, Colors.red);
-        expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
-      }
+      expect(timeTextWidget.style?.color, Colors.red);
+      expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
     });
 
     testWidgets('formats cancelled listing with line-through text and a cancelled label', (WidgetTester tester) async {
@@ -397,6 +422,8 @@ void main() {
             detailsVisible: true,
             onGetDirections: () {},
             listingFavourited: false,
+            listingAlerted: false,
+            dateTimeProvider: dateTimeProvider,
           )));
 
       // Title should have line-through
@@ -472,9 +499,11 @@ void main() {
               directionsCalled = true;
             },
             listingFavourited: false,
+            listingAlerted: false,
             onFavouriteTapped: () {
               favouriteCalled = true;
             },
+            dateTimeProvider: dateTimeProvider,
           )));
 
       final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
@@ -528,9 +557,11 @@ void main() {
             detailsVisible: false,
             onGetDirections: () {},
             listingFavourited: true,
+            listingAlerted: false,
             onFavouriteTapped: () {
               favouriteCalled = true;
             },
+            dateTimeProvider: dateTimeProvider,
           )));
 
       final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);

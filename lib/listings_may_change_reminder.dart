@@ -1,8 +1,9 @@
-import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListingUpdateNotifier {
@@ -78,14 +79,13 @@ class ListingUpdateNotifier {
   }
 
   static Future<void> maybeShowNotice(
-    BuildContext context, {
-    DateTime? now,
-  }) async {
+    BuildContext context
+  ) async {
     if (onTest) {
       return;
     }
 
-    final noticeDate = now ?? DateTime.now();
+    final noticeDate = context.read<DateTimeProvider>().now();
     final isListingsMayChange = isListingsMayChangeNotice(noticeDate);
 
     // The dismissal preference applies only before the Fair. The notices on
@@ -109,9 +109,8 @@ class ListingUpdateNotifier {
       return;
     }
 
-    final analyticsService = context.read<AnalyticsService>();
     final analyticsId = analyticsIdFor(noticeDate);
-    await analyticsService.logNoticeShown(analyticsId);
+    await context.read<AnalyticsService>().logNoticeShown(analyticsId);
     if (!context.mounted) {
       return;
     }
@@ -131,7 +130,7 @@ class ListingUpdateNotifier {
                 value: dontShowAgain,
                 onChanged: (value) {
                   HapticFeedback.selectionClick();
-                  analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
+                  context.read<AnalyticsService>().logButtonTapped('${analyticsId}_dont_show_again_toggle');
                   setState(() => dontShowAgain = value ?? false);
                 },
                 title: const Text("Don't show this again"),
@@ -142,11 +141,11 @@ class ListingUpdateNotifier {
             TextButton(
               onPressed: () async {
                 HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('${analyticsId}_ok');
+                context.read<AnalyticsService>().logButtonTapped('${analyticsId}_ok');
                 if (isListingsMayChange) {
                   listingUpdateNoticeEnabled = !dontShowAgain;
                   await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
-                  await analyticsService.logPreferenceSet(
+                  await context.read<AnalyticsService>().logPreferenceSet(
                     'listing_update_notice',
                     listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
                   );

@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,16 +48,16 @@ const apiHeaders = [
 ];
 
 const expectedSubcategories = {
-  'food': 'Food & Drink',
-  'shopping': 'Shopping & Stalls',
-  'charityCommunityInfo': 'Charity, Community, Info',
+  'food': 'Food & drink',
+  'shopping': 'Shopping',
+  'charityCommunityInfo': 'Charity, community, info',
   'performanceMusic': 'Music',
-  'performanceChildrens': 'Children’s',
+  'performanceChildrens': 'Children’s entertainment',
   'performanceDance': 'Dance',
   'performanceOther': 'Other performances',
-  'visitExperience': 'Visit & Experience',
+  'visitExperience': 'Visits & experiences',
   'service': 'Services',
-  'business': 'Other business',
+  'business': 'Other businesses',
 };
 
 Map<String, dynamic> listingFor(String id, String subcategory) => {
@@ -137,7 +138,7 @@ void main() {
         ];
         favouriteListingKeys.value = {...expectedSubcategories.keys, 'parent'};
         String? selected;
-        await tester.pumpWidget(Provider<AnalyticsService>.value(
+        await tester.pumpWithClock(Provider<AnalyticsService>.value(
             value: FakeAnalyticsService(),
             child: MaterialApp(home: Scaffold(
               body: StatefulBuilder(builder: (context, setState) {
@@ -157,7 +158,8 @@ void main() {
           matching: find.byType(DropdownMenu<String?>),
         );
         final dropdown = tester.widget<DropdownMenu<String?>>(dropdownFinder);
-        expect({for (final option in dropdown.dropdownMenuEntries) option.value: option.label}, {null: 'All', ...expectedSubcategories});
+        expect({for (final option in dropdown.dropdownMenuEntries)
+          option.value: option.label}, {null: 'Everything', ...expectedSubcategories});
         dropdown.onSelected!(entry.key);
         await tester.pumpAndSettle();
 

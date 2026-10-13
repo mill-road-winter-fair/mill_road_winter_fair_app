@@ -1,13 +1,14 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:provider/provider.dart';
+import 'pump_with_clock.dart';
 
 import 'fakes/fake_analytics_service.dart';
 
@@ -31,14 +32,17 @@ void main() {
 
   group('ImportantInfoPage', () {
     testWidgets('displays expected headings and content', (WidgetTester tester) async {
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: ImportantInfoPage())));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: ImportantInfoPage())));
 
       // Verify headings
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Caution – vehicles!'), findsOneWidget);
       expect(find.text('First aid'), findsOneWidget);
       expect(find.text('Coming with children?'), findsOneWidget);
+      expect(find.text('Keep the pavement clear! Keep the Fair alive!'), findsOneWidget);
       expect(find.text('Road closure'), findsOneWidget);
+      expect(find.text('On the day, you can also phone 07486 398744.'), findsOneWidget);
+      expect(find.text('Our responsibilities'), findsOneWidget);
       expect(find.text('Updates and contact'), findsOneWidget);
     });
 
@@ -76,7 +80,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(Provider<AnalyticsService>.value(
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
           value: FakeAnalyticsService(),
           child: MyApp(
             firstExecution: false,
@@ -120,24 +124,27 @@ void main() {
     });
 
     testWidgets('email hyperlink opens the contact dialog', (WidgetTester tester) async {
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: ImportantInfoPage())));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: ChooserPage(
+        theEvents: [],
+        onOpenTimetable: (bool p1, bool? p2) {},
+        onOpenListings: (String p1, String? p2) {},
+        onOpenMap: (int? p1) {},
+        onTabSelected: (int value) {},
+      ))));
 
-      final emailParagraph = tester.widget<Text>(
-        find.byWidgetPredicate(
-          (widget) => widget is Text && widget.textSpan?.toPlainText().contains('Email addresses for the Fair') == true,
-        ),
-      );
-      final paragraphSpan = emailParagraph.textSpan as TextSpan;
-      final linkSpan = paragraphSpan.children!.whereType<TextSpan>().singleWhere((span) => span.text == 'here');
-
-      (linkSpan.recognizer as TapGestureRecognizer).onTap!();
-      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.menu));
+      await settle(tester);
+      await tester.tap(find.text('Contact us'));
+      await settle(tester);
 
       expect(find.byType(Dialog), findsOneWidget);
       expect(find.text('For general enquiries:'), findsOneWidget);
       expect(find.text('info@millroadwinterfair.org'), findsOneWidget);
       expect(find.text('volunteers@millroadwinterfair.org'), findsOneWidget);
       expect(find.text('Close'), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await settle(tester);
+      expect(find.byType(Dialog), findsNothing);
     });
   });
 }

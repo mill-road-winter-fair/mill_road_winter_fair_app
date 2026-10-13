@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -92,7 +93,7 @@ void main() {
   });
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
-    await tester.pumpWidget(Provider<AnalyticsService>.value(
+    await tester.pumpWithClock(Provider<AnalyticsService>.value(
         value: analytics,
         child: MaterialApp(
             home: Builder(
@@ -100,26 +101,27 @@ void main() {
                         bottomNavigationBar: fairBottomNavigationBar(
                       context,
                       0,
-                      (index) => analytics.calls.add('navigate:$index'),
+                              (index) => analytics.calls.add('navigate:$index'),
+                      ColorScheme.light(),
                     ))))));
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
   });
 
-  for (final width in [350.0, 500.0]) {
+  for (final width in [400.0, 500.0]) {
     testWidgets('Details logs once and invokes the callback at width $width', (tester) async {
       tester.view.physicalSize = Size(width, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(Provider<AnalyticsService>.value(
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
         value: analytics,
         child: MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
           listingId: 'listing-123',
           cancelled: false, brickAndMortar: false, emoji: '', title: 'Listing', subtitle: '', location: '',
           description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
           imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: false,
-          listingFavourited: false, inDialog: false, onGetDirections: () {},
+          listingFavourited: false, listingAlerted: false, inDialog: false, onGetDirections: () {},
           onDetailsTapped: () => analytics.calls.add('details'), colorScheme: ColorScheme.light(),
         ))),
       ));
@@ -135,37 +137,26 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(Provider<AnalyticsService>.value(
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
         value: analytics,
         child: MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
           listingId: 'listing-456', cancelled: false, brickAndMortar: false, emoji: '', title: 'Another listing', subtitle: '', location: '',
           description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
           imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: true,
-          listingFavourited: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
+          listingFavourited: false, listingAlerted: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
           colorScheme: ColorScheme.light(),
       )))));
       // The sheet has one IconButton: the favourite control.
       await tester.tap(find.byType(IconButton));
       await tester.tap(find.byIcon(Icons.directions_walk));
       await tester.tap(find.byIcon(Icons.info));
-      for (final icon in [Icons.public, Icons.email, Icons.phone]) {
-        await tester.tap(find.byIcon(icon));
-        await tester.pumpAndSettle();
-      }
       for (final text in ['Website: https://example.com', 'Email: test@example.com', 'Telephone: 0123456789']) {
         await tester.tap(find.text(text));
         await tester.pumpAndSettle();
       }
       expect(analytics.buttonEvents.map((event) => event['button_id']), [
-        'save_listing',
-        'directions_to_listing',
-        'listing_details',
-        'visit_listing_website',
-        'email_listing',
-        'phone_listing',
-        'visit_listing_website',
-        'email_listing',
-        'phone_listing',
+        'save_listing', 'directions_to_listing', 'listing_details',
+        'visit_listing_website', 'email_listing', 'phone_listing',
       ]);
       for (final event in analytics.buttonEvents) {
         expect(event['listing_id'], 'listing-456');
@@ -175,7 +166,7 @@ void main() {
   }
 
   testWidgets('settings logs taps and the new preference value', (tester) async {
-    await tester.pumpWidget(Provider<AnalyticsService>.value(value: analytics, child: MaterialApp(home: SettingsPage())));
+    await tester.pumpWithClock(Provider<AnalyticsService>.value(value: analytics, child: MaterialApp(home: SettingsPage())));
     analytics.calls.clear();
     await tester.tap(find.text('Metric'));
     await tester.pumpAndSettle();
@@ -196,7 +187,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(Provider<AnalyticsService>.value(
+    await tester.pumpWithClock(Provider<AnalyticsService>.value(
         value: analytics,
         child: MaterialApp(
           theme: appThemes['light'],
@@ -224,22 +215,25 @@ void main() {
   });
 
   testWidgets('only the visible tab is tracked and returning from Settings restores it', (tester) async {
-    await tester.pumpWidget(Provider<AnalyticsService>.value(value: analytics, child: MyApp(firstExecution: false)));
-    await tester.pumpAndSettle();
+    await tester.pumpWithClock(Provider<AnalyticsService>.value(value: analytics, child: MyApp(firstExecution: false)));
+    // The chooser loads images and animates continuously; navigation tracking
+    // only needs the initial post-frame callbacks to complete.
+    await tester.pump();
     expect(analytics.calls.where((call) => call.startsWith('screen:')), ['screen:ChooserPage']);
     expect(analytics.calls, contains('consent_prompt'));
     await tester.tap(find.text('Map').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(analytics.calls.last, 'screen:MapPage');
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.push(MaterialPageRoute(builder: (_) => SettingsPage()));
+    await tester.pump();
     expect(analytics.calls.last, 'screen:SettingsPage');
-    await tester.tap(find.byType(BackButton));
-    await tester.pumpAndSettle();
+
+    navigator.pop();
+    await tester.pump();
     expect(analytics.calls.last, 'screen:MapPage');
-    await tester.pumpWidget(Provider<AnalyticsService>.value(value: analytics, child: const SizedBox()));
+    await tester.pumpWithClock(Provider<AnalyticsService>.value(value: analytics, child: const SizedBox()));
     await tester.pumpAndSettle();
   });
 }

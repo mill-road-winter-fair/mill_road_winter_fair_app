@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
@@ -17,7 +18,9 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -40,10 +43,11 @@ Future<void> main() async {
       rethrow;
     }
   }
-
+  tz.initializeTimeZones();
+  await initialiseFlutterLocalNotificationsPlugin();
   await loadSettings();
+  alertsStore.loadEventAlerts();
   final analyticsService = FirebaseAnalyticsService();
-  await analyticsService.initialize();
 
   listings = await fetchListings(http.Client());
   debugPrint('Listings fetched: count = ${listings.length}');
@@ -57,8 +61,8 @@ Future<void> main() async {
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
-        // Register shared app dependencies here so they are available to every route.
         providers: [
+          Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
           Provider<AnalyticsService>.value(value: analyticsService),
         ],
         child: RootWidget(firstExecution: firstExecution),
@@ -268,8 +272,19 @@ class HomePageState extends State<HomePage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      ChooserPage(theEvents: listings, onTabSelected: setCurrentIndex, onOpenTimetable: openTimetable, onOpenListings: openListings, onOpenMap: openMap),
-      MapPage(listings: listings, key: mapPageKey, nearestMarkerCount: mapNearestMarkerCount, onTabSelected: setCurrentIndex, onHomeTapped: cancelMapNearest),
+      ChooserPage(
+          theEvents: listings,
+          isVisible: index == 0,
+          onTabSelected: setCurrentIndex,
+          onOpenTimetable: openTimetable,
+          onOpenListings: openListings,
+          onOpenMap: openMap),
+      MapPage(
+          listings: listings,
+          key: mapPageKey,
+          nearestMarkerCount: mapNearestMarkerCount,
+          onTabSelected: setCurrentIndex,
+          cancelMapNearest: cancelMapNearest),
       TimetablePage(
           theEvents: listings,
           onTabSelected: setCurrentIndex,

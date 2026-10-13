@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
@@ -66,7 +67,7 @@ void main() {
         }
       ];
 
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
       await settle(tester);
 
       // Obtain the HomePage state
