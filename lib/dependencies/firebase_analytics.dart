@@ -141,7 +141,11 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'food': 'map_filter_food',
       'shopping': 'map_filter_shopping',
       'charityCommunityInfo': 'map_filter_community',
-      'performances': 'map_filter_performances',
+      'performanceMusic': 'map_filter_music',
+      'performanceDance': 'map_filter_dance',
+      'performanceOther': 'map_filter_other_performances',
+      'performanceChildrens': 'map_filter_childrens',
+      'business': 'map_filter_business',
       'visitsExperiences': 'map_filter_visits',
       'services': 'map_filter_services',
     };
