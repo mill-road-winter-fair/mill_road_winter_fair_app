@@ -105,6 +105,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   int? detailsVisibleIndex; // which listing (if any) on modal bottom sheet has details button selected
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchAnalyticsTimer;
   String _searchQuery = '';
   final Map<String, int> _markerPositionCounts = <String, int>{};
   bool _isSearching = false; // true when the search bar is open (with/without text)
@@ -514,6 +515,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<void> _searchListings(String value) async {
+    _searchAnalyticsTimer?.cancel();
+    final trimmedSearchTerm = value.trim();
+    if (trimmedSearchTerm.isNotEmpty) {
+      _searchAnalyticsTimer = Timer(const Duration(milliseconds: 750), () {
+        widget.analyticsService.logSearch(trimmedSearchTerm, searchArea: 'map');
+      });
+    }
     final normalisedValue = value.toLowerCase();
     _cameraBeforeSearch ??= _currentCamera;
     _searchQuery = normalisedValue;
@@ -1400,6 +1408,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     themeNotifier.removeListener(_onThemeChanged);
+    _searchAnalyticsTimer?.cancel();
     _searchController.dispose();
     debugPrint('MapPageState dispose() called');
     // Cancel the location subscription when the page is disposed
@@ -1951,6 +1960,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               onLongPress: () => showMiniPopup(context, filterIconKey, 'Tap to choose which map markers to show or hide'),
               onPressed: () {
                 HapticFeedback.lightImpact();
+                widget.analyticsService.logButtonTapped('map_filter_open');
                 showFilterMenu();
                 setVisibleMarkerLists();
               },
@@ -1964,6 +1974,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
               onPressed: () async {
                 HapticFeedback.lightImpact();
+                widget.analyticsService.logButtonTapped('map_search_toggle');
                 if (_isSearching) {
                   final camera = _cameraBeforeSearch;
                   await _resetSearch();

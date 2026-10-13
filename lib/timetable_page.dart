@@ -556,6 +556,7 @@ class _TimetablePageState extends State<TimetablePage> {
           onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything'),
           onPressed: () {
             HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('timetable_category_toggle');
             _toggleFilteredMusicOrNot();
             theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
           },
