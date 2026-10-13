@@ -212,6 +212,27 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes) async {
+    if (usageAnalyticsEnabled != true) {
+      return;
+    }
+
+    final value = minutes.toString();
+    debugPrint('[FIREBASE] Logging preference_set (alert_notice_period_minutes): $value');
+    await _record(() => analytics.setUserProperty(
+      name: 'alert_notice_period_minutes',
+      value: value,
+    ));
+    await _record(() => analytics.logEvent(
+      name: 'preference_set',
+      parameters: {
+        'type': 'alert_notice_period_minutes',
+        'value': value,
+      },
+    ));
+  }
+
+  @override
   Future<void> logListingSaved(String listingName) async {
     if (usageAnalyticsEnabled != true) {
       return;
@@ -405,6 +426,7 @@ abstract class AnalyticsService {
   Future<void> logRoadClosurePolygonPreferenceSet(bool visible);
   Future<void> logDistanceUnitPreferenceSet(String distanceUnit);
   Future<void> logThemePreferenceSet(String theme);
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes);
   Future<void> logListingSaved(String listingName);
   Future<void> logListingUnsaved(String listingName);
   Future<void> logDirectionsToListingRequested(String listingName);
@@ -462,6 +484,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logThemePreferenceSet(String theme) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes) async {
     // Do nothing
   }
   @override

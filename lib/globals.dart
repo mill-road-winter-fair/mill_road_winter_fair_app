@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 
 // Consolidated global variables used across the app.
@@ -72,6 +73,12 @@ late bool listingUpdateNoticeEnabled;
 // Initialise the list of favourited listings (ValueNotifier as pages need to know when others change these)
 final ValueNotifier<Set<String>> favouriteListingKeys = ValueNotifier<Set<String>>({});
 
+// The favoured, and offered, alert notice periods
+int alertNoticePeriod = 15;
+const alertNoticePeriods = [0, 5, 15, 30, 60]; // the selection of periods in minutes to be offered
+AlertScheduleStore alertsStore = AlertScheduleStore.initial(); // will be read from prefs
+bool settingsOpened = false; // keeps track of permissions dialog being opened so we can re-check
+
 // --- Location related globals (moved from get_current_location.dart) ---
 // Whether device location services are enabled and the permission status.
 late bool locationServicesEnabled;
@@ -82,6 +89,9 @@ int promptedUserToEnableLocationServices = 0;
 
 // Cached user location used by the map and listings pages.
 LatLng? currentLatLng;
+
+// Whether to have a static chooser page
+ValueNotifier<bool> staticChooserPage = ValueNotifier(onTest);
 
 // Fair date (and times) for this year
 // Also used by the listing-update notifier.
@@ -251,14 +261,14 @@ class SubfilterLabel {
 
 const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'performanceMusic': SubfilterLabel('Music', Icons.music_note, true),
-  'performanceChildrens': SubfilterLabel('Children’s', Icons.cruelty_free, true),
   'performanceDance': SubfilterLabel('Dance', Icons.emoji_people, true),
   'performanceOther': SubfilterLabel('Other performances', Icons.theater_comedy, true),
-  'visitExperience': SubfilterLabel('Visit & Experience', Icons.attractions, false),
-  'food': SubfilterLabel('Food & Drink', Icons.fastfood, false),
-  'shopping': SubfilterLabel('Shopping & Stalls', Icons.local_offer, false),
-  'charityCommunityInfo': SubfilterLabel('Charity, Community, Info', Icons.volunteer_activism, false),
-  'business': SubfilterLabel('Other business', Icons.business, false),
+  'performanceChildrens': SubfilterLabel('Children’s entertainment', Icons.escalator_warning, true),
+  'visitExperience': SubfilterLabel('Visits & experiences', Icons.attractions, false),
+  'food': SubfilterLabel('Food & drink', Icons.fastfood, false),
+  'shopping': SubfilterLabel('Shopping', Icons.local_offer, false),
+  'charityCommunityInfo': SubfilterLabel('Charity, community, info', Icons.volunteer_activism, false),
+  'business': SubfilterLabel('Other businesses', Icons.business, false),
   'service': SubfilterLabel('Services', Icons.family_restroom, false)
 };
 
