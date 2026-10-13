@@ -1,3 +1,4 @@
+import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,96 +24,9 @@ void main() {
     await loadSettings();
 
     listings = [
-      {
-        'id': '1',
-        'visibleOnMap': 'TRUE',
-        'cancelled': 'FALSE',
-        'groupParent': 'TRUE',
-        'brickAndMortar': 'FALSE',
-        'emoji': '',
-        'title': 'Food Group',
-        'subtitle': 'Food',
-        'groupID': '1',
-        'food': 'TRUE',
-        'shopping': 'FALSE',
-        'charityCommunityInfo': 'FALSE',
-        'performanceMusic': 'FALSE',
-        'performanceChildrens': 'FALSE',
-        'performanceDance': 'FALSE',
-        'performanceOther': 'FALSE',
-        'visitExperience': 'FALSE',
-        'service': 'FALSE',
-        'business': 'FALSE',
-        'location': 'Fake Street',
-        'description': '',
-        'email': '',
-        'website': '',
-        'phone': '',
-        'latLng': '52.199838,0.139016', // 199m
-        'imageURL': '',
-        'startTime': '10:30',
-        'endTime': '16:30',
-      },
-      {
-        'id': '2',
-        'visibleOnMap': 'FALSE',
-        'cancelled': 'FALSE',
-        'groupParent': 'FALSE',
-        'brickAndMortar': 'FALSE',
-        'emoji': '🍩',
-        'title': 'Glazed and Confused',
-        'subtitle': 'Doughnuts',
-        'groupID': '1',
-        'food': 'TRUE',
-        'shopping': 'FALSE',
-        'charityCommunityInfo': 'FALSE',
-        'performanceMusic': 'FALSE',
-        'performanceChildrens': 'FALSE',
-        'performanceDance': 'FALSE',
-        'performanceOther': 'FALSE',
-        'visitExperience': 'FALSE',
-        'service': 'FALSE',
-        'business': 'FALSE',
-        'location': 'Fake Street',
-        'description': 'Nice buns',
-        'email': '',
-        'website': 'https://www.glazedandconfused.com',
-        'phone': '01223 111111',
-        'latLng': '52.199687,0.138813', // 535m
-        'imageURL': '',
-        'startTime': '11:00',
-        'endTime': '15:00',
-      },
-      {
-        'id': '3',
-        'visibleOnMap': 'TRUE',
-        'cancelled': 'FALSE',
-        'groupParent': 'FALSE',
-        'brickAndMortar': 'FALSE',
-        'emoji': '🍣',
-        'title': 'Sushi Squad',
-        'subtitle': 'Sushi',
-        'groupID': '',
-        'food': 'TRUE',
-        'shopping': 'FALSE',
-        'charityCommunityInfo': 'FALSE',
-        'performanceMusic': 'FALSE',
-        'performanceChildrens': 'FALSE',
-        'performanceDance': 'FALSE',
-        'performanceOther': 'FALSE',
-        'visitExperience': 'FALSE',
-        'service': 'FALSE',
-        'business': 'FALSE',
-        'location': 'Implausible Avenue',
-        'description': 'Cold rice',
-        'email': '',
-        'website': 'https://www.sushisquad.com',
-        'phone': '01223 222222',
-        'latLng': '52.199188,0.139437', // 135m
-        'imageURL': '',
-        'startTime': '12:00',
-        'endTime': '16:30',
-      },
+      mockListing('foodGroup'),
+      mockListing('groupedDoughnuts'),
+      mockListing('nearbySushi'),
     ];
   });
 
@@ -287,66 +201,8 @@ void main() {
 
     testWidgets('search keeps distinct markers apart when multiple matches share the same location', (tester) async {
       final sharedLocationListings = [
-        {
-          'id': 'sea-group',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'TRUE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '',
-          'title': 'Seafood Group',
-          'subtitle': 'Food',
-          'groupID': 'sea-group',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Harbour Lane',
-          'description': '',
-          'email': '',
-          'website': '',
-          'phone': '',
-          'latLng': '52.199838,0.139016',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
-        {
-          'id': 'sea-specific',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '',
-          'title': 'Seabreeze Stall',
-          'subtitle': 'Food',
-          'groupID': 'sea-group',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Harbour Lane',
-          'description': '',
-          'email': '',
-          'website': '',
-          'phone': '',
-          'latLng': '52.199838,0.139016',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
+        mockListing('seafoodGroup'),
+        mockListing('seabreezeStall'),
       ];
 
       final originalListings = [...listings];
@@ -437,7 +293,7 @@ void main() {
       expect(visibleIds(), isEmpty);
       expect(toastCalls.single.method, 'showToast');
       expect(toastCalls.single.arguments['msg'], 'No matching listings found');
-      await tester.enterText(field, 'fake street');
+      await tester.enterText(field, 'headly street');
       await tester.pumpAndSettle();
       expect(visibleIds(), {'1', '2'});
       await tester.enterText(field, '');
@@ -503,13 +359,7 @@ void main() {
       addTearDown(() => listings = originalListings);
       listings = [
         originalListings[2],
-        {
-          ...originalListings[2],
-          'id': '4',
-          'title': 'Information Point',
-          'food': 'FALSE',
-          'service': 'TRUE',
-        },
+        mockListing('informationPoint'),
       ];
 
       await tester.pumpWidget(MaterialApp(
@@ -912,7 +762,7 @@ void main() {
       expect(find.text('🍣 '), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue (~135m away)'), findsOneWidget);
+      expect(find.text('Mortimer Road (~135m away)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
     });
@@ -941,10 +791,10 @@ void main() {
           "performanceOther": "FALSE",
           "visitExperience": "FALSE",
           "service": "FALSE",
-          "location": "Gwydir St Car Park",
+          "location": "Gwydir Street",
           "description": "Nice buns",
           "email": "",
-          "website": "https://www.glazedandconfused.com",
+          "website": "https://glazedandconfused.example",
           "phone": "01223 111111",
           "latLng": "52.199687,0.138813",
           'imageURL': '',
@@ -970,7 +820,7 @@ void main() {
           "performanceOther": "FALSE",
           "visitExperience": "FALSE",
           "service": "FALSE",
-          "location": "Donkey Common",
+          "location": "East Road",
           "description": "Artistic crafts for all ages",
           "email": "contact@craftycanvas.com",
           "website": "https://www.craftycanvas.com",
@@ -999,7 +849,7 @@ void main() {
           "performanceOther": "FALSE",
           "visitExperience": "FALSE",
           "service": "FALSE",
-          "location": "Donkey Common",
+          "location": "East Road",
           "description": "Smooth jazz performances all day",
           "email": "contact@jazzjunction.com",
           "website": "https://www.jazzjunction.com",
@@ -1249,36 +1099,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       // Build the MapPage widget

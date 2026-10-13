@@ -1,3 +1,4 @@
+import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -12,16 +13,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
-// API column order from the supplied 28-column response.
-const apiHeaders = [
-  'id', 'visibleOnMap', 'cancelled', 'groupParent', 'brickAndMortar',
-  'emoji', 'title', 'subtitle', 'groupID', 'food', 'shopping',
-  'charityCommunityInfo', 'performanceMusic', 'performanceChildrens',
-  'performanceDance', 'performanceOther', 'visitExperience', 'service',
-  'business', 'location', 'description', 'email', 'website', 'phone',
-  'latLng', 'imageURL', 'startTime', 'endTime',
-];
-
 const expectedSubcategories = {
   'food': 'Food & drink',
   'shopping': 'Shopping',
@@ -33,22 +24,6 @@ const expectedSubcategories = {
   'visitExperience': 'Visits & experiences',
   'service': 'Services',
   'business': 'Other businesses',
-};
-
-Map<String, dynamic> listingFor(String id, String subcategory) => {
-  for (final header in apiHeaders) header: '',
-  for (final key in expectedSubcategories.keys) key: 'FALSE',
-  'id': id,
-  'title': id,
-  'visibleOnMap': 'TRUE',
-  'cancelled': 'FALSE',
-  'groupParent': 'FALSE',
-  'brickAndMortar': 'FALSE',
-  subcategory: 'TRUE',
-  'location': 'Mill Road',
-  'latLng': '52.199687,0.138813',
-  'startTime': '10:30',
-  'endTime': '16:30',
 };
 
 void main() {
@@ -71,15 +46,11 @@ void main() {
   test('API preserves each subcategory and the columns following business', () async {
     final expected = expectedSubcategories.keys
         .map((key) => listingFor(key, key)).toList();
-    final client = MockClient((_) async => http.Response(jsonEncode({
-      'range': "'2025'!A1:AB350",
-      'majorDimension': 'ROWS',
-      'values': [
-        apiHeaders,
-        for (final listing in expected)
-          [for (final header in apiHeaders) listing[header]],
-      ],
-    }), 200));
+    final client = MockClient((_) async => http.Response(
+      jsonEncode(mockListingsResponse(expected)),
+      200,
+      headers: {'content-type': 'application/json; charset=utf-8'},
+    ));
     addTearDown(client.close);
 
     expect(await fetchListings(client), expected);

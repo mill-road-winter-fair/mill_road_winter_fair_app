@@ -1,3 +1,4 @@
+import 'mocks/listings_mocks.dart';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -100,20 +101,8 @@ void main() {
         _FakeAndroidFlutterLocalNotificationsPlugin();
     SharedPreferences.setMockInitialValues({});
     listings = [
-      {
-        'id': 'listing-1',
-        'title': 'Glazed and Confused',
-        'location': 'Gwydir St Car Park',
-        'startTime': '10:30',
-        'endTime': '16:30',
-      },
-      {
-        'id': 'listing-2',
-        'title': 'Acoustic Stage',
-        'location': 'Mill Road',
-        'startTime': '12:00',
-        'endTime': '14:00',
-      },
+      mockListing('alertDoughnuts'),
+      mockListing('acousticStage'),
     ];
     alertsStore = AlertScheduleStore.initial();
     settingsOpened = false;
@@ -169,7 +158,7 @@ void main() {
         final payload = jsonEncode({
           'listingId': 'listing-1',
           'listingTitle': 'Glazed and Confused',
-          'listingLocation': 'Gwydir St Car Park',
+          'listingLocation': 'Gwydir Street',
           'listingStartTime': startTime.toIso8601String(),
           'listingEndTime': endTime.toIso8601String(),
         });
@@ -192,14 +181,14 @@ void main() {
       final invalidStartPayload = jsonEncode({
         'listingId': 'listing-1',
         'listingTitle': 'Glazed and Confused',
-        'listingLocation': 'Gwydir St Car Park',
+        'listingLocation': 'Gwydir Street',
         'listingStartTime': 'not-a-date',
         'listingEndTime': validEnd.toIso8601String(),
       });
       final validPayload = jsonEncode({
         'listingId': 'listing-1',
         'listingTitle': 'Glazed and Confused',
-        'listingLocation': 'Gwydir St Car Park',
+        'listingLocation': 'Gwydir Street',
         'listingStartTime': validStart.toIso8601String(),
         'listingEndTime': validEnd.toIso8601String(),
       });
@@ -242,7 +231,7 @@ void main() {
         final payload = jsonEncode({
           'listingId': 'listing-1',
           'listingTitle': 'Glazed and Confused',
-          'listingLocation': 'Gwydir St Car Park',
+          'listingLocation': 'Gwydir Street',
           'listingStartTime': startTime.toIso8601String(),
           'listingEndTime': endTime.toIso8601String(),
         });
@@ -274,7 +263,7 @@ void main() {
         final payload = jsonEncode({
           'listingId': 'listing-1',
           'listingTitle': 'Glazed and Confused',
-          'listingLocation': 'Gwydir St Car Park',
+          'listingLocation': 'Gwydir Street',
           'listingStartTime': startTime.toIso8601String(),
           'listingEndTime': 'not-a-date',
         });
@@ -303,7 +292,7 @@ void main() {
           7,
           'listing-1',
           'Glazed and Confused',
-          'Gwydir St Car Park',
+          'Gwydir Street',
           fairDate.add(const Duration(hours: 10)),
           fairDate.add(const Duration(hours: 11)),
           15,
@@ -447,7 +436,7 @@ void main() {
           18,
           'listing-1',
           'Glazed and Confused',
-          'Gwydir St Car Park',
+          'Gwydir Street',
           fairDate.add(const Duration(hours: 10)),
           fairDate.add(const Duration(hours: 11)),
           15,
@@ -589,7 +578,7 @@ void main() {
             66,
             listingId,
             'Glazed and Confused',
-            'Gwydir St Car Park',
+            'Gwydir Street',
             fairDate.add(const Duration(hours: 10)),
             fairDate.add(const Duration(hours: 11)),
             15,

@@ -1,3 +1,4 @@
+import 'mocks/listings_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,23 +19,7 @@ void main() {
     locationServicesEnabled = false;
     await loadSettings();
     listings = [
-      {
-        'id': 'scrollable',
-        'title': 'Listing',
-        'subtitle': 'Stall',
-        'location': 'Mill Road',
-        'groupParent': 'FALSE',
-        'cancelled': 'FALSE',
-        'brickAndMortar': 'FALSE',
-        'description': List.filled(150, 'Long details.').join(' '),
-        'email': '',
-        'website': '',
-        'phone': '01223 123456',
-        'imageURL': '',
-        'latLng': '52.199687,0.138813',
-        'startTime': '10:00',
-        'endTime': '23:59',
-      }
+      mockListing('longDescription')
     ];
     await tester.pumpWithClock(MaterialApp(
         home: FilteredListingsPage(
