@@ -128,6 +128,37 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('search map shrinks above the keyboard and restores its height when dismissed', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(800, 600);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetViewInsets);
+
+      await tester.pumpWidget(MaterialApp(
+        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+      ));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Search the map'));
+      await tester.pumpAndSettle();
+
+      final map = find.byType(GoogleMap);
+      final beforeKeyboard = tester.getRect(map);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      await tester.pumpAndSettle();
+
+      final withKeyboard = tester.getRect(map);
+      expect(withKeyboard.height, lessThan(beforeKeyboard.height));
+      expect(withKeyboard.topLeft, beforeKeyboard.topLeft);
+      expect(withKeyboard.width, beforeKeyboard.width);
+      expect(withKeyboard.bottom, lessThanOrEqualTo(600 - 300));
+      expect(tester.takeException(), isNull);
+
+      tester.view.resetViewInsets();
+      await tester.pumpAndSettle();
+      expect(tester.getRect(map), beforeKeyboard);
+    });
+
     testWidgets('theme changes refresh existing marker types without resetting the map', (tester) async {
       final previousTheme = selectedThemeKey;
       selectedThemeKey = 'light';
