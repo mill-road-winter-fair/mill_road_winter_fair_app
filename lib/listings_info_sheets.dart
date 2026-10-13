@@ -721,6 +721,7 @@ Future<void> showListingDetailsDialog(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
+              HapticFeedback.lightImpact();
               analyticsService.logButtonTapped('listing_dialog_dismiss', listingId: event.id, listingName: event.name);
               Navigator.of(ctx2).pop();
             },
