@@ -48,6 +48,7 @@ Future<void> main() async {
   await loadSettings();
   alertsStore.loadEventAlerts();
   final analyticsService = FirebaseAnalyticsService();
+  await analyticsService.initialize();
 
   listings = await fetchListings(http.Client());
   debugPrint('Listings fetched: count = ${listings.length}');
