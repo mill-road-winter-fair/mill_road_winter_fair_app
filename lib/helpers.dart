@@ -172,7 +172,7 @@ void showInfoToast(BuildContext context, String message) {
   );
 }
 
-BottomNavigationBar fairBottomNavigationBar(BuildContext context, index, ValueChanged<int> onTabSelected, ColorScheme colorscheme) {
+BottomNavigationBar fairBottomNavigationBar(BuildContext context, int index, ValueChanged<int> onTabSelected, ColorScheme colorscheme) {
   // Visual order differs from the stable page indices used throughout the app.
   const tabOrder = [1, 2, 0, 3, 4];
   return BottomNavigationBar(
