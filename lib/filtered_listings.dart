@@ -326,9 +326,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('FilteredListingsPageState build() called with filterCategory=$filterCategory and subfilterCategory=${widget.subfilterCategory}');
+    debugPrint('[Listings] Screen build: memoryCount=${listings.length}, '
+        'widgetCount=${widget.listings.length}, category=$filterCategory, '
+        'subcategory=${widget.subfilterCategory}, refreshing=$isRefreshing');
     // Show error if there are no listings
     if (listings.isEmpty) {
+      debugPrint('[Listings] Screen showing unable-to-retrieve message');
       return FairScaffold(
         appBarTitle: calculateAppBarTitle(),
         currentTab: switch (filterCategory) { 'favourite' => 4, _ => 3 },
@@ -402,6 +405,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     } else {
       numberOfVisibleListings = filteredListings.length;
     }
+    debugPrint('[Listings] Screen filtered: categoryCount=${categoryFiltered.length}, '
+        'subcategoryCount=${subCategoryFiltered.length}, '
+        'searchActive=${_searchQuery.isNotEmpty}, '
+        'searchResultCount=${filteredListings.length}, hidePast=$_hidePastListings, '
+        'visibleCount=$numberOfVisibleListings');
     int? firstVisibleIndex; // will be used to store the first listing that is actually visible
 
     final colorScheme = Theme.of(context).colorScheme;

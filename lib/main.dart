@@ -24,7 +24,9 @@ import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:mill_road_winter_fair_app/main_alerting.dart';
 
 Future<void> main() async {
-  debugPrint('App starting: main() called');
+  debugPrint('[Listings] App starting: time=${DateTime.now().toIso8601String()}, '
+      'platform=$defaultTargetPlatform, '
+      'mode=${kReleaseMode ? "release" : kProfileMode ? "profile" : "debug"}');
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -51,8 +53,9 @@ Future<void> main() async {
   final analyticsService = FirebaseAnalyticsService();
   await analyticsService.initialize();
 
+  debugPrint('[Listings] Startup initialisation complete; loading cache');
   listings = await loadListingsFromCache();
-  debugPrint('Cached listings loaded: count = ${listings.length}');
+  debugPrint('[Listings] Startup cache loaded: count=${listings.length}');
 
   // Check whether location services are enabled and permissions are granted to the app
   locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
@@ -62,7 +65,8 @@ Future<void> main() async {
 
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
-  debugPrint('Setting preferred orientation and running app');
+  debugPrint('[Listings] Running app: count=${listings.length}, '
+      'firstExecution=$firstExecution');
  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
         providers: [
           Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
@@ -79,8 +83,12 @@ FirebaseOptions firebaseOptionsForBuildMode({required bool isRelease}) {
 }
 
 Future<void> _refreshListingsAfterStartup() async {
+  debugPrint('[Listings] Startup background refresh starting: '
+      'memoryCount=${listings.length}');
   final refreshedListings = await fetchListings(http.Client());
-  debugPrint('Listings refreshed: count = ${refreshedListings.length}');
+  debugPrint('[Listings] Startup background refresh completed: '
+      'count=${refreshedListings.length}, '
+      'homePageReady=${homePageKey.currentState != null}');
   homePageKey.currentState?.listingsUpdated();
 }
 
