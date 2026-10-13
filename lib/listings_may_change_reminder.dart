@@ -141,11 +141,12 @@ class ListingUpdateNotifier {
             TextButton(
               onPressed: () async {
                 HapticFeedback.lightImpact();
-                context.read<AnalyticsService>().logButtonTapped('${analyticsId}_ok');
+                final analyticsService = context.read<AnalyticsService>();
+                analyticsService.logButtonTapped('${analyticsId}_ok');
                 if (isListingsMayChange) {
                   listingUpdateNoticeEnabled = !dontShowAgain;
                   await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
-                  await context.read<AnalyticsService>().logPreferenceSet(
+                  await analyticsService.logPreferenceSet(
                     'listing_update_notice',
                     listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
                   );
