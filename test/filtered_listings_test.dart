@@ -1,4 +1,5 @@
 import 'pump_with_clock.dart';
+import 'fakes/fixed_date_time_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -82,9 +83,18 @@ void main() {
   Future<void> pumpFilteredListingsPage(
     WidgetTester tester,
     String category,
-    List<Map<String, dynamic>> listings,
-    List<String> favouriteListingKeys,
-  ) async {
+    List<Map<String, dynamic>> pageListings,
+    List<String> favouriteIds, {
+    String? subfilterCategory,
+    FixedDateTimeProvider? dateTimeProvider,
+    bool resetState = false,
+  }) async {
+    if (resetState) {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+    listings = pageListings;
+    favouriteListingKeys.value = favouriteIds.toSet();
     await tester.pumpWithClock(
       MaterialApp(
         home: Scaffold(
@@ -94,11 +104,11 @@ void main() {
             listings: pageListings,
             onTabSelected: (_) {},
             onSubfilterChange: (_) {},
-            currentDateTime: currentDateTime,
             analyticsService: FakeAnalyticsService(),
           ),
         ),
       ),
+      dateTimeProvider: dateTimeProvider ?? FixedDateTimeProvider(fairDate),
     );
     await tester.pump();
     await settle(tester);
@@ -879,9 +889,9 @@ void main() {
         sampleListings,
         [],
         subfilterCategory: 'performanceMusic',
-        currentDateTime: currentDateTime,
+        dateTimeProvider: FixedDateTimeProvider(currentDateTime),
       );
-      await tester.tap(find.byIcon(Icons.update));
+      await tester.tap(find.byTooltip('Scroll to what is on now or starting soon'));
       await settle(tester);
 
       final state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
@@ -932,18 +942,18 @@ void main() {
         sampleListings,
         [],
         subfilterCategory: 'performanceMusic',
-        currentDateTime: currentDateTime,
+        dateTimeProvider: FixedDateTimeProvider(currentDateTime),
       );
       expect(find.text('Past act'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.event_busy));
+      await tester.tap(find.byTooltip('Hide past events and performances'));
       await settle(tester);
       expect(find.text('Past act'), findsNothing);
       expect(find.text('Current act'), findsOneWidget);
       expect(find.text('Future act'), findsOneWidget);
-      expect(find.byIcon(Icons.free_cancellation), findsOneWidget);
+      expect(find.byTooltip('Show past events and performances'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.free_cancellation));
+      await tester.tap(find.byTooltip('Show past events and performances'));
       await settle(tester);
       expect(find.text('Past act'), findsOneWidget);
       await tester.pump(const Duration(seconds: 2));
