@@ -13,6 +13,21 @@ import 'package:provider/provider.dart';
 
 import 'fakes/fake_analytics_service.dart';
 
+class RecordingMapAnalyticsService extends FakeAnalyticsService {
+  final buttons = <String>[];
+  final filters = <(String, bool)>[];
+
+  @override
+  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
+    buttons.add(buttonName);
+  }
+
+  @override
+  Future<void> logMapMarkerFilterPreferenceSet(String category, bool visible) async {
+    filters.add((category, visible));
+  }
+}
+
 void main() {
   // We're on test
   onTest = true;
@@ -361,6 +376,39 @@ void main() {
         isTrue,
         reason: 'Food remains selected, so disabling Business must not hide a Food+Business marker.',
       );
+    });
+
+    testWidgets('map filter analytics identify each performance category and business independently', (tester) async {
+      tester.view.physicalSize = const Size(800, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final analytics = RecordingMapAnalyticsService();
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+        value: analytics,
+        child: MaterialApp(home: MapPage(listings: listings, onTabSelected: (_) {})),
+      ));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.filter_alt));
+      await tester.pumpAndSettle();
+
+      for (final (label, category, button) in [
+        ('Music', 'performanceMusic', 'music'),
+        ('Dance', 'performanceDance', 'dance'),
+        ('Other performances', 'performanceOther', 'other_performances'),
+        ('Children’s entertainment', 'performanceChildrens', 'childrens'),
+        ('Other businesses', 'business', 'business'),
+      ]) {
+        analytics.buttons.clear();
+        analytics.filters.clear();
+        final tile = find.widgetWithText(CheckboxListTile, label);
+        final wasVisible = tester.widget<CheckboxListTile>(tile).value!;
+        await tester.tap(tile);
+        await tester.pumpAndSettle();
+        expect(analytics.buttons, ['${button}_mapMarker_filter_toggle']);
+        expect(analytics.filters, [(category, !wasVisible)]);
+      }
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('search includes hidden listings and restores default pins', (tester) async {

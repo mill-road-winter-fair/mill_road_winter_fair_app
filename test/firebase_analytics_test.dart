@@ -173,11 +173,22 @@ void main() {
   test('show/hide all updates every map filter property', () async {
     usageAnalyticsEnabled = true;
     await service.logMapMarkerFilterPreferenceSet('all', false);
-    expect(sdk.properties.length, 6);
+    expect(sdk.properties.keys, unorderedEquals([
+      'map_filter_food', 'map_filter_shopping', 'map_filter_community',
+      'map_filter_music', 'map_filter_dance', 'map_filter_other_performances',
+      'map_filter_childrens', 'map_filter_business', 'map_filter_visits',
+      'map_filter_services',
+    ]));
     expect(sdk.properties.values, everyElement('false'));
     await service.logMapMarkerFilterPreferenceSet('shopping', true);
     expect(sdk.properties['map_filter_shopping'], 'true');
     expect(sdk.events.last['parameters'], {'filter_type': 'map_marker', 'category': 'shopping', 'is_enabled': 1});
+    await service.logMapMarkerFilterPreferenceSet('performanceDance', true);
+    expect(sdk.properties['map_filter_dance'], 'true');
+    expect(sdk.properties['map_filter_music'], 'false');
+    expect(sdk.properties['map_filter_community'], 'false');
+    await service.logMapMarkerFilterPreferenceSet('all', true);
+    expect(sdk.properties.values, everyElement('true'));
   });
 
   test('rapid consent changes finish in the order requested', () async {
