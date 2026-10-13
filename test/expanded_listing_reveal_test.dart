@@ -7,6 +7,7 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'pump_with_clock.dart';
 
 void main() {
   testWidgets(
@@ -35,7 +36,7 @@ void main() {
         'endTime': '23:59',
       }
     ];
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWithClock(MaterialApp(
         home: FilteredListingsPage(
       filterCategory: 'all',
       listings: listings,
