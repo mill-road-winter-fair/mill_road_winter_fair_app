@@ -1,12 +1,22 @@
+import 'dart:io';
+import 'fakes/fixed_date_time_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:provider/provider.dart';
 
 void main() {
+  // Mocking DateTime.now()
+  final dateTimeProvider = FixedDateTimeProvider(
+    DateTime(2026, 12, 5, 21, 15),
+  );
+
   LatLng currentLatLng = const LatLng(52.199174, 0.140929);
   LatLng destinationLatLng = const LatLng(52.199687, 0.138813);
   int approximateDistanceMetres = asTheCrowFlies(currentLatLng, destinationLatLng);
@@ -29,41 +39,110 @@ void main() {
     required String approxDistance,
     required bool detailsVisible,
     required bool listingFavourited,
+    required bool listingAlerted,
     required Function onGetDirections,
     VoidCallback? onDetailsTapped,
     VoidCallback? onFavouriteTapped,
+    required DateTimeProvider dateTimeProvider,
   }) {
-    return MaterialApp(
-      home: Scaffold(
-        body: SpecificListingInfoSheet(
-          listingId: 'test-listing',
-          cancelled: cancelled,
-          brickAndMortar: brickAndMortar,
-          emoji: emoji,
-          title: title,
-          subtitle: subtitle,
-          location: location,
-          description: description,
-          email: email,
-          website: website,
-          phoneNumber: phoneNumber,
-          imageURL: imageURL,
-          startTime: startTime,
-          endTime: endTime,
-          approxDistance: approxDistance,
-          detailsVisible: detailsVisible,
-          onGetDirections: onGetDirections,
-          listingFavourited: listingFavourited,
-          onDetailsTapped: onDetailsTapped,
-          onFavouriteTapped: onFavouriteTapped,
-          inDialog: false,
-          analyticsService: FakeAnalyticsService(),
+    return Provider<DateTimeProvider>.value(
+      value: dateTimeProvider,
+      child: MaterialApp(
+        home: Scaffold(
+          body: SpecificListingInfoSheet(
+            listingId: 'test-listing',
+            cancelled: cancelled,
+            brickAndMortar: brickAndMortar,
+            emoji: emoji,
+            title: title,
+            subtitle: subtitle,
+            location: location,
+            description: description,
+            email: email,
+            website: website,
+            phoneNumber: phoneNumber,
+            imageURL: imageURL,
+            startTime: startTime,
+            endTime: endTime,
+            approxDistance: approxDistance,
+            detailsVisible: detailsVisible,
+            onGetDirections: onGetDirections,
+            listingFavourited: listingFavourited,
+            listingAlerted: listingAlerted,
+            onDetailsTapped: onDetailsTapped,
+            onFavouriteTapped: onFavouriteTapped,
+            inDialog: false,
+            analyticsService: FakeAnalyticsService(),
+            colorScheme: ColorScheme.light(),
+          ),
         ),
       ),
     );
   }
 
   group('ListingsInfoSheet', () {
+    for (final location in ['Mill Road', '']) {
+      testWidgets('hides opening times for a brickAndMortar listing ${location.isEmpty ? 'in a group' : 'with a location'}', (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest(
+          cancelled: false,
+          brickAndMortar: true,
+          emoji: '',
+          title: 'Mill Road Shop',
+          subtitle: 'Shopping',
+          location: location,
+          description: '',
+          email: '',
+          website: '',
+          phoneNumber: '',
+          imageURL: '',
+          startTime: '10:30',
+          endTime: '16:30',
+          approxDistance: '',
+          detailsVisible: true,
+          listingFavourited: false,
+          listingAlerted: false,
+          onGetDirections: () {},
+          dateTimeProvider: dateTimeProvider,
+        ));
+
+        expect(find.text('Mill Road Shop'), findsOneWidget);
+        expect(find.text('Shopping', findRichText: true), findsOneWidget);
+        expect(find.textContaining('10:30', findRichText: true), findsNothing);
+        expect(find.textContaining('16:30', findRichText: true), findsNothing);
+      });
+    }
+
+    testWidgets('AdaptiveImageText reserves space and caps the image height while loading', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: AdaptiveImageText(
+            imageUrl: 'https://example.com/image.jpg',
+            descriptionWidget: const Text('A description'),
+          ),
+        ),
+      ));
+
+      final constrainedBoxes = tester.widgetList<ConstrainedBox>(find.byType(ConstrainedBox));
+      expect(constrainedBoxes.any((box) => box.constraints.maxHeight <= 180), isTrue,
+          reason: 'The image should reserve a maximum-height placeholder while the network image is loading.');
+    });
+
+    testWidgets('AdaptiveImageText keeps the description visible when the image fails to load', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: AdaptiveImageText(
+            imageUrl: 'https://example.com/missing-image.jpg',
+            descriptionWidget: const Text('A description'),
+          ),
+        ),
+      ));
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('A description'), findsOneWidget);
+    });
+
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
@@ -83,6 +162,8 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       expect(find.text('🍩 '), findsOneWidget);
@@ -90,7 +171,6 @@ void main() {
       expect(find.text('Food • Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
-      expect(find.byIcon(Icons.public), findsOneWidget);
     });
 
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
@@ -112,6 +192,8 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       expect(find.text('🍩 '), findsOneWidget);
@@ -146,9 +228,11 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         onFavouriteTapped: () {
           favouriteCalled = true;
         },
+        dateTimeProvider: dateTimeProvider,
       ));
 
       // Find the heart icon button. It's an IconButton containing a FaIcon.
@@ -184,9 +268,11 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         onDetailsTapped: () {
           detailsToggled = true;
         },
+        dateTimeProvider: dateTimeProvider,
       ));
 
       // Extra info should not be present
@@ -220,7 +306,9 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
         onDetailsTapped: () {},
+        dateTimeProvider: dateTimeProvider,
       ));
 
       // Extra info should now be present
@@ -251,6 +339,8 @@ void main() {
           directionsCalled = true;
         },
         listingFavourited: false,
+        listingAlerted: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       final getDirectionsButton = find.byIcon(Icons.directions_walk);
@@ -264,8 +354,6 @@ void main() {
     });
 
     testWidgets('formatted with line-through and red text when endTime has passed', (WidgetTester tester) async {
-      // Note: This test assumes hasEventEnded returns true for the given endTime.
-      // This will be true if the test is run after the fair date/time.
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: false,
         brickAndMortar: false,
@@ -284,20 +372,19 @@ void main() {
         detailsVisible: false,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       final timeTextFinder = find.text('09:00—10:00');
       expect(timeTextFinder, findsOneWidget);
 
       final Text timeTextWidget = tester.widget(timeTextFinder);
-      // If the event has ended, it should be red and have a line-through decoration
-      if (hasEventEnded('10:00')) {
-        expect(timeTextWidget.style?.color, Colors.red);
-        expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
-      }
+      expect(timeTextWidget.style?.color, Colors.red);
+      expect(timeTextWidget.style?.decoration, TextDecoration.lineThrough);
     });
 
-    testWidgets('formatted with line-through and red text when listing is cancelled', (WidgetTester tester) async {
+    testWidgets('formats cancelled listing with line-through text and a cancelled label', (WidgetTester tester) async {
       await tester.pumpWidget(createWidgetUnderTest(
         cancelled: true,
         brickAndMortar: false,
@@ -316,24 +403,163 @@ void main() {
         detailsVisible: true,
         onGetDirections: () {},
         listingFavourited: false,
+        listingAlerted: false,
+        dateTimeProvider: dateTimeProvider,
       ));
 
       // Title should have line-through
       final emojiFinder = find.text('🍩 ');
       expect(emojiFinder, findsOneWidget);
+      expect(find.ancestor(of: emojiFinder, matching: find.byType(ColorFiltered)), findsOneWidget);
+      final Opacity emojiOpacity = tester.widget(find.ancestor(of: emojiFinder, matching: find.byType(Opacity).last));
+      expect(emojiOpacity.opacity, 0.5);
       final titleFinder = find.text('Glazed and Confused');
       expect(titleFinder, findsOneWidget);
       final Text titleWidget = tester.widget(titleFinder);
       expect(titleWidget.style?.decoration, TextDecoration.lineThrough);
 
-      // Times should be replaced by CANCELLED and be red
+      // Subtitle should retain its normal colour and have line-through
+      final Text subtitleWidget = tester.widget(find.text('Food • Doughnuts'));
+      final TextSpan subtitleSpan = subtitleWidget.textSpan! as TextSpan;
+      expect(subtitleSpan.style?.decoration, TextDecoration.lineThrough);
+      expect(subtitleSpan.style?.color, isNot(Colors.red));
+
+      // Times should be replaced by a rounded CANCELLED label using the action-button colours
       final cancelledTextFinder = find.text('CANCELLED');
-      expect(cancelledTextFinder, findsWidgets); // Might be more than one if both subtitle and body use it
+      expect(cancelledTextFinder, findsOneWidget);
       final Text cancelledTextWidget = tester.widget(cancelledTextFinder.first);
-      expect(cancelledTextWidget.style?.color, Colors.red);
+      final colorScheme = ColorScheme.light();
+      expect(cancelledTextWidget.style?.color, colorScheme.onPrimary);
+      expect(cancelledTextWidget.style?.color, isNot(Colors.red));
+
+      final cancelledLabelFinder = find.ancestor(
+        of: cancelledTextFinder,
+        matching: find.byWidgetPredicate((widget) {
+          if (widget is! Container || widget.decoration is! BoxDecoration) return false;
+          final decoration = widget.decoration! as BoxDecoration;
+          return decoration.color == colorScheme.onSurfaceVariant && decoration.borderRadius == BorderRadius.circular(12);
+        }),
+      );
+      expect(cancelledLabelFinder, findsOneWidget);
+
+      await tester.tap(cancelledTextFinder);
+      await tester.pump();
+
+      expect(find.text('Originally 10:30–16:30'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 4));
+      expect(find.text('Originally 10:30–16:30'), findsNothing);
 
       // Description should have prefix removed
       expect(find.text('Nice buns'), findsOneWidget);
+    });
+
+    testWidgets('disables favourite and directions actions but leaves share enabled when listing is cancelled', (WidgetTester tester) async {
+      bool favouriteCalled = false;
+      bool directionsCalled = false;
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: true,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: '100m',
+        detailsVisible: false,
+        onGetDirections: () {
+          directionsCalled = true;
+        },
+        listingFavourited: false,
+        listingAlerted: false,
+        onFavouriteTapped: () {
+          favouriteCalled = true;
+        },
+        dateTimeProvider: dateTimeProvider,
+      ));
+
+      final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
+      final FaIcon favouriteIcon = tester.widget(find.descendant(
+        of: find.byType(IconButton).first,
+        matching: find.byType(FaIcon),
+      ));
+      final ElevatedButton directionsButton = tester.widget(find.ancestor(
+        of: find.byIcon(Icons.directions_walk),
+        matching: find.byType(ElevatedButton),
+      ));
+      final Finder shareIcon = Platform.isAndroid ? find.byIcon(Icons.share) : find.byIcon(Icons.ios_share);
+      final ElevatedButton shareButton = tester.widget(find.ancestor(
+        of: shareIcon,
+        matching: find.byType(ElevatedButton),
+      ));
+
+      expect(favouriteButton.onPressed, isNull);
+      expect(favouriteIcon.color, Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).disabledColor);
+      expect(directionsButton.onPressed, isNull);
+      expect(shareButton.onPressed, isNotNull);
+
+      await tester.tap(find.byType(IconButton).first);
+      await tester.tap(find.byIcon(Icons.directions_walk));
+      await tester.pump();
+
+      expect(favouriteCalled, isFalse);
+      expect(directionsCalled, isFalse);
+    });
+
+    testWidgets('allows a cancelled listing to be unfavourited', (WidgetTester tester) async {
+      bool favouriteCalled = false;
+
+      await tester.pumpWidget(createWidgetUnderTest(
+        cancelled: true,
+        brickAndMortar: false,
+        emoji: '🍩',
+        title: 'Glazed and Confused',
+        subtitle: 'Food • Doughnuts',
+        location: 'Gwydir St Car Park',
+        description: 'Nice buns',
+        email: 'sales@glazedandconfused.com',
+        website: 'https://www.glazedandconfused.com',
+        phoneNumber: '01223 111111',
+        imageURL: '',
+        startTime: '10:30',
+        endTime: '16:30',
+        approxDistance: '100m',
+        detailsVisible: false,
+        onGetDirections: () {},
+        listingFavourited: true,
+        listingAlerted: false,
+        onFavouriteTapped: () {
+          favouriteCalled = true;
+        },
+        dateTimeProvider: dateTimeProvider,
+      ));
+
+      final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
+      final FaIcon favouriteIcon = tester.widget(find.descendant(
+        of: find.byType(IconButton).first,
+        matching: find.byType(FaIcon),
+      ));
+
+      expect(favouriteButton.onPressed, isNotNull);
+      expect(favouriteIcon.icon?.codePoint, FontAwesomeIcons.solidHeart.codePoint);
+      expect(favouriteIcon.icon?.fontFamily, FontAwesomeIcons.solidHeart.fontFamily);
+      expect(favouriteIcon.icon?.fontPackage, FontAwesomeIcons.solidHeart.fontPackage);
+      expect(
+        favouriteIcon.color,
+        ColorScheme.light().primary,
+      );
+
+      await tester.tap(find.byType(IconButton).first);
+      await tester.pump();
+
+      expect(favouriteCalled, isTrue);
     });
   });
 }

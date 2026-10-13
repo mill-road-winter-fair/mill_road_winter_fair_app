@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,16 +23,16 @@ const apiHeaders = [
 ];
 
 const expectedSubcategories = {
-  'food': 'Food & Drink',
-  'shopping': 'Shopping & Stalls',
-  'charityCommunityInfo': 'Charity, Community, Info',
+  'food': 'Food & drink',
+  'shopping': 'Shopping',
+  'charityCommunityInfo': 'Charity, community, info',
   'performanceMusic': 'Music',
-  'performanceChildrens': 'Children’s',
+  'performanceChildrens': 'Children’s entertainment',
   'performanceDance': 'Dance',
   'performanceOther': 'Other performances',
-  'visitExperience': 'Visit & Experience',
+  'visitExperience': 'Visits & experiences',
   'service': 'Services',
-  'business': 'Business',
+  'business': 'Other businesses',
 };
 
 Map<String, dynamic> listingFor(String id, String subcategory) => {
@@ -87,14 +88,19 @@ void main() {
   for (final entry in expectedSubcategories.entries) {
     test('${entry.key} is recognised as a single category', () {
       final listing = listingFor('single', entry.key);
-      expect(countCategories(listing), 1);
-      expect(getCategory(listing), entry.key.startsWith('performance')
-          ? 'Performance'
-          : {
+      expect(countCategories(listing), entry.key.startsWith('performance')
+          ? (1, 1)
+          : (1, 0));
+      expect(getCategory(listing), {
               'food': 'Food', 'shopping': 'Shopping',
               'charityCommunityInfo': 'Charity/Community/Info',
+              'performanceMusic': 'Music',
+              'performanceChildrens': 'Childrens',
+              'performanceDance': 'Dance',
+              'performanceOther': 'Other',
               'visitExperience': 'Visit/Experience',
-              'service': 'Service', 'business': 'Business',
+              'service': 'Service', 
+              'business': 'Business',
             }[entry.key]);
     });
 
@@ -107,7 +113,7 @@ void main() {
         ];
         favouriteListingKeys.value = {...expectedSubcategories.keys, 'parent'};
         String? selected;
-        await tester.pumpWidget(MaterialApp(home: Scaffold(
+        await tester.pumpWithClock(MaterialApp(home: Scaffold(
           body: StatefulBuilder(builder: (context, setState) {
             return FilteredListingsPage(
               filterCategory: page,
@@ -127,7 +133,7 @@ void main() {
         );
         final dropdown = tester.widget<DropdownMenu<String?>>(dropdownFinder);
         expect({for (final option in dropdown.dropdownMenuEntries)
-          option.value: option.label}, {null: 'All', ...expectedSubcategories});
+          option.value: option.label}, {null: 'Everything', ...expectedSubcategories});
         dropdown.onSelected!(entry.key);
         await tester.pumpAndSettle();
 
@@ -145,7 +151,7 @@ void main() {
 
   test('business combined with another subcategory is mixed', () {
     final listing = {...listingFor('mixed', 'business'), 'shopping': 'TRUE'};
-    expect(countCategories(listing), 2);
+    expect(countCategories(listing), (2, 0));
     expect(getCategory(listing), 'Mixed');
   });
 }

@@ -68,6 +68,7 @@ void main() {
       await service.setCurrentScreen('MapPage');
       await service.logButtonTapped('home');
       await service.logButtonTapped('listing_details', listingId: 'listing-123', listingName: 'Listing');
+      await service.logNoticeShown('fair_day_notice');
       await service.logSearch('mulled wine', searchArea: 'listings');
       await service.logMapMarkerTapped('Listing');
       await service.logMapTypePreferenceSet('hybrid');
@@ -148,6 +149,16 @@ void main() {
     expect(sdk.events.single, {
       'name': 'search',
       'parameters': {'search_term': 'Mulled Wine', 'search_area': 'listings'},
+    });
+  });
+
+  test('notice impressions identify the notice and current screen', () async {
+    usageAnalyticsEnabled = true;
+    await service.setCurrentScreen('MapPage');
+    await service.logNoticeShown('fair_day_notice');
+    expect(sdk.events.single, {
+      'name': 'notice_shown',
+      'parameters': {'notice_id': 'fair_day_notice', 'screen_name': 'MapPage'},
     });
   });
 

@@ -56,6 +56,20 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
+  Future<void> logNoticeShown(String noticeName) async {
+    if (usageAnalyticsEnabled != true) return;
+
+    debugPrint('[FIREBASE] Logging notice_shown: $noticeName on screen $currentScreen');
+    await _record(() => analytics.logEvent(
+      name: 'notice_shown',
+      parameters: {
+        'notice_id': noticeName,
+        'screen_name': currentScreen,
+      },
+    ));
+  }
+
+  @override
   Future<void> logSearch(String searchTerm, {required String searchArea}) async {
     final trimmedSearchTerm = searchTerm.trim();
     if (trimmedSearchTerm.isEmpty || usageAnalyticsEnabled != true) return;
@@ -193,6 +207,27 @@ class FirebaseAnalyticsService implements AnalyticsService {
       parameters: {
         'type': 'theme',
         'value': theme,
+      },
+    ));
+  }
+
+  @override
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes) async {
+    if (usageAnalyticsEnabled != true) {
+      return;
+    }
+
+    final value = minutes.toString();
+    debugPrint('[FIREBASE] Logging preference_set (alert_notice_period_minutes): $value');
+    await _record(() => analytics.setUserProperty(
+      name: 'alert_notice_period_minutes',
+      value: value,
+    ));
+    await _record(() => analytics.logEvent(
+      name: 'preference_set',
+      parameters: {
+        'type': 'alert_notice_period_minutes',
+        'value': value,
       },
     ));
   }
@@ -383,6 +418,7 @@ abstract class AnalyticsService {
   Future<void> setCurrentScreen(String screenName);
   Future<void> logMapMarkerTapped(String listingName);
   Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName});
+  Future<void> logNoticeShown(String noticeName);
   Future<void> logSearch(String searchTerm, {required String searchArea});
   Future<void> logMapTypePreferenceSet(String mapType);
   Future<void> logMapOrientationPreferenceSet(String mapOrientation);
@@ -390,6 +426,7 @@ abstract class AnalyticsService {
   Future<void> logRoadClosurePolygonPreferenceSet(bool visible);
   Future<void> logDistanceUnitPreferenceSet(String distanceUnit);
   Future<void> logThemePreferenceSet(String theme);
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes);
   Future<void> logListingSaved(String listingName);
   Future<void> logListingUnsaved(String listingName);
   Future<void> logDirectionsToListingRequested(String listingName);
@@ -418,6 +455,10 @@ class FakeAnalyticsService implements AnalyticsService {
     // Do nothing
   }
   @override
+  Future<void> logNoticeShown(String noticeName) async {
+    // Do nothing
+  }
+  @override
   Future<void> logSearch(String searchTerm, {required String searchArea}) async {
     // Do nothing
   }
@@ -443,6 +484,10 @@ class FakeAnalyticsService implements AnalyticsService {
   }
   @override
   Future<void> logThemePreferenceSet(String theme) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes) async {
     // Do nothing
   }
   @override
