@@ -12,8 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
-class _FakeAndroidFlutterLocalNotificationsPlugin
-    extends AndroidFlutterLocalNotificationsPlugin {
+class _FakeAndroidFlutterLocalNotificationsPlugin extends AndroidFlutterLocalNotificationsPlugin {
   final List<int> cancelledIds = <int>[];
   final List<Map<String, dynamic>> scheduled = <Map<String, dynamic>>[];
   bool notificationsEnabled = true;
@@ -24,16 +23,14 @@ class _FakeAndroidFlutterLocalNotificationsPlugin
   Future<bool> initialize({
     required AndroidInitializationSettings settings,
     DidReceiveNotificationResponseCallback? onDidReceiveNotificationResponse,
-    DidReceiveBackgroundNotificationResponseCallback?
-        onDidReceiveBackgroundNotificationResponse,
+    DidReceiveBackgroundNotificationResponseCallback? onDidReceiveBackgroundNotificationResponse,
   }) async {
     this.onDidReceiveNotificationResponse = onDidReceiveNotificationResponse;
     return true;
   }
 
   @override
-  Future<NotificationAppLaunchDetails?> getNotificationAppLaunchDetails() async =>
-      const NotificationAppLaunchDetails(false);
+  Future<NotificationAppLaunchDetails?> getNotificationAppLaunchDetails() async => const NotificationAppLaunchDetails(false);
 
   @override
   Future<void> zonedSchedule({
@@ -86,18 +83,15 @@ Future<void> _withAndroidPlatform(Future<void> Function() callback) async {
 void main() {
   setUp(() async {
     tzdata.initializeTimeZones();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel('PonnamKarthik/fluttertoast'),
       (call) async => true,
     );
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel('flutter.baseflow.com/permissions/methods'),
       (call) async => true,
     );
-    FlutterLocalNotificationsPlatform.instance =
-        _FakeAndroidFlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlatform.instance = _FakeAndroidFlutterLocalNotificationsPlugin();
     SharedPreferences.setMockInitialValues({});
     listings = [
       {
@@ -134,8 +128,7 @@ void main() {
       final streamedResponse = notificationStream.stream.first;
 
       await _withAndroidPlatform(initialiseFlutterLocalNotificationsPlugin);
-      (FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin)
-          .onDidReceiveNotificationResponse!(response);
+      (FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).onDidReceiveNotificationResponse!(response);
 
       expect(await streamedResponse, same(response));
     });
@@ -204,32 +197,42 @@ void main() {
         'listingEndTime': validEnd.toIso8601String(),
       });
 
-      notificationTapBackground(NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        id: null,
-        payload: validPayload,
-      ),);
-      notificationTapBackground(const NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        id: 1,
-        payload: null,
-      ),);
-      notificationTapBackground(const NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        id: 1,
-        payload: '{',
-      ),);
-      notificationTapBackground(NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        id: 1,
-        payload: invalidStartPayload,
-      ),);
-      notificationTapBackground(NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotificationAction,
-        id: 1,
-        actionId: 'unsupported-action',
-        payload: validPayload,
-      ),);
+      notificationTapBackground(
+        NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotification,
+          id: null,
+          payload: validPayload,
+        ),
+      );
+      notificationTapBackground(
+        const NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotification,
+          id: 1,
+          payload: null,
+        ),
+      );
+      notificationTapBackground(
+        const NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotification,
+          id: 1,
+          payload: '{',
+        ),
+      );
+      notificationTapBackground(
+        NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotification,
+          id: 1,
+          payload: invalidStartPayload,
+        ),
+      );
+      notificationTapBackground(
+        NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotificationAction,
+          id: 1,
+          actionId: 'unsupported-action',
+          payload: validPayload,
+        ),
+      );
       await Future<void>.delayed(Duration.zero);
 
       expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isEmpty);
@@ -255,12 +258,14 @@ void main() {
         ];
 
         for (var index = 0; index < actionIds.length; index++) {
-          notificationTapBackground(NotificationResponse(
-            notificationResponseType: NotificationResponseType.selectedNotificationAction,
-            id: index + 1,
-            actionId: actionIds[index],
-            payload: payload,
-          ),);
+          notificationTapBackground(
+            NotificationResponse(
+              notificationResponseType: NotificationResponseType.selectedNotificationAction,
+              id: index + 1,
+              actionId: actionIds[index],
+              payload: payload,
+            ),
+          );
           await Future<void>.delayed(Duration.zero);
         }
 
@@ -279,12 +284,14 @@ void main() {
           'listingEndTime': 'not-a-date',
         });
 
-        notificationTapBackground(NotificationResponse(
-          notificationResponseType: NotificationResponseType.selectedNotificationAction,
-          id: 1,
-          actionId: 'snooze5mins',
-          payload: payload,
-        ),);
+        notificationTapBackground(
+          NotificationResponse(
+            notificationResponseType: NotificationResponseType.selectedNotificationAction,
+            id: 1,
+            actionId: 'snooze5mins',
+            payload: payload,
+          ),
+        );
         await Future<void>.delayed(Duration.zero);
 
         expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isEmpty);
@@ -298,19 +305,22 @@ void main() {
 
     test('updateAlertNoticePeriodById rewrites the persisted alert period', () async {
       final prefs = await SharedPreferences.getInstance();
-      final store = AlertScheduleStore([
-        AlertSchedule(
-          7,
-          'listing-1',
-          'Glazed and Confused',
-          'Gwydir St Car Park',
-          fairDate.add(const Duration(hours: 10)),
-          fairDate.add(const Duration(hours: 11)),
-          15,
-          true,
-          null,
-        ),
-      ], 8,);
+      final store = AlertScheduleStore(
+        [
+          AlertSchedule(
+            7,
+            'listing-1',
+            'Glazed and Confused',
+            'Gwydir St Car Park',
+            fairDate.add(const Duration(hours: 10)),
+            fairDate.add(const Duration(hours: 11)),
+            15,
+            true,
+            null,
+          ),
+        ],
+        8,
+      );
       await prefs.setString('alertsStore', jsonEncode(store));
 
       await updateAlertNoticePeriodById(7, 30);
@@ -402,19 +412,22 @@ void main() {
     });
 
     test('saveAllEventAlerts and loadEventAlerts round-trip stored data', () async {
-      final store = AlertScheduleStore([
-        AlertSchedule(
-          2,
-          'listing-2',
-          'Acoustic Stage',
-          'Mill Road',
-          fairDate.add(const Duration(hours: 12)),
-          fairDate.add(const Duration(hours: 13)),
-          20,
-          true,
-          null,
-        ),
-      ], 3,);
+      final store = AlertScheduleStore(
+        [
+          AlertSchedule(
+            2,
+            'listing-2',
+            'Acoustic Stage',
+            'Mill Road',
+            fairDate.add(const Duration(hours: 12)),
+            fairDate.add(const Duration(hours: 13)),
+            20,
+            true,
+            null,
+          ),
+        ],
+        3,
+      );
       alertsStore = store;
 
       alertsStore.saveAllEventAlerts();
@@ -442,32 +455,38 @@ void main() {
 
     test('refreshEventAlertSchedules reloads stored alerts while preserving current store', () async {
       final prefs = await SharedPreferences.getInstance();
-      final live = AlertScheduleStore([
-        AlertSchedule(
-          18,
-          'listing-1',
-          'Glazed and Confused',
-          'Gwydir St Car Park',
-          fairDate.add(const Duration(hours: 10)),
-          fairDate.add(const Duration(hours: 11)),
-          15,
-          true,
-          null,
-        ),
-      ], 19,);
-      alertsStore = AlertScheduleStore([
-        AlertSchedule(
-          99,
-          'stale',
-          'Old',
-          'Nowhere',
-          fairDate.add(const Duration(hours: 8)),
-          fairDate.add(const Duration(hours: 9)),
-          5,
-          false,
-          null,
-        ),
-      ], 100,);
+      final live = AlertScheduleStore(
+        [
+          AlertSchedule(
+            18,
+            'listing-1',
+            'Glazed and Confused',
+            'Gwydir St Car Park',
+            fairDate.add(const Duration(hours: 10)),
+            fairDate.add(const Duration(hours: 11)),
+            15,
+            true,
+            null,
+          ),
+        ],
+        19,
+      );
+      alertsStore = AlertScheduleStore(
+        [
+          AlertSchedule(
+            99,
+            'stale',
+            'Old',
+            'Nowhere',
+            fairDate.add(const Duration(hours: 8)),
+            fairDate.add(const Duration(hours: 9)),
+            5,
+            false,
+            null,
+          ),
+        ],
+        100,
+      );
       await prefs.setString('alertsStore', jsonEncode(live));
 
       await alertsStore.refreshEventAlertSchedules();
@@ -584,19 +603,22 @@ void main() {
     testWidgets('setTheAlert cancels an existing scheduled alert for the listing', (tester) async {
       await _withAndroidPlatform(() async {
         final listingId = 'listing-1';
-        alertsStore = AlertScheduleStore([
-          AlertSchedule(
-            66,
-            listingId,
-            'Glazed and Confused',
-            'Gwydir St Car Park',
-            fairDate.add(const Duration(hours: 10)),
-            fairDate.add(const Duration(hours: 11)),
-            15,
-            true,
-            null,
-          ),
-        ], 67,);
+        alertsStore = AlertScheduleStore(
+          [
+            AlertSchedule(
+              66,
+              listingId,
+              'Glazed and Confused',
+              'Gwydir St Car Park',
+              fairDate.add(const Duration(hours: 10)),
+              fairDate.add(const Duration(hours: 11)),
+              15,
+              true,
+              null,
+            ),
+          ],
+          67,
+        );
 
         await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
         await setTheAlert(tester.element(find.byType(SizedBox)), 15, listingId);

@@ -8,9 +8,11 @@ extension PumpWithClock on WidgetTester {
     Widget widget, {
     DateTimeProvider dateTimeProvider = const SystemDateTimeProvider(),
   }) {
-    return pumpWidget(Provider<DateTimeProvider>.value(
-      value: dateTimeProvider,
-      child: widget,
-    ),);
+    return pumpWidget(
+      Provider<DateTimeProvider>.value(
+        value: dateTimeProvider,
+        child: widget,
+      ),
+    );
   }
 }

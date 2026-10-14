@@ -162,17 +162,21 @@ class FirebaseAnalyticsService implements AnalyticsService {
 
     final value = minutes.toString();
     debugPrint('[FIREBASE] Logging preference_set (alert_notice_period_minutes): $value');
-    await _record(() => analytics.setUserProperty(
-      name: 'alert_notice_period_minutes',
-      value: value,
-    ),);
-    await _record(() => analytics.logEvent(
-      name: 'preference_set',
-      parameters: {
-        'type': 'alert_notice_period_minutes',
-        'value': value,
-      },
-    ),);
+    await _record(
+      () => analytics.setUserProperty(
+        name: 'alert_notice_period_minutes',
+        value: value,
+      ),
+    );
+    await _record(
+      () => analytics.logEvent(
+        name: 'preference_set',
+        parameters: {
+          'type': 'alert_notice_period_minutes',
+          'value': value,
+        },
+      ),
+    );
   }
 
   @override

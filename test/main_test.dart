@@ -185,7 +185,8 @@ void main() {
               appBarTitle: 'Test',
               body: const SizedBox(),
               currentTab: 0,
-              onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
             ),
           ),
         );

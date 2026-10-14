@@ -33,9 +33,7 @@ void main() {
 
   group('Listings', () {
     group('fetchListings', () {
-      test(
-          'retries 10 times and returns empty listings when status code is not 200 and we have no listings cached',
-          () async {
+      test('retries 10 times and returns empty listings when status code is not 200 and we have no listings cached', () async {
         final invalidResponse = {};
 
         when(
@@ -45,8 +43,7 @@ void main() {
         final result = await fetchExistingListings(mockClient);
 
         expect(result, []);
-        verify(mockClient.get(any, headers: anyNamed('headers')))
-            .called(equals(10));
+        verify(mockClient.get(any, headers: anyNamed('headers'))).called(equals(10));
       });
 
       test('returns a list of listings when response is valid', () async {
@@ -294,8 +291,7 @@ void main() {
         expect(result.first['id'], '1');
       });
 
-      test('handles explicit null cells by converting them to empty strings',
-          () async {
+      test('handles explicit null cells by converting them to empty strings', () async {
         final mockResponse = {
           "values": [
             [
@@ -373,8 +369,7 @@ void main() {
     });
 
     group('fetchExistingListings', () {
-      test('returns listings from fetchListings if no existing listings',
-          () async {
+      test('returns listings from fetchListings if no existing listings', () async {
         listings = [];
 
         final mockResponse = {
@@ -491,9 +486,7 @@ void main() {
         expect(result.first["title"], "Glazed and Confused");
       });
 
-      test(
-          'retains cached listings data when app is restarted with API failure',
-          () async {
+      test('retains cached listings data when app is restarted with API failure', () async {
         SharedPreferences.setMockInitialValues({});
         // Simulate first app launch: successfully fetch listings from API
         final initialMockResponse = {
@@ -620,8 +613,7 @@ void main() {
         verify(mockClient.get(any, headers: anyNamed('headers'))).called(2);
       });
 
-      test('does not replace cached listings with an empty successful response',
-          () async {
+      test('does not replace cached listings with an empty successful response', () async {
         final cachedListings = [
           {'id': '1', 'title': 'Cached listing'},
         ];
@@ -644,9 +636,7 @@ void main() {
         expect(stillCached, cachedListings);
       });
 
-      test(
-          'fetchExistingListings with empty cache returns empty list on API failure',
-          () async {
+      test('fetchExistingListings with empty cache returns empty list on API failure', () async {
         // Simulate fresh app install with API down
         SharedPreferences.setMockInitialValues({});
         listings = [];
@@ -658,8 +648,7 @@ void main() {
         final result = await fetchExistingListings(mockClient);
 
         expect(result, []);
-        verify(mockClient.get(any, headers: anyNamed('headers')))
-            .called(equals(10)); // Verifies retries happened
+        verify(mockClient.get(any, headers: anyNamed('headers'))).called(equals(10)); // Verifies retries happened
       });
     });
   });

@@ -11,7 +11,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 class ChooserPage extends StatefulWidget {
-
   final AnalyticsService analyticsService;
   const ChooserPage({
     required this.theEvents,
@@ -33,12 +32,9 @@ class ChooserPage extends StatefulWidget {
 
   @override
   State<ChooserPage> createState() => _ChooserPageState();
-
 }
 
-
 class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin {
-
   AnimationController? _animationController;
   AnimationController? _initialEntranceController;
   AnimationController? _secondPhaseController;
@@ -60,12 +56,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
   bool _initialEntranceStarted = false;
   bool _initialEntranceComplete = false;
 
-
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(vsync: this, duration: const Duration(seconds: _idleAnimationPeriod))
-      ..addListener(_updatePaintPhase);
+    _animationController = AnimationController(vsync: this, duration: const Duration(seconds: _idleAnimationPeriod))..addListener(_updatePaintPhase);
     _initialEntranceController = AnimationController(vsync: this, duration: const Duration(seconds: _entranceAnimationPeriod))
       ..addListener(_updateEntranceProgress)
       ..addStatusListener(_entranceStatusChanged);
@@ -79,22 +73,27 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
       _entranceProgress.value = 1.0;
       _secondPhaseProgress.value = 1.0;
     }
-}
-
+  }
 
   @override
   void dispose() {
     staticChooserPage.removeListener(_staticChooserPageChanged);
-    _animationController?..removeListener(_updatePaintPhase)..dispose();
-    _initialEntranceController?..removeListener(_updateEntranceProgress)..removeStatusListener(_entranceStatusChanged)..dispose();
-    _secondPhaseController?..removeListener(_updateSecondPhaseProgress)..dispose();
+    _animationController
+      ?..removeListener(_updatePaintPhase)
+      ..dispose();
+    _initialEntranceController
+      ?..removeListener(_updateEntranceProgress)
+      ..removeStatusListener(_entranceStatusChanged)
+      ..dispose();
+    _secondPhaseController
+      ?..removeListener(_updateSecondPhaseProgress)
+      ..dispose();
     _paintPhase.dispose();
     _entranceProgress.dispose();
     _secondPhaseProgress.dispose();
     _idleTimer?.cancel();
     super.dispose();
   }
-
 
   @override
   void didUpdateWidget(covariant ChooserPage oldWidget) {
@@ -106,14 +105,15 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     }
   }
 
-
   void _staticChooserPageChanged() {
     if (!mounted) return;
     if (staticChooserPage.value) {
       _idleTimer?.cancel();
       _animationController?.stop(canceled: false);
       _initialEntranceController?.stop(canceled: false);
-      setState(() { _initialEntranceComplete = true; });
+      setState(() {
+        _initialEntranceComplete = true;
+      });
       _entranceProgress.value = 1.0;
       _secondPhaseProgress.value = 1.0;
       _paintPhase.value = 0.0;
@@ -131,14 +131,13 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     }
   }
 
-
-  void _updatePaintPhase() { // optimise by only animating fixed number of steps, rather than every frame
+  void _updatePaintPhase() {
+    // optimise by only animating fixed number of steps, rather than every frame
     final step = (_animationController!.value * _idleAnimationSteps).floor();
     if (step == _lastPaintStep) return;
     _lastPaintStep = step;
     _paintPhase.value = step / _idleAnimationSteps;
   }
-
 
   void _updateEntranceProgress() {
     final step = (_initialEntranceController!.value * _entranceAnimationSteps).floor();
@@ -153,44 +152,46 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
 
   void _entranceStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.completed && mounted) {
-      setState(() { _initialEntranceComplete = true; });
+      setState(() {
+        _initialEntranceComplete = true;
+      });
       _secondPhaseController?.forward(from: 0.0);
     }
   }
-
 
   void _pauseAnimationOnPointerDown(PointerDownEvent event) {
     _animationController?.stop(canceled: false);
     if (!staticChooserPage.value) _restartAnimationTimer();
   }
 
-
   void _restartAnimationTimer() {
     _idleTimer?.cancel();
-    _idleTimer = Timer(const Duration(seconds: _restartIdleAnimationPeriod), () 
-      {
+    _idleTimer = Timer(
+      const Duration(seconds: _restartIdleAnimationPeriod),
+      () {
         if (!mounted) return;
-        setState(() { _chosenHotspotID = null; });
+        setState(() {
+          _chosenHotspotID = null;
+        });
         _animationController?.repeat();
       },
     );
   }
 
-
   void _selectHotspot(int index) {
     _idleTimer?.cancel();
-    setState(() { _chosenHotspotID = index; });
+    setState(() {
+      _chosenHotspotID = index;
+    });
     _animationController?.stop(canceled: false);
     hotspots[index].theTap();
   }
-
 
   Future<void> _createHotspots(
     double maxWidth,
     double maxHeight,
     double devicePixelRatio,
   ) async {
-
     hotspots = [
       Hotspot(
         label: 'Food &\nDrink',
@@ -315,14 +316,11 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         _animationController?.repeat();
       }
     });
-
   }
-
 
   Future<ui.Image> _resolveImage(
     ImageProvider provider,
   ) {
-
     final completer = Completer<ui.Image>();
     final stream = provider.resolve(const ImageConfiguration());
     late final ImageStreamListener listener;
@@ -343,13 +341,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     );
     stream.addListener(listener);
     return completer.future.whenComplete(() => stream.removeListener(listener));
-
   }
-
 
   @override
   Widget build(BuildContext context) {
-
     final colourScheme = Theme.of(context).colorScheme;
     final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
 
@@ -394,14 +389,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         );
       },
     );
-
   }
-
 }
 
-
 class _ChooserContent extends StatelessWidget {
-
   const _ChooserContent({
     required this.hotspots,
     required this.paintPhase,
@@ -430,10 +421,10 @@ class _ChooserContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final visibleCount = min(3, hotspots.length);
 
-    return Stack(fit: StackFit.expand,
+    return Stack(
+      fit: StackFit.expand,
       children: [
         const RepaintBoundary(child: _ChooserBackground()),
         for (int index = 0; index < hotspots.length; index++)
@@ -450,7 +441,10 @@ class _ChooserContent extends StatelessWidget {
             colourScheme: colourScheme,
             onTap: () => onHotspotTap(index),
           ),
-        Positioned(top: 20, left: 0, right: 0,
+        Positioned(
+          top: 20,
+          left: 0,
+          right: 0,
           child: Align(
             alignment: Alignment.center,
             child: GestureDetector(
@@ -464,14 +458,10 @@ class _ChooserContent extends StatelessWidget {
         ),
       ],
     );
-
   }
-
 }
 
-
 class _ChooserBackground extends StatelessWidget {
-
   const _ChooserBackground();
 
   @override
@@ -489,12 +479,9 @@ class _ChooserBackground extends StatelessWidget {
       ],
     );
   }
-
 }
 
-
 class _ChooserLogo extends StatelessWidget {
-
   const _ChooserLogo();
 
   @override
@@ -511,12 +498,9 @@ class _ChooserLogo extends StatelessWidget {
       ),
     );
   }
-
 }
 
-
 class _AnimatedHotspot extends StatelessWidget {
-
   const _AnimatedHotspot({
     required this.hotspot,
     required this.index,
@@ -565,12 +549,9 @@ class _AnimatedHotspot extends StatelessWidget {
       ),
     );
   }
-
 }
 
-
 class _HotspotLayers extends StatelessWidget {
-
   const _HotspotLayers({
     required this.hotspot,
     required this.index,
@@ -654,12 +635,9 @@ class _HotspotLayers extends StatelessWidget {
       },
     );
   }
-
 }
 
-
 class _AnimatedOpacityLayer extends StatelessWidget {
-
   const _AnimatedOpacityLayer({
     required this.opacity,
     required this.child,
@@ -674,12 +652,9 @@ class _AnimatedOpacityLayer extends StatelessWidget {
     if (opacity >= 1.0) return child; // for efficiency
     return Opacity(opacity: opacity, child: child);
   }
-
 }
 
-
 class _CachedShadowedImage extends StatelessWidget {
-
   const _CachedShadowedImage({
     required this.hotspot,
   });
@@ -703,12 +678,9 @@ class _CachedShadowedImage extends StatelessWidget {
       ),
     );
   }
-
 }
 
-
 class _CachedNormalImage extends StatelessWidget {
-
   const _CachedNormalImage({
     required this.hotspot,
   });
@@ -726,12 +698,9 @@ class _CachedNormalImage extends StatelessWidget {
       ),
     );
   }
-
 }
 
-
 class _CachedLabel extends StatelessWidget {
-  
   const _CachedLabel({
     required this.hotspot,
     required this.colourScheme,
@@ -743,43 +712,50 @@ class _CachedLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final maxFontSize = (MediaQuery.of(context).size.width > 400) ? 27.0 : 22.0;
-    return Stack(children: [ // single-item stack since it's a child of Opacity()
-      Positioned(
-        left: hotspot.labelLeftOffset,
-        width: hotspot.size!.width - hotspot.labelLeftOffset - hotspot.labelRightOffset,
-        top: hotspot.labelTopOffset,
-        height: hotspot.size!.height - hotspot.labelTopOffset,
-        child: Container(
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+    return Stack(
+      children: [
+        // single-item stack since it's a child of Opacity()
+        Positioned(
+          left: hotspot.labelLeftOffset,
           width: hotspot.size!.width - hotspot.labelLeftOffset - hotspot.labelRightOffset,
-          child: RepaintBoundary(
-            child: FittedBox(fit: BoxFit.scaleDown, child: Text(
-              hotspot.label,
-              textAlign: TextAlign.center,
-              softWrap: false,
-              style: TextStyle(fontSize: maxFontSize, fontWeight: FontWeight.bold, color: Colors.white, height: 0.9,
-                shadows: [
-                  const Shadow(blurRadius: 4, color: Colors.black),
-                  Shadow(blurRadius: 16, color: colourScheme.primary),
-                ],
+          top: hotspot.labelTopOffset,
+          height: hotspot.size!.height - hotspot.labelTopOffset,
+          child: Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            width: hotspot.size!.width - hotspot.labelLeftOffset - hotspot.labelRightOffset,
+            child: RepaintBoundary(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  hotspot.label,
+                  textAlign: TextAlign.center,
+                  softWrap: false,
+                  style: TextStyle(
+                    fontSize: maxFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 0.9,
+                    shadows: [
+                      const Shadow(blurRadius: 4, color: Colors.black),
+                      Shadow(blurRadius: 16, color: colourScheme.primary),
+                    ],
+                  ),
+                ),
               ),
-            ),),
+            ),
           ),
         ),
-      ),
-    ],);
+      ],
+    );
   }
-
 }
-
 
 double hotspotEntranceOpacityForIndex(
   int index,
   double progress, {
   required int totalHotspots,
 }) {
-
   if (totalHotspots <= 0) return 1.0;
   if (progress <= 0.0) return 0.0;
   final revealStart = 0.1 + ((index / totalHotspots) * 0.8);
@@ -788,24 +764,19 @@ double hotspotEntranceOpacityForIndex(
   if (progress >= revealEnd) return 1.0;
   final localProgress = (progress - revealStart) / (revealEnd - revealStart);
   return localProgress.clamp(0.0, 1.0);
-
 }
-
 
 double hotspotLabelOpacityForPhase(
   int index,
   double progress, {
   required int visibleCount,
 }) {
-
   if (visibleCount <= 1) return 1.0;
   final slot = index % visibleCount;
   final normalized = (progress + (slot / visibleCount)) % 1.0;
   final wave = 0.5 + (0.5 * cos(2 * pi * normalized));
   return 0.3 + (0.7 * wave.clamp(0.0, 1.0));
-
 }
-
 
 class Hotspot {
   Hotspot({
