@@ -329,8 +329,11 @@ void main() {
       final originalListings = [...listings];
       addTearDown(() => listings = originalListings);
       listings = sharedLocationListings;
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {})),
+      await tester.pumpWidget(Provider<AnalyticsService>.value(
+        value: FakeAnalyticsService(),
+        child: MaterialApp(
+          home: Scaffold(body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {})),
+        ),
       ));
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.search));
@@ -524,9 +527,12 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: MapPage(listings: listings, onTabSelected: (_) {}),
+      await tester.pumpWidget(Provider<AnalyticsService>.value(
+        value: FakeAnalyticsService(),
+        child: MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
+          ),
         ),
       ));
       await tester.pumpAndSettle();
