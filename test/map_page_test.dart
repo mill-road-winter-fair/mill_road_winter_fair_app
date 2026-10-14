@@ -140,9 +140,11 @@ void main() {
         addTearDown(tester.view.resetViewPadding);
         addTearDown(tester.view.resetPadding);
 
-        await tester.pumpWidget(MaterialApp(
-          home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
-        ));
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
+        );
         await tester.pumpAndSettle();
         await tester.tap(find.byTooltip('Search the map'));
         await tester.pumpAndSettle();
@@ -176,9 +178,13 @@ void main() {
         themeNotifier.value = previousTheme;
         tester.platformDispatcher.clearPlatformBrightnessTestValue();
       });
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       state.addSimpleMarker('Service-FirstAid', const LatLng(52.2, 0.14));
@@ -188,8 +194,11 @@ void main() {
       state.hideAllMarkers();
       final before = Map<MarkerId, Marker>.of(state.markers);
       final types = {
-        '1': 'Group-Food', '3': 'Food', aSimpleMarkerId: 'Service-FirstAid',
-        'mixed': 'Mixed', 'performance': 'Group-PerformanceEvent',
+        '1': 'Group-Food',
+        '3': 'Food',
+        aSimpleMarkerId: 'Service-FirstAid',
+        'mixed': 'Mixed',
+        'performance': 'Group-PerformanceEvent',
       };
       for (final theme in ['dark', '2024', 'highContrast', 'colourBlindFriendly', 'light']) {
         selectedThemeKey = theme;
@@ -210,8 +219,10 @@ void main() {
       for (final brightness in [Brightness.dark, Brightness.light]) {
         tester.platformDispatcher.platformBrightnessTestValue = brightness;
         await tester.pumpAndSettle();
-        expect(state.markers[const MarkerId('3')]!.icon.toJson(),
-          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson());
+        expect(
+          state.markers[const MarkerId('3')]!.icon.toJson(),
+          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson(),
+        );
       }
       // A queued refresh must not call setState after the map has been removed.
       selectedThemeKey = 'dark';
@@ -228,29 +239,31 @@ void main() {
       currentLatLng = const LatLng(52.2, 0.14);
       int? nearestMarkerCount;
 
-      await tester.pumpWidget(MaterialApp(
-        home: StatefulBuilder(
-          builder: (context, setState) => Scaffold(
-            body: Column(
-              children: [
-                TextButton(
-                  onPressed: () => setState(() => nearestMarkerCount = 10),
-                  child: const Text('Show nearby'),
-                ),
-                Expanded(
-                  child: MapPage(
-                    listings: listings,
-                    nearestMarkerCount: nearestMarkerCount,
-                    cancelMapNearest: () => setState(() => nearestMarkerCount = null),
-                    onTabSelected: (_) {},
-                    analyticsService: FakeAnalyticsService(),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) => Scaffold(
+              body: Column(
+                children: [
+                  TextButton(
+                    onPressed: () => setState(() => nearestMarkerCount = 10),
+                    child: const Text('Show nearby'),
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: MapPage(
+                      listings: listings,
+                      nearestMarkerCount: nearestMarkerCount,
+                      cancelMapNearest: () => setState(() => nearestMarkerCount = null),
+                      onTabSelected: (_) {},
+                      analyticsService: FakeAnalyticsService(),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
       tester.state<MapPageState>(find.byType(MapPage)).hideAllMarkers();
       await tester.pump();
@@ -352,9 +365,13 @@ void main() {
       final originalListings = [...listings];
       addTearDown(() => listings = originalListings);
       listings = sharedLocationListings;
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
@@ -363,14 +380,19 @@ void main() {
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       expect(state.markers.length, 2);
-      expect(state.markers.values.map((m) => m.position).toSet().length, 2,
-          reason: 'Two matching markers at the same lat/lng should be visually offset to avoid overlap.');
+      expect(
+        state.markers.values.map((m) => m.position).toSet().length,
+        2,
+        reason: 'Two matching markers at the same lat/lng should be visually offset to avoid overlap.',
+      );
     });
 
     testWidgets('cancelNavigation restores markers matching any selected category', (tester) async {
       final originalListings = listings;
       addTearDown(() => listings = originalListings);
-      listings = [{...originalListings[2], 'business': 'TRUE'}];
+      listings = [
+        {...originalListings[2], 'business': 'TRUE'},
+      ];
 
       await tester.pumpWidget(
         MaterialApp(
@@ -410,15 +432,16 @@ void main() {
         return true;
       });
       addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null));
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
-      Set<String> visibleIds() => state.markers.values
-          .where((marker) => marker.visible)
-          .map((marker) => marker.markerId.value)
-          .toSet();
+      Set<String> visibleIds() => state.markers.values.where((marker) => marker.visible).map((marker) => marker.markerId.value).toSet();
       expect(visibleIds(), {'1', '3'});
 
       await tester.tap(find.byIcon(Icons.search));
@@ -512,18 +535,17 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
 
       final state = tester.state<MapPageState>(find.byType(MapPage));
-      Set<String> visibleIds() => state.markers.values
-          .where((marker) => marker.visible)
-          .map((marker) => marker.markerId.value)
-          .toSet();
+      Set<String> visibleIds() => state.markers.values.where((marker) => marker.visible).map((marker) => marker.markerId.value).toSet();
       state.filterSettings['Food'] = false;
       state.showFilteredMarkers();
       expect(visibleIds(), {'4'});
@@ -697,9 +719,11 @@ void main() {
       // The dialog has a title "Road closures" and specific body text.
       expect(find.byType(Dialog), findsOneWidget);
       expect(
-          find.text(
-              'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
-          findsOneWidget);
+        find.text(
+          'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',
+        ),
+        findsOneWidget,
+      );
 
       // Verify "Close" button exists to dismiss the dialog
       expect(find.text('Close'), findsOneWidget);
@@ -1066,7 +1090,7 @@ void main() {
           'imageURL': '',
           "startTime": "10:30",
           "endTime": "16:30",
-        }
+        },
       ];
 
       // Build the MapPage widget
@@ -1278,7 +1302,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Build the MapPage widget
@@ -1325,7 +1349,7 @@ void main() {
                         preferredMapOrientation = (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
                       });
                     },
-                  )
+                  ),
                 ],
               );
             },

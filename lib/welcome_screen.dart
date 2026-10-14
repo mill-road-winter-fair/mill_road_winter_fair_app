@@ -132,26 +132,26 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       pageColor: colourScheme.secondary.withValues(alpha: 0.8),
     );
     Widget guideRow(Widget icon, Widget content) => Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(width: 40, child: Center(child: icon)),
-              const SizedBox(width: 8),
-              Expanded(child: content),
-            ],
-          ),
-        );
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(width: 40, child: Center(child: icon)),
+          const SizedBox(width: 8),
+          Expanded(child: content),
+        ],
+      ),
+    );
 
     Widget tip(IconData icon, String text) => guideRow(
-          Icon(icon, size: 40, color: colourScheme.onSecondary),
-          Text(text, style: bodyStyle),
-        );
+      Icon(icon, size: 40, color: colourScheme.onSecondary),
+      Text(text, style: bodyStyle),
+    );
 
     Widget category(String key, String colourKey) => guideRow(
-          Icon(subfilterCategoryLabels[key]!.iconData, size: 40, color: getCategoryColor(selectedThemeKey, colourKey)),
-          Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
-        );
+      Icon(subfilterCategoryLabels[key]!.iconData, size: 40, color: getCategoryColor(selectedThemeKey, colourKey)),
+      Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
+    );
 
     PageViewModel guidePage(String title, List<Widget> children) {
       // The original non-scrolling page gives its body unbounded height. Reserve
@@ -163,13 +163,14 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       )..layout();
       final titleWidth = MediaQuery.sizeOf(context).width - pageDecoration.contentMargin.horizontal;
       final titleScale = (titleWidth / titlePainter.width).clamp(0.0, 1.0);
-      final bodyHeight = (MediaQuery.sizeOf(context).height -
-              MediaQuery.paddingOf(context).vertical -
-              pageDecoration.safeArea -
-              pageDecoration.titlePadding.vertical -
-              pageDecoration.bodyPadding!.vertical -
-              titlePainter.height * titleScale)
-          .clamp(0.0, double.infinity);
+      final bodyHeight =
+          (MediaQuery.sizeOf(context).height -
+                  MediaQuery.paddingOf(context).vertical -
+                  pageDecoration.safeArea -
+                  pageDecoration.titlePadding.vertical -
+                  pageDecoration.bodyPadding!.vertical -
+                  titlePainter.height * titleScale)
+              .clamp(0.0, double.infinity);
       titlePainter.dispose();
       return PageViewModel(
         useScrollView: false,
@@ -203,30 +204,37 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
 
     final pages = [
       guidePage('Welcome to the official\nMill Road Winter Fair app!', [
-        tip(Icons.home,
-            'Using our new homepage, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
+        tip(
+          Icons.home,
+          'Using our new homepage, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.',
+        ),
         tip(Icons.music_note, 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
-        tip(Icons.map,
-            'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and Favourites you\'ve saved.'),
-        tip(Icons.menu,
-            'Use the menu in the top-right for important information, settings and to share this app. You can read this App Guide again there too.'),
+        tip(
+          Icons.map,
+          'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and Favourites you\'ve saved.',
+        ),
+        tip(
+          Icons.menu,
+          'Use the menu in the top-right for important information, settings and to share this app. You can read this App Guide again there too.',
+        ),
       ]),
       guidePage('What do the map pins mean?', [
         for (final key in subfilterCategoryLabels.keys)
           category(
-              key,
-              const {
-                'food': 'Food',
-                'shopping': 'Shopping',
-                'charityCommunityInfo': 'Charity/Community/Info',
-                'performanceMusic': 'Music',
-                'performanceChildrens': 'Childrens',
-                'performanceDance': 'Dance',
-                'performanceOther': 'Other',
-                'visitExperience': 'Visit/Experience',
-                'business': 'Business',
-                'service': 'Service',
-              }[key]!),
+            key,
+            const {
+              'food': 'Food',
+              'shopping': 'Shopping',
+              'charityCommunityInfo': 'Charity/Community/Info',
+              'performanceMusic': 'Music',
+              'performanceChildrens': 'Childrens',
+              'performanceDance': 'Dance',
+              'performanceOther': 'Other',
+              'visitExperience': 'Visit/Experience',
+              'business': 'Business',
+              'service': 'Service',
+            }[key]!,
+          ),
         guideRow(
           Image.asset('assets/mapMarkers/mixedMarker.png', height: 40, width: 40, color: getCategoryColor(selectedThemeKey, 'Mixed')),
           Text('A mix of any of these categories', style: bodyStyle),
@@ -266,7 +274,8 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         guideRow(
           Icon(Icons.report, size: 40, color: colourScheme.onSecondary),
           Text.rich(
-              TextSpan(children: [
+            TextSpan(
+              children: [
                 const TextSpan(text: 'Please read the '),
                 TextSpan(
                   text: 'important information',
@@ -279,13 +288,16 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     },
                 ),
                 const TextSpan(text: ' about the Fair and its facilities.'),
-              ]),
-              style: bodyStyle),
+              ],
+            ),
+            style: bodyStyle,
+          ),
         ),
         guideRow(
           Icon(Icons.diversity_1, size: 40, color: colourScheme.onSecondary),
           Text.rich(
-              TextSpan(children: [
+            TextSpan(
+              children: [
                 const TextSpan(text: 'The Fair is run entirely by volunteers. To get involved, visit our '),
                 TextSpan(
                   text: 'website',
@@ -298,13 +310,16 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     },
                 ),
                 const TextSpan(text: '.'),
-              ]),
-              style: bodyStyle),
+              ],
+            ),
+            style: bodyStyle,
+          ),
         ),
         guideRow(
           Icon(Icons.feedback, size: 40, color: colourScheme.onSecondary),
           Text.rich(
-              TextSpan(children: [
+            TextSpan(
+              children: [
                 const TextSpan(text: 'We’d love to hear your feedback about the app. Just fill in '),
                 TextSpan(
                   text: 'this form',
@@ -317,8 +332,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     },
                 ),
                 const TextSpan(text: '.'),
-              ]),
-              style: bodyStyle),
+              ],
+            ),
+            style: bodyStyle,
+          ),
         ),
       ]),
     ];
@@ -327,107 +344,119 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     const controlsPadding = kIsWeb ? EdgeInsets.all(12.0) : EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0);
     const buttonFlex = 1;
     const dotsFlex = 2;
-    return LayoutBuilder(builder: (context, constraints) {
-      final controlsWidth = (constraints.maxWidth - controlsMargin.horizontal - controlsPadding.horizontal).clamp(0.0, double.infinity);
-      final dotsWidth = controlsWidth * dotsFlex / (buttonFlex * 2 + dotsFlex);
-      final dotShapesWidth = (pages.length - 1) * 12.0 + 20.0;
-      final dotSpacing = ((dotsWidth - dotShapesWidth) / (pages.length * 2)).clamp(0.0, 6.0);
-      // Keep the larger dots; reduce their gaps first. Scale only if even the
-      // dot shapes alone cannot fit in an exceptionally narrow viewport.
-      final dotScale = (dotsWidth / dotShapesWidth).clamp(0.0, 1.0);
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/welcomeScreen/chooserPage_background.jpg',
-            fit: BoxFit.cover,
-            excludeFromSemantics: true,
-          ),
-          IntroductionScreen(
-            key: introKey,
-            safeAreaList: [false, false, false, Platform.isAndroid && isNavBarVisible(context)],
-            autoScrollDuration: onTest ? null : 150000,
-            infiniteAutoScroll: onTest ? false : true,
-            globalBackgroundColor: Colors.transparent,
-            allowImplicitScrolling: true,
-            globalFooter: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text('Take me straight to the app!',
-                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final controlsWidth = (constraints.maxWidth - controlsMargin.horizontal - controlsPadding.horizontal).clamp(0.0, double.infinity);
+        final dotsWidth = controlsWidth * dotsFlex / (buttonFlex * 2 + dotsFlex);
+        final dotShapesWidth = (pages.length - 1) * 12.0 + 20.0;
+        final dotSpacing = ((dotsWidth - dotShapesWidth) / (pages.length * 2)).clamp(0.0, 6.0);
+        // Keep the larger dots; reduce their gaps first. Scale only if even the
+        // dot shapes alone cannot fit in an exceptionally narrow viewport.
+        final dotScale = (dotsWidth / dotShapesWidth).clamp(0.0, 1.0);
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              'assets/welcomeScreen/chooserPage_background.jpg',
+              fit: BoxFit.cover,
+              excludeFromSemantics: true,
+            ),
+            IntroductionScreen(
+              key: introKey,
+              safeAreaList: [false, false, false, Platform.isAndroid && isNavBarVisible(context)],
+              autoScrollDuration: onTest ? null : 150000,
+              infiniteAutoScroll: onTest ? false : true,
+              globalBackgroundColor: Colors.transparent,
+              allowImplicitScrolling: true,
+              globalFooter: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Take me straight to the app!',
+                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary),
+                      ),
+                    ),
+                    onPressed: () {
+                      HapticFeedback.heavyImpact();
+                      widget.analyticsService.logButtonTapped('skip_WelcomeScreen');
+                      _onIntroEnd(context);
+                    },
                   ),
-                  onPressed: () {
-                    HapticFeedback.heavyImpact();
-                    widget.analyticsService.logButtonTapped('skip_WelcomeScreen');
-                    _onIntroEnd(context);
-                  },
+                ),
+              ),
+              pages: pages,
+              onDone: () {
+                HapticFeedback.lightImpact();
+                widget.analyticsService.logButtonTapped('done_WelcomeScreen');
+                _onIntroEnd(context);
+              },
+              onSkip: () {
+                HapticFeedback.lightImpact();
+                widget.analyticsService.logButtonTapped('skip_text_WelcomeScreen');
+                _onIntroEnd(context);
+              },
+              showSkipButton: true,
+              skipOrBackFlex: buttonFlex,
+              dotsFlex: dotsFlex,
+              nextFlex: buttonFlex,
+              showBackButton: false,
+              back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
+              skip: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'Skip',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary),
+                ),
+              ),
+              overrideNext: (context, onPressed) => Tooltip(
+                message: 'Next page',
+                excludeFromSemantics: true,
+                child: TextButton(
+                  onPressed: onPressed == null
+                      ? null
+                      : () {
+                          HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('next_WelcomeScreen');
+                          onPressed();
+                        },
+                  child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
+                ),
+              ),
+              done: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'Done',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary),
+                ),
+              ),
+              curve: Curves.fastLinearToSlowEaseIn,
+              controlsMargin: controlsMargin,
+              controlsPadding: controlsPadding,
+              dotsDecorator: DotsDecorator(
+                size: Size(12.0 * dotScale, 12.0 * dotScale),
+                spacing: EdgeInsets.symmetric(horizontal: dotSpacing),
+                color: const Color(0xFFBDBDBD),
+                activeSize: Size(20.0 * dotScale, 10.0 * dotScale),
+                activeShape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                ),
+              ),
+              dotsContainerDecorator: const ShapeDecoration(
+                color: Colors.black87,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 ),
               ),
             ),
-            pages: pages,
-            onDone: () {
-              HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('done_WelcomeScreen');
-              _onIntroEnd(context);
-            },
-            onSkip: () {
-              HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('skip_text_WelcomeScreen');
-              _onIntroEnd(context);
-            },
-            showSkipButton: true,
-            skipOrBackFlex: buttonFlex,
-            dotsFlex: dotsFlex,
-            nextFlex: buttonFlex,
-            showBackButton: false,
-            back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
-            skip: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
-            overrideNext: (context, onPressed) => Tooltip(
-              message: 'Next page',
-              excludeFromSemantics: true,
-              child: TextButton(
-                onPressed: onPressed == null
-                    ? null
-                    : () {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('next_WelcomeScreen');
-                        onPressed();
-                      },
-                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
-              ),
-            ),
-            done: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
-            curve: Curves.fastLinearToSlowEaseIn,
-            controlsMargin: controlsMargin,
-            controlsPadding: controlsPadding,
-            dotsDecorator: DotsDecorator(
-              size: Size(12.0 * dotScale, 12.0 * dotScale),
-              spacing: EdgeInsets.symmetric(horizontal: dotSpacing),
-              color: Color(0xFFBDBDBD),
-              activeSize: Size(20.0 * dotScale, 10.0 * dotScale),
-              activeShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-              ),
-            ),
-            dotsContainerDecorator: const ShapeDecoration(
-              color: Colors.black87,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              ),
-            ),
-          ),
-        ],
-      );
-    });
+          ],
+        );
+      },
+    );
   }
 }

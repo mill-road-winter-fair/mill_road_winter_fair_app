@@ -74,13 +74,15 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
-      await tester.pumpWithClock(MyApp(
-        firstExecution: false,
-        analyticsService: FakeAnalyticsService(),
-      ));
+      await tester.pumpWithClock(
+        MyApp(
+          firstExecution: false,
+          analyticsService: FakeAnalyticsService(),
+        ),
+      );
       await settle(tester);
 
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
@@ -120,15 +122,18 @@ void main() {
     });
 
     testWidgets('Contact us in the drawer opens and closes the contact dialog', (WidgetTester tester) async {
-      await tester.pumpWithClock(MaterialApp(
+      await tester.pumpWithClock(
+        MaterialApp(
           home: ChooserPage(
-        analyticsService: FakeAnalyticsService(),
-        theEvents: [],
-        onOpenTimetable: (bool p1, bool? p2) {},
-        onOpenListings: (String p1, String? p2) {},
-        onOpenMap: (int? p1) {},
-        onTabSelected: (int value) {},
-      )));
+            analyticsService: FakeAnalyticsService(),
+            theEvents: [],
+            onOpenTimetable: (bool p1, bool? p2) {},
+            onOpenListings: (String p1, String? p2) {},
+            onOpenMap: (int? p1) {},
+            onTabSelected: (int value) {},
+          ),
+        ),
+      );
 
       await tester.tap(find.byIcon(Icons.menu));
       await settle(tester);

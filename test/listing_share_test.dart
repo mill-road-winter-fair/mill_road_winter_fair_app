@@ -5,13 +5,7 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 void main() {
   group('buildListingShareText', () {
     test('uses cancellation wording for a cancelled listing', () {
-      final message = buildListingShareText(
-        'Glazed and Confused',
-        'Gwydir St Car Park',
-        '10:30',
-        '16:30',
-        cancelled: true,
-      );
+      final message = buildListingShareText('Glazed and Confused', 'Gwydir St Car Park', '10:30', '16:30', cancelled: true);
 
       expect(
         message,
@@ -22,14 +16,7 @@ void main() {
     });
 
     test('retains attendance wording for an active listing', () {
-      final message = buildListingShareText(
-        'Glazed and Confused',
-        'Gwydir St Car Park',
-        '10:30',
-        '11:30',
-        cancelled: false,
-        currentTime: DateTime(2026, 12, 5, 9),
-      );
+      final message = buildListingShareText('Glazed and Confused', 'Gwydir St Car Park', '10:30', '11:30', cancelled: false, currentTime: DateTime(2026, 12, 5, 9));
 
       expect(message, startsWith('At 10:30 I’ll be at Glazed and Confused at Gwydir St Car Park'));
       expect(message, isNot(contains('cancelled')));

@@ -11,18 +11,22 @@ void main() {
       onTest = true;
       addTearDown(() => FToast().removeQueuedCustomToasts());
 
-      await tester.pumpWidget(MaterialApp(
-        home: Builder(builder: (context) => FairScaffold(
-          appBarTitle: 'Timetable',
-          currentTab: 2,
-          onTabSelected: (_) {},
-          analyticsService: FakeAnalyticsService(),
-          body: TextButton(
-            onPressed: () => showInfoToast(context, 'Showing only music performances'),
-            child: const Text('Change filter'),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => FairScaffold(
+              appBarTitle: 'Timetable',
+              currentTab: 2,
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
+              body: TextButton(
+                onPressed: () => showInfoToast(context, 'Showing only music performances'),
+                child: const Text('Change filter'),
+              ),
+            ),
           ),
-        )),
-      ));
+        ),
+      );
       await tester.tap(find.text('Change filter'));
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Showing only music performances'), findsOneWidget);

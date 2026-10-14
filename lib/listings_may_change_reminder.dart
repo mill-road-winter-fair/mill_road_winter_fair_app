@@ -17,8 +17,8 @@ class ListingUpdateNotifier {
     final noticeName = DateUtils.isSameDay(fairDate, now)
         ? 'fair_day'
         : now.isAfter(fairDate)
-            ? 'after_fair'
-            : 'before_fair';
+        ? 'after_fair'
+        : 'before_fair';
 
     return '${_lastShownKey}_${fairDate.year}_$noticeName';
   }

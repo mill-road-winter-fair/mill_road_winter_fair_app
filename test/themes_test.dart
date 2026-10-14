@@ -69,7 +69,7 @@ void main() {
         'Service-Information',
         'Service-FirstAid',
         'Service-Toilet',
-        'Service'
+        'Service',
       ];
       for (final t in types) {
         final m = await getColoredMarker(t, Colors.blue);

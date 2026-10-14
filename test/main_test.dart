@@ -97,7 +97,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -144,7 +144,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -185,7 +185,8 @@ void main() {
               appBarTitle: 'Test',
               body: const SizedBox(),
               currentTab: 0,
-              onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
             ),
           ),
         );
@@ -299,7 +300,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -348,7 +349,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -397,7 +398,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -450,7 +451,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -504,7 +505,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -555,7 +556,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -590,7 +591,10 @@ void main() {
       await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())));
 
       // show the dialog
-      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context, analyticsService: FakeAnalyticsService()));
+      showDialog(
+        context: tester.element(find.byType(SizedBox)),
+        builder: (context) => contactUsDialog(context, analyticsService: FakeAnalyticsService()),
+      );
       await tester.pumpAndSettle();
 
       // Check for some known email addresses
@@ -646,7 +650,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Provide initial mock values for shared preferences
