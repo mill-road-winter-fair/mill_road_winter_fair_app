@@ -2510,10 +2510,10 @@ class _NavigationBottomRowState extends State<NavigationBottomRow> {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      minimum: const EdgeInsets.all(12),
+      minimum: const EdgeInsets.fromLTRB(12, 12, 12, 30),
       child: LayoutBuilder(builder: (context, constraints) {
         final hasDestination = widget.destinationCard != null;
-        final compactWidth = 24.0 + (hasDestination ? 48 : 0) +
+        final compactWidth = 24.0 + (hasDestination ? 40 : 0) +
             (hasDestination && widget.distance != null ? 12 : 0) +
             (widget.distance != null ? 120 : 0);
         return Align(
@@ -2541,7 +2541,7 @@ class _NavigationBottomRowState extends State<NavigationBottomRow> {
                       if (hasDestination)
                         Expanded(
                           child: _expanded ? widget.destinationCard! : SizedBox.square(
-                            dimension: 48,
+                            dimension: 40,
                             child: Material(
                               shape: const CircleBorder(),
                               elevation: 3,
@@ -2568,24 +2568,39 @@ class _NavigationBottomRowState extends State<NavigationBottomRow> {
                       if (hasDestination && (widget.distance != null || _expanded)) const SizedBox(width: 12),
                       if (widget.distance != null || (hasDestination && _expanded))
                         SizedBox(
-                          width: 120,
+                          width: widget.distance != null ? 120 : 40,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               if (widget.distance != null)
                                 NavigationDistanceButton(distance: widget.distance!, onPressed: widget.onDistancePressed),
-                              if (hasDestination && _expanded)
-                                TextButton.icon(
-                                  onPressed: () {
-                                    _collapseTimer?.cancel();
-                                    HapticFeedback.lightImpact();
-                                    widget.onDestinationMinimised?.call();
-                                    setState(() => _expanded = false);
-                                  },
-                                  icon: const Icon(Icons.chevron_left),
-                                  label: const Text('Minimise'),
+                              if (hasDestination && _expanded) ...[
+                                if (widget.distance != null) const SizedBox(height: 8),
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: SizedBox.square(
+                                    dimension: 40,
+                                    child: Material(
+                                      shape: const CircleBorder(),
+                                      elevation: 3,
+                                      color: Theme.of(context).colorScheme.primary,
+                                      clipBehavior: Clip.antiAlias,
+                                      child: IconButton(
+                                        tooltip: 'Minimise destination details',
+                                        style: IconButton.styleFrom(shape: const CircleBorder()),
+                                        onPressed: () {
+                                          _collapseTimer?.cancel();
+                                          HapticFeedback.lightImpact();
+                                          widget.onDestinationMinimised?.call();
+                                          setState(() => _expanded = false);
+                                        },
+                                        icon: Icon(Icons.chevron_left, color: Theme.of(context).colorScheme.onPrimary),
+                                      ),
+                                    ),
+                                  ),
                                 ),
+                              ],
                             ],
                           ),
                         ),
@@ -2625,7 +2640,7 @@ class NavigationDistanceButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.directions, size: 16),
+          const Icon(Icons.directions, size: 22),
           const SizedBox(width: 4),
           Flexible(child: Text(distance, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
         ],

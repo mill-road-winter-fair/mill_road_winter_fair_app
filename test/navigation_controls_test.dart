@@ -105,7 +105,7 @@ void main() {
     expect(find.text('Navigating to'), findsOneWidget);
     expect(find.text('11:00–15:00'), findsOneWidget);
     expect(find.byType(BottomAppBar), findsNothing);
-    await tester.tap(find.text('Minimise'));
+    await tester.tap(find.byTooltip('Minimise destination details'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Show destination details'), findsOneWidget);
     await tester.tap(find.byTooltip('Show destination details'));
@@ -185,7 +185,7 @@ void main() {
     final bounds = tester.getRect(card);
     final mapBounds = tester.getRect(find.byType(GoogleMap));
     expect(bounds.left, closeTo(mapBounds.left + 12, 1));
-    expect(bounds.bottom, lessThanOrEqualTo(mapBounds.bottom - 12));
+    expect(bounds.bottom, lessThanOrEqualTo(mapBounds.bottom - 24));
     final padding = tester.widget<GoogleMap>(find.byType(GoogleMap)).padding.bottom;
     expect(padding, 0);
     expect(state.mapHeight, closeTo(mapBounds.height, 1));
@@ -256,15 +256,15 @@ void main() {
     await tester.pump(const Duration(milliseconds: 175));
     final animatedBounds = tester.getRect(find.byType(AnimatedSize));
     expect(animatedBounds.width, lessThan(expandedBounds.width));
-    expect(animatedBounds.width, greaterThan(204));
+    expect(animatedBounds.width, greaterThan(196));
     await tester.pumpAndSettle();
     expect(find.text('Destination details'), findsNothing);
     expect(find.byTooltip('Show destination details'), findsOneWidget);
     final collapsedBounds = tester.getRect(find.byType(AnimatedSize));
     expect(collapsedBounds.left, closeTo(expandedBounds.left, 1));
-    expect(collapsedBounds.width, 204);
+    expect(collapsedBounds.width, 196);
     final destinationButton = find.byTooltip('Show destination details');
-    expect(tester.getSize(destinationButton), const Size(48, 48));
+    expect(tester.getSize(destinationButton), const Size(40, 40));
     final buttonMaterial = tester.widget<Material>(find.ancestor(of: destinationButton, matching: find.byType(Material)).first);
     expect(buttonMaterial.shape, isA<CircleBorder>());
     expect(actions, isEmpty);
@@ -278,7 +278,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Destination details'), findsOneWidget);
     expect(actions, ['expand']);
-    await tester.tap(find.text('Minimise'));
+    await tester.tap(find.byTooltip('Minimise destination details'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Show destination details'), findsOneWidget);
     expect(actions, ['expand', 'minimise']);
@@ -291,7 +291,7 @@ void main() {
     final state = await openMap(tester, analytics: analytics);
     await navigate(tester, state);
     // Minimise before the initial timer expires, then reopen and stay open.
-    await tester.tap(find.text('Minimise'));
+    await tester.tap(find.byTooltip('Minimise destination details'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Show destination details'));
     await tester.pumpAndSettle();
@@ -353,9 +353,9 @@ void main() {
     expect(bounds.bottom, lessThanOrEqualTo(804));
     expect(tester.getRect(find.byType(NavigationBottomRow)).bottom, closeTo(844, 1));
     expect(bounds.height, 48);
-    final minimiseBounds = tester.getRect(find.widgetWithText(TextButton, 'Minimise'));
+    final minimiseBounds = tester.getRect(find.byTooltip('Minimise destination details'));
     expect(minimiseBounds.top, greaterThanOrEqualTo(bounds.bottom));
-    expect(minimiseBounds.left, closeTo(bounds.left, 1));
+    expect(minimiseBounds.size, const Size(40, 40));
     expect(minimiseBounds.right, closeTo(bounds.right, 1));
     expect(bounds.right, closeTo(tester.getRect(sharedCard).right - 12, 1));
     expect(tester.widget<Text>(find.text('250 m')).style!.fontSize, 16);
