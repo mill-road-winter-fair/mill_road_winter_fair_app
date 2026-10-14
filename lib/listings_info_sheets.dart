@@ -468,7 +468,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       child: GestureDetector(
         onTap: widget.brickAndMortar ? null : () {
           HapticFeedback.lightImpact();
-          widget.analyticsService.logButtonTapped('listing_original_time', listingId: widget.listingId, listingName: widget.title);
+          context.read<AnalyticsService>().logButtonTapped('listing_original_time', listingId: widget.listingId, listingName: widget.title);
           showMiniPopup(
             context,
             _cancelledLabelKey,
@@ -640,7 +640,7 @@ Future<void> showListingDetailsDialog(
               behavior: HitTestBehavior.opaque,
               onTap: () => {
                 HapticFeedback.lightImpact(),
-                analyticsService.logButtonTapped('listing_dialog_dismiss', listingId: event.id, listingName: event.name),
+                context.read<AnalyticsService>().logButtonTapped('listing_dialog_dismiss', listingId: event.id, listingName: event.name),
                 Navigator.of(ctx2).pop(),
               },
               child: SingleChildScrollView(

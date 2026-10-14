@@ -519,7 +519,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     final trimmedSearchTerm = value.trim();
     if (trimmedSearchTerm.isNotEmpty) {
       _searchAnalyticsTimer = Timer(const Duration(milliseconds: 750), () {
-        widget.analyticsService.logSearch(trimmedSearchTerm, searchArea: 'map');
+        context.read<AnalyticsService>().logSearch(trimmedSearchTerm, searchArea: 'map');
       });
     }
     final normalisedValue = value.toLowerCase();
@@ -1960,7 +1960,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               onLongPress: () => showMiniPopup(context, filterIconKey, 'Tap to choose which map markers to show or hide'),
               onPressed: () {
                 HapticFeedback.lightImpact();
-                widget.analyticsService.logButtonTapped('map_filter_open');
+                context.read<AnalyticsService>().logButtonTapped('map_filter_open');
                 showFilterMenu();
                 setVisibleMarkerLists();
               },
@@ -1974,7 +1974,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar'),
               onPressed: () async {
                 HapticFeedback.lightImpact();
-                widget.analyticsService.logButtonTapped('map_search_toggle');
+                context.read<AnalyticsService>().logButtonTapped('map_search_toggle');
                 if (_isSearching) {
                   final camera = _cameraBeforeSearch;
                   await _resetSearch();

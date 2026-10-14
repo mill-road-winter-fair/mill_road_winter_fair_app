@@ -636,7 +636,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     ? null
                                     : () {
                                         final listing = filteredListings[detailsVisibleIndex!];
-                                        widget.analyticsService.logButtonTapped('listing_details_dismiss', listingId: listing['id'], listingName: listing['title']);
+                                        context.read<AnalyticsService>().logButtonTapped('listing_details_dismiss', listingId: listing['id'], listingName: listing['title']);
                                         detailsVisibleIndex = null;
                                         HapticFeedback.lightImpact();
                                         setState(() {});
