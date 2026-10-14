@@ -294,6 +294,19 @@ Drawer fairDrawer(BuildContext context) {
           ),
         ),
         Expanded(
+          flex: 4,
+          child: ListTile(
+            leading: const Icon(Icons.volunteer_activism),
+            title: const Text('Donate to the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              context.read<AnalyticsService>().logButtonTapped('drawer_donate');
+              Navigator.pop(context);
+              launchUrl(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
+            },
+          ),
+        ),
+        Expanded(
           // needed as Expanded() is relative and this needs a fixed space on larger screens
           flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 1),
           child: const SizedBox.expand(),

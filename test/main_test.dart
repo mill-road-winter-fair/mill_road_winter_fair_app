@@ -160,6 +160,7 @@ void main() {
       expect(find.text('Important information'), findsOneWidget);
       expect(find.text('Visit our website'), findsOneWidget);
       expect(find.text('Contact us'), findsOneWidget);
+      expect(find.text('Donate to the Fair'), findsOneWidget);
       expect(find.byType(IconButton), findsExactly(5));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('App guide'), findsOneWidget);
