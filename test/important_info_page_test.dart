@@ -74,7 +74,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       await tester.pumpWithClock(

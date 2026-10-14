@@ -24,7 +24,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
       const DarwinNotificationCategory(
         'UnderwayCategory',
         actions: <DarwinNotificationAction>[
-//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+          //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
         ],
         options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},
       ),
@@ -32,7 +32,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
         '5MinsCategory',
         actions: <DarwinNotificationAction>[
           DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+          //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
         ],
         options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},
       ),
@@ -41,7 +41,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
         actions: <DarwinNotificationAction>[
           DarwinNotificationAction.plain('snooze5mins', 'Snooze for 5 minutes'),
           DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+          //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
         ],
         options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},
       ),
@@ -51,7 +51,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
           DarwinNotificationAction.plain('snooze10mins', 'Snooze for 10 minutes'),
           DarwinNotificationAction.plain('snooze20mins', 'Snooze for 20 minutes'),
           DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+          //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
         ],
         options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},
       ),
@@ -61,7 +61,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
           DarwinNotificationAction.plain('snooze15mins', 'Snooze for 15 minutes'),
           DarwinNotificationAction.plain('snooze30mins', 'Snooze for 30 minutes'),
           DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+          //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
         ],
         options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},
       ),
@@ -198,7 +198,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
         '5MinsCategory',
         [
           const AndroidNotificationAction('snoozeStart', 'Snooze to start'),
-        ]
+        ],
       );
     case <= 19:
       return (
@@ -206,7 +206,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
         [
           const AndroidNotificationAction('snooze5mins', 'Snooze 5'),
           const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
-        ]
+        ],
       );
     case <= 35:
       return (
@@ -215,7 +215,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
           const AndroidNotificationAction('snooze10mins', 'Snooze 10'),
           const AndroidNotificationAction('snooze20mins', 'Snooze 20'),
           const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
-        ]
+        ],
       );
     default:
       return (
@@ -224,7 +224,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
           const AndroidNotificationAction('snooze15mins', 'Snooze 15'),
           const AndroidNotificationAction('snooze30mins', 'Snooze 30'),
           const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
-        ]
+        ],
       );
   }
 }
@@ -395,35 +395,35 @@ class AlertScheduleStore {
 }
 
 AlertSchedule _$AlertScheduleFromJson(Map<String, dynamic> json) => AlertSchedule(
-      (json['id'] as num).toInt(),
-      json['listingId'] as String,
-      json['listingTitle'] as String,
-      json['listingLocation'] as String,
-      DateTime.parse(json['listingStartTime'] as String),
-      DateTime.parse(json['listingEndTime'] as String),
-      (json['noticePeriod'] as num).toInt(),
-      json['isScheduled'] as bool,
-      json['fromHighlight'] as bool?,
-    );
+  (json['id'] as num).toInt(),
+  json['listingId'] as String,
+  json['listingTitle'] as String,
+  json['listingLocation'] as String,
+  DateTime.parse(json['listingStartTime'] as String),
+  DateTime.parse(json['listingEndTime'] as String),
+  (json['noticePeriod'] as num).toInt(),
+  json['isScheduled'] as bool,
+  json['fromHighlight'] as bool?,
+);
 
 Map<String, dynamic> _$AlertScheduleToJson(AlertSchedule instance) => <String, dynamic>{
-      'id': instance.id,
-      'listingId': instance.listingId,
-      'listingTitle': instance.listingTitle,
-      'listingLocation': instance.listingLocation,
-      'listingStartTime': instance.listingStartTime.toIso8601String(),
-      'listingEndTime': instance.listingEndTime.toIso8601String(),
-      'noticePeriod': instance.noticePeriod,
-      'isScheduled': instance.isScheduled,
-      'fromHighlight': instance.fromHighlight,
-    };
+  'id': instance.id,
+  'listingId': instance.listingId,
+  'listingTitle': instance.listingTitle,
+  'listingLocation': instance.listingLocation,
+  'listingStartTime': instance.listingStartTime.toIso8601String(),
+  'listingEndTime': instance.listingEndTime.toIso8601String(),
+  'noticePeriod': instance.noticePeriod,
+  'isScheduled': instance.isScheduled,
+  'fromHighlight': instance.fromHighlight,
+};
 
 AlertScheduleStore _$AlertScheduleStoreFromJson(Map<String, dynamic> json) => AlertScheduleStore(
-      (json['alertSchedules'] as List<dynamic>).map((e) => AlertSchedule.fromJson(e as Map<String, dynamic>)).toList(),
-      (json['nextId'] as num).toInt(),
-    );
+  (json['alertSchedules'] as List<dynamic>).map((e) => AlertSchedule.fromJson(e as Map<String, dynamic>)).toList(),
+  (json['nextId'] as num).toInt(),
+);
 
 Map<String, dynamic> _$AlertScheduleStoreToJson(AlertScheduleStore instance) => <String, dynamic>{
-      'alertSchedules': instance.alertSchedules,
-      'nextId': instance.nextId,
-    };
+  'alertSchedules': instance.alertSchedules,
+  'nextId': instance.nextId,
+};

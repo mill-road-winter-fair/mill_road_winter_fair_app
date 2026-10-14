@@ -35,7 +35,8 @@ Future<void> loadSettings() async {
     preferredRoadClosurePolygonVisible = prefs.getBool('preferredRoadClosurePolygonVisible') ?? true;
 
     // Keep the listings-change notice enabled by default for each fair year.
-    listingUpdateNoticeEnabled = prefs.getBool(
+    listingUpdateNoticeEnabled =
+        prefs.getBool(
           'listingUpdateNoticeEnabled${fairDate.year}',
         ) ??
         true;
@@ -141,7 +142,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
     widget.analyticsService.setCurrentScreen('SettingsPage');
   }
 
-// Save settings to shared preferences
+  // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);

@@ -32,7 +32,7 @@ void main() {
         'latLng': '52.199687,0.138813',
         'startTime': '10:00',
         'endTime': '23:59',
-      }
+      },
     ];
     await tester.pumpWithClock(
       MaterialApp(

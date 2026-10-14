@@ -66,7 +66,7 @@ void main() {
         'imageURL': '',
         'startTime': '10:30',
         'endTime': '16:30',
-      }
+      },
     ];
     locationServicesEnabled = true;
     locationPermission = LocationPermission.always;

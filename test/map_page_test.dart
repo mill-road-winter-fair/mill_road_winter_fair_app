@@ -180,7 +180,9 @@ void main() {
       });
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -365,7 +367,9 @@ void main() {
       listings = sharedLocationListings;
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+          home: Scaffold(
+            body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -387,7 +391,7 @@ void main() {
       final originalListings = listings;
       addTearDown(() => listings = originalListings);
       listings = [
-        {...originalListings[2], 'business': 'TRUE'}
+        {...originalListings[2], 'business': 'TRUE'},
       ];
 
       await tester.pumpWidget(
@@ -430,7 +434,9 @@ void main() {
       addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null));
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -1084,7 +1090,7 @@ void main() {
           'imageURL': '',
           "startTime": "10:30",
           "endTime": "16:30",
-        }
+        },
       ];
 
       // Build the MapPage widget
@@ -1296,7 +1302,7 @@ void main() {
           'imageURL': '',
           'startTime': '10:30',
           'endTime': '16:30',
-        }
+        },
       ];
 
       // Build the MapPage widget

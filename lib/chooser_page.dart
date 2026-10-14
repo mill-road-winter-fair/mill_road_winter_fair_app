@@ -59,10 +59,17 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(vsync: this, duration: const Duration(seconds: _idleAnimationPeriod))..addListener(_updatePaintPhase);
-    _initialEntranceController = AnimationController(vsync: this, duration: const Duration(seconds: _entranceAnimationPeriod))
-      ..addListener(_updateEntranceProgress)
-      ..addStatusListener(_entranceStatusChanged);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: _idleAnimationPeriod),
+    )..addListener(_updatePaintPhase);
+    _initialEntranceController =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(seconds: _entranceAnimationPeriod),
+          )
+          ..addListener(_updateEntranceProgress)
+          ..addStatusListener(_entranceStatusChanged);
     _secondPhaseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
     _secondPhaseController!.addListener(() {
       _secondPhaseProgress.value = _secondPhaseController!.value;
@@ -626,9 +633,18 @@ class _HotspotLayers extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              _AnimatedOpacityLayer(opacity: shadowedOpacity, child: _CachedShadowedImage(hotspot: hotspot)),
-              _AnimatedOpacityLayer(opacity: normalOpacity, child: _CachedNormalImage(hotspot: hotspot)),
-              _AnimatedOpacityLayer(opacity: labelOpacity, child: _CachedLabel(hotspot: hotspot, colourScheme: colourScheme)),
+              _AnimatedOpacityLayer(
+                opacity: shadowedOpacity,
+                child: _CachedShadowedImage(hotspot: hotspot),
+              ),
+              _AnimatedOpacityLayer(
+                opacity: normalOpacity,
+                child: _CachedNormalImage(hotspot: hotspot),
+              ),
+              _AnimatedOpacityLayer(
+                opacity: labelOpacity,
+                child: _CachedLabel(hotspot: hotspot, colourScheme: colourScheme),
+              ),
             ],
           ),
         );

@@ -419,7 +419,7 @@ class _TimetablePageState extends State<TimetablePage> {
     (theMsg, newFilteredMusicOrNot) = switch (widget.filteredMusicOrNot) {
       null => ('Showing only music performances', true),
       true => ('Showing everything but music performances', false),
-      false => ('Showing all performances', null)
+      false => ('Showing all performances', null),
     };
     if (mounted) setState(() {});
     widget.analyticsService.logPreferenceSet(
@@ -427,8 +427,8 @@ class _TimetablePageState extends State<TimetablePage> {
       newFilteredMusicOrNot == null
           ? 'all'
           : newFilteredMusicOrNot
-              ? 'music'
-              : 'other',
+          ? 'music'
+          : 'other',
     );
     widget.onFilterChange.call(widget.onlyNowOrSoon, newFilteredMusicOrNot);
     showInfoToast(context, theMsg);
@@ -528,7 +528,11 @@ class _TimetablePageState extends State<TimetablePage> {
     final subcategoryIconKey = GlobalKey();
     final searchIconKey = GlobalKey();
 
-    String appBarTitle = switch (widget.filteredMusicOrNot) { true => 'Timetable (music)', false => 'Timetable (non-music)', _ => 'Timetable' };
+    String appBarTitle = switch (widget.filteredMusicOrNot) {
+      true => 'Timetable (music)',
+      false => 'Timetable (non-music)',
+      _ => 'Timetable',
+    };
 
     return FairScaffold(
       appBarTitle: appBarTitle,
@@ -580,7 +584,11 @@ class _TimetablePageState extends State<TimetablePage> {
             theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
           },
           style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((widget.filteredMusicOrNot != null) ? Colors.white.withAlpha(30) : null)),
-          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
+          icon: Icon(switch (widget.filteredMusicOrNot) {
+            false => Icons.music_off,
+            true => Icons.music_note,
+            null => Icons.filter_alt,
+          }, size: 26),
         ),
         IconButton(
           key: searchIconKey,
@@ -692,7 +700,11 @@ class _TimetablePageState extends State<TimetablePage> {
               final furnitureHeight = 98.0;
               final contentHeight = constraints.maxHeight - 34 - (_isSearching ? 52 : 0) - (keyboardHeight - furnitureHeight).clamp(0.0, double.infinity);
               final timelineHeight = max(constraints.maxHeight - 40, spanMinutes * _dayPixelsPerMinute + 4);
-              final hintTextSnippet = switch (widget.filteredMusicOrNot) { null => 'all', true => 'music', false => 'non-music' };
+              final hintTextSnippet = switch (widget.filteredMusicOrNot) {
+                null => 'all',
+                true => 'music',
+                false => 'non-music',
+              };
               final theContent = Column(
                 children: [
                   AnimatedSwitcher(

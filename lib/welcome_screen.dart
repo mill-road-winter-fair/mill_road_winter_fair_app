@@ -132,26 +132,26 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       pageColor: colourScheme.secondary.withValues(alpha: 0.8),
     );
     Widget guideRow(Widget icon, Widget content) => Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(width: 40, child: Center(child: icon)),
-              const SizedBox(width: 8),
-              Expanded(child: content),
-            ],
-          ),
-        );
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(width: 40, child: Center(child: icon)),
+          const SizedBox(width: 8),
+          Expanded(child: content),
+        ],
+      ),
+    );
 
     Widget tip(IconData icon, String text) => guideRow(
-          Icon(icon, size: 40, color: colourScheme.onSecondary),
-          Text(text, style: bodyStyle),
-        );
+      Icon(icon, size: 40, color: colourScheme.onSecondary),
+      Text(text, style: bodyStyle),
+    );
 
     Widget category(String key, String colourKey) => guideRow(
-          Icon(subfilterCategoryLabels[key]!.iconData, size: 40, color: getCategoryColor(selectedThemeKey, colourKey)),
-          Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
-        );
+      Icon(subfilterCategoryLabels[key]!.iconData, size: 40, color: getCategoryColor(selectedThemeKey, colourKey)),
+      Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
+    );
 
     PageViewModel guidePage(String title, List<Widget> children) {
       // The original non-scrolling page gives its body unbounded height. Reserve
@@ -163,13 +163,14 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       )..layout();
       final titleWidth = MediaQuery.sizeOf(context).width - pageDecoration.contentMargin.horizontal;
       final titleScale = (titleWidth / titlePainter.width).clamp(0.0, 1.0);
-      final bodyHeight = (MediaQuery.sizeOf(context).height -
-              MediaQuery.paddingOf(context).vertical -
-              pageDecoration.safeArea -
-              pageDecoration.titlePadding.vertical -
-              pageDecoration.bodyPadding!.vertical -
-              titlePainter.height * titleScale)
-          .clamp(0.0, double.infinity);
+      final bodyHeight =
+          (MediaQuery.sizeOf(context).height -
+                  MediaQuery.paddingOf(context).vertical -
+                  pageDecoration.safeArea -
+                  pageDecoration.titlePadding.vertical -
+                  pageDecoration.bodyPadding!.vertical -
+                  titlePainter.height * titleScale)
+              .clamp(0.0, double.infinity);
       titlePainter.dispose();
       return PageViewModel(
         useScrollView: false,
@@ -408,7 +409,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
               back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
               skip: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
+                child: Text(
+                  'Skip',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary),
+                ),
               ),
               overrideNext: (context, onPressed) => Tooltip(
                 message: 'Next page',
@@ -426,7 +430,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
               ),
               done: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary)),
+                child: Text(
+                  'Done',
+                  style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary),
+                ),
               ),
               curve: Curves.fastLinearToSlowEaseIn,
               controlsMargin: controlsMargin,

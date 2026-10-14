@@ -235,7 +235,10 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   Expanded(flex: 2, child: Container()),
                   FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text(' $fairDateTimes', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      ' $fairDateTimes',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
                   ),
                   Expanded(flex: 2, child: Container()),
                 ],
@@ -487,7 +490,10 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
     builder: (dialogContext) {
       return Dialog(
         insetPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
-        shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: colorScheme.onSecondary, width: 0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
         backgroundColor: colorScheme.surfaceContainerLowest,
         shadowColor: colorScheme.surfaceDim,
         elevation: 3,
@@ -638,7 +644,10 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                             borderRadius: BorderRadius.circular(6.0),
                             child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain),
                           ),
-                          title: Text(fairName, style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold)),
+                          title: Text(
+                            fairName,
+                            style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold),
+                          ),
                           subtitle: Text('v${packageInfo.version}', style: textStyle),
                         ),
                         ListTile(
@@ -807,7 +816,10 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                                   }
                                 },
                             ),
-                            const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
+                            const TextSpan(
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              text: '.',
+                            ),
                           ],
                         ),
                       ),
@@ -1244,7 +1256,10 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
     builder: (BuildContext context) {
       return Dialog(
         insetPadding: const EdgeInsets.all(8), // margin from screen edges
-        shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: colorScheme.onSecondary, width: 0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
         backgroundColor: colorScheme.surfaceContainerLowest,
         shadowColor: colorScheme.surfaceDim,
         elevation: 3,

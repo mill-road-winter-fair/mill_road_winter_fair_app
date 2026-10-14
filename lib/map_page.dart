@@ -794,8 +794,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               detailsVisible: (detailsVisibleIndex == null)
                                                   ? false
                                                   : (detailsVisibleIndex == index)
-                                                      ? true
-                                                      : null,
+                                                  ? true
+                                                  : null,
                                               onDetailsTapped: () => toggleDetailsRow(index),
                                               listingFavourited: isFavourited,
                                               listingAlerted: alertsStore.alertExists(rel['id']),
@@ -858,8 +858,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     final type = catCount == 1
         ? getCategory(listing)
         : catCount == perfOrEventCount
-            ? 'Group-PerformanceEvent'
-            : 'Mixed';
+        ? 'Group-PerformanceEvent'
+        : 'Mixed';
     _markerTypes[markerId] = type;
     final customMarker = _iconForMarkerType(type);
 
@@ -1480,20 +1480,21 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     _destination = destination;
 
     // Start listening for location updates
-    _positionStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 3,
-      ),
-    ).listen((Position position) async {
-      // Update the user's current location
-      currentLatLng = LatLng(position.latitude, position.longitude);
+    _positionStream =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.best,
+            distanceFilter: 3,
+          ),
+        ).listen((Position position) async {
+          // Update the user's current location
+          currentLatLng = LatLng(position.latitude, position.longitude);
 
-      // If a destination is set, get new directions and update the polyline
-      if (_destination != null) {
-        await updatePolyline(currentLatLng!, _destination!);
-      }
-    });
+          // If a destination is set, get new directions and update the polyline
+          if (_destination != null) {
+            await updatePolyline(currentLatLng!, _destination!);
+          }
+        });
   }
 
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
@@ -1876,7 +1877,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         filterSettings['Business'] == false &&
         filterSettings['Services'] == false) {
       widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
-      final idList = _foodMarkerIds +
+      final idList =
+          _foodMarkerIds +
           _shoppingMarkerIds +
           _charityCommunityInfoMarkerIds +
           _performanceMusicMarkerIds +
@@ -2011,10 +2013,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           appBarTitle: (navigationInProgress || doingAPushNavigation != null)
               ? 'Directions'
               : (widget.nearestMarkerCount != null)
-                  ? 'Nearby attractions'
-                  : (hasActiveMarkerFilters)
-                      ? 'Map (filtered)'
-                      : 'Map',
+              ? 'Nearby attractions'
+              : (hasActiveMarkerFilters)
+              ? 'Map (filtered)'
+              : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
@@ -2038,8 +2040,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 key: searchIconKey,
                 tooltip: _isSearching ? 'Close map search' : 'Search the map',
                 color: appBarTheme.foregroundColor,
-                onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
-                    analyticsService: widget.analyticsService),
+                onLongPress: () => showMiniPopup(
+                  context,
+                  searchIconKey,
+                  (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
+                  analyticsService: widget.analyticsService,
+                ),
                 onPressed: () async {
                   HapticFeedback.lightImpact();
                   widget.analyticsService.logButtonTapped('map_search_toggle');

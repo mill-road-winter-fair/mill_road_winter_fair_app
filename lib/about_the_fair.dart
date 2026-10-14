@@ -33,14 +33,22 @@ class TextImageRow extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: imageOnLeft
               ? [
-                  SizedBox(height: textHeight, width: constraints.maxWidth * (1 - textWidthProportion) - 2, child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerLeft)),
+                  SizedBox(
+                    height: textHeight,
+                    width: constraints.maxWidth * (1 - textWidthProportion) - 2,
+                    child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerLeft),
+                  ),
                   const Expanded(child: SizedBox()),
                   SizedBox(width: constraints.maxWidth * textWidthProportion, child: Text.rich(textSpan)),
                 ]
               : [
                   SizedBox(width: constraints.maxWidth * textWidthProportion, child: Text.rich(textSpan)),
                   const Expanded(child: SizedBox()),
-                  SizedBox(height: textHeight, width: constraints.maxWidth * (1 - textWidthProportion) - 2, child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerRight)),
+                  SizedBox(
+                    height: textHeight,
+                    width: constraints.maxWidth * (1 - textWidthProportion) - 2,
+                    child: Image.asset(imagePath, fit: BoxFit.contain, alignment: Alignment.centerRight),
+                  ),
                 ],
         );
       },
@@ -66,9 +74,21 @@ TableRow eventRow(BuildContext context, String eventTime, String eventTitle, [Li
     children: <Widget>[
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
-        child: Container(padding: const EdgeInsets.fromLTRB(4, 4, 2, 4), child: FittedBox(fit: BoxFit.scaleDown, child: Text(eventTime, style: eventsTimeStyle, textAlign: TextAlign.right))),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(4, 4, 2, 4),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(eventTime, style: eventsTimeStyle, textAlign: TextAlign.right),
+          ),
+        ),
       ),
-      TableCell(verticalAlignment: TableCellVerticalAlignment.top, child: Container(padding: const EdgeInsets.fromLTRB(2, 4, 2, 4), child: Text.rich(TextSpan(children: allTitleSpans)))),
+      TableCell(
+        verticalAlignment: TableCellVerticalAlignment.top,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(2, 4, 2, 4),
+          child: Text.rich(TextSpan(children: allTitleSpans)),
+        ),
+      ),
     ],
   );
 }
@@ -250,12 +270,18 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                         verticalAlignment: TableCellVerticalAlignment.middle,
                                         child: Container(
                                           padding: const EdgeInsets.only(left: 4),
-                                          child: Text('Key events', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
+                                          child: Text(
+                                            'Key events',
+                                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0),
+                                          ),
                                         ),
                                       ),
                                       TableCell(
                                         verticalAlignment: TableCellVerticalAlignment.top,
-                                        child: SizedBox(width: 71, child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft)),
+                                        child: SizedBox(
+                                          width: 71,
+                                          child: Image.asset('assets/aboutPage/MRWF25_bird.png', fit: BoxFit.contain, alignment: Alignment.centerLeft),
+                                        ),
                                       ),
                                     ],
                                   ),

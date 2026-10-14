@@ -330,7 +330,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     if (listings.isEmpty) {
       return FairScaffold(
         appBarTitle: calculateAppBarTitle(),
-        currentTab: switch (filterCategory) { 'favourite' => 4, _ => 3 },
+        currentTab: switch (filterCategory) {
+          'favourite' => 4,
+          _ => 3,
+        },
         onTabSelected: widget.onTabSelected,
         allowBack: false,
         analyticsService: widget.analyticsService,
@@ -411,7 +414,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     return FairScaffold(
       appBarTitle: calculateAppBarTitle(),
-      currentTab: switch (filterCategory) { 'favourite' => 4, _ => 3 },
+      currentTab: switch (filterCategory) {
+        'favourite' => 4,
+        _ => 3,
+      },
       onTabSelected: widget.onTabSelected,
       appBarActions: [
         if (filterCategory == 'favourite' || isShowingJustPerformance)
@@ -696,8 +702,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                                   detailsVisible: (detailsVisibleIndex == null)
                                                       ? false
                                                       : (detailsVisibleIndex == index)
-                                                          ? true
-                                                          : null,
+                                                      ? true
+                                                      : null,
                                                   listingFavourited: isFavourited,
                                                   listingAlerted: alertsStore.alertExists(listing['id']),
                                                   onDetailsTapped: () => toggleDetailsRow(index),
@@ -801,17 +807,18 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       padding: const EdgeInsets.all(24.0),
                                       alignment: Alignment.center,
                                       child: Text(
-                                          style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                                          textAlign: TextAlign.center,
-                                          'No'
-                                          '${widget.subfilterCategory != null ? ' ${subfilterCategoryLabels[widget.subfilterCategory]!.label}' : ''}'
-                                          ' listings'
-                                          '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
-                                          '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
-                                          '${(widget.subfilterCategory != null && _isSearching) ? '\n\nTap the magnifying glass to close search, then ‘Show’ to change what type of listings are displayed.' : ''}'
-                                          '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
-                                          '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
-                                          '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}'),
+                                        style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                        'No'
+                                        '${widget.subfilterCategory != null ? ' ${subfilterCategoryLabels[widget.subfilterCategory]!.label}' : ''}'
+                                        ' listings'
+                                        '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
+                                        '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
+                                        '${(widget.subfilterCategory != null && _isSearching) ? '\n\nTap the magnifying glass to close search, then ‘Show’ to change what type of listings are displayed.' : ''}'
+                                        '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
+                                        '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
+                                        '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}',
+                                      ),
                                     ),
                                   )
                                 : const SizedBox.shrink(),

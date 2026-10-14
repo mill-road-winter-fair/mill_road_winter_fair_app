@@ -189,7 +189,13 @@ void main() {
   });
 
   testWidgets('consent dialog saves an opt-in choice', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: Builder(builder: (context) => TextButton(onPressed: () => service.showAnalyticsConsentDialog(context), child: const Text('Prompt')))));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(onPressed: () => service.showAnalyticsConsentDialog(context), child: const Text('Prompt')),
+        ),
+      ),
+    );
     await tester.tap(find.text('Prompt'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('I agree'));

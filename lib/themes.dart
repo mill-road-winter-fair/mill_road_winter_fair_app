@@ -71,7 +71,9 @@ final Map<String, ThemeData> appThemes = {
     appBarTheme: const AppBarTheme(backgroundColor: Color.fromRGBO(44, 44, 44, 1.0), foregroundColor: Colors.white),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0), unselectedItemColor: Colors.grey),
     drawerTheme: const DrawerThemeData(backgroundColor: Color.fromRGBO(44, 44, 44, 1.0)),
-    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
+    ),
     listTileTheme: const ListTileThemeData(tileColor: Color.fromRGBO(44, 44, 44, 1.0)),
     shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
@@ -118,7 +120,9 @@ final Map<String, ThemeData> appThemes = {
     iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0))),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0), unselectedItemColor: Colors.grey),
     drawerTheme: const DrawerThemeData(backgroundColor: Colors.black),
-    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white)),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
+    ),
     listTileTheme: const ListTileThemeData(tileColor: Colors.black),
     shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),

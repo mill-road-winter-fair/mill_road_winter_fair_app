@@ -234,7 +234,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               ),
             );
     } else {
-      subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
+      subDetails = Text.rich(
+        textAlign: TextAlign.right,
+        TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle),
+      );
     }
 
     final startTime = combineDateAndTime(widget.startTime, fairDate);
@@ -384,13 +387,13 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     onPressed: (widget.cancelled && !alertsStore.alertExists(widget.listingId))
                         ? null
                         : (isItAlertable)
-                            ? () {
-                                HapticFeedback.lightImpact();
-                                widget.onAlertTapped?.call();
-                                setState(() {});
-                                widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
-                              }
-                            : () => showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance', analyticsService: widget.analyticsService),
+                        ? () {
+                            HapticFeedback.lightImpact();
+                            widget.onAlertTapped?.call();
+                            setState(() {});
+                            widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
+                          }
+                        : () => showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance', analyticsService: widget.analyticsService),
                     padding: const EdgeInsets.all(0),
                     key: alertIconKey,
                     style: ElevatedButton.styleFrom(
@@ -571,8 +574,14 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               child: Text.rich(
                 TextSpan(
                   children: [
-                    TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Website: '),
-                    TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.website),
+                    TextSpan(
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary),
+                      text: 'Website: ',
+                    ),
+                    TextSpan(
+                      style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline),
+                      text: widget.website,
+                    ),
                   ],
                 ),
               ),
@@ -598,8 +607,14 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               child: Text.rich(
                 TextSpan(
                   children: [
-                    TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Email: '),
-                    TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.email),
+                    TextSpan(
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary),
+                      text: 'Email: ',
+                    ),
+                    TextSpan(
+                      style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline),
+                      text: widget.email,
+                    ),
                   ],
                 ),
               ),
@@ -625,8 +640,14 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               child: Text.rich(
                 TextSpan(
                   children: [
-                    TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Telephone: '),
-                    TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.phoneNumber),
+                    TextSpan(
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary),
+                      text: 'Telephone: ',
+                    ),
+                    TextSpan(
+                      style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline),
+                      text: widget.phoneNumber,
+                    ),
                   ],
                 ),
               ),
@@ -671,7 +692,10 @@ Future<void> showListingDetailsDialog(
       builder: (ctx2, setStateDialog) {
         return Dialog(
           insetPadding: const EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
-          shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: colorScheme.onSecondary, width: 0.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,
           elevation: 12,

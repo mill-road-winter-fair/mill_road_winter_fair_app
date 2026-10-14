@@ -234,7 +234,9 @@ class HomePageState extends State<HomePage> with RouteAware {
       if (!mounted) return;
       if (usedCache == true) {
         final colours = Theme.of(context).colorScheme;
-        FToast().init(context).showToast(
+        FToast()
+            .init(context)
+            .showToast(
               gravity: ToastGravity.CENTER,
               ignorePointer: true,
               toastDuration: const Duration(seconds: 5),
