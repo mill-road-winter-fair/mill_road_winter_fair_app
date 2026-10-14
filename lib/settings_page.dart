@@ -173,13 +173,13 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final settingLabelStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-    final settingTitleStyle = TextStyle(fontSize: 15);
+    final settingLabelStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+    final settingTitleStyle = const TextStyle(fontSize: 15);
     final settingSubtitleStyle = TextStyle(fontSize: 14,  color: Theme.of(context).colorScheme.onSurfaceVariant);
     final List<DropdownOption> unitsOptions = [
       DropdownOption(title: 'Metric', subtitle: 'Metres and kilometres', value: DistanceUnits.metric),
       DropdownOption(title: 'Imperial', subtitle: 'Feet and miles', value: DistanceUnits.imperial),
-      DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge)
+      DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge),
     ];
     final List<DropdownOption> themeOptions = [
       DropdownOption(title: 'Auto', subtitle: 'Follow the device light/dark setting', value: 'auto'),
@@ -188,7 +188,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       DropdownOption(title: '2025 Light', subtitle: 'For last year’s Fair', value: '2025'),
       DropdownOption(title: '2024 Light', subtitle: 'For the Fair that blew away', value: '2024'),
       DropdownOption(title: 'High contrast', subtitle: 'For visual accessibility needs', value: 'highContrast'),
-      DropdownOption(title: 'Colour blind friendly', subtitle: 'For users with colour blindness', value: 'colourBlindFriendly')
+      DropdownOption(title: 'Colour blind friendly', subtitle: 'For users with colour blindness', value: 'colourBlindFriendly'),
     ];
     final List<DropdownOption> homePageOptions = [
       DropdownOption(title: 'Animated', subtitle: 'Spotlights the Fair’s offerings', value: false),
@@ -205,7 +205,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('back');
             Navigator.maybePop(context);
-          }) : null,
+          },) : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Settings'),
@@ -232,10 +232,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         return DropdownMenu<String>(
                           initialSelection: themeNotifier.value,
                           hintText: 'Select a visual theme',
-                          inputDecorationTheme: InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
+                          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: themeOptions.map((opt) {
                             return DropdownMenuEntry<String>(
                               value: opt.value,
@@ -245,7 +245,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                                 Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
                                 Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
                                 const SizedBox(height: 4),
-                              ]),
+                              ],),
                             );
                           }).toList(),
                           onSelected: (value) {
@@ -261,9 +261,9 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             _saveSettings();
                           },
                         );
-                      })
+                      },),
                     ),
-                  ]),
+                  ],),
                   Row(spacing: 12, children: [
                     Text('Alerts:', style: settingLabelStyle),
                     Expanded(
@@ -274,7 +274,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: alertNoticePeriods.map((opt) {
                             final theLabel = (opt == 0) ? 'At time of event' : '$opt minutes before';
                             return DropdownMenuEntry<int>(
@@ -292,9 +292,9 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             setState(() { });
                           },
                         );
-                      }),
+                      },),
                     ),
-                  ]),
+                  ],),
                   Row(spacing: 12, children: [
                     Text('Distances:', style: settingLabelStyle),
                     Expanded(
@@ -305,7 +305,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: unitsOptions.map((opt) {
                             return DropdownMenuEntry<DistanceUnits>(
                               value: opt.value,
@@ -315,7 +315,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                                 Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
                                 Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
                                 const SizedBox(height: 4),
-                              ]),
+                              ],),
                             );
                           }).toList(),
                           onSelected: (DistanceUnits? value) {
@@ -329,9 +329,9 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             _saveSettings();
                           },
                         );
-                      }),
+                      },),
                     ),
-                  ]),
+                  ],),
                   Row(spacing: 12, children: [
                     Text('Home page:', style: settingLabelStyle),
                     Expanded(
@@ -342,7 +342,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: homePageOptions.map((opt) {
                             return DropdownMenuEntry<bool>(
                               value: opt.value,
@@ -352,7 +352,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                                 Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
                                 Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
                                 const SizedBox(height: 4),
-                              ]),
+                              ],),
                             );
                           }).toList(),
                           onSelected: (bool? value) {
@@ -363,16 +363,16 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             _saveSettings();
                           },
                         );
-                      }),
+                      },),
                     ),
-                  ]),
+                  ],),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     activeThumbColor: Theme.of(context).colorScheme.tertiary,
                     title: Text('Allow analytics', style: settingLabelStyle),
                     subtitle: Text.rich(
                       TextSpan(children: [
-                      TextSpan(text: 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '),
+                      const TextSpan(text: 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '),
                       TextSpan(
                         text: 'What does this mean?',
                         style: TextStyle(
@@ -391,7 +391,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             );
                           },
                       ),
-                      ]),
+                      ],),
                     ),
                     value: usageAnalyticsEnabled ?? false,
                     onChanged: (bool value) async {

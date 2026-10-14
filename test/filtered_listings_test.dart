@@ -83,8 +83,8 @@ void main() {
                 onPressed: () => showInfoToast(context, 'Hiding all events and performances that have passed'),
                 child: const Text('Change filter'),
               ),
-            )),
-          ));
+            ),),
+          ),);
           await tester.tap(find.text('Change filter'));
           await tester.pump(const Duration(milliseconds: 400));
           final toast = tester.getRect(find.byKey(const ValueKey('filter-toast')));
@@ -687,7 +687,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: FilteredListingsPage(
-                filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
+                filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {},),
           ),
         ),
       );

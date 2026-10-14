@@ -73,7 +73,7 @@ class FairScaffold extends StatelessWidget {
                     HapticFeedback.lightImpact();
                     analyticsService.logButtonTapped('back');
                     Navigator.maybePop(context);
-                  })
+                  },)
                 : Builder(
                     builder: (context) => IconButton(
                       tooltip: 'Open navigation menu',
@@ -91,11 +91,11 @@ class FairScaffold extends StatelessWidget {
             ),
             centerTitle: false,
             actions: appBarActions.map((a) => SizedBox(width: 42, child: a)).toList(),
-            actionsPadding: EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
+            actionsPadding: const EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
-          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: homeButtonOffset),
+          floatingActionButtonLocation: const CenterDockedWithOffset(dyOffset: homeButtonOffset),
           floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
           resizeToAvoidBottomInset: false,
           floatingActionButton: (allowBack ?? false) ? null : SizedBox(
@@ -110,7 +110,7 @@ class FairScaffold extends StatelessWidget {
                 elevation: 4,
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
-                shape: CircleBorder(),
+                shape: const CircleBorder(),
                 onPressed: () {
                   HapticFeedback.selectionClick();
                   analyticsService.logButtonTapped('navigation_home');
@@ -123,7 +123,7 @@ class FairScaffold extends StatelessWidget {
           bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
             key: const ValueKey('navigation-bar-surface'),
             height: navigationBarHeight,
-            padding: EdgeInsets.only(right: 6), // to stop Favourites hitting edge
+            padding: const EdgeInsets.only(right: 6), // to stop Favourites hitting edge
             elevation: 0,
             color: colorScheme.primary,
             surfaceTintColor: Colors.transparent,
@@ -132,7 +132,7 @@ class FairScaffold extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: fairBottomNavigationBar(currentTab, onTabSelected, colorScheme, analyticsService: analyticsService),
           ),
-        ));
+        ),);
   }
 }
 
@@ -167,7 +167,7 @@ void showInfoToast(BuildContext context, String message) {
           borderRadius: BorderRadius.circular(theme.platform == TargetPlatform.iOS ? 10 : 40),
         ),
         child: Text(message, textAlign: TextAlign.center,
-            style: TextStyle(color: colours.onPrimary, fontSize: 16)),
+            style: TextStyle(color: colours.onPrimary, fontSize: 16),),
       ),
     ),
   );
@@ -187,7 +187,7 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     iconSize: 30,
     selectedItemColor: colorscheme.onPrimary,
     unselectedItemColor: colorscheme.surfaceDim,
-    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+    selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
       analyticsService.logButtonTapped('navigation_${const ['map', 'timetable', 'home', 'listings', 'favourites'][selectedIndex]}');
@@ -228,7 +228,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                     fit: BoxFit.scaleDown,
                     child: Text(' $fairDateTimes', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
                   ),
-                  Expanded(flex: 2, child: Container())
+                  Expanded(flex: 2, child: Container()),
                 ],
               ),
             ),
@@ -249,7 +249,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   MaterialPageRoute(
                       builder: (context) => AboutTheFairPage(
                             analyticsService: analyticsService,
-                          )));
+                          ),),);
             },
           ),
         ),
@@ -268,7 +268,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   MaterialPageRoute(
                       builder: (context) => ImportantInfoPage(
                             analyticsService: analyticsService,
-                          )));
+                          ),),);
             },
           ),
         ),
@@ -402,7 +402,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   MaterialPageRoute(
                       builder: (context) => SettingsPage(
                             analyticsService: analyticsService,
-                          )));
+                          ),),);
             },
           ),
         ),
@@ -421,7 +421,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   MaterialPageRoute(
                       builder: (context) => WelcomeScreen(
                             analyticsService: analyticsService,
-                          )));
+                          ),),);
             },
           ),
         ),
@@ -469,7 +469,7 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
       context: itemContext,
       builder: (dialogContext) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
+          insetPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
           shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceDim,
@@ -481,13 +481,13 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
               ),
               padding: const EdgeInsets.all(16),
               child: Column(mainAxisSize: MainAxisSize.min, spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
-                Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
-                Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
+                const Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
+                const Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
+                const Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
                 Align(
                     alignment: AlignmentGeometry.center,
                     child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png',
-                        width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
+                        width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app',),),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   TextButton(
                     onPressed: () {
@@ -495,7 +495,7 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                       analyticsService.logButtonTapped('share_app_share');
                       Navigator.of(dialogContext).pop();
                       shareApp(itemContext,
-                          'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
+                          'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/',);
                     },
                     child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
                   ),
@@ -507,12 +507,12 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                     },
                     child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
                   ),
-                ]),
-              ]),
+                ],),
+              ],),
             ),
           ),
         );
-      });
+      },);
 }
 
 class CenterDockedWithOffset extends FloatingActionButtonLocation {
@@ -601,7 +601,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               visualDensity: VisualDensity(horizontal: -4 + inflater, vertical: -4),
                               contentPadding: EdgeInsets.zero,
                               leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(6.0), child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain)),
+                                  borderRadius: BorderRadius.circular(6.0), child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain),),
                               title: Text(fairName, style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold)),
                               subtitle: Text('v${packageInfo.version}', style: textStyle),
                             ),
@@ -688,11 +688,11 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                                 },
                                 child: Text('Close', style: TextStyle(color: colorScheme.tertiary)),
                               ),
-                            ]),
-                          ]),
-                        )));
-              }));
-        });
+                            ],),
+                          ],),
+                        ),),);
+              },),);
+        },);
   }
 }
 
@@ -743,7 +743,7 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                         TextSpan(
                           children: [
                             const TextSpan(
-                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
+                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone ',),
                             TextSpan(
                                 text: '07303\u{00A0}142689',
                                 style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
@@ -757,7 +757,7 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                                     } else {
                                       throw Exception('Could not dial 07303 142689');
                                     }
-                                  }),
+                                  },),
                             const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
                           ],
                         ),
@@ -814,7 +814,7 @@ Widget _buildEmailLink(String email, {required AnalyticsService analyticsService
 }
 
 void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage,
-    {required AnalyticsService analyticsService, Color? fgColour, Color? bgColour}) {
+    {required AnalyticsService analyticsService, Color? fgColour, Color? bgColour,}) {
   fgColour ??= Theme.of(itemContext).colorScheme.secondary;
   bgColour ??= Theme.of(itemContext).colorScheme.onSecondary;
 
@@ -869,7 +869,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
             decoration: BoxDecoration(
               color: bgColour,
               borderRadius: BorderRadius.circular(4),
-              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
+              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))],
             ),
             child: Text(theMessage, softWrap: true, style: theStyle),
           ),
@@ -906,7 +906,7 @@ double estimateTextHeight({
       maxLines: maxLines,
       textDirection: TextDirection.ltr,
       textScaler: MediaQuery.textScalerOf(context),
-      strutStyle: StrutStyle.fromTextStyle(style))
+      strutStyle: StrutStyle.fromTextStyle(style),)
     ..layout(maxWidth: maxWidth);
   return tp.size.height;
 }
@@ -1187,7 +1187,7 @@ Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, Build
 Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme) async {
   return showDialog<void>(context: context, builder: (BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.all(8), // margin from screen edges
+      insetPadding: const EdgeInsets.all(8), // margin from screen edges
       shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
       backgroundColor: colorScheme.surfaceContainerLowest,
       shadowColor: colorScheme.surfaceDim,
@@ -1199,9 +1199,9 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
         ),
         padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
         child: Column(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
-          ListTile(
+          const ListTile(
             visualDensity: VisualDensity(horizontal: -2, vertical: 2),
-            leading: const Icon(Icons.error, size: 36, color: Colors.red),
+            leading: Icon(Icons.error, size: 36, color: Colors.red),
             title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
@@ -1210,7 +1210,7 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 HapticFeedback.lightImpact();
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel')
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () async {
@@ -1218,14 +1218,14 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 Navigator.of(context).pop();
                 await openAppSettings();
               },
-              child: Text('Open Settings')
+              child: const Text('Open Settings'),
             ),
-            SizedBox(width: 8),
-          ]),
-        ]),
+            const SizedBox(width: 8),
+          ],),
+        ],),
       ),
     );
-  });
+  },);
 }
 
 
@@ -1283,10 +1283,10 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
         ),
         iOS: DarwinNotificationDetails(
           threadIdentifier: 'org.millroadwinterfair.MRWFapp',
-          categoryIdentifier: categoryID
+          categoryIdentifier: categoryID,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
     String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
     if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';

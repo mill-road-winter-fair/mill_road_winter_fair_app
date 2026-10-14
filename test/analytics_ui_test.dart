@@ -67,8 +67,8 @@ void main() {
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
     await tester.pumpWithClock(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
-      0, (index) => analytics.calls.add('navigate:$index'), ColorScheme.light(), analyticsService: analytics,
-    ))));
+      0, (index) => analytics.calls.add('navigate:$index'), const ColorScheme.light(), analyticsService: analytics,
+    ),),),);
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
   });
@@ -85,8 +85,8 @@ void main() {
         description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
         imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: false,
         listingFavourited: false, listingAlerted: false, inDialog: false, onGetDirections: () {},
-        onDetailsTapped: () => analytics.calls.add('details'), analyticsService: analytics, colorScheme: ColorScheme.light(),
-      ))));
+        onDetailsTapped: () => analytics.calls.add('details'), analyticsService: analytics, colorScheme: const ColorScheme.light(),
+      ),),),);
       await tester.tap(find.byIcon(Icons.info));
       expect(analytics.calls, ['haptic', 'tap:listing_details', 'details']);
       expect(analytics.buttonEvents.single, {'button_id': 'listing_details', 'listing_id': 'listing-123', 'listing_name': 'Listing'});
@@ -104,8 +104,8 @@ void main() {
         description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
         imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: true,
         listingFavourited: false, listingAlerted: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
-        analyticsService: analytics, colorScheme: ColorScheme.light(),
-      ))));
+        analyticsService: analytics, colorScheme: const ColorScheme.light(),
+      ),),),);
       // The sheet has one IconButton: the favourite control.
       await tester.tap(find.byType(IconButton));
       await tester.tap(find.byIcon(Icons.directions_walk));
@@ -150,7 +150,7 @@ void main() {
     await tester.pumpWithClock(MaterialApp(
       theme: appThemes['light'],
       home: AnalyticsExplanationPage(analyticsService: analytics),
-    ));
+    ),);
 
     expect(find.text('What do we track?'), findsOneWidget);
     expect(find.text('• Words and phrases you enter in in-app searches.'), findsOneWidget);

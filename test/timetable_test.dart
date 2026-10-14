@@ -21,8 +21,8 @@ void main() {
             onPressed: () => showInfoToast(context, 'Showing only music performances'),
             child: const Text('Change filter'),
           ),
-        )),
-      ));
+        ),),
+      ),);
       await tester.tap(find.text('Change filter'));
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Showing only music performances'), findsOneWidget);

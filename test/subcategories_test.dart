@@ -79,7 +79,7 @@ void main() {
         for (final listing in expected)
           [for (final header in apiHeaders) listing[header]],
       ],
-    }), 200));
+    }), 200,),);
     addTearDown(client.close);
 
     expect(await fetchListings(client), expected);
@@ -90,7 +90,7 @@ void main() {
       final listing = listingFor('single', entry.key);
       expect(countCategories(listing), entry.key.startsWith('performance')
           ? (1, 1)
-          : (1, 0));
+          : (1, 0),);
       expect(getCategory(listing), {
               'food': 'Food', 'shopping': 'Shopping',
               'charityCommunityInfo': 'Charity/Community/Info',
@@ -101,7 +101,7 @@ void main() {
               'visitExperience': 'Visit/Experience',
               'service': 'Service', 
               'business': 'Business',
-            }[entry.key]);
+            }[entry.key],);
     });
 
     for (final page in ['all', 'favourite']) {
@@ -123,8 +123,8 @@ void main() {
               onSubfilterChange: (value) => setState(() => selected = value),
               analyticsService: FakeAnalyticsService(),
             );
-          }),
-        )));
+          },),
+        ),),);
         await tester.pumpAndSettle();
 
         final dropdownFinder = find.descendant(
@@ -133,13 +133,13 @@ void main() {
         );
         final dropdown = tester.widget<DropdownMenu<String?>>(dropdownFinder);
         expect({for (final option in dropdown.dropdownMenuEntries)
-          option.value: option.label}, {null: 'Everything', ...expectedSubcategories});
+          option.value: option.label,}, {null: 'Everything', ...expectedSubcategories},);
         dropdown.onSelected!(entry.key);
         await tester.pumpAndSettle();
 
         final state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
         expect(state.filteredListings.map((listing) => listing['id']),
-            unorderedEquals([entry.key, if (page == 'all') 'not-favourited']));
+            unorderedEquals([entry.key, if (page == 'all') 'not-favourited']),);
         expect(state.isShowingJustPerformance, entry.key.startsWith('performance'));
 
         tester.widget<DropdownMenu<String?>>(dropdownFinder).onSelected!(null);

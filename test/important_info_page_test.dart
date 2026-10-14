@@ -80,7 +80,7 @@ void main() {
       await tester.pumpWithClock(MyApp(
         firstExecution: false,
         analyticsService: FakeAnalyticsService(),
-      ));
+      ),);
       await settle(tester);
 
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
@@ -128,7 +128,7 @@ void main() {
         onOpenListings: (String p1, String? p2) {},
         onOpenMap: (int? p1) {},
         onTabSelected: (int value) {},
-      )));
+      ),),);
 
       await tester.tap(find.byIcon(Icons.menu));
       await settle(tester);

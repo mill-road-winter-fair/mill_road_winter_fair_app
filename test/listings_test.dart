@@ -522,7 +522,7 @@ void main() {
               "latLng",
               "imageURL",
               "startTime",
-              "endTime"
+              "endTime",
             ],
             [
               "1",
@@ -576,7 +576,7 @@ void main() {
               "12:00",
               "16:40",
             ]
-          ]
+          ],
         };
 
         listings = [];

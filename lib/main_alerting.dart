@@ -21,31 +21,31 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
   final IOSInitializationSettings initializationSettingsIOS = IOSInitializationSettings(
     requestAlertPermission: true,
     notificationCategories: [
-      DarwinNotificationCategory('UnderwayCategory', actions: <DarwinNotificationAction>[
+      const DarwinNotificationCategory('UnderwayCategory', actions: <DarwinNotificationAction>[
 //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
-      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
+      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},),
       DarwinNotificationCategory('5MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
 //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
-      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
+      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},),
       DarwinNotificationCategory('15MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snooze5mins', 'Snooze for 5 minutes'),
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
 //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
-      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
+      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},),
       DarwinNotificationCategory('30MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snooze10mins', 'Snooze for 10 minutes'),
         DarwinNotificationAction.plain('snooze20mins', 'Snooze for 20 minutes'),
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
 //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
-      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
+      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},),
       DarwinNotificationCategory('60MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snooze15mins', 'Snooze for 15 minutes'),
         DarwinNotificationAction.plain('snooze30mins', 'Snooze for 30 minutes'),
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
 //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
-      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
-    ]
+      ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle},),
+    ],
   );
   final InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
@@ -63,7 +63,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
     alertsPermissionGranted = perms != null && perms.isEnabled && perms.isAlertEnabled;
   }
   if (Platform.isAndroid) {
-    final androidChannel = AndroidNotificationChannel(
+    final androidChannel = const AndroidNotificationChannel(
       'org.millroadwinterfair.MRWFapp', // id
       'Event alerts', // name
       description: 'Mill Road Winter Fair event alerts',
@@ -101,17 +101,17 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
   DateTime? newAlertTime;
   switch (notificationResponse.actionId) {
     case 'snooze5mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 5));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 5));
     case 'snooze10mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 10));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 10));
     case 'snooze15mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 15));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 15));
     case 'snooze20mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 20));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 20));
     case 'snooze30mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 30));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 30));
     case 'snoozeStart':
-      newAlertTime = [startTime, DateTime.now().add(Duration(minutes: 2))].reduce((a, b) => a.isAfter(b) ? a: b);
+      newAlertTime = [startTime, DateTime.now().add(const Duration(minutes: 2))].reduce((a, b) => a.isAfter(b) ? a: b);
   }
   if (newAlertTime != null) {
     tz.initializeTimeZones();
@@ -149,7 +149,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       endTime, 
       noticePeriod, 
       true, 
-      null
+      null,
     );
     flutterLocalNotificationsPlugin.zonedSchedule(
       id: notificationResponse.id!,
@@ -161,7 +161,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
         android: AndroidNotificationDetails('org.millroadwinterfair.MRWFapp', 'Mill Road Winter Fair', actions: androidNotificationActions),
         iOS: DarwinNotificationDetails(threadIdentifier: 'org.millroadwinterfair.MRWFapp', categoryIdentifier: categoryID),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
     await updateAlertNoticePeriodById(notificationResponse.id!, noticePeriod);
     debugPrint('onDidReceiveBackgroundNotificationResponse scheduled new alert for $newAlertTime with message “$theMessage”');
@@ -177,24 +177,24 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       []);
     case <= 10:
       return('5MinsCategory', [
-        AndroidNotificationAction('snoozeStart', 'Snooze to start'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze to start'),
       ]);
     case <= 19:
       return('15MinsCategory', [
-        AndroidNotificationAction('snooze5mins', 'Snooze 5'),
-        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
+        const AndroidNotificationAction('snooze5mins', 'Snooze 5'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
     case <= 35:
       return('30MinsCategory', [
-        AndroidNotificationAction('snooze10mins', 'Snooze 10'),
-        AndroidNotificationAction('snooze20mins', 'Snooze 20'),
-        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
+        const AndroidNotificationAction('snooze10mins', 'Snooze 10'),
+        const AndroidNotificationAction('snooze20mins', 'Snooze 20'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
     default:
       return('60MinsCategory',[
-        AndroidNotificationAction('snooze15mins', 'Snooze 15'),
-        AndroidNotificationAction('snooze30mins', 'Snooze 30'),
-        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
+        const AndroidNotificationAction('snooze15mins', 'Snooze 15'),
+        const AndroidNotificationAction('snooze30mins', 'Snooze 30'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
   }
 }
@@ -273,7 +273,7 @@ class AlertSchedule {
     this.listingEndTime,
     this.noticePeriod, 
     this.isScheduled, 
-    this.fromHighlight
+    this.fromHighlight,
   );
 
   // serialise to JSON for saving
@@ -320,7 +320,7 @@ class AlertScheduleStore {
       combineDateAndTime(theListing['endTime'], fairDate),
       noticePeriod,
       isScheduled,
-      null
+      null,
     );
     alertSchedules.add(newAlert);
     return nextId++;

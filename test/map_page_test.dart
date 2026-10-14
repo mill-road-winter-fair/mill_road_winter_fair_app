@@ -142,7 +142,7 @@ void main() {
 
         await tester.pumpWidget(MaterialApp(
           home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
-        ));
+        ),);
         await tester.pumpAndSettle();
         await tester.tap(find.byTooltip('Search the map'));
         await tester.pumpAndSettle();
@@ -178,7 +178,7 @@ void main() {
       });
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      ),);
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       state.addSimpleMarker('Service-FirstAid', const LatLng(52.2, 0.14));
@@ -211,7 +211,7 @@ void main() {
         tester.platformDispatcher.platformBrightnessTestValue = brightness;
         await tester.pumpAndSettle();
         expect(state.markers[const MarkerId('3')]!.icon.toJson(),
-          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson());
+          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson(),);
       }
       // A queued refresh must not call setState after the map has been removed.
       selectedThemeKey = 'dark';
@@ -250,7 +250,7 @@ void main() {
             ),
           ),
         ),
-      ));
+      ),);
       await tester.pumpAndSettle();
       tester.state<MapPageState>(find.byType(MapPage)).hideAllMarkers();
       await tester.pump();
@@ -354,7 +354,7 @@ void main() {
       listings = sharedLocationListings;
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(body: MapPage(listings: sharedLocationListings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      ),);
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
@@ -364,7 +364,7 @@ void main() {
       final state = tester.state<MapPageState>(find.byType(MapPage));
       expect(state.markers.length, 2);
       expect(state.markers.values.map((m) => m.position).toSet().length, 2,
-          reason: 'Two matching markers at the same lat/lng should be visually offset to avoid overlap.');
+          reason: 'Two matching markers at the same lat/lng should be visually offset to avoid overlap.',);
     });
 
     testWidgets('cancelNavigation restores markers matching any selected category', (tester) async {
@@ -412,7 +412,7 @@ void main() {
       addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null));
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
-      ));
+      ),);
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       Set<String> visibleIds() => state.markers.values
@@ -516,7 +516,7 @@ void main() {
         home: Scaffold(
           body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
         ),
-      ));
+      ),);
       await tester.pumpAndSettle();
 
       final state = tester.state<MapPageState>(find.byType(MapPage));
@@ -698,8 +698,8 @@ void main() {
       expect(find.byType(Dialog), findsOneWidget);
       expect(
           find.text(
-              'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
-          findsOneWidget);
+              'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',),
+          findsOneWidget,);
 
       // Verify "Close" button exists to dismiss the dialog
       expect(find.text('Close'), findsOneWidget);
@@ -1325,7 +1325,7 @@ void main() {
                         preferredMapOrientation = (preferredMapOrientation == MapOrientation.adaptive) ? MapOrientation.alwaysNorth : MapOrientation.adaptive;
                       });
                     },
-                  )
+                  ),
                 ],
               );
             },

@@ -49,7 +49,7 @@ void main() {
             ],
           }),
           200,
-        ));
+        ),);
     addTearDown(client.close);
 
     final result = await fetchListings(client, onCacheFallback: () => fallbacks++);

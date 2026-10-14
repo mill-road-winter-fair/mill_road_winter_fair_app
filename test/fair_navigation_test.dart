@@ -19,12 +19,12 @@ void main() {
         currentTab: current,
         onTabSelected: selected.add,
         analyticsService: FakeAnalyticsService(),
-      )));
+      ),),);
       await tester.pumpAndSettle();
       final bar =
           tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
       expect(bar.items.map((item) => item.label),
-          ['Map', 'Timetable', '', 'Listings', 'Favourites']);
+          ['Map', 'Timetable', '', 'Listings', 'Favourites'],);
       expect(bar.currentIndex, [2, 0, 1, 3, 4][current]);
     }
     for (final label in [
@@ -32,7 +32,7 @@ void main() {
       'Timetable',
       '',
       'Listings',
-      'Favourites'
+      'Favourites',
     ]) {
       await tester.tap(find.text(label));
       await tester.pumpAndSettle();
@@ -49,7 +49,7 @@ void main() {
     for (final size in [
       const Size(320, 568),
       const Size(844, 390),
-      const Size(1024, 1366)
+      const Size(1024, 1366),
     ]) {
       tester.view.physicalSize = size;
       await tester.pumpWidget(MaterialApp(
@@ -60,7 +60,7 @@ void main() {
             currentTab: 1,
             onTabSelected: selected.add,
             analyticsService: FakeAnalyticsService(),
-          )));
+          ),),);
       await tester.pumpAndSettle();
       final button =
           tester.getRect(find.byKey(const ValueKey('home-navigation-button')));
@@ -70,12 +70,12 @@ void main() {
       expect(button.center.dx, closeTo(bar.center.dx + 3, .01));
       expect(button.center.dy, closeTo(bar.top + 20, .01));
       final surface = tester.widget<BottomAppBar>(
-          find.byKey(const ValueKey('navigation-bar-surface')));
+          find.byKey(const ValueKey('navigation-bar-surface')),);
       expect(surface.height, 62);
       expect(surface.shape, isA<CircularNotchedRectangle>());
       expect(surface.clipBehavior, Clip.antiAlias);
       expect(tester.getRect(find.byKey(const ValueKey('page-body'))).bottom,
-          closeTo(bar.top, .01));
+          closeTo(bar.top, .01),);
       await tester.tapAt(Offset(button.center.dx, button.top + 8));
       await tester.pumpAndSettle();
       expect(selected.last, 0);
@@ -93,7 +93,7 @@ void main() {
       currentTab: 0,
       onTabSelected: (_) {},
       analyticsService: FakeAnalyticsService(),
-    )));
+    ),),);
     expect(find.byType(BottomNavigationBar), findsNothing);
     expect(find.byKey(const ValueKey('home-navigation-button')), findsNothing);
   });

@@ -41,7 +41,7 @@ class MapPage extends StatefulWidget {
       this.destinationId,
       this.destinationLatLng,
       this.nearestMarkerCount,
-      required this.analyticsService});
+      required this.analyticsService,});
 
   @override
   MapPageState createState() => MapPageState();
@@ -192,7 +192,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         points: roadClosurePolygonPoints,
         strokeWidth: 3,
         strokeColor: Theme.of(context).colorScheme.tertiary,
-        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50));
+        fillColor: Theme.of(context).colorScheme.tertiary.withAlpha(50),);
   }
 
   void updateRoadClosurePolygonVisibility(bool visibleState) {
@@ -237,17 +237,17 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         const SizedBox(height: 10),
                         const Text(
                             style: TextStyle(height: 1.25),
-                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
+                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',),
                         const SizedBox(height: 10),
                         const Text('Pedestrians should exercise particular care before the road is fully closed.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),),
                         const SizedBox(height: 10),
                         const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),),
                         const SizedBox(height: 10),
                         const Text(
                             style: TextStyle(height: 1.25),
-                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.',),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
@@ -255,7 +255,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               const TextSpan(
                                   style: TextStyle(height: 1.25),
                                   text:
-                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
+                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at ',),
                               TextSpan(
                                   text: 'www.millroadwinterfair.org',
                                   style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
@@ -264,7 +264,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                       HapticFeedback.lightImpact();
                                       widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
                                       launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
-                                    }),
+                                    },),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
                           ),
@@ -559,7 +559,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('MapPageState createAllMarkerBitmaps called');
     const listingTypes = ['Food', 'Shopping', 'Charity/Community/Info', 'Music', 'Childrens', 'Dance', 'Other', 'Visit/Experience', 'Service', 'Business', 'Service-FirstAid', 'Service-Information', 'Service-Toilet',
-            'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-PerformanceEvent'];
+            'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-PerformanceEvent',];
     final themeKey = getEffectiveThemeKey(selectedThemeKey);
     final descriptors = <String, BitmapDescriptor>{};
     for (var listingType in listingTypes) {
@@ -780,8 +780,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                                       destinationId: rel['id'],
                                                       destinationLatLng: stringToLatLng(rel['latLng']),
                                                       analyticsService: widget.analyticsService,
-                                                    )
-                                                  )
+                                                    ),
+                                                  ),
                                                 );
                                               },
                                               onAlertTapped: () async {
@@ -794,7 +794,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                               colorScheme: colorScheme,
                                             ),
                                           ),
-                                          if (index != relatedListings.length - 1) SizedBox(height: 8),
+                                          if (index != relatedListings.length - 1) const SizedBox(height: 8),
                                         ],
                                       );
                                     },
@@ -924,8 +924,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                       destinationId: listing['id'],
                                       destinationLatLng: destinationLatLng,
                                       analyticsService: widget.analyticsService,
-                                    )
-                                  )
+                                    ),
+                                  ),
                                 );
                               },
                               onAlertTapped: () async {
@@ -941,12 +941,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         ),
                       ),
                     );
-                  });
-                }),
+                  },);
+                },),
               );
             },
           );
-        });
+        },);
     markers[markerId] = newMarker;
   }
 
@@ -1012,7 +1012,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     debugPrint('MapPageState hideAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
       _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds
-          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, false
+          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, false,
     );
   }
 
@@ -1020,7 +1020,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     debugPrint('MapPageState showAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
       _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds
-          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, true
+          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, true,
     );
   }
 
@@ -1049,12 +1049,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       "Filter map layers",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.left,
-                    )
-                  ]),
+                    ),
+                  ],),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Music'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['performanceMusic']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Music")),
@@ -1073,7 +1073,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Dance'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['performanceDance']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Dance")),
@@ -1090,7 +1090,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Other'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['performanceOther']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Other performances")),
@@ -1107,7 +1107,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Childrens'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['performanceChildrens']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Children’s entertainment")),
@@ -1124,7 +1124,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Visit/Experience'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['visitExperience']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Visits and experiences")),
@@ -1143,7 +1143,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Food'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['food']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Food and drink")),
@@ -1162,7 +1162,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['shopping']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shopping")),
@@ -1181,7 +1181,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Charity/Community/Info'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['charityCommunityInfo']!.iconData),
                     title:  const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Charity, community, info")),
@@ -1200,7 +1200,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Business'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['business']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Other businesses")),
@@ -1219,7 +1219,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Service'),
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
                     secondary: Icon(subfilterCategoryLabels['service']!.iconData),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Services")),
@@ -1239,7 +1239,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: Theme.of(context).colorScheme.tertiary,
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: const EdgeInsets.all(0),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shade road closures")),
                     value: preferredRoadClosurePolygonVisible,
                     onChanged: (value) {
@@ -1687,7 +1687,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     }
 
     _moveCameraToBoundsWithRotation(
-        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing);
+        LatLng(polylineMinLat, polylineMinLong), LatLng(polylineMaxLat, polylineMaxLong), padding * (1 + extraPaddingForShortTrips), bearing,);
   }
 
   void _moveCameraToBoundsWithRotation(LatLng southwestMin, LatLng northeastMax, double padding, double rotation) {
@@ -1989,7 +1989,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 }
               },
               style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_isSearching) ? Colors.white.withAlpha(30) : null)),
-              icon: Icon(Icons.search, size: 26),
+              icon: const Icon(Icons.search, size: 26),
             ),
           ],
           allowBack: (doingAPushNavigation != null),
@@ -2003,7 +2003,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     key: const ValueKey('searchBar'),
                     color: colorScheme.surfaceDim,
                     constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     child: SearchBar(
                       autoFocus: true,
                       controller: _searchController,
@@ -2025,7 +2025,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     ),
                   ),
                 ],
-              ) : SizedBox.shrink(),
+              ) : const SizedBox.shrink(),
             ),
             // Let the map use its keyboard-adjusted height within the full-size stack.
             Expanded(child: Stack(fit: StackFit.loose, children: [
@@ -2085,7 +2085,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         },
                         polygons: _polygons,
                         markers: markers.values.toSet(),
-                        polylines: polylines
+                        polylines: polylines,
                       ),
                     ),
                   );
@@ -2121,7 +2121,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   color: colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: const Offset(2, 2))
+                                  offset: const Offset(2, 2),),
                             ],
                           ),
                           child: const Icon(Icons.home),
@@ -2152,7 +2152,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   color: colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: const Offset(2, 2))
+                                  offset: const Offset(2, 2),),
                             ],
                           ),
                           child: const Icon(Icons.radar),
@@ -2193,7 +2193,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               color: colorScheme.onSurfaceVariant.withAlpha(127),
                               spreadRadius: 1,
                               blurRadius: 3,
-                              offset: const Offset(2, 2))
+                              offset: const Offset(2, 2),),
                           ],
                         ),
                         child: Icon(_layersIcon),
@@ -2232,14 +2232,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   color: colorScheme.onSurfaceVariant.withAlpha(127),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: const Offset(2, 2))
+                                  offset: const Offset(2, 2),),
                             ],
                           ),
                           child: AnimatedRotation(
                             turns: _compassBearing / 360.0,
                             duration: const Duration(milliseconds: 200),
                             curve: Curves.easeOut,
-                            child: Icon(Icons.assistant_navigation),
+                            child: const Icon(Icons.assistant_navigation),
                           ),
                         ),
                       ),
@@ -2258,7 +2258,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
                         padding: const EdgeInsets.all(0),
                         elevation: 3,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         widget.analyticsService.logButtonTapped('distance_to_destination');
@@ -2334,8 +2334,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     ),
                   ),
                 ),
-            ])),
-          ]),
+            ],),),
+          ],),
           analyticsService: widget.analyticsService,
         );
       },

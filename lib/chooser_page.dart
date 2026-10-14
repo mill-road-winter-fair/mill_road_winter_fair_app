@@ -390,7 +390,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
                 },
               ),
             ),
-          )
+          ),
         );
       },
     );
@@ -764,11 +764,11 @@ class _CachedLabel extends StatelessWidget {
                   Shadow(blurRadius: 16, color: colourScheme.primary),
                 ],
               ),
-            )),
+            ),),
           ),
         ),
       ),
-    ]);
+    ],);
   }
 
 }

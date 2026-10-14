@@ -11,6 +11,6 @@ extension PumpWithClock on WidgetTester {
     return pumpWidget(Provider<DateTimeProvider>.value(
       value: dateTimeProvider,
       child: widget,
-    ));
+    ),);
   }
 }

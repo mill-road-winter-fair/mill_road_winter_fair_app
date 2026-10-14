@@ -36,7 +36,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(MaterialApp(
         home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
-      ));
+      ),);
       await settle(tester);
 
       var dots = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).dotsDecorator;
@@ -57,7 +57,7 @@ void main() {
     testWidgets('background stays fixed while panels are swiped', (tester) async {
       await tester.pumpWidget(MaterialApp(
         home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
-      ));
+      ),);
       await settle(tester);
 
       final background = find.image(const AssetImage('assets/welcomeScreen/chooserPage_background.jpg'));
@@ -96,7 +96,7 @@ void main() {
             child: child!,
           ),
           home: OnBoardingPage(analyticsService: FakeAnalyticsService(), onFinished: () => finished = true),
-        ));
+        ),);
         await settle(tester);
 
         final pages = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).pages!;
@@ -113,7 +113,7 @@ void main() {
               rowBottom,
               lessThan(tester
                   .getTopLeft(find.byIcon(Icons.arrow_forward).evaluate().isNotEmpty ? find.byIcon(Icons.arrow_forward) : find.text('Done'))
-                  .dy));
+                  .dy,),);
           expect(tester.takeException(), isNull);
           expect(find.text('Take me straight to the app!').hitTestable(), findsOneWidget);
 

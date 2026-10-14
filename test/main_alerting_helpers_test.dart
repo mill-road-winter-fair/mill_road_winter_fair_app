@@ -33,7 +33,7 @@ class _FakeAndroidFlutterLocalNotificationsPlugin
 
   @override
   Future<NotificationAppLaunchDetails?> getNotificationAppLaunchDetails() async =>
-      NotificationAppLaunchDetails(false);
+      const NotificationAppLaunchDetails(false);
 
   @override
   Future<void> zonedSchedule({
@@ -127,7 +127,7 @@ void main() {
     });
 
     test('initialiseFlutterLocalNotificationsPlugin forwards notification responses to the stream', () async {
-      final response = NotificationResponse(
+      final response = const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 42,
       );
@@ -208,28 +208,28 @@ void main() {
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: null,
         payload: validPayload,
-      ));
-      notificationTapBackground(NotificationResponse(
+      ),);
+      notificationTapBackground(const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 1,
         payload: null,
-      ));
-      notificationTapBackground(NotificationResponse(
+      ),);
+      notificationTapBackground(const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 1,
         payload: '{',
-      ));
+      ),);
       notificationTapBackground(NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 1,
         payload: invalidStartPayload,
-      ));
+      ),);
       notificationTapBackground(NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotificationAction,
         id: 1,
         actionId: 'unsupported-action',
         payload: validPayload,
-      ));
+      ),);
       await Future<void>.delayed(Duration.zero);
 
       expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isEmpty);
@@ -260,7 +260,7 @@ void main() {
             id: index + 1,
             actionId: actionIds[index],
             payload: payload,
-          ));
+          ),);
           await Future<void>.delayed(Duration.zero);
         }
 
@@ -284,7 +284,7 @@ void main() {
           id: 1,
           actionId: 'snooze5mins',
           payload: payload,
-        ));
+        ),);
         await Future<void>.delayed(Duration.zero);
 
         expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isEmpty);
@@ -310,7 +310,7 @@ void main() {
           true,
           null,
         ),
-      ], 8);
+      ], 8,);
       await prefs.setString('alertsStore', jsonEncode(store));
 
       await updateAlertNoticePeriodById(7, 30);
@@ -414,7 +414,7 @@ void main() {
           true,
           null,
         ),
-      ], 3);
+      ], 3,);
       alertsStore = store;
 
       alertsStore.saveAllEventAlerts();
@@ -454,7 +454,7 @@ void main() {
           true,
           null,
         ),
-      ], 19);
+      ], 19,);
       alertsStore = AlertScheduleStore([
         AlertSchedule(
           99,
@@ -467,7 +467,7 @@ void main() {
           false,
           null,
         ),
-      ], 100);
+      ], 100,);
       await prefs.setString('alertsStore', jsonEncode(live));
 
       await alertsStore.refreshEventAlertSchedules();
@@ -596,7 +596,7 @@ void main() {
             true,
             null,
           ),
-        ], 67);
+        ], 67,);
 
         await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
         await setTheAlert(tester.element(find.byType(SizedBox)), 15, listingId);

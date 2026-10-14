@@ -60,7 +60,7 @@ Future<void> main() async {
   locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
   locationPermission = await Geolocator.checkPermission();
   debugPrint(
-      'Location services enabled: $locationServicesEnabled, permission: $locationPermission');
+      'Location services enabled: $locationServicesEnabled, permission: $locationPermission',);
 
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
@@ -70,7 +70,7 @@ Future<void> main() async {
           Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
         ],
         child: RootWidget(firstExecution: firstExecution, analyticsService: analyticsService, startupCacheFallback: startupCacheFallback.future),
-      )));
+      ),),);
 
   // Refresh after rendering so a slow or unavailable network cannot block startup.
   startupCacheFallback.complete(await _refreshListingsAfterStartup());
@@ -325,7 +325,7 @@ class HomePageState extends State<HomePage> with RouteAware {
 
   void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
     debugPrint(
-        'HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
+        'HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot',);
     setState(() {
       timetableFilteredMusicOrNot = newFilteredMusicOrNot;
       timetableOnlyNowOrSoon = newOnlyNowOrSoon;
@@ -334,7 +334,7 @@ class HomePageState extends State<HomePage> with RouteAware {
 
   void listingsSubfilterChange(String? newSubfilterCategory) {
     debugPrint(
-        'HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory');
+        'HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory',);
     setState(() {
       listingsSubfilterCategory = newSubfilterCategory;
     });
@@ -353,21 +353,21 @@ class HomePageState extends State<HomePage> with RouteAware {
           onOpenTimetable: openTimetable,
           onOpenListings: openListings,
           onOpenMap: openMap,
-          analyticsService: widget.analyticsService),
+          analyticsService: widget.analyticsService,),
       MapPage(
           listings: listings,
           key: mapPageKey,
           nearestMarkerCount: mapNearestMarkerCount,
           onTabSelected: setCurrentIndex,
           cancelMapNearest: cancelMapNearest,
-          analyticsService: widget.analyticsService),
+          analyticsService: widget.analyticsService,),
       TimetablePage(
           theEvents: listings,
           onTabSelected: setCurrentIndex,
           filteredMusicOrNot: timetableFilteredMusicOrNot,
           onlyNowOrSoon: timetableOnlyNowOrSoon,
           onFilterChange: timetableFilterChange,
-          analyticsService: widget.analyticsService),
+          analyticsService: widget.analyticsService,),
       FilteredListingsPage(
           filterCategory: "all",
           subfilterCategory: listingsSubfilterCategory,
@@ -375,7 +375,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           key: _allListingsKey,
           onTabSelected: setCurrentIndex,
           onSubfilterChange: listingsSubfilterChange,
-          analyticsService: widget.analyticsService),
+          analyticsService: widget.analyticsService,),
       FilteredListingsPage(
           filterCategory: "favourite",
           subfilterCategory: listingsSubfilterCategory,
@@ -383,7 +383,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           key: _savedListingsKey,
           onTabSelected: setCurrentIndex,
           onSubfilterChange: listingsSubfilterChange,
-          analyticsService: widget.analyticsService),
+          analyticsService: widget.analyticsService,),
     ];
     return IndexedStack(
       index: index,
