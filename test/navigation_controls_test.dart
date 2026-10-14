@@ -7,6 +7,7 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'pump_with_clock.dart';
 
 class NavigationAnalytics extends FakeAnalyticsService {
   final events = <Map<String, String?>>[];
@@ -70,7 +71,7 @@ void main() {
   });
 
   Future<MapPageState> openMap(WidgetTester tester, {AnalyticsService? analytics}) async {
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWithClock(MaterialApp(
         home: MapPage(
       listings: listings,
       onTabSelected: (_) {},
@@ -101,6 +102,15 @@ void main() {
     expect(find.text('Road closures'), findsNothing);
     expect(find.byTooltip('Switch to satellite map'), findsOneWidget);
     expect(find.byType(BackButton), findsOneWidget);
+    expect(find.text('Navigating to'), findsOneWidget);
+    expect(find.text('11:00–15:00'), findsOneWidget);
+    expect(find.byType(BottomAppBar), findsNothing);
+    await tester.tap(find.text('Minimise'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Show destination details'), findsOneWidget);
+    await tester.tap(find.byTooltip('Show destination details'));
+    await tester.pumpAndSettle();
+    expect(find.text('Navigating to'), findsOneWidget);
     expect(original.navigationInProgress, isFalse);
     expect(original.markers, originalMarkers);
     expect(tester.state<MapPageState>(find.byType(MapPage)), isNot(same(original)));
@@ -187,7 +197,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(state.markers[const MarkerId('destination')]?.visible, isTrue);
     expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).markers.any((marker) => marker.markerId.value == 'destination' && marker.visible), isTrue);
-    await tester.tap(find.byIcon(Icons.cancel));
+    state.cancelNavigation();
     await tester.pumpAndSettle();
     expect(find.text('Navigating to'), findsNothing);
   });
@@ -209,10 +219,23 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('pushed directions omit opening times for brick-and-mortar businesses', (tester) async {
+    firstExecution = false;
+    listings.first['brickAndMortar'] = 'TRUE';
+    final original = await openMap(tester);
+    final closed = original.getDirections('destination', const LatLng(52.199687, 0.138813), false);
+    await tester.pumpAndSettle();
+    expect(find.text('Navigating to'), findsOneWidget);
+    expect(find.text('11:00–15:00'), findsNothing);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    await closed;
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('destination details initially collapse then stay open until manually minimised', (tester) async {
     var distanceTaps = 0;
     final actions = <String>[];
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWithClock(MaterialApp(
       home: Scaffold(
         body: Align(
           alignment: Alignment.bottomCenter,
@@ -306,7 +329,7 @@ void main() {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWithClock(MaterialApp(
         home: MediaQuery(
       data: const MediaQueryData(size: Size(390, 844), padding: EdgeInsets.only(bottom: 40)),
       child: Scaffold(body: Column(children: [

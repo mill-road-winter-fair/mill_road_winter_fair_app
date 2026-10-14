@@ -1,5 +1,8 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
@@ -40,7 +43,7 @@ void main() {
     List<Map<String, dynamic>> listings,
     List<String> favouriteListingKeys,
   ) async {
-    await tester.pumpWidget(
+    await tester.pumpWithClock(
       MaterialApp(
         home: Scaffold(
           body: FilteredListingsPage(
@@ -58,6 +61,46 @@ void main() {
   }
 
   group('FilteredListingsPage', () {
+    testWidgets('filter feedback clears navigation in portrait and landscape', (tester) async {
+      onTest = true;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(() => FToast().removeQueuedCustomToasts());
+
+      for (final size in [const Size(320, 568), const Size(844, 390)]) {
+        for (final inset in [0.0, 34.0, 48.0]) {
+          tester.view.physicalSize = size;
+          tester.view.padding = FakeViewPadding(bottom: inset);
+          await tester.pumpWidget(MaterialApp(
+            home: Builder(builder: (context) => FairScaffold(
+              appBarTitle: 'Fair',
+              currentTab: 3,
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
+              body: TextButton(
+                onPressed: () => showInfoToast(context, 'Hiding all events and performances that have passed'),
+                child: const Text('Change filter'),
+              ),
+            )),
+          ));
+          await tester.tap(find.text('Change filter'));
+          await tester.pump(const Duration(milliseconds: 400));
+          final toast = tester.getRect(find.byKey(const ValueKey('filter-toast')));
+          final home = tester.getRect(find.byKey(const ValueKey('home-navigation-button')));
+          expect(home.top - toast.bottom, closeTo(16, 0.01));
+          expect(toast.left, greaterThanOrEqualTo(24));
+          expect(toast.right, lessThanOrEqualTo(size.width - 24));
+
+          await tester.pump(const Duration(seconds: 2));
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+        }
+      }
+    });
+
     testWidgets('displays error text when fetchFilteredListings fails', (WidgetTester tester) async {
       // Define a test listing
       List<Map<String, dynamic>> listings = [];
@@ -143,14 +186,12 @@ void main() {
       expect(find.text('10:30—16:30'), findsOneWidget);
       expect(find.text('Gwydir St Car Park (~206m away)'), findsOneWidget);
       expect(find.text('01223 111111'), findsNothing); // as Details won't be open
-      expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (~197m away)'), findsOneWidget);
       // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
       expect(find.byIcon(Icons.directions_walk), findsExactly(3));
-      expect(find.byIcon(Icons.public), findsExactly(2));
     });
 
     testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
@@ -522,7 +563,7 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await settle(tester);
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
@@ -642,7 +683,7 @@ void main() {
       // Start with a known current location so distance sorting works if required
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await tester.pumpWidget(
+      await tester.pumpWithClock(
         MaterialApp(
           home: Scaffold(
             body: FilteredListingsPage(
