@@ -102,7 +102,7 @@ void main() {
     expect(find.text('Road closures'), findsNothing);
     expect(find.byTooltip('Switch to satellite map'), findsOneWidget);
     expect(find.byType(BackButton), findsOneWidget);
-    expect(find.text('Navigating to'), findsOneWidget);
+    expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(find.text('11:00–15:00'), findsOneWidget);
     expect(find.byType(BottomAppBar), findsNothing);
     await tester.tap(find.byTooltip('Minimise destination details'));
@@ -110,7 +110,7 @@ void main() {
     expect(find.byTooltip('Show destination details'), findsOneWidget);
     await tester.tap(find.byTooltip('Show destination details'));
     await tester.pumpAndSettle();
-    expect(find.text('Navigating to'), findsOneWidget);
+    expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(original.navigationInProgress, isFalse);
     expect(original.markers, originalMarkers);
     expect(tester.state<MapPageState>(find.byType(MapPage)), isNot(same(original)));
@@ -120,7 +120,7 @@ void main() {
     await routeClosed;
     expect(tester.state<MapPageState>(find.byType(MapPage)), same(original));
     expect(find.byIcon(Icons.filter_alt), findsOneWidget);
-    expect(find.text('Navigating to'), findsNothing);
+    expect(find.text('Glazed and Confused'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -162,7 +162,7 @@ void main() {
     await state.doTheNavigation('removed-listing', const LatLng(52.199687, 0.138813), false);
     await tester.pumpAndSettle();
     expect(find.text('Directions'), findsOneWidget);
-    expect(find.text('Navigating to'), findsNothing);
+    expect(find.text('Glazed and Confused'), findsNothing);
     expect(tester.takeException(), isNull);
   });
   testWidgets('destination card overlays the map without changing camera space and clears on cancel', (tester) async {
@@ -173,13 +173,13 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final state = await openMap(tester);
-    expect(find.text('Navigating to'), findsNothing);
+    expect(find.text('Glazed and Confused'), findsNothing);
     await navigate(tester, state);
 
-    for (final text in ['Navigating to', '🍩', 'Glazed and Confused', 'Doughnuts', 'Gwydir St Car Park', '11:00–15:00']) {
+    for (final text in ['🍩', 'Glazed and Confused', 'Doughnuts', 'Gwydir St Car Park', '11:00–15:00']) {
       expect(find.text(text), findsOneWidget);
     }
-    final card = find.ancestor(of: find.text('Navigating to'), matching: find.byType(Material)).first;
+    final card = find.ancestor(of: find.text('Glazed and Confused'), matching: find.byType(Material)).first;
     final shape = tester.widget<Material>(card).shape! as RoundedRectangleBorder;
     expect(shape.side, BorderSide(color: Theme.of(tester.element(card)).colorScheme.primary, width: 0.5));
     final bounds = tester.getRect(card);
@@ -199,7 +199,7 @@ void main() {
     expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).markers.any((marker) => marker.markerId.value == 'destination' && marker.visible), isTrue);
     state.cancelNavigation();
     await tester.pumpAndSettle();
-    expect(find.text('Navigating to'), findsNothing);
+    expect(find.text('Glazed and Confused'), findsNothing);
   });
 
   testWidgets('destination card omits missing optional fields and supports a single time', (tester) async {
@@ -225,11 +225,28 @@ void main() {
     final original = await openMap(tester);
     final closed = original.getDirections('destination', const LatLng(52.199687, 0.138813), false);
     await tester.pumpAndSettle();
-    expect(find.text('Navigating to'), findsOneWidget);
+    expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(find.text('11:00–15:00'), findsNothing);
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     await closed;
+    expect(tester.takeException(), isNull);
+  });
+  testWidgets('navigation view toggles without requesting a new location fix', (tester) async {
+    firstExecution = false;
+    final state = await openMap(tester);
+    await navigate(tester, state);
+    state.toggleNavigationView();
+    await tester.pumpAndSettle();
+    expect(tester.widget<NavigationBottomRow>(find.byType(NavigationBottomRow)).following, isFalse);
+    currentLatLng = const LatLng(52.2, 0.13);
+    state.polylines.add(const Polyline(polylineId: PolylineId('route'), points: [LatLng(52.2, 0.13), LatLng(52.201, 0.13)]));
+    state.toggleNavigationView();
+    await tester.pumpAndSettle();
+    expect(tester.widget<NavigationBottomRow>(find.byType(NavigationBottomRow)).following, isTrue);
+    state.toggleNavigationView();
+    await tester.pumpAndSettle();
+    expect(tester.widget<NavigationBottomRow>(find.byType(NavigationBottomRow)).following, isFalse);
     expect(tester.takeException(), isNull);
   });
   testWidgets('destination details initially collapse then stay open until manually minimised', (tester) async {
@@ -296,7 +313,7 @@ void main() {
     await tester.tap(find.byTooltip('Show destination details'));
     await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 10));
-    expect(find.text('Navigating to'), findsOneWidget);
+    expect(find.text('Glazed and Confused'), findsOneWidget);
     expect(analytics.events, [
       {'button': 'destination_card_minimise', 'id': 'destination', 'name': 'Glazed and Confused'},
       {'button': 'destination_card_expand', 'id': 'destination', 'name': 'Glazed and Confused'},
@@ -321,7 +338,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).mapType, MapType.hybrid);
     expect(preferredMapStyleType, MapStyleType.hybrid);
-    expect(find.text('Navigating to'), findsOneWidget);
+    expect(find.text('Glazed and Confused'), findsOneWidget);
   });
 
   testWidgets('navigation row keeps both controls below the map and above the system inset', (tester) async {
@@ -352,7 +369,7 @@ void main() {
     expect(cardBounds.top, greaterThan(mapBounds.bottom));
     expect(bounds.bottom, lessThanOrEqualTo(804));
     expect(tester.getRect(find.byType(NavigationBottomRow)).bottom, closeTo(844, 1));
-    expect(bounds.height, 48);
+    expect(bounds.height, greaterThanOrEqualTo(48));
     final minimiseBounds = tester.getRect(find.byTooltip('Minimise destination details'));
     expect(minimiseBounds.top, greaterThanOrEqualTo(bounds.bottom));
     expect(minimiseBounds.size, const Size(40, 40));

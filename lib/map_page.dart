@@ -17,6 +17,7 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/navigation_camera.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
@@ -84,6 +85,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   double? mapWidth;
   double? mapHeight;
   bool _navigationCameraFitted = false;
+  bool _followNavigation = false;
+  Position? _navigationPosition;
   String? _distanceToDestination;
   Map<String, dynamic>? _navigationListing;
   StreamSubscription<Position>? _positionStream;
@@ -1334,6 +1337,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
     if (!mounted) return;
     _navigationCameraFitted = false;
+    _followNavigation = false;
+    _navigationPosition = null;
     _cameraBeforeNavigation = _currentCamera;
     hideAllMarkers();
     _polygons.clear();
@@ -1370,9 +1375,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     if (currentLatLng != null) {
       // Get the user's current location
       Position position = await getCurrentPosition();
-      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
+      _navigationPosition = position;
+      currentLatLng = LatLng(position.latitude, position.longitude);
       if (!mounted) return;
-      await updatePolyline(currentLatLng, destination);
+      await updatePolyline(currentLatLng!, destination);
       if (!mounted) return;
       // Set the camera position once, at the beginning of the navigation
       _fitNavigationCameraOnce();
@@ -1401,7 +1407,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void cancelNavigation() async {
     debugPrint('MapPageState cancelNavigation called');
+    _destination = null;
     _navigationListing = null;
+    _followNavigation = false;
+    _navigationPosition = null;
     // Halt the location subscription
     _positionStream?.cancel();
 
@@ -1462,8 +1471,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         distanceFilter: 3,
       ),
     ).listen((Position position) async {
+      if (!mounted || _destination != destination) return;
+      _navigationPosition = position;
       // Update the user's current location
       currentLatLng = LatLng(position.latitude, position.longitude);
+
+      _updateFollowingCamera();
 
       // If a destination is set, get new directions and update the polyline
       if (_destination != null) {
@@ -1691,8 +1704,23 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
 
+  void toggleNavigationView() {
+    if (currentLatLng == null || polylines.isEmpty) return;
+    setState(() => _followNavigation = !_followNavigation);
+    if (_followNavigation) {
+      _updateFollowingCamera();
+    } else {
+      _setMapCameraToFitPolyline(polylines);
+    }
+  }
+
+  void _updateFollowingCamera() {
+    if (!mounted || !_followNavigation || currentLatLng == null || polylines.isEmpty) return;
+    final camera = navigationCamera(currentLatLng!, polylines.first.points, position: _navigationPosition);
+    _controller?.animateCamera(CameraUpdate.newCameraPosition(camera));
+  }
   void _fitNavigationCameraOnce() {
-    if (_navigationCameraFitted || _controller == null || polylines.isEmpty ||
+    if (_followNavigation || _navigationCameraFitted || _controller == null || polylines.isEmpty ||
         currentLatLng == null || mapWidth == null || mapHeight == null) {
       return;
     }
@@ -2153,7 +2181,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         mapToolbarEnabled: false,
                         onMapCreated: (GoogleMapController controller) {
                           _controller = controller;
-                          if (polylines.isNotEmpty) {
+                          if (_followNavigation) {
+                            _updateFollowingCamera();
+                          } else if (polylines.isNotEmpty) {
                             _fitNavigationCameraOnce();
                           } else if (listings.isNotEmpty && (!_isDirections || currentLatLng == null)) {
                             // We should have listings by this point so set the camera to their bounds
@@ -2235,6 +2265,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           if (!_isDirections) {
                             enableAllFiltersIfAllOff();
                             focusMapOnNearestMarkers(10);
+                            return;
+                          }
+                          if (_followNavigation) {
+                            _updateFollowingCamera();
                             return;
                           }
                           try {
@@ -2373,6 +2407,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   key: ValueKey(_navigationListing?['id']),
                   destinationCard: _navigationListing == null ? null : _buildDestinationCard(context, _navigationListing!),
                   distance: _distanceToDestination,
+                  following: _followNavigation,
                   onDestinationExpanded: () => widget.analyticsService.logButtonTapped(
                     'destination_card_expand',
                     listingId: _navigationListing?['id']?.toString(),
@@ -2386,7 +2421,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   onDistancePressed: () {
                     HapticFeedback.lightImpact();
                     widget.analyticsService.logButtonTapped('distance_to_destination');
-                    _setMapCameraToFitPolyline(polylines);
+                    toggleNavigationView();
                   },
                   ),
                 ),
@@ -2464,9 +2499,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 // Floating destination card, including the device's bottom safe area.
 class NavigationBottomRow extends StatefulWidget {
   const NavigationBottomRow({super.key, this.destinationCard, this.distance, required this.onDistancePressed,
-    this.onDestinationExpanded, this.onDestinationMinimised});
+    this.onDestinationExpanded, this.onDestinationMinimised, this.following = false});
 
   final Widget? destinationCard;
+  final bool following;
   final String? distance;
   final VoidCallback onDistancePressed;
   final VoidCallback? onDestinationExpanded;
@@ -2577,7 +2613,7 @@ class _NavigationBottomRowState extends State<NavigationBottomRow> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               if (widget.distance != null)
-                                NavigationDistanceButton(distance: widget.distance!, onPressed: widget.onDistancePressed),
+                                NavigationDistanceButton(distance: widget.distance!, onPressed: widget.onDistancePressed, following: widget.following),
                               if (hasDestination && _expanded) ...[
                                 if (widget.distance != null) const SizedBox(height: 8),
                                 Align(
@@ -2621,14 +2657,17 @@ class _NavigationBottomRowState extends State<NavigationBottomRow> {
 
 // Remaining distance and route overview action within the navigation row.
 class NavigationDistanceButton extends StatelessWidget {
-  const NavigationDistanceButton({super.key, required this.distance, required this.onPressed});
+  const NavigationDistanceButton({super.key, required this.distance, required this.onPressed, this.following = false});
 
   final String distance;
+  final bool following;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return Tooltip(
+      message: following ? 'Show whole route' : 'Follow my journey in 3D',
+      child: ElevatedButton(
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -2643,11 +2682,11 @@ class NavigationDistanceButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.directions, size: 22),
+          Icon(following ? Icons.navigation : Icons.directions, size: 22),
           const SizedBox(width: 4),
           Flexible(child: Text(distance, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
         ],
       ),
-    );
+    ));
   }
 }
