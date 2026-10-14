@@ -12,6 +12,6 @@ abstract final class AppConfig {
   static const androidCertificateFingerprint = String.fromEnvironment('SIGNING_KEY');
   static const iosBundleId = String.fromEnvironment(
     'IOS_BUNDLE_ID',
-    defaultValue: 'com.theberridge.mill_road_winter_fair_app',
+    defaultValue: 'org.millroadwinterfair.MRWFapp',
   );
 }
