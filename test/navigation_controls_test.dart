@@ -176,7 +176,7 @@ void main() {
     expect(find.text('Navigating to'), findsNothing);
     await navigate(tester, state);
 
-    for (final text in ['Navigating to', '🍩 Glazed and Confused', 'Doughnuts', 'Gwydir St Car Park', '11:00–15:00']) {
+    for (final text in ['Navigating to', '🍩', 'Glazed and Confused', 'Doughnuts', 'Gwydir St Car Park', '11:00–15:00']) {
       expect(find.text(text), findsOneWidget);
     }
     final card = find.ancestor(of: find.text('Navigating to'), matching: find.byType(Material)).first;

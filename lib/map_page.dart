@@ -1857,44 +1857,47 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     String field(String key) => listing[key]?.toString().trim() ?? '';
     final times = [field('startTime'), field('endTime')].where((time) => time.isNotEmpty).join('–');
 
+    Widget row(String text, {Widget? leading, double fontSize = 12, FontWeight? weight}) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 24, child: Center(child: leading)),
+          const SizedBox(width: 6),
+          Expanded(child: Text(text, style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: weight,
+            color: colors.onSurface,
+          ))),
+        ],
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Navigating to', style: TextStyle(fontSize: 11, color: colors.primary)),
+        Text('Destination', style: TextStyle(fontSize: 11, color: colors.primary)),
         const SizedBox(height: 4),
-        Text(
-          [field('emoji'), field('title')].where((text) => text.isNotEmpty).join(' '),
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: colors.onSurface),
+        row(
+          field('title'),
+          leading: field('emoji').isEmpty ? null : Text(field('emoji'),
+            style: TextStyle(fontSize: 15, color: colors.onSurface)),
+          fontSize: 15,
+          weight: FontWeight.bold,
         ),
         if (field('subtitle').isNotEmpty)
-          Text(field('subtitle'), style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
+          row(field('subtitle'), fontSize: 13),
         if (field('location').isNotEmpty) ...[
           const SizedBox(height: 6),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.place_outlined, size: 16, color: colors.onSurfaceVariant),
-              const SizedBox(width: 4),
-              Expanded(child: Text(field('location'), style: TextStyle(fontSize: 12, color: colors.onSurface))),
-            ],
-          ),
+          row(field('location'), leading: Icon(Icons.place_outlined, size: 16, color: colors.onSurface)),
         ],
         if (listing['brickAndMortar'] != 'TRUE' && times.isNotEmpty) ...[
           const SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.schedule, size: 16, color: colors.onSurfaceVariant),
-              const SizedBox(width: 4),
-              Expanded(child: Text(times, style: TextStyle(fontSize: 12, color: colors.onSurface))),
-            ],
-          ),
+          row(times, leading: Icon(Icons.schedule, size: 16, color: colors.onSurface)),
         ],
       ],
     );
   }
-
   void enableAllFiltersIfAllOff() {
     if (filterSettings['Food'] == false &&
         filterSettings['Shopping'] == false &&
