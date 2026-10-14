@@ -7,12 +7,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:provider/provider.dart';
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
 import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -23,6 +21,8 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:mill_road_winter_fair_app/main_alerting.dart';
+import 'package:provider/provider.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -68,8 +68,9 @@ Future<void> main() async {
  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
         providers: [
           Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
+          Provider<AnalyticsService>.value(value: analyticsService),
         ],
-        child: RootWidget(firstExecution: firstExecution, analyticsService: analyticsService, startupCacheFallback: startupCacheFallback.future),
+        child: RootWidget(firstExecution: firstExecution, startupCacheFallback: startupCacheFallback.future),
       )));
 
   // Refresh after rendering so a slow or unavailable network cannot block startup.
@@ -99,9 +100,8 @@ Future<bool> _refreshListingsAfterStartup() async {
 
 class RootWidget extends StatefulWidget {
   final bool firstExecution;
-  final AnalyticsService analyticsService;
   final Future<bool>? startupCacheFallback;
-  const RootWidget({super.key, required this.firstExecution, required this.analyticsService, this.startupCacheFallback});
+  const RootWidget({super.key, required this.firstExecution, this.startupCacheFallback});
 
   @override
   State<RootWidget> createState() => _RootWidgetState();
@@ -120,21 +120,18 @@ class _RootWidgetState extends State<RootWidget> {
   Widget build(BuildContext context) {
     return _showWelcomeScreen
         ? WelcomeScreen(
-            analyticsService: widget.analyticsService,
             onFinished: () => setState(() => _showWelcomeScreen = false),
           )
-        : MyApp(firstExecution: false, analyticsService: widget.analyticsService, startupCacheFallback: widget.startupCacheFallback);
+        : MyApp(firstExecution: false, startupCacheFallback: widget.startupCacheFallback);
   }
 }
 
 class MyApp extends StatefulWidget {
   final bool firstExecution;
-  final AnalyticsService analyticsService;
   final Future<bool>? startupCacheFallback;
   const MyApp({
     super.key,
     required this.firstExecution,
-    required this.analyticsService,
     this.startupCacheFallback,
   });
   @override
@@ -190,7 +187,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               ? appThemes['light']
               : appThemes[selectedThemeKey] ?? baseTheme,
           darkTheme: isAuto ? appThemes['dark'] : darkTheme,
-          home: HomePage(key: homePageKey, analyticsService: widget.analyticsService, startupCacheFallback: widget.startupCacheFallback),
+          home: HomePage(key: homePageKey, startupCacheFallback: widget.startupCacheFallback),
           navigatorObservers: [
             routeObserver,
           ],
@@ -201,9 +198,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 }
 
 class HomePage extends StatefulWidget {
-  final AnalyticsService analyticsService;
   final Future<bool>? startupCacheFallback;
-  const HomePage({super.key, required this.analyticsService, this.startupCacheFallback});
+  const HomePage({super.key, this.startupCacheFallback});
 
   @override
   HomePageState createState() => HomePageState();
@@ -223,14 +219,14 @@ class HomePageState extends State<HomePage> with RouteAware {
 
   static const screenNames = ['ChooserPage', 'MapPage', 'TimetablePage', 'ListingsPage', 'FavouritesPage'];
 
-  void _trackScreen() => widget.analyticsService.setCurrentScreen(screenNames[index]);
+  void _trackScreen() => context.read<AnalyticsService>().setCurrentScreen(screenNames[index]);
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      widget.analyticsService.showAnalyticsConsentDialog(context);
+      context.read<AnalyticsService>().showAnalyticsConsentDialog(context);
       final usedCache = await widget.startupCacheFallback;
       if (!mounted) return;
       if (usedCache == true) {
@@ -352,38 +348,33 @@ class HomePageState extends State<HomePage> with RouteAware {
           onTabSelected: setCurrentIndex,
           onOpenTimetable: openTimetable,
           onOpenListings: openListings,
-          onOpenMap: openMap,
-          analyticsService: widget.analyticsService),
+          onOpenMap: openMap),
       MapPage(
           listings: listings,
           key: mapPageKey,
           nearestMarkerCount: mapNearestMarkerCount,
           onTabSelected: setCurrentIndex,
-          cancelMapNearest: cancelMapNearest,
-          analyticsService: widget.analyticsService),
+          cancelMapNearest: cancelMapNearest),
       TimetablePage(
           theEvents: listings,
           onTabSelected: setCurrentIndex,
           filteredMusicOrNot: timetableFilteredMusicOrNot,
           onlyNowOrSoon: timetableOnlyNowOrSoon,
-          onFilterChange: timetableFilterChange,
-          analyticsService: widget.analyticsService),
+          onFilterChange: timetableFilterChange),
       FilteredListingsPage(
           filterCategory: "all",
           subfilterCategory: listingsSubfilterCategory,
           listings: listings,
           key: _allListingsKey,
           onTabSelected: setCurrentIndex,
-          onSubfilterChange: listingsSubfilterChange,
-          analyticsService: widget.analyticsService),
+          onSubfilterChange: listingsSubfilterChange),
       FilteredListingsPage(
           filterCategory: "favourite",
           subfilterCategory: listingsSubfilterCategory,
           listings: listings,
           key: _savedListingsKey,
           onTabSelected: setCurrentIndex,
-          onSubfilterChange: listingsSubfilterChange,
-          analyticsService: widget.analyticsService),
+          onSubfilterChange: listingsSubfilterChange),
     ];
     return IndexedStack(
       index: index,

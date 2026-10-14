@@ -1,9 +1,11 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RecordingFirebaseAnalytics extends Fake implements FirebaseAnalytics {
@@ -171,11 +173,22 @@ void main() {
   test('show/hide all updates every map filter property', () async {
     usageAnalyticsEnabled = true;
     await service.logMapMarkerFilterPreferenceSet('all', false);
-    expect(sdk.properties.length, 6);
+    expect(sdk.properties.keys, unorderedEquals([
+      'map_filter_food', 'map_filter_shopping', 'map_filter_community',
+      'map_filter_music', 'map_filter_dance', 'map_filter_other_performances',
+      'map_filter_childrens', 'map_filter_business', 'map_filter_visits',
+      'map_filter_services',
+    ]));
     expect(sdk.properties.values, everyElement('false'));
     await service.logMapMarkerFilterPreferenceSet('shopping', true);
     expect(sdk.properties['map_filter_shopping'], 'true');
     expect(sdk.events.last['parameters'], {'filter_type': 'map_marker', 'category': 'shopping', 'is_enabled': 1});
+    await service.logMapMarkerFilterPreferenceSet('performanceDance', true);
+    expect(sdk.properties['map_filter_dance'], 'true');
+    expect(sdk.properties['map_filter_music'], 'false');
+    expect(sdk.properties['map_filter_community'], 'false');
+    await service.logMapMarkerFilterPreferenceSet('all', true);
+    expect(sdk.properties.values, everyElement('true'));
   });
 
   test('rapid consent changes finish in the order requested', () async {
@@ -193,14 +206,44 @@ void main() {
   });
 
   testWidgets('consent dialog saves an opt-in choice', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: Builder(builder: (context) => TextButton(
+    await tester.pumpWidget(Provider<AnalyticsService>.value(value: service, child: MaterialApp(home: Builder(builder: (context) => TextButton(
       onPressed: () => service.showAnalyticsConsentDialog(context), child: const Text('Prompt'),
-    ))));
+    )))));
     await tester.tap(find.text('Prompt'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('I agree'));
     await tester.pumpAndSettle();
     expect(usageAnalyticsEnabled, true);
     expect(find.text('I agree'), findsNothing);
+  });
+
+  testWidgets('consent explanation route uses the shared analytics service', (tester) async {
+    await service.setCurrentScreen('ChooserPage');
+    await tester.pumpWidget(Provider<AnalyticsService>.value(
+      value: service,
+      child: MaterialApp(
+        navigatorObservers: [routeObserver],
+        home: Builder(builder: (context) => TextButton(
+          onPressed: () => context.read<AnalyticsService>().showAnalyticsConsentDialog(context),
+          child: const Text('Prompt'),
+        )),
+      ),
+    ));
+    await tester.tap(find.text('Prompt'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('What does this mean?', findRichText: true));
+    await tester.pumpAndSettle();
+
+    final explanationContext = tester.element(find.byType(AnalyticsExplanationPage));
+    expect(explanationContext.read<AnalyticsService>(), same(service));
+    expect(service.currentScreen, 'AnalyticsExplanationPage');
+    expect(sdk.events, isEmpty);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(service.currentScreen, 'ChooserPage');
+    await tester.tap(find.text('No thanks'));
+    await tester.pumpAndSettle();
+    expect(usageAnalyticsEnabled, false);
   });
 }

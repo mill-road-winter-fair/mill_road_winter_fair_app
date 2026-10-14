@@ -4,14 +4,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ImportantInfoPage extends StatefulWidget {
-  final AnalyticsService analyticsService;
-
-  const ImportantInfoPage({super.key, required this.analyticsService});
+  const ImportantInfoPage({super.key});
 
   @override
   State<ImportantInfoPage> createState() => _ImportantInfoPageState();
@@ -21,7 +20,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
   late final TapGestureRecognizer _phoneLinkRecognizer = TapGestureRecognizer()
     ..onTap = () {
       HapticFeedback.lightImpact();
-      widget.analyticsService.logButtonTapped('contact_phone');
+      context.read<AnalyticsService>().logButtonTapped('contact_phone');
       launchUrl(Uri(scheme: 'tel', path: '07486398744'));
     };
 
@@ -51,12 +50,12 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
 
   @override
   void didPush() {
-    widget.analyticsService.setCurrentScreen('ImportantInfoPage');
+    context.read<AnalyticsService>().setCurrentScreen('ImportantInfoPage');
   }
 
   @override
   void didPopNext() {
-    widget.analyticsService.setCurrentScreen('ImportantInfoPage');
+    context.read<AnalyticsService>().setCurrentScreen('ImportantInfoPage');
   }
 
   @override
@@ -69,11 +68,13 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.read<AnalyticsService>().logButtonTapped('back');
+                  Navigator.maybePop(context);
+                })
+              : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Important information'),
@@ -146,7 +147,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               HapticFeedback.lightImpact();
-                              widget.analyticsService.logButtonTapped('mrwf_business_safety_hyperlink');
+                              context.read<AnalyticsService>().logButtonTapped('mrwf_business_safety_hyperlink');
                               launchUrl(Uri.parse('https://www.millroadwinterfair.org/businesses-info'));
                             }),
                     ],
@@ -167,7 +168,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               HapticFeedback.lightImpact();
-                              widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
+                              context.read<AnalyticsService>().logButtonTapped('mrwf_website_hyperlink');
                               launchUrl(Uri.parse('https://www.millroadwinterfair.org'));
                             }),
                     ],

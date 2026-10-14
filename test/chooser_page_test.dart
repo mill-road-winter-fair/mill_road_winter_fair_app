@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 
@@ -66,7 +65,6 @@ void main() {
             onOpenListings: (_, __) {},
             onOpenMap: (_) {},
             onTabSelected: (_) {},
-            analyticsService: FakeAnalyticsService(),
           ),
         ),
       );
@@ -88,7 +86,6 @@ void main() {
             onOpenListings: (_, __) {},
             onOpenMap: (_) {},
             onTabSelected: (_) {},
-            analyticsService: FakeAnalyticsService(),
           ),
         ),
       );
@@ -107,7 +104,6 @@ void main() {
             onOpenListings: (_, __) {},
             onOpenMap: (_) {},
             onTabSelected: (_) {},
-            analyticsService: FakeAnalyticsService(),
           ),
         ),
       );
