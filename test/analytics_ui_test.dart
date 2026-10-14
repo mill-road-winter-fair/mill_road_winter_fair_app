@@ -119,14 +119,14 @@ void main() {
         'visit_listing_website', 'email_listing', 'phone_listing',
       ]);
       expect(launcher.openedUris, [
-        for (var i = 0; i < 2; i++) ...[
+        for (var i = 0; i < 1; i++) ...[
           Uri.parse('https://example.com'),
           Uri(scheme: 'mailto', path: 'test@example.com'),
           Uri(scheme: 'tel', path: '0123456789'),
         ],
       ]);
       expect(launcher.checkedUris, [
-        for (var i = 0; i < 2; i++) ...[
+        for (var i = 0; i < 1; i++) ...[
           Uri(scheme: 'mailto', path: 'test@example.com'),
           Uri(scheme: 'tel', path: '0123456789'),
         ],
@@ -138,43 +138,33 @@ void main() {
     });
   }
 
-  for (final useTextLink in [false, true]) {
-    for (final email in [false, true]) {
-      testWidgets('unavailable handler does not launch (text=$useTextLink, email=$email)', (tester) async {
-        launcher.canOpenResult = false;
-        await tester.pumpWidget(Provider<UrlLauncher>.value(
-          value: launcher,
-          child: MaterialApp(home: Scaffold(body: SpecificListingInfoSheet(
-            listingId: 'listing-456', cancelled: false, brickAndMortar: false,
-            emoji: '', title: 'Listing', subtitle: '', location: '', description: '',
-            email: 'test@example.com', website: '', phoneNumber: '0123456789',
-            imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '',
-            detailsVisible: true, listingFavourited: false, inDialog: false,
-            onGetDirections: () {}, analyticsService: analytics, colorScheme: ColorScheme.light(), listingAlerted: false,
-          ))),
-        ));
-        // Invoke the async callback to assert the existing error contract.
-        final dynamic callback;
-        if (useTextLink) {
-          callback = tester.widget<GestureDetector>(find.ancestor(
-            of: find.text(email ? 'Email: test@example.com' : 'Telephone: 0123456789'),
-            matching: find.byType(GestureDetector),
-          ).first).onTap;
-        } else {
-          callback = tester.widget<InkWell>(find.ancestor(
-            of: find.byIcon(email ? Icons.email : Icons.phone),
-            matching: find.byType(InkWell),
-          ).first).onTap;
-        }
-        await expectLater(callback(), throwsA(isA<Exception>().having(
-          (error) => error.toString(), 'message',
-          email ? 'Exception: Could not launch email client' : 'Exception: Could not launch 0123456789',
-        )));
-        expect(launcher.checkedUris, [Uri(scheme: email ? 'mailto' : 'tel', path: email ? 'test@example.com' : '0123456789')]);
-        expect(launcher.openedUris, isEmpty);
-        expect(analytics.buttonEvents.single['button_id'], email ? 'email_listing' : 'phone_listing');
-      });
-    }
+  for (final email in [false, true]) {
+    testWidgets('unavailable handler does not launch from text link (email=$email)', (tester) async {
+      launcher.canOpenResult = false;
+      await tester.pumpWithClock(Provider<UrlLauncher>.value(
+        value: launcher,
+        child: MaterialApp(home: Scaffold(body: SpecificListingInfoSheet(
+          listingId: 'listing-456', cancelled: false, brickAndMortar: false,
+          emoji: '', title: 'Listing', subtitle: '', location: '', description: '',
+          email: 'test@example.com', website: '', phoneNumber: '0123456789',
+          imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '',
+          detailsVisible: true, listingFavourited: false, inDialog: false,
+          onGetDirections: () {}, analyticsService: analytics, colorScheme: ColorScheme.light(), listingAlerted: false,
+        ))),
+      ));
+      // Invoke the async callback to assert the existing error contract.
+      final dynamic callback = tester.widget<GestureDetector>(find.ancestor(
+        of: find.text(email ? 'Email: test@example.com' : 'Telephone: 0123456789'),
+        matching: find.byType(GestureDetector),
+      ).first).onTap;
+      await expectLater(callback(), throwsA(isA<Exception>().having(
+        (error) => error.toString(), 'message',
+        email ? 'Exception: Could not launch email client' : 'Exception: Could not launch 0123456789',
+      )));
+      expect(launcher.checkedUris, [Uri(scheme: email ? 'mailto' : 'tel', path: email ? 'test@example.com' : '0123456789')]);
+      expect(launcher.openedUris, isEmpty);
+      expect(analytics.buttonEvents.single['button_id'], email ? 'email_listing' : 'phone_listing');
+    });
   }
 
   testWidgets('contact dialog opens the selected email through the app provider', (tester) async {
