@@ -7,6 +7,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -14,8 +17,7 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final AnalyticsService analyticsService;
@@ -40,6 +42,14 @@ class FilteredListingsPage extends StatefulWidget {
 }
 
 class FilteredListingsPageState extends State<FilteredListingsPage> {
+  late DateTimeProvider _dateTimeProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _dateTimeProvider = context.watch<DateTimeProvider>();
+  }
+
   List<Map<String, dynamic>> filteredListings = [];
   bool isRefreshing = false;
   bool useFallbackSorting = false;
@@ -99,12 +109,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   String calculateAppBarTitle() {
     String appBarTitle = '';
-    if (widget.subfilterCategory != null) appBarTitle += 'Filtered';
     if (filterCategory == 'favourite') {
-      appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites'; // 'filtered favourite listings' doesn't fit!
+      appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites';
     } else {
       appBarTitle += (appBarTitle.isEmpty) ? 'All listings' : ' listings';
     }
+    if (widget.subfilterCategory != null) appBarTitle += ' (filtered)';
     return appBarTitle;
   }
 
@@ -122,7 +132,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     try {
       if (allListings.isEmpty) throw Exception("No listings exist");
 
-      if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) && preferredSortingMethod == SortingMethod.nearest) {
+      if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
+          preferredSortingMethod == SortingMethod.nearest) {
         // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
         preferredSortingMethod = SortingMethod.alphabetical;
       }
@@ -280,7 +291,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   int findFirstNextListingIndex(List filteredListings) {
     for (int i = 0; i < filteredListings.length; i++) {
-      if (!hasEventEnded(filteredListings[i]['endTime'])) {
+      if (!hasEventEnded(filteredListings[i]['endTime'], _dateTimeProvider)) {
         return i;
       }
     }
@@ -387,7 +398,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 5: Calculate number of visible listings for scroll thumb
     if (_hidePastListings) {
-      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], _dateTimeProvider)).length;
     } else {
       numberOfVisibleListings = filteredListings.length;
     }
@@ -412,7 +423,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             onPressed: () {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('listings_scroll_to_now');
-              if (isItEventDay()) {
+              if (isItEventDay(_dateTimeProvider)) {
                 if (firstNextListingIndex < 0) {
                   // we may not be on Sort by Time, or the Fair may have recently started
                   SortingMethod savedSortingMethod = preferredSortingMethod;
@@ -425,7 +436,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   } else {
                     filteredListings = filteredListingsTemp;
                     if (_hidePastListings) {
-                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], _dateTimeProvider)).length;
                     } else {
                       numberOfVisibleListings = filteredListings.length;
                     }
@@ -455,45 +466,36 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             },
             icon: Icon(
               Icons.access_time,
-              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+              size: 24,
+              color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         if (isShowingJustPerformance || filterCategory == 'favourite')
           IconButton(
             key: hidePastIconKey,
             tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
-            onLongPress: () => showMiniPopup(
-              context,
-              hidePastIconKey,
-              (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed',
-              analyticsService: widget.analyticsService,
-            ),
+            onLongPress: () => showMiniPopup(context, hidePastIconKey,
+                (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
             onPressed: () {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
-              if (isItEventDay()) {
+              if (isItEventDay(_dateTimeProvider)) {
                 setState(() {
                   _hidePastListings = !_hidePastListings;
                   widget.analyticsService.logPreferenceSet('listings_hide_past', _hidePastListings.toString());
                   numberOfVisibleListings = -1;
                   firstVisibleIndex = null;
                 });
-                Fluttertoast.showToast(
-                  msg: (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances',
-                  gravity: ToastGravity.BOTTOM,
-                  backgroundColor: colorScheme.primary,
-                  textColor: colorScheme.onPrimary,
-                  fontSize: 16,
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                );
+                showInfoToast(context, (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances');
               } else {
                 showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
               }
             },
+            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_hidePastListings) ? Colors.white.withAlpha(30) : null)),
             icon: Icon(
-              (_hidePastListings) ? Icons.free_cancellation : Icons.history_toggle_off,
-              color: (isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+              Icons.history_toggle_off,
+              size:24,
+              color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
         IconButton(
@@ -515,14 +517,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               }
             });
           },
-          icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
+          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_isSearching) ? Colors.white.withAlpha(30) : null)),
+          icon: Icon(Icons.search, size: 26, color: appBarTheme.foregroundColor),
         ),
       ],
       body: ValueListenableBuilder<Set<String>>(
-        valueListenable: favouriteListingKeys,
-        builder: (context, name, child) {
-          return Column(
-            children: [
+          valueListenable: favouriteListingKeys,
+          builder: (context, name, child) {
+            return Column(children: [
               Container(
                 height: 52,
                 decoration: BoxDecoration(
@@ -610,209 +612,213 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   backgroundColor: colorScheme.primary,
                   color: colorScheme.onPrimary,
                   child: Container(
-                    // ensure the Stack has a defined height
                     color: colorScheme.surfaceDim,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final trackHeight = constraints.maxHeight;
-                        return Stack(
-                          children: [
-                            NotificationListener<ScrollNotification>(
-                              onNotification: (notification) {
-                                if (notification is UserScrollNotification || notification is ScrollUpdateNotification) {
-                                  _showThumb();
-                                }
-                                return false;
-                              },
-                              child: Semantics(
-                                container: true,
-                                explicitChildNodes: true,
-                                button: detailsVisibleIndex != null,
-                                label: detailsVisibleIndex == null ? null : 'Hide listing details',
-                                child: GestureDetector(
-                                  onTap: (detailsVisibleIndex == null)
-                                      ? null
-                                      : () {
-                                          detailsVisibleIndex = null;
-                                          HapticFeedback.lightImpact();
-                                          setState(() {});
-                                        },
-                                  child: ScrollablePositionedList.builder(
-                                    itemCount: filteredListings.length,
-                                    itemScrollController: itemScrollController,
-                                    itemPositionsListener: itemPositionsListener,
-                                    physics: ExpandedListingScrollPhysics(bounds: _expandedScrollBounds, parent: const AlwaysScrollableScrollPhysics()),
-                                    itemBuilder: (context, index) {
-                                      final listing = filteredListings[index]; // since index=0 is the sort/search bar
-                                      final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
-                                      final approximateDistance = '(~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
-                                      final isFavourited = isListingFavourited(listing['id']);
-                                      LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                                      if (!_hidePastListings || !hasEventEnded(listing['endTime'])) {
-                                        // if this is the first visible item, capture its index
-                                        firstVisibleIndex ??= index;
-                                      }
-                                      return Column(
-                                        key: ValueKey(listing['id']),
-                                        children: [
-                                          if (!_hidePastListings || !hasEventEnded(listing['endTime']))
-                                            Container(
-                                              width: constraints.maxWidth - 10,
-                                              decoration: BoxDecoration(
-                                                color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
-                                                border: Border.all(color: colorScheme.primary, width: 0.5),
-                                                borderRadius: BorderRadius.circular(8),
-                                                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
-                                              ),
-                                              child: SpecificListingInfoSheet(
-                                                scrollBounds: _expandedScrollBounds,
-                                                listingId: listing['id'],
-                                                cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                                                brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                                                emoji: listing['emoji'] ?? '',
-                                                title: listing['title'] ?? '',
-                                                subtitle: listing['subtitle'] ?? '',
-                                                location: listing['location'],
-                                                description: listing['description'] ?? '',
-                                                email: listing['email'] ?? '',
-                                                website: listing['website'] ?? '',
-                                                phoneNumber: listing['phone'] ?? '',
-                                                imageURL: listing['imageURL'] ?? '',
-                                                startTime: "${listing['startTime']}",
-                                                endTime: "${listing['endTime']}",
-                                                approxDistance: approximateDistance,
-                                                detailsVisible: (detailsVisibleIndex == null)
-                                                    ? false
-                                                    : (detailsVisibleIndex == index)
-                                                        ? true
-                                                        : null,
-                                                listingFavourited: isFavourited,
-                                                onDetailsTapped: () => toggleDetailsRow(index),
-                                                onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                                onGetDirections: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) => MapPage(
-                                                        listings: listings,
-                                                        onTabSelected: (_) => {},
-                                                        destinationId: listing['id'],
-                                                        destinationLatLng: destinationLatLng,
-                                                        analyticsService: widget.analyticsService,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                                analyticsService: widget.analyticsService,
-                                                inDialog: false,
-                                                colorScheme: colorScheme,
-                                              ),
+                    child: LayoutBuilder(builder: (context, constraints) {
+                      final trackHeight = constraints.maxHeight;
+                      final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+                      final furnitureHeight = 98.0;
+                      final contentHeight = constraints.maxHeight - (keyboardHeight - furnitureHeight).clamp(0.0, double.infinity);
+                      return Stack(children: [
+                        SizedBox(
+                          height: contentHeight,
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: (notification) {
+                              if (notification is UserScrollNotification ||
+                                  notification is ScrollUpdateNotification) {
+                                _showThumb();
+                              }
+                              return false;
+                            },
+                            child: Semantics(
+                              container: true,
+                              explicitChildNodes: true,
+                              button: detailsVisibleIndex != null,
+                              label: detailsVisibleIndex == null ? null : 'Hide listing details',
+                              child: GestureDetector(
+                                onTap: detailsVisibleIndex == null
+                                    ? null
+                                    : () {
+                                        final listing = filteredListings[detailsVisibleIndex!];
+                                        widget.analyticsService.logButtonTapped('listing_details_dismiss', listingId: listing['id'], listingName: listing['title']);
+                                        detailsVisibleIndex = null;
+                                        HapticFeedback.lightImpact();
+                                        setState(() {});
+                                      },
+                                child: ScrollablePositionedList.builder(
+                                  itemCount: filteredListings.length,
+                                  itemScrollController: itemScrollController,
+                                  itemPositionsListener: itemPositionsListener,
+                                  physics: ExpandedListingScrollPhysics(bounds: _expandedScrollBounds, parent: const AlwaysScrollableScrollPhysics()),
+                                  itemBuilder: (context, index) {
+                                    final listing = filteredListings[index]; // since index=0 is the sort/search bar
+                                    final approximateDistanceMetres = listing['approximateDistanceMetres'] ?? 0;
+                                    final approximateDistance = '(~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
+                                    final isFavourited = isListingFavourited(listing['id']);
+                                    LatLng destinationLatLng = stringToLatLng(listing['latLng']);
+                                    if (!_hidePastListings || !hasEventEnded(listing['endTime'], _dateTimeProvider)) {
+                                      // if this is the first visible item, capture its index
+                                      firstVisibleIndex ??= index;
+                                    }
+                                    return Column(
+                                      key: ValueKey(listing['id']),
+                                      children: [
+                                        if (!_hidePastListings || !hasEventEnded(listing['endTime'], _dateTimeProvider)) ...[
+                                          Container(
+                                            width: constraints.maxWidth - 10,
+                                            decoration: BoxDecoration(
+                                              color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
+                                              border: Border.all(color: colorScheme.primary, width: 0.5),
+                                              borderRadius: BorderRadius.circular(8),
+                                              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
                                             ),
+                                            child: SpecificListingInfoSheet(
+                                              scrollBounds: _expandedScrollBounds,
+                                              listingId: listing['id'],
+                                              cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                                              brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
+                                              emoji: listing['emoji'] ?? '',
+                                              title: listing['title'] ?? '',
+                                              subtitle: listing['subtitle'] ?? '',
+                                              location: listing['location'],
+                                              description: listing['description'] ?? '',
+                                              email: listing['email'] ?? '',
+                                              website: listing['website'] ?? '',
+                                              phoneNumber: listing['phone'] ?? '',
+                                              imageURL: listing['imageURL'] ?? '',
+                                              startTime: "${listing['startTime']}",
+                                              endTime: "${listing['endTime']}",
+                                              approxDistance: approximateDistance,
+                                              detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
+                                              listingFavourited: isFavourited,
+                                              listingAlerted: alertsStore.alertExists(listing['id']),
+                                              onDetailsTapped: () => toggleDetailsRow(index),
+                                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                              onGetDirections: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => MapPage(
+                                                      listings: listings,
+                                                      onTabSelected: (_) => {},
+                                                      destinationId: listing['id'],
+                                                      destinationLatLng: destinationLatLng,
+                                                      analyticsService: widget.analyticsService,
+                                                    )
+                                                  )
+                                                );
+                                              },
+                                              onAlertTapped: () async {
+                                                HapticFeedback.lightImpact();
+                                                await toggleListingAlert(listing['id'], alertNoticePeriod, context);
+                                                setState(() { });
+                                              },
+                                              analyticsService: widget.analyticsService,
+                                              inDialog: false,
+                                              colorScheme: colorScheme,
+                                            )
+                                          ),
                                           const SizedBox(height: 8),
                                         ],
-                                      );
-                                    },
-                                  ),
+                                      ],
+                                    );
+                                  },
                                 ),
                               ),
                             ),
-                            ValueListenableBuilder<Iterable<ItemPosition>>(
-                              valueListenable: itemPositionsListener.itemPositions,
-                              builder: (context, positions, _) {
-                                if (positions.isEmpty || firstVisibleIndex == null || numberOfVisibleListings == 0) {
-                                  return const SizedBox.shrink();
-                                }
-                                final visiblePositions = positions.where((p) {
-                                  return p.index >= firstVisibleIndex! && p.index < firstVisibleIndex! + numberOfVisibleListings;
-                                });
-                                if (visiblePositions.isEmpty) {
-                                  return const SizedBox.shrink();
-                                }
-                                final indices = visiblePositions.map((p) => p.index);
-                                final minIndex = indices.reduce((a, b) => a < b ? a : b);
-                                final maxIndex = indices.reduce((a, b) => a > b ? a : b);
-                                final minIndexRelative = minIndex - firstVisibleIndex!;
-                                final visibleFraction = ((maxIndex - minIndex + 1) / numberOfVisibleListings).clamp(0.02, 1.0);
-                                final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
-                                final thumbTop = (minIndexRelative / numberOfVisibleListings) * trackHeight;
-                                return ValueListenableBuilder<bool>(
-                                  valueListenable: thumbVisible,
-                                  builder: (context, visible, _) {
-                                    return Positioned(
-                                      right: 3,
-                                      top: thumbTop,
-                                      width: 4,
-                                      height: thumbHeight,
-                                      child: AnimatedOpacity(
-                                        opacity: visible ? 1.0 : 0.0,
-                                        duration: const Duration(milliseconds: 250),
-                                        curve: Curves.easeOut,
-                                        child: GestureDetector(
-                                          onVerticalDragStart: (_) => _showThumb(),
-                                          onVerticalDragUpdate: detailsVisibleIndex != null
-                                              ? null
-                                              : (details) {
-                                                  _showThumb();
-                                                  final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
-                                                  final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
-                                                  final targetIndex = (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
-                                                  itemScrollController.scrollTo(
-                                                    index: targetIndex,
-                                                    duration: const Duration(milliseconds: 120),
-                                                  );
-                                                },
-                                          child: Container(
-                                            width: 2,
-                                            decoration: BoxDecoration(
-                                              color: Colors.black.withValues(alpha: 0.4),
-                                              borderRadius: BorderRadius.circular(2),
-                                            ),
-                                          ),
+                          ),
+                        ),
+                        ValueListenableBuilder<Iterable<ItemPosition>>(
+                          valueListenable: itemPositionsListener.itemPositions,
+                          builder: (context, positions, _) {
+                            if (positions.isEmpty || firstVisibleIndex == null || numberOfVisibleListings == 0) {
+                              return const SizedBox.shrink();
+                            }
+                            final visiblePositions = positions.where((p) {
+                              return p.index >= firstVisibleIndex! && p.index < firstVisibleIndex! + numberOfVisibleListings;
+                            });
+                            if (visiblePositions.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            final indices = visiblePositions.map((p) => p.index);
+                            final minIndex = indices.reduce((a, b) => a < b ? a : b);
+                            final maxIndex = indices.reduce((a, b) => a > b ? a : b);
+                            final minIndexRelative = minIndex - firstVisibleIndex!;
+                            final visibleFraction = ((maxIndex - minIndex + 1) / numberOfVisibleListings).clamp(0.02, 1.0);
+                            final thumbHeight = (trackHeight * visibleFraction).clamp(24.0, trackHeight);
+                            final thumbTop = (minIndexRelative / numberOfVisibleListings) * trackHeight;
+                            return ValueListenableBuilder<bool>(
+                              valueListenable: thumbVisible,
+                              builder: (context, visible, _) {
+                                return Positioned(
+                                  right: 3,
+                                  top: thumbTop,
+                                  width: 4,
+                                  height: thumbHeight,
+                                  child: AnimatedOpacity(
+                                    opacity: visible ? 1.0 : 0.0,
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.easeOut,
+                                    child: GestureDetector(
+                                      onVerticalDragStart: (_) => _showThumb(),
+                                      onVerticalDragUpdate: detailsVisibleIndex != null ? null : (details) {
+                                        _showThumb();
+                                        final localDy = details.localPosition.dy.clamp(0.0, trackHeight);
+                                        final fraction = (localDy / trackHeight).clamp(0.0, 1.0);
+                                        final targetIndex =
+                                            (fraction * numberOfVisibleListings).floor().clamp(0, numberOfVisibleListings - 1) + firstVisibleIndex!;
+                                        itemScrollController.scrollTo(
+                                          index: targetIndex,
+                                          duration: const Duration(milliseconds: 120),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 2,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(alpha: 0.4),
+                                          borderRadius: BorderRadius.circular(2),
                                         ),
                                       ),
-                                    );
-                                  },
+                                    ),
+                                  ),
                                 );
                               },
-                            ),
-                            (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0))
-                                ? Center(
-                                    child: Container(
-                                      padding: const EdgeInsets.all(24.0),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                          style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                                          textAlign: TextAlign.center,
-                                          'No'
-                                          '${widget.subfilterCategory != null ? ' ${subfilterCategoryLabels[widget.subfilterCategory]!.label}' : ''}'
-                                          ' listings'
-                                          '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
-                                          '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
-                                          '${(widget.subfilterCategory != null && _isSearching) ? '\n\nTap the magnifying glass to close search, then ‘Show’ to change what type of listings are displayed.' : ''}'
-                                          '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
-                                          '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
-                                          '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}'),
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
-                          ],
-                        );
-                      },
-                    ),
+                            );
+                          },
+                        ),
+                        (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0))
+                            ? Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(24.0),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                      style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                                      textAlign: TextAlign.center,
+                                      'No'
+                                      '${widget.subfilterCategory != null ? ' ${subfilterCategoryLabels[widget.subfilterCategory]!.label}' : ''}'
+                                      ' listings'
+                                      '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
+                                      '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
+                                      '${(widget.subfilterCategory != null && _isSearching) ? '\n\nTap the magnifying glass to close search, then ‘Show’ to change what type of listings are displayed.' : ''}'
+                                      '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
+                                      '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
+                                      '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}'),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      ]);
+                    }),
                   ),
                 ),
               ),
-            ],
-          );
-        },
-      ),
+            ]);
+          }),
       analyticsService: widget.analyticsService,
     );
   }
 
   Widget _buildSortingDropdown(BuildContext context, bool isPerformance) {
     final colorScheme = Theme.of(context).colorScheme;
-    final dropdownStyle = const ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
+    final dropdownStyle = ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
     return Container(
       key: const ValueKey('sortingdropdown'),
       color: colorScheme.surfaceDim,
@@ -820,7 +826,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         padding: const EdgeInsets.symmetric(horizontal: 2),
         child: DropdownMenu(
           initialSelection: useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod,
-          label: const Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          label: Text("Sort by", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           leadingIcon: const Icon(Icons.sort),
           textStyle: TextStyle(color: colorScheme.onSecondary, fontSize: 12, height: 1.0),
           inputDecorationTheme: InputDecorationTheme(
@@ -833,8 +839,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             isDense: true,
             visualDensity: const VisualDensity(horizontal: -4),
             contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-            constraints: const BoxConstraints(maxHeight: 40),
-            suffixIconConstraints: const BoxConstraints(minWidth: 30, maxWidth: 30),
+            constraints: BoxConstraints(maxHeight: 40),
+            suffixIconConstraints: BoxConstraints(minWidth: 30, maxWidth: 30),
           ),
           dropdownMenuEntries: [
             if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
@@ -872,7 +878,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   Widget _buildFilteringDropdown(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final dropdownStyle = const ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
+    final dropdownStyle = ButtonStyle(textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)));
     return Container(
       key: const ValueKey('filteringdropdown'),
       color: colorScheme.surfaceDim,
@@ -894,8 +900,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             isDense: true,
             visualDensity: const VisualDensity(horizontal: -4),
             contentPadding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
-            constraints: const BoxConstraints(maxHeight: 40),
-            suffixIconConstraints: const BoxConstraints(minWidth: 30, maxWidth: 30),
+            constraints: BoxConstraints(maxHeight: 40),
+            suffixIconConstraints: BoxConstraints(minWidth: 30, maxWidth: 30),
           ),
           dropdownMenuEntries: [
             DropdownMenuEntry(
@@ -911,11 +917,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 style: dropdownStyle,
                 leadingIcon: Icon(e.value.iconData, size: 20),
               );
-            }),
+            })
           ],
           onSelected: filteringDropdownCallback,
         ),
       ),
     );
   }
+
 }

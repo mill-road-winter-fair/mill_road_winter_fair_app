@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ListingUpdateNotifier {
@@ -76,12 +78,15 @@ class ListingUpdateNotifier {
     return !DateUtils.isSameDay(fairDate, now) && now.isBefore(fairDate);
   }
 
-  static Future<void> maybeShowNotice(BuildContext context, {DateTime? now, required AnalyticsService analyticsService}) async {
+  static Future<void> maybeShowNotice(
+    BuildContext context, {
+    required AnalyticsService analyticsService,
+  }) async {
     if (onTest) {
       return;
     }
 
-    final noticeDate = now ?? DateTime.now();
+    final noticeDate = context.read<DateTimeProvider>().now();
     final isListingsMayChange = isListingsMayChangeNotice(noticeDate);
 
     // The dismissal preference applies only before the Fair. The notices on
@@ -141,7 +146,10 @@ class ListingUpdateNotifier {
                 if (isListingsMayChange) {
                   listingUpdateNoticeEnabled = !dontShowAgain;
                   await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
-                  await analyticsService.logPreferenceSet('listing_update_notice', listingUpdateNoticeEnabled ? 'enabled' : 'disabled');
+                  await analyticsService.logPreferenceSet(
+                    'listing_update_notice',
+                    listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
+                  );
                 }
                 if (dialogContext.mounted) {
                   Navigator.of(dialogContext).pop();

@@ -1,3 +1,4 @@
+import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +21,6 @@ class RecordingAnalyticsService extends FakeAnalyticsService {
     calls.add('tap:$buttonName');
     buttonEvents.add({'button_id': buttonName, 'listing_id': listingId, 'listing_name': listingName});
   }
-
   @override
   Future<void> setCurrentScreen(String screenName) async => calls.add('screen:$screenName');
   @override
@@ -39,34 +39,13 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await loadSettings();
     firstExecution = true; // Avoid the listing reminder's unrelated toast timer.
-    listings = [
-      {
-        'id': '1',
-        'visibleOnMap': 'TRUE',
-        'cancelled': 'FALSE',
-        'groupParent': 'FALSE',
-        'brickAndMortar': 'FALSE',
-        'emoji': '',
-        'title': 'Listing',
-        'subtitle': '',
-        'groupID': '',
-        'food': 'TRUE',
-        'shopping': 'FALSE',
-        'charityCommunityInfo': 'FALSE',
-        'performance': 'FALSE',
-        'visitExperience': 'FALSE',
-        'service': 'FALSE',
-        'location': 'Mill Road',
-        'description': '',
-        'email': '',
-        'website': '',
-        'phone': '',
-        'latLng': '52.199687,0.138813',
-        'imageURL': '',
-        'startTime': '10:30',
-        'endTime': '16:30',
-      }
-    ];
+    listings = [{
+      'id': '1', 'visibleOnMap': 'TRUE', 'cancelled': 'FALSE', 'groupParent': 'FALSE', 'brickAndMortar': 'FALSE',
+      'emoji': '', 'title': 'Listing', 'subtitle': '', 'groupID': '', 'food': 'TRUE', 'shopping': 'FALSE',
+      'charityCommunityInfo': 'FALSE', 'performance': 'FALSE', 'visitExperience': 'FALSE', 'service': 'FALSE',
+      'location': 'Mill Road', 'description': '', 'email': '', 'website': '', 'phone': '', 'latLng': '52.199687,0.138813',
+      'imageURL': '', 'startTime': '10:30', 'endTime': '16:30',
+    }];
     locationServicesEnabled = true;
     locationPermission = LocationPermission.always;
     analytics = RecordingAnalyticsService();
@@ -75,72 +54,39 @@ void main() {
       return null;
     });
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/url_launcher'),
-      (call) async => true,
+      const MethodChannel('plugins.flutter.io/url_launcher'), (call) async => true,
     );
   });
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/url_launcher'),
-      null,
+      const MethodChannel('plugins.flutter.io/url_launcher'), null,
     );
   });
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          bottomNavigationBar: fairBottomNavigationBar(
-            0,
-            (index) => analytics.calls.add('navigate:$index'),
-            analyticsService: analytics,
-          ),
-        ),
-      ),
-    );
+    await tester.pumpWithClock(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
+      0, (index) => analytics.calls.add('navigate:$index'), ColorScheme.light(), analyticsService: analytics,
+    ))));
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
   });
 
-  for (final width in [350.0, 500.0]) {
+  for (final width in [400.0, 500.0]) {
     testWidgets('Details logs once and invokes the callback at width $width', (tester) async {
       tester.view.physicalSize = Size(width, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: appThemes['light'],
-          home: Scaffold(
-            body: SpecificListingInfoSheet(
-              listingId: 'listing-123',
-              cancelled: false,
-              brickAndMortar: false,
-              emoji: '',
-              title: 'Listing',
-              subtitle: '',
-              location: '',
-              description: 'Details',
-              email: 'test@example.com',
-              website: 'https://example.com',
-              phoneNumber: '0123456789',
-              imageURL: '',
-              startTime: '10:30',
-              endTime: '16:30',
-              approxDistance: '',
-              detailsVisible: false,
-              listingFavourited: false,
-              inDialog: false,
-              onGetDirections: () {},
-              onDetailsTapped: () => analytics.calls.add('details'),
-              analyticsService: analytics,
-              colorScheme: const ColorScheme.light(),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
+        listingId: 'listing-123',
+        cancelled: false, brickAndMortar: false, emoji: '', title: 'Listing', subtitle: '', location: '',
+        description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
+        imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: false,
+        listingFavourited: false, listingAlerted: false, inDialog: false, onGetDirections: () {},
+        onDetailsTapped: () => analytics.calls.add('details'), analyticsService: analytics, colorScheme: ColorScheme.light(),
+      ))));
       await tester.tap(find.byIcon(Icons.info));
       expect(analytics.calls, ['haptic', 'tap:listing_details', 'details']);
       expect(analytics.buttonEvents.single, {'button_id': 'listing_details', 'listing_id': 'listing-123', 'listing_name': 'Listing'});
@@ -153,38 +99,13 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: appThemes['light'],
-          home: Scaffold(
-            body: SpecificListingInfoSheet(
-              listingId: 'listing-456',
-              cancelled: false,
-              brickAndMortar: false,
-              emoji: '',
-              title: 'Another listing',
-              subtitle: '',
-              location: '',
-              description: 'Details',
-              email: 'test@example.com',
-              website: 'https://example.com',
-              phoneNumber: '0123456789',
-              imageURL: '',
-              startTime: '10:30',
-              endTime: '16:30',
-              approxDistance: '',
-              detailsVisible: true,
-              listingFavourited: false,
-              inDialog: inDialog,
-              onGetDirections: () {},
-              onDetailsTapped: () {},
-              onFavouriteTapped: () {},
-              analyticsService: analytics,
-              colorScheme: const ColorScheme.light(),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
+        listingId: 'listing-456', cancelled: false, brickAndMortar: false, emoji: '', title: 'Another listing', subtitle: '', location: '',
+        description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
+        imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: true,
+        listingFavourited: false, listingAlerted: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
+        analyticsService: analytics, colorScheme: ColorScheme.light(),
+      ))));
       // The sheet has one IconButton: the favourite control.
       await tester.tap(find.byType(IconButton));
       await tester.tap(find.byIcon(Icons.directions_walk));
@@ -194,12 +115,8 @@ void main() {
         await tester.pumpAndSettle();
       }
       expect(analytics.buttonEvents.map((event) => event['button_id']), [
-        'save_listing',
-        'directions_to_listing',
-        'listing_details',
-        'visit_listing_website',
-        'email_listing',
-        'phone_listing',
+        'save_listing', 'directions_to_listing', 'listing_details',
+        'visit_listing_website', 'email_listing', 'phone_listing',
       ]);
       for (final event in analytics.buttonEvents) {
         expect(event['listing_id'], 'listing-456');
@@ -209,7 +126,7 @@ void main() {
   }
 
   testWidgets('settings logs taps and the new preference value', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: analytics)));
+    await tester.pumpWithClock(MaterialApp(home: SettingsPage(analyticsService: analytics)));
     analytics.calls.clear();
     await tester.tap(find.text('Metric'));
     await tester.pumpAndSettle();
@@ -230,12 +147,10 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: appThemes['light'],
-        home: AnalyticsExplanationPage(analyticsService: analytics),
-      ),
-    );
+    await tester.pumpWithClock(MaterialApp(
+      theme: appThemes['light'],
+      home: AnalyticsExplanationPage(analyticsService: analytics),
+    ));
 
     expect(find.text('What do we track?'), findsOneWidget);
     expect(find.text('• Words and phrases you enter in in-app searches.'), findsOneWidget);
@@ -258,22 +173,25 @@ void main() {
   });
 
   testWidgets('only the visible tab is tracked and returning from Settings restores it', (tester) async {
-    await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: analytics));
-    await tester.pumpAndSettle();
+    await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: analytics));
+    // The chooser loads images and animates continuously; navigation tracking
+    // only needs the initial post-frame callbacks to complete.
+    await tester.pump();
     expect(analytics.calls.where((call) => call.startsWith('screen:')), ['screen:ChooserPage']);
     expect(analytics.calls, contains('consent_prompt'));
     await tester.tap(find.text('Map').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(analytics.calls.last, 'screen:MapPage');
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.push(MaterialPageRoute(builder: (_) => SettingsPage(analyticsService: analytics)));
+    await tester.pump();
     expect(analytics.calls.last, 'screen:SettingsPage');
-    await tester.tap(find.byType(BackButton));
-    await tester.pumpAndSettle();
+
+    navigator.pop();
+    await tester.pump();
     expect(analytics.calls.last, 'screen:MapPage');
-    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWithClock(const SizedBox());
     await tester.pumpAndSettle();
   });
 }

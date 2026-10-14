@@ -2,21 +2,28 @@ import 'dart:async';
 import 'dart:ui' as ui;
 import 'dart:io';
 import 'dart:math';
+import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,6 +33,10 @@ Timer? _miniPopupTimer; // times how long the above stays on screen
 Route? listingDetailsDialogRoute; // to keep track of dialog so it can be closed if needed. This will move to main if we enter the app from an alert
 
 class FairScaffold extends StatelessWidget {
+  static const navigationBarHeight = 62.0;
+  static const homeButtonSize = 68.0;
+  static const homeButtonOffset = 20.0;
+
   const FairScaffold({
     super.key,
     required this.appBarTitle,
@@ -46,66 +57,147 @@ class FairScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SafeArea(
-      top: false,
-      left: false,
-      right: false,
-      bottom: Platform.isAndroid && isNavBarVisible(context),
-      child: Scaffold(
-        appBar: AppBar(
-          titleSpacing: 0,
-          leadingWidth: 44,
-          leading: (allowBack ?? false)
-              ? BackButton(
-                  onPressed: () {
+        top: false,
+        left: false,
+        right: false,
+        bottom: Platform.isAndroid && isNavBarVisible(context),
+        child: Scaffold(
+          backgroundColor: colorScheme.surfaceDim,
+          appBar: AppBar(
+            titleSpacing: 0,
+            leadingWidth: 44,
+            leading: (allowBack ?? false)
+                ? BackButton(onPressed: () {
                     HapticFeedback.lightImpact();
                     analyticsService.logButtonTapped('back');
                     Navigator.maybePop(context);
-                  },
-                )
-              : Builder(
-                  builder: (context) => IconButton(
-                    tooltip: 'Open navigation menu',
-                    icon: const Icon(Icons.menu),
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      analyticsService.logButtonTapped('drawer_open');
-                      Scaffold.of(context).openDrawer();
-                    },
+                  })
+                : Builder(
+                    builder: (context) => IconButton(
+                      tooltip: 'Open navigation menu',
+                      icon: const Icon(Icons.menu),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        analyticsService.logButtonTapped('drawer_open');
+                        Scaffold.of(context).openDrawer();
+                      },
+                    ),
                   ),
-                ),
-          title: FittedBox(fit: BoxFit.scaleDown, child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
-          centerTitle: false,
-          actions: appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
-          actionsPadding: const EdgeInsets.only(right: 4),
-        ),
-        body: body,
-        drawer: fairDrawer(context, analyticsService: analyticsService),
-        bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected, analyticsService: analyticsService),
-      ),
-    );
+            title: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            ),
+            centerTitle: false,
+            actions: appBarActions.map((a) => SizedBox(width: 42, child: a)).toList(),
+            actionsPadding: EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
+          ),
+          body: body,
+          drawer: fairDrawer(context, analyticsService: analyticsService),
+          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: homeButtonOffset),
+          floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+          resizeToAvoidBottomInset: false,
+          floatingActionButton: (allowBack ?? false) ? null : SizedBox(
+            width: homeButtonSize,
+            height: homeButtonSize,
+            child: Semantics(
+              selected: currentTab == 0,
+              child: FloatingActionButton(
+                key: const ValueKey('home-navigation-button'),
+                heroTag: null,
+                tooltip: 'Home',
+                elevation: 4,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: CircleBorder(),
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  analyticsService.logButtonTapped('navigation_home');
+                  onTabSelected(0);
+                },
+                child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, color: (currentTab == 0) ? colorScheme.onPrimary : colorScheme.surfaceDim),
+              ),
+            ),
+          ),
+          bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
+            key: const ValueKey('navigation-bar-surface'),
+            height: navigationBarHeight,
+            padding: EdgeInsets.only(right: 6), // to stop Favourites hitting edge
+            elevation: 0,
+            color: colorScheme.primary,
+            surfaceTintColor: Colors.transparent,
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 4,
+            clipBehavior: Clip.antiAlias,
+            child: fairBottomNavigationBar(currentTab, onTabSelected, colorScheme, analyticsService: analyticsService),
+          ),
+        ));
   }
 }
 
-BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, {required AnalyticsService analyticsService}) {
+// We typically use this for non-error toasts as it not in the centre of the screen, but also avoids the navbar
+void showInfoToast(BuildContext context, String message) {
+  final theme = Theme.of(context);
+  final colours = theme.colorScheme;
+  final toast = FToast().init(context);
+  // Replace stale feedback when filters change rapidly.
+  toast.removeQueuedCustomToasts();
+  toast.showToast(
+    ignorePointer: true,
+    toastDuration: const Duration(seconds: 2),
+    positionedToastBuilder: (context, child, gravity) {
+      final media = MediaQuery.of(context);
+      const navigationHeight = FairScaffold.navigationBarHeight +
+          FairScaffold.homeButtonSize / 2 - FairScaffold.homeButtonOffset;
+      return Positioned(
+        bottom: max(media.padding.bottom + navigationHeight, media.viewInsets.bottom) + 16,
+        left: 24,
+        right: 24,
+        child: child,
+      );
+    },
+    child: Semantics(
+      liveRegion: true,
+      child: Container(
+        key: const ValueKey('filter-toast'),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: colours.primary,
+          borderRadius: BorderRadius.circular(theme.platform == TargetPlatform.iOS ? 10 : 40),
+        ),
+        child: Text(message, textAlign: TextAlign.center,
+            style: TextStyle(color: colours.onPrimary, fontSize: 16)),
+      ),
+    ),
+  );
+}
+
+BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, ColorScheme colorscheme, {required AnalyticsService analyticsService}) {
+  // Visual order differs from the stable page indices used throughout the app.
+  const tabOrder = [1, 2, 0, 3, 4];
   return BottomNavigationBar(
+    backgroundColor: Colors.transparent,
     type: BottomNavigationBarType.fixed,
     showUnselectedLabels: true,
     elevation: 0,
-    currentIndex: index,
-    selectedFontSize: 12,
-    unselectedFontSize: 12,
+    currentIndex: tabOrder.indexOf(index),
+    selectedFontSize: 13,
+    unselectedFontSize: 13,
     iconSize: 30,
+    selectedItemColor: colorscheme.onPrimary,
+    unselectedItemColor: colorscheme.surfaceDim,
+    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
-      analyticsService.logButtonTapped('navigation_${const ['home', 'map', 'timetable', 'listings', 'favourites'][selectedIndex]}');
-      onTabSelected.call(selectedIndex);
+      analyticsService.logButtonTapped('navigation_${const ['map', 'timetable', 'home', 'listings', 'favourites'][selectedIndex]}');
+      onTabSelected.call(tabOrder[selectedIndex]);
     },
     items: const [
-      BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
       BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-      BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
-      BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
+      BottomNavigationBarItem(icon: Icon(Icons.watch_later), label: "Timetable"),
+      BottomNavigationBarItem(icon: SizedBox(width: 30, height: 30), label: ""),
+      BottomNavigationBarItem(icon: Icon(Icons.ballot), label: "Listings"),
       BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
     ],
   );
@@ -127,10 +219,16 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(flex: 4, child: Container()),
-                  FittedBox(fit: BoxFit.scaleDown, child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain)),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
+                  ),
                   Expanded(flex: 2, child: Container()),
-                  FittedBox(fit: BoxFit.scaleDown, child: Text(' $fairDateTimes', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold))),
-                  Expanded(flex: 2, child: Container()),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(' $fairDateTimes', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                  ),
+                  Expanded(flex: 2, child: Container())
                 ],
               ),
             ),
@@ -146,7 +244,12 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               analyticsService.logButtonTapped('drawer_about_fair');
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              Navigator.push(navigatorContext, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
+              Navigator.push(
+                  navigatorContext,
+                  MaterialPageRoute(
+                      builder: (context) => AboutTheFairPage(
+                            analyticsService: analyticsService,
+                          )));
             },
           ),
         ),
@@ -160,7 +263,12 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               analyticsService.logButtonTapped('drawer_important_information');
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              Navigator.push(navigatorContext, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: analyticsService)));
+              Navigator.push(
+                  navigatorContext,
+                  MaterialPageRoute(
+                      builder: (context) => ImportantInfoPage(
+                            analyticsService: analyticsService,
+                          )));
             },
           ),
         ),
@@ -193,6 +301,19 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   return contactUsDialog(context, analyticsService: analyticsService);
                 },
               );
+            },
+          ),
+        ),
+        Expanded(
+          flex: 4,
+          child: ListTile(
+            leading: const Icon(Icons.volunteer_activism),
+            title: const Text('Donate to the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              analyticsService.logButtonTapped('drawer_donate');
+              Navigator.pop(context);
+              launchUrl(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
             },
           ),
         ),
@@ -258,8 +379,14 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             ],
           ),
         ),
-        const Expanded(flex: 2, child: SizedBox.expand()),
-        const Expanded(flex: 0, child: Divider()),
+        const Expanded(
+          flex: 2,
+          child: SizedBox.expand(),
+        ),
+        const Expanded(
+          flex: 0,
+          child: Divider(),
+        ),
         Expanded(
           flex: 4,
           child: ListTile(
@@ -270,7 +397,12 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               analyticsService.logButtonTapped('drawer_settings');
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              Navigator.push(navigatorContext, MaterialPageRoute(builder: (context) => SettingsPage(analyticsService: analyticsService)));
+              Navigator.push(
+                  navigatorContext,
+                  MaterialPageRoute(
+                      builder: (context) => SettingsPage(
+                            analyticsService: analyticsService,
+                          )));
             },
           ),
         ),
@@ -284,7 +416,12 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               analyticsService.logButtonTapped('drawer_app_guide');
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
-              Navigator.pushReplacement(navigatorContext, MaterialPageRoute(builder: (context) => WelcomeScreen(analyticsService: analyticsService)));
+              Navigator.pushReplacement(
+                  navigatorContext,
+                  MaterialPageRoute(
+                      builder: (context) => WelcomeScreen(
+                            analyticsService: analyticsService,
+                          )));
             },
           ),
         ),
@@ -316,7 +453,10 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             },
           ),
         ),
-        const Expanded(flex: 2, child: SizedBox(height: 20)),
+        const Expanded(
+          flex: 2,
+          child: SizedBox(height: 20),
+        ),
       ],
     ),
   );
@@ -326,59 +466,66 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
   final colorScheme = Theme.of(itemContext).colorScheme;
 
   await showDialog(
-    context: itemContext,
-    builder: (dialogContext) {
-      return Dialog(
-        insetPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
-        shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
-        backgroundColor: colorScheme.surfaceContainerLowest,
-        shadowColor: colorScheme.surfaceDim,
-        elevation: 3,
-        child: IntrinsicHeight(
-          child: Container(
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 8,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
-                const Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
-                const Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
+      context: itemContext,
+      builder: (dialogContext) {
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
+          shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+          backgroundColor: colorScheme.surfaceContainerLowest,
+          shadowColor: colorScheme.surfaceDim,
+          elevation: 3,
+          child: IntrinsicHeight(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(mainAxisSize: MainAxisSize.min, spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
+                Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
+                Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
                 Align(
-                  alignment: AlignmentGeometry.center,
-                  child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app'),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        analyticsService.logButtonTapped('share_app_share');
-                        Navigator.of(dialogContext).pop();
-                        shareApp(itemContext, 'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
-                      },
-                      child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        analyticsService.logButtonTapped('share_app_close');
-                        Navigator.of(dialogContext).pop();
-                      },
-                      child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
-                    ),
-                  ],
-                ),
-              ],
+                    alignment: AlignmentGeometry.center,
+                    child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png',
+                        width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  TextButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      analyticsService.logButtonTapped('share_app_share');
+                      Navigator.of(dialogContext).pop();
+                      shareApp(itemContext,
+                          'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
+                    },
+                    child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      analyticsService.logButtonTapped('share_app_close');
+                      Navigator.of(dialogContext).pop();
+                    },
+                    child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                  ),
+                ]),
+              ]),
             ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      });
+}
+
+class CenterDockedWithOffset extends FloatingActionButtonLocation {
+  final double dyOffset; // positive = lower
+
+  const CenterDockedWithOffset({required this.dyOffset});
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final base = FloatingActionButtonLocation.centerDocked
+        .getOffset(scaffoldGeometry);
+    return Offset(base.dx, base.dy + dyOffset);
+  }
 }
 
 void shareApp(BuildContext context, String msgText) async {
@@ -407,7 +554,14 @@ void shareApp(BuildContext context, String msgText) async {
 
 void aboutDialog(BuildContext context, {required AnalyticsService analyticsService}) async {
   // fallback
-  PackageInfo packageInfo = PackageInfo(appName: 'Unknown', packageName: 'Unknown', version: 'Unknown', buildNumber: 'Unknown', buildSignature: 'Unknown', installerStore: 'Unknown');
+  PackageInfo packageInfo = PackageInfo(
+    appName: 'Unknown',
+    packageName: 'Unknown',
+    version: 'Unknown',
+    buildNumber: 'Unknown',
+    buildSignature: 'Unknown',
+    installerStore: 'Unknown',
+  );
   try {
     packageInfo = await PackageInfo.fromPlatform().timeout(const Duration(milliseconds: 200), onTimeout: () => packageInfo);
   } catch (e) {
@@ -419,137 +573,126 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
   final inflater = (MediaQuery.of(context).size.height.toInt() - 600).clamp(0, 250) / 50;
   final colorScheme = Theme.of(context).colorScheme;
   final textStyle = TextStyle(fontSize: 13.0 + inflater / 3);
-  final linkStyle = TextStyle(fontSize: 12.5 + inflater / 3, decoration: TextDecoration.underline, decorationColor: colorScheme.tertiary, color: colorScheme.tertiary);
+  final linkStyle =
+      TextStyle(fontSize: 12.5 + inflater / 3, decoration: TextDecoration.underline, decorationColor: colorScheme.tertiary, color: colorScheme.tertiary);
   final ScrollController aboutDialogScrollController = ScrollController();
 
   if (context.mounted) {
     await showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return Dialog(
-          insetPadding: EdgeInsets.all(4.0 + inflater * 2),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final maxWidth = constraints.maxWidth.clamp(350.0, 400.0);
-              return Container(
-                constraints: BoxConstraints(maxWidth: maxWidth),
-                padding: EdgeInsets.fromLTRB(16.0 + inflater * 2, 20, 10, 6),
-                child: Scrollbar(
-                  controller: aboutDialogScrollController,
-                  thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
-                  thickness: 4,
-                  radius: const Radius.circular(8),
-                  child: SingleChildScrollView(
-                    controller: aboutDialogScrollController,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ListTile(
-                          dense: true,
-                          visualDensity: VisualDensity(horizontal: -4 + inflater, vertical: -4),
-                          contentPadding: EdgeInsets.zero,
-                          leading: ClipRRect(borderRadius: BorderRadius.circular(6.0), child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain)),
-                          title: Text(fairName, style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold)),
-                          subtitle: Text('v${packageInfo.version}', style: textStyle),
-                        ),
-                        ListTile(
-                          dense: true,
-                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.phone_android, size: 28),
-                          title: Text('Android app by Alexander Berridge', style: textStyle),
-                          subtitle: Text('https://theberridge.com', style: linkStyle),
-                          onTap: () async {
-                            HapticFeedback.lightImpact();
-                            analyticsService.logButtonTapped('about_alex');
-                            launchUrl(Uri.parse('https://theberridge.com'));
-                          },
-                        ),
-                        ListTile(
-                          dense: true,
-                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.phone_iphone, size: 28),
-                          title: Text('iPhone version by Matt Whiting', style: textStyle),
-                          subtitle: Text('http://mattwhiting.com', style: linkStyle),
-                          onTap: () async {
-                            HapticFeedback.lightImpact();
-                            analyticsService.logButtonTapped('about_matt');
-                            launchUrl(Uri.parse('http://mattwhiting.com'));
-                          },
-                        ),
-                        ListTile(
-                          dense: true,
-                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.schedule, size: 28),
-                          title: Text('Timetable view based on Clashfinder Pal by Matt Whiting', style: textStyle),
-                          subtitle: Text('https://linktr.ee/cfpal', style: linkStyle),
-                          onTap: () async {
-                            HapticFeedback.lightImpact();
-                            analyticsService.logButtonTapped('about_clashfinder');
-                            launchUrl(Uri.parse('https://linktr.ee/cfpal'));
-                          },
-                        ),
-                        ListTile(
-                          dense: true,
-                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.palette_outlined, size: 28),
-                          title: Text('Illustrations by Clare McEwan', style: textStyle),
-                          subtitle: Text('https://www.claremcewan.co.uk', style: linkStyle),
-                          onTap: () async {
-                            HapticFeedback.lightImpact();
-                            analyticsService.logButtonTapped('about_clare');
-                            launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
-                          },
-                        ),
-                        ListTile(
-                          dense: true,
-                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.feedback_outlined, size: 28),
-                          title: Text('Tell us if you like this app', style: textStyle),
-                          subtitle: Text('Open a feedback form', style: linkStyle),
-                          onTap: () async {
-                            HapticFeedback.lightImpact();
-                            analyticsService.logButtonTapped('about_feedback');
-                            launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
-                          },
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          spacing: 10,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_licenses');
-                                Navigator.of(dialogContext).pop();
-                                showLicensePage(context: context);
-                              },
-                              child: Text('View licences', style: TextStyle(color: colorScheme.tertiary)),
+        context: context,
+        builder: (dialogContext) {
+          return Dialog(
+              insetPadding: EdgeInsets.all(4.0 + inflater * 2),
+              child: LayoutBuilder(builder: (context, constraints) {
+                final maxWidth = constraints.maxWidth.clamp(350.0, 400.0);
+                return Container(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    padding: EdgeInsets.fromLTRB(16.0 + inflater * 2, 20, 10, 6),
+                    child: Scrollbar(
+                        controller: aboutDialogScrollController,
+                        thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
+                        thickness: 4,
+                        radius: const Radius.circular(8),
+                        child: SingleChildScrollView(
+                          controller: aboutDialogScrollController,
+                          child: Column(mainAxisSize: MainAxisSize.min, children: [
+                            ListTile(
+                              dense: true,
+                              visualDensity: VisualDensity(horizontal: -4 + inflater, vertical: -4),
+                              contentPadding: EdgeInsets.zero,
+                              leading: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6.0), child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain)),
+                              title: Text(fairName, style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold)),
+                              subtitle: Text('v${packageInfo.version}', style: textStyle),
                             ),
-                            TextButton(
-                              onPressed: () {
+                            ListTile(
+                              dense: true,
+                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.phone_android, size: 28),
+                              title: Text('Android app by Alexander Berridge', style: textStyle),
+                              subtitle: Text('https://theberridge.com', style: linkStyle),
+                              onTap: () async {
                                 HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_close');
-                                Navigator.of(dialogContext).pop();
+                                analyticsService.logButtonTapped('about_alex');
+                                launchUrl(Uri.parse('https://theberridge.com'));
                               },
-                              child: Text('Close', style: TextStyle(color: colorScheme.tertiary)),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
+                            ListTile(
+                              dense: true,
+                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.phone_iphone, size: 28),
+                              title: Text('iPhone version by Matt Whiting', style: textStyle),
+                              subtitle: Text('http://mattwhiting.com', style: linkStyle),
+                              onTap: () async {
+                                HapticFeedback.lightImpact();
+                                analyticsService.logButtonTapped('about_matt');
+                                launchUrl(Uri.parse('http://mattwhiting.com'));
+                              },
+                            ),
+                            ListTile(
+                              dense: true,
+                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.schedule, size: 28),
+                              title: Text('Timetable view based on Clashfinder Pal by Matt Whiting', style: textStyle),
+                              subtitle: Text('https://linktr.ee/cfpal', style: linkStyle),
+                              onTap: () async {
+                                HapticFeedback.lightImpact();
+                                analyticsService.logButtonTapped('about_clashfinder');
+                                launchUrl(Uri.parse('https://linktr.ee/cfpal'));
+                              },
+                            ),
+                            ListTile(
+                              dense: true,
+                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.palette_outlined, size: 28),
+                              title: Text('Illustrations by Clare McEwan', style: textStyle),
+                              subtitle: Text('https://www.claremcewan.co.uk', style: linkStyle),
+                              onTap: () async {
+                                HapticFeedback.lightImpact();
+                                analyticsService.logButtonTapped('about_clare');
+                                launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+                              },
+                            ),
+                            ListTile(
+                              dense: true,
+                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                              contentPadding: EdgeInsets.zero,
+                              leading: const Icon(Icons.feedback_outlined, size: 28),
+                              title: Text('Tell us if you like this app', style: textStyle),
+                              subtitle: Text('Open a feedback form', style: linkStyle),
+                              onTap: () async {
+                                HapticFeedback.lightImpact();
+                                analyticsService.logButtonTapped('about_feedback');
+                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                              },
+                            ),
+                            Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 10, children: [
+                              TextButton(
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  analyticsService.logButtonTapped('about_licenses');
+                                  Navigator.of(dialogContext).pop();
+                                  showLicensePage(context: context);
+                                },
+                                child: Text('View licences', style: TextStyle(color: colorScheme.tertiary)),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  analyticsService.logButtonTapped('about_close');
+                                  Navigator.of(dialogContext).pop();
+                                },
+                                child: Text('Close', style: TextStyle(color: colorScheme.tertiary)),
+                              ),
+                            ]),
+                          ]),
+                        )));
+              }));
+        });
   }
 }
 
@@ -599,22 +742,22 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                       Text.rich(
                         TextSpan(
                           children: [
-                            const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
+                            const TextSpan(
+                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
                             TextSpan(
-                              text: '07303\u{00A0}142689',
-                              style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () async {
-                                  HapticFeedback.lightImpact();
-                                  analyticsService.logButtonTapped('contact_phone');
-                                  final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                  if (await canLaunchUrl(phoneUri)) {
-                                    await launchUrl(phoneUri);
-                                  } else {
-                                    throw Exception('Could not dial 07303 142689');
-                                  }
-                                },
-                            ),
+                                text: '07303\u{00A0}142689',
+                                style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    HapticFeedback.lightImpact();
+                                    analyticsService.logButtonTapped('contact_phone');
+                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                    if (await canLaunchUrl(phoneUri)) {
+                                      await launchUrl(phoneUri);
+                                    } else {
+                                      throw Exception('Could not dial 07303 142689');
+                                    }
+                                  }),
                             const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
                           ],
                         ),
@@ -628,7 +771,10 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                             analyticsService.logButtonTapped('contact_close');
                             Navigator.pop(context);
                           },
-                          child: Text('Close', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
+                          child: Text(
+                            'Close',
+                            style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
+                          ),
                         ),
                       ),
                     ],
@@ -659,12 +805,16 @@ Widget _buildEmailLink(String email, {required AnalyticsService analyticsService
           throw Exception('Could not launch email client');
         }
       },
-      child: Text(email, style: const TextStyle(decoration: TextDecoration.underline)),
+      child: Text(
+        email,
+        style: const TextStyle(decoration: TextDecoration.underline),
+      ),
     ),
   );
 }
 
-void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage, {required AnalyticsService analyticsService, Color? fgColour, Color? bgColour}) {
+void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage,
+    {required AnalyticsService analyticsService, Color? fgColour, Color? bgColour}) {
   fgColour ??= Theme.of(itemContext).colorScheme.secondary;
   bgColour ??= Theme.of(itemContext).colorScheme.onSecondary;
 
@@ -710,15 +860,19 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
             removeMiniPopup();
           },
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: overlayW, // wrapping boundary
+          constraints: BoxConstraints(
+            maxWidth: overlayW, // wrapping boundary
+          ),
+          child: Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: bgColour,
+              borderRadius: BorderRadius.circular(4),
+              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
             ),
-            child: Container(
-              alignment: Alignment.centerLeft,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(color: bgColour, borderRadius: BorderRadius.circular(4), boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))]),
-              child: Text(theMessage, softWrap: true, style: theStyle),
-            ),
+            child: Text(theMessage, softWrap: true, style: theStyle),
+          ),
           ),
         ),
       ),
@@ -740,14 +894,20 @@ void removeMiniPopup() {
   }
 }
 
-double estimateTextHeight({required String text, required TextStyle style, required double maxWidth, required BuildContext context, int? maxLines}) {
+double estimateTextHeight({
+  required String text,
+  required TextStyle style,
+  required double maxWidth,
+  required BuildContext context,
+  int? maxLines,
+}) {
   final tp = TextPainter(
-    text: TextSpan(text: text, style: style),
-    maxLines: maxLines,
-    textDirection: TextDirection.ltr,
-    textScaler: MediaQuery.textScalerOf(context),
-    strutStyle: StrutStyle.fromTextStyle(style),
-  )..layout(maxWidth: maxWidth);
+      text: TextSpan(text: text, style: style),
+      maxLines: maxLines,
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+      strutStyle: StrutStyle.fromTextStyle(style))
+    ..layout(maxWidth: maxWidth);
   return tp.size.height;
 }
 
@@ -829,7 +989,9 @@ int asTheCrowFlies(LatLng origin, LatLng destination) {
   const c = cos;
 
   // Haversine formula for calculating the central angle between two points on a sphere
-  var a = 0.5 - c((destination.latitude - origin.latitude) * p) / 2 + c(origin.latitude * p) * c(destination.latitude * p) * (1 - c((destination.longitude - origin.longitude) * p)) / 2;
+  var a = 0.5 -
+      c((destination.latitude - origin.latitude) * p) / 2 +
+      c(origin.latitude * p) * c(destination.latitude * p) * (1 - c((destination.longitude - origin.longitude) * p)) / 2;
 
   // Why have a fudge factor? It's a UX thing
   // Estimating distances usings straight line routes means that the estimation is inevitably shorter than the actual walking route
@@ -883,10 +1045,27 @@ String formatTimeRange(DateTime startTime, DateTime endTime) {
   return '${formatTime(startTime)}–${formatTime(endTime)}';
 }
 
-void shareListing(String theTitle, String theLocation, String theStartTimeString, String theEndTimeString, BuildContext context, {bool cancelled = false, bool brickAndMortar = false}) async {
+void shareListing(
+  String theTitle,
+  String theLocation,
+  String theStartTimeString,
+  String theEndTimeString,
+  BuildContext context, {
+  bool cancelled = false,
+  bool brickAndMortar = false,
+}) async {
   debugPrint('shareEvent called with theEvent=$theTitle theLocation=$theLocation theStartTime=$theStartTimeString theEndTimeString=$theEndTimeString');
-  final msgText = buildListingShareText(theTitle, theLocation, theStartTimeString, theEndTimeString, cancelled: cancelled, brickAndMortar: brickAndMortar);
-  final params = ShareParams(text: msgText);
+  final msgText = buildListingShareText(
+    theTitle,
+    theLocation,
+    theStartTimeString,
+    theEndTimeString,
+    cancelled: cancelled,
+    brickAndMortar: brickAndMortar,
+  );
+  final params = ShareParams(
+    text: msgText,
+  );
   try {
     await SharePlus.instance.share(params);
   } catch (e) {
@@ -905,7 +1084,15 @@ void shareListing(String theTitle, String theLocation, String theStartTimeString
   }
 }
 
-String buildListingShareText(String theTitle, String theLocation, String theStartTimeString, String theEndTimeString, {required bool cancelled, DateTime? currentTime, bool brickAndMortar = false}) {
+String buildListingShareText(
+  String theTitle,
+  String theLocation,
+  String theStartTimeString,
+  String theEndTimeString, {
+  required bool cancelled,
+  DateTime? currentTime,
+  bool brickAndMortar = false,
+}) {
   if (cancelled) {
     return '$theTitle at $theLocation has been cancelled and will not be appearing at $fairName.\nhttps://www.millroadwinterfair.org/';
   }
@@ -957,7 +1144,13 @@ DateTime combineDateAndTime(String theTime, DateTime theDate) {
   final parts = theTime.split(':');
   final hour = int.parse(parts[0]);
   final minute = int.parse(parts[1]);
-  final result = DateTime(theDate.year, theDate.month, theDate.day, hour, minute);
+  final result = DateTime(
+    theDate.year,
+    theDate.month,
+    theDate.day,
+    hour,
+    minute,
+  );
   return result;
 }
 
@@ -969,28 +1162,191 @@ String formatFullDate(DateTime date) {
   return '$dayName $monthName $day$suffix';
 }
 
+Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, BuildContext context) async {
+  debugPrint('toggleListingAlert called for $listingID and desiredNoticePeriod=$desiredNoticePeriod');
+  final colorScheme = Theme.of(context).colorScheme;
+  if (settingsOpened) { // button previously tapped when alert permissions weren't given; maybe they are now
+    alertsPermissionGranted = await requestAlertPermissions();
+    settingsOpened = false;
+  }
+  if (!context.mounted) return;
+  if (alertsPermissionGranted) {
+    await setTheAlert(context, desiredNoticePeriod, listingID);
+  } else {
+    alertsPermissionGranted = await requestAlertPermissions();
+    if (!alertsPermissionGranted) {
+      settingsOpened = true;
+      if (context.mounted) await showNoPermissionsDialog(context, colorScheme);
+    } else {
+      if (!context.mounted) return;
+      await setTheAlert(context, desiredNoticePeriod, listingID);
+    }
+  }
+}
+
+Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme) async {
+  return showDialog<void>(context: context, builder: (BuildContext context) {
+    return Dialog(
+      insetPadding: EdgeInsets.all(8), // margin from screen edges
+      shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+      backgroundColor: colorScheme.surfaceContainerLowest,
+      shadowColor: colorScheme.surfaceDim,
+      elevation: 3,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
+        child: Column(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
+          ListTile(
+            visualDensity: VisualDensity(horizontal: -2, vertical: 2),
+            leading: const Icon(Icons.error, size: 36, color: Colors.red),
+            title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
+            TextButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel')
+            ),
+            TextButton(
+              onPressed: () async {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+                await openAppSettings();
+              },
+              child: Text('Open Settings')
+            ),
+            SizedBox(width: 8),
+          ]),
+        ]),
+      ),
+    );
+  });
+}
+
+
+Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) async {
+  await alertsStore.refreshEventAlertSchedules(); // since snooze may have updated these
+  if (!context.mounted) return;
+  final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
+  if (theListing == null) return;
+  final existingAlert = alertsStore.alertSchedules.firstWhereOrNull((a) => a.listingId == listingID);
+  if (existingAlert != null) {
+    final theAlertId = existingAlert.id;
+    debugPrint('setTheAlert removing and cancelling theAlertId=$theAlertId');
+    alertsStore.removeAlertById(theAlertId);
+    flutterLocalNotificationsPlugin.cancel(id: theAlertId);
+    showToast(context, 'Alert for ${theListing['title']} has been cancelled.', false);
+    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.saveAllEventAlerts();
+    return;
+  } else {
+    final theListingStart = combineDateAndTime(theListing['startTime'], fairDate);
+    String? categoryID;
+    List<AndroidNotificationAction> androidNotificationActions;
+    final now = DateTime.now();
+    final timeToGo = theListingStart.difference(now).inMinutes;
+    int theAlertNoticePeriod;
+    if (timeToGo <= 0) {
+      showToast(context, 'No alert set as ${theListing['title']} is already underway.', true);
+      return;
+    } else if (timeToGo < desiredNoticePeriod) {
+      theAlertNoticePeriod = max(timeToGo ~/ 1.5, 1); // arbitrary value if within desiredNoticePeriod of start
+    } else {
+      theAlertNoticePeriod = desiredNoticePeriod;
+    }
+    (categoryID, androidNotificationActions) = calculateAlertActionCategories(theAlertNoticePeriod);
+    final newAlertId = alertsStore.addAlert(listingID, theAlertNoticePeriod, true);
+    final schedTime = theListingStart.subtract(Duration(minutes: theAlertNoticePeriod));
+    flutterLocalNotificationsPlugin.zonedSchedule(
+      id: newAlertId,
+      title: fairName,
+      body: (theAlertNoticePeriod > 0)
+        ? '${theListing['title']} starting at ${theListing['location']} in $theAlertNoticePeriod minutes (${theListing['startTime']})'
+        : '${theListing['title']} underway at ${theListing['location']} until ${theListing['endTime']}',
+      payload: jsonEncode(alertsStore.alertSchedules.firstWhere((a) => a.id == newAlertId)),
+      scheduledDate: tz.TZDateTime.from(schedTime, tz.local),//todo
+      //scheduledDate: tz.TZDateTime.from(now.add(Duration(seconds: 3)), tz.local),
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'org.millroadwinterfair.MRWFapp',
+          'Event alerts',
+          channelDescription: 'Mill Road Winter Fair event alerts',
+          importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
+          actions: androidNotificationActions,
+        ),
+        iOS: DarwinNotificationDetails(
+          threadIdentifier: 'org.millroadwinterfair.MRWFapp',
+          categoryIdentifier: categoryID
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
+    );
+    String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
+    if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
+    showToast(context, '$theMessage.', false);
+    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.saveAllEventAlerts();
+    debugPrint('setTheAlert scheduled new alert with ID $newAlertId in $theAlertNoticePeriod minutes at $schedTime with message “$theMessage”');
+    return;
+  }
+}
+
+
+void showToast(BuildContext theContext, String theMessage, bool isError) {
+  Fluttertoast.showToast(
+    msg: theMessage,
+    gravity: ToastGravity.BOTTOM,
+    backgroundColor: (isError) ? Theme.of(theContext).colorScheme.tertiary : Theme.of(theContext).colorScheme.primary,
+    textColor: (isError) ? Theme.of(theContext).colorScheme.onPrimary : Theme.of(theContext).colorScheme.onPrimary,
+    fontSize: 16,
+    toastLength: Toast.LENGTH_SHORT,
+    timeInSecForIosWeb: 2,
+  );
+}
+
+
 // Function to determine if the event has ended based on endTime string
-bool hasEventEnded(String endTime) {
+bool hasEventEnded(String endTime, DateTimeProvider dateTimeProvider) {
   try {
     final parts = endTime.split(':');
     final endHour = int.parse(parts[0]);
     final endMinute = parts.length > 1 ? int.parse(parts[1]) : 0;
-
-    final endDateTime = DateTime(fairDate.year, fairDate.month, fairDate.day, endHour, endMinute);
-
-    return DateTime.now().isAfter(endDateTime);
+    final endDateTime = DateTime(
+      fairDate.year,
+      fairDate.month,
+      fairDate.day,
+      endHour,
+      endMinute,
+    );
+    return dateTimeProvider.now().isAfter(endDateTime);
   } catch (_) {
     return false; // default to not ended if parsing fails
   }
 }
 
+
 // Function to determine if the event is today
-bool isItEventDay() {
-  return DateUtils.isSameDay(fairDate, DateTime.now());
+bool isItEventDay(DateTimeProvider dateTimeProvider) {
+  return DateUtils.isSameDay(
+    fairDate,
+    dateTimeProvider.now(),
+  );
 }
 
+
 class AdaptiveImageText extends StatefulWidget {
-  const AdaptiveImageText({super.key, required this.imageUrl, required this.descriptionWidget});
+  const AdaptiveImageText({
+    super.key,
+    required this.imageUrl,
+    required this.descriptionWidget,
+  });
 
   final String imageUrl;
   final Widget descriptionWidget;
@@ -1065,7 +1421,11 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
             width: _inlineImageWidth,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [const Icon(Icons.broken_image, size: 32), if (showErrorText) const SizedBox(height: 4), if (showErrorText) const Text('Could not load image', style: TextStyle(fontSize: 12))],
+              children: [
+                const Icon(Icons.broken_image, size: 32),
+                if (showErrorText) const SizedBox(height: 4),
+                if (showErrorText) const Text('Could not load image', style: TextStyle(fontSize: 12)),
+              ],
             ),
           ),
         ),
@@ -1085,7 +1445,10 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
             width: _inlineImageWidth,
             height: _loadingImageHeight,
             child: DecoratedBox(
-              decoration: BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
             ),
           ),
@@ -1100,7 +1463,10 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
       children: [
         Expanded(child: widget.descriptionWidget),
         const SizedBox(width: 12),
-        ConstrainedBox(constraints: const BoxConstraints(maxHeight: _maxImageHeight), child: _buildImage(width: _inlineImageWidth)),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: _buildImage(width: _inlineImageWidth),
+        ),
       ],
     );
   }
@@ -1109,7 +1475,13 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Align(alignment: AlignmentGeometry.center, child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: _maxImageHeight), child: _buildImage())),
+        Align(
+          alignment: AlignmentGeometry.center,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+            child: _buildImage(),
+          ),
+        ),
         const SizedBox(height: 12),
         widget.descriptionWidget,
       ],
@@ -1134,12 +1506,18 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
   }
 }
 
+
 Future<void> ensureWidgetFullyVisible(GlobalKey key) async {
   final context = key.currentContext;
   if (context == null) return;
   if (isWidgetFullyVisible(context)) return;
   // First attempt with ensureVisible
-  Scrollable.ensureVisible(context, alignment: 1.0, duration: const Duration(milliseconds: 150), curve: Curves.easeInOut);
+  Scrollable.ensureVisible(
+    context,
+    alignment: 1.0,
+    duration: const Duration(milliseconds: 150),
+    curve: Curves.easeInOut,
+  );
   // Let that animation finish
   await Future.delayed(const Duration(milliseconds: 160));
   if (!context.mounted) return;
@@ -1169,9 +1547,16 @@ Future<void> ensureWidgetFullyVisible(GlobalKey key) async {
     return;
   }
   // Clamp to valid scroll range
-  targetScrollOffset = targetScrollOffset.clamp(position.minScrollExtent, position.maxScrollExtent);
+  targetScrollOffset = targetScrollOffset.clamp(
+    position.minScrollExtent,
+    position.maxScrollExtent,
+  );
   if (targetScrollOffset == position.pixels) return;
-  await position.animateTo(targetScrollOffset, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+  await position.animateTo(
+    targetScrollOffset,
+    duration: const Duration(milliseconds: 200),
+    curve: Curves.easeInOut,
+  );
 }
 
 bool isWidgetFullyVisible(BuildContext context) {
@@ -1183,5 +1568,8 @@ bool isWidgetFullyVisible(BuildContext context) {
   final offset = box.localToGlobal(Offset.zero, ancestor: viewport);
   final size = box.size;
   final viewportSize = viewport.paintBounds.size;
-  return offset.dy >= 0 && offset.dy + size.height <= viewportSize.height && offset.dx >= 0 && offset.dx + size.width <= viewportSize.width;
+  return offset.dy >= 0 &&
+      offset.dy + size.height <= viewportSize.height &&
+      offset.dx >= 0 &&
+      offset.dx + size.width <= viewportSize.width;
 }
