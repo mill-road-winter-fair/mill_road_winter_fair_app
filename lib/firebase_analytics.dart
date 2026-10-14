@@ -45,7 +45,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
     await _record(
       () => analytics.logEvent(
         name: 'button_click',
-        parameters: {'button_id': buttonName, 'screen_name': currentScreen, if (listingId != null) 'listing_id': listingId, if (listingName != null) 'listing_name': listingName},
+        parameters: {'button_id': buttonName, 'screen_name': currentScreen, 'listing_id': ?listingId, 'listing_name': ?listingName},
       ),
     );
   }

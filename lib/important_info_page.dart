@@ -232,7 +232,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
           const Text('• ', style: TextStyle(height: 1.3)),
           Expanded(
             child: Text.rich(
-              TextSpan(text: theText, children: [if (link != null) link]),
+              TextSpan(text: theText, children: [?link]),
               style: TextStyle(height: 1.3, fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
             ),
           ),
