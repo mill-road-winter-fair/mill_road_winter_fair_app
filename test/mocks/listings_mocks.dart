@@ -300,6 +300,7 @@ Map<String, dynamic> mockListing(String scenario) {
   return Map<String, dynamic>.from(listing);
 }
 
+// Returns the mock category listing matching the given subcategory, replacing its ID with the supplied ID.
 Map<String, dynamic> listingFor(String id, String subcategory) => {
       ...categoryListingsMocks
           .singleWhere((listing) => listing['id'] == subcategory),
