@@ -1,5 +1,5 @@
-/// Shared fictional listings. Use [mockListing] to get a mutable copy.
-/// Empty groupID means a standalone listing, rather than a missing value.
+// Shared fictional listings. Use [mockListing] to get a mutable copy.
+// Empty groupID means a standalone listing, rather than a missing value.
 const listingHeaders = <String>[
   'id',
   'visibleOnMap',
@@ -62,7 +62,7 @@ const _completeListing = <String, dynamic>{
   'endTime': '16:30',
 };
 
-/// Named scenarios keep test selection independent of array order.
+// Named scenarios keep test selection independent of array order.
 final _listingScenarios = <String, Map<String, dynamic>>{
   'glazedAndConfused': {
     ..._completeListing,
@@ -243,8 +243,8 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
 };
 
-/// The complete catalogue. Scenario variants may deliberately reuse IDs;
-/// select a coherent subset when displaying several listings together.
+// The complete catalogue. Scenario variants may deliberately reuse IDs;
+// select a coherent subset when displaying several listings together.
 final List<Map<String, dynamic>> listingsMocks = List.unmodifiable([
   ..._listingScenarios.values.map(Map<String, dynamic>.unmodifiable),
   ...categoryListingsMocks,
@@ -262,7 +262,7 @@ final _longDescriptionListing = {
   'endTime': '23:59',
 };
 
-/// Each subcategory has exactly one flag enabled.
+// Each subcategory has exactly one flag enabled.
 final List<Map<String, dynamic>> categoryListingsMocks = List.unmodifiable([
   for (final (category, title, location) in [
     ('food', 'Wok This Way', 'Mill Road'),
@@ -291,7 +291,7 @@ final List<Map<String, dynamic>> categoryListingsMocks = List.unmodifiable([
     }),
 ]);
 
-/// Always return a fresh map: tests routinely change flags, times and IDs.
+// Always return a fresh map: tests routinely change flags, times and IDs.
 Map<String, dynamic> mockListing(String scenario) {
   final listing = scenario == 'longDescription'
       ? _longDescriptionListing
@@ -306,7 +306,7 @@ Map<String, dynamic> listingFor(String id, String subcategory) => {
       'id': id,
     };
 
-/// Encode the same fixtures in the spreadsheet API's column order.
+// Encode the same fixtures in the spreadsheet API's column order.
 Map<String, dynamic> mockListingsResponse(
         List<Map<String, dynamic>> listings) =>
     {
