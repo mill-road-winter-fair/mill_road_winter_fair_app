@@ -76,7 +76,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       final listing = mockListing('listing');
       await tester.pumpWithClock(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
-        listingId: 'listing-123',
+        listingId: '26002',
         cancelled: listing['cancelled'] == 'TRUE', brickAndMortar: listing['brickAndMortar'] == 'TRUE',
         emoji: listing['emoji'] as String, title: listing['title'] as String, subtitle: listing['subtitle'] as String, location: listing['location'] as String,
         description: listing['description'] as String, email: listing['email'] as String, website: listing['website'] as String, phoneNumber: listing['phone'] as String,
@@ -86,7 +86,7 @@ void main() {
       ))));
       await tester.tap(find.byIcon(Icons.info));
       expect(analytics.calls, ['haptic', 'tap:listing_details', 'details']);
-      expect(analytics.buttonEvents.single, {'button_id': 'listing_details', 'listing_id': 'listing-123', 'listing_name': 'Listing'});
+      expect(analytics.buttonEvents.single, {'button_id': 'listing_details', 'listing_id': '26002', 'listing_name': 'Listing'});
     });
   }
 
@@ -98,7 +98,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWithClock(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
-        listingId: 'listing-456', cancelled: listing['cancelled'] == 'TRUE', brickAndMortar: listing['brickAndMortar'] == 'TRUE',
+        listingId: '26018', cancelled: listing['cancelled'] == 'TRUE', brickAndMortar: listing['brickAndMortar'] == 'TRUE',
         emoji: listing['emoji'] as String, title: listing['title'] as String, subtitle: listing['subtitle'] as String, location: listing['location'] as String,
         description: listing['description'] as String, email: listing['email'] as String, website: listing['website'] as String, phoneNumber: listing['phone'] as String,
         imageURL: listing['imageURL'] as String, startTime: listing['startTime'] as String, endTime: listing['endTime'] as String, approxDistance: '', detailsVisible: true,
@@ -118,7 +118,7 @@ void main() {
         'visit_listing_website', 'email_listing', 'phone_listing',
       ]);
       for (final event in analytics.buttonEvents) {
-        expect(event['listing_id'], 'listing-456');
+        expect(event['listing_id'], '26018');
         expect(event['listing_name'], 'Another listing');
       }
     });

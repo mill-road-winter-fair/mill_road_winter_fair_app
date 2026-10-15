@@ -156,7 +156,7 @@ void main() {
         final startTime = DateTime.now().add(const Duration(minutes: 30));
         final endTime = startTime.add(const Duration(minutes: 90));
         final payload = jsonEncode({
-          'listingId': 'listing-1',
+          'listingId': '26009',
           'listingTitle': 'Glazed and Confused',
           'listingLocation': 'Gwydir Street',
           'listingStartTime': startTime.toIso8601String(),
@@ -179,14 +179,14 @@ void main() {
       final validStart = DateTime.now().add(const Duration(hours: 1));
       final validEnd = validStart.add(const Duration(hours: 1));
       final invalidStartPayload = jsonEncode({
-        'listingId': 'listing-1',
+        'listingId': '26009',
         'listingTitle': 'Glazed and Confused',
         'listingLocation': 'Gwydir Street',
         'listingStartTime': 'not-a-date',
         'listingEndTime': validEnd.toIso8601String(),
       });
       final validPayload = jsonEncode({
-        'listingId': 'listing-1',
+        'listingId': '26009',
         'listingTitle': 'Glazed and Confused',
         'listingLocation': 'Gwydir Street',
         'listingStartTime': validStart.toIso8601String(),
@@ -229,7 +229,7 @@ void main() {
         final startTime = DateTime.now().add(const Duration(hours: 2));
         final endTime = startTime.add(const Duration(hours: 1));
         final payload = jsonEncode({
-          'listingId': 'listing-1',
+          'listingId': '26009',
           'listingTitle': 'Glazed and Confused',
           'listingLocation': 'Gwydir Street',
           'listingStartTime': startTime.toIso8601String(),
@@ -261,7 +261,7 @@ void main() {
       await _withAndroidPlatform(() async {
         final startTime = DateTime.now().add(const Duration(hours: 1));
         final payload = jsonEncode({
-          'listingId': 'listing-1',
+          'listingId': '26009',
           'listingTitle': 'Glazed and Confused',
           'listingLocation': 'Gwydir Street',
           'listingStartTime': startTime.toIso8601String(),
@@ -290,7 +290,7 @@ void main() {
       final store = AlertScheduleStore([
         AlertSchedule(
           7,
-          'listing-1',
+          '26009',
           'Glazed and Confused',
           'Gwydir Street',
           fairDate.add(const Duration(hours: 10)),
@@ -322,17 +322,17 @@ void main() {
 
     test('AlertScheduleStore can add, find, and remove alerts and purge expired ones', () {
       final store = AlertScheduleStore.initial();
-      final id = store.addAlert('listing-1', 15, true);
+      final id = store.addAlert('26009', 15, true);
 
       expect(id, 0);
-      expect(store[0].listingId, 'listing-1');
+      expect(store[0].listingId, '26009');
       expect(store.addAlert('missing-listing', 15, true), -1);
-      expect(store.alertExists('listing-1'), isTrue);
-      expect(store.alertIdForListing('listing-1'), 0);
+      expect(store.alertExists('26009'), isTrue);
+      expect(store.alertIdForListing('26009'), 0);
 
       final placeholder = AlertSchedule(
         1,
-        'listing-2',
+        '26010',
         'Acoustic Stage',
         'Mill Road',
         DateTime.now().subtract(const Duration(minutes: 2)),
@@ -342,12 +342,12 @@ void main() {
         null,
       );
       store.alertSchedules.add(placeholder);
-      store.removeAlertByListingId('listing-2');
-      expect(store.alertExists('listing-2'), isFalse);
+      store.removeAlertByListingId('26010');
+      expect(store.alertExists('26010'), isFalse);
 
       final stale = AlertSchedule(
         2,
-        'listing-2',
+        '26010',
         'Acoustic Stage',
         'Mill Road',
         DateTime.now().subtract(const Duration(minutes: 15)),
@@ -369,7 +369,7 @@ void main() {
       final now = DateTime.now();
       final alert = AlertSchedule(
         12,
-        'listing-2',
+        '26010',
         'Acoustic Stage',
         'Mill Road',
         now,
@@ -394,7 +394,7 @@ void main() {
       final store = AlertScheduleStore([
         AlertSchedule(
           2,
-          'listing-2',
+          '26010',
           'Acoustic Stage',
           'Mill Road',
           fairDate.add(const Duration(hours: 12)),
@@ -415,7 +415,7 @@ void main() {
       alertsStore.loadEventAlerts();
       await Future<void>.delayed(Duration.zero);
       expect(alertsStore.alertSchedules, isNotEmpty);
-      expect(alertsStore.alertSchedules.single.listingId, 'listing-2');
+      expect(alertsStore.alertSchedules.single.listingId, '26010');
     });
 
     test('loadEventAlerts and refreshEventAlertSchedules leave the store unchanged without saved data', () async {
@@ -434,7 +434,7 @@ void main() {
       final live = AlertScheduleStore([
         AlertSchedule(
           18,
-          'listing-1',
+          '26009',
           'Glazed and Confused',
           'Gwydir Street',
           fairDate.add(const Duration(hours: 10)),
@@ -462,7 +462,7 @@ void main() {
       await alertsStore.refreshEventAlertSchedules();
 
       expect(alertsStore.alertSchedules.single.id, 18);
-      expect(alertsStore.alertSchedules.single.listingId, 'listing-1');
+      expect(alertsStore.alertSchedules.single.listingId, '26009');
     });
   });
 
@@ -507,11 +507,11 @@ void main() {
           ),
         );
 
-        await toggleListingAlert('listing-1', 15, tester.element(find.byType(SizedBox)));
+        await toggleListingAlert('26009', 15, tester.element(find.byType(SizedBox)));
         await tester.pump(const Duration(seconds: 3));
 
         expect(alertsStore.alertSchedules, isNotEmpty);
-        expect(alertsStore.alertSchedules.first.listingId, 'listing-1');
+        expect(alertsStore.alertSchedules.first.listingId, '26009');
       });
     });
 
@@ -525,7 +525,7 @@ void main() {
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () async {
-                  await toggleListingAlert('listing-1', 15, context);
+                  await toggleListingAlert('26009', 15, context);
                 },
                 child: const Text('Try alert'),
               ),
@@ -551,7 +551,7 @@ void main() {
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () async {
-                  await toggleListingAlert('listing-1', 15, context);
+                  await toggleListingAlert('26009', 15, context);
                 },
                 child: const Text('Try again'),
               ),
@@ -572,7 +572,7 @@ void main() {
 
     testWidgets('setTheAlert cancels an existing scheduled alert for the listing', (tester) async {
       await _withAndroidPlatform(() async {
-        final listingId = 'listing-1';
+        final listingId = '26009';
         alertsStore = AlertScheduleStore([
           AlertSchedule(
             66,
@@ -599,11 +599,11 @@ void main() {
     testWidgets('setTheAlert creates a new alert and persists it', (tester) async {
       await _withAndroidPlatform(() async {
         await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
-        await setTheAlert(tester.element(find.byType(SizedBox)), 15, 'listing-1');
+        await setTheAlert(tester.element(find.byType(SizedBox)), 15, '26009');
         await tester.pump(const Duration(seconds: 3));
 
         expect(alertsStore.alertSchedules, isNotEmpty);
-        expect(alertsStore.alertSchedules.single.listingId, 'listing-1');
+        expect(alertsStore.alertSchedules.single.listingId, '26009');
         expect(alertsStore.alertSchedules.single.noticePeriod, 15);
         expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isNotEmpty);
       });

@@ -192,7 +192,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'favourite', listings, ['1']);
+      await pumpFilteredListingsPage(tester, 'favourite', listings, ['26001']);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);

@@ -32,7 +32,7 @@ const listingHeaders = <String>[
 ];
 
 const _completeListing = <String, dynamic>{
-  'id': '1',
+  'id': '26001',
   'visibleOnMap': 'TRUE',
   'cancelled': 'FALSE',
   'groupParent': 'FALSE',
@@ -66,15 +66,17 @@ const _completeListing = <String, dynamic>{
 final _listingScenarios = <String, Map<String, dynamic>>{
   'glazedAndConfused': {
     ..._completeListing,
+    'id': '26001',
   },
   'listing': {
     ..._completeListing,
+    'id': '26002',
     'title': 'Listing',
     'location': 'Mill Road',
   },
   'sushiSquad': {
     ..._completeListing,
-    'id': '2',
+    'id': '26003',
     'emoji': '🍣',
     'title': 'Sushi Squad',
     'subtitle': 'Sushi',
@@ -88,7 +90,7 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
   'biteClub': {
     ..._completeListing,
-    'id': '3',
+    'id': '26004',
     'emoji': '🍔',
     'title': 'Bite Club',
     'subtitle': 'Burgers',
@@ -103,10 +105,12 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
   'musicalDoughnuts': {
     ..._completeListing,
+    'id': '26005',
     'performanceMusic': 'TRUE',
   },
   'sushiFirstId': {
     ..._completeListing,
+    'id': '26006',
     'emoji': '🍣',
     'title': 'Sushi Squad',
     'subtitle': 'Sushi',
@@ -120,19 +124,20 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
   'doughnutsSecondId': {
     ..._completeListing,
-    'id': '2',
+    'id': '26007',
   },
   'cachedListing': {
     ..._completeListing,
+    'id': '26008',
     'title': 'Cached listing',
   },
   'alertDoughnuts': {
     ..._completeListing,
-    'id': 'listing-1',
+    'id': '26009',
   },
   'acousticStage': {
     ..._completeListing,
-    'id': 'listing-2',
+    'id': '26010',
     'title': 'Acoustic Stage',
     'emoji': '🎸',
     'subtitle': 'Unplugged and slightly out of tune',
@@ -145,25 +150,26 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
   'foodGroup': {
     ..._completeListing,
+    'id': '26101',
     'groupParent': 'TRUE',
     'title': 'Food Group',
     'subtitle': 'Food',
-    'groupID': '1',
+    'groupID': '26101',
     'location': 'Headly Street',
     'latLng': '52.199838,0.139016',
   },
   'groupedDoughnuts': {
     ..._completeListing,
-    'id': '2',
+    'id': '26011',
     'visibleOnMap': 'FALSE',
-    'groupID': '1',
+    'groupID': '26101',
     'location': 'Headly Street',
     'startTime': '11:00',
     'endTime': '15:00',
   },
   'nearbySushi': {
     ..._completeListing,
-    'id': '3',
+    'id': '26012',
     'emoji': '🍣',
     'title': 'Sushi Squad',
     'subtitle': 'Sushi',
@@ -178,26 +184,26 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
   'seafoodGroup': {
     ..._completeListing,
-    'id': 'sea-group',
+    'id': '26102',
     'groupParent': 'TRUE',
     'title': 'Seafood Group',
     'subtitle': 'Food',
-    'groupID': 'sea-group',
+    'groupID': '26102',
     'location': 'Devonshire Road',
     'latLng': '52.199838,0.139016',
   },
   'seabreezeStall': {
     ..._completeListing,
-    'id': 'sea-specific',
+    'id': '26013',
     'title': 'Seabreeze Stall',
     'subtitle': 'Food',
-    'groupID': 'sea-group',
+    'groupID': '26102',
     'location': 'Devonshire Road',
     'latLng': '52.199838,0.139016',
   },
   'informationPoint': {
     ..._completeListing,
-    'id': '4',
+    'id': '26014',
     'title': 'Information Point',
     'food': 'FALSE',
     'service': 'TRUE',
@@ -205,19 +211,21 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
   'cancelledDoughnuts': {
     ..._completeListing,
+    'id': '26015',
     'cancelled': 'TRUE',
     'subtitle': 'Food • Doughnuts',
   },
   'doughnutInfoSheet': {
     ..._completeListing,
+    'id': '26016',
     'subtitle': 'Food • Doughnuts',
   },
   'performanceGroup': {
     ..._completeListing,
-    'id': 'performances',
+    'id': '26103',
     'title': 'Performances',
     'subtitle': 'Music',
-    'groupID': 'performances',
+    'groupID': '26103',
     'groupParent': 'TRUE',
     'food': 'FALSE',
     'performanceMusic': 'TRUE',
@@ -225,6 +233,7 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
   'permanentShop': {
     ..._completeListing,
+    'id': '26017',
     'title': 'Mill Road Shop',
     'subtitle': 'Shopping',
     'location': 'Mill Road',
@@ -234,7 +243,7 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
   'analyticsActions': {
     ..._completeListing,
-    'id': 'listing-456',
+    'id': '26018',
     'title': 'Another listing',
     'location': 'Tenison Road',
     'description': 'Details',
@@ -243,7 +252,7 @@ final _listingScenarios = <String, Map<String, dynamic>>{
   },
 };
 
-// The complete catalogue. Scenario variants may deliberately reuse IDs;
+// The complete catalogue. Each scenario has its own ID;
 // select a coherent subset when displaying several listings together.
 final List<Map<String, dynamic>> listingsMocks = List.unmodifiable([
   ..._listingScenarios.values.map(Map<String, dynamic>.unmodifiable),
@@ -253,7 +262,7 @@ final List<Map<String, dynamic>> listingsMocks = List.unmodifiable([
 
 final _longDescriptionListing = {
   ..._completeListing,
-  'id': 'scrollable',
+  'id': '26019',
   'title': 'The Neverending Storey',
   'subtitle': 'Stall',
   'location': 'Mill Road',
@@ -264,21 +273,21 @@ final _longDescriptionListing = {
 
 // Each subcategory has exactly one flag enabled.
 final List<Map<String, dynamic>> categoryListingsMocks = List.unmodifiable([
-  for (final (category, title, location) in [
-    ('food', 'Wok This Way', 'Mill Road'),
-    ('shopping', 'Knit Happens', 'Mortimer Road'),
-    ('charityCommunityInfo', 'Good Deeds and Biscuits', 'Headly Street'),
-    ('performanceMusic', 'The Treble Makers', 'Tenison Road'),
-    ('performanceChildrens', 'Tiny Tophat Theatre', 'St Barnabas Road'),
-    ('performanceDance', 'Two Left Feet', 'Devonshire Road'),
-    ('performanceOther', 'Mildly Amazing Magic', 'Gwydir Street'),
-    ('visitExperience', 'The Curious Cupboard', 'Cavendish Road'),
-    ('service', 'The Helpful Hedgehog', 'Catharine Street'),
-    ('business', 'Pencil Pushers United', 'Coleridge Road'),
+  for (final (id, category, title, location) in [
+    ('26020', 'food', 'Wok This Way', 'Mill Road'),
+    ('26021', 'shopping', 'Knit Happens', 'Mortimer Road'),
+    ('26022', 'charityCommunityInfo', 'Good Deeds and Biscuits', 'Headly Street'),
+    ('26023', 'performanceMusic', 'The Treble Makers', 'Tenison Road'),
+    ('26024', 'performanceChildrens', 'Tiny Tophat Theatre', 'St Barnabas Road'),
+    ('26025', 'performanceDance', 'Two Left Feet', 'Devonshire Road'),
+    ('26026', 'performanceOther', 'Mildly Amazing Magic', 'Gwydir Street'),
+    ('26027', 'visitExperience', 'The Curious Cupboard', 'Cavendish Road'),
+    ('26028', 'service', 'The Helpful Hedgehog', 'Catharine Street'),
+    ('26029', 'business', 'Pencil Pushers United', 'Coleridge Road'),
   ])
     Map<String, dynamic>.unmodifiable({
       ..._completeListing,
-      'id': category,
+      'id': id,
       'food': 'FALSE',
       category: 'TRUE',
       'title': title,
@@ -303,7 +312,7 @@ Map<String, dynamic> mockListing(String scenario) {
 // Returns the mock category listing matching the given subcategory, replacing its ID with the supplied ID.
 Map<String, dynamic> listingFor(String id, String subcategory) => {
       ...categoryListingsMocks
-          .singleWhere((listing) => listing['id'] == subcategory),
+          .singleWhere((listing) => listing[subcategory] == 'TRUE'),
       'id': id,
     };
 
