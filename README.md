@@ -29,41 +29,25 @@ Currently the aim is for the app to provides listings of the various stalls, mus
 
 6. Run `flutter pub get` to get all of the relevant dependencies listed in `pubsepc.yaml`. 
 
-7. Create a `.env` file containing the following:
-```txt
-HEROKU_API=https://mrwf.theberridge.com/listings
-HEROKU_API_KEY=\\API Key for the Heroku-based caching API
-ANDROID_GOOGLE_MAPS_SDK_API_KEY=\\API Key for Google Maps SDK for Android
-ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=\\API Key for Google Maps Directions API for Android
-IOS_GOOGLE_MAPS_SDK_API_KEY=\\API Key for Google Maps SDK for iOS
-IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=\\API Key for Google Maps Directions API for iOS
-SIGNING_KEY=\\Signing key for the app
-IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
+7. Copy `.env.example` to `.env` in the repository root and fill in the API settings for your platform. `.env` is ignored by Git. It contains app settings, never keystore passwords.
+
+8. Pass the same configuration file to Flutter from your terminal or IDE:
+```shell
+flutter run --dart-define-from-file=.env
 ```
+In Android Studio, put `--dart-define-from-file=.env` in Additional run args. In VS Code, put it in `toolArgs` in your local `.vscode/launch.json`. No signing environment variables are needed. Local launch configurations are ignored by Git.
 
-8. Ensure that your run target for `main.dart` is using the following arg(s):
-```txt
---dart-define-from-file=.env
-```
+9. Create `android/app/google-services.json` by copying `android/app/google-services-dev.json`. Debug and profile builds automatically use the development Firebase project in Dart, so this keeps the native configuration aligned with it.
 
-9. Create a keystore (to manage signing keys), by using the below command. This will prompt you to enter a keystore password, your name, organisation and location details.
-```powershell
-keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
-```
+10. Run the app. Debug and profile builds use Android's debug signing configuration; you do not need a release keystore or `android/key.properties`.
 
-10. Move the generated `.jks` keystore file to a secure location outside of the repository.  
+### How configuration works
 
-11. Ensure that your run target for `main.dart` is using the following environment variables. The values should correspond to what you entered when you configured your keystore.
-```txt
-KEYSTORE_FILE=\\The path to your keystore file
-KEYSTORE_PASSWORD=\\The password you set when generating the keystore
-KEY_ALIAS=upload
-KEY_PASSWORD=\\The password you set when generating the keystore
-```
-
-12. Create `android/app/google-services.json` by copying `android/app/google-services-dev.json`. Debug and profile builds automatically use the development Firebase project in Dart, so this keeps the native configuration aligned with it.
-
-13. You should now have everything you need to run the app locally.
+- `.env` is the source for app settings. `--dart-define-from-file=.env` passes those settings to the compiler; Dart reads them through `lib/app_config.dart`. Android Gradle reads the same defines for the native Maps SDK key only. The `.env` file is no longer packaged as an asset or loaded at runtime. Restart/rebuild after changing values; hot reload does not update compilation settings.
+- Missing app settings default to empty strings (apart from the iOS bundle ID). Supply the API URL/key to fetch listings and the Maps keys to use maps/directions. Unit tests use mock clients and can run with `flutter test` without `.env` or release credentials.
+- `SIGNING_KEY` is the public certificate SHA-1 fingerprint sent in the Google Directions `X-Android-Cert` header. It is not a release signing password. Use the certificate matching the installed app and configure your API key restrictions accordingly.
+- `android/key.properties` is the single, build-only source for Android release signing, following [Flutter's signing guidance](https://docs.flutter.dev/deployment/android#reference-the-keystore-from-the-app). It is intentionally separate because these credentials must not be passed into Dart or packaged with the app. Shell and IDE `KEYSTORE_*` / `KEY_*` variables are no longer used.
+- iOS native Maps configuration still uses the existing ignored `ios/Flutter/APIkeys.xcconfig` with `IOS_GOOGLE_MAPS_SDK_API_KEY`. Keep that value aligned with `.env`; the Android changes do not alter Xcode configuration. Firebase retains its platform configuration files and build-mode project selection.
 
 ## Google Cloud Platform
 The app currently uses the the Google Maps Platform within GCP in order to access the following API(s):
@@ -84,13 +68,13 @@ The app currently uses the the Google Maps Platform within GCP in order to acces
 
 6. Ensure that the contents of `android/app/google-services.json` match `android/app/google-services-prod.json`. Release builds automatically use the production Firebase project in Dart, so this keeps the native configuration aligned with it.
 
-7. Set environment variables for the signing key store.
+7. Release publishers only: copy `android/key.properties.example` to `android/key.properties` and fill in `storeFile`, `storePassword`, `keyAlias` and `keyPassword` for your existing upload keystore. Use an absolute path with forward slashes (also on Windows). Relative paths resolve from `android/`. Keep the keystore outside the repository. Both the properties file and keystores are ignored by Git. Do not put these values in `.env` or Dart defines.
+
+   If setting up signing for a new app, create an upload keystore with:
 ```shell
-$env:KEYSTORE_FILE='C:\Users\alexb\Development\google_play_keystore\upload-keystore.jks'
-$env:KEYSTORE_PASSWORD=REDACTED
-$env:KEY_ALIAS='upload'
-$env:KEY_PASSWORD=REDACTED
+keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
 ```
+   For an existing Play app, use its existing upload key. Release builds fail with an actionable error if signing settings are missing; they never fall back to debug signing.
 
 8. Run the following command in the terminal:
 ```shell
@@ -107,7 +91,7 @@ flutter build appbundle --release --dart-define-from-file=.env
     NB the build number has to have increased from the last one uploaded to Apple. 
 
 6. Run
-    flutter build ios --config-only --release
+    flutter build ios --config-only --release --dart-define-from-file=.env
     
 7. To get screen shots without 'DEBUG' (which Apple will reject) add this line to main.dart within MaterialApp() debugShowCheckedModeBanner:false
    Get screen shots at the largest iPhone and iPad sizes (latest 6.9" Pro Max and 13" Pro), then remove the above.
