@@ -7,6 +7,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -14,8 +17,7 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final AnalyticsService analyticsService;
@@ -40,6 +42,14 @@ class FilteredListingsPage extends StatefulWidget {
 }
 
 class FilteredListingsPageState extends State<FilteredListingsPage> {
+  late DateTimeProvider _dateTimeProvider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _dateTimeProvider = context.watch<DateTimeProvider>();
+  }
+
   List<Map<String, dynamic>> filteredListings = [];
   bool isRefreshing = false;
   bool useFallbackSorting = false;
@@ -99,12 +109,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   String calculateAppBarTitle() {
     String appBarTitle = '';
-    if (widget.subfilterCategory != null) appBarTitle += 'Filtered';
     if (filterCategory == 'favourite') {
-      appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites'; // 'filtered favourite listings' doesn't fit!
+      appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites';
     } else {
       appBarTitle += (appBarTitle.isEmpty) ? 'All listings' : ' listings';
     }
+    if (widget.subfilterCategory != null) appBarTitle += ' (filtered)';
     return appBarTitle;
   }
 
@@ -281,7 +291,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   int findFirstNextListingIndex(List filteredListings) {
     for (int i = 0; i < filteredListings.length; i++) {
-      if (!hasEventEnded(filteredListings[i]['endTime'])) {
+      if (!hasEventEnded(filteredListings[i]['endTime'], _dateTimeProvider)) {
         return i;
       }
     }
@@ -388,7 +398,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     // Step 5: Calculate number of visible listings for scroll thumb
     if (_hidePastListings) {
-      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], _dateTimeProvider)).length;
     } else {
       numberOfVisibleListings = filteredListings.length;
     }
@@ -414,7 +424,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           onPressed: !canScrollToNow ? null : () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('listings_scroll_to_now');
-            if (isItEventDay()) {
+            if (isItEventDay(_dateTimeProvider)) {
               if (firstNextListingIndex < 0) {
                 // we may not be on Sort by Time, or the Fair may have recently started
                 SortingMethod savedSortingMethod = preferredSortingMethod;
@@ -427,7 +437,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                 } else {
                   filteredListings = filteredListingsTemp;
                   if (_hidePastListings) {
-                    numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'])).length;
+                    numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], _dateTimeProvider)).length;
                   } else {
                     numberOfVisibleListings = filteredListings.length;
                   }
@@ -457,7 +467,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           },
           icon: Icon(
             Icons.access_time,
-            color: (canScrollToNow && isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+            size: 24,
+            color: (canScrollToNow && isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
           ),
         ),
         IconButton(
@@ -468,29 +479,22 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           onPressed: !canTogglePastListings ? null : () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
-            if (isItEventDay()) {
+            if (isItEventDay(_dateTimeProvider)) {
               setState(() {
                 _hidePastListings = !_hidePastListings;
                 widget.analyticsService.logPreferenceSet('listings_hide_past', _hidePastListings.toString());
                 numberOfVisibleListings = -1;
                 firstVisibleIndex = null;
               });
-              Fluttertoast.showToast(
-                msg: (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances',
-                gravity: ToastGravity.BOTTOM,
-                backgroundColor: colorScheme.primary,
-                textColor: colorScheme.onPrimary,
-                fontSize: 16,
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-              );
+              showInfoToast(context, (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances');
             } else {
               showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
             }
           },
           icon: Icon(
             (_hidePastListings) ? Icons.free_cancellation : Icons.history_toggle_off,
-            color: (canTogglePastListings && isItEventDay()) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+            size:24,
+            color: (canTogglePastListings && isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
           ),
         ),
         IconButton(
@@ -512,7 +516,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               }
             });
           },
-          icon: Icon((_isSearching) ? Icons.search_off : Icons.search, size: 26, color: appBarTheme.foregroundColor),
+          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_isSearching) ? Colors.white.withAlpha(30) : null)),
+          icon: Icon(Icons.search, size: 26, color: appBarTheme.foregroundColor),
         ),
       ],
       body: ValueListenableBuilder<Set<String>>(
@@ -632,6 +637,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 onTap: detailsVisibleIndex == null
                                     ? null
                                     : () {
+                                        final listing = filteredListings[detailsVisibleIndex!];
+                                        widget.analyticsService.logButtonTapped('listing_details_dismiss', listingId: listing['id'], listingName: listing['title']);
                                         detailsVisibleIndex = null;
                                         HapticFeedback.lightImpact();
                                         setState(() {});
@@ -647,14 +654,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     final approximateDistance = '(~${convertDistanceUnits(approximateDistanceMetres, preferredDistanceUnits)} away)';
                                     final isFavourited = isListingFavourited(listing['id']);
                                     LatLng destinationLatLng = stringToLatLng(listing['latLng']);
-                                    if (!_hidePastListings || !hasEventEnded(listing['endTime'])) {
+                                    if (!_hidePastListings || !hasEventEnded(listing['endTime'], _dateTimeProvider)) {
                                       // if this is the first visible item, capture its index
                                       firstVisibleIndex ??= index;
                                     }
                                     return Column(
                                       key: ValueKey(listing['id']),
                                       children: [
-                                        if (!_hidePastListings || !hasEventEnded(listing['endTime']))
+                                        if (!_hidePastListings || !hasEventEnded(listing['endTime'], _dateTimeProvider)) ...[
                                           Container(
                                             width: constraints.maxWidth - 10,
                                             decoration: BoxDecoration(
@@ -682,6 +689,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                               approxDistance: approximateDistance,
                                               detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
                                               listingFavourited: isFavourited,
+                                              listingAlerted: alertsStore.alertExists(listing['id']),
                                               onDetailsTapped: () => toggleDetailsRow(index),
                                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
                                               onGetDirections: () {
@@ -698,12 +706,18 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                                   )
                                                 );
                                               },
+                                              onAlertTapped: () async {
+                                                HapticFeedback.lightImpact();
+                                                await toggleListingAlert(listing['id'], alertNoticePeriod, context);
+                                                setState(() { });
+                                              },
                                               analyticsService: widget.analyticsService,
                                               inDialog: false,
                                               colorScheme: colorScheme,
                                             )
                                           ),
-                                        SizedBox(height: 8),
+                                          const SizedBox(height: 8),
+                                        ],
                                       ],
                                     );
                                   },
