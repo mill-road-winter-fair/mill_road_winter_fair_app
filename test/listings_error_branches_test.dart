@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'mocks/listings_mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -21,7 +22,7 @@ void main() {
     test('fetchListings returns cached listings on SocketException', () async {
       // Populate cached listings
       listings = [
-        {'name': 'cached'}
+        mockListing('cachedListing')
       ];
 
       // Make the client throw a SocketException
@@ -37,7 +38,7 @@ void main() {
 
     test('fetchListings handles bad format (FormatException) and returns cached listings', () async {
       listings = [
-        {'name': 'cached2'}
+        mockListing('cachedListing')
       ];
 
       // Return an invalid JSON body that will cause json.decode to throw

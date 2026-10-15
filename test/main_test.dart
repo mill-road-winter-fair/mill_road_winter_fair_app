@@ -1,3 +1,4 @@
+import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,36 +69,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -115,36 +87,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -270,36 +213,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -319,36 +233,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -368,36 +253,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -421,36 +277,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -475,36 +302,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -526,36 +324,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -617,36 +386,7 @@ void main() {
 
       // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       // Provide initial mock values for shared preferences
@@ -654,7 +394,7 @@ void main() {
       await loadSettings();
 
       // Set the mock listing as a favourite before the widget is built
-      favouriteListingKeys.value = {...favouriteListingKeys.value, '1'};
+      favouriteListingKeys.value = {...favouriteListingKeys.value, '26001'};
 
       // Pump MyApp which contains the AppBar with the snowflake button
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
