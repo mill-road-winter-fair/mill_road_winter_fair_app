@@ -105,6 +105,10 @@ const maxDurationToBeEvent = Duration(minutes: 120);
 const fairName = 'Mill Road Winter Fair 2026';
 String appBarTitle = fairName; // this may be changed in main, filtered_listings etc.
 
+// Potential emergency alert
+const emergencyAlertFlag = '***EMERGENCY***';
+({String title, String body})? emergencyAlertText;
+
 // Road closure coordinates rounded to 6 decimal places (~0.1 m precision).
 final List<LatLng> roadClosurePolygonPoints = [
   const LatLng(52.202353, 0.131062),
