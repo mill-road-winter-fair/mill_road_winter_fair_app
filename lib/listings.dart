@@ -128,7 +128,7 @@ List<Map<String, dynamic>> _parseListings(String body) {
       (rows.first as List<dynamic>).map((h) => h?.toString() ?? '').toList();
   final headerCount = headers.length;
 
-  return rows.skip(1).map((row) {
+  return rows.skip(1).expand((row) {
     // Each `row` (after row 1) should be a list of cells. Make a mutable copy.
     final cells = List<dynamic>.from(row as List<dynamic>);
 
@@ -145,10 +145,18 @@ List<Map<String, dynamic>> _parseListings(String body) {
       if (cells[i] == null) cells[i] = '';
     }
 
-    return Map<String, dynamic>.fromIterables(
+    final listing = Map<String, dynamic>.fromIterables(
       headers.cast<String>(),
       cells.cast<dynamic>(),
     );
+
+    if ((listing['title'] ?? '') == emergencyAlertFlag && listing['description'] != null) {
+      emergencyAlertText = (title: listing['subtitle'], body: listing['description']);
+      debugPrint('_parseListings got emergency alert of ${listing['description']}');
+      return const <Map<String, dynamic>>[];
+    } else {
+      return <Map<String, dynamic>>[listing];
+    }
   }).toList();
 }
 
