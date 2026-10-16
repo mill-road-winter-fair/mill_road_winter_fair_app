@@ -18,6 +18,7 @@ import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:provider/provider.dart';
+import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final AnalyticsService analyticsService;
@@ -233,6 +234,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         isRefreshing = false;
       });
     }
+    if (mounted) ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
   }
 
   void sortingDropdownCallback(SortingMethod? selectedValue) {
