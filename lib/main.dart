@@ -8,21 +8,22 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:provider/provider.dart';
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
 import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
-import 'package:mill_road_winter_fair_app/main_alerting.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -78,6 +79,7 @@ Future<void> main() async {
  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
         providers: [
           Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
+          Provider<UrlLauncher>(create: (_) => const SystemUrlLauncher()),
         ],
         child: RootWidget(firstExecution: firstExecution, analyticsService: analyticsService, startupCacheFallback: startupCacheFallback.future),
       )));
