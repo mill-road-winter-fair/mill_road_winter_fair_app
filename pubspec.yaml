@@ -90,12 +90,9 @@ flutter:
   assets:
     - .env
     - assets/
-    - assets/aboutPage/
+    - assets/infoPages/
     - assets/icons/
-    - assets/importantInfoPage/
     - assets/mapMarkers/
-    - assets/welcomeScreen/
-    - assets/chooserPage/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

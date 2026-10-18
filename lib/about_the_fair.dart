@@ -256,7 +256,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       textSpan: TextSpan(
                         text: 'Mill Road Winter Fair is a celebration of community along one of the most diverse and vibrant roads in Cambridge.',
                       ),
-                      imagePath: "assets/chooserPage/nearby.png",
+                      imagePath: "assets/infoPages/nearby.png",
                       textStyle: bodyStyle,
                     ),
                     TextImageRow(
@@ -264,7 +264,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                         text: 'Usually held on the first Saturday of December, the Fair brings together local businesses and organisations, '
                         'shops and stallholders, musicians, artists and dancers in one day of festival joy.',
                       ),
-                      imagePath: "assets/chooserPage/music.png",
+                      imagePath: "assets/infoPages/music.png",
                       imageOnLeft: true,
                       textStyle: bodyStyle,
                     ),
@@ -279,7 +279,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                         text: 'This year, we celebrate 21 years since the first Fair in 2005! It’s been a remarkable journey, '
                             'but we still hold true to the Fair’s original aim of celebrating all that is great about the Mill Road area.'
                       ),
-                      imagePath: "assets/chooserPage/childrens.png",
+                      imagePath: "assets/infoPages/childrens.png",
                       textStyle: bodyStyle,
                     ),
                     TextImageRow(
@@ -287,7 +287,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                         text: 'We have a huge range of activities to discover throughout the day; it’s sure to be the best Fair yet! '
                             'Be sure to come early so that you don’t miss out!',
                       ),
-                      imagePath: "assets/chooserPage/foodDrink.png",
+                      imagePath: "assets/infoPages/foodDrink.png",
                       imageOnLeft: true,
                       textStyle: bodyStyle,
                     ),
@@ -345,8 +345,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                 ),
                               ),
                             ),
-                            Positioned(top: 0, right: 0, child: Image.asset('assets/chooserPage/charityCommunityInfo.png', fit: BoxFit.contain, height: 145)),
-                            Positioned(bottom: 0, right: 0, child: Image.asset('assets/chooserPage/visitExperience.png', fit: BoxFit.contain, height: 120)),
+                            Positioned(top: 0, right: 0, child: Image.asset('assets/infoPages/charityCommunityInfo.png', fit: BoxFit.contain, height: 145)),
+                            Positioned(bottom: 0, right: 0, child: Image.asset('assets/infoPages/visitExperience.png', fit: BoxFit.contain, height: 120)),
                           ],
                         )),
                       ], 
@@ -363,7 +363,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                           ...sponsorSpans,
                         ],
                       ),
-                      imagePath: "assets/chooserPage/shopping.png",
+                      imagePath: "assets/infoPages/shopping.png",
                       imageOnLeft: true,
                       textStyle: bodyStyle,
                     ),
@@ -374,12 +374,12 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                             'Community Grant and the ongoing help of the Mill Road Traders Association.'),
                         ],
                       ),
-                      imagePath: "assets/chooserPage/services.png",
+                      imagePath: "assets/infoPages/services.png",
                       textStyle: bodyStyle,
                     ),
                     FittedBox(
                       fit: BoxFit.fill,
-                      child: Image.asset("assets/aboutPage/MRWF25_sponsor_logos.png"),
+                      child: Image.asset("assets/infoPages/MRWF25_sponsor_logos.png"),
                     ),
                     const SizedBox(height: 4),
                   ],
