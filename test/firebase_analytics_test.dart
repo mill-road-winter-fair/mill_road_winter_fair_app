@@ -96,6 +96,17 @@ void main() {
     expect(sdk.events, isEmpty);
   });
 
+  test('build-disabled analytics cannot overwrite saved consent', () async {
+    usageAnalyticsEnabled = true;
+    final disabledService = DisabledAnalyticsService();
+
+    await disabledService.setAnalyticsEnabled(false);
+    await disabledService.setAnalyticsEnabled(true);
+
+    expect(usageAnalyticsEnabled, isTrue);
+    expect((await SharedPreferences.getInstance()).getBool('usageAnalyticsEnabled'), isNull);
+  });
+
   test('saved opt-in restores properties without fabricating changes or an Unknown screen', () async {
     usageAnalyticsEnabled = true;
     selectedThemeKey = 'dark';
