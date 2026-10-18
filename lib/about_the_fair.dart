@@ -47,7 +47,7 @@ class TextImageRow extends StatelessWidget {
           ),
         );
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           spacing: spacing,
           children: imageOnLeft ? [image, text] : [text, image],
@@ -254,15 +254,16 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                   children: [
                     TextImageRow(
                       textSpan: TextSpan(
-                        text: 'Mill Road Winter Fair is a celebration of community along one of the most diverse and vibrant roads in Cambridge.',
+                        text: 'Mill Road Winter Fair, usually held on the first Saturday of December, '
+                        'is a celebration of community along one of the most diverse and vibrant roads in Cambridge.',
                       ),
                       imagePath: "assets/infoPages/nearby.png",
                       textStyle: bodyStyle,
                     ),
                     TextImageRow(
                       textSpan: TextSpan(
-                        text: 'Usually held on the first Saturday of December, the Fair brings together local businesses and organisations, '
-                        'shops and stallholders, musicians, artists and dancers in one day of festival joy.',
+                        text: 'The Fair brings together local organisations, partner businesses (now listed in this app), '
+                        'and stallholders, musicians, artists and dancers in one day of festival joy.',
                       ),
                       imagePath: "assets/infoPages/music.png",
                       imageOnLeft: true,
@@ -371,7 +372,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       textSpan: TextSpan(
                         children: [
                           const TextSpan(text: 'The Fair is entirely run by volunteers and benefits from a Cambridge City Council '
-                            'Community Grant and the ongoing help of the Mill Road Traders Association.'),
+                            'Community Grant, support from donors, and the ongoing help of the Mill Road Traders Association.'),
                         ],
                       ),
                       imagePath: "assets/infoPages/services.png",
