@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -11,7 +12,10 @@ import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'fakes/fake_url_launcher.dart';
 
 class RecordingAnalyticsService extends FakeAnalyticsService {
   final calls = <String>[];
@@ -34,6 +38,7 @@ class RecordingAnalyticsService extends FakeAnalyticsService {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late RecordingAnalyticsService analytics;
+  late FakeUrlLauncher launcher;
   setUp(() async {
     onTest = true;
     SharedPreferences.setMockInitialValues({});
@@ -49,20 +54,15 @@ void main() {
     locationServicesEnabled = true;
     locationPermission = LocationPermission.always;
     analytics = RecordingAnalyticsService();
+    launcher = FakeUrlLauncher();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
       if (call.method == 'HapticFeedback.vibrate') analytics.calls.add('haptic');
       return null;
     });
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/url_launcher'), (call) async => true,
-    );
   });
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('plugins.flutter.io/url_launcher'), null,
-    );
   });
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
@@ -99,13 +99,13 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWithClock(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
+      await tester.pumpWithClock(Provider<UrlLauncher>.value(value: launcher, child: MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
         listingId: 'listing-456', cancelled: false, brickAndMortar: false, emoji: '', title: 'Another listing', subtitle: '', location: '',
         description: 'Details', email: 'test@example.com', website: 'https://example.com', phoneNumber: '0123456789',
         imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '', detailsVisible: true,
         listingFavourited: false, listingAlerted: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
         analyticsService: analytics, colorScheme: ColorScheme.light(),
-      ))));
+      )))));
       // The sheet has one IconButton: the favourite control.
       await tester.tap(find.byType(IconButton));
       await tester.tap(find.byIcon(Icons.directions_walk));
@@ -118,12 +118,74 @@ void main() {
         'save_listing', 'directions_to_listing', 'listing_details',
         'visit_listing_website', 'email_listing', 'phone_listing',
       ]);
+      expect(launcher.openedUris, [
+        for (var i = 0; i < 1; i++) ...[
+          Uri.parse('https://example.com'),
+          Uri(scheme: 'mailto', path: 'test@example.com'),
+          Uri(scheme: 'tel', path: '0123456789'),
+        ],
+      ]);
+      expect(launcher.checkedUris, [
+        for (var i = 0; i < 1; i++) ...[
+          Uri(scheme: 'mailto', path: 'test@example.com'),
+          Uri(scheme: 'tel', path: '0123456789'),
+        ],
+      ]);
       for (final event in analytics.buttonEvents) {
         expect(event['listing_id'], 'listing-456');
         expect(event['listing_name'], 'Another listing');
       }
     });
   }
+
+  for (final email in [false, true]) {
+    testWidgets('unavailable handler does not launch from text link (email=$email)', (tester) async {
+      launcher.canOpenResult = false;
+      await tester.pumpWithClock(Provider<UrlLauncher>.value(
+        value: launcher,
+        child: MaterialApp(home: Scaffold(body: SpecificListingInfoSheet(
+          listingId: 'listing-456', cancelled: false, brickAndMortar: false,
+          emoji: '', title: 'Listing', subtitle: '', location: '', description: '',
+          email: 'test@example.com', website: '', phoneNumber: '0123456789',
+          imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '',
+          detailsVisible: true, listingFavourited: false, inDialog: false,
+          onGetDirections: () {}, analyticsService: analytics, colorScheme: ColorScheme.light(), listingAlerted: false,
+        ))),
+      ));
+      // Invoke the async callback to assert the existing error contract.
+      final dynamic callback = tester.widget<GestureDetector>(find.ancestor(
+        of: find.text(email ? 'Email: test@example.com' : 'Telephone: 0123456789'),
+        matching: find.byType(GestureDetector),
+      ).first).onTap;
+      await expectLater(callback(), throwsA(isA<Exception>().having(
+        (error) => error.toString(), 'message',
+        email ? 'Exception: Could not launch email client' : 'Exception: Could not launch 0123456789',
+      )));
+      expect(launcher.checkedUris, [Uri(scheme: email ? 'mailto' : 'tel', path: email ? 'test@example.com' : '0123456789')]);
+      expect(launcher.openedUris, isEmpty);
+      expect(analytics.buttonEvents.single['button_id'], email ? 'email_listing' : 'phone_listing');
+    });
+  }
+
+  testWidgets('contact dialog opens the selected email through the app provider', (tester) async {
+    await tester.pumpWidget(Provider<UrlLauncher>.value(
+      value: launcher,
+      child: MaterialApp(home: Builder(builder: (context) => Scaffold(
+        body: TextButton(onPressed: () => showDialog<void>(
+          context: context,
+          builder: (context) => contactUsDialog(context, analyticsService: analytics),
+        ), child: const Text('Contact')),
+      ))),
+    ));
+    await tester.tap(find.text('Contact'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('info@millroadwinterfair.org'));
+    await tester.pumpAndSettle();
+    final uri = Uri(scheme: 'mailto', path: 'info@millroadwinterfair.org');
+    expect(launcher.checkedUris, [uri]);
+    expect(launcher.openedUris, [uri]);
+    expect(analytics.buttonEvents.single['button_id'], 'contact_email');
+  });
 
   testWidgets('settings logs taps and the new preference value', (tester) async {
     await tester.pumpWithClock(MaterialApp(home: SettingsPage(analyticsService: analytics)));
