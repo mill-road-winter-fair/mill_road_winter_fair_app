@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -31,23 +32,16 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
-  if (analyticsEnabledForBuild) {
-    // Release builds use the production Firebase project. Debug and profile
-    // builds with DEV_ANALYTICS=true use the development project.
-    try {
-      await Firebase.initializeApp(
-        options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
-      );
-      debugPrint('main(): Firebase initialized successfully');
-    } on FirebaseException catch (e) {
-      if (e.code == 'duplicate-app') {
-        // Firebase was already initialized (e.g., by native side).
-        debugPrint('main(): Firebase already initialized: ${e.message}');
-      } else {
-        rethrow;
-      }
-    }
-  } else {
+  try {
+    await Firebase.initializeApp(
+      options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
+    );
+  } on FirebaseException catch (e) {
+    if (e.code != 'duplicate-app') rethrow;
+  }
+
+  if (!analyticsEnabledForBuild) {
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
     debugPrint('main(): Firebase analytics disabled for this build');
   }
   tz.initializeTimeZones();
