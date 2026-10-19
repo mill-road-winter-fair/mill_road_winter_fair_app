@@ -49,6 +49,30 @@ In Android Studio, put `--dart-define-from-file=.env` in Additional run args. In
 - `android/key.properties` is the single, build-only source for Android release signing, following [Flutter's signing guidance](https://docs.flutter.dev/deployment/android#reference-the-keystore-from-the-app). It is intentionally separate because these credentials must not be passed into Dart or packaged with the app. Shell and IDE `KEYSTORE_*` / `KEY_*` variables are no longer used.
 - iOS native Maps configuration still uses the existing ignored `ios/Flutter/APIkeys.xcconfig` with `IOS_GOOGLE_MAPS_SDK_API_KEY`. Keep that value aligned with `.env`; the Android changes do not alter Xcode configuration. Firebase retains its platform configuration files and build-mode project selection.
 
+### Run configurations and analytics
+
+Shared run configurations are provided for Android Studio in `.run/` and VS Code in `.vscode/launch.json`. They correspond to these commands:
+
+No analytics (the default development mode):
+
+```shell
+flutter run --dart-define-from-file=.env
+```
+
+Analytics sent to the development Firebase project (in Firebase debug mode):
+
+```shell
+flutter run --dart-define-from-file=.env --dart-define=DEV_ANALYTICS=true
+```
+
+Analytics sent to the production Firebase project:
+
+```shell
+flutter run --dart-define-from-file=.env --release
+```
+
+The matching configurations are named `MRWF: no analytics`, `MRWF: dev analytics` and `MRWF: production release`. The development-analytics configuration first enables Firebase Analytics DebugView for the app with `adb shell setprop debug.firebase.analytics.app com.theberridge.mill_road_winter_fair_app`. An analytics-free run does not initialise Firebase analytics and does not change the user's saved consent preference.
+
 ## Google Cloud Platform
 The app currently uses the the Google Maps Platform within GCP in order to access the following API(s):
 1. Maps SDK for Android (To render the interactive map on the app's homepage.)

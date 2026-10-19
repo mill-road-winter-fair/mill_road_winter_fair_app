@@ -1,30 +1,32 @@
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:mill_road_winter_fair_app/main_alerting.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -281,7 +283,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               HapticFeedback.lightImpact();
               analyticsService.logButtonTapped('drawer_website');
               Navigator.pop(context);
-              launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+              context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/'));
             },
           ),
         ),
@@ -334,7 +336,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_facebook');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -346,7 +348,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_x');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://x.com/millroadfair'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://x.com/millroadfair'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -358,7 +360,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_instagram');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -370,7 +372,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_flickr');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -722,22 +724,22 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('info@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'info@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('volunteers@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'volunteers@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('events@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'events@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('stalls@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'stalls@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('it@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'it@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('app@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'app@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       Text.rich(
                         TextSpan(
@@ -752,8 +754,9 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                                     HapticFeedback.lightImpact();
                                     analyticsService.logButtonTapped('contact_phone');
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                    if (await canLaunchUrl(phoneUri)) {
-                                      await launchUrl(phoneUri);
+                                    final launcher = context.read<UrlLauncher>();
+                                    if (await launcher.canOpen(phoneUri)) {
+                                      await launcher.open(phoneUri);
                                     } else {
                                       throw Exception('Could not dial 07303 142689');
                                     }
@@ -789,7 +792,7 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
   );
 }
 
-Widget _buildEmailLink(String email, {required AnalyticsService analyticsService}) {
+Widget _buildEmailLink(BuildContext context, String email, {required AnalyticsService analyticsService}) {
   return Semantics(
     button: true,
     label: 'Email $email',
@@ -799,8 +802,9 @@ Widget _buildEmailLink(String email, {required AnalyticsService analyticsService
         HapticFeedback.lightImpact();
         analyticsService.logButtonTapped('contact_email');
         final Uri mailUri = Uri(scheme: 'mailto', path: email);
-        if (await canLaunchUrl(mailUri)) {
-          await launchUrl(mailUri);
+        final launcher = context.read<UrlLauncher>();
+        if (await launcher.canOpen(mailUri)) {
+          await launcher.open(mailUri);
         } else {
           throw Exception('Could not launch email client');
         }
