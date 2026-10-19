@@ -803,6 +803,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final menuEntryStyle = TextStyle(fontSize: 16, color: colorScheme.onSecondary);
     final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
     return MenuAnchor(
+      key: ValueKey('sortingdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,
@@ -853,6 +854,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final menuEntryStyle = TextStyle(fontSize: 16, color: colorScheme.onSecondary);
     final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
     return MenuAnchor(
+      key: ValueKey('filterdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,

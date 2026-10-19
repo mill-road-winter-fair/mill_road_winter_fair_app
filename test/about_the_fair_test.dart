@@ -89,7 +89,7 @@ void main() {
       expect(homePageState.index, 3);
 
       // 2) Select Stalls tab (index 2)
-      await tester.tap(find.text('Listings'));
+      await tester.tap(find.text('Listings').last);
       await settle(tester);
       expect(homePageState.index, 3);
 
