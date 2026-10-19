@@ -1,10 +1,38 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// An abstract class to define the interface for analytics services, allowing for easy mocking in tests
+abstract class AnalyticsService {
+  Future<void> setAnalyticsEnabled(bool enabled);
+  Future<void> logPreferenceSet(String preference, String value);
+  Future<void> setCurrentScreen(String screenName);
+  Future<void> logMapMarkerTapped(String listingName);
+  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName});
+  Future<void> logNoticeShown(String noticeName);
+  Future<void> logSearch(String searchTerm, {required String searchArea});
+  Future<void> logMapTypePreferenceSet(String mapType);
+  Future<void> logMapOrientationPreferenceSet(String mapOrientation);
+  Future<void> logMapMarkerFilterPreferenceSet(String category, bool visible);
+  Future<void> logRoadClosurePolygonPreferenceSet(bool visible);
+  Future<void> logDistanceUnitPreferenceSet(String distanceUnit);
+  Future<void> logThemePreferenceSet(String theme);
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes);
+  Future<void> logListingSaved(String listingName);
+  Future<void> logListingUnsaved(String listingName);
+  Future<void> logDirectionsToListingRequested(String listingName);
+  Future<void> showAnalyticsConsentDialog(BuildContext context);
+}
+
+// Analytics is enabled automatically for release builds and can be opted into
+// for debug/profile builds with `--dart-define=DEV_ANALYTICS=true`.
+const bool devAnalyticsEnabled = bool.fromEnvironment('DEV_ANALYTICS');
+const bool analyticsEnabledForBuild = kReleaseMode || devAnalyticsEnabled;
 
 // A service class to handle analytics events, using Firebase Analytics in production and a fake implementation for testing
 class FirebaseAnalyticsService implements AnalyticsService {
@@ -413,24 +441,77 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 }
 
-// An abstract class to define the interface for analytics services, allowing for easy mocking in tests
-abstract class AnalyticsService {
-  Future<void> setAnalyticsEnabled(bool enabled);
-  Future<void> logPreferenceSet(String preference, String value);
-  Future<void> setCurrentScreen(String screenName);
-  Future<void> logMapMarkerTapped(String listingName);
-  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName});
-  Future<void> logNoticeShown(String noticeName);
-  Future<void> logSearch(String searchTerm, {required String searchArea});
-  Future<void> logMapTypePreferenceSet(String mapType);
-  Future<void> logMapOrientationPreferenceSet(String mapOrientation);
-  Future<void> logMapMarkerFilterPreferenceSet(String category, bool visible);
-  Future<void> logRoadClosurePolygonPreferenceSet(bool visible);
-  Future<void> logDistanceUnitPreferenceSet(String distanceUnit);
-  Future<void> logThemePreferenceSet(String theme);
-  Future<void> logAlertNoticePeriodPreferenceSet(int minutes);
-  Future<void> logListingSaved(String listingName);
-  Future<void> logListingUnsaved(String listingName);
-  Future<void> logDirectionsToListingRequested(String listingName);
-  Future<void> showAnalyticsConsentDialog(BuildContext context);
+// A no-op service used when analytics is disabled for the entire build.
+// Unlike [FakeAnalyticsService], attempting to opt in does not alter the in-memory or persisted user preference.
+class DisabledAnalyticsService implements AnalyticsService {
+  @override
+  Future<void> setAnalyticsEnabled(bool enabled) async {}
+
+  @override
+  Future<void> logPreferenceSet(String preference, String value) async {}
+
+  @override
+  Future<void> setCurrentScreen(String screenName) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logMapMarkerTapped(String listingName) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logButtonTapped(String buttonName, {String? listingId, String? listingName}) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logNoticeShown(String noticeName) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logSearch(String searchTerm, {required String searchArea}) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logMapTypePreferenceSet(String mapType) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logMapOrientationPreferenceSet(String mapOrientation) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logMapMarkerFilterPreferenceSet(String mapMarkerCategory, bool visible) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logRoadClosurePolygonPreferenceSet(bool visible) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logDistanceUnitPreferenceSet(String distanceUnit) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logThemePreferenceSet(String theme) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logListingSaved(String listingName) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logListingUnsaved(String listingName) async {
+    // Do nothing
+  }
+  @override
+  Future<void> logDirectionsToListingRequested(String listingName) async {
+    // Do nothing
+  }
+  @override
+  Future<void> showAnalyticsConsentDialog(BuildContext context) async {
+    // Do nothing
+  }
 }

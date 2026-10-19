@@ -1,29 +1,30 @@
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:mill_road_winter_fair_app/main_alerting.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -270,7 +271,7 @@ Drawer fairDrawer(BuildContext context) {
               HapticFeedback.lightImpact();
               context.read<AnalyticsService>().logButtonTapped('drawer_website');
               Navigator.pop(context);
-              launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+              context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/'));
             },
           ),
         ),
@@ -323,7 +324,7 @@ Drawer fairDrawer(BuildContext context) {
                   HapticFeedback.lightImpact();
                   context.read<AnalyticsService>().logButtonTapped('drawer_facebook');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -335,7 +336,7 @@ Drawer fairDrawer(BuildContext context) {
                   HapticFeedback.lightImpact();
                   context.read<AnalyticsService>().logButtonTapped('drawer_x');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://x.com/millroadfair'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://x.com/millroadfair'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -347,7 +348,7 @@ Drawer fairDrawer(BuildContext context) {
                   HapticFeedback.lightImpact();
                   context.read<AnalyticsService>().logButtonTapped('drawer_instagram');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -359,7 +360,7 @@ Drawer fairDrawer(BuildContext context) {
                   HapticFeedback.lightImpact();
                   context.read<AnalyticsService>().logButtonTapped('drawer_flickr');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -731,8 +732,9 @@ Widget contactUsDialog(BuildContext theBuildContext) {
                                     HapticFeedback.lightImpact();
                                     theBuildContext.read<AnalyticsService>().logButtonTapped('contact_phone');
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                    if (await canLaunchUrl(phoneUri)) {
-                                      await launchUrl(phoneUri);
+                                    final launcher = context.read<UrlLauncher>();
+                                    if (await launcher.canOpen(phoneUri)) {
+                                      await launcher.open(phoneUri);
                                     } else {
                                       throw Exception('Could not dial 07303 142689');
                                     }
@@ -778,8 +780,9 @@ Widget _buildEmailLink(BuildContext context, String email) {
         HapticFeedback.lightImpact();
         context.read<AnalyticsService>().logButtonTapped('contact_email');
         final Uri mailUri = Uri(scheme: 'mailto', path: email);
-        if (await canLaunchUrl(mailUri)) {
-          await launchUrl(mailUri);
+        final launcher = context.read<UrlLauncher>();
+        if (await launcher.canOpen(mailUri)) {
+          await launcher.open(mailUri);
         } else {
           throw Exception('Could not launch email client');
         }

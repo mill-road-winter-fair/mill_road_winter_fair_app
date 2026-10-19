@@ -1,15 +1,15 @@
 import 'dart:io';
-import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
+import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class GroupListingInfoSheet extends StatelessWidget {
   final bool brickAndMortar;
@@ -524,7 +524,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             onTap: () async {
               HapticFeedback.lightImpact();
               context.read<AnalyticsService>().logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
-              launchUrl(Uri.parse(widget.website));
+              context.read<UrlLauncher>().open(Uri.parse(widget.website));
             },
             child: Text.rich(
               TextSpan(
@@ -547,8 +547,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               HapticFeedback.lightImpact();
               context.read<AnalyticsService>().logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
-              if (await canLaunchUrl(mailUri)) {
-                await launchUrl(mailUri);
+              final launcher = context.read<UrlLauncher>();
+              if (await launcher.canOpen(mailUri)) {
+                await launcher.open(mailUri);
               } else {
                 throw Exception('Could not launch email client');
               }
@@ -573,8 +574,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               HapticFeedback.lightImpact();
               context.read<AnalyticsService>().logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
-              if (await canLaunchUrl(phoneUri)) {
-                await launchUrl(phoneUri);
+              final launcher = context.read<UrlLauncher>();
+              if (await launcher.canOpen(phoneUri)) {
+                await launcher.open(phoneUri);
               } else {
                 throw Exception('Could not launch ${widget.phoneNumber}');
               }
