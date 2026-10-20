@@ -652,11 +652,11 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               contentPadding: EdgeInsets.zero,
                               leading: const Icon(Icons.palette_outlined, size: 28),
                               title: Text('Illustrations by Clare McEwan', style: textStyle),
-                              subtitle: Text('https://www.claremcewan.co.uk', style: linkStyle),
+                              subtitle: Text('https://www.artistsmarquee.co.uk', style: linkStyle),
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_clare');
-                                launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+                                launchUrl(Uri.parse('https://www.artistsmarquee.co.uk/claremcewan'));
                               },
                             ),
                             ListTile(
