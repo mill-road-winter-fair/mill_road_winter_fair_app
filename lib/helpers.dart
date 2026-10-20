@@ -367,6 +367,18 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on LinkedIn',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  analyticsService.logButtonTapped('drawer_linkedin');
+                  Navigator.pop(context);
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.linkedin.com/company/mill-road-winter-fair/'));
+                },
+                constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                padding: EdgeInsets.zero,
+                icon: FaIcon(FontAwesomeIcons.linkedin, size: 40, color: Theme.of(context).colorScheme.tertiary),
+              ),
+              IconButton(
                 tooltip: 'Open Mill Road Winter Fair on Flickr',
                 onPressed: () {
                   HapticFeedback.lightImpact();
