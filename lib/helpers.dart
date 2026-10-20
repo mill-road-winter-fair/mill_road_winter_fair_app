@@ -1,21 +1,32 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui' as ui;
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -24,6 +35,10 @@ Timer? _miniPopupTimer; // times how long the above stays on screen
 Route? listingDetailsDialogRoute; // to keep track of dialog so it can be closed if needed. This will move to main if we enter the app from an alert
 
 class FairScaffold extends StatelessWidget {
+  static const navigationBarHeight = 62.0;
+  static const homeButtonSize = 68.0;
+  static const homeButtonOffset = 20.0;
+
   const FairScaffold({
     super.key,
     required this.appBarTitle,
@@ -44,12 +59,14 @@ class FairScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SafeArea(
         top: false,
         left: false,
         right: false,
         bottom: Platform.isAndroid && isNavBarVisible(context),
         child: Scaffold(
+          backgroundColor: colorScheme.surfaceDim,
           appBar: AppBar(
             titleSpacing: 0,
             leadingWidth: 44,
@@ -61,6 +78,7 @@ class FairScaffold extends StatelessWidget {
                   })
                 : Builder(
                     builder: (context) => IconButton(
+                      tooltip: 'Open navigation menu',
                       icon: const Icon(Icons.menu),
                       onPressed: () {
                         HapticFeedback.lightImpact();
@@ -74,35 +92,114 @@ class FairScaffold extends StatelessWidget {
               child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ),
             centerTitle: false,
-            actions: appBarActions.map((a) => SizedBox(width: 36, child: a)).toList(),
-            actionsPadding: EdgeInsets.only(right: 4),
+            actions: appBarActions.map((a) => SizedBox(width: 42, child: a)).toList(),
+            actionsPadding: EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
-          bottomNavigationBar: (allowBack ?? false) ? null : fairBottomNavigationBar(currentTab, onTabSelected, analyticsService: analyticsService),
+          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: homeButtonOffset),
+          floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+          resizeToAvoidBottomInset: false,
+          floatingActionButton: (allowBack ?? false) ? null : SizedBox(
+            width: homeButtonSize,
+            height: homeButtonSize,
+            child: Semantics(
+              selected: currentTab == 0,
+              child: FloatingActionButton(
+                key: const ValueKey('home-navigation-button'),
+                heroTag: null,
+                tooltip: 'Home',
+                elevation: 4,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: CircleBorder(),
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  analyticsService.logButtonTapped('navigation_home');
+                  onTabSelected(0);
+                },
+                child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, color: (currentTab == 0) ? colorScheme.onPrimary : colorScheme.surfaceDim),
+              ),
+            ),
+          ),
+          bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
+            key: const ValueKey('navigation-bar-surface'),
+            height: navigationBarHeight,
+            padding: EdgeInsets.only(right: 6), // to stop Favourites hitting edge
+            elevation: 0,
+            color: colorScheme.primary,
+            surfaceTintColor: Colors.transparent,
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 4,
+            clipBehavior: Clip.antiAlias,
+            child: fairBottomNavigationBar(currentTab, onTabSelected, colorScheme, analyticsService: analyticsService),
+          ),
         ));
   }
 }
 
-BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, {required AnalyticsService analyticsService}) {
+// We typically use this for non-error toasts as it not in the centre of the screen, but also avoids the navbar
+void showInfoToast(BuildContext context, String message) {
+  final theme = Theme.of(context);
+  final colours = theme.colorScheme;
+  final toast = FToast().init(context);
+  // Replace stale feedback when filters change rapidly.
+  toast.removeQueuedCustomToasts();
+  toast.showToast(
+    ignorePointer: true,
+    toastDuration: const Duration(seconds: 2),
+    positionedToastBuilder: (context, child, gravity) {
+      final media = MediaQuery.of(context);
+      const navigationHeight = FairScaffold.navigationBarHeight +
+          FairScaffold.homeButtonSize / 2 - FairScaffold.homeButtonOffset;
+      return Positioned(
+        bottom: max(media.padding.bottom + navigationHeight, media.viewInsets.bottom) + 16,
+        left: 24,
+        right: 24,
+        child: child,
+      );
+    },
+    child: Semantics(
+      liveRegion: true,
+      child: Container(
+        key: const ValueKey('filter-toast'),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: colours.primary,
+          borderRadius: BorderRadius.circular(theme.platform == TargetPlatform.iOS ? 10 : 40),
+        ),
+        child: Text(message, textAlign: TextAlign.center,
+            style: TextStyle(color: colours.onPrimary, fontSize: 16)),
+      ),
+    ),
+  );
+}
+
+BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, ColorScheme colorscheme, {required AnalyticsService analyticsService}) {
+  // Visual order differs from the stable page indices used throughout the app.
+  const tabOrder = [1, 2, 0, 3, 4];
   return BottomNavigationBar(
+    backgroundColor: Colors.transparent,
     type: BottomNavigationBarType.fixed,
     showUnselectedLabels: true,
     elevation: 0,
-    currentIndex: index,
-    selectedFontSize: 12,
-    unselectedFontSize: 12,
+    currentIndex: tabOrder.indexOf(index),
+    selectedFontSize: 13,
+    unselectedFontSize: 13,
     iconSize: 30,
+    selectedItemColor: colorscheme.onPrimary,
+    unselectedItemColor: colorscheme.surfaceDim,
+    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
-      analyticsService.logButtonTapped('navigation_${const ['home', 'map', 'timetable', 'listings', 'favourites'][selectedIndex]}');
-      onTabSelected.call(selectedIndex);
+      analyticsService.logButtonTapped('navigation_${const ['map', 'timetable', 'home', 'listings', 'favourites'][selectedIndex]}');
+      onTabSelected.call(tabOrder[selectedIndex]);
     },
     items: const [
-      BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
       BottomNavigationBarItem(icon: Icon(Icons.map), label: "Map"),
-      BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "Timetable"),
-      BottomNavigationBarItem(icon: Icon(Icons.list), label: "Listings"),
+      BottomNavigationBarItem(icon: Icon(Icons.watch_later), label: "Timetable"),
+      BottomNavigationBarItem(icon: SizedBox(width: 30, height: 30), label: ""),
+      BottomNavigationBarItem(icon: Icon(Icons.ballot), label: "Listings"),
       BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favourites"),
     ],
   );
@@ -186,7 +283,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               HapticFeedback.lightImpact();
               analyticsService.logButtonTapped('drawer_website');
               Navigator.pop(context);
-              launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+              context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/'));
             },
           ),
         ),
@@ -210,6 +307,19 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           ),
         ),
         Expanded(
+          flex: 4,
+          child: ListTile(
+            leading: const Icon(Icons.volunteer_activism),
+            title: const Text('Donate to the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              analyticsService.logButtonTapped('drawer_donate');
+              Navigator.pop(context);
+              launchUrl(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
+            },
+          ),
+        ),
+        Expanded(
           // needed as Expanded() is relative and this needs a fixed space on larger screens
           flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 1),
           child: const SizedBox.expand(),
@@ -221,44 +331,48 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on Facebook',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_facebook');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
                 icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on X',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_x');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://x.com/millroadfair'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://x.com/millroadfair'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
                 icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on Instagram',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_instagram');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
                 icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
+                tooltip: 'Open Mill Road Winter Fair on Flickr',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_flickr');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -372,7 +486,10 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                 Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
                 Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
                 Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
-                Align(alignment: AlignmentGeometry.center, child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150)),
+                Align(
+                    alignment: AlignmentGeometry.center,
+                    child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png',
+                        width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                   TextButton(
                     onPressed: () {
@@ -398,6 +515,19 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
           ),
         );
       });
+}
+
+class CenterDockedWithOffset extends FloatingActionButtonLocation {
+  final double dyOffset; // positive = lower
+
+  const CenterDockedWithOffset({required this.dyOffset});
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final base = FloatingActionButtonLocation.centerDocked
+        .getOffset(scaffoldGeometry);
+    return Offset(base.dx, base.dy + dyOffset);
+  }
 }
 
 void shareApp(BuildContext context, String msgText) async {
@@ -522,11 +652,11 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               contentPadding: EdgeInsets.zero,
                               leading: const Icon(Icons.palette_outlined, size: 28),
                               title: Text('Illustrations by Clare McEwan', style: textStyle),
-                              subtitle: Text('https://www.claremcewan.co.uk', style: linkStyle),
+                              subtitle: Text('https://www.artistsmarquee.co.uk', style: linkStyle),
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_clare');
-                                launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+                                launchUrl(Uri.parse('https://www.artistsmarquee.co.uk/claremcewan'));
                               },
                             ),
                             ListTile(
@@ -594,22 +724,22 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('info@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'info@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('volunteers@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'volunteers@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('events@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'events@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('stalls@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'stalls@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('it@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'it@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('app@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'app@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       Text.rich(
                         TextSpan(
@@ -624,8 +754,9 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                                     HapticFeedback.lightImpact();
                                     analyticsService.logButtonTapped('contact_phone');
                                     final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                    if (await canLaunchUrl(phoneUri)) {
-                                      await launchUrl(phoneUri);
+                                    final launcher = context.read<UrlLauncher>();
+                                    if (await launcher.canOpen(phoneUri)) {
+                                      await launcher.open(phoneUri);
                                     } else {
                                       throw Exception('Could not dial 07303 142689');
                                     }
@@ -661,21 +792,27 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
   );
 }
 
-Widget _buildEmailLink(String email, {required AnalyticsService analyticsService}) {
-  return InkWell(
-    onTap: () async {
-      HapticFeedback.lightImpact();
-      analyticsService.logButtonTapped('contact_email');
-      final Uri mailUri = Uri(scheme: 'mailto', path: email);
-      if (await canLaunchUrl(mailUri)) {
-        await launchUrl(mailUri);
-      } else {
-        throw Exception('Could not launch email client');
-      }
-    },
-    child: Text(
-      email,
-      style: const TextStyle(decoration: TextDecoration.underline),
+Widget _buildEmailLink(BuildContext context, String email, {required AnalyticsService analyticsService}) {
+  return Semantics(
+    button: true,
+    label: 'Email $email',
+    excludeSemantics: true,
+    child: InkWell(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        analyticsService.logButtonTapped('contact_email');
+        final Uri mailUri = Uri(scheme: 'mailto', path: email);
+        final launcher = context.read<UrlLauncher>();
+        if (await launcher.canOpen(mailUri)) {
+          await launcher.open(mailUri);
+        } else {
+          throw Exception('Could not launch email client');
+        }
+      },
+      child: Text(
+        email,
+        style: const TextStyle(decoration: TextDecoration.underline),
+      ),
     ),
   );
 }
@@ -716,14 +853,17 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
     builder: (ctx) => Positioned(
       left: desiredLeft,
       top: desiredTop,
-      child: GestureDetector(
-        // since field may be clipped
-        onTap: () {
-          HapticFeedback.lightImpact();
-          analyticsService.logButtonTapped('tooltip_dismiss');
-          removeMiniPopup();
-        },
-        child: ConstrainedBox(
+      child: Semantics(
+        button: true,
+        label: 'Dismiss message',
+        child: GestureDetector(
+          // since field may be clipped
+          onTap: () {
+            HapticFeedback.lightImpact();
+            analyticsService.logButtonTapped('tooltip_dismiss');
+            removeMiniPopup();
+          },
+          child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: overlayW, // wrapping boundary
           ),
@@ -736,6 +876,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
               boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
             ),
             child: Text(theMessage, softWrap: true, style: theStyle),
+          ),
           ),
         ),
       ),
@@ -878,10 +1019,10 @@ String convertDistanceUnits(int distanceMetres, DistanceUnits preferredDistanceU
 
   if (preferredDistanceUnits == DistanceUnits.metric) {
     if (distanceMetres <= 999) {
-      distanceToDestination = '$distanceMetres m';
+      distanceToDestination = '${distanceMetres}m';
     } else {
       final distanceKilometresRounded = (distanceMetres / 1000).toStringAsFixed(2);
-      distanceToDestination = '$distanceKilometresRounded km';
+      distanceToDestination = '${distanceKilometresRounded}km';
     }
   } else if (preferredDistanceUnits == DistanceUnits.imperial) {
     if (distanceMetres <= 161) {
@@ -915,6 +1056,7 @@ void shareListing(
   String theEndTimeString,
   BuildContext context, {
   bool cancelled = false,
+  bool brickAndMortar = false,
 }) async {
   debugPrint('shareEvent called with theEvent=$theTitle theLocation=$theLocation theStartTime=$theStartTimeString theEndTimeString=$theEndTimeString');
   final msgText = buildListingShareText(
@@ -923,6 +1065,7 @@ void shareListing(
     theStartTimeString,
     theEndTimeString,
     cancelled: cancelled,
+    brickAndMortar: brickAndMortar,
   );
   final params = ShareParams(
     text: msgText,
@@ -952,6 +1095,7 @@ String buildListingShareText(
   String theEndTimeString, {
   required bool cancelled,
   DateTime? currentTime,
+  bool brickAndMortar = false,
 }) {
   if (cancelled) {
     return '$theTitle at $theLocation has been cancelled and will not be appearing at $fairName.\nhttps://www.millroadwinterfair.org/';
@@ -977,7 +1121,7 @@ String buildListingShareText(
     msgText += 'Tomorrow ';
   }
 
-  if (isItAnEvent && whenEventStart.abs() < 6) {
+  if (!brickAndMortar && isItAnEvent && whenEventStart.abs() < 6) {
     msgText += '${msgText == '' ? 'At' : 'at'} ${formatTime(startTime)} ';
   }
 
@@ -1020,4 +1164,416 @@ String formatFullDate(DateTime date) {
   final day = date.day;
   final suffix = day >= 11 && day <= 13 ? 'th' : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][day % 10];
   return '$dayName $monthName $day$suffix';
+}
+
+Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, BuildContext context) async {
+  debugPrint('toggleListingAlert called for $listingID and desiredNoticePeriod=$desiredNoticePeriod');
+  final colorScheme = Theme.of(context).colorScheme;
+  if (settingsOpened) { // button previously tapped when alert permissions weren't given; maybe they are now
+    alertsPermissionGranted = await requestAlertPermissions();
+    settingsOpened = false;
+  }
+  if (!context.mounted) return;
+  if (alertsPermissionGranted) {
+    await setTheAlert(context, desiredNoticePeriod, listingID);
+  } else {
+    alertsPermissionGranted = await requestAlertPermissions();
+    if (!alertsPermissionGranted) {
+      settingsOpened = true;
+      if (context.mounted) await showNoPermissionsDialog(context, colorScheme);
+    } else {
+      if (!context.mounted) return;
+      await setTheAlert(context, desiredNoticePeriod, listingID);
+    }
+  }
+}
+
+Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme) async {
+  return showDialog<void>(context: context, builder: (BuildContext context) {
+    return Dialog(
+      insetPadding: EdgeInsets.all(8), // margin from screen edges
+      shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+      backgroundColor: colorScheme.surfaceContainerLowest,
+      shadowColor: colorScheme.surfaceDim,
+      elevation: 3,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
+        child: Column(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
+          ListTile(
+            visualDensity: VisualDensity(horizontal: -2, vertical: 2),
+            leading: const Icon(Icons.error, size: 36, color: Colors.red),
+            title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
+            TextButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel')
+            ),
+            TextButton(
+              onPressed: () async {
+                HapticFeedback.lightImpact();
+                Navigator.of(context).pop();
+                await openAppSettings();
+              },
+              child: Text('Open Settings')
+            ),
+            SizedBox(width: 8),
+          ]),
+        ]),
+      ),
+    );
+  });
+}
+
+
+Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) async {
+  await alertsStore.refreshEventAlertSchedules(); // since snooze may have updated these
+  if (!context.mounted) return;
+  final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
+  if (theListing == null) return;
+  final existingAlert = alertsStore.alertSchedules.firstWhereOrNull((a) => a.listingId == listingID);
+  if (existingAlert != null) {
+    final theAlertId = existingAlert.id;
+    debugPrint('setTheAlert removing and cancelling theAlertId=$theAlertId');
+    alertsStore.removeAlertById(theAlertId);
+    flutterLocalNotificationsPlugin.cancel(id: theAlertId);
+    showToast(context, 'Alert for ${theListing['title']} has been cancelled.', false);
+    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.saveAllEventAlerts();
+    return;
+  } else {
+    final theListingStart = combineDateAndTime(theListing['startTime'], fairDate);
+    String? categoryID;
+    List<AndroidNotificationAction> androidNotificationActions;
+    final now = DateTime.now();
+    final timeToGo = theListingStart.difference(now).inMinutes;
+    int theAlertNoticePeriod;
+    if (timeToGo <= 0) {
+      showToast(context, 'No alert set as ${theListing['title']} is already underway.', true);
+      return;
+    } else if (timeToGo < desiredNoticePeriod) {
+      theAlertNoticePeriod = max(timeToGo ~/ 1.5, 1); // arbitrary value if within desiredNoticePeriod of start
+    } else {
+      theAlertNoticePeriod = desiredNoticePeriod;
+    }
+    (categoryID, androidNotificationActions) = calculateAlertActionCategories(theAlertNoticePeriod);
+    final newAlertId = alertsStore.addAlert(listingID, theAlertNoticePeriod, true);
+    final schedTime = theListingStart.subtract(Duration(minutes: theAlertNoticePeriod));
+    flutterLocalNotificationsPlugin.zonedSchedule(
+      id: newAlertId,
+      title: fairName,
+      body: (theAlertNoticePeriod > 0)
+        ? '${theListing['title']} starting at ${theListing['location']} in $theAlertNoticePeriod minutes (${theListing['startTime']})'
+        : '${theListing['title']} underway at ${theListing['location']} until ${theListing['endTime']}',
+      payload: jsonEncode(alertsStore.alertSchedules.firstWhere((a) => a.id == newAlertId)),
+      scheduledDate: tz.TZDateTime.from(schedTime, tz.local),//todo
+      //scheduledDate: tz.TZDateTime.from(now.add(Duration(seconds: 3)), tz.local),
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'org.millroadwinterfair.MRWFapp',
+          'Event alerts',
+          channelDescription: 'Mill Road Winter Fair event alerts',
+          importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
+          actions: androidNotificationActions,
+        ),
+        iOS: DarwinNotificationDetails(
+          threadIdentifier: 'org.millroadwinterfair.MRWFapp',
+          categoryIdentifier: categoryID
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
+    );
+    String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
+    if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
+    showToast(context, '$theMessage.', false);
+    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.saveAllEventAlerts();
+    debugPrint('setTheAlert scheduled new alert with ID $newAlertId in $theAlertNoticePeriod minutes at $schedTime with message “$theMessage”');
+    return;
+  }
+}
+
+
+void showToast(BuildContext theContext, String theMessage, bool isError) {
+  Fluttertoast.showToast(
+    msg: theMessage,
+    gravity: ToastGravity.BOTTOM,
+    backgroundColor: (isError) ? Theme.of(theContext).colorScheme.tertiary : Theme.of(theContext).colorScheme.primary,
+    textColor: (isError) ? Theme.of(theContext).colorScheme.onPrimary : Theme.of(theContext).colorScheme.onPrimary,
+    fontSize: 16,
+    toastLength: Toast.LENGTH_SHORT,
+    timeInSecForIosWeb: 2,
+  );
+}
+
+
+// Function to determine if the event has ended based on endTime string
+bool hasEventEnded(String endTime, DateTimeProvider dateTimeProvider) {
+  try {
+    final parts = endTime.split(':');
+    final endHour = int.parse(parts[0]);
+    final endMinute = parts.length > 1 ? int.parse(parts[1]) : 0;
+    final endDateTime = DateTime(
+      fairDate.year,
+      fairDate.month,
+      fairDate.day,
+      endHour,
+      endMinute,
+    );
+    return dateTimeProvider.now().isAfter(endDateTime);
+  } catch (_) {
+    return false; // default to not ended if parsing fails
+  }
+}
+
+
+// Function to determine if the event is today
+bool isItEventDay(DateTimeProvider dateTimeProvider) {
+  return DateUtils.isSameDay(
+    fairDate,
+    dateTimeProvider.now(),
+  );
+}
+
+
+class AdaptiveImageText extends StatefulWidget {
+  const AdaptiveImageText({
+    super.key,
+    required this.imageUrl,
+    required this.descriptionWidget,
+  });
+
+  final String imageUrl;
+  final Widget descriptionWidget;
+
+  @override
+  State<AdaptiveImageText> createState() => _AdaptiveImageTextState();
+}
+
+class _AdaptiveImageTextState extends State<AdaptiveImageText> {
+  static const double _inlineImageWidth = 160;
+  static const double _maxImageHeight = 180;
+  static const double _loadingImageHeight = 120;
+
+  Future<ui.Image>? _imageFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageFuture = _resolveImage(NetworkImage(widget.imageUrl));
+  }
+
+  @override
+  void didUpdateWidget(covariant AdaptiveImageText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.imageUrl != widget.imageUrl) {
+      _imageFuture = _resolveImage(NetworkImage(widget.imageUrl));
+    }
+  }
+
+  Future<ui.Image> _resolveImage(ImageProvider provider) {
+    final completer = Completer<ui.Image>();
+    final stream = provider.resolve(ImageConfiguration.empty);
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (ImageInfo info, bool synchronousCall) {
+        if (!completer.isCompleted) completer.complete(info.image);
+        stream.removeListener(listener);
+      },
+      onError: (Object error, StackTrace? stackTrace) {
+        if (!completer.isCompleted) completer.completeError(error, stackTrace ?? StackTrace.current);
+        stream.removeListener(listener);
+      },
+    );
+    stream.addListener(listener);
+    return completer.future;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ui.Image>(
+      future: _imageFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return _buildFallbackLayout(showErrorText: true);
+        if (!snapshot.hasData) return _buildLoadingLayout();
+        final image = snapshot.data!;
+        final imageIsLandscape = image.width > image.height;
+        return imageIsLandscape ? _buildVerticalLayout() : _buildHorizontalLayout();
+      },
+    );
+  }
+
+  Widget _buildFallbackLayout({bool showErrorText = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: widget.descriptionWidget),
+        const SizedBox(width: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: SizedBox(
+            width: _inlineImageWidth,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.broken_image, size: 32),
+                if (showErrorText) const SizedBox(height: 4),
+                if (showErrorText) const Text('Could not load image', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadingLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: widget.descriptionWidget),
+        const SizedBox(width: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: SizedBox(
+            width: _inlineImageWidth,
+            height: _loadingImageHeight,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHorizontalLayout() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: widget.descriptionWidget),
+        const SizedBox(width: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+          child: _buildImage(width: _inlineImageWidth),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVerticalLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: AlignmentGeometry.center,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: _maxImageHeight),
+            child: _buildImage(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        widget.descriptionWidget,
+      ],
+    );
+  }
+
+  Widget _buildImage({double? width}) {
+    return SizedBox(
+      width: width,
+      height: width == null ? _maxImageHeight : null,
+      child: Image.network(
+        widget.imageUrl,
+        width: width,
+        height: width == null ? _maxImageHeight : null,
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(Icons.broken_image);
+        },
+      ),
+    );
+  }
+}
+
+
+Future<void> ensureWidgetFullyVisible(GlobalKey key) async {
+  final context = key.currentContext;
+  if (context == null) return;
+  if (isWidgetFullyVisible(context)) return;
+  // First attempt with ensureVisible
+  Scrollable.ensureVisible(
+    context,
+    alignment: 1.0,
+    duration: const Duration(milliseconds: 150),
+    curve: Curves.easeInOut,
+  );
+  // Let that animation finish
+  await Future.delayed(const Duration(milliseconds: 160));
+  if (!context.mounted) return;
+  if (isWidgetFullyVisible(context)) return;
+  // Still not fully visible -> manually adjust scroll offset
+  final renderObject = context.findRenderObject();
+  if (renderObject == null || renderObject is! RenderBox) return;
+  final box = renderObject;
+  final viewport = RenderAbstractViewport.maybeOf(box);
+  if (viewport == null) return;
+  final scrollable = Scrollable.of(context);
+  final position = scrollable.position;
+  // Global offset of the box relative to the viewport
+  final offsetInViewport = box.localToGlobal(Offset.zero, ancestor: viewport);
+  final top = offsetInViewport.dy;
+  final bottom = top + box.size.height;
+  final viewportHeight = viewport.paintBounds.size.height;
+  double targetScrollOffset = position.pixels;
+  if (top < 0) {
+    // Top is above viewport -> scroll up so top aligns with 0
+    targetScrollOffset = position.pixels + top; // top is negative
+  } else if (bottom > viewportHeight) {
+    // Bottom is below viewport -> scroll down so bottom aligns with viewportHeight
+    targetScrollOffset = position.pixels + (bottom - viewportHeight);
+  } else {
+    // Already fully inside vertically; nothing to do
+    return;
+  }
+  // Clamp to valid scroll range
+  targetScrollOffset = targetScrollOffset.clamp(
+    position.minScrollExtent,
+    position.maxScrollExtent,
+  );
+  if (targetScrollOffset == position.pixels) return;
+  await position.animateTo(
+    targetScrollOffset,
+    duration: const Duration(milliseconds: 200),
+    curve: Curves.easeInOut,
+  );
+}
+
+bool isWidgetFullyVisible(BuildContext context) {
+  final renderObject = context.findRenderObject();
+  if (renderObject == null || renderObject is! RenderBox) return false;
+  final box = renderObject;
+  final viewport = RenderAbstractViewport.maybeOf(box);
+  if (viewport == null) return false;
+  final offset = box.localToGlobal(Offset.zero, ancestor: viewport);
+  final size = box.size;
+  final viewportSize = viewport.paintBounds.size;
+  return offset.dy >= 0 &&
+      offset.dy + size.height <= viewportSize.height &&
+      offset.dx >= 0 &&
+      offset.dx + size.width <= viewportSize.width;
 }

@@ -1,10 +1,16 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Analytics is enabled automatically for release builds and can be opted into
+// for debug/profile builds with `--dart-define=DEV_ANALYTICS=true`.
+const bool devAnalyticsEnabled = bool.fromEnvironment('DEV_ANALYTICS');
+const bool analyticsEnabledForBuild = kReleaseMode || devAnalyticsEnabled;
 
 // A service class to handle analytics events, using Firebase Analytics in production and a fake implementation for testing
 class FirebaseAnalyticsService implements AnalyticsService {
@@ -212,6 +218,27 @@ class FirebaseAnalyticsService implements AnalyticsService {
   }
 
   @override
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes) async {
+    if (usageAnalyticsEnabled != true) {
+      return;
+    }
+
+    final value = minutes.toString();
+    debugPrint('[FIREBASE] Logging preference_set (alert_notice_period_minutes): $value');
+    await _record(() => analytics.setUserProperty(
+      name: 'alert_notice_period_minutes',
+      value: value,
+    ));
+    await _record(() => analytics.logEvent(
+      name: 'preference_set',
+      parameters: {
+        'type': 'alert_notice_period_minutes',
+        'value': value,
+      },
+    ));
+  }
+
+  @override
   Future<void> logListingSaved(String listingName) async {
     if (usageAnalyticsEnabled != true) {
       return;
@@ -405,6 +432,7 @@ abstract class AnalyticsService {
   Future<void> logRoadClosurePolygonPreferenceSet(bool visible);
   Future<void> logDistanceUnitPreferenceSet(String distanceUnit);
   Future<void> logThemePreferenceSet(String theme);
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes);
   Future<void> logListingSaved(String listingName);
   Future<void> logListingUnsaved(String listingName);
   Future<void> logDirectionsToListingRequested(String listingName);
@@ -465,6 +493,10 @@ class FakeAnalyticsService implements AnalyticsService {
     // Do nothing
   }
   @override
+  Future<void> logAlertNoticePeriodPreferenceSet(int minutes) async {
+    // Do nothing
+  }
+  @override
   Future<void> logListingSaved(String listingName) async {
     // Do nothing
   }
@@ -480,4 +512,11 @@ class FakeAnalyticsService implements AnalyticsService {
   Future<void> showAnalyticsConsentDialog(BuildContext context) async {
     // Do nothing
   }
+}
+
+// A no-op service used when analytics is disabled for the entire build.
+// Unlike [FakeAnalyticsService], attempting to opt in does not alter the in-memory or persisted user preference.
+class DisabledAnalyticsService extends FakeAnalyticsService {
+  @override
+  Future<void> setAnalyticsEnabled(bool enabled) async {}
 }
