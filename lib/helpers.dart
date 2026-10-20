@@ -28,7 +28,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 OverlayEntry? _miniPopupOverlayEntry; // widget that floats over a given widget as a 'tooltip'
 Timer? _miniPopupTimer; // times how long the above stays on screen
@@ -315,7 +314,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               HapticFeedback.lightImpact();
               analyticsService.logButtonTapped('drawer_donate');
               Navigator.pop(context);
-              launchUrl(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
+              context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
             },
           ),
         ),
@@ -617,7 +616,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_alex');
-                                launchUrl(Uri.parse('https://theberridge.com'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://theberridge.com'));
                               },
                             ),
                             ListTile(
@@ -630,7 +629,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_matt');
-                                launchUrl(Uri.parse('http://mattwhiting.com'));
+                                context.read<UrlLauncher>().open(Uri.parse('http://mattwhiting.com'));
                               },
                             ),
                             ListTile(
@@ -643,7 +642,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_clashfinder');
-                                launchUrl(Uri.parse('https://linktr.ee/cfpal'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://linktr.ee/cfpal'));
                               },
                             ),
                             ListTile(
@@ -656,7 +655,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_clare');
-                                launchUrl(Uri.parse('https://www.artistsmarquee.co.uk/claremcewan'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://www.artistsmarquee.co.uk/claremcewan'));
                               },
                             ),
                             ListTile(
@@ -669,7 +668,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_feedback');
-                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
                               },
                             ),
                             Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 10, children: [

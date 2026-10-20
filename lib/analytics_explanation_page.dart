@@ -3,9 +3,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 
 class AnalyticsExplanationPage extends StatefulWidget {
   final AnalyticsService analyticsService;
@@ -98,7 +99,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('firebase_info_link');
-                                launchUrl(Uri.parse('https://firebase.google.com/'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://firebase.google.com/'));
                               },
                           ),
                           const TextSpan(
@@ -203,7 +204,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('google_partner_sites_link');
-                                launchUrl(Uri.parse('https://policies.google.com/technologies/partner-sites'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://policies.google.com/technologies/partner-sites'));
                               },
                           ),
                           const TextSpan(text: ' and in the '),
@@ -217,7 +218,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('firebase_privacy_link');
-                                launchUrl(Uri.parse('https://firebase.google.com/support/privacy'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://firebase.google.com/support/privacy'));
                               },
                           ),
                           const TextSpan(text: '.'),
@@ -240,7 +241,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('app_privacy_policy_link');
-                                launchUrl(Uri.parse(
+                                context.read<UrlLauncher>().open(Uri.parse(
                                   'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf',
                                 ));
                               },
