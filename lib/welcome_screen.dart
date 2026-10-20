@@ -236,6 +236,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(Icons.home, 'Tap the Home button on the map to show the whole Fair.'),
         tip(Icons.radar, 'Tap the radar button to see your location and nearby pins.'),
         tip(Icons.satellite_alt, 'Switch between street and satellite maps as you prefer.'),
+        tip(Icons.assistant_navigation, 'Set the map to orientation that works for you.'),
         tip(Icons.directions_walk, 'Open a listing and tap the walking icon for directions.'),
         tip(Icons.search, 'Search for stalls and events on the map.'),
         tip(Icons.filter_alt, 'Choose which types of attraction you want to appear on the map.'),
