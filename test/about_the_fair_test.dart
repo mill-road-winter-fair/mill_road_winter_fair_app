@@ -4,27 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:url_launcher_platform_interface/link.dart';
-import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+import 'package:provider/provider.dart';
+import 'fakes/fake_url_launcher.dart';
 import 'pump_with_clock.dart';
-
-class FakeUrlLauncher extends UrlLauncherPlatform {
-  final List<String> launchedUrls = [];
-
-  @override
-  LinkDelegate? get linkDelegate => null;
-
-  @override
-  Future<bool> launchUrl(String url, LaunchOptions options) async {
-    launchedUrls.add(url);
-    return true;
-  }
-}
 
 class RecordingNavigatorObserver extends NavigatorObserver {
   final List<Route<dynamic>> pushedRoutes = [];
@@ -58,15 +46,19 @@ void main() {
     Future<void> pumpAboutPage(
       WidgetTester tester, {
       NavigatorObserver? navigatorObserver,
+      FakeUrlLauncher? urlLauncher,
     }) async {
       listings = [];
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpWidget(
-        MaterialApp(
-          home: AboutTheFairPage(analyticsService: FakeAnalyticsService()),
-          navigatorObservers: [
-            if (navigatorObserver != null) navigatorObserver,
-          ],
+        Provider<UrlLauncher>.value(
+          value: urlLauncher ?? FakeUrlLauncher(),
+          child: MaterialApp(
+            home: AboutTheFairPage(analyticsService: FakeAnalyticsService()),
+            navigatorObservers: [
+              if (navigatorObserver != null) navigatorObserver,
+            ],
+          ),
         ),
       );
       await tester.pump();
@@ -169,10 +161,7 @@ void main() {
     testWidgets('sponsor hyperlinks launch the sponsor websites', (
       tester,
     ) async {
-      final originalUrlLauncher = UrlLauncherPlatform.instance;
       final fakeUrlLauncher = FakeUrlLauncher();
-      UrlLauncherPlatform.instance = fakeUrlLauncher;
-      addTearDown(() => UrlLauncherPlatform.instance = originalUrlLauncher);
 
       const sponsorUrls = {
         'Bush & Co Sales and Lettings': 'https://bushandco.co.uk/',
@@ -184,7 +173,7 @@ void main() {
         'Taank Optometrists': 'https://taank.co.uk/',
       };
 
-      await pumpAboutPage(tester);
+      await pumpAboutPage(tester, urlLauncher: fakeUrlLauncher);
 
       for (final sponsor in sponsorUrls.entries) {
         linkRecognizer(
@@ -195,7 +184,10 @@ void main() {
         await tester.pump();
       }
 
-      expect(fakeUrlLauncher.launchedUrls, sponsorUrls.values.toList());
+      expect(
+        fakeUrlLauncher.openedUris,
+        sponsorUrls.values.map(Uri.parse).toList(),
+      );
     });
 
     testWidgets(
