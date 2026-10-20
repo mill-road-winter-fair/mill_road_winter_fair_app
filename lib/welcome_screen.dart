@@ -209,7 +209,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(Icons.map,
             'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and Favourites you\'ve saved.'),
         tip(Icons.menu,
-            'Use the menu in the top-right for important information, settings and to share this app. You can read this App Guide again there too.'),
+            'Use the menu in the top left for important information, settings and to share this app. You can read this App Guide again there too.'),
       ]),
       guidePage('What do the map pins mean?', [
         for (final key in subfilterCategoryLabels.keys)
