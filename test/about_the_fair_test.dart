@@ -11,6 +11,7 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+import 'pump_with_clock.dart';
 
 class FakeUrlLauncher extends UrlLauncherPlatform {
   final List<String> launchedUrls = [];
@@ -236,13 +237,8 @@ void main() {
           },
         ];
 
-        await tester.pumpWidget(
-          MyApp(
-            firstExecution: false,
-            analyticsService: FakeAnalyticsService(),
-          ),
-        );
-        await settle(tester);
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await settle(tester);
 
         // Obtain the HomePage state
         final homePageState =

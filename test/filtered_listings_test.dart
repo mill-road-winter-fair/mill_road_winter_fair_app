@@ -1,5 +1,10 @@
+import 'pump_with_clock.dart';
+import 'fakes/fixed_date_time_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
@@ -11,6 +16,47 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 1000));
+}
+
+Map<String, dynamic> testListing({
+  required String id,
+  required String title,
+  String groupParent = 'FALSE',
+  String food = 'FALSE',
+  String shopping = 'FALSE',
+  String performanceMusic = 'FALSE',
+  String startTime = '10:30',
+  String endTime = '16:30',
+}) {
+  return {
+    'id': id,
+    'visibleOnMap': 'TRUE',
+    'cancelled': 'FALSE',
+    'groupParent': groupParent,
+    'brickAndMortar': 'FALSE',
+    'emoji': '',
+    'title': title,
+    'subtitle': '',
+    'groupID': '',
+    'food': food,
+    'shopping': shopping,
+    'charityCommunityInfo': 'FALSE',
+    'performanceMusic': performanceMusic,
+    'performanceChildrens': 'FALSE',
+    'performanceDance': 'FALSE',
+    'performanceOther': 'FALSE',
+    'visitExperience': 'FALSE',
+    'service': 'FALSE',
+    'location': 'Mill Road',
+    'description': '',
+    'email': '',
+    'website': '',
+    'phone': '',
+    'latLng': '52.199174,0.140929',
+    'imageURL': '',
+    'startTime': startTime,
+    'endTime': endTime,
+  };
 }
 
 class RecordingSearchAnalyticsService extends FakeAnalyticsService {
@@ -37,27 +83,78 @@ void main() {
   Future<void> pumpFilteredListingsPage(
     WidgetTester tester,
     String category,
-    List<Map<String, dynamic>> listings,
-    List<String> favouriteListingKeys,
-  ) async {
-    await tester.pumpWidget(
+    List<Map<String, dynamic>> pageListings,
+    List<String> favouriteIds, {
+    String? subfilterCategory,
+    FixedDateTimeProvider? dateTimeProvider,
+    bool resetState = false,
+  }) async {
+    if (resetState) {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+    listings = pageListings;
+    favouriteListingKeys.value = favouriteIds.toSet();
+    await tester.pumpWithClock(
       MaterialApp(
         home: Scaffold(
           body: FilteredListingsPage(
             filterCategory: category,
-            listings: listings,
+            subfilterCategory: subfilterCategory,
+            listings: pageListings,
             onTabSelected: (_) {},
             onSubfilterChange: (_) {},
             analyticsService: FakeAnalyticsService(),
           ),
         ),
       ),
+      dateTimeProvider: dateTimeProvider ?? FixedDateTimeProvider(fairDate),
     );
     await tester.pump();
     await settle(tester);
   }
 
   group('FilteredListingsPage', () {
+    testWidgets('filter feedback clears navigation in portrait and landscape', (tester) async {
+      onTest = true;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(() => FToast().removeQueuedCustomToasts());
+
+      for (final size in [const Size(320, 568), const Size(844, 390)]) {
+        for (final inset in [0.0, 34.0, 48.0]) {
+          tester.view.physicalSize = size;
+          tester.view.padding = FakeViewPadding(bottom: inset);
+          await tester.pumpWidget(MaterialApp(
+            home: Builder(builder: (context) => FairScaffold(
+              appBarTitle: 'Fair',
+              currentTab: 3,
+              onTabSelected: (_) {},
+              analyticsService: FakeAnalyticsService(),
+              body: TextButton(
+                onPressed: () => showInfoToast(context, 'Hiding all events and performances that have passed'),
+                child: const Text('Change filter'),
+              ),
+            )),
+          ));
+          await tester.tap(find.text('Change filter'));
+          await tester.pump(const Duration(milliseconds: 400));
+          final toast = tester.getRect(find.byKey(const ValueKey('filter-toast')));
+          final home = tester.getRect(find.byKey(const ValueKey('home-navigation-button')));
+          expect(home.top - toast.bottom, closeTo(16, 0.01));
+          expect(toast.left, greaterThanOrEqualTo(24));
+          expect(toast.right, lessThanOrEqualTo(size.width - 24));
+
+          await tester.pump(const Duration(seconds: 2));
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+        }
+      }
+    });
+
     testWidgets('displays error text when fetchFilteredListings fails', (WidgetTester tester) async {
       // Define a test listing
       List<Map<String, dynamic>> listings = [];
@@ -141,16 +238,14 @@ void main() {
       expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
-      expect(find.text('Gwydir St Car Park (approx. 206 m)'), findsOneWidget);
+      expect(find.text('Gwydir St Car Park (~206m away)'), findsOneWidget);
       expect(find.text('01223 111111'), findsNothing); // as Details won't be open
-      expect(find.byIcon(Icons.phone), findsOneWidget);
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue (approx. 197 m)'), findsOneWidget);
+      expect(find.text('Implausible Avenue (~197m away)'), findsOneWidget);
       // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
       expect(find.byIcon(Icons.directions_walk), findsExactly(3));
-      expect(find.byIcon(Icons.public), findsExactly(2));
     });
 
     testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
@@ -522,7 +617,7 @@ void main() {
         },
       ];
 
-      await tester.pumpWidget(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await settle(tester);
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
@@ -642,7 +737,7 @@ void main() {
       // Start with a known current location so distance sorting works if required
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await tester.pumpWidget(
+      await tester.pumpWithClock(
         MaterialApp(
           home: Scaffold(
             body: FilteredListingsPage(
@@ -691,6 +786,177 @@ void main() {
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Bite Club'), findsOneWidget);
+    });
+
+    testWidgets('filters listings by page category, subcategory and favourites', (WidgetTester tester) async {
+      final sampleListings = [
+        testListing(id: 'food', title: 'Food stall', food: 'TRUE'),
+        testListing(id: 'shop', title: 'Shopping stall', shopping: 'TRUE'),
+        testListing(id: 'music', title: 'Music act', performanceMusic: 'TRUE'),
+        testListing(
+          id: 'parent',
+          title: 'Group parent',
+          groupParent: 'TRUE',
+          food: 'TRUE',
+        ),
+      ];
+
+      await pumpFilteredListingsPage(tester, 'food', sampleListings, [], resetState: true);
+      var state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
+      expect(state.filteredListings.map((listing) => listing['id']), ['food']);
+
+      await pumpFilteredListingsPage(
+        tester,
+        'all',
+        sampleListings,
+        [],
+        subfilterCategory: 'performanceMusic',
+        resetState: true,
+      );
+      state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
+      expect(state.filteredListings.map((listing) => listing['id']), ['music']);
+
+      await pumpFilteredListingsPage(tester, 'favourite', sampleListings, ['shop'], resetState: true);
+      state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
+      expect(state.filteredListings.map((listing) => listing['id']), ['shop']);
+    });
+
+    testWidgets('only offers time sorting for performance and favourite pages', (WidgetTester tester) async {
+      final sampleListings = [
+        testListing(id: 'food', title: 'Food stall', food: 'TRUE'),
+        testListing(id: 'music', title: 'Music act', performanceMusic: 'TRUE'),
+      ];
+      locationPermission = LocationPermission.always;
+      currentLatLng = const LatLng(52.199174, 0.140929);
+      preferredSortingMethod = SortingMethod.alphabetical;
+
+      await pumpFilteredListingsPage(tester, 'food', sampleListings, [], resetState: true);
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
+      await settle(tester);
+      expect(find.text('Nearest'), findsWidgets);
+      expect(find.text('Location (a–z)'), findsWidgets);
+      expect(find.text('Name (a–z)'), findsWidgets);
+      expect(find.text('Time'), findsNothing);
+
+      await pumpFilteredListingsPage(
+        tester,
+        'all',
+        sampleListings,
+        [],
+        subfilterCategory: 'performanceMusic',
+        resetState: true,
+      );
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
+      await settle(tester);
+      expect(find.text('Time'), findsWidgets);
+
+      await pumpFilteredListingsPage(tester, 'favourite', sampleListings, ['food'], resetState: true);
+      await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
+      await settle(tester);
+      expect(find.text('Time'), findsWidgets);
+    });
+
+    testWidgets('scroll to now selects time sorting and finds the first current listing', (WidgetTester tester) async {
+      final currentDateTime = DateTime(fairDate.year, fairDate.month, fairDate.day, 12, 15);
+      final sampleListings = [
+        testListing(
+          id: 'future',
+          title: 'Future act',
+          performanceMusic: 'TRUE',
+          startTime: '13:00',
+          endTime: '14:00',
+        ),
+        testListing(
+          id: 'past',
+          title: 'Past act',
+          performanceMusic: 'TRUE',
+          startTime: '10:00',
+          endTime: '11:00',
+        ),
+        testListing(
+          id: 'current',
+          title: 'Current act',
+          performanceMusic: 'TRUE',
+          startTime: '12:00',
+          endTime: '13:00',
+        ),
+      ];
+      preferredSortingMethod = SortingMethod.alphabetical;
+
+      await pumpFilteredListingsPage(
+        tester,
+        'all',
+        sampleListings,
+        [],
+        subfilterCategory: 'performanceMusic',
+        dateTimeProvider: FixedDateTimeProvider(currentDateTime),
+      );
+      await tester.tap(find.byTooltip('Scroll to what is on now or starting soon'));
+      await settle(tester);
+
+      final state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
+      expect(preferredSortingMethod, SortingMethod.startTime);
+      expect(state.filteredListings.map((listing) => listing['id']), ['past', 'current', 'future']);
+      expect(state.firstNextListingIndex, 1);
+    });
+
+    testWidgets('hide past listings removes ended listings and can show them again', (WidgetTester tester) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('PonnamKarthik/fluttertoast'),
+        (_) async => true,
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          const MethodChannel('PonnamKarthik/fluttertoast'),
+          null,
+        );
+      });
+      final currentDateTime = DateTime(fairDate.year, fairDate.month, fairDate.day, 12, 15);
+      final sampleListings = [
+        testListing(
+          id: 'past',
+          title: 'Past act',
+          performanceMusic: 'TRUE',
+          startTime: '10:00',
+          endTime: '11:00',
+        ),
+        testListing(
+          id: 'current',
+          title: 'Current act',
+          performanceMusic: 'TRUE',
+          startTime: '12:00',
+          endTime: '13:00',
+        ),
+        testListing(
+          id: 'future',
+          title: 'Future act',
+          performanceMusic: 'TRUE',
+          startTime: '13:00',
+          endTime: '14:00',
+        ),
+      ];
+
+      await pumpFilteredListingsPage(
+        tester,
+        'all',
+        sampleListings,
+        [],
+        subfilterCategory: 'performanceMusic',
+        dateTimeProvider: FixedDateTimeProvider(currentDateTime),
+      );
+      expect(find.text('Past act'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Hide past events and performances'));
+      await settle(tester);
+      expect(find.text('Past act'), findsNothing);
+      expect(find.text('Current act'), findsOneWidget);
+      expect(find.text('Future act'), findsOneWidget);
+      expect(find.byTooltip('Show past events and performances'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Show past events and performances'));
+      await settle(tester);
+      expect(find.text('Past act'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 2));
     });
   });
 }
