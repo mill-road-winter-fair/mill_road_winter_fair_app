@@ -147,7 +147,7 @@ void main() {
       expect(find.text('Visit our website'), findsOneWidget);
       expect(find.text('Contact us'), findsOneWidget);
       expect(find.text('Donate to the Fair'), findsOneWidget);
-      expect(find.byType(IconButton), findsExactly(5));
+      expect(find.byType(IconButton), findsExactly(6));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('App guide'), findsOneWidget);
       expect(find.text('Share this app'), findsOneWidget);
@@ -240,12 +240,22 @@ void main() {
         },
       );
 
-      testWidgets('Flickr button launches the Fair Flickr page', (tester) async {
+      testWidgets('LinkedIn button launches the Fair LinkedIn page', (tester) async {
         await openDrawer(tester);
 
         await expectButtonLaunches(
           tester,
           findDrawerSocialButton(3),
+          'https://www.linkedin.com/company/mill-road-winter-fair/',
+        );
+      });
+
+      testWidgets('Flickr button launches the Fair Flickr page', (tester) async {
+        await openDrawer(tester);
+
+        await expectButtonLaunches(
+          tester,
+          findDrawerSocialButton(4),
           'https://www.flickr.com/people/millroadwinterfair/',
         );
       });
