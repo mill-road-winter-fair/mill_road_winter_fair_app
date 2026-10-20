@@ -3,34 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:url_launcher_platform_interface/link.dart';
-import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+import 'package:provider/provider.dart';
+import 'fakes/fake_url_launcher.dart';
 import 'pump_with_clock.dart';
-
-class FakeUrlLauncher extends UrlLauncherPlatform {
-  final List<String> checkedUrls = [];
-  final List<String> launchedUrls = [];
-
-  @override
-  LinkDelegate? get linkDelegate => null;
-
-  @override
-  Future<bool> canLaunch(String url) async {
-    checkedUrls.add(url);
-    return true;
-  }
-
-  @override
-  Future<bool> launchUrl(String url, LaunchOptions options) async {
-    launchedUrls.add(url);
-    return true;
-  }
-}
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -169,22 +150,19 @@ void main() {
     });
 
     group('external hyperlinks', () {
-      final originalUrlLauncher = UrlLauncherPlatform.instance;
       late FakeUrlLauncher fakeUrlLauncher;
 
       setUp(() {
         fakeUrlLauncher = FakeUrlLauncher();
-        UrlLauncherPlatform.instance = fakeUrlLauncher;
-      });
-
-      tearDown(() {
-        UrlLauncherPlatform.instance = originalUrlLauncher;
       });
 
       Future<void> pumpPage(WidgetTester tester) async {
-        await tester.pumpWidget(MaterialApp(
-          home: ImportantInfoPage(
-            analyticsService: FakeAnalyticsService(),
+        await tester.pumpWidget(Provider<UrlLauncher>.value(
+          value: fakeUrlLauncher,
+          child: MaterialApp(
+            home: ImportantInfoPage(
+              analyticsService: FakeAnalyticsService(),
+            ),
           ),
         ));
       }
@@ -199,11 +177,17 @@ void main() {
             (widget) => widget is Text && widget.textSpan?.toPlainText().contains(paragraphText) == true,
           ),
         );
-        final paragraphSpan = paragraph.textSpan as TextSpan;
-        return paragraphSpan.children!.whereType<TextSpan>().singleWhere((span) => span.text == linkText);
+        final matchingSpans = <TextSpan>[];
+        paragraph.textSpan!.visitChildren((span) {
+          if (span is TextSpan && span.text == linkText) {
+            matchingSpans.add(span);
+          }
+          return true;
+        });
+        return matchingSpans.single;
       }
 
-      testWidgets('website hyperlink launches the road closure notice', (WidgetTester tester) async {
+      testWidgets('road closure website hyperlink launches the Fair website', (WidgetTester tester) async {
         await pumpPage(tester);
 
         final linkSpan = findLinkSpan(
@@ -216,8 +200,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-          fakeUrlLauncher.launchedUrls,
-          ['https://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'],
+          fakeUrlLauncher.openedUris,
+          [Uri.parse('https://www.millroadwinterfair.org')],
         );
       });
 
@@ -227,14 +211,13 @@ void main() {
         final linkSpan = findLinkSpan(
           tester,
           paragraphText: 'On the day, you can also phone',
-          linkText: '07303 142689',
+          linkText: '07486 398744',
         );
 
         (linkSpan.recognizer as TapGestureRecognizer).onTap!();
         await tester.pumpAndSettle();
 
-        expect(fakeUrlLauncher.checkedUrls, ['tel:07303%20142689']);
-        expect(fakeUrlLauncher.launchedUrls, ['tel:07303%20142689']);
+        expect(fakeUrlLauncher.openedUris, [Uri(scheme: 'tel', path: '07486398744')]);
       });
     });
   });
