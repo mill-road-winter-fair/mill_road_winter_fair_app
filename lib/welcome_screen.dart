@@ -233,7 +233,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         ),
       ]),
       guidePage('Explore the map', [
-        tip(Icons.home, 'Tap the Home button on the map to zoom to the Fair.'),
+        tip(Icons.home, 'Tap the Home button on the map to show the whole Fair.'),
         tip(Icons.radar, 'Tap the radar button to see your location and nearby pins.'),
         tip(Icons.satellite_alt, 'Switch between street and satellite maps as you prefer.'),
         tip(Icons.directions_walk, 'Open a listing and tap the walking icon for directions.'),
