@@ -247,7 +247,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(Icons.favorite, 'Tap a listing’s heart icon to save it. It will then appear in your Favourites.'),
         tip(Icons.directions_walk, 'Tap the walking icon for directions.'),
         tip(Icons.share, 'Share a listing with friends to tell them where you\'re headed.'),
-        tip(Icons.event_busy, 'On the day of the Fair, performance lists and Favourites let you hide finished events or jump to what’s on now.'),
+        tip(Icons.access_time, 'On the day of the Fair, performance lists and Favourites let you hide finished events or jump to what’s on now.'),
       ]),
       guidePage('Plan your day with the timetable', [
         tip(Icons.watch_later, 'See performances and shorter visits and experiences by time and location.'),
