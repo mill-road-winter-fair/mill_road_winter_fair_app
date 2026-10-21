@@ -1237,6 +1237,7 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
   if (!context.mounted) return;
   final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
   if (theListing == null) return;
+  final dateTimeProvider = context.read<DateTimeProvider>();
   final existingAlert = alertsStore.alertSchedules.firstWhereOrNull((a) => a.listingId == listingID);
   if (existingAlert != null) {
     final theAlertId = existingAlert.id;
@@ -1244,14 +1245,14 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
     alertsStore.removeAlertById(theAlertId);
     flutterLocalNotificationsPlugin.cancel(id: theAlertId);
     showToast(context, 'Alert for ${theListing['title']} has been cancelled.', false);
-    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.removePastEventAlerts(dateTimeProvider: dateTimeProvider); // hygiene
     alertsStore.saveAllEventAlerts();
     return;
   } else {
     final theListingStart = combineDateAndTime(theListing['startTime'], fairDate);
     String? categoryID;
     List<AndroidNotificationAction> androidNotificationActions;
-    final now = DateTime.now();
+    final now = dateTimeProvider.now();
     final timeToGo = theListingStart.difference(now).inMinutes;
     int theAlertNoticePeriod;
     if (timeToGo <= 0) {
@@ -1292,9 +1293,9 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
     );
     String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
-    if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
+    if (theListingStart.difference(now).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
     showToast(context, '$theMessage.', false);
-    alertsStore.removePastEventAlerts(); // hygiene
+    alertsStore.removePastEventAlerts(dateTimeProvider: dateTimeProvider); // hygiene
     alertsStore.saveAllEventAlerts();
     debugPrint('setTheAlert scheduled new alert with ID $newAlertId in $theAlertNoticePeriod minutes at $schedTime with message “$theMessage”');
     return;
