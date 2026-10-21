@@ -1233,7 +1233,7 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
 
 
 Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) async {
-  await alertsStore.refreshEventAlertSchedules(); // since snooze may have updated these
+  await alertsStore.removePastEventAlerts();  // also refreshes from shared prefs in case of snooze
   if (!context.mounted) return;
   final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
   if (theListing == null) return;
@@ -1244,7 +1244,6 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
     alertsStore.removeAlertById(theAlertId);
     flutterLocalNotificationsPlugin.cancel(id: theAlertId);
     showToast(context, 'Alert for ${theListing['title']} has been cancelled.', false);
-    alertsStore.removePastEventAlerts(); // hygiene
     alertsStore.saveAllEventAlerts();
     return;
   } else {
@@ -1294,7 +1293,6 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
     String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
     if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
     showToast(context, '$theMessage.', false);
-    alertsStore.removePastEventAlerts(); // hygiene
     alertsStore.saveAllEventAlerts();
     debugPrint('setTheAlert scheduled new alert with ID $newAlertId in $theAlertNoticePeriod minutes at $schedTime with message “$theMessage”');
     return;
