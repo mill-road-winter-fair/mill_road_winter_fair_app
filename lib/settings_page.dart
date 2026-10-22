@@ -178,6 +178,8 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
     const dropdownDecoration = InputDecorationTheme(
       border: OutlineInputBorder(),
       isDense: true,
+      // Remove the arrow button's default padding inside the compact field.
+      isCollapsed: true,
       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       suffixIconConstraints: BoxConstraints(minWidth: 40, maxHeight: 40),
     );
