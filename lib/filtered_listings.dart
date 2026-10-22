@@ -467,7 +467,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
-        if (isShowingJustPerformance || filterCategory == 'favourite')
+        if (isShowingJustPerformance || filterCategory == 'favourite' || _hidePastListings)
           IconButton(
             key: hidePastIconKey,
             tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',

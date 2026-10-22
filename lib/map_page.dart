@@ -911,7 +911,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               listingFavourited: isListingFavourited(listing['id']),
                               listingAlerted: alertsStore.alertExists(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                              onGetDirections: () {
+                              onGetDirections: (navigationInProgress) ? null : () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

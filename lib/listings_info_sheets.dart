@@ -138,7 +138,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final VoidCallback? onDetailsTapped;
   final VoidCallback? onFavouriteTapped;
   final VoidCallback? onAlertTapped;
-  final Function onGetDirections;
+  final Function? onGetDirections;
   final bool inDialog;
   final ExpandedListingScrollBounds? scrollBounds;
   final ColorScheme colorScheme;
@@ -377,7 +377,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   ),
                 ),
                 Spacer(),
-                ElevatedButton(
+                if (widget.onGetDirections != null) ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     iconSize: 24,
                     visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
@@ -390,7 +390,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           HapticFeedback.lightImpact();
                           context.read<AnalyticsService>().logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
                           context.read<AnalyticsService>().logDirectionsToListingRequested(widget.title);
-                          widget.onGetDirections();
+                          widget.onGetDirections?.call(); // null-safe
                         },
                   child: const Icon(Icons.directions_walk, semanticLabel: 'Get walking directions'),
                 ),

@@ -28,7 +28,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 OverlayEntry? _miniPopupOverlayEntry; // widget that floats over a given widget as a 'tooltip'
 Timer? _miniPopupTimer; // times how long the above stays on screen
@@ -303,7 +302,7 @@ Drawer fairDrawer(BuildContext context) {
               HapticFeedback.lightImpact();
               context.read<AnalyticsService>().logButtonTapped('drawer_donate');
               Navigator.pop(context);
-              launchUrl(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
+              context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
             },
           ),
         ),
@@ -595,7 +594,7 @@ void aboutDialog(BuildContext context) async {
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 context.read<AnalyticsService>().logButtonTapped('about_alex');
-                                launchUrl(Uri.parse('https://theberridge.com'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://theberridge.com'));
                               },
                             ),
                             ListTile(
@@ -608,7 +607,7 @@ void aboutDialog(BuildContext context) async {
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 context.read<AnalyticsService>().logButtonTapped('about_matt');
-                                launchUrl(Uri.parse('http://mattwhiting.com'));
+                                context.read<UrlLauncher>().open(Uri.parse('http://mattwhiting.com'));
                               },
                             ),
                             ListTile(
@@ -621,7 +620,7 @@ void aboutDialog(BuildContext context) async {
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 context.read<AnalyticsService>().logButtonTapped('about_clashfinder');
-                                launchUrl(Uri.parse('https://linktr.ee/cfpal'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://linktr.ee/cfpal'));
                               },
                             ),
                             ListTile(
@@ -630,11 +629,11 @@ void aboutDialog(BuildContext context) async {
                               contentPadding: EdgeInsets.zero,
                               leading: const Icon(Icons.palette_outlined, size: 28),
                               title: Text('Illustrations by Clare McEwan', style: textStyle),
-                              subtitle: Text('https://www.claremcewan.co.uk', style: linkStyle),
+                              subtitle: Text('https://www.artistsmarquee.co.uk', style: linkStyle),
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 context.read<AnalyticsService>().logButtonTapped('about_clare');
-                                launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://www.artistsmarquee.co.uk/claremcewan'));
                               },
                             ),
                             ListTile(
@@ -647,7 +646,7 @@ void aboutDialog(BuildContext context) async {
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 context.read<AnalyticsService>().logButtonTapped('about_feedback');
-                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
                               },
                             ),
                             Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 10, children: [

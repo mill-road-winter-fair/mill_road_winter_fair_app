@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ImportantInfoPage extends StatefulWidget {
   const ImportantInfoPage({super.key});
@@ -21,7 +21,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
     ..onTap = () {
       HapticFeedback.lightImpact();
       context.read<AnalyticsService>().logButtonTapped('contact_phone');
-      launchUrl(Uri(scheme: 'tel', path: '07486398744'));
+      context.read<UrlLauncher>().open(Uri(scheme: 'tel', path: '07486398744'));
     };
 
   @override
@@ -148,7 +148,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                             ..onTap = () {
                               HapticFeedback.lightImpact();
                               context.read<AnalyticsService>().logButtonTapped('mrwf_business_safety_hyperlink');
-                              launchUrl(Uri.parse('https://www.millroadwinterfair.org/businesses-info'));
+                              context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/businesses-info'));
                             }),
                     ],
                   ),
@@ -169,7 +169,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                             ..onTap = () {
                               HapticFeedback.lightImpact();
                               context.read<AnalyticsService>().logButtonTapped('mrwf_website_hyperlink');
-                              launchUrl(Uri.parse('https://www.millroadwinterfair.org'));
+                              context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org'));
                             }),
                     ],
                   ),
