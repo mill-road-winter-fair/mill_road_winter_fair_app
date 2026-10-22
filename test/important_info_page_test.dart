@@ -1,12 +1,16 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:provider/provider.dart';
+import 'fakes/fake_url_launcher.dart';
 import 'pump_with_clock.dart';
 
 Future<void> settle(WidgetTester tester) async {
@@ -143,6 +147,78 @@ void main() {
       await tester.tap(find.text('Close'));
       await settle(tester);
       expect(find.byType(Dialog), findsNothing);
+    });
+
+    group('external hyperlinks', () {
+      late FakeUrlLauncher fakeUrlLauncher;
+
+      setUp(() {
+        fakeUrlLauncher = FakeUrlLauncher();
+      });
+
+      Future<void> pumpPage(WidgetTester tester) async {
+        await tester.pumpWidget(Provider<UrlLauncher>.value(
+          value: fakeUrlLauncher,
+          child: MaterialApp(
+            home: ImportantInfoPage(
+              analyticsService: FakeAnalyticsService(),
+            ),
+          ),
+        ));
+      }
+
+      TextSpan findLinkSpan(
+        WidgetTester tester, {
+        required String paragraphText,
+        required String linkText,
+      }) {
+        final paragraph = tester.widget<Text>(
+          find.byWidgetPredicate(
+            (widget) => widget is Text && widget.textSpan?.toPlainText().contains(paragraphText) == true,
+          ),
+        );
+        final matchingSpans = <TextSpan>[];
+        paragraph.textSpan!.visitChildren((span) {
+          if (span is TextSpan && span.text == linkText) {
+            matchingSpans.add(span);
+          }
+          return true;
+        });
+        return matchingSpans.single;
+      }
+
+      testWidgets('road closure website hyperlink launches the Fair website', (WidgetTester tester) async {
+        await pumpPage(tester);
+
+        final linkSpan = findLinkSpan(
+          tester,
+          paragraphText: 'Road Closure Notice',
+          linkText: 'www.millroadwinterfair.org/important-info',
+        );
+
+        (linkSpan.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pumpAndSettle();
+
+        expect(
+          fakeUrlLauncher.openedUris,
+          [Uri.parse('https://www.millroadwinterfair.org/important-info')],
+        );
+      });
+
+      testWidgets('phone hyperlink launches the telephone dialler', (WidgetTester tester) async {
+        await pumpPage(tester);
+
+        final linkSpan = findLinkSpan(
+          tester,
+          paragraphText: 'On the day, you can also phone',
+          linkText: '07486 398744',
+        );
+
+        (linkSpan.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pumpAndSettle();
+
+        expect(fakeUrlLauncher.openedUris, [Uri(scheme: 'tel', path: '07486398744')]);
+      });
     });
   });
 }
