@@ -746,18 +746,18 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                             const TextSpan(
                                 style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
                             TextSpan(
-                                text: '07303\u{00A0}142689',
+                                text: '07486\u{00A0}398744',
                                 style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () async {
                                     HapticFeedback.lightImpact();
                                     analyticsService.logButtonTapped('contact_phone');
-                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
+                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07486 398744');
                                     final launcher = context.read<UrlLauncher>();
                                     if (await launcher.canOpen(phoneUri)) {
                                       await launcher.open(phoneUri);
                                     } else {
-                                      throw Exception('Could not dial 07303 142689');
+                                      throw Exception('Could not dial 07486 398744');
                                     }
                                   }),
                             const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
