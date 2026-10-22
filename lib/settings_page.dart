@@ -175,6 +175,12 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
   Widget build(BuildContext context) {
     final settingLabelStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
     final settingTitleStyle = TextStyle(fontSize: 15);
+    const dropdownDecoration = InputDecorationTheme(
+      border: OutlineInputBorder(),
+      isDense: true,
+      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      suffixIconConstraints: BoxConstraints(minWidth: 40, maxHeight: 40),
+    );
     final settingSubtitleStyle = TextStyle(fontSize: 14,  color: Theme.of(context).colorScheme.onSurfaceVariant);
     final List<DropdownOption> unitsOptions = [
       DropdownOption(title: 'Metric', subtitle: 'Metres and kilometres', value: DistanceUnits.metric),
@@ -239,6 +245,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           child: Text('Theme:', style: settingLabelStyle),
                         ),
                         DropdownMenu<String>(
+                          inputDecorationTheme: dropdownDecoration,
                           initialSelection: themeNotifier.value,
                           hintText: 'Select a visual theme',
                           alignmentOffset: const Offset(0, -60),
@@ -276,6 +283,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           child: Text('Alerts:', style: settingLabelStyle),
                         ),
                         DropdownMenu<int>(
+                          inputDecorationTheme: dropdownDecoration,
                           initialSelection: alertNoticePeriod,
                           hintText: 'Select notice period for alerts',
                           alignmentOffset: const Offset(0, -60),
@@ -305,6 +313,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           child: Text('Distances:', style: settingLabelStyle),
                         ),
                         DropdownMenu<DistanceUnits>(
+                          inputDecorationTheme: dropdownDecoration,
                           initialSelection: preferredDistanceUnits,
                           hintText: 'Select units for map distances',
                           alignmentOffset: const Offset(0, -60),
@@ -340,6 +349,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           child: Text('Home page:', style: settingLabelStyle),
                         ),
                         DropdownMenu<bool>(
+                          inputDecorationTheme: dropdownDecoration,
                           initialSelection: staticChooserPage.value,
                           hintText: 'Select style of home page',
                           alignmentOffset: const Offset(0, -60),
