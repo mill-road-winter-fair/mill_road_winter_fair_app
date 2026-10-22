@@ -176,7 +176,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
     final settingLabelStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
     final settingTitleStyle = TextStyle(fontSize: 15);
     const dropdownDecoration = InputDecorationTheme(
-      border: OutlineInputBorder(),
+      enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 0.5)),
       isDense: true,
       // Remove the arrow button's default padding inside the compact field.
       isCollapsed: true,
@@ -250,7 +250,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           inputDecorationTheme: dropdownDecoration,
                           initialSelection: themeNotifier.value,
                           hintText: 'Select a visual theme',
-                          alignmentOffset: const Offset(0, -60),
+                          alignmentOffset: const Offset(-15, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: themeOptions.map((opt) {
