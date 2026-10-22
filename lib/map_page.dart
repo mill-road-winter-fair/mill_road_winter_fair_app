@@ -255,13 +255,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   text:
                                       'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
                               TextSpan(
-                                  text: 'www.millroadwinterfair.org',
+                                  text: 'www.millroadwinterfair.org/important-info',
                                   style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       HapticFeedback.lightImpact();
                                       widget.analyticsService.logButtonTapped('mrwf_roadClosures_hyperlink');
-                                      launchUrl(Uri.parse('http://www.millroadwinterfair.org/wp-content/uploads/2025/11/Road-Closure-Notice.pdf'));
+                                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/important-info'));
                                     }),
                               const TextSpan(style: TextStyle(height: 1.25), text: '.'),
                             ],
@@ -912,7 +912,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               listingFavourited: isListingFavourited(listing['id']),
                               listingAlerted: alertsStore.alertExists(listing['id']),
                               onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                              onGetDirections: () {
+                              onGetDirections: (navigationInProgress) ? null : () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
