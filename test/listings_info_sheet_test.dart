@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'fakes/fixed_date_time_provider.dart';
+import 'fakes/fake_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
@@ -204,6 +206,94 @@ void main() {
       expect(find.byIcon(Icons.public), findsNothing);
     });
 
+    group('contact links', () {
+      late FakeUrlLauncher fakeUrlLauncher;
+
+      setUp(() {
+        fakeUrlLauncher = FakeUrlLauncher();
+      });
+
+      Future<void> pumpListing(WidgetTester tester) async {
+        await tester.pumpWidget(Provider<UrlLauncher>.value(
+          value: fakeUrlLauncher,
+          child: createWidgetUnderTest(
+            cancelled: false,
+            brickAndMortar: false,
+            emoji: '🍩',
+            title: 'Glazed and Confused',
+            subtitle: 'Food • Doughnuts',
+            location: 'Gwydir St Car Park',
+            description: 'Nice buns',
+            email: 'sales@glazedandconfused.com',
+            website: 'https://www.glazedandconfused.com',
+            phoneNumber: '01223 111111',
+            imageURL: '',
+            startTime: '10:30',
+            endTime: '16:30',
+            approxDistance: convertDistanceUnits(
+              approximateDistanceMetres,
+              DistanceUnits.metric,
+            ),
+            detailsVisible: true,
+            onGetDirections: () {},
+            listingFavourited: false,
+            onDetailsTapped: () {},
+            listingAlerted: false,
+            dateTimeProvider: dateTimeProvider,
+          ),
+        ));
+      }
+
+      Future<void> expectTapLaunches(
+        WidgetTester tester,
+        Finder target,
+        String expectedUrl,
+      ) async {
+        await tester.tap(target);
+        await tester.pumpAndSettle();
+
+        expect(fakeUrlLauncher.openedUris, [Uri.parse(expectedUrl)]);
+      }
+
+      testWidgets(
+        'Website hyperlink launches the listing website',
+        (tester) async {
+          await pumpListing(tester);
+
+          await expectTapLaunches(
+            tester,
+            find.text('Website: https://www.glazedandconfused.com'),
+            'https://www.glazedandconfused.com',
+          );
+        },
+      );
+
+      testWidgets(
+        'Email hyperlink launches the listing email address',
+        (tester) async {
+          await pumpListing(tester);
+
+          await expectTapLaunches(
+            tester,
+            find.text('Email: sales@glazedandconfused.com'),
+            'mailto:sales@glazedandconfused.com',
+          );
+        },
+      );
+
+      testWidgets(
+        'Telephone hyperlink launches the listing telephone number',
+        (tester) async {
+          await pumpListing(tester);
+
+          await expectTapLaunches(
+            tester,
+            find.text('Telephone: 01223 111111'),
+            'tel:01223%20111111',
+          );
+        },
+      );
+    });
 
     testWidgets('calls onFavouriteTapped when heart button is pressed', (WidgetTester tester) async {
       bool favouriteCalled = false;

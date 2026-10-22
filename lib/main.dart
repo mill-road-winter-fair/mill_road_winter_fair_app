@@ -177,6 +177,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed) {
+      await alertsStore.removePastEventAlerts();
+      setState(() {});
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     debugPrint('MyApp build() called');
     return ValueListenableBuilder<String>(
