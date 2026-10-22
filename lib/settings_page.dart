@@ -225,11 +225,20 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(spacing: 12, children: [
-                    Text('Theme:', style: settingLabelStyle),
-                    Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        return DropdownMenu<String>(
+                  Table(
+                    // Share the label width while dropdowns fill the remaining space.
+                    columnWidths: const {
+                      0: IntrinsicColumnWidth(),
+                      1: FlexColumnWidth(),
+                    },
+                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                    children: [
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Theme:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<String>(
                           initialSelection: themeNotifier.value,
                           hintText: 'Select a visual theme',
                           alignmentOffset: const Offset(0, -60),
@@ -259,15 +268,14 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        );
-                      })
-                    ),
-                  ]),
-                  Row(spacing: 12, children: [
-                    Text('Alerts:', style: settingLabelStyle),
-                    Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        return DropdownMenu<int>(
+                        ),
+                      ]),
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Alerts:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<int>(
                           initialSelection: alertNoticePeriod,
                           hintText: 'Select notice period for alerts',
                           alignmentOffset: const Offset(0, -60),
@@ -289,15 +297,14 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             saveAlertNoticePeriod(value);
                             setState(() { });
                           },
-                        );
-                      }),
-                    ),
-                  ]),
-                  Row(spacing: 12, children: [
-                    Text('Distances:', style: settingLabelStyle),
-                    Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        return DropdownMenu<DistanceUnits>(
+                        ),
+                      ]),
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Distances:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<DistanceUnits>(
                           initialSelection: preferredDistanceUnits,
                           hintText: 'Select units for map distances',
                           alignmentOffset: const Offset(0, -60),
@@ -325,15 +332,14 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        );
-                      }),
-                    ),
-                  ]),
-                  Row(spacing: 12, children: [
-                    Text('Home page:', style: settingLabelStyle),
-                    Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        return DropdownMenu<bool>(
+                        ),
+                      ]),
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Home page:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<bool>(
                           initialSelection: staticChooserPage.value,
                           hintText: 'Select style of home page',
                           alignmentOffset: const Offset(0, -60),
@@ -358,10 +364,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        );
-                      }),
-                    ),
-                  ]),
+                        ),
+                      ]),
+                    ],
+                  ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     activeThumbColor: Theme.of(context).colorScheme.tertiary,
