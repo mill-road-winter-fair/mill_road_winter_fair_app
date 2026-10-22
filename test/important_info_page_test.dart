@@ -193,7 +193,7 @@ void main() {
         final linkSpan = findLinkSpan(
           tester,
           paragraphText: 'Road Closure Notice',
-          linkText: 'www.millroadwinterfair.org',
+          linkText: 'www.millroadwinterfair.org/important-info',
         );
 
         (linkSpan.recognizer as TapGestureRecognizer).onTap!();
@@ -201,7 +201,7 @@ void main() {
 
         expect(
           fakeUrlLauncher.openedUris,
-          [Uri.parse('https://www.millroadwinterfair.org')],
+          [Uri.parse('https://www.millroadwinterfair.org/important-info')],
         );
       });
 
