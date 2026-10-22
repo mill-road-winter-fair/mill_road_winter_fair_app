@@ -232,7 +232,6 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         return DropdownMenu<String>(
                           initialSelection: themeNotifier.value,
                           hintText: 'Select a visual theme',
-                          inputDecorationTheme: InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
@@ -271,7 +270,6 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         return DropdownMenu<int>(
                           initialSelection: alertNoticePeriod,
                           hintText: 'Select notice period for alerts',
-                          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
@@ -302,7 +300,6 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         return DropdownMenu<DistanceUnits>(
                           initialSelection: preferredDistanceUnits,
                           hintText: 'Select units for map distances',
-                          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
@@ -339,7 +336,6 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                         return DropdownMenu<bool>(
                           initialSelection: staticChooserPage.value,
                           hintText: 'Select style of home page',
-                          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
