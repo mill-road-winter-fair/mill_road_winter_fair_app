@@ -277,6 +277,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           },
                         ),
                       ]),
+                      const TableRow(children: [
+                        SizedBox(height: 12),
+                        SizedBox(height: 12),
+                      ]),
                       TableRow(children: [
                         Padding(
                           padding: const EdgeInsetsDirectional.only(end: 12),
@@ -306,6 +310,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             setState(() { });
                           },
                         ),
+                      ]),
+                      const TableRow(children: [
+                        SizedBox(height: 12),
+                        SizedBox(height: 12),
                       ]),
                       TableRow(children: [
                         Padding(
@@ -342,6 +350,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             _saveSettings();
                           },
                         ),
+                      ]),
+                      const TableRow(children: [
+                        SizedBox(height: 12),
+                        SizedBox(height: 12),
                       ]),
                       TableRow(children: [
                         Padding(
