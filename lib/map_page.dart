@@ -47,7 +47,7 @@ class MapPage extends StatefulWidget {
   MapPageState createState() => MapPageState();
 }
 
-class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserver {
+class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserver, SingleTickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -115,9 +115,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   CameraPosition? _cameraBeforeSearch; // to be able to restore camera position after search
   late ColorScheme colorScheme; // will be set in build
   bool get hasActiveMarkerFilters => filterSettings.values.any((isEnabled) => !isEnabled);
+  late final AnimationController _dotPulse; // for the user's location dot
 
   @override
   void initState() {
+    super.initState();
     WidgetsBinding.instance.addObserver(this);
     themeNotifier.addListener(_onThemeChanged);
     debugPrint('MapPageState initState() called with destinationId=${widget.destinationId}');
@@ -137,7 +139,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
       }
     });
-    super.initState();
+    _dotPulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat(reverse: false);
   }
 
   @override
@@ -1402,6 +1404,22 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     setState(() {});
   }
 
+  Set<Circle> get _pulsingHalo {
+    if (currentLatLng == null) return {};
+    if (_currentCamera == null) return {};
+    final t = Curves.easeOut.transform(_dotPulse.value);
+    return {
+      Circle(
+        circleId: const CircleId('user_halo'),
+        center: currentLatLng!,
+        radius: (1 + t) * 700000 / pow(2, _currentCamera!.zoom),
+        strokeWidth: 2,
+        strokeColor: Colors.blue.withAlpha(130 - (90 * t).toInt()),
+        fillColor: Colors.blue.withAlpha(50 - (40 * t).toInt()),
+      ),
+    };
+  }
+
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
@@ -1413,6 +1431,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     // Cancel the location subscription when the page is disposed
     _positionStream?.cancel();
     _controller?.dispose();
+    _dotPulse.dispose();
     super.dispose();
   }
 
@@ -2047,45 +2066,51 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     },
                     child: SizedBox(
                       height: contentHeight,
-                      child: GoogleMap(
-                        style: mapStyle,
-                        mapType: mapType,
-                        rotateGesturesEnabled: false,
-                        compassEnabled: false,
-                        myLocationEnabled: locationServicesEnabled &&
-                            (locationPermission == LocationPermission.always ||
-                                locationPermission == LocationPermission.whileInUse),
-                        myLocationButtonEnabled: false,
-                        mapToolbarEnabled: false,
-                        onMapCreated: (GoogleMapController controller) {
-                          _controller = controller;
-                          if (listings.isNotEmpty) {
-                            // We should have listings by this point so set the camera to their bounds
-                            _setMapCameraToFitMapMarkers();
-                          }
+                      child: AnimatedBuilder(
+                        animation: _dotPulse,
+                        builder: (context, _) {
+                          return GoogleMap(
+                            style: mapStyle,
+                            mapType: mapType,
+                            rotateGesturesEnabled: false,
+                            compassEnabled: false,
+                            myLocationEnabled: locationServicesEnabled &&
+                                (locationPermission == LocationPermission.always ||
+                                    locationPermission == LocationPermission.whileInUse),
+                            myLocationButtonEnabled: false,
+                            mapToolbarEnabled: false,
+                            onMapCreated: (GoogleMapController controller) {
+                              _controller = controller;
+                              if (listings.isNotEmpty) {
+                                // We should have listings by this point so set the camera to their bounds
+                                _setMapCameraToFitMapMarkers();
+                              }
+                            },
+                            initialCameraPosition: CameraPosition(
+                              target: centreOfFair,
+                              zoom: mapInitialZoom,
+                              bearing: _mapBearing,
+                            ),
+                            onCameraMove: (CameraPosition position) {
+                              //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
+                              _currentCamera = position;
+                              setState(() {
+                                switch (preferredMapOrientation) {
+                                  case MapOrientation.adaptive:
+                                    _compassBearing = 90;
+                                    break;
+                                  case MapOrientation.alwaysNorth:
+                                    _compassBearing = 0;
+                                    break;
+                                }
+                              });
+                            },
+                            polygons: _polygons,
+                            markers: markers.values.toSet(),
+                            circles: (Platform.isIOS) ? _pulsingHalo : {},
+                            polylines: polylines
+                          );
                         },
-                        initialCameraPosition: CameraPosition(
-                          target: centreOfFair,
-                          zoom: mapInitialZoom,
-                          bearing: _mapBearing,
-                        ),
-                        onCameraMove: (CameraPosition position) {
-                          //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
-                          _currentCamera = position;
-                          setState(() {
-                            switch (preferredMapOrientation) {
-                              case MapOrientation.adaptive:
-                                _compassBearing = 90;
-                                break;
-                              case MapOrientation.alwaysNorth:
-                                _compassBearing = 0;
-                                break;
-                            }
-                          });
-                        },
-                        polygons: _polygons,
-                        markers: markers.values.toSet(),
-                        polylines: polylines
                       ),
                     ),
                   );
