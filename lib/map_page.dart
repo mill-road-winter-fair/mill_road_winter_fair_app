@@ -1525,7 +1525,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     if (currentLatLng == null) return {};
     if (_currentCamera == null) return {};
     final t = Curves.easeOut.transform(dotPulse.value);
-debugPrint('MW $t');
     return {
       Circle(
         circleId: const CircleId('user_halo'),
