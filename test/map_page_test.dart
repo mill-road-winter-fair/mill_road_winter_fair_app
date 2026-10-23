@@ -472,6 +472,47 @@ void main() {
       expect(toastCalls, hasLength(1));
     });
 
+    testWidgets('dot pulse pauses while the map page is hidden and resumes when visible', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: true),
+        ),
+      ));
+
+      final visibleState = tester.state(find.byType(MapPage)) as MapPageState;
+      visibleState.dotPulseController ??= AnimationController(vsync: visibleState, duration: const Duration(milliseconds: 1500));
+      visibleState.dotPulse = CurvedAnimation(parent: visibleState.dotPulseController!, curve: Curves.easeInOut);
+      visibleState.dotPulseController!.repeat(reverse: false);
+      expect(visibleState.dotPulseController!.isAnimating, isTrue);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: false),
+        ),
+      ));
+
+      final hiddenState = tester.state(find.byType(MapPage)) as MapPageState;
+      hiddenState.dotPulseController ??= AnimationController(vsync: hiddenState, duration: const Duration(milliseconds: 1500));
+      hiddenState.dotPulse = CurvedAnimation(parent: hiddenState.dotPulseController!, curve: Curves.easeInOut);
+      hiddenState.dotPulseController!.repeat(reverse: false);
+      hiddenState.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      expect(hiddenState.dotPulseController!.isAnimating, isFalse);
+      expect(hiddenState.widget.isVisible, isFalse);
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: true),
+        ),
+      ));
+
+      final visibleAgainState = tester.state(find.byType(MapPage)) as MapPageState;
+      visibleAgainState.dotPulseController ??= AnimationController(vsync: visibleAgainState, duration: const Duration(milliseconds: 1500));
+      visibleAgainState.dotPulse = CurvedAnimation(parent: visibleAgainState.dotPulseController!, curve: Curves.easeInOut);
+      visibleAgainState.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      expect(visibleAgainState.widget.isVisible, isTrue);
+      expect(visibleAgainState.dotPulseController!.isAnimating, isTrue);
+    });
+
     testWidgets('all map buttons are present', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
