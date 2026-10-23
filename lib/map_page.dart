@@ -278,19 +278,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               TextButton(
                                 onPressed: () {
                                   HapticFeedback.lightImpact();
-                                  widget.analyticsService.logButtonTapped('hide_road_closures');
-                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(false);
-                                  updateRoadClosurePolygonVisibility(false);
-                                  Navigator.pop(context);
-                                },
-                                child: Text(
-                                  'Hide road closures',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
                                   widget.analyticsService.logButtonTapped('close_road_closures_dialog');
                                   Navigator.pop(context);
                                 },
