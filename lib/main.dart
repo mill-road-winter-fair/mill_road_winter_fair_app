@@ -380,7 +380,8 @@ class HomePageState extends State<HomePage> with RouteAware {
           nearestMarkerCount: mapNearestMarkerCount,
           onTabSelected: setCurrentIndex,
           cancelMapNearest: cancelMapNearest,
-          analyticsService: widget.analyticsService),
+          analyticsService: widget.analyticsService,
+          isVisible: index == 1),
       TimetablePage(
           theEvents: listings,
           onTabSelected: setCurrentIndex,
