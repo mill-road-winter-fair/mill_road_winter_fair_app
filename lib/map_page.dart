@@ -115,7 +115,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   CameraPosition? _cameraBeforeSearch; // to be able to restore camera position after search
   late ColorScheme colorScheme; // will be set in build
   bool get hasActiveMarkerFilters => filterSettings.values.any((isEnabled) => !isEnabled);
-  late final AnimationController _dotPulse; // for the user's location dot
+  late final Animation dotPulse; // for the user's location dot on iOS
+  AnimationController? dotPulseController; // for the user's location dot on iOS
 
   @override
   void initState() {
@@ -139,7 +140,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
       }
     });
-    _dotPulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat(reverse: false);
+    if (Platform.isIOS) {
+      dotPulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat(reverse: false);
+      dotPulse = CurvedAnimation(parent: dotPulseController!, curve: Curves.easeInOut);
+      startLocationUpdates(null);
+    } else {
+      dotPulse = const AlwaysStoppedAnimation<double>(1.0);
+    }
   }
 
   @override
@@ -1407,7 +1414,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   Set<Circle> get _pulsingHalo {
     if (currentLatLng == null) return {};
     if (_currentCamera == null) return {};
-    final t = Curves.easeOut.transform(_dotPulse.value);
+    final t = Curves.easeOut.transform(dotPulse.value);
     return {
       Circle(
         circleId: const CircleId('user_halo'),
@@ -1431,12 +1438,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     // Cancel the location subscription when the page is disposed
     _positionStream?.cancel();
     _controller?.dispose();
-    _dotPulse.dispose();
+    dotPulseController?.dispose();
     super.dispose();
   }
 
-  Future<void> startLocationUpdates(LatLng destination) async {
+  Future<void> startLocationUpdates(LatLng? destination) async {
     debugPrint('MapPageState startLocationUpdates called');
+    // Cancel any running _positionStream
+
+    _positionStream?.cancel();
     // Store the destination
     _destination = destination;
 
@@ -1453,6 +1463,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       // If a destination is set, get new directions and update the polyline
       if (_destination != null) {
         await updatePolyline(currentLatLng!, _destination!);
+        _setMapCameraToFitPolyline(polylines);
       }
     });
   }
@@ -2067,7 +2078,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     child: SizedBox(
                       height: contentHeight,
                       child: AnimatedBuilder(
-                        animation: _dotPulse,
+                        animation: dotPulse,
                         builder: (context, _) {
                           return GoogleMap(
                             style: mapStyle,
