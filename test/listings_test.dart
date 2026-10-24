@@ -5,7 +5,6 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http_testing;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
@@ -18,17 +17,6 @@ void main() {
 
   setUp(() async {
     mockClient = MockClient();
-    SharedPreferences.setMockInitialValues({});
-    dotenv.loadFromString(envString: '''
-    HEROKU_API=MOCK_API
-    HEROKU_API_KEY=MOCK_KEY
-    ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
-    ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
-    IOS_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
-    IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
-    SIGNING_KEY=MOCK_CERT
-    IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
   });
 
   group('Listings', () {
@@ -212,16 +200,6 @@ void main() {
       setUp(() async {
         mockClient = MockClient();
         listings = [];
-        dotenv.loadFromString(envString: '''
-    HEROKU_API=MOCK_API
-    HEROKU_API_KEY=MOCK_KEY
-    ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
-    ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
-    IOS_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
-    IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
-    SIGNING_KEY=MOCK_CERT
-    IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
       });
 
       test('handles rows with missing cells by padding to headers', () async {
