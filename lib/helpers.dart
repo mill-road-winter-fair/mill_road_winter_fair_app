@@ -357,7 +357,7 @@ Drawer fairDrawer(BuildContext context) {
                 tooltip: 'Open Mill Road Winter Fair on LinkedIn',
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  analyticsService.logButtonTapped('drawer_linkedin');
+                  context.read<AnalyticsService>().logButtonTapped('drawer_linkedin');
                   Navigator.pop(context);
                   context.read<UrlLauncher>().open(Uri.parse('https://www.linkedin.com/company/mill-road-winter-fair/'));
                 },
