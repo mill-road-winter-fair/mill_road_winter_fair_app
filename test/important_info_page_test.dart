@@ -158,12 +158,13 @@ void main() {
       });
 
       Future<void> pumpPage(WidgetTester tester) async {
-        await tester.pumpWidget(Provider<UrlLauncher>.value(
-          value: fakeUrlLauncher,
+        await tester.pumpWithClock(MultiProvider(
+          providers: [
+            Provider<AnalyticsService>.value(value: FakeAnalyticsService()),
+            Provider<UrlLauncher>.value(value: fakeUrlLauncher),
+          ],
           child: MaterialApp(
-            home: ImportantInfoPage(
-              analyticsService: FakeAnalyticsService(),
-            ),
+            home: ImportantInfoPage(),
           ),
         ));
       }

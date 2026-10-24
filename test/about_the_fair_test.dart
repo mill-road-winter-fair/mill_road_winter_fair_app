@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
-import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.da1rt';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
@@ -52,11 +52,16 @@ void main() {
     }) async {
       listings = [];
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpWidget(
-        Provider<UrlLauncher>.value(
-          value: urlLauncher ?? FakeUrlLauncher(),
+      await tester.pumpWithClock(
+        MultiProvider(
+          providers: [
+            Provider<AnalyticsService>.value(value: FakeAnalyticsService()),
+            Provider<UrlLauncher>.value(
+              value: urlLauncher ?? FakeUrlLauncher(),
+            ),
+          ],
           child: MaterialApp(
-            home: AboutTheFairPage(analyticsService: FakeAnalyticsService()),
+            home: AboutTheFairPage(),
             navigatorObservers: [
               if (navigatorObserver != null) navigatorObserver,
             ],
