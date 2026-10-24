@@ -8,10 +8,13 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+import 'package:provider/provider.dart';
+
+import 'fakes/fake_analytics_service.dart';
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -96,7 +99,10 @@ void main() {
     listings = pageListings;
     favouriteListingKeys.value = favouriteIds.toSet();
     await tester.pumpWithClock(
-      MaterialApp(
+        Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child:
+          MaterialApp(
         home: Scaffold(
           body: FilteredListingsPage(
             filterCategory: category,
@@ -104,9 +110,9 @@ void main() {
             listings: pageListings,
             onTabSelected: (_) {},
             onSubfilterChange: (_) {},
-            analyticsService: FakeAnalyticsService(),
           ),
         ),
+          ),
       ),
       dateTimeProvider: dateTimeProvider ?? FixedDateTimeProvider(fairDate),
     );
@@ -132,7 +138,6 @@ void main() {
               appBarTitle: 'Fair',
               currentTab: 3,
               onTabSelected: (_) {},
-              analyticsService: FakeAnalyticsService(),
               body: TextButton(
                 onPressed: () => showInfoToast(context, 'Hiding all events and performances that have passed'),
                 child: const Text('Change filter'),
@@ -617,7 +622,7 @@ void main() {
         },
       ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
       await settle(tester);
 
       expect(homePageKey.currentState, isNotNull, reason: 'HomePage should be mounted');
@@ -737,14 +742,13 @@ void main() {
       // Start with a known current location so distance sorting works if required
       currentLatLng = const LatLng(52.199174, 0.140929);
 
-      await tester.pumpWithClock(
-        MaterialApp(
-          home: Scaffold(
-            body: FilteredListingsPage(
-                filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
-          ),
-        ),
-      );
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: analytics,
+          child: MaterialApp(
+            home: Scaffold(
+              body: FilteredListingsPage(filterCategory: 'all', listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
+            ),
+          )));
 
       await settle(tester);
 

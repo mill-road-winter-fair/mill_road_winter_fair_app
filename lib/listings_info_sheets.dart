@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:provider/provider.dart';
@@ -141,7 +141,6 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final Function? onGetDirections;
   final bool inDialog;
   final ExpandedListingScrollBounds? scrollBounds;
-  final AnalyticsService analyticsService;
   final ColorScheme colorScheme;
 
   const SpecificListingInfoSheet({
@@ -169,7 +168,6 @@ class SpecificListingInfoSheet extends StatefulWidget {
     required this.onGetDirections,
     required this.inDialog,
     this.scrollBounds,
-    required this.analyticsService,
     required this.colorScheme,
     super.key,
   });
@@ -316,7 +314,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                             ),
                     ),
                   ) else if (widget.brickAndMortar) GestureDetector(
-                    onTap: () => showMiniPopup(context, brickAndMortarIconKey, 'A permanent shop or office building', analyticsService: widget.analyticsService),
+                    onTap: () => showMiniPopup(context, brickAndMortarIconKey, 'A permanent shop or office building'),
                     key: brickAndMortarIconKey,
                     child: Icon(Icons.store),
                   ),
@@ -336,7 +334,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       : () {
                           HapticFeedback.lightImpact();
                           widget.onFavouriteTapped?.call();
-                          widget.analyticsService.logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
+                          context.read<AnalyticsService>().logButtonTapped('save_listing', listingId: widget.listingId, listingName: widget.title);
                         },
                   padding: const EdgeInsets.all(0),
                   style: ElevatedButton.styleFrom(
@@ -360,9 +358,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           HapticFeedback.lightImpact();
                           widget.onAlertTapped?.call();
                           setState(() { });
-                          widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
+                          context.read<AnalyticsService>().logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
                         }
-                      : () => showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance', analyticsService: widget.analyticsService),
+                      : () => showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance'),
                   padding: const EdgeInsets.all(0),
                   key: alertIconKey,
                   style: ElevatedButton.styleFrom(
@@ -390,8 +388,8 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       ? null
                       : () {
                           HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
-                          widget.analyticsService.logDirectionsToListingRequested(widget.title);
+                          context.read<AnalyticsService>().logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
+                          context.read<AnalyticsService>().logDirectionsToListingRequested(widget.title);
                           widget.onGetDirections?.call(); // null-safe
                         },
                   child: const Icon(Icons.directions_walk, semanticLabel: 'Get walking directions'),
@@ -416,7 +414,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
+                      context.read<AnalyticsService>().logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
                       widget.onDetailsTapped?.call();
                     },
                     child: Icon(Icons.info, semanticLabel: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details'),
@@ -439,7 +437,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         cancelled: widget.cancelled,
                         brickAndMortar: widget.brickAndMortar,
                       );
-                      widget.analyticsService.logButtonTapped('share_listing', listingId: widget.listingId, listingName: widget.title);
+                    context.read<AnalyticsService>().logButtonTapped('share_listing', listingId: widget.listingId, listingName: widget.title);
                   },
                   child: (Platform.isAndroid)
                       ? const Icon(Icons.share, semanticLabel: 'Share listing')
@@ -470,12 +468,11 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       child: GestureDetector(
         onTap: widget.brickAndMortar ? null : () {
           HapticFeedback.lightImpact();
-          widget.analyticsService.logButtonTapped('listing_original_time', listingId: widget.listingId, listingName: widget.title);
+          context.read<AnalyticsService>().logButtonTapped('listing_original_time', listingId: widget.listingId, listingName: widget.title);
           showMiniPopup(
             context,
             _cancelledLabelKey,
             'Originally ${widget.startTime}–${widget.endTime}',
-            analyticsService: widget.analyticsService,
           );
         },
         child: Container(
@@ -526,7 +523,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
+              context.read<AnalyticsService>().logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
               context.read<UrlLauncher>().open(Uri.parse(widget.website));
             },
             child: Text.rich(
@@ -548,7 +545,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     child: GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
+              context.read<AnalyticsService>().logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
               final launcher = context.read<UrlLauncher>();
               if (await launcher.canOpen(mailUri)) {
@@ -575,7 +572,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     child: GestureDetector(
             onTap: () async {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
+              context.read<AnalyticsService>().logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
               final launcher = context.read<UrlLauncher>();
               if (await launcher.canOpen(phoneUri)) {
@@ -607,9 +604,8 @@ Future<void> showListingDetailsDialog(
   void Function(VoidCallback) setStateFunction,
   // final int? Function(PositionedEvent, int, int?) toggleAlertAction,
   Future<void> Function() onAlertTapped,
-  Future<dynamic> Function() onGetDirections, {
-  required AnalyticsService analyticsService,
-}) async {
+  Future<dynamic> Function() onGetDirections
+) async {
   debugPrint('showListingDetailsDialog called');
 
   removeMiniPopup(); // just in case one was opened
@@ -646,7 +642,7 @@ Future<void> showListingDetailsDialog(
               behavior: HitTestBehavior.opaque,
               onTap: () => {
                 HapticFeedback.lightImpact(),
-                analyticsService.logButtonTapped('listing_dialog_dismiss', listingId: event.id, listingName: event.name),
+                context.read<AnalyticsService>().logButtonTapped('listing_dialog_dismiss', listingId: event.id, listingName: event.name),
                 Navigator.of(ctx2).pop(),
               },
               child: SingleChildScrollView(
@@ -689,7 +685,6 @@ Future<void> showListingDetailsDialog(
                       setStateDialog(() {});
                     },
                     inDialog: true,
-                    analyticsService: analyticsService,
                     colorScheme: colorScheme,
                   ),
                 ),
