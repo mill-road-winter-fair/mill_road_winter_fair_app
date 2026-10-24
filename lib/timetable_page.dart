@@ -160,17 +160,35 @@ class _TimetablePageState extends State<TimetablePage> {
     if (mounted) setState(() {});
   }
 
+  // Invalid spreadsheet times must not throw or roll over into another day.
+  DateTime? _tryParseTimetableTime(Object? value) {
+    if (value is! String) return null;
+    final match = RegExp(r'^(\d{1,2}):(\d{2})$').firstMatch(value.trim());
+    if (match == null) return null;
+    final hour = int.parse(match[1]!);
+    final minute = int.parse(match[2]!);
+    if (hour > 23 || minute > 59) return null;
+    return DateTime(fairDate.year, fairDate.month, fairDate.day, hour, minute);
+  }
+
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
     Map<String, List<PositionedEvent>> preparedEvents = {};
     for (var ev in theEvents) {
-      final startTime = combineDateAndTime(ev['startTime'], fairDate);
-      final endTime = combineDateAndTime(ev['endTime'], fairDate);
-      if (((ev['performanceMusic'] != null && ev['performanceMusic'] == 'TRUE') ||
-              (ev['performanceChildrens'] != null && ev['performanceChildrens'] == 'TRUE') ||
-              (ev['performanceDance'] != null && ev['performanceDance'] == 'TRUE') ||
-              (ev['performanceOther'] != null && ev['performanceOther'] == 'TRUE') ||
-              (ev['visitExperience'] != null && ev['visitExperience'] == 'TRUE')) &&
-          endTime.difference(startTime) < maxDurationToBeEvent) {
+      final isEvent = const [
+        'performanceMusic',
+        'performanceChildrens',
+        'performanceDance',
+        'performanceOther',
+        'visitExperience',
+      ].any((category) => ev[category] == 'TRUE');
+      if (!isEvent) continue;
+      final startTime = _tryParseTimetableTime(ev['startTime']);
+      final endTime = _tryParseTimetableTime(ev['endTime']);
+      // Skip invalid rows from either the API or an existing cache.
+      if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
+        continue;
+      }
+      if (endTime.difference(startTime) < maxDurationToBeEvent) {
         final eventLocation = ev['location'];
         final thePreparedEvent = PositionedEvent(
           startTime: startTime,
