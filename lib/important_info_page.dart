@@ -163,13 +163,13 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                           text:
                               'To find out more about the road closure, please read the Road Closure Notice distributed separately or available at: '),
                       TextSpan(
-                          text: 'www.millroadwinterfair.org',
+                          text: 'www.millroadwinterfair.org/important-info',
                           style: const TextStyle(decoration: TextDecoration.underline),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               HapticFeedback.lightImpact();
                               context.read<AnalyticsService>().logButtonTapped('mrwf_website_hyperlink');
-                              context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org'));
+                              context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/important-info'));
                             }),
                     ],
                   ),
