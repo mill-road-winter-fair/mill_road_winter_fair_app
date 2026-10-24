@@ -254,10 +254,10 @@ void main() {
         await settle(tester);
         expect(homePageState.index, 3);
 
-      // 2) Select Stalls tab (index 2)
-      await tester.tap(find.text('Listings').last);
-      await settle(tester);
-      expect(homePageState.index, 3);
+        // 2) Select Stalls tab (index 2)
+        await tester.tap(find.text('Listings').last);
+        await settle(tester);
+        expect(homePageState.index, 3);
 
         // Open drawer and navigate to About the Fair again
         await tester.tap(find.byIcon(Icons.menu));
