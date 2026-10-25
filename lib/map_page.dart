@@ -1797,6 +1797,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       setVisibleMarkerLists();
       addAllVisibleMarkers();
       establishLocation();
+      timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
     } finally {
       setState(() {
         isRefreshing = false;
