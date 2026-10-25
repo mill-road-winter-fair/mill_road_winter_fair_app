@@ -163,6 +163,7 @@ class _TimetablePageState extends State<TimetablePage> {
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
     Map<String, List<PositionedEvent>> preparedEvents = {};
     for (var ev in theEvents) {
+      if (ev['startTime'] == '' || ev['endTime'] == '') continue; // this can't be a timed event
       final startTime = combineDateAndTime(ev['startTime'], fairDate);
       final endTime = combineDateAndTime(ev['endTime'], fairDate);
       if (((ev['performanceMusic'] != null && ev['performanceMusic'] == 'TRUE') ||
