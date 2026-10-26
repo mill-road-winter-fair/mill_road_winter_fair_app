@@ -377,6 +377,26 @@ void main() {
       expect(filteredListingsPageState.filteredListings[2]['title'], 'Sushi Squad');
     });
 
+    testWidgets('location sorting ignores house number ranges and suffixes', (WidgetTester tester) async {
+      await loadSettings();
+      preferredSortingMethod = SortingMethod.location;
+      final locations = ['1-2 Mill Road', '92A York Street', 'Donkey Common', '3–4 Gwydir Street', '12a Kingston Street'];
+      final entries = locations.asMap().entries.map((entry) => <String, dynamic>{
+        ...testListing(id: 'numbered-location-${entry.key}', title: 'Venue ${entry.key}'),
+        'location': entry.value,
+      }).toList();
+
+      await pumpFilteredListingsPage(tester, 'all', entries, []);
+      final state = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
+      expect(state.filteredListings.map((listing) => listing['location']), [
+        'Donkey Common',
+        '3–4 Gwydir Street',
+        '12a Kingston Street',
+        '1-2 Mill Road',
+        '92A York Street',
+      ]);
+    });
+
     testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {
       await loadSettings();
 
