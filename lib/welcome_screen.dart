@@ -5,26 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  final AnalyticsService analyticsService;
   final VoidCallback? onFinished;
-  const WelcomeScreen({super.key, required this.analyticsService, this.onFinished});
+  const WelcomeScreen({super.key, this.onFinished});
 
   @override
   Widget build(BuildContext context) {
     debugPrint('WelcomeScreen build() called');
     // The app guide shares the existing navigator and its route observer.
     if (Navigator.maybeOf(context) != null) {
-      return OnBoardingPage(analyticsService: analyticsService);
+      return OnBoardingPage();
     }
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
@@ -46,15 +45,14 @@ class WelcomeScreen extends StatelessWidget {
       theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? appThemes['light']!,
       darkTheme: isAuto ? appThemes['dark'] : appThemes['dark'],
       navigatorObservers: [routeObserver],
-      home: OnBoardingPage(analyticsService: analyticsService, onFinished: onFinished),
+      home: OnBoardingPage(onFinished: onFinished),
     );
   }
 }
 
 class OnBoardingPage extends StatefulWidget {
-  final AnalyticsService analyticsService;
   final VoidCallback? onFinished;
-  const OnBoardingPage({super.key, required this.analyticsService, this.onFinished});
+  const OnBoardingPage({super.key, this.onFinished});
 
   @override
   OnBoardingPageState createState() => OnBoardingPageState();
@@ -77,7 +75,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     }
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => HomePage(analyticsService: widget.analyticsService),
+        builder: (_) => HomePage(),
       ),
     );
   }
@@ -107,12 +105,12 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
 
   @override
   void didPush() {
-    widget.analyticsService.setCurrentScreen('WelcomePage');
+    context.read<AnalyticsService>().setCurrentScreen('WelcomePage');
   }
 
   @override
   void didPopNext() {
-    widget.analyticsService.setCurrentScreen('WelcomePage');
+    context.read<AnalyticsService>().setCurrentScreen('WelcomePage');
   }
 
   @override
@@ -275,8 +273,8 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('importantInfo_hyperlink');
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage(analyticsService: widget.analyticsService)));
+                      context.read<AnalyticsService>().logButtonTapped('importantInfo_hyperlink');
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage()));
                     },
                 ),
                 const TextSpan(text: ' about the Fair and its facilities.'),
@@ -294,7 +292,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
+                      context.read<AnalyticsService>().logButtonTapped('mrwf_website_hyperlink');
                       context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/'));
                     },
                 ),
@@ -313,7 +311,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
                       HapticFeedback.lightImpact();
-                      widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
+                      context.read<AnalyticsService>().logButtonTapped('app_feedback_hyperlink');
                       context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
                     },
                 ),
@@ -365,7 +363,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                   ),
                   onPressed: () {
                     HapticFeedback.heavyImpact();
-                    widget.analyticsService.logButtonTapped('skip_WelcomeScreen');
+                    context.read<AnalyticsService>().logButtonTapped('skip_WelcomeScreen');
                     _onIntroEnd(context);
                   },
                 ),
@@ -374,12 +372,12 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             pages: pages,
             onDone: () {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('done_WelcomeScreen');
+              context.read<AnalyticsService>().logButtonTapped('done_WelcomeScreen');
               _onIntroEnd(context);
             },
             onSkip: () {
               HapticFeedback.lightImpact();
-              widget.analyticsService.logButtonTapped('skip_text_WelcomeScreen');
+              context.read<AnalyticsService>().logButtonTapped('skip_text_WelcomeScreen');
               _onIntroEnd(context);
             },
             showSkipButton: true,
@@ -399,7 +397,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     ? null
                     : () {
                         HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('next_WelcomeScreen');
+                        context.read<AnalyticsService>().logButtonTapped('next_WelcomeScreen');
                         onPressed();
                       },
                 child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),

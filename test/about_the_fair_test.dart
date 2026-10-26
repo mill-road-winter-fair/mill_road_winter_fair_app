@@ -4,15 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:provider/provider.dart';
-import 'fakes/fake_url_launcher.dart';
 import 'pump_with_clock.dart';
+
+import 'fakes/fake_analytics_service.dart';
+import 'fakes/fake_url_launcher.dart';
 
 class RecordingNavigatorObserver extends NavigatorObserver {
   final List<Route<dynamic>> pushedRoutes = [];
@@ -50,11 +52,16 @@ void main() {
     }) async {
       listings = [];
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpWidget(
-        Provider<UrlLauncher>.value(
-          value: urlLauncher ?? FakeUrlLauncher(),
+      await tester.pumpWithClock(
+        MultiProvider(
+          providers: [
+            Provider<AnalyticsService>.value(value: FakeAnalyticsService()),
+            Provider<UrlLauncher>.value(
+              value: urlLauncher ?? FakeUrlLauncher(),
+            ),
+          ],
           child: MaterialApp(
-            home: AboutTheFairPage(analyticsService: FakeAnalyticsService()),
+            home: AboutTheFairPage(),
             navigatorObservers: [
               if (navigatorObserver != null) navigatorObserver,
             ],
@@ -229,7 +236,7 @@ void main() {
           },
         ];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
       await settle(tester);
 
         // Obtain the HomePage state

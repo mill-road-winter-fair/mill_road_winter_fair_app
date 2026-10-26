@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:provider/provider.dart';
-import 'fakes/fake_url_launcher.dart';
 import 'pump_with_clock.dart';
+
+import 'fakes/fake_analytics_service.dart';
+import 'fakes/fake_url_launcher.dart';
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -33,7 +35,7 @@ void main() {
 
   group('ImportantInfoPage', () {
     testWidgets('displays expected headings and content', (WidgetTester tester) async {
-      await tester.pumpWithClock(MaterialApp(home: ImportantInfoPage(analyticsService: FakeAnalyticsService())));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: ImportantInfoPage())));
 
       // Verify headings
       expect(find.text('Important information'), findsOneWidget);
@@ -81,10 +83,11 @@ void main() {
         }
       ];
 
-      await tester.pumpWithClock(MyApp(
-        firstExecution: false,
-        analyticsService: FakeAnalyticsService(),
-      ));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(
+          value: FakeAnalyticsService(),
+          child: MyApp(
+            firstExecution: false,
+          )));
       await settle(tester);
 
       final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
@@ -123,16 +126,14 @@ void main() {
       expect(homePageState.index, 2);
     });
 
-    testWidgets('Contact us in the drawer opens and closes the contact dialog', (WidgetTester tester) async {
-      await tester.pumpWithClock(MaterialApp(
-          home: ChooserPage(
-        analyticsService: FakeAnalyticsService(),
+    testWidgets('email hyperlink opens the contact dialog', (WidgetTester tester) async {
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: ChooserPage(
         theEvents: [],
         onOpenTimetable: (bool p1, bool? p2) {},
         onOpenListings: (String p1, String? p2) {},
         onOpenMap: (int? p1) {},
         onTabSelected: (int value) {},
-      )));
+      ))));
 
       await tester.tap(find.byIcon(Icons.menu));
       await settle(tester);
@@ -157,12 +158,13 @@ void main() {
       });
 
       Future<void> pumpPage(WidgetTester tester) async {
-        await tester.pumpWidget(Provider<UrlLauncher>.value(
-          value: fakeUrlLauncher,
+        await tester.pumpWithClock(MultiProvider(
+          providers: [
+            Provider<AnalyticsService>.value(value: FakeAnalyticsService()),
+            Provider<UrlLauncher>.value(value: fakeUrlLauncher),
+          ],
           child: MaterialApp(
-            home: ImportantInfoPage(
-              analyticsService: FakeAnalyticsService(),
-            ),
+            home: ImportantInfoPage(),
           ),
         ));
       }
