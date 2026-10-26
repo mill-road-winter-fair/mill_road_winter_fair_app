@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'pump_with_clock.dart';
 import 'package:flutter/material.dart' hide RootWidget;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -29,6 +31,96 @@ void main() {
   });
 
   group('WelcomeScreen', () {
+    const pageTitles = [
+      'Welcome to the official\nMill Road Winter Fair app!',
+      'Explore the map',
+      'What do the map pins mean?',
+      'Find what brings you to the Fair',
+      'Plan your day with the timetable',
+      'Visit our exciting attractions',
+      'Make the app your own',
+      'A few final things…',
+    ];
+
+    testWidgets('guide stays on the selected page until advanced manually', (tester) async {
+      final previousOnTest = onTest;
+      onTest = false;
+      addTearDown(() => onTest = previousOnTest);
+      await tester.pumpWidget(MaterialApp(
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      // Wait beyond the former 150-second automatic advance interval.
+      await tester.pump(const Duration(minutes: 3));
+      await settle(tester);
+      expect(find.text(pageTitles.first), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.arrow_forward));
+      await settle(tester);
+      await tester.pump(const Duration(minutes: 3));
+      await settle(tester);
+      expect(find.text('Explore the map'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('guide explains map, listing, reminder and settings controls on their pages', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      // Check each instruction alongside its control icon on the current page.
+      void expectTip(String text, IconData icon) {
+        final instruction = find.textContaining(text);
+        expect(instruction, findsOneWidget);
+        final row = find.ancestor(of: instruction, matching: find.byType(Row));
+        expect(find.descendant(of: row, matching: find.byIcon(icon)), findsOneWidget);
+      }
+
+      for (final title in pageTitles) {
+        expect(find.text(title), findsOneWidget);
+        switch (title) {
+          case 'Welcome to the official\nMill Road Winter Fair app!':
+            expectTip('menu in the top left', Icons.menu);
+          case 'Explore the map':
+            expectTip('show the whole Fair', Icons.home);
+            expectTip('Nearby button', Icons.radar);
+            expectTip('orientation', Icons.assistant_navigation);
+            expectTip('map, listings and timetable pages', Icons.search);
+          case 'Find what brings you to the Fair':
+            expectTip('closeness to you', Icons.sort);
+            expectTip('Tap the Filter icon', Icons.filter_alt);
+            expectTip('hide finished events', Icons.access_time);
+          case 'Plan your day with the timetable':
+            expectTip('to set a reminder', Icons.info);
+          case 'Visit our exciting attractions':
+            expectTip('Info button', Icons.info);
+            expectTip('Heart icon', Icons.favorite);
+            expectTip('Walking icon', Icons.directions_walk);
+            expectTip('Share a listing', Platform.isIOS ? Icons.ios_share : Icons.share);
+            final bellRow = find.ancestor(
+              of: find.text('Tap the Bell icon to set a reminder for any listing.'),
+              matching: find.byType(Row),
+            );
+            final bell = find.descendant(of: bellRow, matching: find.byType(FaIcon));
+            expect(tester.widget<FaIcon>(bell).icon, FontAwesomeIcons.bell.data);
+            final iconTheme = IconTheme.of(tester.element(bell));
+            expect(iconTheme.size, 40);
+            expect(iconTheme.color, Theme.of(tester.element(bell)).colorScheme.onSecondary);
+          case 'Make the app your own':
+            expectTip('disable animations on the home page', Icons.home);
+            expectTip('preferred notice period for notifications', Icons.home);
+        }
+        if (title != pageTitles.last) {
+          await tester.tap(find.byIcon(Icons.arrow_forward));
+          await settle(tester);
+        }
+      }
+      expect(find.text('Done'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('larger dots adapt their spacing when the screen is resized', (tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1;
@@ -100,7 +192,9 @@ void main() {
         await settle(tester);
 
         final pages = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).pages!;
+        expect(pages, hasLength(pageTitles.length));
         for (var index = 0; index < pages.length; index++) {
+          expect(find.text(pageTitles[index]), findsOneWidget);
           expect(find.byWidget(pages[index].titleWidget!), findsOneWidget);
           expect(pages[index].useScrollView, isFalse);
           expect(tester.takeException(), isNull);
@@ -277,7 +371,7 @@ void main() {
 
       // Verify we are on the first page
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
-      expect(find.text('What do the map pins mean?'), findsNothing);
+      expect(find.text('Explore the map'), findsNothing);
 
       // Find and tap the 'Next' button (the arrow forward icon)
       final nextButton = find.byIcon(Icons.arrow_forward);
@@ -286,7 +380,7 @@ void main() {
       await settle(tester);
 
       // Verify we have advanced to the second page
-      expect(find.text('What do the map pins mean?'), findsOneWidget);
+      expect(find.text('Explore the map'), findsOneWidget);
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsNothing);
     });
 
