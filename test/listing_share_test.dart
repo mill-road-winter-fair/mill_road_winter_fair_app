@@ -4,6 +4,54 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 
 void main() {
   group('buildListingShareText', () {
+    for (final timings in [
+      ('15:45', '', '\nStarts at 15:45'),
+      ('', '16:30', '\nEnds at 16:30'),
+      ('', '', ''),
+      (' 15:45 ', '   ', '\nStarts at 15:45'),
+      ('   ', ' 16:30 ', '\nEnds at 16:30'),
+      ('   ', '   ', ''),
+    ]) {
+      test('shares incomplete timings (${timings.$1}, ${timings.$2})', () {
+        for (final now in [
+          fairDate.subtract(const Duration(days: 1)),
+          fairDate.add(const Duration(hours: 16)),
+          fairDate.add(const Duration(days: 1)),
+        ]) {
+          final message = buildListingShareText(
+            'Oli Bruce',
+            'Avenue of Limes',
+            timings.$1,
+            timings.$2,
+            cancelled: false,
+            currentTime: now,
+          );
+
+          expect(
+            message,
+            'Oli Bruce at Avenue of Limes, $fairName on ${formatFullDate(fairDate)}${timings.$3}\n'
+            'https://www.millroadwinterfair.org/',
+          );
+        }
+      });
+    }
+
+    test('keeps cancellation wording when both times are missing', () {
+      final message = buildListingShareText(
+        'Oli Bruce',
+        'Avenue of Limes',
+        '',
+        '',
+        cancelled: true,
+      );
+
+      expect(
+        message,
+        'Oli Bruce at Avenue of Limes has been cancelled and will not be appearing at $fairName.\n'
+        'https://www.millroadwinterfair.org/',
+      );
+    });
+
     test('uses cancellation wording for a cancelled listing', () {
       final message = buildListingShareText(
         'Glazed and Confused',
