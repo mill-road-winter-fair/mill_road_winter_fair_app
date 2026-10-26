@@ -263,6 +263,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(Icon(Icons.filter_alt), 'Tap the Filter icon to cycle between music, non-music and everything.'),
         tip(Icon(Icons.schedule), 'On the day, tap the Clock icon to show what’s on now or starting soon.'),
         tip(Icon(Icons.info), 'Tap any event for more details, to save it as a favourite or to set a reminder.'),
+        tip(Icon(Icons.home), 'You can even disable animations on the home page, and choose your preferred notice period for notifications.'),
       ]),
       guidePage('Make the app your own', [
         tip(Icon(Icons.palette), 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
