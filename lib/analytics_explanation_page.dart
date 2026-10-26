@@ -153,8 +153,7 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                           SizedBox(height: 4),
                           Text('• App preferences such as your theme, distance units, map settings and filters.'),
                           SizedBox(height: 4),
-                          Text(
-                              '• Basic app and device information provided by Firebase, such as app version, device type, operating system and session information.'),
+                          Text('• Basic app and device information provided by Firebase, such as app version, device type, operating system and session information.'),
                         ],
                       ),
                     ),
@@ -242,9 +241,11 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
                                 context.read<AnalyticsService>().logButtonTapped('app_privacy_policy_link');
-                                context.read<UrlLauncher>().open(Uri.parse(
-                                  'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf',
-                                ));
+                                context.read<UrlLauncher>().open(
+                                      Uri.parse(
+                                        'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf',
+                                      ),
+                                    );
                               },
                           ),
                           const TextSpan(text: '.'),
