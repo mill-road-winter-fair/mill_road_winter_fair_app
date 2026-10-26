@@ -138,6 +138,12 @@ void main() {
       navigationInProgress = false;
       const locationChannel = MethodChannel('flutter.baseflow.com/geolocator');
       const streamChannel = MethodChannel('flutter.baseflow.com/geolocator_updates');
+      const toastChannel = MethodChannel('PonnamKarthik/fluttertoast');
+      final toastCalls = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, (call) async {
+        toastCalls.add(call);
+        return true;
+      });
       var streamStarts = 0;
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(locationChannel, (call) async {
         if (call.method == 'getCurrentPosition') {
@@ -156,6 +162,7 @@ void main() {
         navigationInProgress = previousNavigation;
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(locationChannel, null);
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(streamChannel, null);
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null);
       });
       await tester.pumpWithClock(MaterialApp(
         home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
@@ -171,12 +178,16 @@ void main() {
       expect(state.polylines, isEmpty);
       expect(streamStarts, 0);
       expect(state.markers.containsKey(const MarkerId(aSimpleMarkerId)), isFalse);
-      expect(find.text('Failed to get route directions.'), findsOneWidget);
+      expect(toastCalls, hasLength(1));
+      expect(toastCalls.single.method, 'showToast');
+      expect(toastCalls.single.arguments['msg'], 'Failed to get route directions.');
+      expect(toastCalls.single.arguments['gravity'], 'center');
+      expect(find.byType(SnackBar), findsNothing);
       expect(tester.takeException(), isNull);
 
       // Exercise the real entry point: requesting directions pushes a new map
       // page, which starts navigation from its first post-frame callback
-      ScaffoldMessenger.of(state.context).removeCurrentSnackBar();
+      toastCalls.clear();
       Navigator.of(state.context).push(MaterialPageRoute<void>(
         builder: (_) => MapPage(
           listings: listings,
@@ -192,10 +203,15 @@ void main() {
       expect(tester.state<MapPageState>(find.byType(MapPage)), same(state));
       expect(Navigator.of(state.context).canPop(), isFalse);
       expect(find.text('Directions'), findsNothing);
-      expect(find.text('Failed to get route directions.'), findsOneWidget);
+      expect(toastCalls, hasLength(1));
+      expect(toastCalls.single.method, 'showToast');
+      expect(toastCalls.single.arguments['msg'], 'Failed to get route directions.');
+      expect(toastCalls.single.arguments['gravity'], 'center');
+      expect(find.byType(SnackBar), findsNothing);
       expect(navigationInProgress, isFalse);
       expect(streamStarts, 0);
       expect(tester.takeException(), isNull);
+      await tester.pump(const Duration(seconds: 4));
     });
 
     for (final bottomSafeArea in [0.0, 24.0, 34.0, 48.0]) {
