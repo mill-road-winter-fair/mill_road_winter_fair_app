@@ -109,12 +109,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
   String calculateAppBarTitle() {
     String appBarTitle = '';
-    if (widget.subfilterCategory != null) appBarTitle += 'Filtered';
     if (filterCategory == 'favourite') {
-      appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites'; // 'filtered favourite listings' doesn't fit!
+      appBarTitle += (appBarTitle.isEmpty) ? 'Favourite listings' : ' favourites';
     } else {
       appBarTitle += (appBarTitle.isEmpty) ? 'All listings' : ' listings';
     }
+    if (widget.subfilterCategory != null) appBarTitle += ' (filtered)';
     return appBarTitle;
   }
 
@@ -470,7 +470,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
             ),
           ),
-        if (isShowingJustPerformance || filterCategory == 'favourite')
+        if (isShowingJustPerformance || filterCategory == 'favourite' || _hidePastListings)
           IconButton(
             key: hidePastIconKey,
             tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
@@ -486,15 +486,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                   numberOfVisibleListings = -1;
                   firstVisibleIndex = null;
                 });
-                Fluttertoast.showToast(
-                  msg: (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances',
-                  gravity: ToastGravity.BOTTOM,
-                  backgroundColor: colorScheme.primary,
-                  textColor: colorScheme.onPrimary,
-                  fontSize: 16,
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                );
+                showInfoToast(context, (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances');
               } else {
                 showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
               }
@@ -646,6 +638,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                 onTap: detailsVisibleIndex == null
                                     ? null
                                     : () {
+                                        final listing = filteredListings[detailsVisibleIndex!];
+                                        widget.analyticsService.logButtonTapped('listing_details_dismiss', listingId: listing['id'], listingName: listing['title']);
                                         detailsVisibleIndex = null;
                                         HapticFeedback.lightImpact();
                                         setState(() {});
@@ -668,7 +662,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     return Column(
                                       key: ValueKey(listing['id']),
                                       children: [
-                                        if (!_hidePastListings || !hasEventEnded(listing['endTime'], _dateTimeProvider))
+                                        if (!_hidePastListings || !hasEventEnded(listing['endTime'], _dateTimeProvider)) ...[
                                           Container(
                                             width: constraints.maxWidth - 10,
                                             decoration: BoxDecoration(
@@ -723,7 +717,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                               colorScheme: colorScheme,
                                             )
                                           ),
-                                        SizedBox(height: 8),
+                                          const SizedBox(height: 8),
+                                        ],
                                       ],
                                     );
                                   },

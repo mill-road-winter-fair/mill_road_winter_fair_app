@@ -341,8 +341,9 @@ class AlertScheduleStore {
     alertSchedules.removeWhere((a) => a.id == theId);
   }
 
-  void removePastEventAlerts({DateTimeProvider dateTimeProvider = const SystemDateTimeProvider()}) {
+  Future<void> removePastEventAlerts({DateTimeProvider dateTimeProvider = const SystemDateTimeProvider()}) async {
     debugPrint('AlertScheduleStore removePastEventAlerts called');
+    await refreshEventAlertSchedules();
     final now = dateTimeProvider.now();
     alertSchedules.removeWhere((a) => a.listingStartTime.subtract(Duration(minutes: a.noticePeriod)).isBefore(now));
   }

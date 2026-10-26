@@ -77,6 +77,10 @@ class _FakeAndroidFlutterLocalNotificationsPlugin
   Future<List<PendingNotificationRequest>> pendingNotificationRequests() async => <PendingNotificationRequest>[];
 }
 
+String _formatHourMinute(DateTime dateTime) {
+  return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+}
+
 Future<void> _withAndroidPlatform(Future<void> Function() callback) async {
   debugDefaultTargetPlatformOverride = TargetPlatform.android;
   try {
@@ -104,20 +108,24 @@ void main() {
     FlutterLocalNotificationsPlatform.instance =
         _FakeAndroidFlutterLocalNotificationsPlugin();
     SharedPreferences.setMockInitialValues({});
+    final listingOneStart = DateTime.now().add(const Duration(hours: 2));
+    final listingOneEnd = listingOneStart.add(const Duration(hours: 2));
+    final listingTwoStart = DateTime.now().add(const Duration(hours: 5));
+    final listingTwoEnd = listingTwoStart.add(const Duration(hours: 2));
     listings = [
       {
         'id': 'listing-1',
         'title': 'Glazed and Confused',
         'location': 'Gwydir St Car Park',
-        'startTime': '10:30',
-        'endTime': '16:30',
+        'startTime': _formatHourMinute(listingOneStart),
+        'endTime': _formatHourMinute(listingOneEnd),
       },
       {
         'id': 'listing-2',
         'title': 'Acoustic Stage',
         'location': 'Mill Road',
-        'startTime': '12:00',
-        'endTime': '14:00',
+        'startTime': _formatHourMinute(listingTwoStart),
+        'endTime': _formatHourMinute(listingTwoEnd),
       },
     ];
     alertsStore = AlertScheduleStore.initial();
@@ -343,7 +351,7 @@ void main() {
       expect(AlertScheduleStore.fromJson(jsonDecode(prefs.getString('alertsStore')!)).alertSchedules, isEmpty);
     });
 
-    test('AlertScheduleStore can add, find, and remove alerts and purge expired ones', () {
+    test('AlertScheduleStore can add, find, and remove alerts and purge expired ones', () async {
       final store = AlertScheduleStore.initial();
       final id = store.addAlert('listing-1', 15, true);
 
@@ -380,7 +388,7 @@ void main() {
         null,
       );
       store.alertSchedules.add(stale);
-      store.removePastEventAlerts(dateTimeProvider: dateTimeProvider);
+      await store.removePastEventAlerts(dateTimeProvider: dateTimeProvider);
       expect(store.alertSchedules.any((a) => a.id == 2), isFalse);
       expect(store.alertExists('listing-1'), isTrue);
 

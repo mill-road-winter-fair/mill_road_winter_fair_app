@@ -175,6 +175,14 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
   Widget build(BuildContext context) {
     final settingLabelStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
     final settingTitleStyle = TextStyle(fontSize: 15);
+    const dropdownDecoration = InputDecorationTheme(
+      enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 0.5)),
+      isDense: true,
+      // Remove the arrow button's default padding inside the compact field.
+      isCollapsed: true,
+      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      suffixIconConstraints: BoxConstraints(minWidth: 40, maxHeight: 40),
+    );
     final settingSubtitleStyle = TextStyle(fontSize: 14,  color: Theme.of(context).colorScheme.onSurfaceVariant);
     final List<DropdownOption> unitsOptions = [
       DropdownOption(title: 'Metric', subtitle: 'Metres and kilometres', value: DistanceUnits.metric),
@@ -225,15 +233,24 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(spacing: 12, children: [
-                    Text('Theme:', style: settingLabelStyle),
-                    Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        return DropdownMenu<String>(
+                  Table(
+                    // Share the label width while dropdowns fill the remaining space.
+                    columnWidths: const {
+                      0: IntrinsicColumnWidth(),
+                      1: FlexColumnWidth(),
+                    },
+                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                    children: [
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Theme:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<String>(
+                          inputDecorationTheme: dropdownDecoration,
                           initialSelection: themeNotifier.value,
                           hintText: 'Select a visual theme',
-                          inputDecorationTheme: InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
-                          alignmentOffset: const Offset(0, -60),
+                          alignmentOffset: const Offset(-15, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: themeOptions.map((opt) {
@@ -260,18 +277,21 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        );
-                      })
-                    ),
-                  ]),
-                  Row(spacing: 12, children: [
-                    Text('Alerts:', style: settingLabelStyle),
-                    Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        return DropdownMenu<int>(
+                        ),
+                      ]),
+                      const TableRow(children: [
+                        SizedBox(height: 12),
+                        SizedBox(height: 12),
+                      ]),
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Alerts:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<int>(
+                          inputDecorationTheme: dropdownDecoration,
                           initialSelection: alertNoticePeriod,
                           hintText: 'Select notice period for alerts',
-                          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
@@ -291,18 +311,21 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             saveAlertNoticePeriod(value);
                             setState(() { });
                           },
-                        );
-                      }),
-                    ),
-                  ]),
-                  Row(spacing: 12, children: [
-                    Text('Distances:', style: settingLabelStyle),
-                    Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        return DropdownMenu<DistanceUnits>(
+                        ),
+                      ]),
+                      const TableRow(children: [
+                        SizedBox(height: 12),
+                        SizedBox(height: 12),
+                      ]),
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Distances:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<DistanceUnits>(
+                          inputDecorationTheme: dropdownDecoration,
                           initialSelection: preferredDistanceUnits,
                           hintText: 'Select units for map distances',
-                          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
@@ -328,18 +351,21 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        );
-                      }),
-                    ),
-                  ]),
-                  Row(spacing: 12, children: [
-                    Text('Home page:', style: settingLabelStyle),
-                    Expanded(
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        return DropdownMenu<bool>(
+                        ),
+                      ]),
+                      const TableRow(children: [
+                        SizedBox(height: 12),
+                        SizedBox(height: 12),
+                      ]),
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Home page:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<bool>(
+                          inputDecorationTheme: dropdownDecoration,
                           initialSelection: staticChooserPage.value,
                           hintText: 'Select style of home page',
-                          inputDecorationTheme: const InputDecorationTheme(border: InputBorder.none, contentPadding: EdgeInsets.zero),
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
@@ -362,45 +388,55 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        );
-                      }),
-                    ),
-                  ]),
+                        ),
+                      ]),
+                    ],
+                  ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     activeThumbColor: Theme.of(context).colorScheme.tertiary,
                     title: Text('Allow analytics', style: settingLabelStyle),
-                    subtitle: Text.rich(
-                      TextSpan(children: [
-                      TextSpan(text: 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google. '),
-                      TextSpan(
-                        text: 'What does this mean?',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.tertiary,
-                          decoration: TextDecoration.underline,
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          analyticsEnabledForBuild
+                              ? 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'
+                              : 'Analytics is disabled for this development run.',
                         ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped('analytics_explanation_settings');
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
-                              ),
-                            );
-                          },
-                      ),
-                      ]),
+                        const SizedBox(height: 4),
+                        RichText(
+                          text: TextSpan(
+                            text: 'What does this mean?',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.tertiary,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('analytics_explanation_settings');
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AnalyticsExplanationPage(analyticsService: widget.analyticsService),
+                                  ),
+                                );
+                              },
+                          ),
+                        ),
+                      ],
                     ),
-                    value: usageAnalyticsEnabled ?? false,
-                    onChanged: (bool value) async {
+                    value: analyticsEnabledForBuild ? usageAnalyticsEnabled ?? false : false,
+                    onChanged: analyticsEnabledForBuild
+                        ? (bool value) async {
                       HapticFeedback.selectionClick();
                       widget.analyticsService.logButtonTapped('analytics_preference_toggle');
                       await widget.analyticsService.setAnalyticsEnabled(value);
                       if (mounted) setState(() {});
-                    },
-                  ),
+                    }
+                        : null,
+                  )
                 ],
               ),
             ),

@@ -4,9 +4,50 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// SharedPreferences key for storing cached listings as JSON
+const String _listingsCacheKey = 'cached_listings_json';
+
+// Save listings to SharedPreferences
+Future<void> _saveListingsToCache(
+    List<Map<String, dynamic>> listingsToCache) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = jsonEncode(listingsToCache);
+    await prefs.setString(_listingsCacheKey, jsonString);
+    debugPrint('Listings saved to SharedPreferences');
+  } catch (e) {
+    debugPrint('Error saving listings to cache: $e');
+  }
+}
+
+// Load listings from SharedPreferences
+Future<List<Map<String, dynamic>>> loadListingsFromCache() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_listingsCacheKey);
+
+    if (jsonString == null || jsonString.isEmpty) {
+      debugPrint('No cached listings found in SharedPreferences');
+      return [];
+    }
+
+    final decoded = jsonDecode(jsonString) as List<dynamic>;
+    final result = decoded.cast<Map<String, dynamic>>();
+    debugPrint('Loaded ${result.length} listings from SharedPreferences');
+    return result;
+  } catch (e) {
+    debugPrint('Error loading listings from cache: $e');
+    return [];
+  }
+}
 
 // Fetch listings from Heroku caching layer
-Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
+Future<List<Map<String, dynamic>>> fetchListings(
+  http.Client client, {
+  VoidCallback? onCacheFallback,
+}) async {
   debugPrint('fetchListings called');
   try {
     // Load environment variables
@@ -15,18 +56,27 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
     String herokuApiKey = dotenv.env['HEROKU_API_KEY'] ?? '';
     final uri = Uri.parse(herokuApi);
 
-    final response = await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
+    final response =
+        await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
     debugPrint('API response status: ${response.statusCode}');
 
     // Retry up to 10 times for transient failures
     if (response.statusCode != 200) {
       for (var i = 0; i < 9; i++) {
         await Future.delayed(const Duration(seconds: 2));
-        final retryResponse = await client.get(uri);
-        debugPrint('Retry ${i + 1} response status: ${retryResponse.statusCode}');
+        final retryResponse = await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
+        debugPrint(
+            'Retry ${i + 1} response status: ${retryResponse.statusCode}');
         if (retryResponse.statusCode == 200) {
           debugPrint('Listings fetched after retry');
-          return _parseListings(retryResponse.body);
+          final newListings = _parseListings(retryResponse.body);
+          if (newListings.isEmpty) {
+            throw const FormatException('The listings response was empty');
+          }
+          listings = newListings;
+          // Save to persistent cache
+          await _saveListingsToCache(newListings);
+          return newListings;
         }
       }
       debugPrint('All retries failed');
@@ -35,23 +85,34 @@ Future<List<Map<String, dynamic>>> fetchListings(http.Client client) async {
 
     // Success
     final newListings = _parseListings(response.body);
+    if (newListings.isEmpty) {
+      throw const FormatException('The listings response was empty');
+    }
     listings = newListings;
     debugPrint('Listings successfully parsed and stored');
-    return listings;
+    // Save to persistent cache
+    await _saveListingsToCache(newListings);
+    return newListings;
   } on SocketException catch (_) {
-    debugPrint('\u26a0\ufe0f Network error: unable to reach server, using stale listings.');
-    return listings.isNotEmpty ? listings : [];
+    debugPrint(
+        '\u26a0\ufe0f Network error: unable to reach server, trying cache.');
   } on HttpException catch (e) {
     debugPrint('\u26a0\ufe0f Server responded with an error: $e');
-    return listings.isNotEmpty ? listings : [];
   } on FormatException catch (e) {
     debugPrint('\u26a0\ufe0f Bad response format: $e');
-    return listings.isNotEmpty ? listings : [];
   } catch (e, stack) {
     debugPrint('\u26a0\ufe0f Unexpected error fetching listings: $e');
     debugPrint(stack.toString());
-    return listings.isNotEmpty ? listings : [];
   }
+
+  // Only report a fallback once the API request (including retries) has failed.
+  if (listings.isEmpty) {
+    listings = await loadListingsFromCache();
+  }
+  if (listings.isNotEmpty) {
+    onCacheFallback?.call();
+  }
+  return listings;
 }
 
 // Helper to parse JSON into the app’s listing structure
@@ -63,7 +124,8 @@ List<Map<String, dynamic>> _parseListings(String body) {
   if (rows.isEmpty) return [];
 
   // Normalise headers to a list of strings
-  final headers = (rows.first as List<dynamic>).map((h) => h?.toString() ?? '').toList();
+  final headers =
+      (rows.first as List<dynamic>).map((h) => h?.toString() ?? '').toList();
   final headerCount = headers.length;
 
   return rows.skip(1).map((row) {
@@ -91,7 +153,8 @@ List<Map<String, dynamic>> _parseListings(String body) {
 }
 
 // Fetch listings only if we don't already have them
-Future<List<Map<String, dynamic>>> fetchExistingListings(http.Client client) async {
+Future<List<Map<String, dynamic>>> fetchExistingListings(
+    http.Client client) async {
   debugPrint('fetchExistingListings called');
   if (listings.isEmpty) {
     try {
