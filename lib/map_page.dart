@@ -1326,7 +1326,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       Position position = await getCurrentPosition();
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
       final routeLoaded = await updatePolyline(currentLatLng, destination);
-      if (!routeLoaded) return;
+      if (!routeLoaded) {
+        _closeFailedDirectionsPage(navigatorPop);
+        return;
+      }
       // Set the camera position once, at the beginning of the navigation
       _setMapCameraToFitPolyline(polylines);
       // Start location updates
@@ -1341,6 +1344,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
       );
+      _closeFailedDirectionsPage(navigatorPop);
       return;
     }
 
@@ -1367,6 +1371,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     });
   }
 
+
+  void _closeFailedDirectionsPage(bool navigatorPop) {
+    if (!navigatorPop || !mounted) return;
+    // Directions requested elsewhere have already pushed this page. Only
+    // dismiss it if it is still current, so we cannot pop an unrelated page.
+    if (ModalRoute.of(context)?.isCurrent == true && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
 
   void cancelNavigation() async {
     debugPrint('MapPageState cancelNavigation called');
@@ -1522,7 +1535,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       _distanceToDestination = null;
       hideAllMarkers();
       addAllVisibleMarkers();
-      _setMapCameraToFitMapMarkers();
+      // Startup can fail before the newly pushed map has a controller.
+      if (_controller != null) _setMapCameraToFitMapMarkers();
       navigationInProgress = false;
     });
     debugPrint('MapPageState _handlePolylineError error: $message');
