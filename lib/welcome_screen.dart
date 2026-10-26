@@ -355,8 +355,6 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
           IntroductionScreen(
             key: introKey,
             safeAreaList: [false, false, false, Platform.isAndroid && isNavBarVisible(context)],
-            autoScrollDuration: onTest ? null : 150000,
-            infiniteAutoScroll: onTest ? false : true,
             globalBackgroundColor: Colors.transparent,
             allowImplicitScrolling: true,
             globalFooter: Padding(
