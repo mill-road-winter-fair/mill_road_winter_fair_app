@@ -813,23 +813,23 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
           MenuItemButton(
             onPressed: () => sortingDropdownCallback(SortingMethod.nearest),
-            leadingIcon: Icon(Icons.directions_walk, size: 20, color: (preferredSortingMethod == SortingMethod.nearest) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+            leadingIcon: Icon(Icons.directions_walk, size: 20, color: (effectiveSortingMethod == SortingMethod.nearest) ? colorScheme.primary : colorScheme.onSurfaceVariant),
             child: Text("Nearest", style: (effectiveSortingMethod == SortingMethod.nearest) ? selectedMenuEntryStyle : menuEntryStyle),
           ),
         MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.location),
-          leadingIcon: Icon(Icons.signpost, size: 20, color: (preferredSortingMethod == SortingMethod.location) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          leadingIcon: Icon(Icons.signpost, size: 20, color: (effectiveSortingMethod == SortingMethod.location) ? colorScheme.primary : colorScheme.onSurfaceVariant),
           child: Text("Location (a–z)", style: (effectiveSortingMethod == SortingMethod.location) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.alphabetical),
-          leadingIcon: Icon(Icons.sort_by_alpha, size: 20, color: (preferredSortingMethod == SortingMethod.alphabetical) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          leadingIcon: Icon(Icons.sort_by_alpha, size: 20, color: (effectiveSortingMethod == SortingMethod.alphabetical) ? colorScheme.primary : colorScheme.onSurfaceVariant),
           child: Text("Name (a–z)", style: (effectiveSortingMethod == SortingMethod.alphabetical) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         if (isPerformance || filterCategory == 'favourite')
           MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.startTime),
-            leadingIcon: Icon(Icons.alarm, size: 20, color: (preferredSortingMethod == SortingMethod.startTime) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+            leadingIcon: Icon(Icons.alarm, size: 20, color: (effectiveSortingMethod == SortingMethod.startTime) ? colorScheme.primary : colorScheme.onSurfaceVariant),
             child: Text("Start time", style: (effectiveSortingMethod == SortingMethod.startTime) ? selectedMenuEntryStyle : menuEntryStyle),
           ),
       ],
