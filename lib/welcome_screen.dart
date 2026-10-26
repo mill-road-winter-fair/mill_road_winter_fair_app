@@ -250,11 +250,6 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       guidePage('Find what brings you to the Fair', [
         tip(Icon(Icons.ballot), 'Tap Listings to browse everything at the Fair.'),
         tip(Icon(Icons.sort), 'Sort by name, location, closeness to you, or (for performances and events) start time.'),
-        tip(Icon(Icons.info), 'Tap the Info button to find out more about any listing.'),
-        tip(Icon(Icons.favorite), 'Tap a listing’s Heart icon to save it. It will then appear in your Favourites.'),
-        tip(FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
-        tip(Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
-        tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
         tip(Icon(Icons.access_time), 'Performance listings and favourites let you hide finished events or jump to what’s on now.'),
       ]),
       guidePage('Plan your day with the timetable', [
@@ -263,6 +258,13 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(Icon(Icons.filter_alt), 'Tap the Filter icon to cycle between music, non-music and everything.'),
         tip(Icon(Icons.schedule), 'On the day, tap the Clock icon to show what’s on now or starting soon.'),
         tip(Icon(Icons.info), 'Tap any event for more details, to save it as a favourite or to set a reminder.'),
+      ]),
+      guidePage('Visit our exciting attractions', [
+        tip(Icon(Icons.info), 'Tap the Info button to find out more about any listing.'),
+        tip(Icon(Icons.favorite), 'Tap a listing’s Heart icon to save it. It will then appear in your Favourites.'),
+        tip(FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
+        tip(Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
+        tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
       ]),
       guidePage('Make the app your own', [
         tip(Icon(Icons.palette), 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
