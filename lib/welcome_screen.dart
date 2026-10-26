@@ -218,6 +218,14 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(Icon(Icons.menu),
             'Use the menu in the top left for important information, settings and to share this app. You can read this app guide again there too.'),
       ]),
+      guidePage('Explore the map', [
+        tip(Icon(Icons.home), 'Tap the Home button on the map to show the whole Fair.'),
+        tip(Icon(Icons.radar), 'Tap the Nearby button to see your location and nearby pins.'),
+        tip(Icon(Icons.satellite_alt), 'Switch between street and satellite maps as you prefer.'),
+        tip(Icon(Icons.assistant_navigation), 'Set the map to the orientation that works for you.'),
+        tip(Icon(Icons.search), 'Search for attractions on the map, listings and timetable pages.'),
+        tip(Icon(Icons.filter_alt), 'Choose which types of attraction you want to appear on the map.'),
+      ]),
       guidePage('What do the map pins mean?', [
         for (final key in subfilterCategoryLabels.keys)
           category(
@@ -238,14 +246,6 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
           Image.asset('assets/mapMarkers/mixedMarker.png', height: 40, width: 40, color: getCategoryColor(selectedThemeKey, 'Mixed')),
           Text('A mix of any of these categories', style: bodyStyle),
         ),
-      ]),
-      guidePage('Explore the map', [
-        tip(Icon(Icons.home), 'Tap the Home button on the map to show the whole Fair.'),
-        tip(Icon(Icons.radar), 'Tap the Nearby button to see your location and nearby pins.'),
-        tip(Icon(Icons.satellite_alt), 'Switch between street and satellite maps as you prefer.'),
-        tip(Icon(Icons.assistant_navigation), 'Set the map to the orientation that works for you.'),
-        tip(Icon(Icons.search), 'Search for attractions on the map, listings and timetable pages.'),
-        tip(Icon(Icons.filter_alt), 'Choose which types of attraction you want to appear on the map.'),
       ]),
       guidePage('Find what brings you to the Fair', [
         tip(Icon(Icons.ballot), 'Tap Listings to browse everything at the Fair.'),
