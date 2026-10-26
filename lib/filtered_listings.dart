@@ -403,6 +403,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
 
     final colorScheme = Theme.of(context).colorScheme;
     final appBarTheme = Theme.of(context).appBarTheme;
+    final canScrollToNow = filterCategory == 'favourite' || isShowingJustPerformance;
+    final canTogglePastListings = canScrollToNow || _hidePastListings;
     final nowOrSoonIconKey = GlobalKey();
     final hidePastIconKey = GlobalKey();
     final searchIconKey = GlobalKey();
@@ -412,89 +414,94 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       currentTab: switch (filterCategory) { 'favourite' => 4, _ => 3 },
       onTabSelected: widget.onTabSelected,
       appBarActions: [
-        if (filterCategory == 'favourite' || isShowingJustPerformance)
-          IconButton(
-            key: nowOrSoonIconKey,
-            tooltip: 'Scroll to what is on now or starting soon',
-            onLongPress: () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon'),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              context.read<AnalyticsService>().logButtonTapped('listings_scroll_to_now');
-              if (isItEventDay(_dateTimeProvider)) {
+        IconButton(
+          key: nowOrSoonIconKey,
+          tooltip: 'Scroll to what is on now or starting soon',
+          onLongPress: !canScrollToNow ? null : () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon'),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            if (!canScrollToNow) {
+              showMiniPopup(context, nowOrSoonIconKey, '‘Go to now’ is only available when showing just events or performances', fgColour: colorScheme.error);
+              return;
+            }
+            context.read<AnalyticsService>().logButtonTapped('listings_scroll_to_now');
+            if (isItEventDay(_dateTimeProvider)) {
+              if (firstNextListingIndex < 0) {
+                // we may not be on Sort by Time, or the Fair may have recently started
+                SortingMethod savedSortingMethod = preferredSortingMethod;
+                preferredSortingMethod = SortingMethod.startTime;
+                List<Map<String, dynamic>> sortedListingsTemp = _applySorting(subCategoryFiltered);
+                List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
+                firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
                 if (firstNextListingIndex < 0) {
-                  // we may not be on Sort by Time, or the Fair may have recently started
-                  SortingMethod savedSortingMethod = preferredSortingMethod;
-                  preferredSortingMethod = SortingMethod.startTime;
-                  List<Map<String, dynamic>> sortedListingsTemp = _applySorting(subCategoryFiltered);
-                  List<Map<String, dynamic>> filteredListingsTemp = _applySearchFilter(sortedListingsTemp);
-                  firstNextListingIndex = findFirstNextListingIndex(filteredListingsTemp);
-                  if (firstNextListingIndex < 0) {
-                    preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to
-                  } else {
-                    filteredListings = filteredListingsTemp;
-                    if (_hidePastListings) {
-                      numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], _dateTimeProvider)).length;
-                    } else {
-                      numberOfVisibleListings = filteredListings.length;
-                    }
-                    setState(() {
-                      preferredSortingMethod = SortingMethod.startTime;
-                    });
-                  }
-                }
-                if (firstNextListingIndex >= 0) {
-                  itemScrollController.scrollTo(
-                    curve: Curves.linear,
-                    index: firstNextListingIndex,
-                    duration: const Duration(milliseconds: 300),
-                    alignment: 0,
-                  );
+                  preferredSortingMethod = savedSortingMethod; // restore if not found a listing to scroll to
                 } else {
-                  itemScrollController.scrollTo(
-                    curve: Curves.linear,
-                    index: filteredListings.length - 1,
-                    duration: const Duration(milliseconds: 300),
-                    alignment: 0,
-                  );
+                  filteredListings = filteredListingsTemp;
+                  if (_hidePastListings) {
+                    numberOfVisibleListings = filteredListings.where((listing) => !hasEventEnded(listing['endTime'], _dateTimeProvider)).length;
+                  } else {
+                    numberOfVisibleListings = filteredListings.length;
+                  }
+                  setState(() {
+                    preferredSortingMethod = SortingMethod.startTime;
+                  });
                 }
-              } else {
-                showMiniPopup(context, nowOrSoonIconKey, '‘Scroll to now’ is only available when the Fair is underway', fgColour: colorScheme.error);
               }
-            },
-            icon: Icon(
-              Icons.access_time,
-              size: 24,
-              color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
-            ),
-          ),
-        if (isShowingJustPerformance || filterCategory == 'favourite' || _hidePastListings)
-          IconButton(
-            key: hidePastIconKey,
-            tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
-            onLongPress: () => showMiniPopup(context, hidePastIconKey,
-                (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed'),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              context.read<AnalyticsService>().logButtonTapped('listings_hide_past_toggle');
-              if (isItEventDay(_dateTimeProvider)) {
-                setState(() {
-                  _hidePastListings = !_hidePastListings;
-                  context.read<AnalyticsService>().logPreferenceSet('listings_hide_past', _hidePastListings.toString());
-                  numberOfVisibleListings = -1;
-                  firstVisibleIndex = null;
-                });
-                showInfoToast(context, (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances');
+              if (firstNextListingIndex >= 0) {
+                itemScrollController.scrollTo(
+                  curve: Curves.linear,
+                  index: firstNextListingIndex,
+                  duration: const Duration(milliseconds: 300),
+                  alignment: 0,
+                );
               } else {
-                showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error);
+                itemScrollController.scrollTo(
+                  curve: Curves.linear,
+                  index: filteredListings.length - 1,
+                  duration: const Duration(milliseconds: 300),
+                  alignment: 0,
+                );
               }
-            },
-            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_hidePastListings) ? Colors.white.withAlpha(30) : null)),
-            icon: Icon(
-              Icons.history_toggle_off,
-              size:24,
-              color: (isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
-            ),
+            } else {
+              showMiniPopup(context, nowOrSoonIconKey, '‘Scroll to now’ is only available when the Fair is underway', fgColour: colorScheme.error);
+            }
+          },
+          icon: Icon(
+            Icons.access_time,
+            size: 24,
+            color: (canScrollToNow && isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
           ),
+        ),
+        IconButton(
+          key: hidePastIconKey,
+          tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
+          onLongPress: !canTogglePastListings ? null : () => showMiniPopup(context, hidePastIconKey,
+              (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed'),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            if (!canTogglePastListings) {
+              showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when showing just events or performances', fgColour: colorScheme.error);
+              return;
+            }
+            context.read<AnalyticsService>().logButtonTapped('listings_hide_past_toggle');
+            if (isItEventDay(_dateTimeProvider)) {
+              setState(() {
+                _hidePastListings = !_hidePastListings;
+                context.read<AnalyticsService>().logPreferenceSet('listings_hide_past', _hidePastListings.toString());
+                numberOfVisibleListings = -1;
+                firstVisibleIndex = null;
+              });
+              showInfoToast(context, (_hidePastListings) ? 'Hiding all events and performances that have passed' : 'Showing all events and performances');
+            } else {
+              showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when the Fair is underway', fgColour: colorScheme.error);
+            }
+          },
+          icon: Icon(
+            (_hidePastListings) ? Icons.free_cancellation : Icons.history_toggle_off,
+            size:24,
+            color: (canTogglePastListings && isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
+          ),
+        ),
         IconButton(
           key: searchIconKey,
           tooltip: _isSearching ? 'Close listings search' : 'Search listings',
