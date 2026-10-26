@@ -255,7 +255,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
         tip(Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
         tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
-        tip(Icon(Icons.access_time), 'Performance lists and favourites let you hide finished events or jump to what’s on now.'),
+        tip(Icon(Icons.access_time), 'Performance listings and favourites let you hide finished events or jump to what’s on now.'),
       ]),
       guidePage('Plan your day with the timetable', [
         tip(Icon(Icons.watch_later), 'See performances and shorter visits and experiences by time and location.'),
