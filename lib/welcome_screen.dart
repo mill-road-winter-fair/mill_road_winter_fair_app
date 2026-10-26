@@ -249,7 +249,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       ]),
       guidePage('Find what brings you to the Fair', [
         tip(Icon(Icons.ballot), 'Tap Listings to browse everything at the Fair.'),
-        tip(Icon(Icons.sort), 'Sort by name or location, or by the nearest attraction. Time sorting is also available for performances and children\'s entertainment.'),
+        tip(Icon(Icons.sort), 'Sort by name, location, closeness to you, or (for performances and events) start time.'),
         tip(Icon(Icons.info), 'Tap the Info button to find out more about any listing.'),
         tip(Icon(Icons.favorite), 'Tap a listing’s Heart icon to save it. It will then appear in your Favourites.'),
         tip(FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
