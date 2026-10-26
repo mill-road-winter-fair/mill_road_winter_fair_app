@@ -31,15 +31,17 @@ Currently the aim is for the app to provides listings of the various stalls, mus
 
 7. Copy `.env.example` to `.env` in the repository root and fill in the API settings for your platform. `.env` is ignored by Git. It contains app settings, never keystore passwords.
 
-8. Pass the same configuration file to Flutter from your terminal or IDE:
+8. Request the testing/development API keys by emailing [app@millroadwinterfair.org](mailto:app@millroadwinterfair.org). Android developers must include their local debug signing certificate's SHA-1 fingerprint in the request. The Android API keys are restricted by package name and signing certificate fingerprint, so the maintainers need this fingerprint to update the API key restrictions before you can use the keys. Set `SIGNING_KEY` in `.env` to the same fingerprint.
+
+9. Pass the same configuration file to Flutter from your terminal or IDE:
 ```shell
 flutter run --dart-define-from-file=.env
 ```
 In Android Studio, put `--dart-define-from-file=.env` in Additional run args. In VS Code, put it in `toolArgs` in your local `.vscode/launch.json`. No signing environment variables are needed. Local launch configurations are ignored by Git.
 
-9. Create `android/app/google-services.json` by copying `android/app/google-services-dev.json`. Debug and profile builds automatically use the development Firebase project in Dart, so this keeps the native configuration aligned with it.
+10. Create `android/app/google-services.json` by copying `android/app/google-services-dev.json`. Debug and profile builds automatically use the development Firebase project in Dart, so this keeps the native configuration aligned with it.
 
-10. Run the app. Debug and profile builds use Android's debug signing configuration; you do not need a release keystore or `android/key.properties`.
+11. Run the app. Debug and profile builds use Android's debug signing configuration; you do not need a release keystore or `android/key.properties`.
 
 ### How configuration works
 
