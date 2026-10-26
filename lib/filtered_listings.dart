@@ -235,18 +235,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
   }
 
-  void _showUnavailableFilterToast(String action) {
-    Fluttertoast.showToast(
-      msg: '‘$action’ is not available for the current filter',
-      gravity: ToastGravity.CENTER,
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      textColor: Theme.of(context).colorScheme.onPrimary,
-      fontSize: 16,
-      toastLength: Toast.LENGTH_LONG,
-      timeInSecForIosWeb: 4,
-    );
-  }
-
   void sortingDropdownCallback(SortingMethod? selectedValue) {
     HapticFeedback.selectionClick();
     widget.analyticsService.logButtonTapped('sorting_dropdown_option');
@@ -436,7 +424,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canScrollToNow) {
-              _showUnavailableFilterToast('Go to now');
+              showMiniPopup(context, nowOrSoonIconKey, '‘Go to now’ is only available when showing just events or performances', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
               return;
             }
             widget.analyticsService.logButtonTapped('listings_scroll_to_now');
@@ -495,7 +483,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canTogglePastListings) {
-              _showUnavailableFilterToast('Hide past listings');
+              showMiniPopup(context, hidePastIconKey, '‘Hide past listings’ is only available when showing just events or performances', fgColour: colorScheme.error, analyticsService: widget.analyticsService);
               return;
             }
             widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
