@@ -235,6 +235,18 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
   }
 
+  void _showUnavailableFilterToast(String action) {
+    Fluttertoast.showToast(
+      msg: '‘$action’ is not available for the current filter',
+      gravity: ToastGravity.CENTER,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      textColor: Theme.of(context).colorScheme.onPrimary,
+      fontSize: 16,
+      toastLength: Toast.LENGTH_LONG,
+      timeInSecForIosWeb: 4,
+    );
+  }
+
   void sortingDropdownCallback(SortingMethod? selectedValue) {
     HapticFeedback.selectionClick();
     widget.analyticsService.logButtonTapped('sorting_dropdown_option');
@@ -421,8 +433,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           key: nowOrSoonIconKey,
           tooltip: 'Scroll to what is on now or starting soon',
           onLongPress: !canScrollToNow ? null : () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon', analyticsService: widget.analyticsService),
-          onPressed: !canScrollToNow ? null : () {
+          onPressed: () {
             HapticFeedback.lightImpact();
+            if (!canScrollToNow) {
+              _showUnavailableFilterToast('Go to now');
+              return;
+            }
             widget.analyticsService.logButtonTapped('listings_scroll_to_now');
             if (isItEventDay(_dateTimeProvider)) {
               if (firstNextListingIndex < 0) {
@@ -476,8 +492,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
           onLongPress: !canTogglePastListings ? null : () => showMiniPopup(context, hidePastIconKey,
               (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
-          onPressed: !canTogglePastListings ? null : () {
+          onPressed: () {
             HapticFeedback.lightImpact();
+            if (!canTogglePastListings) {
+              _showUnavailableFilterToast('Hide past listings');
+              return;
+            }
             widget.analyticsService.logButtonTapped('listings_hide_past_toggle');
             if (isItEventDay(_dateTimeProvider)) {
               setState(() {
