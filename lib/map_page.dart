@@ -1540,15 +1540,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       navigationInProgress = false;
     });
     debugPrint('MapPageState _handlePolylineError error: $message');
-    // Show a snackbar with the error
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        content: Text(
-          message,
-          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-        ),
-      ),
+    // A toast remains visible when the failed directions page is popped.
+    Fluttertoast.showToast(
+      msg: message,
+      gravity: ToastGravity.CENTER,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      textColor: Theme.of(context).colorScheme.onPrimary,
+      fontSize: 16,
+      toastLength: Toast.LENGTH_LONG,
+      timeInSecForIosWeb: 4,
     );
   }
 
