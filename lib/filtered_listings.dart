@@ -194,7 +194,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         // The only other option is location sorting
         
         // The building/house number needs to be cut off before sorting, this regex targets numbers like '16', '1-2' and '27B'
-        final leadingHouseNumber = RegExp(r'^\s*\d+[a-zA-Z]?(?:\s*[-–]\s*\d+[a-zA-Z]?)?(?:\s+|$)');
+        final leadingHouseNumber = RegExp(r'^\s*\d+[a-zA-Z]?(?:\s*[-–—]\s*\d+[a-zA-Z]?)?(?:\s+|$)');
 
         allListings.sort((a, b) {
           // 1. Compare by location, ignoring leading building/house numbers
