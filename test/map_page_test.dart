@@ -173,6 +173,29 @@ void main() {
       expect(state.markers.containsKey(const MarkerId(aSimpleMarkerId)), isFalse);
       expect(find.text('Failed to get route directions.'), findsOneWidget);
       expect(tester.takeException(), isNull);
+
+      // Exercise the real entry point: requesting directions pushes a new map
+      // page, which starts navigation from its first post-frame callback
+      ScaffoldMessenger.of(state.context).removeCurrentSnackBar();
+      Navigator.of(state.context).push(MaterialPageRoute<void>(
+        builder: (_) => MapPage(
+          listings: listings,
+          onTabSelected: (_) {},
+          analyticsService: FakeAnalyticsService(),
+          destinationId: 'SIMPLE-Event',
+          destinationLatLng: const LatLng(52.21, 0.15),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MapPage), findsOneWidget);
+      expect(tester.state<MapPageState>(find.byType(MapPage)), same(state));
+      expect(Navigator.of(state.context).canPop(), isFalse);
+      expect(find.text('Directions'), findsNothing);
+      expect(find.text('Failed to get route directions.'), findsOneWidget);
+      expect(navigationInProgress, isFalse);
+      expect(streamStarts, 0);
+      expect(tester.takeException(), isNull);
     });
 
     for (final bottomSafeArea in [0.0, 24.0, 34.0, 48.0]) {
