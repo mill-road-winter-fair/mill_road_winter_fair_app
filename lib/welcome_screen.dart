@@ -267,7 +267,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       guidePage('Make the app your own', [
         tip(Icon(Icons.palette), 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
         tip(Icon(Icons.straighten), 'Choose the units used for distances.'),
-        tip(Icon(Icons.privacy_tip), 'You choose whether to allow anonymous usage analytics in Settings.'),
+        tip(Icon(Icons.privacy_tip), 'You can choose whether to allow anonymous usage analytics.'),
       ]),
       guidePage('A few final things…', [
         tip(Icon(Icons.favorite), 'Thank you for visiting Mill Road Winter Fair and using our app.'),
