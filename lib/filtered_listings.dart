@@ -802,6 +802,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final menuEntryStyle = TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant);
     final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
+    final effectiveSortingMethod = useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod;
     return MenuAnchor(
       key: ValueKey('sortingdropdown'),
       menuChildren: [
@@ -813,23 +814,23 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           MenuItemButton(
             onPressed: () => sortingDropdownCallback(SortingMethod.nearest),
             leadingIcon: Icon(Icons.directions_walk, size: 20, color: (preferredSortingMethod == SortingMethod.nearest) ? colorScheme.primary : colorScheme.onSurfaceVariant),
-            child: Text("Nearest", style: (preferredSortingMethod == SortingMethod.nearest) ? selectedMenuEntryStyle : menuEntryStyle),
+            child: Text("Nearest", style: (effectiveSortingMethod == SortingMethod.nearest) ? selectedMenuEntryStyle : menuEntryStyle),
           ),
         MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.location),
           leadingIcon: Icon(Icons.signpost, size: 20, color: (preferredSortingMethod == SortingMethod.location) ? colorScheme.primary : colorScheme.onSurfaceVariant),
-          child: Text("Location (a–z)", style: (preferredSortingMethod == SortingMethod.location) ? selectedMenuEntryStyle : menuEntryStyle),
+          child: Text("Location (a–z)", style: (effectiveSortingMethod == SortingMethod.location) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.alphabetical),
           leadingIcon: Icon(Icons.sort_by_alpha, size: 20, color: (preferredSortingMethod == SortingMethod.alphabetical) ? colorScheme.primary : colorScheme.onSurfaceVariant),
-          child: Text("Name (a–z)", style: (preferredSortingMethod == SortingMethod.alphabetical) ? selectedMenuEntryStyle : menuEntryStyle),
+          child: Text("Name (a–z)", style: (effectiveSortingMethod == SortingMethod.alphabetical) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         if (isPerformance || filterCategory == 'favourite')
           MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.startTime),
             leadingIcon: Icon(Icons.alarm, size: 20, color: (preferredSortingMethod == SortingMethod.startTime) ? colorScheme.primary : colorScheme.onSurfaceVariant),
-            child: Text("Start time", style: (preferredSortingMethod == SortingMethod.startTime) ? selectedMenuEntryStyle : menuEntryStyle),
+            child: Text("Start time", style: (effectiveSortingMethod == SortingMethod.startTime) ? selectedMenuEntryStyle : menuEntryStyle),
           ),
       ],
       builder: (context, controller, child) {
