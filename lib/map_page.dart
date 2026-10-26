@@ -1325,7 +1325,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       // Get the user's current location
       Position position = await getCurrentPosition();
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-      await updatePolyline(currentLatLng, destination);
+      final routeLoaded = await updatePolyline(currentLatLng, destination);
+      if (!routeLoaded) return;
       // Set the camera position once, at the beginning of the navigation
       _setMapCameraToFitPolyline(polylines);
       // Start location updates
@@ -1340,6 +1341,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
       );
+      return;
     }
 
     // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
@@ -1438,7 +1440,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     });
   }
 
-  Future<void> updatePolyline(LatLng origin, LatLng destination) async {
+  Future<bool> updatePolyline(LatLng origin, LatLng destination) async {
     debugPrint('MapPageState updatePolyline called');
     try {
       // Load environment variables
@@ -1494,6 +1496,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
         _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
+      return true;
     } on SocketException catch (e) {
       debugPrint("MapPageState updatePolyline Network error while fetching route: $e");
       _handlePolylineError("Network connection issue. Please try again.");
@@ -1507,9 +1510,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       debugPrint("MapPageState updatePolyline Unexpected error fetching directions: $e\n$stack");
       _handlePolylineError("Failed to get route directions.");
     }
+    return false;
   }
 
   void _handlePolylineError(String message) {
+    _destination = null;
+    _positionStream?.cancel();
+    _positionStream = null;
     setState(() {
       polylines.clear();
       _distanceToDestination = null;
