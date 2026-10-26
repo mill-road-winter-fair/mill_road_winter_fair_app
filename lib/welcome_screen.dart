@@ -130,7 +130,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       bodyFlex: 0,
       fullScreen: true,
       safeArea: 160,
-      pageColor: colourScheme.secondary.withValues(alpha: 0.8),
+      pageColor: colourScheme.secondary.withValues(alpha: 0.85),
     );
     Widget guideRow(Widget icon, Widget content) => Padding(
           padding: const EdgeInsets.only(bottom: 16),
