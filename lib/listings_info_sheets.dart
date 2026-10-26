@@ -232,10 +232,16 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
-    final startTime = combineDateAndTime(widget.startTime, fairDate);
-    final endTime = combineDateAndTime(widget.endTime, fairDate);
-    final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
-    final isItAlertable = startTime.difference(DateTime.now()).inDays < 7;
+    bool isItAlertable, isItAnEvent;
+    if (widget.startTime == '' || widget.endTime == '') { // this can't be a timed event
+      isItAnEvent = false;
+      isItAlertable = false;
+    } else {
+      final startTime = combineDateAndTime(widget.startTime, fairDate);
+      final endTime = combineDateAndTime(widget.endTime, fairDate);
+      isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
+      isItAlertable = startTime.difference(DateTime.now()).inDays < 7;
+    }
     final alertIconKey = GlobalKey();
 
     final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,

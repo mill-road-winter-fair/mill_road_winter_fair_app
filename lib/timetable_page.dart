@@ -164,6 +164,7 @@ class TimetablePageState extends State<TimetablePage> {
     debugPrint('TimetablePageState prepareEvents called for ${theEvents.length} listings');
     Map<String, List<PositionedEvent>> preparedEvents = {};
     for (var ev in theEvents) {
+      if (ev['startTime'] == '' || ev['endTime'] == '') continue; // this can't be a timed event
       final startTime = combineDateAndTime(ev['startTime'], fairDate);
       final endTime = combineDateAndTime(ev['endTime'], fairDate);
       if (((ev['performanceMusic'] != null && ev['performanceMusic'] == 'TRUE') ||
