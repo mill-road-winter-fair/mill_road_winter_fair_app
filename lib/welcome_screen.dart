@@ -257,6 +257,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 'service': 'Service',
               }[key]!),
         guideRow(
+          marker('Group-PerformanceEvent'),
+          Text('Multiple performances and events at one location', style: bodyStyle),
+        ),
+        guideRow(
           marker('Mixed'),
           Text('A mix of any of these categories', style: bodyStyle),
         ),
