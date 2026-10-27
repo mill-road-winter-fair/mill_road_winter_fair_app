@@ -182,7 +182,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(context),
       )..layout();
-      final titleWidth = MediaQuery.sizeOf(context).width - pageDecoration.contentMargin.horizontal;
+      final titleWidth = MediaQuery.sizeOf(context).width - pageDecoration.contentMargin.horizontal - 12;
       final titleScale = (titleWidth / titlePainter.width).clamp(0.0, 1.0);
       final bodyHeight = (MediaQuery.sizeOf(context).height -
               MediaQuery.paddingOf(context).vertical -
@@ -197,7 +197,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         titleWidget: FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.center,
-          child: Text(title, style: titleStyle, textAlign: TextAlign.center),
+          child: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 6), child: Text(title, style: titleStyle, textAlign: TextAlign.center)),
         ),
         bodyWidget: LayoutBuilder(
           builder: (context, constraints) => ConstrainedBox(
@@ -280,7 +280,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       ]),
       guidePage('Visit our exciting attractions', [
         tip(Icon(Icons.info), 'Tap the Info button to find out more about any listing.'),
-        tip(Icon(Icons.favorite), 'Tap a listing’s Heart icon to save it. It will then appear in your Favourites.'),
+        tip(FaIcon(FontAwesomeIcons.heart), 'Tap a listing’s Heart icon to save it. It will then appear in the Favourites tab.'),
         tip(FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
         tip(Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
         tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
