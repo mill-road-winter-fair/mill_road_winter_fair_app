@@ -1,14 +1,20 @@
-import 'mocks/listings_mocks.dart';
+// Dart SDK imports
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+// App imports
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
+
+// Third-party imports
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Test helpers, fakes and mocks
+import 'mocks/listings_mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

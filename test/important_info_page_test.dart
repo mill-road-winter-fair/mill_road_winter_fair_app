@@ -1,7 +1,4 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -9,11 +6,18 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
-import 'package:provider/provider.dart';
-import 'fakes/fake_url_launcher.dart';
-import 'pump_with_clock.dart';
 
+// Third-party imports
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
+
+// Test helpers, fakes and mocks
+import 'fakes/fake_url_launcher.dart';
 import 'mocks/listings_mocks.dart';
+import 'pump_with_clock.dart';
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();

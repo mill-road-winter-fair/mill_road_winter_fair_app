@@ -1,16 +1,22 @@
-import 'mocks/listings_mocks.dart';
+// Dart SDK imports
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart' as http_testing;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 
+// Third-party imports
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart' as http_testing;
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Test helpers, fakes and mocks
+import 'mocks/listings_mocks.dart';
 @GenerateMocks([http.Client, SharedPreferences])
 import 'mocks/listings_test.mocks.dart';
 

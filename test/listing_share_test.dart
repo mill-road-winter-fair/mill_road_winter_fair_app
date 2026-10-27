@@ -1,7 +1,12 @@
-import 'mocks/listings_mocks.dart';
-import 'package:flutter_test/flutter_test.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+
+// Third-party imports
+import 'package:flutter_test/flutter_test.dart';
+
+// Test helpers, fakes and mocks
+import 'mocks/listings_mocks.dart';
 
 void main() {
   group('buildListingShareText', () {

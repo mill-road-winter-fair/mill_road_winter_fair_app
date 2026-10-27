@@ -1,17 +1,24 @@
-import 'mocks/listings_mocks.dart';
-import 'pump_with_clock.dart';
+// Dart SDK imports
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/category_tools.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+// Third-party imports
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+
+// Test helpers, fakes and mocks
+import 'mocks/listings_mocks.dart';
+import 'pump_with_clock.dart';
 
 const expectedSubcategories = {
   'food': 'Food & drink',

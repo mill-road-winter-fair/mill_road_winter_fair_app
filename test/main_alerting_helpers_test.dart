@@ -1,17 +1,23 @@
-import 'mocks/listings_mocks.dart';
+// Dart SDK imports
 import 'dart:convert';
 
+// App imports
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
+
+// Third-party imports
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:mill_road_winter_fair_app/helpers.dart';
-import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
+
+// Test helpers, fakes and mocks
+import 'mocks/listings_mocks.dart';
 
 class _FakeAndroidFlutterLocalNotificationsPlugin
     extends AndroidFlutterLocalNotificationsPlugin {
