@@ -1,32 +1,33 @@
 import 'dart:async';
-import 'dart:ui' as ui;
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:mill_road_winter_fair_app/main_alerting.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 OverlayEntry? _miniPopupOverlayEntry; // widget that floats over a given widget as a 'tooltip'
 Timer? _miniPopupTimer; // times how long the above stays on screen
@@ -281,7 +282,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               HapticFeedback.lightImpact();
               analyticsService.logButtonTapped('drawer_website');
               Navigator.pop(context);
-              launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+              context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/'));
             },
           ),
         ),
@@ -313,7 +314,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               HapticFeedback.lightImpact();
               analyticsService.logButtonTapped('drawer_donate');
               Navigator.pop(context);
-              launchUrl(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
+              context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
             },
           ),
         ),
@@ -334,7 +335,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_facebook');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -346,7 +347,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_x');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://x.com/millroadfair'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://x.com/millroadfair'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -358,11 +359,23 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_instagram');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
                 icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
+              ),
+              IconButton(
+                tooltip: 'Open Mill Road Winter Fair on LinkedIn',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  analyticsService.logButtonTapped('drawer_linkedin');
+                  Navigator.pop(context);
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.linkedin.com/company/mill-road-winter-fair/'));
+                },
+                constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                padding: EdgeInsets.zero,
+                icon: FaIcon(FontAwesomeIcons.linkedin, size: 40, color: Theme.of(context).colorScheme.tertiary),
               ),
               IconButton(
                 tooltip: 'Open Mill Road Winter Fair on Flickr',
@@ -370,7 +383,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   HapticFeedback.lightImpact();
                   analyticsService.logButtonTapped('drawer_flickr');
                   Navigator.pop(context);
-                  launchUrl(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
+                  context.read<UrlLauncher>().open(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                 },
                 constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                 padding: EdgeInsets.zero,
@@ -615,7 +628,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_alex');
-                                launchUrl(Uri.parse('https://theberridge.com'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://theberridge.com'));
                               },
                             ),
                             ListTile(
@@ -628,7 +641,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_matt');
-                                launchUrl(Uri.parse('http://mattwhiting.com'));
+                                context.read<UrlLauncher>().open(Uri.parse('http://mattwhiting.com'));
                               },
                             ),
                             ListTile(
@@ -641,7 +654,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_clashfinder');
-                                launchUrl(Uri.parse('https://linktr.ee/cfpal'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://linktr.ee/cfpal'));
                               },
                             ),
                             ListTile(
@@ -650,11 +663,11 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               contentPadding: EdgeInsets.zero,
                               leading: const Icon(Icons.palette_outlined, size: 28),
                               title: Text('Illustrations by Clare McEwan', style: textStyle),
-                              subtitle: Text('https://www.claremcewan.co.uk', style: linkStyle),
+                              subtitle: Text('https://www.artistsmarquee.co.uk', style: linkStyle),
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_clare');
-                                launchUrl(Uri.parse('https://www.claremcewan.co.uk'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://www.artistsmarquee.co.uk/claremcewan'));
                               },
                             ),
                             ListTile(
@@ -667,7 +680,7 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
                               onTap: () async {
                                 HapticFeedback.lightImpact();
                                 analyticsService.logButtonTapped('about_feedback');
-                                launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                                context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
                               },
                             ),
                             Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 10, children: [
@@ -722,22 +735,22 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Text('For general enquiries:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('info@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'info@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('If you would like to volunteer:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('volunteers@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'volunteers@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding events or busking:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('events@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'events@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding vendors:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('stalls@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'stalls@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the website:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('it@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'it@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       const Text('Enquiries regarding the app:', style: TextStyle(fontWeight: FontWeight.bold)),
-                      _buildEmailLink('app@millroadwinterfair.org', analyticsService: analyticsService),
+                      _buildEmailLink(context, 'app@millroadwinterfair.org', analyticsService: analyticsService),
                       const SizedBox(height: 15),
                       Text.rich(
                         TextSpan(
@@ -745,17 +758,18 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                             const TextSpan(
                                 style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
                             TextSpan(
-                                text: '07303\u{00A0}142689',
+                                text: '07486\u{00A0}398744',
                                 style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () async {
                                     HapticFeedback.lightImpact();
                                     analyticsService.logButtonTapped('contact_phone');
-                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07303 142689');
-                                    if (await canLaunchUrl(phoneUri)) {
-                                      await launchUrl(phoneUri);
+                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07486 398744');
+                                    final launcher = context.read<UrlLauncher>();
+                                    if (await launcher.canOpen(phoneUri)) {
+                                      await launcher.open(phoneUri);
                                     } else {
-                                      throw Exception('Could not dial 07303 142689');
+                                      throw Exception('Could not dial 07486 398744');
                                     }
                                   }),
                             const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
@@ -789,7 +803,7 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
   );
 }
 
-Widget _buildEmailLink(String email, {required AnalyticsService analyticsService}) {
+Widget _buildEmailLink(BuildContext context, String email, {required AnalyticsService analyticsService}) {
   return Semantics(
     button: true,
     label: 'Email $email',
@@ -799,8 +813,9 @@ Widget _buildEmailLink(String email, {required AnalyticsService analyticsService
         HapticFeedback.lightImpact();
         analyticsService.logButtonTapped('contact_email');
         final Uri mailUri = Uri(scheme: 'mailto', path: email);
-        if (await canLaunchUrl(mailUri)) {
-          await launchUrl(mailUri);
+        final launcher = context.read<UrlLauncher>();
+        if (await launcher.canOpen(mailUri)) {
+          await launcher.open(mailUri);
         } else {
           throw Exception('Could not launch email client');
         }
@@ -1097,6 +1112,19 @@ String buildListingShareText(
     return '$theTitle at $theLocation has been cancelled and will not be appearing at $fairName.\nhttps://www.millroadwinterfair.org/';
   }
 
+  // Incomplete timings cannot establish whether a listing is underway or over.
+  // Share the known details without inventing times or attendance wording.
+  final startTimeText = theStartTimeString.trim();
+  final endTimeText = theEndTimeString.trim();
+  if (startTimeText.isEmpty || endTimeText.isEmpty) {
+    final timing = startTimeText.isNotEmpty
+        ? '\nStarts at $startTimeText'
+        : endTimeText.isNotEmpty
+            ? '\nEnds at $endTimeText'
+            : '';
+    return '$theTitle at $theLocation, $fairName on ${formatFullDate(fairDate)}$timing\nhttps://www.millroadwinterfair.org/';
+  }
+
   final now = currentTime ?? DateTime.now();
   final startTime = combineDateAndTime(theStartTimeString, fairDate);
   final endTime = combineDateAndTime(theEndTimeString, fairDate);
@@ -1230,7 +1258,7 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
 
 
 Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) async {
-  await alertsStore.refreshEventAlertSchedules(); // since snooze may have updated these
+  await alertsStore.removePastEventAlerts();  // also refreshes from shared prefs in case of snooze
   if (!context.mounted) return;
   final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
   if (theListing == null) return;
@@ -1241,7 +1269,6 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
     alertsStore.removeAlertById(theAlertId);
     flutterLocalNotificationsPlugin.cancel(id: theAlertId);
     showToast(context, 'Alert for ${theListing['title']} has been cancelled.', false);
-    alertsStore.removePastEventAlerts(); // hygiene
     alertsStore.saveAllEventAlerts();
     return;
   } else {
@@ -1291,7 +1318,6 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
     String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
     if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
     showToast(context, '$theMessage.', false);
-    alertsStore.removePastEventAlerts(); // hygiene
     alertsStore.saveAllEventAlerts();
     debugPrint('setTheAlert scheduled new alert with ID $newAlertId in $theAlertNoticePeriod minutes at $schedTime with message “$theMessage”');
     return;

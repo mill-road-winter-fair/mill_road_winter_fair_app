@@ -79,7 +79,7 @@ void main() {
     });
 
     for (final page in ['all', 'favourite']) {
-      testWidgets('$page dropdown filters ${entry.key} independently', (tester) async {
+      testWidgets('$page menu filters ${entry.key} independently', (tester) async {
         listings = [
           for (final key in expectedSubcategories.keys) listingFor(categoryListingId(key), key),
           listingFor('26030', entry.key),
@@ -101,14 +101,23 @@ void main() {
         )));
         await tester.pumpAndSettle();
 
-        final dropdownFinder = find.descendant(
-          of: find.byKey(const ValueKey('filteringdropdown')),
-          matching: find.byType(DropdownMenu<String?>),
+        final menuFinder = find.byKey(const ValueKey('filterdropdown'));
+        final menuButtonFinder = find.descendant(
+          of: menuFinder,
+          matching: find.byType(IconButton),
         );
-        final dropdown = tester.widget<DropdownMenu<String?>>(dropdownFinder);
-        expect({for (final option in dropdown.dropdownMenuEntries)
-          option.value: option.label}, {null: 'Everything', ...expectedSubcategories});
-        dropdown.onSelected!(entry.key);
+        await tester.tap(menuButtonFinder);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Show'), findsOneWidget);
+        expect(find.text('Everything'), findsOneWidget);
+        for (final label in expectedSubcategories.values) {
+          expect(find.text(label), findsOneWidget);
+        }
+
+        final selectedOption = find.text(expectedSubcategories[entry.key]!);
+        await tester.ensureVisible(selectedOption);
+        await tester.tap(selectedOption);
         await tester.pumpAndSettle();
 
         final state = tester.state<FilteredListingsPageState>(find.byType(FilteredListingsPage));
@@ -116,7 +125,9 @@ void main() {
             unorderedEquals([categoryListingId(entry.key), if (page == 'all') '26030']));
         expect(state.isShowingJustPerformance, entry.key.startsWith('performance'));
 
-        tester.widget<DropdownMenu<String?>>(dropdownFinder).onSelected!(null);
+        await tester.tap(menuButtonFinder);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Everything'));
         await tester.pumpAndSettle();
         expect(state.filteredListings.length, expectedSubcategories.length + (page == 'all' ? 1 : 0));
       });

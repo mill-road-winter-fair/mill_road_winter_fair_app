@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/testing.dart' as http_testing;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -20,6 +21,7 @@ void main() {
     listings = [];
     SharedPreferences.setMockInitialValues({});
     mockClient = MockClient();
+    SharedPreferences.setMockInitialValues({});
     dotenv.loadFromString(envString: '''
     HEROKU_API=MOCK_API
     HEROKU_API_KEY=MOCK_KEY
@@ -143,6 +145,19 @@ void main() {
 
         expect(result.length, 1);
         expect(result.first['endTime'], '');
+      });
+
+      test('retry retains authentication header', () async {
+        listings = [];
+        final authenticated = <bool>[];
+        final client = http_testing.MockClient((request) async {
+          authenticated.add(request.headers.containsKey('X-Api-Key'));
+          return http.Response(jsonEncode({'values': [['id'], ['1']]}),
+              authenticated.length == 1 ? 503 : 200);
+        });
+        await fetchListings(client);
+        client.close();
+        expect(authenticated, [true, true]);
       });
     });
 

@@ -1,15 +1,15 @@
 import 'dart:io';
-import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
+import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class GroupListingInfoSheet extends StatelessWidget {
   final bool brickAndMortar;
@@ -138,7 +138,7 @@ class SpecificListingInfoSheet extends StatefulWidget {
   final VoidCallback? onDetailsTapped;
   final VoidCallback? onFavouriteTapped;
   final VoidCallback? onAlertTapped;
-  final Function onGetDirections;
+  final Function? onGetDirections;
   final bool inDialog;
   final ExpandedListingScrollBounds? scrollBounds;
   final AnalyticsService analyticsService;
@@ -232,10 +232,16 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
-    final startTime = combineDateAndTime(widget.startTime, fairDate);
-    final endTime = combineDateAndTime(widget.endTime, fairDate);
-    final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
-    final isItAlertable = startTime.difference(DateTime.now()).inDays < 7;
+    bool isItAlertable, isItAnEvent;
+    if (widget.startTime == '' || widget.endTime == '') { // this can't be a timed event
+      isItAnEvent = false;
+      isItAlertable = false;
+    } else {
+      final startTime = combineDateAndTime(widget.startTime, fairDate);
+      final endTime = combineDateAndTime(widget.endTime, fairDate);
+      isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
+      isItAlertable = startTime.difference(DateTime.now()).inDays < 7;
+    }
     final alertIconKey = GlobalKey();
 
     final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
@@ -379,7 +385,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   ),
                 ),
                 Spacer(),
-                ElevatedButton(
+                if (widget.onGetDirections != null) ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     iconSize: 24,
                     visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
@@ -392,7 +398,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('directions_to_listing', listingId: widget.listingId, listingName: widget.title);
                           widget.analyticsService.logDirectionsToListingRequested(widget.title);
-                          widget.onGetDirections();
+                          widget.onGetDirections?.call(); // null-safe
                         },
                   child: const Icon(Icons.directions_walk, semanticLabel: 'Get walking directions'),
                 ),
@@ -527,7 +533,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             onTap: () async {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('visit_listing_website', listingId: widget.listingId, listingName: widget.title);
-              launchUrl(Uri.parse(widget.website));
+              context.read<UrlLauncher>().open(Uri.parse(widget.website));
             },
             child: Text.rich(
               TextSpan(
@@ -550,8 +556,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('email_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri mailUri = Uri(scheme: 'mailto', path: widget.email);
-              if (await canLaunchUrl(mailUri)) {
-                await launchUrl(mailUri);
+              final launcher = context.read<UrlLauncher>();
+              if (await launcher.canOpen(mailUri)) {
+                await launcher.open(mailUri);
               } else {
                 throw Exception('Could not launch email client');
               }
@@ -576,8 +583,9 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
               HapticFeedback.lightImpact();
               widget.analyticsService.logButtonTapped('phone_listing', listingId: widget.listingId, listingName: widget.title);
               final Uri phoneUri = Uri(scheme: 'tel', path: widget.phoneNumber);
-              if (await canLaunchUrl(phoneUri)) {
-                await launchUrl(phoneUri);
+              final launcher = context.read<UrlLauncher>();
+              if (await launcher.canOpen(phoneUri)) {
+                await launcher.open(phoneUri);
               } else {
                 throw Exception('Could not launch ${widget.phoneNumber}');
               }
