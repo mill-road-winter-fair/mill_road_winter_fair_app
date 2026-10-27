@@ -175,19 +175,6 @@ void main() {
         await tester.pumpWidget(Provider<UrlLauncher>.value(
           value: fakeUrlLauncher,
           child: createWidgetUnderTest(
-            cancelled: false,
-            brickAndMortar: false,
-            emoji: '🍩',
-            title: 'Glazed and Confused',
-            subtitle: 'Food • Doughnuts',
-            location: 'Gwydir St Car Park',
-            description: 'Nice buns',
-            email: 'sales@glazedandconfused.com',
-            website: 'https://www.glazedandconfused.com',
-            phoneNumber: '01223 111111',
-            imageURL: '',
-            startTime: '10:30',
-            endTime: '16:30',
             approxDistance: convertDistanceUnits(
               approximateDistanceMetres,
               DistanceUnits.metric,
@@ -220,8 +207,8 @@ void main() {
 
           await expectTapLaunches(
             tester,
-            find.text('Website: https://www.glazedandconfused.com'),
-            'https://www.glazedandconfused.com',
+            find.text('Website: https://glazedandconfused.example'),
+            'https://glazedandconfused.example',
           );
         },
       );
@@ -233,8 +220,8 @@ void main() {
 
           await expectTapLaunches(
             tester,
-            find.text('Email: sales@glazedandconfused.com'),
-            'mailto:sales@glazedandconfused.com',
+            find.text('Email: sales@glazedandconfused.example'),
+            'mailto:sales@glazedandconfused.example',
           );
         },
       );

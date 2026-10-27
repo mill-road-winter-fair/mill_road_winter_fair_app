@@ -121,13 +121,13 @@ void main() {
         for (var i = 0; i < 1; i++) ...[
           Uri.parse('https://example.com'),
           Uri(scheme: 'mailto', path: 'test@example.com'),
-          Uri(scheme: 'tel', path: '0123456789'),
+          Uri(scheme: 'tel', path: '01223 111111'),
         ],
       ]);
       expect(launcher.checkedUris, [
         for (var i = 0; i < 1; i++) ...[
           Uri(scheme: 'mailto', path: 'test@example.com'),
-          Uri(scheme: 'tel', path: '0123456789'),
+          Uri(scheme: 'tel', path: '01223 111111'),
         ],
       ]);
       for (final event in analytics.buttonEvents) {

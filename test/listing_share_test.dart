@@ -5,6 +5,7 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 
 void main() {
   group('buildListingShareText', () {
+    final listing = mockListing('glazedAndConfused');
     for (final timings in [
       ('15:45', '', '\nStarts at 15:45'),
       ('', '16:30', '\nEnds at 16:30'),
@@ -20,8 +21,8 @@ void main() {
           fairDate.add(const Duration(days: 1)),
         ]) {
           final message = buildListingShareText(
-            'Oli Bruce',
-            'Avenue of Limes',
+            listing['title'] as String,
+            listing['location'] as String,
             timings.$1,
             timings.$2,
             cancelled: false,
@@ -30,7 +31,7 @@ void main() {
 
           expect(
             message,
-            'Oli Bruce at Avenue of Limes, $fairName on ${formatFullDate(fairDate)}${timings.$3}\n'
+            'Glazed and Confused at Gwydir Street, $fairName on ${formatFullDate(fairDate)}${timings.$3}\n'
             'https://www.millroadwinterfair.org/',
           );
         }
@@ -39,8 +40,8 @@ void main() {
 
     test('keeps cancellation wording when both times are missing', () {
       final message = buildListingShareText(
-        'Oli Bruce',
-        'Avenue of Limes',
+        listing['title'] as String,
+        listing['location'] as String,
         '',
         '',
         cancelled: true,
@@ -48,7 +49,7 @@ void main() {
 
       expect(
         message,
-        'Oli Bruce at Avenue of Limes has been cancelled and will not be appearing at $fairName.\n'
+        'Glazed and Confused at Gwydir Street has been cancelled and will not be appearing at $fairName.\n'
         'https://www.millroadwinterfair.org/',
       );
     });

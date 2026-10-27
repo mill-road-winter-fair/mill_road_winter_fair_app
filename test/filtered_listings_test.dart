@@ -30,31 +30,13 @@ Map<String, dynamic> testListing({
   String endTime = '16:30',
 }) {
   return {
+    ...mockListing('listing'),
     'id': id,
-    'visibleOnMap': 'TRUE',
-    'cancelled': 'FALSE',
     'groupParent': groupParent,
-    'brickAndMortar': 'FALSE',
-    'emoji': '',
     'title': title,
-    'subtitle': '',
-    'groupID': '',
     'food': food,
     'shopping': shopping,
-    'charityCommunityInfo': 'FALSE',
     'performanceMusic': performanceMusic,
-    'performanceChildrens': 'FALSE',
-    'performanceDance': 'FALSE',
-    'performanceOther': 'FALSE',
-    'visitExperience': 'FALSE',
-    'service': 'FALSE',
-    'location': 'Mill Road',
-    'description': '',
-    'email': '',
-    'website': '',
-    'phone': '',
-    'latLng': '52.199174,0.140929',
-    'imageURL': '',
     'startTime': startTime,
     'endTime': endTime,
   };
@@ -186,7 +168,7 @@ void main() {
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue (~197m away)'), findsOneWidget);
+      expect(find.text('Mortimer Road (~197m away)'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsExactly(2));
     });
 
