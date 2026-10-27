@@ -81,10 +81,6 @@ class _FakeAndroidFlutterLocalNotificationsPlugin
   Future<List<PendingNotificationRequest>> pendingNotificationRequests() async => <PendingNotificationRequest>[];
 }
 
-String _formatHourMinute(DateTime dateTime) {
-  return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-}
-
 Future<void> _withAndroidPlatform(Future<void> Function() callback) async {
   debugDefaultTargetPlatformOverride = TargetPlatform.android;
   try {
@@ -110,10 +106,6 @@ void main() {
     FlutterLocalNotificationsPlatform.instance =
         _FakeAndroidFlutterLocalNotificationsPlugin();
     SharedPreferences.setMockInitialValues({});
-    final listingOneStart = DateTime.now().add(const Duration(hours: 2));
-    final listingOneEnd = listingOneStart.add(const Duration(hours: 2));
-    final listingTwoStart = DateTime.now().add(const Duration(hours: 5));
-    final listingTwoEnd = listingTwoStart.add(const Duration(hours: 2));
     listings = [
       mockListing('alertDoughnuts'),
       mockListing('acousticStage'),
