@@ -256,6 +256,8 @@ String markerAssetPath(String category) {
       assetPath = 'assets/mapMarkers/performanceEventGroupMarker.png';
     case 'Mixed':
       assetPath = 'assets/mapMarkers/mixedGroupMarker.png';
+    default:
+      throw ArgumentError.value(category, 'category', 'Unknown map marker category');
   }
 
   return assetPath;
@@ -265,13 +267,13 @@ String markerFrameAssetPath(String category) =>
     category == 'Group-PerformanceEvent' || category == 'Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
 
 Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
-  final assetPath = markerAssetPath(category);
-  final backdropData = await rootBundle.load(markerFrameAssetPath(category));
-  if (onTest == true) {
-    // Return a default marker during unit tests to avoid crashes
-    return BitmapDescriptor.defaultMarker;
-  }
   try {
+    final assetPath = markerAssetPath(category);
+    final backdropData = await rootBundle.load(markerFrameAssetPath(category));
+    if (onTest == true) {
+      // Return a default marker during unit tests to avoid crashes
+      return BitmapDescriptor.defaultMarker;
+    }
     int markerPixelSize = 288;
     final ui.Codec backdropCodec = await ui.instantiateImageCodec(
       backdropData.buffer.asUint8List(),
