@@ -280,7 +280,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       ]),
       guidePage('Visit our exciting attractions', [
         tip(Icon(Icons.info), 'Tap the Info button to find out more about any listing.'),
-        tip(Icon(Icons.favorite), 'Tap a listing’s Heart icon to save it. It will then appear in your Favourites.'),
+        tip(FaIcon(FontAwesomeIcons.heart), 'Tap a listing’s Heart icon to save it. It will then appear in the Favourites tab.'),
         tip(FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
         tip(Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
         tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
