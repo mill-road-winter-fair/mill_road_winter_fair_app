@@ -197,7 +197,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         titleWidget: FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.center,
-          child: Text(title, style: titleStyle, textAlign: TextAlign.center),
+          child: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 6), child: Text(title, style: titleStyle, textAlign: TextAlign.center)),
         ),
         bodyWidget: LayoutBuilder(
           builder: (context, constraints) => ConstrainedBox(
