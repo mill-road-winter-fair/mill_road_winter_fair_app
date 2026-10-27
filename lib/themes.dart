@@ -57,7 +57,7 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   'dark': ThemeData(
     useMaterial3: true,
@@ -93,7 +93,7 @@ final Map<String, ThemeData> appThemes = {
     listTileTheme: const ListTileThemeData(
       tileColor: Color.fromRGBO(44, 44, 44, 1.0),
     ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   '2024': ThemeData(
     useMaterial3: true,
@@ -123,7 +123,7 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
@@ -162,8 +162,8 @@ final Map<String, ThemeData> appThemes = {
       style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
     ),
     listTileTheme: const ListTileThemeData(tileColor: Colors.black),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
-),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
+  ),
   'colourBlindFriendly': ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme(
@@ -192,8 +192,8 @@ final Map<String, ThemeData> appThemes = {
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
     ),
-    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
-),
+    shadowColor: const Color.fromRGBO(0, 0, 0, 0.2),
+  ),
 };
 
 // Standard Google Maps themes (designed with https://mapstyle.withgoogle.com/)
@@ -216,9 +216,8 @@ String nightMap =
 String aubergineMap =
     '[{"elementType":"geometry","stylers":[{"color":"#1d2c4d"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#8ec3b9"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#1a3646"}]},{"featureType":"administrative.country","elementType":"geometry.stroke","stylers":[{"color":"#4b6878"}]},{"featureType":"administrative.land_parcel","elementType":"labels.text.fill","stylers":[{"color":"#64779e"}]},{"featureType":"administrative.province","elementType":"geometry.stroke","stylers":[{"color":"#4b6878"}]},{"featureType":"landscape.man_made","elementType":"geometry.stroke","stylers":[{"color":"#334e87"}]},{"featureType":"landscape.natural","elementType":"geometry","stylers":[{"color":"#023e58"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#283d6a"}]},{"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#6f9ba5"}]},{"featureType":"poi","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#023e58"}]},{"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#3C7680"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#304a7d"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#98a5be"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#2c6675"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#255763"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#b0d5ce"}]},{"featureType":"road.highway","elementType":"labels.text.stroke","stylers":[{"color":"#023e58"}]},{"featureType":"transit","elementType":"labels.text.fill","stylers":[{"color":"#98a5be"}]},{"featureType":"transit","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"transit.line","elementType":"geometry.fill","stylers":[{"color":"#283d6a"}]},{"featureType":"transit.station","elementType":"geometry","stylers":[{"color":"#3a4762"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#0e1626"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#4e6d70"}]},{"featureType":"transit.line","elementType":"geometry","stylers":[{"visibility":"on"}]}]';
 
-Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
+String markerAssetPath(String category) {
   late String assetPath;
-  final ByteData backdropData;
 
   switch (category) {
     case 'Group-Food':
@@ -259,13 +258,15 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
       assetPath = 'assets/mapMarkers/mixedGroupMarker.png';
   }
 
-  // Adjust the asset path if this is a group and load the relevant backdrop image (frame)
-  if (category == 'Group-PerformanceEvent' || category == 'Mixed') {
-    backdropData = await rootBundle.load("assets/mapMarkers/groupMarkerIconFrameThin.png");
-  } else {
-    backdropData = await rootBundle.load("assets/mapMarkers/markerIconFrame.png");
-  }
+  return assetPath;
+}
 
+String markerFrameAssetPath(String category) =>
+    category == 'Group-PerformanceEvent' || category == 'Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
+
+Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
+  final assetPath = markerAssetPath(category);
+  final backdropData = await rootBundle.load(markerFrameAssetPath(category));
   if (onTest == true) {
     // Return a default marker during unit tests to avoid crashes
     return BitmapDescriptor.defaultMarker;
@@ -323,7 +324,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
   final effectiveThemeKey = getEffectiveThemeKey(selectedThemeKey);
   Color color;
   if (effectiveThemeKey == "light") {
-    color = switch(category) {
+    color = switch (category) {
       "Food" || "Group-Food" => const Color.fromRGBO(255, 156, 26, 1.0),
       "Shopping" || "Group-Shopping" => const Color.fromRGBO(209, 85, 89, 1.0),
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(190, 110, 230, 1.0),
@@ -335,7 +336,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
     };
   } else if (effectiveThemeKey == "dark") {
-    color = switch(category) {
+    color = switch (category) {
       "Food" || "Group-Food" => const Color.fromRGBO(241, 108, 0, 1.0),
       "Shopping" || "Group-Shopping" => const Color.fromRGBO(138, 57, 58, 1.0),
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(183, 13, 204, 1.0),
