@@ -244,8 +244,7 @@ void main() {
       expect(find.text('Sushi'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
       expect(find.text('Implausible Avenue (~197m away)'), findsOneWidget);
-      // Count of walking icons is 3 because of the 1 in the sorting dropdown, plus 2 listings
-      expect(find.byIcon(Icons.directions_walk), findsExactly(3));
+      expect(find.byIcon(Icons.directions_walk), findsExactly(2));
     });
 
     testWidgets('different sorting methodologies change the order', (WidgetTester tester) async {
@@ -377,6 +376,26 @@ void main() {
       expect(filteredListingsPageState.filteredListings[2]['title'], 'Sushi Squad');
     });
 
+    testWidgets('location sorting ignores house number ranges and suffixes', (WidgetTester tester) async {
+      await loadSettings();
+      preferredSortingMethod = SortingMethod.location;
+      final locations = ['1-2 Mill Road', '92A York Street', 'Donkey Common', '3–4 Gwydir Street', '12a Kingston Street'];
+      final entries = locations.asMap().entries.map((entry) => <String, dynamic>{
+        ...testListing(id: 'numbered-location-${entry.key}', title: 'Venue ${entry.key}'),
+        'location': entry.value,
+      }).toList();
+
+      await pumpFilteredListingsPage(tester, 'all', entries, []);
+      final state = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
+      expect(state.filteredListings.map((listing) => listing['location']), [
+        'Donkey Common',
+        '3–4 Gwydir Street',
+        '12a Kingston Street',
+        '1-2 Mill Road',
+        '92A York Street',
+      ]);
+    });
+
     testWidgets('tapping the sorting buttons changes preferred sorting method', (WidgetTester tester) async {
       await loadSettings();
 
@@ -430,7 +449,7 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
-      await tester.tap(find.text('Time').last);
+      await tester.tap(find.text('Start time').last);
       await settle(tester);
 
       expect(preferredSortingMethod, SortingMethod.values[2]);
@@ -848,12 +867,12 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
-      expect(find.text('Time'), findsWidgets);
+      expect(find.text('Start time'), findsWidgets);
 
       await pumpFilteredListingsPage(tester, 'favourite', sampleListings, ['food'], resetState: true);
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
-      expect(find.text('Time'), findsWidgets);
+      expect(find.text('Start time'), findsWidgets);
     });
 
     testWidgets('scroll to now selects time sorting and finds the first current listing', (WidgetTester tester) async {

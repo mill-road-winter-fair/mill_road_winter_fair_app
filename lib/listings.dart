@@ -64,7 +64,7 @@ Future<List<Map<String, dynamic>>> fetchListings(
     if (response.statusCode != 200) {
       for (var i = 0; i < 9; i++) {
         await Future.delayed(const Duration(seconds: 2));
-        final retryResponse = await client.get(uri);
+        final retryResponse = await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
         debugPrint(
             'Retry ${i + 1} response status: ${retryResponse.statusCode}');
         if (retryResponse.statusCode == 200) {

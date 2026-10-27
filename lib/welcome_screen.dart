@@ -6,13 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 
 class WelcomeScreen extends StatelessWidget {
   final AnalyticsService analyticsService;
@@ -325,7 +326,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     ..onTap = () {
                       HapticFeedback.lightImpact();
                       widget.analyticsService.logButtonTapped('mrwf_website_hyperlink');
-                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/'));
+                      context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/'));
                     },
                 ),
                 const TextSpan(text: '.'),
@@ -344,7 +345,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     ..onTap = () {
                       HapticFeedback.lightImpact();
                       widget.analyticsService.logButtonTapped('app_feedback_hyperlink');
-                      launchUrl(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                      context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
                     },
                 ),
                 const TextSpan(text: '.'),
