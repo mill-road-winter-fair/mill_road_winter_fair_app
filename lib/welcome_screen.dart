@@ -182,7 +182,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(context),
       )..layout();
-      final titleWidth = MediaQuery.sizeOf(context).width - pageDecoration.contentMargin.horizontal;
+      final titleWidth = MediaQuery.sizeOf(context).width - pageDecoration.contentMargin.horizontal - 12;
       final titleScale = (titleWidth / titlePainter.width).clamp(0.0, 1.0);
       final bodyHeight = (MediaQuery.sizeOf(context).height -
               MediaQuery.paddingOf(context).vertical -
