@@ -84,5 +84,13 @@ void main() {
       expect(m, isNotNull);
       expect(m, equals(BitmapDescriptor.defaultMarker));
     });
+
+    testWidgets('getColoredMarker returns default for unknown category outside test mode', (tester) async {
+      final previousOnTest = onTest;
+      onTest = false;
+      addTearDown(() => onTest = previousOnTest);
+
+      expect(await getColoredMarker('Not-A-Real-Type', Colors.blue), BitmapDescriptor.defaultMarker);
+    });
   });
 }

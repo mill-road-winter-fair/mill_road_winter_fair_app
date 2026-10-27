@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -237,25 +238,31 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         const SizedBox(height: 10),
                         const Text(
                             style: TextStyle(height: 1.25),
-                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.'),
+                            'Whilst Mill Road (between East Road and Coleridge Road), Mortimer Road, Headly Street and the tops of Tenison Road, St Barnabas Road, Devonshire Road, Gwydir Street, Cavendish Road and Catharine Street where they join Mill Road will be closed to traffic (including cyclists and scooters) between 09:00 and 17:30 on the day, there will be some vehicle movement.',
+                        ),
                         const SizedBox(height: 10),
-                        const Text('Pedestrians should exercise particular care before the road is fully closed.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                        const Text(
+                          style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),
+                          'Pedestrians should exercise particular care before the road is fully closed.',
+                        ),
                         const SizedBox(height: 10),
-                        const Text('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
-                            style: TextStyle(fontWeight: FontWeight.bold, height: 1.25)),
+                        const Text(
+                          style: TextStyle(fontWeight: FontWeight.bold, height: 1.25),
+                          'Re-opening will occur gradually, so drivers and pedestrians should take extreme care.',
+                        ),
                         const SizedBox(height: 10),
                         const Text(
                             style: TextStyle(height: 1.25),
-                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
+                            'Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.',
+                        ),
                         const SizedBox(height: 10),
                         Text.rich(
                           TextSpan(
                             children: [
                               const TextSpan(
                                   style: TextStyle(height: 1.25),
-                                  text:
-                                      'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at '),
+                                  text: 'If your property/business is in the area affected by the road closure, please read the Road Closure Notice distributed separately or available at ',
+                              ),
                               TextSpan(
                                   text: 'www.millroadwinterfair.org/important-info',
                                   style: const TextStyle(decoration: TextDecoration.underline, height: 1.25),
@@ -648,7 +655,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           if (timeCompare != 0) return timeCompare;
           return a['title'].compareTo(b['title']);
         });
-
 
         final groupSheetModalScrollController = ScrollController();
         final expandedScrollBounds = ExpandedListingScrollBounds();
@@ -1365,7 +1371,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     });
   }
 
-
   void cancelNavigation() async {
     debugPrint('MapPageState cancelNavigation called');
     // Halt the location subscription
@@ -1635,7 +1640,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     _moveCameraToBounds(LatLng(markerMinLat, markerMinLong), LatLng(markerMaxLat, markerMaxLong));
   }
 
-
   void _moveCameraToBounds(LatLng southwest, LatLng northeast) {
     debugPrint('MapPageState moveCameraToBounds called with southwest=$southwest northeast=$northeast');
     switch (preferredMapOrientation) {
@@ -1651,7 +1655,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         break;
     }
   }
-
 
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
     debugPrint('MapPageState _setMapCameraToFitPolyline called');
@@ -2327,64 +2330,33 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     ),
                   ),
                 ),
-              if (preferredRoadClosurePolygonVisible && navigationInProgress == false)
+              if (!navigationInProgress && doingAPushNavigation == null)
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 5.0, bottom: 6.0),
+                    padding: const EdgeInsets.only(left: 5, bottom: 6),
                     child: Material(
                       elevation: 3,
                       borderRadius: BorderRadius.circular(8),
                       color: colorScheme.surface,
-                      child: Semantics(
-                        button: true,
-                        label: 'Road closures. Show more information',
-                        excludeSemantics: true,
-                        child: GestureDetector(
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            widget.analyticsService.logButtonTapped('road_closures_legend');
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return roadClosuresDialog();
+                      child: IconButton(
+                        tooltip: 'Map markers',
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('map_key');
+                          showDialog(
+                            context: context,
+                            builder: (keyContext) => MapKeyDialog(
+                              onRoadClosureInformation: () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('road_closures_more_information');
+                                Navigator.pop(keyContext);
+                                showDialog(context: context, builder: (_) => roadClosuresDialog());
                               },
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 20,
-                                  height: 14,
-                                  decoration: BoxDecoration(
-                                    color: selectedThemeKey == 'colourBlindFriendly'
-                                        ? const Color.fromRGBO(224, 129, 87, 255)
-                                        : colorScheme.tertiary.withAlpha(50),
-                                    border: Border.all(
-                                      color: colorScheme.tertiary,
-                                      width: 3,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Road closures',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: colorScheme.tertiary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                          );
+                        },
+                        icon: const MapKeyIcon(),
                       ),
                     ),
                   ),
@@ -2394,6 +2366,137 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           analyticsService: widget.analyticsService,
         );
       },
+    );
+  }
+}
+
+class MapKeyIcon extends StatelessWidget {
+  const MapKeyIcon({super.key});
+
+  @override
+  Widget build(BuildContext context) => FaIcon(FontAwesomeIcons.mapLocationDot, size: 24, color: Theme.of(context).colorScheme.primary);
+}
+
+class MapKeyDialog extends StatefulWidget {
+  final VoidCallback onRoadClosureInformation;
+
+  const MapKeyDialog({super.key, required this.onRoadClosureInformation});
+
+  @override
+  State<MapKeyDialog> createState() => _MapKeyDialogState();
+}
+
+class _MapKeyDialogState extends State<MapKeyDialog> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  static const markerLabels = {
+    'Food': 'Food and drink',
+    'Shopping': 'Shopping stalls',
+    'Charity/Community/Info': 'Charity, community and information',
+    'Music': 'Music',
+    'Childrens': 'Children’s activities',
+    'Dance': 'Dance',
+    'Other': 'Other performances and events',
+    'Visit/Experience': 'Visits and experiences',
+    'Business': 'Local businesses',
+    'Service': 'Services, including toilets, first aid and information',
+    'Group-PerformanceEvent': 'Multiple performances and events at one location',
+    'Mixed': 'A mix of activities at one location',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final colours = Theme.of(context).colorScheme;
+    return AlertDialog(
+      title: const Text('Map markers'),
+      titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      actionsPadding: const EdgeInsets.fromLTRB(8, 0, 8, 4),
+      content: SizedBox(
+        width: 320,
+        child: Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: Platform.isIOS ? false : true,
+          thickness: 4,
+          radius: const Radius.circular(8),
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            primary: false,
+            padding: const EdgeInsets.only(right: 8),
+            child: DefaultTextStyle.merge(
+              style: const TextStyle(fontSize: 14),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final entry in markerLabels.entries)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        children: [
+                          ExcludeSemantics(
+                            child: SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.asset(markerFrameAssetPath(entry.key)),
+                                  Image.asset(markerAssetPath(entry.key), color: getCategoryColor(selectedThemeKey, entry.key), colorBlendMode: BlendMode.srcIn),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(entry.value)),
+                        ],
+                      ),
+                    ),
+                  const Divider(),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 32,
+                        child: Center(
+                          child: Container(
+                            width: 20,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: selectedThemeKey == 'colourBlindFriendly' ? const Color.fromRGBO(224, 129, 87, 1) : colours.tertiary.withAlpha(50),
+                              border: Border.all(color: colours.tertiary, width: 3),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(child: Text('Road closures — the shaded area is closed to traffic.')),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 40),
+                    child: TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 28),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          alignment: Alignment.centerLeft,
+                        ),
+                        onPressed: widget.onRoadClosureInformation,
+                        child: const Text('More information')),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))],
     );
   }
 }

@@ -188,8 +188,11 @@ void main() {
       state.hideAllMarkers();
       final before = Map<MarkerId, Marker>.of(state.markers);
       final types = {
-        '1': 'Group-Food', '3': 'Food', aSimpleMarkerId: 'Service-FirstAid',
-        'mixed': 'Mixed', 'performance': 'Group-PerformanceEvent',
+        '1': 'Group-Food',
+        '3': 'Food',
+        aSimpleMarkerId: 'Service-FirstAid',
+        'mixed': 'Mixed',
+        'performance': 'Group-PerformanceEvent',
       };
       for (final theme in ['dark', '2024', 'highContrast', 'colourBlindFriendly', 'light']) {
         selectedThemeKey = theme;
@@ -211,7 +214,7 @@ void main() {
         tester.platformDispatcher.platformBrightnessTestValue = brightness;
         await tester.pumpAndSettle();
         expect(state.markers[const MarkerId('3')]!.icon.toJson(),
-          BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson());
+            BitmapDescriptor.defaultMarkerWithHue(HSVColor.fromColor(getCategoryColor(brightness == Brightness.dark ? 'dark' : 'light', 'Food')).hue).toJson());
       }
       // A queued refresh must not call setState after the map has been removed.
       selectedThemeKey = 'dark';
@@ -363,14 +366,39 @@ void main() {
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
       expect(state.markers.length, 2);
-      expect(state.markers.values.map((m) => m.position).toSet().length, 2,
-          reason: 'Two matching markers at the same lat/lng should be visually offset to avoid overlap.');
+      expect(state.markers.values.map((m) => m.position).toSet().length, 2, reason: 'Two matching markers at the same lat/lng should be visually offset to avoid overlap.');
+    });
+
+    testWidgets('map markers button stays hidden throughout the directions transition', (tester) async {
+      final previousNavigationInProgress = navigationInProgress;
+      navigationInProgress = false;
+      addTearDown(() => navigationInProgress = previousNavigationInProgress);
+      await tester.pumpWidget(MaterialApp(
+        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('Map markers'), findsOneWidget);
+
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      // The pushed page starts at true, then switches to false while directions load.
+      for (final transitionState in [true, false]) {
+        state.doingAPushNavigation = transitionState;
+        tester.element(find.byType(MapPage)).markNeedsBuild();
+        await tester.pump();
+        expect(find.byTooltip('Map markers'), findsNothing);
+      }
+      navigationInProgress = true;
+      tester.element(find.byType(MapPage)).markNeedsBuild();
+      await tester.pump();
+      expect(find.byTooltip('Map markers'), findsNothing);
     });
 
     testWidgets('cancelNavigation restores markers matching any selected category', (tester) async {
       final originalListings = listings;
       addTearDown(() => listings = originalListings);
-      listings = [{...originalListings[2], 'business': 'TRUE'}];
+      listings = [
+        {...originalListings[2], 'business': 'TRUE'}
+      ];
 
       await tester.pumpWidget(
         MaterialApp(
@@ -415,10 +443,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
-      Set<String> visibleIds() => state.markers.values
-          .where((marker) => marker.visible)
-          .map((marker) => marker.markerId.value)
-          .toSet();
+      Set<String> visibleIds() => state.markers.values.where((marker) => marker.visible).map((marker) => marker.markerId.value).toSet();
       expect(visibleIds(), {'1', '3'});
 
       await tester.tap(find.byIcon(Icons.search));
@@ -494,8 +519,8 @@ void main() {
       expect(find.byIcon(Icons.filter_alt), findsOneWidget);
       expect(find.byIcon(Icons.radar), findsOneWidget);
 
-      // Check road closure button
-      expect(find.text('Road closures'), findsOneWidget);
+      // Check map key button
+      expect(find.byTooltip('Map markers'), findsOneWidget);
     });
 
     testWidgets('cancelling search reapplies the selected marker filters', (tester) async {
@@ -520,10 +545,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final state = tester.state<MapPageState>(find.byType(MapPage));
-      Set<String> visibleIds() => state.markers.values
-          .where((marker) => marker.visible)
-          .map((marker) => marker.markerId.value)
-          .toSet();
+      Set<String> visibleIds() => state.markers.values.where((marker) => marker.visible).map((marker) => marker.markerId.value).toSet();
       state.filterSettings['Food'] = false;
       state.showFilteredMarkers();
       expect(visibleIds(), {'4'});
@@ -666,7 +688,7 @@ void main() {
       expect(tester.widget<AnimatedRotation>(animatedRotationFinder).turns, 0.25);
     });
 
-    testWidgets('tapping Road Closure legend opens road closures dialog', (WidgetTester tester) async {
+    testWidgets('map key opens the original road closure notice through More information', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
@@ -683,14 +705,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Find the "Road closures" legend at the bottom left
-      // There are two "Road closures" texts potentially (legend and dialog title),
-      // but only the legend is present initially.
-      final legendFinder = find.text('Road closures');
+      // Open the map key at the bottom left.
+      final legendFinder = find.byTooltip('Map markers');
       expect(legendFinder, findsOneWidget);
 
       // Tap the legend
       await tester.tap(legendFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('Map markers'), findsOneWidget);
+      await tester.ensureVisible(find.text('More information'));
+      await tester.tap(find.text('More information'));
       await tester.pumpAndSettle();
 
       // Verify the dialog is opened
@@ -730,14 +754,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Find the "Road closures" legend at the bottom left
-      // There are two "Road closures" texts potentially (legend and dialog title),
-      // but only the legend is present initially.
-      final legendFinder = find.text('Road closures');
+      // Open the map key at the bottom left.
+      final legendFinder = find.byTooltip('Map markers');
       expect(legendFinder, findsOneWidget);
 
       // Tap the legend
       await tester.tap(legendFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('Map markers'), findsOneWidget);
+      await tester.ensureVisible(find.text('More information'));
+      await tester.tap(find.text('More information'));
       await tester.pumpAndSettle();
 
       // Tap the "Hide road closures" text in the dialog
@@ -748,6 +774,7 @@ void main() {
 
       // Verify state update and polygon removal
       expect(preferredRoadClosurePolygonVisible, isFalse);
+      expect(find.byTooltip('Map markers'), findsOneWidget);
       expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isFalse);
     });
 
@@ -784,6 +811,7 @@ void main() {
 
       // Verify state update and polygon removal
       expect(preferredRoadClosurePolygonVisible, isFalse);
+      expect(find.byTooltip('Map markers'), findsOneWidget);
       expect(tester.widget<GoogleMap>(find.byType(GoogleMap)).polygons.any((p) => p.polygonId.value == 'roadClosure'), isFalse);
 
       // Toggle it back on
