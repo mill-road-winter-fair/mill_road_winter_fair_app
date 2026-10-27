@@ -155,8 +155,22 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       Text(text, style: bodyStyle),
     );
 
+    Widget marker(String category) => ExcludeSemantics(
+          child: SizedBox(
+            width: 40,
+            height: 40,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(markerFrameAssetPath(category)),
+                Image.asset(markerAssetPath(category), color: getCategoryColor(selectedThemeKey, category), colorBlendMode: BlendMode.srcIn),
+              ],
+            ),
+          ),
+        );
+
     Widget category(String key, String colourKey) => guideRow(
-          Icon(subfilterCategoryLabels[key]!.iconData, size: 40, color: getCategoryColor(selectedThemeKey, colourKey)),
+          marker(colourKey),
           Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
         );
 
@@ -243,7 +257,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 'service': 'Service',
               }[key]!),
         guideRow(
-          Image.asset('assets/mapMarkers/mixedMarker.png', height: 40, width: 40, color: getCategoryColor(selectedThemeKey, 'Mixed')),
+          marker('Mixed'),
           Text('A mix of any of these categories', style: bodyStyle),
         ),
       ]),
