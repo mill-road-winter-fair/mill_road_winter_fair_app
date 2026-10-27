@@ -1599,3 +1599,21 @@ bool isWidgetFullyVisible(BuildContext context) {
       offset.dx >= 0 &&
       offset.dx + size.width <= viewportSize.width;
 }
+
+// Retry failed or stalled requests, with one deadline for the whole operation.
+// Timed-out futures may still finish, so [request] must not mutate UI state.
+Future<T> requestRoute<T>(Future<T> Function() request, {
+  Duration timeout = const Duration(seconds: 10),
+}) {
+  Future<T> attemptRequests() async {
+    for (var attempt = 0; ; attempt++) {
+      try {
+        return await request().timeout(const Duration(seconds: 3));
+      } on Exception {
+        if (attempt == 2) rethrow;
+      }
+    }
+  }
+
+  return attemptRequests().timeout(timeout);
+}

@@ -89,6 +89,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   GoogleMapController? _controller;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
+  bool _routeLoading = false;
+  int _routeRequestVersion = 0;
   final ScrollController _roadClosuresDialogScrollController = ScrollController();
   // Declare default filters
   final Map<String, bool> filterSettings = {
@@ -1319,13 +1321,26 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
+    if (_routeLoading || !mounted) return;
+    final version = ++_routeRequestVersion;
+    final deadline = DateTime.now().add(const Duration(seconds: 10));
+    setState(() => _routeLoading = true);
+    try {
     // If user has location tracking enabled
     if (currentLatLng != null) {
       hideAllMarkers();
       // Get the user's current location
-      Position position = await getCurrentPosition();
-      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-      final routeLoaded = await updatePolyline(currentLatLng, destination);
+      var origin = currentLatLng!;
+      try {
+        final position = await getCurrentPosition().timeout(const Duration(seconds: 1));
+        origin = LatLng(position.latitude, position.longitude);
+      } on Exception {
+        // Use the established location if a fresh GPS fix is unavailable.
+      }
+      if (!mounted || version != _routeRequestVersion) return;
+      final routeLoaded = await updatePolyline(origin, destination,
+          timeout: deadline.difference(DateTime.now()));
+      if (!mounted || version != _routeRequestVersion) return;
       if (!routeLoaded) {
         _closeFailedDirectionsPage(navigatorPop);
         return;
@@ -1334,6 +1349,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       _setMapCameraToFitPolyline(polylines);
       // Start location updates
       await startLocationUpdates(destination);
+      if (!mounted || version != _routeRequestVersion) return;
     } else {
       Fluttertoast.showToast(
         msg: 'Location services and permissions are required to determine directions',
@@ -1369,6 +1385,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       // Set navigation as in progress; do this late so cancel button isn't available before nav starts
       navigationInProgress = true;
     });
+    } finally {
+      if (mounted && version == _routeRequestVersion) {
+        setState(() => _routeLoading = false);
+      }
+    }
   }
 
 
@@ -1382,6 +1403,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   void cancelNavigation() async {
+    _routeRequestVersion++;
+    _routeLoading = false;
+    _destination = null;
     debugPrint('MapPageState cancelNavigation called');
     // Halt the location subscription
     _positionStream?.cancel();
@@ -1419,6 +1443,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   @override
   void dispose() {
+    _routeRequestVersion++;
     routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     themeNotifier.removeListener(_onThemeChanged);
@@ -1453,10 +1478,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     });
   }
 
-  Future<bool> updatePolyline(LatLng origin, LatLng destination) async {
+  Future<bool> updatePolyline(LatLng origin, LatLng destination, {
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final version = _routeRequestVersion;
     debugPrint('MapPageState updatePolyline called');
     try {
-      // Load environment variables
+      final response = await (() async {
+      // Configuration loading shares the request deadline.
       await _ensureDirectionsConfigLoaded();
 
       if (googleMapsDirectionsApiKey.isEmpty) {
@@ -1473,13 +1502,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       );
 
       // Get route using Routes API
-      pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(
-        request: request,
-      );
-
-      if (response.routes.isEmpty) {
-        throw Exception("No route points returned from Google Routes API. ");
-      }
+      return requestRoute(() async {
+        final response = await _polylinePoints.getRouteBetweenCoordinatesV2(request: request);
+        if (response.routes.isEmpty || (response.routes.first.polylinePoints?.isEmpty ?? true)) {
+          throw const FormatException('No route points returned from Google Routes API.');
+        }
+        return response;
+      }, timeout: timeout);
+      })().timeout(timeout);
+      if (!mounted || version != _routeRequestVersion) return false;
 
       // Let's not complicate things and just choose the first
       pl.Route route = response.routes.first;
@@ -1510,16 +1541,23 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
       return true;
+    } on TimeoutException {
+      if (!mounted || version != _routeRequestVersion) return false;
+      _handlePolylineError('Getting directions took too long. Please try again.');
     } on SocketException catch (e) {
+      if (!mounted || version != _routeRequestVersion) return false;
       debugPrint("MapPageState updatePolyline Network error while fetching route: $e");
       _handlePolylineError("Network connection issue. Please try again.");
     } on HttpException catch (e) {
+      if (!mounted || version != _routeRequestVersion) return false;
       debugPrint("MapPageState updatePolyline HTTP error while fetching route: $e");
       _handlePolylineError("Error retrieving route data. Please check your connection and try again.");
     } on FormatException catch (e) {
+      if (!mounted || version != _routeRequestVersion) return false;
       debugPrint("MapPageState updatePolyline Data format error: $e");
       _handlePolylineError("Unexpected data format from directions API.");
     } on Exception catch (e, stack) {
+      if (!mounted || version != _routeRequestVersion) return false;
       debugPrint("MapPageState updatePolyline Unexpected error fetching directions: $e\n$stack");
       _handlePolylineError("Failed to get route directions.");
     }
@@ -2064,7 +2102,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   mapHeight = contentHeight - (_isSearching ? 56 : 0);
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
-                      if (didPop && navigationInProgress) cancelNavigation();
+                      if (didPop) {
+                        _routeRequestVersion++;
+                        _routeLoading = false;
+                        if (navigationInProgress) cancelNavigation();
+                      }
                     },
                     child: SizedBox(
                       height: contentHeight,
@@ -2406,6 +2448,22 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             ),
                           ),
                         ),
+                      ),
+                    ),
+                  ),
+                ),
+              if (_routeLoading)
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: colorScheme.surface.withAlpha(220),
+                    child: const Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text('Getting directions…'),
+                        ],
                       ),
                     ),
                   ),
