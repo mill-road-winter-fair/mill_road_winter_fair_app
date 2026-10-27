@@ -9,6 +9,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 bool alertsPermissionGranted = false; // whether the user has granted permission for notifications+alerts
@@ -78,7 +79,10 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
 }
 
 @pragma('vm:entry-point')
-void notificationTapBackground(NotificationResponse notificationResponse) async {
+void notificationTapBackground(
+  NotificationResponse notificationResponse, {
+  DateTimeProvider dateTimeProvider = const SystemDateTimeProvider(),
+}) async {
   // handle the alert action in an isolated process
   if (notificationResponse.payload == null || notificationResponse.id == null) {
     debugPrint('notificationTapBackground: invalid payload or id');
@@ -98,20 +102,21 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
     debugPrint('notificationTapBackground: failed to parse startTime: $e');
     return;
   }
+  final now = dateTimeProvider.now();
   DateTime? newAlertTime;
   switch (notificationResponse.actionId) {
     case 'snooze5mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 5));
+      newAlertTime = now.add(Duration(minutes: 5));
     case 'snooze10mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 10));
+      newAlertTime = now.add(Duration(minutes: 10));
     case 'snooze15mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 15));
+      newAlertTime = now.add(Duration(minutes: 15));
     case 'snooze20mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 20));
+      newAlertTime = now.add(Duration(minutes: 20));
     case 'snooze30mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 30));
+      newAlertTime = now.add(Duration(minutes: 30));
     case 'snoozeStart':
-      newAlertTime = [startTime, DateTime.now().add(Duration(minutes: 2))].reduce((a, b) => a.isAfter(b) ? a: b);
+      newAlertTime = [startTime, now.add(Duration(minutes: 2))].reduce((a, b) => a.isAfter(b) ? a: b);
   }
   if (newAlertTime != null) {
     tz.initializeTimeZones();
@@ -336,10 +341,10 @@ class AlertScheduleStore {
     alertSchedules.removeWhere((a) => a.id == theId);
   }
 
-  Future<void> removePastEventAlerts() async {
+  Future<void> removePastEventAlerts({DateTimeProvider dateTimeProvider = const SystemDateTimeProvider()}) async {
     debugPrint('AlertScheduleStore removePastEventAlerts called');
     await refreshEventAlertSchedules();
-    final now = DateTime.now();
+    final now = dateTimeProvider.now();
     alertSchedules.removeWhere((a) => a.listingStartTime.subtract(Duration(minutes: a.noticePeriod)).isBefore(now));
   }
 

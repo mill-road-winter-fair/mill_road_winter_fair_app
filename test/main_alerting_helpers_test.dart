@@ -12,6 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
+import 'fakes/fixed_date_time_provider.dart';
+import 'pump_with_clock.dart';
+
 class _FakeAndroidFlutterLocalNotificationsPlugin
     extends AndroidFlutterLocalNotificationsPlugin {
   final List<int> cancelledIds = <int>[];
@@ -88,6 +91,8 @@ Future<void> _withAndroidPlatform(Future<void> Function() callback) async {
 }
 
 void main() {
+  final dateTimeProvider = FixedDateTimeProvider(fairDate.subtract(const Duration(days: 1)));
+
   setUp(() async {
     tzdata.initializeTimeZones();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -172,7 +177,7 @@ void main() {
 
     test('notificationTapBackground handles a snooze action without throwing', () async {
       await _withAndroidPlatform(() async {
-        final startTime = DateTime.now().add(const Duration(minutes: 30));
+        final startTime = dateTimeProvider.now().add(const Duration(minutes: 30));
         final endTime = startTime.add(const Duration(minutes: 90));
         final payload = jsonEncode({
           'listingId': 'listing-1',
@@ -189,13 +194,14 @@ void main() {
             actionId: 'snoozeStart',
             payload: payload,
           ),
+          dateTimeProvider: dateTimeProvider,
         );
         await Future<void>.delayed(Duration.zero);
       });
     });
 
     test('notificationTapBackground ignores invalid payloads and unsupported actions', () async {
-      final validStart = DateTime.now().add(const Duration(hours: 1));
+      final validStart = dateTimeProvider.now().add(const Duration(hours: 1));
       final validEnd = validStart.add(const Duration(hours: 1));
       final invalidStartPayload = jsonEncode({
         'listingId': 'listing-1',
@@ -216,28 +222,28 @@ void main() {
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: null,
         payload: validPayload,
-      ));
+      ), dateTimeProvider: dateTimeProvider);
       notificationTapBackground(NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 1,
         payload: null,
-      ));
+      ), dateTimeProvider: dateTimeProvider);
       notificationTapBackground(NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 1,
         payload: '{',
-      ));
+      ), dateTimeProvider: dateTimeProvider);
       notificationTapBackground(NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 1,
         payload: invalidStartPayload,
-      ));
+      ), dateTimeProvider: dateTimeProvider);
       notificationTapBackground(NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotificationAction,
         id: 1,
         actionId: 'unsupported-action',
         payload: validPayload,
-      ));
+      ), dateTimeProvider: dateTimeProvider);
       await Future<void>.delayed(Duration.zero);
 
       expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isEmpty);
@@ -245,7 +251,7 @@ void main() {
 
     test('notificationTapBackground schedules each supported snooze action', () async {
       await _withAndroidPlatform(() async {
-        final startTime = DateTime.now().add(const Duration(hours: 2));
+        final startTime = dateTimeProvider.now().add(const Duration(hours: 2));
         final endTime = startTime.add(const Duration(hours: 1));
         final payload = jsonEncode({
           'listingId': 'listing-1',
@@ -268,17 +274,23 @@ void main() {
             id: index + 1,
             actionId: actionIds[index],
             payload: payload,
-          ));
+          ), dateTimeProvider: dateTimeProvider);
           await Future<void>.delayed(Duration.zero);
         }
 
-        expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, hasLength(actionIds.length));
+        final scheduled = (FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled;
+        expect(scheduled, hasLength(actionIds.length));
+        const snoozeMinutes = [5, 10, 15, 20, 30];
+        for (var index = 0; index < snoozeMinutes.length; index++) {
+          expect(scheduled[index]['scheduledDate'],
+              tz.TZDateTime.from(dateTimeProvider.now().add(Duration(minutes: snoozeMinutes[index])), tz.local));
+        }
       });
     });
 
     test('notificationTapBackground ignores an invalid end time after a snooze action', () async {
       await _withAndroidPlatform(() async {
-        final startTime = DateTime.now().add(const Duration(hours: 1));
+        final startTime = dateTimeProvider.now().add(const Duration(hours: 1));
         final payload = jsonEncode({
           'listingId': 'listing-1',
           'listingTitle': 'Glazed and Confused',
@@ -292,7 +304,7 @@ void main() {
           id: 1,
           actionId: 'snooze5mins',
           payload: payload,
-        ));
+        ), dateTimeProvider: dateTimeProvider);
         await Future<void>.delayed(Duration.zero);
 
         expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isEmpty);
@@ -354,8 +366,8 @@ void main() {
         'listing-2',
         'Acoustic Stage',
         'Mill Road',
-        DateTime.now().subtract(const Duration(minutes: 2)),
-        DateTime.now().add(const Duration(minutes: 10)),
+        dateTimeProvider.now().subtract(const Duration(minutes: 2)),
+        dateTimeProvider.now().add(const Duration(minutes: 10)),
         5,
         true,
         null,
@@ -369,15 +381,16 @@ void main() {
         'listing-2',
         'Acoustic Stage',
         'Mill Road',
-        DateTime.now().subtract(const Duration(minutes: 15)),
-        DateTime.now().subtract(const Duration(minutes: 5)),
+        dateTimeProvider.now().subtract(const Duration(minutes: 15)),
+        dateTimeProvider.now().subtract(const Duration(minutes: 5)),
         10,
         true,
         null,
       );
       store.alertSchedules.add(stale);
-      await store.removePastEventAlerts();
+      await store.removePastEventAlerts(dateTimeProvider: dateTimeProvider);
       expect(store.alertSchedules.any((a) => a.id == 2), isFalse);
+      expect(store.alertExists('listing-1'), isTrue);
 
       store.removeAlertById(0);
       expect(store.alertSchedules, isEmpty);
@@ -385,7 +398,7 @@ void main() {
 
     test('AlertScheduleStoreJSON round-trips through SharedPreferences', () async {
       final prefs = await SharedPreferences.getInstance();
-      final now = DateTime.now();
+      final now = dateTimeProvider.now();
       final alert = AlertSchedule(
         12,
         'listing-2',
@@ -487,7 +500,7 @@ void main() {
 
   group('helpers.dart alert UI helpers', () {
     testWidgets('showNoPermissionsDialog shows a permission request to the user', (tester) async {
-      await tester.pumpWidget(
+      await tester.pumpWithClock(
         MaterialApp(
           home: Scaffold(
             body: Builder(
@@ -500,6 +513,7 @@ void main() {
             ),
           ),
         ),
+        dateTimeProvider: dateTimeProvider,
       );
 
       await tester.tap(find.text('Open dialog'));
@@ -518,12 +532,13 @@ void main() {
       await _withAndroidPlatform(() async {
         alertsPermissionGranted = true;
 
-        await tester.pumpWidget(
+        await tester.pumpWithClock(
           const MaterialApp(
             home: Scaffold(
               body: SizedBox(),
             ),
           ),
+          dateTimeProvider: dateTimeProvider,
         );
 
         await toggleListingAlert('listing-1', 15, tester.element(find.byType(SizedBox)));
@@ -538,7 +553,7 @@ void main() {
       settingsOpened = false;
       alertsPermissionGranted = false;
 
-      await tester.pumpWidget(
+      await tester.pumpWithClock(
         MaterialApp(
           home: Scaffold(
             body: Builder(
@@ -551,6 +566,7 @@ void main() {
             ),
           ),
         ),
+        dateTimeProvider: dateTimeProvider,
       );
 
       await tester.tap(find.text('Try alert'));
@@ -564,7 +580,7 @@ void main() {
       settingsOpened = true;
       alertsPermissionGranted = false;
 
-      await tester.pumpWidget(
+      await tester.pumpWithClock(
         MaterialApp(
           home: Scaffold(
             body: Builder(
@@ -577,6 +593,7 @@ void main() {
             ),
           ),
         ),
+        dateTimeProvider: dateTimeProvider,
       );
 
       await tester.tap(find.text('Try again'));
@@ -606,7 +623,7 @@ void main() {
           ),
         ], 67);
 
-        await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+        await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: dateTimeProvider);
         await setTheAlert(tester.element(find.byType(SizedBox)), 15, listingId);
         await tester.pump(const Duration(seconds: 3));
 
@@ -617,7 +634,7 @@ void main() {
 
     testWidgets('setTheAlert creates a new alert and persists it', (tester) async {
       await _withAndroidPlatform(() async {
-        await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+        await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: dateTimeProvider);
         await setTheAlert(tester.element(find.byType(SizedBox)), 15, 'listing-1');
         await tester.pump(const Duration(seconds: 3));
 
@@ -628,8 +645,22 @@ void main() {
       });
     });
 
+    testWidgets('setTheAlert does not create an alert after the fair', (tester) async {
+      await _withAndroidPlatform(() async {
+        await tester.pumpWithClock(
+          const MaterialApp(home: Scaffold(body: SizedBox())),
+          dateTimeProvider: FixedDateTimeProvider(fairDate.add(const Duration(days: 1))),
+        );
+        await setTheAlert(tester.element(find.byType(SizedBox)), 15, 'listing-1');
+        await tester.pump(const Duration(seconds: 3));
+
+        expect(alertsStore.alertSchedules, isEmpty);
+        expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isEmpty);
+      });
+    });
+
     testWidgets('setTheAlert leaves alerts unchanged when the listing does not exist', (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: dateTimeProvider);
       await setTheAlert(tester.element(find.byType(SizedBox)), 15, 'missing-listing');
       await tester.pump();
 
