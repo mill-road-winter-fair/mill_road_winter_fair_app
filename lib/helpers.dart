@@ -206,271 +206,276 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
 
 Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsService}) {
   return Drawer(
-    child: Column(
-      spacing: 0,
-      children: <Widget>[
-        Expanded(
-          flex: 0,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
-            child: DrawerHeader(
-              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(flex: 4, child: Container()),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Image.asset('assets/MRWF25_leaflet_banner.png', fit: BoxFit.contain),
-                  ),
-                  Expanded(flex: 2, child: Container()),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(' $fairDateTimes', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
-                  ),
-                  Expanded(flex: 2, child: Container())
-                ],
+    child: Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(begin: AlignmentGeometry.topCenter, end: AlignmentGeometry.bottomCenter,
+        colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary])
+      ),
+      child: Column(
+        spacing: 0,
+        children: <Widget>[
+          Expanded(
+            flex: 0,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
+              child: DrawerHeader(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(flex: 4, child: Container()),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Image.asset('assets/MRWF26_leaflet_banner.png', fit: BoxFit.contain),
+                    ),
+                    Expanded(flex: 2, child: Container()),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(' $fairDateTimes', style: TextStyle(color: Color.fromRGBO(228, 199, 143, 1), fontSize: 13, fontWeight: FontWeight.bold)),
+                    ),
+                    Expanded(flex: 2, child: Container())
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        Expanded(
-          flex: 4,
-          child: ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              analyticsService.logButtonTapped('drawer_about_fair');
-              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
-              Navigator.pop(context);
-              Navigator.push(
-                  navigatorContext,
-                  MaterialPageRoute(
-                      builder: (context) => AboutTheFairPage(
-                            analyticsService: analyticsService,
-                          )));
-            },
+          Expanded(
+            flex: 4,
+            child: ListTile(
+              leading: const Icon(Icons.info),
+              title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('drawer_about_fair');
+                final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
+                Navigator.pop(context);
+                Navigator.push(
+                    navigatorContext,
+                    MaterialPageRoute(
+                        builder: (context) => AboutTheFairPage(
+                              analyticsService: analyticsService,
+                            )));
+              },
+            ),
           ),
-        ),
-        Expanded(
-          flex: 4,
-          child: ListTile(
-            leading: const Icon(Icons.warning),
-            title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              analyticsService.logButtonTapped('drawer_important_information');
-              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
-              Navigator.pop(context);
-              Navigator.push(
-                  navigatorContext,
-                  MaterialPageRoute(
-                      builder: (context) => ImportantInfoPage(
-                            analyticsService: analyticsService,
-                          )));
-            },
+          Expanded(
+            flex: 4,
+            child: ListTile(
+              leading: const Icon(Icons.warning),
+              title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('drawer_important_information');
+                final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
+                Navigator.pop(context);
+                Navigator.push(
+                    navigatorContext,
+                    MaterialPageRoute(
+                        builder: (context) => ImportantInfoPage(
+                              analyticsService: analyticsService,
+                            )));
+              },
+            ),
           ),
-        ),
-        Expanded(
-          flex: 4,
-          child: ListTile(
-            leading: const Icon(Icons.public),
-            title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              analyticsService.logButtonTapped('drawer_website');
-              Navigator.pop(context);
-              context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/'));
-            },
+          Expanded(
+            flex: 4,
+            child: ListTile(
+              leading: const Icon(Icons.public),
+              title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('drawer_website');
+                Navigator.pop(context);
+                context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/'));
+              },
+            ),
           ),
-        ),
-        Expanded(
-          flex: 4,
-          child: ListTile(
-            leading: const Icon(Icons.email),
-            title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              analyticsService.logButtonTapped('drawer_contact');
-              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
-              Navigator.pop(context);
-              showDialog(
-                context: navigatorContext,
-                builder: (BuildContext context) {
-                  return contactUsDialog(context, analyticsService: analyticsService);
-                },
-              );
-            },
+          Expanded(
+            flex: 4,
+            child: ListTile(
+              leading: const Icon(Icons.email),
+              title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('drawer_contact');
+                final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
+                Navigator.pop(context);
+                showDialog(
+                  context: navigatorContext,
+                  builder: (BuildContext context) {
+                    return contactUsDialog(context, analyticsService: analyticsService);
+                  },
+                );
+              },
+            ),
           ),
-        ),
-        Expanded(
-          flex: 4,
-          child: ListTile(
-            leading: const Icon(Icons.volunteer_activism),
-            title: const Text('Donate to the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              analyticsService.logButtonTapped('drawer_donate');
-              Navigator.pop(context);
-              context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
-            },
+          Expanded(
+            flex: 4,
+            child: ListTile(
+              leading: const Icon(Icons.volunteer_activism),
+              title: const Text('Donate to the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('drawer_donate');
+                Navigator.pop(context);
+                context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
+              },
+            ),
           ),
-        ),
-        Expanded(
-          // needed as Expanded() is relative and this needs a fixed space on larger screens
-          flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 1),
-          child: const SizedBox.expand(),
-        ),
-        Expanded(
-          flex: 3,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IconButton(
-                tooltip: 'Open Mill Road Winter Fair on Facebook',
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  analyticsService.logButtonTapped('drawer_facebook');
-                  Navigator.pop(context);
-                  context.read<UrlLauncher>().open(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
-                },
-                constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                padding: EdgeInsets.zero,
-                icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
-              ),
-              IconButton(
-                tooltip: 'Open Mill Road Winter Fair on X',
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  analyticsService.logButtonTapped('drawer_x');
-                  Navigator.pop(context);
-                  context.read<UrlLauncher>().open(Uri.parse('https://x.com/millroadfair'));
-                },
-                constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                padding: EdgeInsets.zero,
-                icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
-              ),
-              IconButton(
-                tooltip: 'Open Mill Road Winter Fair on Instagram',
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  analyticsService.logButtonTapped('drawer_instagram');
-                  Navigator.pop(context);
-                  context.read<UrlLauncher>().open(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
-                },
-                constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                padding: EdgeInsets.zero,
-                icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
-              ),
-              IconButton(
-                tooltip: 'Open Mill Road Winter Fair on LinkedIn',
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  analyticsService.logButtonTapped('drawer_linkedin');
-                  Navigator.pop(context);
-                  context.read<UrlLauncher>().open(Uri.parse('https://www.linkedin.com/company/mill-road-winter-fair/'));
-                },
-                constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                padding: EdgeInsets.zero,
-                icon: FaIcon(FontAwesomeIcons.linkedin, size: 40, color: Theme.of(context).colorScheme.tertiary),
-              ),
-              IconButton(
-                tooltip: 'Open Mill Road Winter Fair on Flickr',
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                  analyticsService.logButtonTapped('drawer_flickr');
-                  Navigator.pop(context);
-                  context.read<UrlLauncher>().open(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
-                },
-                constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
-                padding: EdgeInsets.zero,
-                icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
-              ),
-            ],
+          Expanded(
+            // needed as Expanded() is relative and this needs a fixed space on larger screens
+            flex: max(((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 1),
+            child: const SizedBox.expand(),
           ),
-        ),
-        const Expanded(
-          flex: 2,
-          child: SizedBox.expand(),
-        ),
-        const Expanded(
-          flex: 0,
-          child: Divider(),
-        ),
-        Expanded(
-          flex: 4,
-          child: ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              analyticsService.logButtonTapped('drawer_settings');
-              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
-              Navigator.pop(context);
-              Navigator.push(
-                  navigatorContext,
-                  MaterialPageRoute(
-                      builder: (context) => SettingsPage(
-                            analyticsService: analyticsService,
-                          )));
-            },
+          Expanded(
+            flex: 3,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(
+                  tooltip: 'Open Mill Road Winter Fair on Facebook',
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    analyticsService.logButtonTapped('drawer_facebook');
+                    Navigator.pop(context);
+                    context.read<UrlLauncher>().open(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
+                  },
+                  constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                  padding: EdgeInsets.zero,
+                  icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                ),
+                IconButton(
+                  tooltip: 'Open Mill Road Winter Fair on X',
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    analyticsService.logButtonTapped('drawer_x');
+                    Navigator.pop(context);
+                    context.read<UrlLauncher>().open(Uri.parse('https://x.com/millroadfair'));
+                  },
+                  constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                  padding: EdgeInsets.zero,
+                  icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                ),
+                IconButton(
+                  tooltip: 'Open Mill Road Winter Fair on Instagram',
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    analyticsService.logButtonTapped('drawer_instagram');
+                    Navigator.pop(context);
+                    context.read<UrlLauncher>().open(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
+                  },
+                  constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                  padding: EdgeInsets.zero,
+                  icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                ),
+                IconButton(
+                  tooltip: 'Open Mill Road Winter Fair on LinkedIn',
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    analyticsService.logButtonTapped('drawer_linkedin');
+                    Navigator.pop(context);
+                    context.read<UrlLauncher>().open(Uri.parse('https://www.linkedin.com/company/mill-road-winter-fair/'));
+                  },
+                  constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                  padding: EdgeInsets.zero,
+                  icon: FaIcon(FontAwesomeIcons.linkedin, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                ),
+                IconButton(
+                  tooltip: 'Open Mill Road Winter Fair on Flickr',
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    analyticsService.logButtonTapped('drawer_flickr');
+                    Navigator.pop(context);
+                    context.read<UrlLauncher>().open(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
+                  },
+                  constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                  padding: EdgeInsets.zero,
+                  icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                ),
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          flex: 4,
-          child: ListTile(
-            leading: const Icon(Icons.menu_book),
-            title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              analyticsService.logButtonTapped('drawer_app_guide');
-              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
-              Navigator.pop(context);
-              Navigator.pushReplacement(
-                  navigatorContext,
-                  MaterialPageRoute(
-                      builder: (context) => WelcomeScreen(
-                            analyticsService: analyticsService,
-                          )));
-            },
+          const Expanded(
+            flex: 2,
+            child: SizedBox.expand(),
           ),
-        ),
-        Expanded(
-          flex: 4,
-          child: ListTile(
-            leading: Icon((Platform.isIOS) ? Icons.ios_share : Icons.share),
-            title: const Text('Share this app', style: TextStyle(fontWeight: FontWeight.bold)),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
-              Navigator.pop(context);
-              analyticsService.logButtonTapped('share_this_app');
-              displayAppShareDialog(navigatorContext, analyticsService: analyticsService);
-            },
+          const Expanded(
+            flex: 0,
+            child: Divider(),
           ),
-        ),
-        Expanded(
-          flex: 4,
-          child: ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('About this app', style: TextStyle(fontWeight: FontWeight.bold)),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              analyticsService.logButtonTapped('drawer_about_app');
-              final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
-              Navigator.pop(context);
-              aboutDialog(navigatorContext, analyticsService: analyticsService);
-            },
+          Expanded(
+            flex: 4,
+            child: ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('drawer_settings');
+                final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
+                Navigator.pop(context);
+                Navigator.push(
+                    navigatorContext,
+                    MaterialPageRoute(
+                        builder: (context) => SettingsPage(
+                              analyticsService: analyticsService,
+                            )));
+              },
+            ),
           ),
-        ),
-        const Expanded(
-          flex: 2,
-          child: SizedBox(height: 20),
-        ),
-      ],
+          Expanded(
+            flex: 4,
+            child: ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('drawer_app_guide');
+                final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                    navigatorContext,
+                    MaterialPageRoute(
+                        builder: (context) => WelcomeScreen(
+                              analyticsService: analyticsService,
+                            )));
+              },
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: ListTile(
+              leading: Icon((Platform.isIOS) ? Icons.ios_share : Icons.share),
+              title: const Text('Share this app', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
+                Navigator.pop(context);
+                analyticsService.logButtonTapped('share_this_app');
+                displayAppShareDialog(navigatorContext, analyticsService: analyticsService);
+              },
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: ListTile(
+              leading: const Icon(Icons.info),
+              title: const Text('About this app', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('drawer_about_app');
+                final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
+                Navigator.pop(context);
+                aboutDialog(navigatorContext, analyticsService: analyticsService);
+              },
+            ),
+          ),
+          const Expanded(
+            flex: 2,
+            child: SizedBox(height: 20),
+          ),
+        ],
+      ),
     ),
   );
 }

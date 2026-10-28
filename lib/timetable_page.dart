@@ -633,7 +633,7 @@ class TimetablePageState extends State<TimetablePage> {
                     top: 0,
                     left: 12 + leftColumnWidth + i * (totalWidth - leftColumnWidth) / cols,
                     height: spanMinutes * _dayPixelsPerMinute + 8,
-                    child: Container(color: colorScheme.surfaceDim, width: (totalWidth - leftColumnWidth) / cols - 22),
+                    child: Container(color: colorScheme.onPrimaryFixedVariant, width: (totalWidth - leftColumnWidth) / cols - 22),
                   ),
                 );
               }

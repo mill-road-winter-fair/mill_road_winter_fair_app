@@ -355,7 +355,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     size: 25,
                     color: widget.cancelled && !widget.listingFavourited
                         ? Theme.of(context).disabledColor
-                        : widget.colorScheme.primary,
+                        : Colors.red,
                   ),
                 ),
                 if (isItAnEvent) IconButton(
@@ -381,7 +381,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     size: 25,
                     color: (widget.cancelled && !widget.listingAlerted || !isItAlertable)
                         ? Theme.of(context).disabledColor
-                        : Theme.of(context).colorScheme.primary,
+                        : Colors.orange,
                   ),
                 ),
                 Spacer(),
