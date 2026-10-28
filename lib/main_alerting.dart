@@ -341,6 +341,8 @@ class AlertScheduleStore {
     await refreshEventAlertSchedules();
     final now = DateTime.now();
     alertSchedules.removeWhere((a) => a.listingStartTime.subtract(Duration(minutes: a.noticePeriod)).isBefore(now));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('alertsStore', jsonEncode(this));
   }
 
   void saveAllEventAlerts() async {
