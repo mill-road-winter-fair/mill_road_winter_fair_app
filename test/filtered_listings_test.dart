@@ -1,17 +1,23 @@
-import 'pump_with_clock.dart';
-import 'fakes/fixed_date_time_provider.dart';
+// App imports
+import 'package:mill_road_winter_fair_app/filtered_listings.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+// Third-party imports
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:mill_road_winter_fair_app/main.dart';
-import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+// Test helpers, fakes and mocks
+import 'fakes/fixed_date_time_provider.dart';
+import 'mocks/listings_mocks.dart';
+import 'pump_with_clock.dart';
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -29,31 +35,13 @@ Map<String, dynamic> testListing({
   String endTime = '16:30',
 }) {
   return {
+    ...mockListing('listing'),
     'id': id,
-    'visibleOnMap': 'TRUE',
-    'cancelled': 'FALSE',
     'groupParent': groupParent,
-    'brickAndMortar': 'FALSE',
-    'emoji': '',
     'title': title,
-    'subtitle': '',
-    'groupID': '',
     'food': food,
     'shopping': shopping,
-    'charityCommunityInfo': 'FALSE',
     'performanceMusic': performanceMusic,
-    'performanceChildrens': 'FALSE',
-    'performanceDance': 'FALSE',
-    'performanceOther': 'FALSE',
-    'visitExperience': 'FALSE',
-    'service': 'FALSE',
-    'location': 'Mill Road',
-    'description': '',
-    'email': '',
-    'website': '',
-    'phone': '',
-    'latLng': '52.199174,0.140929',
-    'imageURL': '',
     'startTime': startTime,
     'endTime': endTime,
   };
@@ -169,66 +157,8 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
       // Define mock values
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
-        {
-          'id': '2',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍣',
-          'title': 'Sushi Squad',
-          'subtitle': 'Sushi',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Implausible Avenue',
-          'description': 'Cold rice',
-          'email': '',
-          'website': 'https://www.sushisquad.com',
-          'phone': '',
-          'latLng': '52.200063,0.139313',
-          'imageURL': '',
-          'startTime': '12:00',
-          'endTime': '16:30',
-        },
+        mockListing('glazedAndConfused'),
+        mockListing('sushiSquad'),
       ];
 
       await loadSettings();
@@ -238,12 +168,12 @@ void main() {
       expect(find.text('Glazed and Confused'), findsOneWidget);
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('10:30—16:30'), findsOneWidget);
-      expect(find.text('Gwydir St Car Park (~206m away)'), findsOneWidget);
+      expect(find.text('Gwydir Street (~206m away)'), findsOneWidget);
       expect(find.text('01223 111111'), findsNothing); // as Details won't be open
       expect(find.text('Sushi Squad'), findsOneWidget);
       expect(find.text('Sushi'), findsOneWidget);
       expect(find.text('12:00—16:30'), findsOneWidget);
-      expect(find.text('Implausible Avenue (~197m away)'), findsOneWidget);
+      expect(find.text('Mortimer Road (~197m away)'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsExactly(2));
     });
 
@@ -253,96 +183,9 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
-        {
-          'id': '2',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍣',
-          'title': 'Sushi Squad',
-          'subtitle': 'Sushi',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Implausible Avenue',
-          'description': 'Cold rice',
-          'email': '',
-          'website': 'https://www.sushisquad.com',
-          'phone': '',
-          'latLng': '52.200063,0.139313',
-          'imageURL': '',
-          'startTime': '12:00',
-          'endTime': '16:30',
-        },
-        {
-          'id': '3',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍔',
-          'title': 'Bite Club',
-          'subtitle': 'Burgers',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Donkey Common',
-          'description': 'Dead cattle',
-          'email': '',
-          'website': 'https://www.biteclub.com',
-          'phone': '01223 333333',
-          'latLng': '52.202313,0.131562', // 968m
-          'imageURL': '',
-          'startTime': '14:00',
-          'endTime': '16:30',
-        },
+        mockListing('glazedAndConfused'),
+        mockListing('sushiSquad'),
+        mockListing('biteClub'),
       ];
 
       // Mock sorting preference is alphabetical
@@ -401,36 +244,7 @@ void main() {
 
       // Provide a listing so the page renders the sorting controls.
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'TRUE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
+        mockListing('musicalDoughnuts'),
       ];
 
       // Ensure the nearest sorting option is available in the menu
@@ -438,7 +252,7 @@ void main() {
       currentLatLng = const LatLng(52.199174, 0.140929);
       preferredSortingMethod = SortingMethod.values[0];
 
-      await pumpFilteredListingsPage(tester, 'favourite', listings, ['1']);
+      await pumpFilteredListingsPage(tester, 'favourite', listings, ['26001']);
 
       await tester.tap(find.byKey(const ValueKey('sortingdropdown')));
       await settle(tester);
@@ -478,36 +292,7 @@ void main() {
 
       // Define mock values
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
+        mockListing('glazedAndConfused'),
       ];
 
       await loadSettings();
@@ -528,36 +313,7 @@ void main() {
 
       // Define mock values
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
+        mockListing('glazedAndConfused'),
       ];
 
       // Mock location services are disabled
@@ -604,36 +360,7 @@ void main() {
       firstExecution = false;
 
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
+        mockListing('glazedAndConfused'),
       ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
@@ -658,96 +385,9 @@ void main() {
     testWidgets('FilteredListingsPage search filters results based on query (UI)', (WidgetTester tester) async {
       final analytics = RecordingSearchAnalyticsService();
       final sampleListings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍣',
-          'title': 'Sushi Squad',
-          'subtitle': 'Sushi',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Implausible Avenue',
-          'description': 'Cold rice',
-          'email': '',
-          'website': 'https://www.sushisquad.com',
-          'phone': '',
-          'latLng': '52.200063,0.139313',
-          'imageURL': '',
-          'startTime': '12:00',
-          'endTime': '16:30',
-        },
-        {
-          'id': '2',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        },
-        {
-          'id': '3',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍔',
-          'title': 'Bite Club',
-          'subtitle': 'Burgers',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Donkey Common',
-          'description': 'Dead cattle',
-          'email': '',
-          'website': 'https://www.biteclub.com',
-          'phone': '01223 333333',
-          'latLng': '52.202313,0.131562',
-          'imageURL': '',
-          'startTime': '14:00',
-          'endTime': '16:30',
-        },
+        mockListing('sushiFirstId'),
+        mockListing('doughnutsSecondId'),
+        mockListing('biteClub'),
       ];
 
       // Set global listings so pages relying on the global don't show error/loading UI
