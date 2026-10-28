@@ -73,7 +73,7 @@ TableRow eventRow(ColorScheme colorScheme, String eventTime, String eventTitle, 
   }
 
   return TableRow(
-    decoration: BoxDecoration(color: colorScheme.primary),
+    decoration: BoxDecoration(color: colorScheme.tertiary),
     children: <Widget>[
       TableCell(
         verticalAlignment: TableCellVerticalAlignment.top,
@@ -333,7 +333,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                   eventRow(colorScheme, '16:15', 'All trading ends'),
                                   eventRow(colorScheme, '16:30', 'Winter Fair ends'),
                                   eventRow(colorScheme, '17:30', 'Roads fully open'),
-                                  TableRow(decoration: BoxDecoration(color: colorScheme.primary), children: [SizedBox(height: 10), SizedBox(height: 10)]),
+                                  TableRow(decoration: BoxDecoration(color: colorScheme.tertiary), children: [SizedBox(height: 10), SizedBox(height: 10)]),
                                 ],
                               ),
                             ),
@@ -341,7 +341,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                               child: Container(
                                 height: 48,
                                 padding: const EdgeInsets.all(8),
-                                color: colorScheme.primary,
+                                color: colorScheme.tertiary,
                                 alignment: Alignment.centerLeft,
                                 child: Text('Key events', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: colorScheme.onPrimary, height: 1.0),
                                 ),
