@@ -32,11 +32,11 @@ class TextImageRow extends StatelessWidget {
         final availableWidth = constraints.maxWidth;
         final plainText = textSpan.toPlainText();
         final length = plainText.length;
-        final textProportion = (0.65 + (length - 150) / 1500).clamp(0.55, 0.75).toDouble();
+        final textProportion = (0.6 + (length - 150) / 1500).clamp(0.55, 0.75).toDouble();
         final spacing = imageOnLeft ? 16.0 : 2.0;
         final textWidth = availableWidth * textProportion - spacing / 2;
         final imageWidth = availableWidth - textWidth - spacing;
-        final text = SizedBox(width: textWidth, child: Text.rich(textSpan, style: textStyle));
+        final text = SizedBox(width: textWidth, child: Text.rich(textSpan, style: textStyle, textAlign: imageOnLeft ? TextAlign.right : TextAlign.left));
         final image = SizedBox(
           width: imageWidth,
           child: Image.asset(
@@ -195,7 +195,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
   Widget build(BuildContext context) {
     debugPrint('AboutTheFairPage build() called');
     final colorScheme = Theme.of(context).colorScheme;
-    final bodyStyle = TextStyle(fontSize: 17);
+    final bodyStyle = TextStyle(fontSize: 16);
+    final headingStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colorScheme.primary);
     final eventsSubtitleStyle = TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: colorScheme.onPrimary);
     final eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: colorScheme.onPrimary);
 
@@ -251,23 +252,25 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                 controller: _aboutPageScrollController,
                 primary: false,
                 child: Column(
-                  spacing: 12,
+                  spacing: 10,
                   children: [
+                    Text('Your annual celebration of all that is great about Mill Road returns for its 21st year!', style: bodyStyle.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary)),
                     TextImageRow(
-                      textSpan: TextSpan(
-                        text: 'Mill Road Winter Fair, usually held on the first Saturday of December, '
-                        'is a celebration of community along one of the most diverse and vibrant roads in Cambridge.',
-                      ),
-                      imagePath: "assets/infoPages/nearby.png",
-                      textStyle: bodyStyle,
-                    ),
-                    TextImageRow(
-                      textSpan: TextSpan(
-                        text: 'The Fair brings together local organisations, partner businesses (now listed in this app), '
-                        'and stallholders, musicians, artists and dancers in one day of festival joy.',
-                      ),
-                      imagePath: "assets/infoPages/music.png",
-                      imageOnLeft: true,
+                      textSpan: TextSpan(children: [
+                        TextSpan(text: 'As well as highlights like parades, stalls, performances and children’s activities, '
+                          'there is so much to discover in the community venues and businesses. '
+                          'This is only possible with local support, so please do consider '),
+                        TextSpan(text: 'contributing', style: bodyStyle.copyWith(decoration: TextDecoration.underline, decorationColor: colorScheme.onSecondary), 
+                          recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                HapticFeedback.lightImpact();
+                                widget.analyticsService.logButtonTapped('aboutpage_contributing');
+                                context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
+                              },
+                        ),
+                        TextSpan(text: ' to keep it going. Be sure to come early and enjoy the best Fair yet!'),
+                      ]),
+                      imagePath: "assets/infoPages/charityCommunityInfo.png",
                       textStyle: bodyStyle,
                     ),
                     SizedBox.shrink(),
@@ -277,20 +280,66 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     ),
                     SizedBox.shrink(),
                     TextImageRow(
-                      textSpan: TextSpan(
-                        text: 'This year, we celebrate 21 years since the first Fair in 2005! It’s been a remarkable journey, '
-                            'but we still hold true to the Fair’s original aim of celebrating all that is great about the Mill Road area.'
-                      ),
+                      textSpan: TextSpan(children: [
+                        TextSpan(text: 'Food and drink from around the world\n', style: headingStyle),
+                        TextSpan(text: 'Enjoy something delicious at food stalls, cafés and venues all along Mill Road, or visit the Food Fair in Gwydir Street Car park.'),
+                      ]),
+                      imagePath: "assets/infoPages/foodDrink.png",
+                      imageOnLeft: true,
+                      textStyle: bodyStyle,
+                    ),
+                    SizedBox.shrink(),
+                    TextImageRow(
+                      textSpan: TextSpan(children: [
+                        TextSpan(text: 'Fantastic live music and performance\n', style: headingStyle),
+                        TextSpan(text: 'With the main music stages at Donkey Common, Ditchburn Gardens, St Barnabas Church, Argyle Street Housing Co-op, '
+                          'St Philip’s Church and at the corner of Thoday Street, plus many busking spots along the street, there’s something for everyone.'),
+                      ]),
+                      imagePath: "assets/infoPages/music.png",
+                      textStyle: bodyStyle,
+                    ),
+                    SizedBox.shrink(),
+                    TextImageRow(
+                      textSpan: TextSpan(children: [
+                        TextSpan(text: 'Locally-made art and crafts\n', style: headingStyle),
+                        TextSpan(text: 'You’ll find plenty to choose from all along the street, with even more at Donkey Common, Petersfield Green, Ditchburn Gardens '
+                          'and Headly Street. There’s also work from local artists at ARU, the Six Bells, David Parr House, St Barnabas Centre and Romsey Mill.'),
+                      ]),
+                      imagePath: "assets/infoPages/shopping.png",
+                      imageOnLeft: true,
+                      textStyle: bodyStyle,
+                    ),
+                    SizedBox.shrink(),
+                    TextImageRow(
+                      textSpan: TextSpan(children: [
+                        TextSpan(text: 'Fun things to do with the family\n', style: headingStyle),
+                        TextSpan(text: 'Crafts at Mill Road Community Centre and Salvation Army, magic at Romsey Mill, hands-on science at the '
+                          'Salisbury Club and Dr. Who plus Santa at Ditchburn Place, the Empress the Cambridge Blue. And from 11.45 don’t miss '
+                          'the colourful dancers and musicians of the Coleridge Carnival Crew in the parade'),
+                      ]),
                       imagePath: "assets/infoPages/childrens.png",
                       textStyle: bodyStyle,
                     ),
+                    SizedBox.shrink(),
                     TextImageRow(
-                      textSpan: TextSpan(
-                        text: 'We have a huge range of activities to discover throughout the day; it’s sure to be the best Fair yet! '
-                            'Be sure to come early so that you don’t miss out!',
-                      ),
-                      imagePath: "assets/infoPages/foodDrink.png",
+                      textSpan: TextSpan(children: [
+                        TextSpan(text: 'Guided walks\n', style: headingStyle),
+                        TextSpan(text: 'A 90-minute Mill Road history tour starts at 9am from the corner of Mortimer Road. £15 charge. '
+                          'Free tours of the historic cemetery are at 10am, 11am, 12.30pm and 2pm from the gates near Mackenzie Road.'),
+                      ]),
+                      imagePath: "assets/infoPages/visitExperience.png",
                       imageOnLeft: true,
+                      textStyle: bodyStyle,
+                    ),
+                    SizedBox.shrink(),
+                    TextImageRow(
+                      textSpan: TextSpan(children: [
+                        TextSpan(text: 'Other highlights\n', style: headingStyle),
+                        TextSpan(text: 'This year, we have lots of events at ARU’s main building, accessed from Petersfield Green, including performances '
+                          'and art displays, the Film Festival and the Health Hub. Discover tours, children’s activities and more at Cambridge '
+                          'Central Mosque. Take a trip to the past with Mill Road History Society at the Bath House.'),
+                      ]),
+                      imagePath: "assets/infoPages/nearby.png",
                       textStyle: bodyStyle,
                     ),
                     Column(crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,16 +418,18 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       imageOnLeft: true,
                       textStyle: bodyStyle,
                     ),
+                    SizedBox.shrink(),
                     TextImageRow(
                       textSpan: TextSpan(
                         children: [
-                          const TextSpan(text: 'The Fair is entirely run by volunteers and benefits from a Cambridge City Council '
+                          const TextSpan(text: 'The Fair is organised and run by unpaid volunteers, consituted as Mill Road Winter Fair CIC. It benefits from a Cambridge City Council '
                             'Community Grant, support from donors, and the ongoing help of the Mill Road Traders Association.'),
                         ],
                       ),
                       imagePath: "assets/infoPages/services.png",
                       textStyle: bodyStyle,
                     ),
+                    SizedBox.shrink(),
                     FittedBox(
                       fit: BoxFit.fill,
                       child: Image.asset("assets/infoPages/MRWF25_sponsor_logos.png"),
