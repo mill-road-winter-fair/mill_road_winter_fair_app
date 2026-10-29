@@ -1487,10 +1487,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }) async {
     final version = _routeRequestVersion;
     debugPrint('MapPageState updatePolyline called');
+    final elapsed = Stopwatch()..start();
     try {
-      final response = await (() async {
       // Configuration loading shares the request deadline.
-      await _ensureDirectionsConfigLoaded();
+      await _ensureDirectionsConfigLoaded().timeout(timeout);
+      if (!mounted || version != _routeRequestVersion) return false;
 
       if (googleMapsDirectionsApiKey.isEmpty) {
         throw Exception("Google Maps Directions API key is missing.");
@@ -1506,14 +1507,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       );
 
       // Get route using Routes API
-      return requestRoute(() async {
+      final response = await requestRoute(() async {
         final response = await _polylinePoints.getRouteBetweenCoordinatesV2(request: request);
         if (response.routes.isEmpty || (response.routes.first.polylinePoints?.isEmpty ?? true)) {
           throw const FormatException('No route points returned from Google Routes API.');
         }
         return response;
-      }, timeout: timeout);
-      })().timeout(timeout);
+      }, timeout: timeout - elapsed.elapsed);
       if (!mounted || version != _routeRequestVersion) return false;
 
       // Let's not complicate things and just choose the first

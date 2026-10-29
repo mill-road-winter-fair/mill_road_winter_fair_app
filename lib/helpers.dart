@@ -1626,6 +1626,8 @@ bool isWidgetFullyVisible(BuildContext context) {
 // and parsing failures in it, without preserving a typed cause. Invalid responses
 // and other exceptions must propagate immediately rather than be retried blindly.
 // maxAttempts includes the initial request.
+// Each attempt gets at most three seconds, capped by the remaining total budget.
+// There is no separate outer timeout that could leave the retry loop running.
 // Timed-out futures may still finish, so [request] must not mutate UI state.
 Future<T> requestRoute<T>(Future<T> Function() request, {
   Duration timeout = const Duration(seconds: 10),
@@ -1635,9 +1637,16 @@ Future<T> requestRoute<T>(Future<T> Function() request, {
     throw ArgumentError.value(maxAttempts, 'maxAttempts', 'Must be at least 1');
   }
   Future<T> attemptRequests() async {
+    final elapsed = Stopwatch()..start();
     for (var attempt = 1; ; attempt++) {
+      final remaining = timeout - elapsed.elapsed;
+      if (remaining <= Duration.zero) {
+        throw TimeoutException('Directions request deadline expired', timeout);
+      }
+      const attemptLimit = Duration(seconds: 3);
+      final attemptTimeout = remaining < attemptLimit ? remaining : attemptLimit;
       try {
-        return await request().timeout(const Duration(seconds: 3));
+        return await request().timeout(attemptTimeout);
       } on TimeoutException {
         if (attempt >= maxAttempts) rethrow;
       } on SocketException {
@@ -1646,5 +1655,5 @@ Future<T> requestRoute<T>(Future<T> Function() request, {
     }
   }
 
-  return attemptRequests().timeout(timeout);
+  return attemptRequests();
 }
