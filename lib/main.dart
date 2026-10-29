@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -30,7 +29,6 @@ Future<void> main() async {
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
   if (analyticsEnabledForBuild) {
     // Release builds use the production Firebase project. Debug and profile
     // builds with DEV_ANALYTICS=true use the development project.
@@ -306,6 +304,7 @@ class HomePageState extends State<HomePage> with RouteAware {
     if (!navigationInProgress) {
       mapPageKey.currentState?.addAllVisibleMarkers();
     }
+    timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
     if (mounted) {
       setState(() {});
     }
@@ -383,6 +382,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           analyticsService: widget.analyticsService),
       TimetablePage(
           theEvents: listings,
+          key: timetablePageKey,
           onTabSelected: setCurrentIndex,
           filteredMusicOrNot: timetableFilteredMusicOrNot,
           onlyNowOrSoon: timetableOnlyNowOrSoon,

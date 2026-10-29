@@ -35,10 +35,10 @@ class TimetablePage extends StatefulWidget {
     super.key,
   });
   @override
-  State<TimetablePage> createState() => _TimetablePageState();
+  State<TimetablePage> createState() => TimetablePageState();
 }
 
-class _TimetablePageState extends State<TimetablePage> {
+class TimetablePageState extends State<TimetablePage> {
   late DateTimeProvider _dateTimeProvider;
   late ScrollController _horizontalScrollController;
   late ScrollController _verticalScrollController;
@@ -99,13 +99,13 @@ class _TimetablePageState extends State<TimetablePage> {
   // so app knows if the device has been rotated, and can restore any previous scroll/sizing
   void didChangeDependencies() {
     _dateTimeProvider = context.watch<DateTimeProvider>();
-    debugPrint('_TimetablePageState didChangeDependencies called');
+    debugPrint('TimetablePageState didChangeDependencies called');
     final Orientation currentOrientation = MediaQuery.orientationOf(context);
     if (_deviceOrientationSaved != null && currentOrientation != _deviceOrientationSaved) {
       // i.e. device has been rotated (or this is the first check)
       if (_deviceOrientationSaved != null) {
         debugPrint(
-            '_TimetablePageState didChangeDependencies: changed orientation, _deviceOrientation=$_deviceOrientationSaved currentOrientation=$currentOrientation');
+            'TimetablePageState didChangeDependencies: changed orientation, _deviceOrientation=$_deviceOrientationSaved currentOrientation=$currentOrientation');
       }
       removeMiniPopup();
       safeRemoveRoute(context, listingDetailsDialogRoute);
@@ -120,7 +120,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void loadScales() async {
-    debugPrint('_TimetablePageState loadScales called');
+    debugPrint('TimetablePageState loadScales called');
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     pixelsPerMinuteL = prefs.getDouble('pixelsPerMinuteL') ?? 0;
@@ -129,7 +129,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void saveScales() async {
-    debugPrint('_TimetablePageState saveScales called');
+    debugPrint('TimetablePageState saveScales called');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('pixelsPerMinuteP', pixelsPerMinuteP);
     await prefs.setDouble('pixelsPerMinuteL', pixelsPerMinuteL);
@@ -137,7 +137,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
   void calculateInitialScalesIfNeeded() async {
     if (pixelsPerMinuteP == 0 || pixelsPerMinuteL == 0) {
-      debugPrint('_TimetablePageState calculateInitialScalesIfNeeded estimating initial scale');
+      debugPrint('TimetablePageState calculateInitialScalesIfNeeded estimating initial scale');
       pixelsPerMinuteP = max(0.8, min(1.5, 1000 / max(240, spanMinutes)));
       pixelsPerMinuteL = max(0.8, min(1.5, 600 / max(240, spanMinutes)));
       saveScales();
@@ -153,7 +153,7 @@ class _TimetablePageState extends State<TimetablePage> {
       tick();
       _nowLineTimer = Timer.periodic(delay, (_) => tick());
     });
-    debugPrint('_TimetablePageState startClockUpdates started initially $initialDelay then every $delay for function $tick');
+    debugPrint('TimetablePageState startClockUpdates started initially $initialDelay then every $delay for function $tick');
   }
 
   void updateNowLine() {
@@ -161,8 +161,10 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
+    debugPrint('TimetablePageState prepareEvents called for ${theEvents.length} listings');
     Map<String, List<PositionedEvent>> preparedEvents = {};
     for (var ev in theEvents) {
+      if (ev['startTime'] == '' || ev['endTime'] == '') continue; // this can't be a timed event
       final startTime = combineDateAndTime(ev['startTime'], fairDate);
       final endTime = combineDateAndTime(ev['endTime'], fairDate);
       if (((ev['performanceMusic'] != null && ev['performanceMusic'] == 'TRUE') ||
@@ -211,7 +213,7 @@ class _TimetablePageState extends State<TimetablePage> {
   Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(
       Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, bool? filteredMusicOrNot, String searchQuery, DateTime now) {
     debugPrint(
-        '_TimetablePageState filterEventsAndComputeDefaults called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery');
+        'TimetablePageState filterEventsAndComputeDefaults called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery');
     timelineMinStart = DateTime(9999);
     timelineMaxEnd = DateTime(0);
     Map<String, List<PositionedEvent>> theFilteredEvents = {};
@@ -369,7 +371,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void scrollToKey(GlobalKey theKey, double alignment) async {
-    debugPrint('_TimetablePageState scrollToKey called with theKey=$theKey alignment=$alignment');
+    debugPrint('TimetablePageState scrollToKey called with theKey=$theKey alignment=$alignment');
     final keyContext = theKey.currentContext;
     if (keyContext == null) return;
     final renderObject = keyContext.findRenderObject();
@@ -404,7 +406,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void _toggleFilteredMusicOrNot() {
-    debugPrint('_TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
+    debugPrint('TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
     bool? newFilteredMusicOrNot;
     String theMsg;
     (theMsg, newFilteredMusicOrNot) = switch (widget.filteredMusicOrNot) {
@@ -422,11 +424,11 @@ class _TimetablePageState extends State<TimetablePage> {
                 : 'other');
     widget.onFilterChange.call(widget.onlyNowOrSoon, newFilteredMusicOrNot);
     showInfoToast(context, theMsg);
-    debugPrint('_TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
+    debugPrint('TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
   }
 
   Future<void> refreshListings() async {
-    debugPrint('_TimetablePageState refreshListings called');
+    debugPrint('TimetablePageState refreshListings called');
     setState(() {
       loading = true;
     });
@@ -443,7 +445,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!scaling) debugPrint('_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
+    if (!scaling) debugPrint('TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
     if (listings.isEmpty) {
       return FairScaffold(
         appBarTitle: 'Timetable',
@@ -478,9 +480,12 @@ class _TimetablePageState extends State<TimetablePage> {
       );
     }
 
-    if (thePreparedEvents.isEmpty) thePreparedEvents = prepareEvents(widget.theEvents); // if another page did a refresh
-
     final now = _dateTimeProvider.now();
+
+    if (thePreparedEvents.isEmpty) {
+      thePreparedEvents = prepareEvents(listings); // if another page did a refresh
+      theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
+    }
 
     if (widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
       // refilter to whole day or just now or soon; only do this if changed

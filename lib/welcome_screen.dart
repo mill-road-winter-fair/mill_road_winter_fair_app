@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
@@ -125,12 +126,11 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: colourScheme.onSecondary),
       bodyTextStyle: TextStyle(fontSize: 19, color: colourScheme.onSecondary),
       bodyPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
+      titlePadding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + 12, 16, 10),
       contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-      bodyFlex: 0,
-      fullScreen: true,
+      pageMargin: EdgeInsets.zero,
       safeArea: 160,
-      pageColor: colourScheme.secondary.withValues(alpha: 0.8),
+      pageColor: colourScheme.secondary.withValues(alpha: 0.85),
     );
     Widget guideRow(Widget icon, Widget content) => Padding(
           padding: const EdgeInsets.only(bottom: 16),
@@ -144,59 +144,46 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
           ),
         );
 
-    Widget tip(IconData icon, String text) => guideRow(
-          Icon(icon, size: 40, color: colourScheme.onSecondary),
-          Text(text, style: bodyStyle),
+    Widget tip(Widget icon, String text) => guideRow(
+      IconTheme(
+        data: IconThemeData(
+          size: 40,
+          color: colourScheme.onSecondary,
+        ),
+        child: icon,
+      ),
+      Text(text, style: bodyStyle),
+    );
+
+    Widget marker(String category) => ExcludeSemantics(
+          child: SizedBox(
+            width: 40,
+            height: 40,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(markerFrameAssetPath(category)),
+                Image.asset(markerAssetPath(category), color: getCategoryColor(selectedThemeKey, category), colorBlendMode: BlendMode.srcIn),
+              ],
+            ),
+          ),
         );
 
     Widget category(String key, String colourKey) => guideRow(
-          Icon(subfilterCategoryLabels[key]!.iconData, size: 40, color: getCategoryColor(selectedThemeKey, colourKey)),
+          marker(colourKey),
           Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
         );
 
     PageViewModel guidePage(String title, List<Widget> children) {
-      // The original non-scrolling page gives its body unbounded height. Reserve
-      // room for its fitted title and controls before scaling the updated copy.
-      final titlePainter = TextPainter(
-        text: TextSpan(text: title, style: titleStyle),
-        textDirection: Directionality.of(context),
-        textScaler: MediaQuery.textScalerOf(context),
-      )..layout();
-      final titleWidth = MediaQuery.sizeOf(context).width - pageDecoration.contentMargin.horizontal;
-      final titleScale = (titleWidth / titlePainter.width).clamp(0.0, 1.0);
-      final bodyHeight = (MediaQuery.sizeOf(context).height -
-              MediaQuery.paddingOf(context).vertical -
-              pageDecoration.safeArea -
-              pageDecoration.titlePadding.vertical -
-              pageDecoration.bodyPadding!.vertical -
-              titlePainter.height * titleScale)
-          .clamp(0.0, double.infinity);
-      titlePainter.dispose();
+      // Honour the device text size and wrap at the available width. Longer
+      // pages scroll above the controls instead of scaling their text down.
       return PageViewModel(
-        useScrollView: false,
-        titleWidget: FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.center,
-          child: Text(title, style: titleStyle, textAlign: TextAlign.center),
-        ),
-        bodyWidget: LayoutBuilder(
-          builder: (context, constraints) => ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: bodyHeight.toDouble()),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.topCenter,
-              // Wrap the updated copy before fitting the whole page, as with the
-              // original guide's manually wrapped rows.
-              child: SizedBox(
-                width: 380,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                ),
-              ),
-            ),
-          ),
+        useScrollView: true,
+        titleWidget: Text(title, style: titleStyle, textAlign: TextAlign.center),
+        bodyWidget: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
         ),
         decoration: pageDecoration,
       );
@@ -204,13 +191,21 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
 
     final pages = [
       guidePage('Welcome to the official\nMill Road Winter Fair app!', [
-        tip(Icons.home,
+        tip(Icon(Icons.home),
             'Using our new homepage, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
-        tip(Icons.music_note, 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
-        tip(Icons.map,
+        tip(Icon(Icons.music_note), 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
+        tip(Icon(Icons.map),
             'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and Favourites you\'ve saved.'),
-        tip(Icons.menu,
-            'Use the menu in the top-right for important information, settings and to share this app. You can read this App Guide again there too.'),
+        tip(Icon(Icons.menu),
+            'Use the menu in the top left for important information, settings and to share this app. You can read this app guide again there too.'),
+      ]),
+      guidePage('Explore the map', [
+        tip(Icon(Icons.home), 'Tap the Home button on the map to show the whole Fair.'),
+        tip(Icon(Icons.radar), 'Tap the Nearby button to see your location and nearby pins.'),
+        tip(Icon(Icons.satellite_alt), 'Switch between street and satellite maps as you prefer.'),
+        tip(Icon(Icons.assistant_navigation), 'Set the map to the orientation that works for you.'),
+        tip(Icon(Icons.search), 'Search for attractions on the map, listings and timetable pages.'),
+        tip(Icon(Icons.filter_alt), 'Choose which types of attraction you want to appear on the map.'),
       ]),
       guidePage('What do the map pins mean?', [
         for (final key in subfilterCategoryLabels.keys)
@@ -229,41 +224,43 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 'service': 'Service',
               }[key]!),
         guideRow(
-          Image.asset('assets/mapMarkers/mixedMarker.png', height: 40, width: 40, color: getCategoryColor(selectedThemeKey, 'Mixed')),
+          marker('Group-PerformanceEvent'),
+          Text('Multiple performances and events at one location', style: bodyStyle),
+        ),
+        guideRow(
+          marker('Mixed'),
           Text('A mix of any of these categories', style: bodyStyle),
         ),
       ]),
-      guidePage('Explore the map', [
-        tip(Icons.home, 'Tap the Home button on the map to zoom to the Fair.'),
-        tip(Icons.radar, 'Tap the radar button to see your location and nearby pins.'),
-        tip(Icons.satellite_alt, 'Switch between street and satellite maps as you prefer.'),
-        tip(Icons.directions_walk, 'Open a listing and tap the walking icon for directions.'),
-        tip(Icons.search, 'Search for stalls and events on the map.'),
-        tip(Icons.filter_alt, 'Choose which types of attraction you want to appear on the map.'),
-      ]),
-      guidePage('Find what brings you to the Fair', [
-        tip(Icons.ballot, 'Tap Listings to browse everything at the Fair.'),
-        tip(Icons.sort, 'Sort by name or location, or by Nearest. Time sorting is also available for performances.'),
-        tip(Icons.info, 'Tap the info button to find out more about any listing.'),
-        tip(Icons.favorite, 'Tap a listing’s heart icon to save it. It will then appear in your Favourites.'),
-        tip(Icons.share, 'Share a listing with friends to tell them where you\'re headed.'),
-        tip(Icons.event_busy, 'On the day of the Fair, performance lists and Favourites let you hide finished events or jump to what’s on now.'),
-      ]),
       guidePage('Plan your day with the timetable', [
-        tip(Icons.watch_later, 'See performances and shorter visits and experiences by time and location.'),
-        tip(Icons.pinch, 'Scroll across locations and up or down through the day. Pinch to adjust the timetable’s scale.'),
-        tip(Icons.filter_alt, 'Tap the filter icon to cycle between music, non-music and everything.'),
-        tip(Icons.schedule, 'On the day, tap the clock to show what’s on now or starting soon.'),
-        tip(Icons.info, 'Tap an event for more details, or to save it as a Favourite.'),
+        tip(Icon(Icons.watch_later), 'See performances and shorter visits and experiences by time and location.'),
+        tip(Icon(Icons.pinch), 'Scroll across locations and up or down through the day. Pinch to adjust the timetable’s scale.'),
+        tip(Icon(Icons.filter_alt), 'Tap the Filter icon to cycle between music, non-music and everything.'),
+        tip(Icon(Icons.schedule), 'On the day, tap the Clock icon to show what’s on now or starting soon.'),
+        tip(Icon(Icons.info), 'Tap any event for more details, to save it as a favourite or to set a reminder.'),
+      ]),
+      guidePage('Find what you want at the Fair', [
+        tip(Icon(Icons.ballot), 'Tap Listings to browse everything at the Fair.'),
+        tip(Icon(Icons.sort), 'Sort by name, location, closeness to you, or (for performances and events) start time.'),
+        tip(Icon(Icons.filter_alt), 'Tap the Filter icon to find just what you\'re looking for.'),
+        tip(Icon(Icons.access_time), 'Performance listings and favourites let you hide finished events or jump to what’s on now.'),
+      ]),
+      guidePage('Visit our exciting attractions', [
+        tip(Icon(Icons.info), 'Tap the Info button to find out more about any listing.'),
+        tip(FaIcon(FontAwesomeIcons.heart), 'Tap a listing’s Heart icon to save it. It will then appear in the Favourites tab.'),
+        tip(FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
+        tip(Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
+        tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
       ]),
       guidePage('Make the app your own', [
-        tip(Icons.palette, 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
-        tip(Icons.straighten, 'Choose the units used for distances in Settings.'),
-        tip(Icons.privacy_tip, 'You choose whether to allow anonymous usage analytics in Settings.'),
+        tip(Icon(Icons.palette), 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
+        tip(Icon(Icons.straighten), 'Choose the units used for distances.'),
+        tip(Icon(Icons.privacy_tip), 'You can choose whether to allow anonymous usage analytics.'),
+        tip(Icon(Icons.home), 'You can even disable animations on the home page, and choose your preferred notice period for notifications.'),
       ]),
       guidePage('A few final things…', [
-        tip(Icons.favorite, 'Thank you for visiting Mill Road Winter Fair and using our app.'),
-        tip(Icons.update, 'Listings may change before the Fair, so check back for the latest details.'),
+        tip(Icon(Icons.favorite), 'Thank you for visiting Mill Road Winter Fair and using our app.'),
+        tip(Icon(Icons.update), 'Listings may change before the Fair, so check back for the latest details.'),
         guideRow(
           Icon(Icons.report, size: 40, color: colourScheme.onSecondary),
           Text.rich(
@@ -347,8 +344,6 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
           IntroductionScreen(
             key: introKey,
             safeAreaList: [false, false, false, Platform.isAndroid && isNavBarVisible(context)],
-            autoScrollDuration: onTest ? null : 150000,
-            infiniteAutoScroll: onTest ? false : true,
             globalBackgroundColor: Colors.transparent,
             allowImplicitScrolling: true,
             globalFooter: Padding(
@@ -360,7 +355,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text('Take me straight to the app!',
+                    child: Text('Take me straight to the Fair!',
                         style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
                   ),
                   onPressed: () {
