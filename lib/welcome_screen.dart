@@ -355,7 +355,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text('Take me straight to the app!',
+                    child: Text('Take me straight to the Fair!',
                         style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
                   ),
                   onPressed: () {
