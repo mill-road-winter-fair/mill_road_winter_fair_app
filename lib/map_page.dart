@@ -1524,6 +1524,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void _handlePolylineError(String message) {
     debugPrint('MapPageState _handlePolylineError error: $message');
+    if (!mounted) return;
     final colours = Theme.of(context).colorScheme;
     // Show a toast with the error
     FToast().init(context).showToast(
