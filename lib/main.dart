@@ -304,6 +304,7 @@ class HomePageState extends State<HomePage> with RouteAware {
     if (!navigationInProgress) {
       mapPageKey.currentState?.addAllVisibleMarkers();
     }
+    timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
     if (mounted) {
       setState(() {});
     }
@@ -381,6 +382,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           analyticsService: widget.analyticsService),
       TimetablePage(
           theEvents: listings,
+          key: timetablePageKey,
           onTabSelected: setCurrentIndex,
           filteredMusicOrNot: timetableFilteredMusicOrNot,
           onlyNowOrSoon: timetableOnlyNowOrSoon,

@@ -1795,6 +1795,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       setVisibleMarkerLists();
       addAllVisibleMarkers();
       establishLocation();
+      timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
     } finally {
       setState(() {
         isRefreshing = false;
@@ -2125,15 +2126,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           child: const Icon(Icons.home),
                         ),
                       ),
-                    // Centre-on-user button (only shown when location services are enabled and permission has been granted)
+                    // Nearby attractions button (only shown when location services are enabled and permission has been granted)
                     if (navigationInProgress == false && locationServicesEnabled == true &&
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
-                        heroTag: 'centreOnUserBtn',
-                        tooltip: 'Centre map on your location',
+                        heroTag: 'nearbyAttractionsBtn',
+                        tooltip: 'Show nearby attractions',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('centre_on_user');
+                          widget.analyticsService.logButtonTapped('nearby_attractions');
                           enableAllFiltersIfAllOff();
                           focusMapOnNearestMarkers(10);
                         },
@@ -2154,6 +2155,61 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             ],
                           ),
                           child: const Icon(Icons.radar),
+                        ),
+                      ),
+                    // Centre-on-user button (only shown when navigation in progress, location services are enabled and permission has been granted)
+                    if (locationServicesEnabled == true && navigationInProgress &&
+                        (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
+                      FloatingActionButton(
+                        heroTag: 'centreOnUserBtn',
+                        tooltip: 'Centre the map on your location',
+                        onPressed: () async {
+                          HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('centre_on_user');
+                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
+                          try {
+                            if (currentLatLng == null) {
+                              final pos = await getCurrentPosition();
+                              currentLatLng = LatLng(pos.latitude, pos.longitude);
+                            }
+                            if (currentLatLng != null) {
+                              // Move camera to the user's location with a sensible zoom and bearing
+                              double currentZoom = await _controller!.getZoomLevel();
+                              _controller?.animateCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('Centre-on-user failed: $e');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: colorScheme.primary,
+                                  content: Text('Unable to determine your location'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        backgroundColor: Colors.transparent,
+                        mini: true,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
+                          ),
+                          child: const Icon(Icons.my_location),
                         ),
                       ),
                     FloatingActionButton(
