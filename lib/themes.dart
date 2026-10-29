@@ -216,9 +216,8 @@ String nightMap =
 String aubergineMap =
     '[{"elementType":"geometry","stylers":[{"color":"#1d2c4d"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#8ec3b9"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#1a3646"}]},{"featureType":"administrative.country","elementType":"geometry.stroke","stylers":[{"color":"#4b6878"}]},{"featureType":"administrative.land_parcel","elementType":"labels.text.fill","stylers":[{"color":"#64779e"}]},{"featureType":"administrative.province","elementType":"geometry.stroke","stylers":[{"color":"#4b6878"}]},{"featureType":"landscape.man_made","elementType":"geometry.stroke","stylers":[{"color":"#334e87"}]},{"featureType":"landscape.natural","elementType":"geometry","stylers":[{"color":"#023e58"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#283d6a"}]},{"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#6f9ba5"}]},{"featureType":"poi","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#023e58"}]},{"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#3C7680"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#304a7d"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#98a5be"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#2c6675"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#255763"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#b0d5ce"}]},{"featureType":"road.highway","elementType":"labels.text.stroke","stylers":[{"color":"#023e58"}]},{"featureType":"transit","elementType":"labels.text.fill","stylers":[{"color":"#98a5be"}]},{"featureType":"transit","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"transit.line","elementType":"geometry.fill","stylers":[{"color":"#283d6a"}]},{"featureType":"transit.station","elementType":"geometry","stylers":[{"color":"#3a4762"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#0e1626"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#4e6d70"}]},{"featureType":"transit.line","elementType":"geometry","stylers":[{"visibility":"on"}]}]';
 
-Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
+String markerAssetPath(String category) {
   late String assetPath;
-  final ByteData backdropData;
 
   switch (category) {
     case 'Group-Food':
@@ -257,20 +256,24 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
       assetPath = 'assets/mapMarkers/performanceEventGroupMarker.png';
     case 'Mixed':
       assetPath = 'assets/mapMarkers/mixedGroupMarker.png';
+    default:
+      throw ArgumentError.value(category, 'category', 'Unknown map marker category');
   }
 
-  // Adjust the asset path if this is a group and load the relevant backdrop image (frame)
-  if (category == 'Group-PerformanceEvent' || category == 'Mixed') {
-    backdropData = await rootBundle.load("assets/mapMarkers/groupMarkerIconFrameThin.png");
-  } else {
-    backdropData = await rootBundle.load("assets/mapMarkers/markerIconFrame.png");
-  }
+  return assetPath;
+}
 
+String markerFrameAssetPath(String category) =>
+    category == 'Group-PerformanceEvent' || category == 'Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
+
+Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
   if (onTest == true) {
     // Return a default marker during unit tests to avoid crashes
     return BitmapDescriptor.defaultMarker;
   }
   try {
+    final assetPath = markerAssetPath(category);
+    final backdropData = await rootBundle.load(markerFrameAssetPath(category));
     int markerPixelSize = 288;
     final ui.Codec backdropCodec = await ui.instantiateImageCodec(
       backdropData.buffer.asUint8List(),

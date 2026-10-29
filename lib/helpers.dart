@@ -1112,6 +1112,19 @@ String buildListingShareText(
     return '$theTitle at $theLocation has been cancelled and will not be appearing at $fairName.\nhttps://www.millroadwinterfair.org/';
   }
 
+  // Incomplete timings cannot establish whether a listing is underway or over.
+  // Share the known details without inventing times or attendance wording.
+  final startTimeText = theStartTimeString.trim();
+  final endTimeText = theEndTimeString.trim();
+  if (startTimeText.isEmpty || endTimeText.isEmpty) {
+    final timing = startTimeText.isNotEmpty
+        ? '\nStarts at $startTimeText'
+        : endTimeText.isNotEmpty
+            ? '\nEnds at $endTimeText'
+            : '';
+    return '$theTitle at $theLocation, $fairName on ${formatFullDate(fairDate)}$timing\nhttps://www.millroadwinterfair.org/';
+  }
+
   final now = currentTime ?? DateTime.now();
   final startTime = combineDateAndTime(theStartTimeString, fairDate);
   final endTime = combineDateAndTime(theEndTimeString, fairDate);
