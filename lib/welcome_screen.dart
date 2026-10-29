@@ -126,7 +126,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: colourScheme.onSecondary),
       bodyTextStyle: TextStyle(fontSize: 19, color: colourScheme.onSecondary),
       bodyPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      titlePadding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+      titlePadding: EdgeInsets.fromLTRB(16, MediaQuery.paddingOf(context).top + 12, 16, 10),
       contentMargin: const EdgeInsets.symmetric(horizontal: 16),
       pageMargin: EdgeInsets.zero,
       safeArea: 160,
