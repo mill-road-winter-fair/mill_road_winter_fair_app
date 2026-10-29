@@ -1621,7 +1621,10 @@ bool isWidgetFullyVisible(BuildContext context) {
       offset.dx + size.width <= viewportSize.width;
 }
 
-// Retry failed or stalled requests, with one deadline for the whole operation.
+// Retry timeouts and socket failures, with one deadline for the whole operation.
+// Do not retry HttpException: flutter_polyline_points 3.1.0 wraps both transport
+// and parsing failures in it, without preserving a typed cause. Invalid responses
+// and other exceptions must propagate immediately rather than be retried blindly.
 // maxAttempts includes the initial request.
 // Timed-out futures may still finish, so [request] must not mutate UI state.
 Future<T> requestRoute<T>(Future<T> Function() request, {
@@ -1635,7 +1638,9 @@ Future<T> requestRoute<T>(Future<T> Function() request, {
     for (var attempt = 1; ; attempt++) {
       try {
         return await request().timeout(const Duration(seconds: 3));
-      } on Exception {
+      } on TimeoutException {
+        if (attempt >= maxAttempts) rethrow;
+      } on SocketException {
         if (attempt >= maxAttempts) rethrow;
       }
     }
