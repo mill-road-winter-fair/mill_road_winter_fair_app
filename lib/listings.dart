@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mill_road_winter_fair_app/app_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,10 +50,8 @@ Future<List<Map<String, dynamic>>> fetchListings(
 }) async {
   debugPrint('fetchListings called');
   try {
-    // Load environment variables
-    await dotenv.load(fileName: ".env");
-    String herokuApi = dotenv.env['HEROKU_API'] ?? '';
-    String herokuApiKey = dotenv.env['HEROKU_API_KEY'] ?? '';
+    String herokuApi = AppConfig.herokuApi;
+    String herokuApiKey = AppConfig.herokuApiKey;
     final uri = Uri.parse(herokuApi);
 
     final response =
