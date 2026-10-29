@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/app_config.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
@@ -31,12 +32,9 @@ Future<void> main() async {
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
   final notificationService = FairNotificationService(
-    endpoint: const String.fromEnvironment('HEROKU_NOTIFICATIONS_API').isNotEmpty
-        ? const String.fromEnvironment('HEROKU_NOTIFICATIONS_API')
-        : dotenv.env['HEROKU_NOTIFICATIONS_API'] ?? '',
-    apiKey: dotenv.env['HEROKU_API_KEY'] ?? '',
+    endpoint: AppConfig.herokuNotificationsApi,
+    apiKey: AppConfig.herokuApiKey,
     preferences: await SharedPreferences.getInstance(),
   );
   if (analyticsEnabledForBuild) {

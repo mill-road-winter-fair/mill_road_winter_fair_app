@@ -80,7 +80,10 @@ The matching configurations are named `MRWF: no analytics`, `MRWF: dev analytics
 Set `HEROKU_NOTIFICATIONS_API` in `.env` to
 `https://mrwf.theberridge.com/dev-notifications` for development, or
 `https://mrwf.theberridge.com/notifications` for production. The app sends
-`HEROKU_API_KEY` as the `x-api-key` header.
+`HEROKU_API_KEY` as the `x-api-key` header. Both values are read through
+`AppConfig` at compile time using `--dart-define-from-file=.env`, like the other
+API settings. Rebuild/restart after changing them; hot reload does not update
+these values. If either value is missing, notification polling is disabled.
 
 Both Google Sheets must have these exact headers (column order is flexible):
 

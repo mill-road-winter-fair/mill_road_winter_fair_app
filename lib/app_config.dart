@@ -2,6 +2,7 @@
 // Never put release keystore passwords in this file or in Dart defines.
 abstract final class AppConfig {
   static const herokuApi = String.fromEnvironment('HEROKU_API');
+  static const herokuNotificationsApi = String.fromEnvironment('HEROKU_NOTIFICATIONS_API');
   static const herokuApiKey = String.fromEnvironment('HEROKU_API_KEY');
   static const androidDirectionsApiKey =
       String.fromEnvironment('ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY');
