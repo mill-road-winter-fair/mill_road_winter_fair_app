@@ -1622,16 +1622,21 @@ bool isWidgetFullyVisible(BuildContext context) {
 }
 
 // Retry failed or stalled requests, with one deadline for the whole operation.
+// maxAttempts includes the initial request.
 // Timed-out futures may still finish, so [request] must not mutate UI state.
 Future<T> requestRoute<T>(Future<T> Function() request, {
   Duration timeout = const Duration(seconds: 10),
+  int maxAttempts = 3,
 }) {
+  if (maxAttempts < 1) {
+    throw ArgumentError.value(maxAttempts, 'maxAttempts', 'Must be at least 1');
+  }
   Future<T> attemptRequests() async {
-    for (var attempt = 0; ; attempt++) {
+    for (var attempt = 1; ; attempt++) {
       try {
         return await request().timeout(const Duration(seconds: 3));
       } on Exception {
-        if (attempt == 2) rethrow;
+        if (attempt >= maxAttempts) rethrow;
       }
     }
   }
