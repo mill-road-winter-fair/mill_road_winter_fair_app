@@ -37,6 +37,7 @@ class MapPage extends StatefulWidget {
   final LatLng? destinationLatLng; // optional if we'll be showing directions to somewhere
   final int? nearestMarkerCount; // optional if we'll be zooming in to nearest X markers
   final AnalyticsService analyticsService;
+  final bool allowListingsMayChangeNotice;
 
   const MapPage(
       {super.key,
@@ -46,6 +47,7 @@ class MapPage extends StatefulWidget {
       this.destinationId,
       this.destinationLatLng,
       this.nearestMarkerCount,
+      this.allowListingsMayChangeNotice = true,
       required this.analyticsService});
 
   @override
@@ -136,7 +138,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
-      ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
+      if (!mounted) return;
+      ListingUpdateNotifier.maybeShowNotice(context,
+          analyticsService: widget.analyticsService,
+          allowListingsMayChange: widget.allowListingsMayChangeNotice);
       if (doingAPushNavigation ?? false) {
         doingAPushNavigation = false;
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
