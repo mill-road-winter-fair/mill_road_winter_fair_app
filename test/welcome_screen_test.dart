@@ -1,14 +1,25 @@
-import 'pump_with_clock.dart';
-import 'package:flutter/material.dart' hide RootWidget;
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:introduction_screen/introduction_screen.dart';
+// Dart SDK imports
+import 'dart:io';
+
+// App imports
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+
+// Third-party imports
+import 'package:flutter/material.dart' hide RootWidget;
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Test helpers, fakes and mocks
+import 'mocks/listings_mocks.dart';
+import 'pump_with_clock.dart';
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -29,6 +40,98 @@ void main() {
   });
 
   group('WelcomeScreen', () {
+    const pageTitles = [
+      'Welcome to the official\nMill Road Winter Fair app!',
+      'Explore the map',
+      'What do the map pins mean?',
+      'Plan your day with the timetable',
+      'Find what you want at the Fair',
+      'Visit our exciting attractions',
+      'Make the app your own',
+      'A few final things…',
+    ];
+
+    testWidgets('guide stays on the selected page until advanced manually', (tester) async {
+      final previousOnTest = onTest;
+      onTest = false;
+      addTearDown(() => onTest = previousOnTest);
+      await tester.pumpWidget(MaterialApp(
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      // Wait beyond the former 150-second automatic advance interval.
+      await tester.pump(const Duration(minutes: 3));
+      await settle(tester);
+      expect(find.text(pageTitles.first), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.arrow_forward));
+      await settle(tester);
+      await tester.pump(const Duration(minutes: 3));
+      await settle(tester);
+      expect(find.text('Explore the map'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('guide explains map, listing, reminder and settings controls on their pages', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      // Check each instruction alongside its control icon on the current page.
+      void expectTip(String text, IconData icon) {
+        final instruction = find.textContaining(text);
+        expect(instruction, findsOneWidget);
+        final row = find.ancestor(of: instruction, matching: find.byType(Row));
+        expect(find.descendant(of: row, matching: find.byIcon(icon)), findsOneWidget);
+      }
+
+      for (final title in pageTitles) {
+        expect(find.text(title), findsOneWidget);
+        switch (title) {
+          case 'Welcome to the official\nMill Road Winter Fair app!':
+            expectTip('menu in the top left', Icons.menu);
+          case 'Explore the map':
+            expectTip('show the whole Fair', Icons.home);
+            expectTip('Nearby button', Icons.radar);
+            expectTip('orientation', Icons.assistant_navigation);
+            expectTip('map, listings and timetable pages', Icons.search);
+          case 'Find what you want at the Fair':
+            expectTip('closeness to you', Icons.sort);
+            expectTip('Tap the Filter icon', Icons.filter_alt);
+            expectTip('hide finished events', Icons.access_time);
+          case 'Plan your day with the timetable':
+            expectTip('to set a reminder', Icons.info);
+          case 'Visit our exciting attractions':
+            expectTip('Info button', Icons.info);
+            final heartRow = find.ancestor(of: find.textContaining('Heart icon'), matching: find.byType(Row));
+            final heart = find.descendant(of: heartRow, matching: find.byType(FaIcon));
+            expect(tester.widget<FaIcon>(heart).icon, FontAwesomeIcons.heart.data);
+            expectTip('Walking icon', Icons.directions_walk);
+            expectTip('Share a listing', Platform.isIOS ? Icons.ios_share : Icons.share);
+            final bellRow = find.ancestor(
+              of: find.text('Tap the Bell icon to set a reminder for any listing.'),
+              matching: find.byType(Row),
+            );
+            final bell = find.descendant(of: bellRow, matching: find.byType(FaIcon));
+            expect(tester.widget<FaIcon>(bell).icon, FontAwesomeIcons.bell.data);
+            final iconTheme = IconTheme.of(tester.element(bell));
+            expect(iconTheme.size, 40);
+            expect(iconTheme.color, Theme.of(tester.element(bell)).colorScheme.onSecondary);
+          case 'Make the app your own':
+            expectTip('disable animations on the home page', Icons.home);
+            expectTip('preferred notice period for notifications', Icons.home);
+        }
+        if (title != pageTitles.last) {
+          await tester.tap(find.byIcon(Icons.arrow_forward));
+          await settle(tester);
+        }
+      }
+      expect(find.text('Done'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('larger dots adapt their spacing when the screen is resized', (tester) async {
       tester.view.physicalSize = const Size(320, 568);
       tester.view.devicePixelRatio = 1;
@@ -70,6 +173,8 @@ void main() {
       final gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
       await gesture.moveBy(const Offset(-200, 0));
       await tester.pump();
+      await gesture.moveBy(const Offset(-50, 0));
+      await tester.pump();
       expect(tester.getTopLeft(title).dx, lessThan(titlePosition.dx));
       expect(tester.getRect(background), backgroundRect);
       await gesture.up();
@@ -78,10 +183,58 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('all guide pages preserve margins and honour device text scaling', (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final textScale = ValueNotifier(1.0);
+      addTearDown(textScale.dispose);
+      await tester.pumpWidget(MaterialApp(
+        builder: (context, child) => ValueListenableBuilder<double>(
+          valueListenable: textScale,
+          builder: (context, scale, _) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+            child: child!,
+          ),
+        ),
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      for (var index = 0; index < pageTitles.length; index++) {
+        for (final scale in [1.0, 1.5, 2.0, 3.0]) {
+          textScale.value = scale;
+          await settle(tester);
+          final page = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).pages![index];
+          final body = find.byWidget(page.bodyWidget!);
+          final row = find.descendant(of: body, matching: find.byType(Row)).first;
+          expect(tester.getRect(row).left, closeTo(32, 0.01));
+          expect(tester.getRect(row).right, closeTo(288, 0.01));
+
+          final bodyText = find.descendant(of: body, matching: find.byType(Text)).first;
+          for (final content in [bodyText, find.byWidget(page.titleWidget!)]) {
+            final text = find.descendant(of: content, matching: find.byType(RichText)).first;
+            final paragraph = tester.renderObject<RenderParagraph>(text);
+            expect(paragraph.textScaler.scale(20), closeTo(20 * scale, 0.01));
+            // Detect visual shrinking even when the inherited scaler is correct.
+            expect(paragraph.getTransformTo(null).getMaxScaleOnAxis(), closeTo(1, 0.01));
+          }
+          expect(tester.takeException(), isNull);
+        }
+        if (index < pageTitles.length - 1) {
+          await tester.tap(find.byIcon(Icons.arrow_forward));
+          await settle(tester);
+        }
+      }
+    });
+
     for (final configuration in [
       (size: const Size(320, 568), textScale: 1.0),
       (size: const Size(320, 568), textScale: 2.0),
       (size: const Size(667, 375), textScale: 1.0),
+      (size: const Size(667, 375), textScale: 2.0),
+      (size: const Size(390, 844), textScale: 3.0),
     ]) {
       testWidgets('guide fits and completes at $configuration', (tester) async {
         tester.view.physicalSize = configuration.size;
@@ -100,13 +253,20 @@ void main() {
         await settle(tester);
 
         final pages = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).pages!;
+        expect(pages, hasLength(pageTitles.length));
         for (var index = 0; index < pages.length; index++) {
+          expect(find.text(pageTitles[index]), findsOneWidget);
           expect(find.byWidget(pages[index].titleWidget!), findsOneWidget);
-          expect(pages[index].useScrollView, isFalse);
+          expect(pages[index].useScrollView, isTrue);
           expect(tester.takeException(), isNull);
 
-          // All content fits above the controls without vertical scrolling.
+          // Every row remains reachable by scrolling above the fixed controls.
           final lastRow = find.descendant(of: find.byWidget(pages[index].bodyWidget!), matching: find.byType(Row)).last;
+          final scrollView = find.ancestor(of: lastRow, matching: find.byType(SingleChildScrollView));
+          final scrollable = find.descendant(of: scrollView, matching: find.byType(Scrollable));
+          final position = tester.state<ScrollableState>(scrollable).position;
+          position.jumpTo(position.maxScrollExtent);
+          await tester.pump();
           final rowBottom = tester.getBottomLeft(lastRow).dy;
           expect(rowBottom, greaterThan(0));
           expect(
@@ -115,7 +275,7 @@ void main() {
                   .getTopLeft(find.byIcon(Icons.arrow_forward).evaluate().isNotEmpty ? find.byIcon(Icons.arrow_forward) : find.text('Done'))
                   .dy));
           expect(tester.takeException(), isNull);
-          expect(find.text('Take me straight to the app!').hitTestable(), findsOneWidget);
+          expect(find.text('Take me straight to the Fair!').hitTestable(), findsOneWidget);
 
           if (index < pages.length - 1) {
             await tester.tap(find.byIcon(Icons.arrow_forward));
@@ -149,7 +309,7 @@ void main() {
 
       // Verify the main action button is visible
       // This confirms the welcome screen UI is properly initialized
-      expect(find.text('Take me straight to the app!'), findsOneWidget);
+      expect(find.text('Take me straight to the Fair!'), findsOneWidget);
     });
 
     testWidgets('displays MyApp when not first app execution', (WidgetTester tester) async {
@@ -159,35 +319,7 @@ void main() {
       // Mock user settings and provide a dummy listing to avoid triggering API fetch/retries and timers
       await loadSettings();
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       // Pump the RootWidget
@@ -210,35 +342,7 @@ void main() {
 
       // Provide a dummy listing to avoid triggering API fetch/retries and timers
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       // Set a realistic window size to avoid layout overflow in the test
@@ -277,7 +381,7 @@ void main() {
 
       // Verify we are on the first page
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
-      expect(find.text('What do the map pins mean?'), findsNothing);
+      expect(find.text('Explore the map'), findsNothing);
 
       // Find and tap the 'Next' button (the arrow forward icon)
       final nextButton = find.byIcon(Icons.arrow_forward);
@@ -286,7 +390,7 @@ void main() {
       await settle(tester);
 
       // Verify we have advanced to the second page
-      expect(find.text('What do the map pins mean?'), findsOneWidget);
+      expect(find.text('Explore the map'), findsOneWidget);
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsNothing);
     });
 
@@ -296,35 +400,7 @@ void main() {
 
       // Provide a dummy listing to avoid triggering API fetch/retries and timers
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       // Set a realistic window size to avoid layout overflow in the test
@@ -359,7 +435,7 @@ void main() {
       expect(prefs.getBool('firstExecution'), isFalse);
     });
 
-    testWidgets('Take me straight to the app button saves settings and navigates', (WidgetTester tester) async {
+    testWidgets('Take me straight to the Fair button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
       // Since flutter's default test screen size is for desktop i.e. 800x600, set a sensible minimum mobile screen size
@@ -377,35 +453,7 @@ void main() {
 
       // Provide a dummy listing to avoid triggering API fetch/retries and timers
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performanceMusic': 'FALSE',
-          'performanceChildrens': 'FALSE',
-          'performanceDance': 'FALSE',
-          'performanceOther': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'business': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       // Pump the RootWidget
@@ -413,10 +461,10 @@ void main() {
       await tester.pumpWithClock(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // The footer button text should be present
-      expect(find.text('Take me straight to the app!'), findsOneWidget);
+      expect(find.text('Take me straight to the Fair!'), findsOneWidget);
 
       // Tap the footer button
-      await tester.tap(find.text('Take me straight to the app!'));
+      await tester.tap(find.text('Take me straight to the Fair!'));
       await settle(tester);
 
       // Verify that the main themed application shell is now displayed

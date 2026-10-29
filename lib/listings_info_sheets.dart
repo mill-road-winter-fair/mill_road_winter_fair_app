@@ -1,13 +1,18 @@
+// Dart SDK imports
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+
+// Third-party imports
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -232,10 +237,16 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       subDetails = Text.rich(textAlign: TextAlign.right, TextSpan(text: widget.subtitle, style: widget.cancelled ? subSubStyle : timeStyle));
     }
 
-    final startTime = combineDateAndTime(widget.startTime, fairDate);
-    final endTime = combineDateAndTime(widget.endTime, fairDate);
-    final isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
-    final isItAlertable = startTime.difference(DateTime.now()).inDays < 7;
+    bool isItAlertable, isItAnEvent;
+    if (widget.startTime == '' || widget.endTime == '') { // this can't be a timed event
+      isItAnEvent = false;
+      isItAlertable = false;
+    } else {
+      final startTime = combineDateAndTime(widget.startTime, fairDate);
+      final endTime = combineDateAndTime(widget.endTime, fairDate);
+      isItAnEvent = endTime.difference(startTime) < maxDurationToBeEvent;
+      isItAlertable = startTime.difference(DateTime.now()).inDays < 7;
+    }
     final alertIconKey = GlobalKey();
 
     final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,

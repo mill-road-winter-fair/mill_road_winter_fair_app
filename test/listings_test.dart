@@ -1,15 +1,21 @@
+// Dart SDK imports
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart' as http_testing;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 
+// Third-party imports
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart' as http_testing;
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Test helpers, fakes and mocks
+import 'mocks/listings_mocks.dart';
 @GenerateMocks([http.Client, SharedPreferences])
 import 'mocks/listings_test.mocks.dart';
 
@@ -17,18 +23,9 @@ void main() {
   late MockClient mockClient;
 
   setUp(() async {
-    mockClient = MockClient();
+    listings = [];
     SharedPreferences.setMockInitialValues({});
-    dotenv.loadFromString(envString: '''
-    HEROKU_API=MOCK_API
-    HEROKU_API_KEY=MOCK_KEY
-    ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
-    ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
-    IOS_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
-    IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
-    SIGNING_KEY=MOCK_CERT
-    IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
+    mockClient = MockClient();
   });
 
   group('Listings', () {
@@ -54,70 +51,7 @@ void main() {
       });
 
       test('returns a list of listings when response is valid', () async {
-        final mockResponse = {
-          "values": [
-            [
-              "id",
-              "visibleOnMap",
-              "cancelled",
-              "groupParent",
-              "brickAndMortar",
-              "emoji",
-              "title",
-              "subtitle",
-              "groupID",
-              "food",
-              "shopping",
-              "charityCommunityInfo",
-              "performanceMusic",
-              "performanceChildrens",
-              "performanceDance",
-              "performanceOther",
-              "visitExperience",
-              "service",
-              "business",
-              "location",
-              "description",
-              "email",
-              "website",
-              "phone",
-              "latLng",
-              "imageURL",
-              "startTime",
-              "endTime"
-            ],
-            [
-              "1",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "🍩",
-              "Glazed and Confused",
-              "Doughnuts",
-              "",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "Gwydir St Car Park",
-              "Nice buns",
-              "",
-              "https://www.glazedandconfused.com",
-              "01223 111111",
-              "52.199687,0.138813",
-              '',
-              "10:30",
-              "16:30",
-            ]
-          ]
-        };
+        final mockResponse = mockListingsResponse([mockListing('glazedAndConfused')]);
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response.bytes(
@@ -131,40 +65,12 @@ void main() {
 
         expect(result.length, 1);
         expect(result, [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'groupParent': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'FALSE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          }
+          mockListing('glazedAndConfused')
         ]);
       });
 
       test('returns cached listings when status code is not 200', () async {
+        listings = [mockListing('glazedAndConfused')];
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response('Error', 500),
         );
@@ -172,36 +78,7 @@ void main() {
         final result = await fetchExistingListings(mockClient);
 
         expect(result, [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'groupParent': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'FALSE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          }
+          mockListing('glazedAndConfused')
         ]);
       });
     });
@@ -212,83 +89,12 @@ void main() {
       setUp(() async {
         mockClient = MockClient();
         listings = [];
-        dotenv.loadFromString(envString: '''
-    HEROKU_API=MOCK_API
-    HEROKU_API_KEY=MOCK_KEY
-    ANDROID_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
-    ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
-    IOS_GOOGLE_MAPS_SDK_API_KEY=MOCK_KEY
-    IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY=MOCK_KEY
-    SIGNING_KEY=MOCK_CERT
-    IOS_BUNDLE_ID=com.theberridge.mill_road_winter_fair_app
-    ''');
       });
 
       test('handles rows with missing cells by padding to headers', () async {
-        final mockResponse = {
-          "values": [
-            [
-              "id",
-              "visibleOnMap",
-              "cancelled",
-              "groupParent",
-              "brickAndMortar",
-              "emoji",
-              "title",
-              "subtitle",
-              "groupID",
-              "food",
-              "shopping",
-              "charityCommunityInfo",
-              "performanceMusic",
-              "performanceChildrens",
-              "performanceDance",
-              "performanceOther",
-              "visitExperience",
-              "service",
-              "business",
-              "location",
-              "description",
-              "email",
-              "website",
-              "phone",
-              "latLng",
-              "imageURL",
-              "startTime",
-              "endTime"
-            ],
-            [
-              "1",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "🍩",
-              "Glazed and Confused",
-              "Doughnuts",
-              "",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "Gwydir St Car Park",
-              "Nice buns",
-              "",
-              "https://www.glazedandconfused.com",
-              "01223 111111",
-              "52.199687,0.138813",
-              "",
-              "10:30",
-              "", // endTime is blank (cleared cell)
-            ]
-          ]
-        };
+        final mockResponse = mockListingsResponse([mockListing('glazedAndConfused')]);
+        // Omit the trailing cell to exercise padding, rather than supplying a blank.
+        (mockResponse['values'] as List<List<dynamic>>).last.removeLast();
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response.bytes(
@@ -303,75 +109,13 @@ void main() {
         expect(result.length, 1);
         expect(result.first['endTime'], '');
         expect(result.first['title'], 'Glazed and Confused');
-        expect(result.first['id'], '1');
+        expect(result.first['id'], '26001');
       });
 
       test('handles explicit null cells by converting them to empty strings',
           () async {
-        final mockResponse = {
-          "values": [
-            [
-              "id",
-              "visibleOnMap",
-              "cancelled",
-              "groupParent",
-              "brickAndMortar",
-              "emoji",
-              "title",
-              "subtitle",
-              "groupID",
-              "food",
-              "shopping",
-              "charityCommunityInfo",
-              "performanceMusic",
-              "performanceChildrens",
-              "performanceDance",
-              "performanceOther",
-              "visitExperience",
-              "service",
-              "business",
-              "location",
-              "description",
-              "email",
-              "website",
-              "phone",
-              "latLng",
-              "imageURL",
-              "startTime",
-              "endTime"
-            ],
-            [
-              "1",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "🍩",
-              "Glazed and Confused",
-              "Doughnuts",
-              "",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "Gwydir St Car Park",
-              "Nice buns",
-              "",
-              "https://www.glazedandconfused.com",
-              "01223 111111",
-              "52.199687,0.138813",
-              "",
-              "10:30",
-              null,
-            ]
-          ]
-        };
+        final mockResponse = mockListingsResponse([mockListing('glazedAndConfused')]);
+        (mockResponse['values'] as List<List<dynamic>>).last.last = null;
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response.bytes(
@@ -406,70 +150,7 @@ void main() {
           () async {
         listings = [];
 
-        final mockResponse = {
-          "values": [
-            [
-              "id",
-              "visibleOnMap",
-              "cancelled",
-              "groupParent",
-              "brickAndMortar",
-              "emoji",
-              "title",
-              "subtitle",
-              "groupID",
-              "food",
-              "shopping",
-              "charityCommunityInfo",
-              "performanceMusic",
-              "performanceChildrens",
-              "performanceDance",
-              "performanceOther",
-              "visitExperience",
-              "service",
-              "business",
-              "location",
-              "description",
-              "email",
-              "website",
-              "phone",
-              "latLng",
-              "imageURL",
-              "startTime",
-              "endTime"
-            ],
-            [
-              "1",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "🍩",
-              "Glazed and Confused",
-              "Doughnuts",
-              "",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "Gwydir St Car Park",
-              "Nice buns",
-              "",
-              "https://www.glazedandconfused.com",
-              "01223 111111",
-              "52.199687,0.138813",
-              "",
-              "10:30",
-              "16:30",
-            ]
-          ]
-        };
+        final mockResponse = mockListingsResponse([mockListing('glazedAndConfused')]);
 
         when(mockClient.get(any, headers: anyNamed('headers'))).thenAnswer(
           (_) async => http.Response.bytes(
@@ -487,35 +168,7 @@ void main() {
 
       test('returns existing listings if already populated', () async {
         listings = [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'FALSE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          }
+          mockListing('glazedAndConfused')
         ];
 
         final result = await fetchExistingListings(mockClient);
@@ -529,88 +182,7 @@ void main() {
           () async {
         SharedPreferences.setMockInitialValues({});
         // Simulate first app launch: successfully fetch listings from API
-        final initialMockResponse = {
-          "values": [
-            [
-              "id",
-              "visibleOnMap",
-              "cancelled",
-              "groupParent",
-              "brickAndMortar",
-              "emoji",
-              "title",
-              "subtitle",
-              "groupID",
-              "food",
-              "shopping",
-              "charityCommunityInfo",
-              "performance",
-              "visitExperience",
-              "service",
-              "location",
-              "description",
-              "email",
-              "website",
-              "phone",
-              "latLng",
-              "imageURL",
-              "startTime",
-              "endTime"
-            ],
-            [
-              "1",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "🍩",
-              "Glazed and Confused",
-              "Doughnuts",
-              "",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "Gwydir St Car Park",
-              "Nice buns",
-              "",
-              "https://www.glazedandconfused.com",
-              "01223 111111",
-              "52.199687,0.138813",
-              "",
-              "10:30",
-              "16:30",
-            ],
-            [
-              "2",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "🍣",
-              "Sushi Squad",
-              "Sushi",
-              "",
-              "TRUE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "FALSE",
-              "Sushi Bar",
-              "Delicious sushi",
-              "info@sushisquad.com",
-              "https://www.sushisquad.com",
-              "01223 222222",
-              "52.200063,0.139313",
-              "",
-              "12:00",
-              "16:40",
-            ]
-          ]
-        };
+        final initialMockResponse = mockListingsResponse([mockListing('glazedAndConfused'), mockListing('sushiSquad')]);
 
         listings = [];
 
@@ -656,7 +228,7 @@ void main() {
       test('does not replace cached listings with an empty successful response',
           () async {
         final cachedListings = [
-          {'id': '1', 'title': 'Cached listing'},
+          mockListing('cachedListing'),
         ];
         SharedPreferences.setMockInitialValues({
           'cached_listings_json': jsonEncode(cachedListings),

@@ -1,18 +1,13 @@
-import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
+// Dart SDK imports
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
+
+// App imports
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/app_config.dart';
 import 'package:mill_road_winter_fair_app/category_tools.dart';
+import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -21,6 +16,16 @@ import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
+
+// Third-party imports
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -283,17 +288,16 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   Future<void> _ensureDirectionsConfigLoaded() async {
     if (googleMapsDirectionsHeaders == null || googleMapsDirectionsHeaders!.isEmpty) {
-      await dotenv.load(fileName: ".env");
       if (Platform.isAndroid) {
-        googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        final androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
+        googleMapsDirectionsApiKey = AppConfig.androidDirectionsApiKey;
+        final androidSigningKey = AppConfig.androidCertificateFingerprint;
         googleMapsDirectionsHeaders = {
           "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
           "X-Android-Cert": androidSigningKey,
         };
       } else if (Platform.isIOS) {
-        googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        final iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
+        googleMapsDirectionsApiKey = AppConfig.iosDirectionsApiKey;
+        final iosBundleId = AppConfig.iosBundleId;
         googleMapsDirectionsHeaders = {
           "X-Ios-Bundle-Identifier": iosBundleId,
         };
@@ -1584,7 +1588,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   Future<void> updatePolyline(LatLng origin, LatLng destination) async {
     debugPrint('MapPageState updatePolyline called');
     try {
-      // Load environment variables
       await _ensureDirectionsConfigLoaded();
 
       if (googleMapsDirectionsApiKey.isEmpty) {
@@ -1940,6 +1943,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       setVisibleMarkerLists();
       addAllVisibleMarkers();
       establishLocation();
+      timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
     } finally {
       setState(() {
         isRefreshing = false;
@@ -2276,15 +2280,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           child: const Icon(Icons.home),
                         ),
                       ),
-                    // Centre-on-user button (only shown when location services are enabled and permission has been granted)
+                    // Nearby attractions button (only shown when location services are enabled and permission has been granted)
                     if (navigationInProgress == false && locationServicesEnabled == true &&
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
-                        heroTag: 'centreOnUserBtn',
-                        tooltip: 'Centre map on your location',
+                        heroTag: 'nearbyAttractionsBtn',
+                        tooltip: 'Show nearby attractions',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
-                          widget.analyticsService.logButtonTapped('centre_on_user');
+                          widget.analyticsService.logButtonTapped('nearby_attractions');
                           enableAllFiltersIfAllOff();
                           focusMapOnNearestMarkers(10);
                         },
@@ -2305,6 +2309,61 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             ],
                           ),
                           child: const Icon(Icons.radar),
+                        ),
+                      ),
+                    // Centre-on-user button (only shown when navigation in progress, location services are enabled and permission has been granted)
+                    if (locationServicesEnabled == true && navigationInProgress &&
+                        (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
+                      FloatingActionButton(
+                        heroTag: 'centreOnUserBtn',
+                        tooltip: 'Centre the map on your location',
+                        onPressed: () async {
+                          HapticFeedback.lightImpact();
+                          widget.analyticsService.logButtonTapped('centre_on_user');
+                          // If we already know the current location, animate there. Otherwise attempt to fetch it (getCurrentPosition will throw if services/perm missing)
+                          try {
+                            if (currentLatLng == null) {
+                              final pos = await getCurrentPosition();
+                              currentLatLng = LatLng(pos.latitude, pos.longitude);
+                            }
+                            if (currentLatLng != null) {
+                              // Move camera to the user's location with a sensible zoom and bearing
+                              double currentZoom = await _controller!.getZoomLevel();
+                              _controller?.animateCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(target: currentLatLng!, zoom: currentZoom, bearing: _mapBearing),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('Centre-on-user failed: $e');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: colorScheme.primary,
+                                  content: Text('Unable to determine your location'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        backgroundColor: Colors.transparent,
+                        mini: true,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: colorScheme.onSurfaceVariant.withAlpha(127),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(2, 2))
+                            ],
+                          ),
+                          child: const Icon(Icons.my_location),
                         ),
                       ),
                     FloatingActionButton(

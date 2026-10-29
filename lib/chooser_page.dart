@@ -1,14 +1,19 @@
-import 'package:flutter/foundation.dart';
-import 'dart:ui' as ui;
-import 'dart:math';
+// Dart SDK imports
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'dart:math';
+import 'dart:ui' as ui;
+
+// App imports
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
-import 'package:simple_shadow/simple_shadow.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+
+// Third-party imports
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:simple_shadow/simple_shadow.dart';
 
 class ChooserPage extends StatefulWidget {
 

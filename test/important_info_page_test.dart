@@ -1,7 +1,4 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -9,8 +6,17 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+// Third-party imports
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+
+// Test helpers, fakes and mocks
 import 'fakes/fake_url_launcher.dart';
+import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 
 Future<void> settle(WidgetTester tester) async {
@@ -53,32 +59,7 @@ void main() {
 
       // Minimal listings so pages render correctly
       listings = [
-        {
-          'id': '1',
-          'visibleOnMap': 'TRUE',
-          'cancelled': 'FALSE',
-          'groupParent': 'FALSE',
-          'brickAndMortar': 'FALSE',
-          'emoji': '🍩',
-          'title': 'Glazed and Confused',
-          'subtitle': 'Doughnuts',
-          'groupID': '',
-          'food': 'TRUE',
-          'shopping': 'FALSE',
-          'charityCommunityInfo': 'FALSE',
-          'performance': 'FALSE',
-          'visitExperience': 'FALSE',
-          'service': 'FALSE',
-          'location': 'Gwydir St Car Park',
-          'description': 'Nice buns',
-          'email': '',
-          'website': 'https://www.glazedandconfused.com',
-          'phone': '01223 111111',
-          'latLng': '52.199687,0.138813',
-          'imageURL': '',
-          'startTime': '10:30',
-          'endTime': '16:30',
-        }
+        mockListing('glazedAndConfused')
       ];
 
       await tester.pumpWithClock(MyApp(
