@@ -77,16 +77,11 @@ void main() {
     }) {
       final paragraph = tester.widget<Text>(
         find.byWidgetPredicate(
-          (widget) =>
-              widget is Text &&
-              widget.textSpan?.toPlainText().startsWith(paragraphStartsWith) ==
-                  true,
+          (widget) => widget is Text && widget.textSpan?.toPlainText().startsWith(paragraphStartsWith) == true,
         ),
       );
       final paragraphSpan = paragraph.textSpan as TextSpan;
-      final linkSpan = paragraphSpan.children!
-          .whereType<TextSpan>()
-          .singleWhere((span) => span.text == linkText);
+      final linkSpan = paragraphSpan.children!.whereType<TextSpan>().singleWhere((span) => span.text == linkText);
 
       return linkSpan.recognizer as TapGestureRecognizer;
     }
@@ -111,31 +106,31 @@ void main() {
         (
           paragraph: 'Opening ceremony',
           link: 'Ditchburn Gardens',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.200389, 0.136465),
         ),
         (
           paragraph: 'Parade',
           link: 'Salisbury Club',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.1970778, 0.1472252),
         ),
         (
           paragraph: 'Parade',
           link: 'Petersfield',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.202858, 0.132253),
         ),
         (
           paragraph: 'Final parade',
           link: 'Gwydir Street',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.199627, 0.138407),
         ),
         (
           paragraph: 'Final parade',
           link: 'Petersfield',
-          id: '$aSimpleMarkerId Performance',
+          id: '$aSimpleMarkerId Visit/Experience',
           position: const LatLng(52.202858, 0.132253),
         ),
       ];
@@ -171,7 +166,6 @@ void main() {
 
       const sponsorUrls = {
         'Bush & Co Sales and Lettings': 'https://bushandco.co.uk/',
-        'Al-Amin': 'https://www.alamin.co.uk/',
         'Anglia Ruskin University': 'https://www.aru.ac.uk/',
         'Hughes Hall': 'https://www.hughes.cam.ac.uk/',
         'Love Mill Road': 'https://www.lovemillroad.org.uk/',
@@ -202,17 +196,14 @@ void main() {
         // Set firstExecution to false to simulate normal app launch
         firstExecution = false;
 
-      // Minimal listings so pages render correctly
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+        // Minimal listings so pages render correctly
+        listings = [mockListing('glazedAndConfused')];
 
-      await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
-      await settle(tester);
+        await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
+        await settle(tester);
 
         // Obtain the HomePage state
-        final homePageState =
-            tester.state(find.byType(HomePage)) as HomePageState;
+        final homePageState = tester.state(find.byType(HomePage)) as HomePageState;
 
         // 1) Select Food tab (index 1)
         await tester.tap(find.text('Listings'));

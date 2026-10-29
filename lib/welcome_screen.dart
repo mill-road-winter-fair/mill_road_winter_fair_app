@@ -337,7 +337,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            'assets/welcomeScreen/chooserPage_background.jpg',
+            'assets/infoPages/chooserPage_background.jpg',
             fit: BoxFit.cover,
             excludeFromSemantics: true,
           ),

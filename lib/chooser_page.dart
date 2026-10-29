@@ -200,7 +200,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         left: -0.03,
         top: 0.01,
         scale: 1,
-        assetPath: 'assets/chooserPage/foodDrink.png',
+        assetPath: 'assets/infoPages/foodDrink.png',
         theTap: () => widget.onOpenListings('all', 'food'),
       ),
       Hotspot(
@@ -211,7 +211,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         left: 0.66,
         top: -0.005,
         scale: 1,
-        assetPath: 'assets/chooserPage/music.png',
+        assetPath: 'assets/infoPages/music.png',
         theTap: () => widget.onOpenTimetable(false, true),
       ),
       Hotspot(
@@ -222,7 +222,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         left: 0.35,
         top: 0.18,
         scale: 1.05,
-        assetPath: 'assets/chooserPage/childrens.png',
+        assetPath: 'assets/infoPages/childrens.png',
         theTap: () => widget.onOpenListings('all', 'performanceChildrens'),
       ),
       Hotspot(
@@ -233,7 +233,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         left: 0.65,
         top: 0.28,
         scale: 1,
-        assetPath: 'assets/chooserPage/shopping.png',
+        assetPath: 'assets/infoPages/shopping.png',
         theTap: () => widget.onOpenListings('all', 'shopping'),
       ),
       Hotspot(
@@ -244,7 +244,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         left: 0,
         top: 0.29,
         scale: 1,
-        assetPath: 'assets/chooserPage/charityCommunityInfo.png',
+        assetPath: 'assets/infoPages/charityCommunityInfo.png',
         theTap: () => widget.onOpenListings('all', 'charityCommunityInfo'),
       ),
       Hotspot(
@@ -255,7 +255,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         left: 0.19,
         top: 0.56,
         scale: 1,
-        assetPath: 'assets/chooserPage/visitExperience.png',
+        assetPath: 'assets/infoPages/visitExperience.png',
         theTap: () => widget.onOpenListings('all', 'visitExperience'),
       ),
       Hotspot(
@@ -266,7 +266,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         left: 0,
         top: 0.69,
         scale: 1,
-        assetPath: 'assets/chooserPage/services.png',
+        assetPath: 'assets/infoPages/services.png',
         theTap: () => widget.onOpenListings('all', 'service'),
       ),
       Hotspot(
@@ -277,7 +277,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         left: 0.61,
         top: 0.70,
         scale: 0.9,
-        assetPath: 'assets/chooserPage/nearby.png',
+        assetPath: 'assets/infoPages/nearby.png',
         theTap: () => widget.onOpenMap(10),
       ),
     ];
@@ -303,8 +303,8 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     if (!mounted || staticChooserPage.value) return;
     await Future.wait([
       ...hotspots.map((hotspot) => precacheImage(hotspot.imageProvider!, context)),
-      precacheImage(const AssetImage('assets/chooserPage/chooserPage_background.jpg'), context),
-      precacheImage(const AssetImage('assets/chooserPage/MRWF_logo_transparent.png'), context),
+      precacheImage(const AssetImage('assets/infoPages/chooserPage_background.jpg'), context),
+      precacheImage(const AssetImage('assets/infoPages/MRWF_logo_transparent.png'), context),
     ]);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -479,7 +479,7 @@ class _ChooserBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset('assets/chooserPage/chooserPage_background.jpg', fit: BoxFit.fill),
+        Image.asset('assets/infoPages/chooserPage_background.jpg', fit: BoxFit.fill),
         Positioned.fill(
           child: BackdropFilter(
             filter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
@@ -505,7 +505,7 @@ class _ChooserLogo extends StatelessWidget {
       sigma: 6,
       offset: const Offset(3, 3),
       child: Image.asset(
-        'assets/chooserPage/MRWF_logo_transparent.png',
+        'assets/infoPages/MRWF_logo_transparent.png',
         fit: BoxFit.contain,
         width: MediaQuery.sizeOf(context).width * 0.5,
       ),
