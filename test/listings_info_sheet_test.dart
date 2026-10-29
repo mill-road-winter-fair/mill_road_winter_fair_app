@@ -494,7 +494,7 @@ void main() {
       expect(favouriteIcon.icon?.fontPackage, FontAwesomeIcons.solidHeart.fontPackage);
       expect(
         favouriteIcon.color,
-        ColorScheme.light().primary,
+        Colors.red,
       );
 
       await tester.tap(find.byType(IconButton).first);
