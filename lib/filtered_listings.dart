@@ -232,6 +232,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       if (navigationInProgress == false) {
         mapPageKey.currentState?.addAllVisibleMarkers();
       }
+      timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
       establishLocation();
     } finally {
       setState(() {
