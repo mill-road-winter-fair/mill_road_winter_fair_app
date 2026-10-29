@@ -1,7 +1,12 @@
+// Dart SDK imports
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
+// Third-party imports
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -86,23 +91,25 @@ class FairNotificationService extends ChangeNotifier {
   static const interval = Duration(minutes: 5);
   String get _seenKey => 'notifications_seen_v1:$endpoint';
   String get _nextKey => 'notifications_next_v1:$endpoint';
-  Timer? _pollTimer, _expiryTimer;
+  Timer? _pollTimer;
   bool _active = false, _disposed = false, _busy = false;
   int _failures = 0;
   FairNotification? current;
 
+  void _log(String message) {
+    if (kDebugMode) debugPrint('Notifications: $message');
+  }
+
   Future<void> setActive(bool active) async {
+    _log(active ? 'foreground polling enabled' : 'polling paused');
     _active = active;
     _pollTimer?.cancel();
-    if (!active) {
-      dismiss();
-    } else {
+    if (active) {
       await poll();
     }
   }
 
   void dismiss() {
-    _expiryTimer?.cancel();
     current = null;
     if (!_disposed) notifyListeners();
   }
@@ -110,10 +117,14 @@ class FairNotificationService extends ChangeNotifier {
   Future<void> poll() async {
     final uri = Uri.tryParse(endpoint);
     if (!_active || _disposed || _busy || uri == null || uri.scheme != 'https' || uri.host.isEmpty || apiKey.isEmpty) {
+      _log('check skipped (active=$_active, disposed=$_disposed, busy=$_busy, '
+          'validEndpoint=${uri != null && uri.scheme == 'https' && uri.host.isNotEmpty}, '
+          'keyConfigured=${apiKey.isNotEmpty})');
       return;
     }
     final next = DateTime.fromMillisecondsSinceEpoch(preferences.getInt(_nextKey) ?? 0);
     if (_now().isBefore(next)) {
+      _log('next check at ${next.toUtc().toIso8601String()}');
       _schedule(next.difference(_now()));
       return;
     }
@@ -134,6 +145,7 @@ class FairNotificationService extends ChangeNotifier {
           'Cache-Control': 'no-cache',
         },
       ).timeout(const Duration(seconds: 15));
+      _log('HTTP ${response.statusCode} from ${uri.host}${uri.path}');
       if (response.statusCode != 200) {
         final seconds = int.tryParse(response.headers['retry-after'] ?? '');
         if (seconds != null && seconds > delay.inSeconds) {
@@ -142,11 +154,14 @@ class FairNotificationService extends ChangeNotifier {
         throw const FormatException('Notification request failed');
       }
       final notifications = FairNotification.parse(response.body);
+      _log('${notifications.length} valid enabled rows at ${_now().toUtc().toIso8601String()}');
       _failures = 0;
       if (!_active || _disposed || current != null) return;
       final seen = (preferences.getStringList(_seenKey) ?? []).toSet();
       for (final notification in notifications) {
         if (!notification.isCurrent(_now()) || seen.contains(notification.id)) {
+          _log('skipping ID ${notification.id}: '
+              'current=${notification.isCurrent(_now())}, alreadySeen=${seen.contains(notification.id)}');
           continue;
         }
         // Persist before presentation, favouring no repeats after a crash.
@@ -155,13 +170,13 @@ class FairNotificationService extends ChangeNotifier {
         }
         if (!_active || _disposed || !notification.isCurrent(_now())) return;
         current = notification;
-        final maxEnd = notification.startsAt.add(const Duration(hours: 24));
-        final end = notification.expiresAt.isBefore(maxEnd) ? notification.expiresAt : maxEnd;
-        _expiryTimer = Timer(end.difference(_now()), dismiss);
+        _log('showing ID ${notification.id}');
         notifyListeners();
-        break; // At most one banner per poll; no burst of queued messages.
+        break; // At most one dialog per poll; no burst of queued messages.
       }
-    } catch (_) {
+    } catch (error) {
+      // Do not log raw errors: HTTP exceptions can include credentials or payloads.
+      _log('check failed (${error.runtimeType})');
       _failures = (_failures + 1).clamp(1, 4);
       final backoff = Duration(minutes: (5 * (1 << _failures)).clamp(5, 60));
       if (backoff > delay) delay = backoff;
@@ -184,26 +199,26 @@ class FairNotificationService extends ChangeNotifier {
 
   void _schedule(Duration delay) {
     _pollTimer?.cancel();
-    if (_active && !_disposed) _pollTimer = Timer(delay, poll);
+    if (_active && !_disposed) {
+      _log('next check in ${delay.inSeconds} seconds');
+      _pollTimer = Timer(delay, poll);
+    }
   }
 
   @override
   void dispose() {
     _disposed = true;
     _pollTimer?.cancel();
-    _expiryTimer?.cancel();
+
     _client.close();
     super.dispose();
   }
 }
 
 class FairNotificationHost extends StatefulWidget {
-  const FairNotificationHost({
-    super.key,
-    required this.service,
-    required this.child,
-  });
+  const FairNotificationHost({super.key, required this.service, required this.navigatorKey, required this.child});
   final FairNotificationService service;
+  final GlobalKey<NavigatorState> navigatorKey;
   final Widget child;
 
   @override
@@ -211,13 +226,61 @@ class FairNotificationHost extends StatefulWidget {
 }
 
 class _FairNotificationHostState extends State<FairNotificationHost> with WidgetsBindingObserver {
+  bool _dialogOpen = false;
+  final _dialogScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    widget.service.setActive(
-      WidgetsBinding.instance.lifecycleState == null || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
-    );
+    widget.service.addListener(_notificationChanged);
+    widget.service.setActive(WidgetsBinding.instance.lifecycleState == null || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed);
+  }
+
+  void _notificationChanged() {
+    if (_dialogOpen || widget.service.current == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _dialogOpen) return;
+      final notification = widget.service.current;
+      final dialogContext = widget.navigatorKey.currentState?.overlay?.context;
+      if (notification == null || dialogContext == null) return;
+      _dialogOpen = true;
+      showDialog<void>(
+        context: dialogContext,
+        barrierDismissible: false,
+        builder: (context) => PopScope(
+          canPop: false,
+          child: AlertDialog(
+            title: Text(notification.title),
+            content: Scrollbar(
+              controller: _dialogScrollController,
+              thumbVisibility: Platform.isIOS ? false : true,
+              thickness: 4,
+              radius: const Radius.circular(8),
+              child: SingleChildScrollView(
+                controller: _dialogScrollController,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Text(notification.body),
+                ),
+              ),
+            ),
+            actionsAlignment: MainAxisAlignment.end,
+            actions: [
+              TextButton(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  widget.service.dismiss();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        ),
+      ).whenComplete(() => _dialogOpen = false);
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   @override
@@ -226,62 +289,12 @@ class _FairNotificationHostState extends State<FairNotificationHost> with Widget
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    widget.service.removeListener(_notificationChanged);
+    _dialogScrollController.dispose();
     widget.service.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-        listenable: widget.service,
-        builder: (context, _) {
-          final notification = widget.service.current;
-          return Column(
-            children: [
-              if (notification != null)
-                Material(
-                  color: Theme.of(context).colorScheme.secondaryContainer,
-                  child: SafeArea(
-                    bottom: false,
-                    child: Semantics(
-                      liveRegion: true,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: MediaQuery.sizeOf(context).height * 0.4,
-                        ),
-                        child: SingleChildScrollView(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        notification.title,
-                                        style: Theme.of(context).textTheme.titleMedium,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(notification.body),
-                                    ],
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: widget.service.dismiss,
-                                  child: const Text('Dismiss'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              Expanded(child: widget.child),
-            ],
-          );
-        },
-      );
+  Widget build(BuildContext context) => widget.child;
 }

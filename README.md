@@ -127,8 +127,10 @@ It follows their guidance to minimise networking and unnecessary background work
 and [Android battery guidance](https://developer.android.com/develop/connectivity/preserving-battery).
 
 The newest eligible unseen message appears as an accessible, scrollable,
-dismissible banner. At most one message is presented per poll. Banners are
-removed on expiry or when the app becomes inactive. Content is never cached on
+dialog with an OK button at the bottom right. At most one message is presented
+per poll. Once shown, a dialog remains until OK is tapped, including across
+background/resume and expiry; outside taps and Back do not dismiss it. Expiry
+is checked before presentation. Content is never cached on
 the device, and failed/offline requests display nothing. The API's own cache
 should refresh promptly and respect expiry; dates are also checked on-device.
 Clock accuracy depends on the device clock.
@@ -138,7 +140,7 @@ over guaranteed delivery if the app closes at that exact moment. History survive
 normal restarts and upgrades, but clearing app data/reinstalling may reset it.
 Cross-device or reinstall-proof deduplication would require server-side identity.
 Keep IDs permanent; do not repurpose old rows. Disabling a row takes effect at
-the API and for subsequent presentation, rather than recalling a visible banner.
+the API and for subsequent presentation, rather than recalling a visible dialog.
 
 The API key is bundled with this mobile app and can be extracted; use a scoped,
 read-only key and server-side rate limiting, never an administrative credential.

@@ -174,6 +174,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  final _navigatorKey = GlobalKey<NavigatorState>();
   @override
   void initState() {
     super.initState();
@@ -224,8 +225,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         final ThemeData darkTheme = appThemes['dark'] ?? appThemes['light']!;
         mapStyle = getMapStyleForThemeKey(selectedThemeKey);
         return MaterialApp(
+          navigatorKey: _navigatorKey,
           builder: widget.notificationService == null ? null : (context, child) =>
-              FairNotificationHost(service: widget.notificationService!, child: child!),
+              FairNotificationHost(service: widget.notificationService!, navigatorKey: _navigatorKey, child: child!),
           title: fairName,
           themeMode: resolvedThemeMode,
           theme: isAuto

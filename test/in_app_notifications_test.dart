@@ -113,7 +113,7 @@ void main() {
     service.dispose();
   });
 
-  testWidgets('banner can be dismissed and expires while visible', (tester) async {
+  testWidgets('dialog requires OK and adapts to a small screen with large text', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final service = FairNotificationService(
       endpoint: 'https://example.com/notifications',
@@ -129,17 +129,41 @@ void main() {
         ),
       ),
     );
+    final navigatorKey = GlobalKey<NavigatorState>();
+    tester.view.physicalSize = const Size(320, 480);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       MaterialApp(
-        builder: (context, child) => FairNotificationHost(service: service, child: child!),
+        navigatorKey: navigatorKey,
+        builder: (context, child) =>
+            MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(2)), child: FairNotificationHost(service: service, navigatorKey: navigatorKey, child: child!)),
         home: const Scaffold(),
       ),
     );
     await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Fair update'), findsOneWidget);
-    expect(find.text('Dismiss'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 11));
-    expect(find.text('Fair update'), findsNothing);
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.text('OK'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tapAt(const Offset(2, 2));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await navigatorKey.currentState!.maybePop();
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.pump(const Duration(seconds: 30));
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await service.setActive(false);
+    await service.setActive(true);
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(service.current, isNull);
     await tester.pumpWidget(const SizedBox());
   });
 }
