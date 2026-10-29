@@ -479,53 +479,69 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
   final colorScheme = Theme.of(itemContext).colorScheme;
 
   await showDialog(
-      context: itemContext,
-      builder: (dialogContext) {
-        return Dialog(
-          insetPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
-          shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
-          backgroundColor: colorScheme.surfaceContainerLowest,
-          shadowColor: colorScheme.surfaceDim,
-          elevation: 3,
-          child: IntrinsicHeight(
+    context: itemContext,
+    builder: (dialogContext) {
+      return Dialog(
+        insetPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
+        shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+        backgroundColor: colorScheme.surfaceContainerLowest,
+        shadowColor: colorScheme.surfaceDim,
+        elevation: 3,
+        child: Scrollbar(
+          thumbVisibility: Platform.isIOS ? false : true,
+          child: SingleChildScrollView(
+            primary: true,
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(16),
-              child: Column(mainAxisSize: MainAxisSize.min, spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
-                Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
-                Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
-                Align(
-                    alignment: AlignmentGeometry.center,
-                    child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png',
-                        width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  TextButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      analyticsService.logButtonTapped('share_app_share');
-                      Navigator.of(dialogContext).pop();
-                      shareApp(itemContext,
-                          'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
-                    },
-                    child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
+                  const Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
+                  const Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
+                  Align(
+                      alignment: AlignmentGeometry.center,
+                      child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('share_app_share');
+                            Navigator.of(dialogContext).pop();
+                            shareApp(itemContext, 'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
+                          },
+                          child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('share_app_close');
+                            Navigator.of(dialogContext).pop();
+                          },
+                          child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                        ),
+                      ],
+                    ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      analyticsService.logButtonTapped('share_app_close');
-                      Navigator.of(dialogContext).pop();
-                    },
-                    child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
-                  ),
-                ]),
-              ]),
+                ],
+              ),
             ),
           ),
-        );
-      });
+        ),
+      );
+    },
+  );
 }
 
 class CenterDockedWithOffset extends FloatingActionButtonLocation {
