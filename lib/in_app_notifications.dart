@@ -10,12 +10,14 @@ class FairNotification {
   final DateTime startsAt, expiresAt;
 
   const FairNotification(
-      this.id, this.title, this.body, this.startsAt, this.expiresAt,);
+    this.id,
+    this.title,
+    this.body,
+    this.startsAt,
+    this.expiresAt,
+  );
 
-  bool isCurrent(DateTime now) =>
-      !now.isBefore(startsAt) &&
-      now.isBefore(expiresAt) &&
-      now.difference(startsAt) < const Duration(hours: 24);
+  bool isCurrent(DateTime now) => !now.isBefore(startsAt) && now.isBefore(expiresAt) && now.difference(startsAt) < const Duration(hours: 24);
 
   static List<FairNotification> parse(String body) {
     final data = jsonDecode(body);
@@ -23,8 +25,7 @@ class FairNotification {
     if (rows is! List) throw const FormatException('Missing values array');
     if (rows.isEmpty) return [];
     if (rows.first is! List) throw const FormatException('Missing headers');
-    final headers =
-        (rows.first as List).map((v) => v.toString().trim()).toList();
+    final headers = (rows.first as List).map((v) => v.toString().trim()).toList();
     const required = [
       'id',
       'title',
@@ -33,8 +34,7 @@ class FairNotification {
       'expires_at',
       'enabled',
     ];
-    if (!required.every(headers.contains) ||
-        headers.toSet().length != headers.length) {
+    if (!required.every(headers.contains) || headers.toSet().length != headers.length) {
       throw const FormatException('Invalid notification headers');
     }
     final result = <FairNotification>[];
@@ -59,30 +59,24 @@ class FairNotification {
 
       final start = date('starts_at');
       final end = date('expires_at');
-      if (id.isEmpty ||
-          cell('title').isEmpty ||
-          cell('body').isEmpty ||
-          start == null ||
-          end == null ||
-          !end.isAfter(start)) {
+      if (id.isEmpty || cell('title').isEmpty || cell('body').isEmpty || start == null || end == null || !end.isAfter(start)) {
         continue;
       }
       result.add(FairNotification(id, cell('title'), cell('body'), start, end));
     }
-    return result.where((n) => !duplicates.contains(n.id)).toList()
-      ..sort((a, b) => b.startsAt.compareTo(a.startsAt));
+    return result.where((n) => !duplicates.contains(n.id)).toList()..sort((a, b) => b.startsAt.compareTo(a.startsAt));
   }
 }
 
 /// Foreground-only polling. Content is never cached or replayed offline.
 class FairNotificationService extends ChangeNotifier {
-  FairNotificationService(
-      {required this.endpoint,
-      required this.apiKey,
-      required this.preferences,
-      http.Client? client,
-      DateTime Function()? now,})
-      : _client = client ?? http.Client(),
+  FairNotificationService({
+    required this.endpoint,
+    required this.apiKey,
+    required this.preferences,
+    http.Client? client,
+    DateTime Function()? now,
+  })  : _client = client ?? http.Client(),
         _now = now ?? DateTime.now;
 
   final String endpoint, apiKey;
@@ -115,17 +109,10 @@ class FairNotificationService extends ChangeNotifier {
 
   Future<void> poll() async {
     final uri = Uri.tryParse(endpoint);
-    if (!_active ||
-        _disposed ||
-        _busy ||
-        uri == null ||
-        uri.scheme != 'https' ||
-        uri.host.isEmpty ||
-        apiKey.isEmpty) {
+    if (!_active || _disposed || _busy || uri == null || uri.scheme != 'https' || uri.host.isEmpty || apiKey.isEmpty) {
       return;
     }
-    final next =
-        DateTime.fromMillisecondsSinceEpoch(preferences.getInt(_nextKey) ?? 0);
+    final next = DateTime.fromMillisecondsSinceEpoch(preferences.getInt(_nextKey) ?? 0);
     if (_now().isBefore(next)) {
       _schedule(next.difference(_now()));
       return;
@@ -135,13 +122,18 @@ class FairNotificationService extends ChangeNotifier {
     try {
       // Persist throttling so rapid app restarts cannot hammer the API.
       if (!await preferences.setInt(
-          _nextKey, _now().add(delay).millisecondsSinceEpoch,)) {
+        _nextKey,
+        _now().add(delay).millisecondsSinceEpoch,
+      )) {
         return;
       }
-      final response = await _client.get(uri, headers: {
-        'x-api-key': apiKey,
-        'Cache-Control': 'no-cache',
-      },).timeout(const Duration(seconds: 15));
+      final response = await _client.get(
+        uri,
+        headers: {
+          'x-api-key': apiKey,
+          'Cache-Control': 'no-cache',
+        },
+      ).timeout(const Duration(seconds: 15));
       if (response.statusCode != 200) {
         final seconds = int.tryParse(response.headers['retry-after'] ?? '');
         if (seconds != null && seconds > delay.inSeconds) {
@@ -158,16 +150,13 @@ class FairNotificationService extends ChangeNotifier {
           continue;
         }
         // Persist before presentation, favouring no repeats after a crash.
-        if (!await preferences
-            .setStringList(_seenKey, [...seen, notification.id])) {
+        if (!await preferences.setStringList(_seenKey, [...seen, notification.id])) {
           return;
         }
         if (!_active || _disposed || !notification.isCurrent(_now())) return;
         current = notification;
         final maxEnd = notification.startsAt.add(const Duration(hours: 24));
-        final end = notification.expiresAt.isBefore(maxEnd)
-            ? notification.expiresAt
-            : maxEnd;
+        final end = notification.expiresAt.isBefore(maxEnd) ? notification.expiresAt : maxEnd;
         _expiryTimer = Timer(end.difference(_now()), dismiss);
         notifyListeners();
         break; // At most one banner per poll; no burst of queued messages.
@@ -181,7 +170,9 @@ class FairNotificationService extends ChangeNotifier {
       if (!_disposed) {
         try {
           await preferences.setInt(
-              _nextKey, _now().add(delay).millisecondsSinceEpoch,);
+            _nextKey,
+            _now().add(delay).millisecondsSinceEpoch,
+          );
         } catch (_) {
           /* Retry only on the normal timer if storage is unavailable. */
         }
@@ -207,8 +198,11 @@ class FairNotificationService extends ChangeNotifier {
 }
 
 class FairNotificationHost extends StatefulWidget {
-  const FairNotificationHost(
-      {super.key, required this.service, required this.child,});
+  const FairNotificationHost({
+    super.key,
+    required this.service,
+    required this.child,
+  });
   final FairNotificationService service;
   final Widget child;
 
@@ -216,19 +210,18 @@ class FairNotificationHost extends StatefulWidget {
   State<FairNotificationHost> createState() => _FairNotificationHostState();
 }
 
-class _FairNotificationHostState extends State<FairNotificationHost>
-    with WidgetsBindingObserver {
+class _FairNotificationHostState extends State<FairNotificationHost> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    widget.service.setActive(WidgetsBinding.instance.lifecycleState == null ||
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,);
+    widget.service.setActive(
+      WidgetsBinding.instance.lifecycleState == null || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
+    );
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) =>
-      widget.service.setActive(state == AppLifecycleState.resumed);
+  void didChangeAppLifecycleState(AppLifecycleState state) => widget.service.setActive(state == AppLifecycleState.resumed);
 
   @override
   void dispose() {
@@ -242,45 +235,53 @@ class _FairNotificationHostState extends State<FairNotificationHost>
         listenable: widget.service,
         builder: (context, _) {
           final notification = widget.service.current;
-          return Column(children: [
-            if (notification != null)
-              Material(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                child: SafeArea(
+          return Column(
+            children: [
+              if (notification != null)
+                Material(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: SafeArea(
                     bottom: false,
                     child: Semantics(
                       liveRegion: true,
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                            maxHeight: MediaQuery.sizeOf(context).height * 0.4,),
+                          maxHeight: MediaQuery.sizeOf(context).height * 0.4,
+                        ),
                         child: SingleChildScrollView(
-                            child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                          child: Row(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+                            child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
-                                    child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                      Text(notification.title,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium,),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        notification.title,
+                                        style: Theme.of(context).textTheme.titleMedium,
+                                      ),
                                       const SizedBox(height: 4),
                                       Text(notification.body),
-                                    ],),),
+                                    ],
+                                  ),
+                                ),
                                 TextButton(
-                                    onPressed: widget.service.dismiss,
-                                    child: const Text('Dismiss'),),
-                              ],),
-                        ),),
+                                  onPressed: widget.service.dismiss,
+                                  child: const Text('Dismiss'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ),),
-              ),
-            Expanded(child: widget.child),
-          ],);
+                    ),
+                  ),
+                ),
+              Expanded(child: widget.child),
+            ],
+          );
         },
       );
 }
