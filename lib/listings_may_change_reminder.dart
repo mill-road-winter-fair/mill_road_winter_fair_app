@@ -89,28 +89,47 @@ class ListingUpdateNotifier {
       return;
     }
 
+    bool isListingsMayChange = false;
+    bool dontShowAgain = false;
+    String dialogTitle, dialogContent;
+
     final noticeDate = context.read<DateTimeProvider>().now();
-    final isListingsMayChange = isListingsMayChangeNotice(noticeDate);
-
-    // The dismissal preference applies only before the Fair. The notices on
-    // the day and afterwards must always remain available.
     final prefs = await SharedPreferences.getInstance();
-    if (!context.mounted || (isListingsMayChange && (!listingUpdateNoticeEnabled || !(prefs.getBool(preferenceKey) ?? true)))) {
-      return;
-    }
 
-    final lastShownKey = lastShownKeyFor(noticeDate);
-    final lastShownMillis = prefs.getInt(lastShownKey);
-    if (lastShownMillis != null) {
-      final lastShown = DateTime.fromMillisecondsSinceEpoch(lastShownMillis);
-      if (noticeDate.difference(lastShown) < showIntervalFor(noticeDate)) {
+    if (emergencyAlertText != null) {
+
+      // Emergency alert overrides all else, and will show at every app launch
+      dialogTitle = emergencyAlertText!.title;
+      dialogContent = emergencyAlertText!.body;
+      
+    } else {
+
+      isListingsMayChange = isListingsMayChangeNotice(noticeDate);
+
+      // The dismissal preference applies only before the Fair. The notices on
+      // the day and afterwards must always remain available.
+      if (!context.mounted || (isListingsMayChange && (!listingUpdateNoticeEnabled || !(prefs.getBool(preferenceKey) ?? true)))) {
         return;
       }
-    }
 
-    await prefs.setInt(lastShownKey, noticeDate.millisecondsSinceEpoch);
-    if (!context.mounted) {
-      return;
+      final lastShownKey = lastShownKeyFor(noticeDate);
+      final lastShownMillis = prefs.getInt(lastShownKey);
+      if (lastShownMillis != null) {
+        final lastShown = DateTime.fromMillisecondsSinceEpoch(lastShownMillis);
+        if (noticeDate.difference(lastShown) < showIntervalFor(noticeDate)) {
+          return;
+        }
+      }
+
+      await prefs.setInt(lastShownKey, noticeDate.millisecondsSinceEpoch);
+      if (!context.mounted) {
+        return;
+      }
+
+      dontShowAgain = true;
+      dialogTitle = titleFor(noticeDate);
+      dialogContent = messageFor(noticeDate);
+
     }
 
     final analyticsId = analyticsIdFor(noticeDate);
@@ -119,15 +138,13 @@ class ListingUpdateNotifier {
       return;
     }
 
-    bool dontShowAgain = true;
-
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: Text(titleFor(noticeDate)),
-          content: Text(messageFor(noticeDate)),
+          title: Text(dialogTitle),
+          content: Text(dialogContent),
           actions: [
             if (isListingsMayChange)
               CheckboxListTile(

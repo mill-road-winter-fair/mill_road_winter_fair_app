@@ -14,7 +14,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
-import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Third-party imports
@@ -136,7 +135,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
-      ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
       if (doingAPushNavigation ?? false) {
         doingAPushNavigation = false;
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);

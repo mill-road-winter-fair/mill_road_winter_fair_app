@@ -17,6 +17,7 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 
 // Third-party imports
 import 'package:firebase_core/firebase_core.dart';
@@ -276,6 +277,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           ),
         );
       }
+      ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
     });
   }
 

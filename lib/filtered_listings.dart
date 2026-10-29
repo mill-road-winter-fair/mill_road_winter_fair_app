@@ -12,6 +12,7 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 
 // Third-party imports
 import 'package:flutter/material.dart';
@@ -244,6 +245,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         isRefreshing = false;
       });
     }
+    if (mounted) ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
   }
 
   void sortingDropdownCallback(SortingMethod? selectedValue) {
