@@ -97,7 +97,7 @@ class FairNotificationService extends ChangeNotifier {
   FairNotification? current;
 
   void _log(String message) {
-    if (kDebugMode) debugPrint('Notifications: $message');
+    if (kDebugMode) debugPrint('[Notifications] $message');
   }
 
   Future<void> setActive(bool active) async {
