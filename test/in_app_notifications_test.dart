@@ -8,12 +8,12 @@ import 'package:mill_road_winter_fair_app/in_app_notifications.dart';
 
 const headers = ['id', 'title', 'body', 'starts_at', 'expires_at', 'enabled'];
 String payload(List<List<Object>> rows) => jsonEncode({
-      'values': [headers, ...rows]
+      'values': [headers, ...rows],
     });
 List<Object> row(String id,
         {String start = '2026-10-29T10:00:00Z',
         String end = '2026-10-29T18:00:00Z',
-        Object enabled = true}) =>
+        Object enabled = true,}) =>
     [id, 'Fair update', 'Some information', start, end, enabled];
 
 void main() {
@@ -26,10 +26,10 @@ void main() {
       row('duplicate'),
       row('duplicate'),
       ['short'],
-    ]));
+    ]),);
     expect(parsed.map((n) => n.id), ['valid']);
     expect(() => FairNotification.parse('{"values":[["title"]]}'),
-        throwsFormatException);
+        throwsFormatException,);
   });
 
   test('excludes future, expired and over-24-hour-old notifications', () {
@@ -39,7 +39,7 @@ void main() {
       row('future', start: '2026-10-29T13:00:00Z'),
       row('expired', end: '2026-10-29T12:00:00Z'),
       row('old', start: '2026-10-28T12:00:00Z'),
-    ]));
+    ]),);
     expect(parsed.where((n) => n.isCurrent(now)).map((n) => n.id), ['valid']);
   });
 
@@ -119,12 +119,12 @@ void main() {
           payload([
             row('one', end: '2026-10-29T12:00:10Z'),
           ]),
-          200)),
+          200,),),
     );
     await tester.pumpWidget(MaterialApp(
         builder: (context, child) =>
             FairNotificationHost(service: service, child: child!),
-        home: const Scaffold()));
+        home: const Scaffold(),),);
     await tester.pump();
     expect(find.text('Fair update'), findsOneWidget);
     expect(find.text('Dismiss'), findsOneWidget);

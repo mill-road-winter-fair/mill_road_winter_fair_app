@@ -10,7 +10,7 @@ class FairNotification {
   final DateTime startsAt, expiresAt;
 
   const FairNotification(
-      this.id, this.title, this.body, this.startsAt, this.expiresAt);
+      this.id, this.title, this.body, this.startsAt, this.expiresAt,);
 
   bool isCurrent(DateTime now) =>
       !now.isBefore(startsAt) &&
@@ -31,7 +31,7 @@ class FairNotification {
       'body',
       'starts_at',
       'expires_at',
-      'enabled'
+      'enabled',
     ];
     if (!required.every(headers.contains) ||
         headers.toSet().length != headers.length) {
@@ -81,7 +81,7 @@ class FairNotificationService extends ChangeNotifier {
       required this.apiKey,
       required this.preferences,
       http.Client? client,
-      DateTime Function()? now})
+      DateTime Function()? now,})
       : _client = client ?? http.Client(),
         _now = now ?? DateTime.now;
 
@@ -135,13 +135,13 @@ class FairNotificationService extends ChangeNotifier {
     try {
       // Persist throttling so rapid app restarts cannot hammer the API.
       if (!await preferences.setInt(
-          _nextKey, _now().add(delay).millisecondsSinceEpoch)) {
+          _nextKey, _now().add(delay).millisecondsSinceEpoch,)) {
         return;
       }
       final response = await _client.get(uri, headers: {
         'x-api-key': apiKey,
         'Cache-Control': 'no-cache',
-      }).timeout(const Duration(seconds: 15));
+      },).timeout(const Duration(seconds: 15));
       if (response.statusCode != 200) {
         final seconds = int.tryParse(response.headers['retry-after'] ?? '');
         if (seconds != null && seconds > delay.inSeconds) {
@@ -181,7 +181,7 @@ class FairNotificationService extends ChangeNotifier {
       if (!_disposed) {
         try {
           await preferences.setInt(
-              _nextKey, _now().add(delay).millisecondsSinceEpoch);
+              _nextKey, _now().add(delay).millisecondsSinceEpoch,);
         } catch (_) {
           /* Retry only on the normal timer if storage is unavailable. */
         }
@@ -208,7 +208,7 @@ class FairNotificationService extends ChangeNotifier {
 
 class FairNotificationHost extends StatefulWidget {
   const FairNotificationHost(
-      {super.key, required this.service, required this.child});
+      {super.key, required this.service, required this.child,});
   final FairNotificationService service;
   final Widget child;
 
@@ -223,7 +223,7 @@ class _FairNotificationHostState extends State<FairNotificationHost>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     widget.service.setActive(WidgetsBinding.instance.lifecycleState == null ||
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed);
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,);
   }
 
   @override
@@ -252,7 +252,7 @@ class _FairNotificationHostState extends State<FairNotificationHost>
                       liveRegion: true,
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                            maxHeight: MediaQuery.sizeOf(context).height * 0.4),
+                            maxHeight: MediaQuery.sizeOf(context).height * 0.4,),
                         child: SingleChildScrollView(
                             child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
@@ -267,20 +267,20 @@ class _FairNotificationHostState extends State<FairNotificationHost>
                                       Text(notification.title,
                                           style: Theme.of(context)
                                               .textTheme
-                                              .titleMedium),
+                                              .titleMedium,),
                                       const SizedBox(height: 4),
                                       Text(notification.body),
-                                    ])),
+                                    ],),),
                                 TextButton(
                                     onPressed: widget.service.dismiss,
-                                    child: const Text('Dismiss')),
-                              ]),
-                        )),
+                                    child: const Text('Dismiss'),),
+                              ],),
+                        ),),
                       ),
-                    )),
+                    ),),
               ),
             Expanded(child: widget.child),
-          ]);
+          ],);
         },
       );
 }
