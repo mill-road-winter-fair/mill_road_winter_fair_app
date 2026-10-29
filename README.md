@@ -104,7 +104,7 @@ keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -vali
 
 8. Run the following command in the terminal:
 ```shell
-flutter build appbundle --release --dart-define-from-file=.env
+flutter build appbundle --release --dart-define-from-file=.env --dart-define=HEROKU_API=https://mrwf.theberridge.com/listings
 ```
 
 9. Upload the following file to the Google Play Console as a new release: `/build/app/outputs/bundle/release/app-release.aab`
@@ -116,9 +116,9 @@ flutter build appbundle --release --dart-define-from-file=.env
 1-5. Same steps as (and aligned with) Android 
     NB the build number has to have increased from the last one uploaded to Apple. 
 
-6. Run:
+6. Run the following command in the terminal:
 ```shell
-flutter build ios --config-only --release --dart-define-from-file=.env
+flutter build ios --config-only --release --dart-define-from-file=.env --dart-define=HEROKU_API=https://mrwf.theberridge.com/listings
 ```
 
 7. To get screenshots without 'DEBUG' (which Apple will reject) add this line to `main.dart` within `MaterialApp()`: `debugShowCheckedModeBanner:false`
