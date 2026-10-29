@@ -1,9 +1,14 @@
+// Dart SDK imports
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/app_config.dart';
-import 'package:http/http.dart' as http;
 import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 // SharedPreferences key for storing cached listings as JSON

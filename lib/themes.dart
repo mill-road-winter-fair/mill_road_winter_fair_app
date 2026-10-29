@@ -1,9 +1,14 @@
 // Define available themes
+// Dart SDK imports
 import 'dart:ui' as ui;
+
+// App imports
+import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
 
 String getEffectiveThemeKey(String themeKey, [Brightness? brightness]) {
   if (themeKey != 'auto') return themeKey;
