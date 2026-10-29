@@ -309,7 +309,7 @@ void main() {
 
       // Verify the main action button is visible
       // This confirms the welcome screen UI is properly initialized
-      expect(find.text('Take me straight to the app!'), findsOneWidget);
+      expect(find.text('Take me straight to the Fair!'), findsOneWidget);
     });
 
     testWidgets('displays MyApp when not first app execution', (WidgetTester tester) async {
@@ -435,7 +435,7 @@ void main() {
       expect(prefs.getBool('firstExecution'), isFalse);
     });
 
-    testWidgets('Take me straight to the app button saves settings and navigates', (WidgetTester tester) async {
+    testWidgets('Take me straight to the Fair button saves settings and navigates', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
       // Since flutter's default test screen size is for desktop i.e. 800x600, set a sensible minimum mobile screen size
@@ -461,10 +461,10 @@ void main() {
       await tester.pumpWithClock(RootWidget(firstExecution: true, analyticsService: FakeAnalyticsService()));
 
       // The footer button text should be present
-      expect(find.text('Take me straight to the app!'), findsOneWidget);
+      expect(find.text('Take me straight to the Fair!'), findsOneWidget);
 
       // Tap the footer button
-      await tester.tap(find.text('Take me straight to the app!'));
+      await tester.tap(find.text('Take me straight to the Fair!'));
       await settle(tester);
 
       // Verify that the main themed application shell is now displayed
