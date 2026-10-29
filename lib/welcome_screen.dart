@@ -126,10 +126,9 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       titleTextStyle: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: colourScheme.onSecondary),
       bodyTextStyle: TextStyle(fontSize: 19, color: colourScheme.onSecondary),
       bodyPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      titlePadding: const EdgeInsets.only(top: 12, bottom: 10),
+      titlePadding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       contentMargin: const EdgeInsets.symmetric(horizontal: 16),
-      bodyFlex: 0,
-      fullScreen: true,
+      pageMargin: EdgeInsets.zero,
       safeArea: 160,
       pageColor: colourScheme.secondary.withValues(alpha: 0.85),
     );
@@ -176,49 +175,15 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         );
 
     PageViewModel guidePage(String title, List<Widget> children) {
-      // The original non-scrolling page gives its body unbounded height. Reserve
-      // room for its fitted title and controls before scaling the updated copy.
-      final titlePainter = TextPainter(
-        text: TextSpan(text: title, style: titleStyle),
-        textDirection: Directionality.of(context),
-        textScaler: MediaQuery.textScalerOf(context),
-      )..layout();
-      final titleWidth = MediaQuery.sizeOf(context).width - pageDecoration.contentMargin.horizontal;
-      // FittedBox scales the padding together with the text.
-      final titleScale = (titleWidth / (titlePainter.width + 12)).clamp(0.0, 1.0);
-      final bodyHeight = (MediaQuery.sizeOf(context).height -
-              MediaQuery.paddingOf(context).vertical -
-              pageDecoration.safeArea -
-              pageDecoration.titlePadding.vertical -
-              pageDecoration.bodyPadding!.vertical -
-              titlePainter.height * titleScale)
-          .clamp(0.0, double.infinity);
-      titlePainter.dispose();
+      // Honour the device text size and wrap at the available width. Longer
+      // pages scroll above the controls instead of scaling their text down.
       return PageViewModel(
-        useScrollView: false,
-        titleWidget: FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.center,
-          child: Padding(padding: EdgeInsetsGeometry.symmetric(horizontal: 6), child: Text(title, style: titleStyle, textAlign: TextAlign.center)),
-        ),
-        bodyWidget: LayoutBuilder(
-          builder: (context, constraints) => ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: bodyHeight.toDouble()),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.topCenter,
-              // Wrap the updated copy before fitting the whole page, as with the
-              // original guide's manually wrapped rows.
-              child: SizedBox(
-                width: 380,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: children,
-                ),
-              ),
-            ),
-          ),
+        useScrollView: true,
+        titleWidget: Text(title, style: titleStyle, textAlign: TextAlign.center),
+        bodyWidget: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
         ),
         decoration: pageDecoration,
       );

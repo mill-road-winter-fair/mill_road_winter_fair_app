@@ -10,6 +10,7 @@ import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 
 // Third-party imports
 import 'package:flutter/material.dart' hide RootWidget;
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -172,6 +173,8 @@ void main() {
       final gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
       await gesture.moveBy(const Offset(-200, 0));
       await tester.pump();
+      await gesture.moveBy(const Offset(-50, 0));
+      await tester.pump();
       expect(tester.getTopLeft(title).dx, lessThan(titlePosition.dx));
       expect(tester.getRect(background), backgroundRect);
       await gesture.up();
@@ -180,10 +183,58 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('all guide pages preserve margins and honour device text scaling', (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final textScale = ValueNotifier(1.0);
+      addTearDown(textScale.dispose);
+      await tester.pumpWidget(MaterialApp(
+        builder: (context, child) => ValueListenableBuilder<double>(
+          valueListenable: textScale,
+          builder: (context, scale, _) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+            child: child!,
+          ),
+        ),
+        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      ));
+      await settle(tester);
+
+      for (var index = 0; index < pageTitles.length; index++) {
+        for (final scale in [1.0, 1.5, 2.0, 3.0]) {
+          textScale.value = scale;
+          await settle(tester);
+          final page = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).pages![index];
+          final body = find.byWidget(page.bodyWidget!);
+          final row = find.descendant(of: body, matching: find.byType(Row)).first;
+          expect(tester.getRect(row).left, closeTo(32, 0.01));
+          expect(tester.getRect(row).right, closeTo(288, 0.01));
+
+          final bodyText = find.descendant(of: body, matching: find.byType(Text)).first;
+          for (final content in [bodyText, find.byWidget(page.titleWidget!)]) {
+            final text = find.descendant(of: content, matching: find.byType(RichText)).first;
+            final paragraph = tester.renderObject<RenderParagraph>(text);
+            expect(paragraph.textScaler.scale(20), closeTo(20 * scale, 0.01));
+            // Detect visual shrinking even when the inherited scaler is correct.
+            expect(paragraph.getTransformTo(null).getMaxScaleOnAxis(), closeTo(1, 0.01));
+          }
+          expect(tester.takeException(), isNull);
+        }
+        if (index < pageTitles.length - 1) {
+          await tester.tap(find.byIcon(Icons.arrow_forward));
+          await settle(tester);
+        }
+      }
+    });
+
     for (final configuration in [
       (size: const Size(320, 568), textScale: 1.0),
       (size: const Size(320, 568), textScale: 2.0),
       (size: const Size(667, 375), textScale: 1.0),
+      (size: const Size(667, 375), textScale: 2.0),
+      (size: const Size(390, 844), textScale: 3.0),
     ]) {
       testWidgets('guide fits and completes at $configuration', (tester) async {
         tester.view.physicalSize = configuration.size;
@@ -206,11 +257,16 @@ void main() {
         for (var index = 0; index < pages.length; index++) {
           expect(find.text(pageTitles[index]), findsOneWidget);
           expect(find.byWidget(pages[index].titleWidget!), findsOneWidget);
-          expect(pages[index].useScrollView, isFalse);
+          expect(pages[index].useScrollView, isTrue);
           expect(tester.takeException(), isNull);
 
-          // All content fits above the controls without vertical scrolling.
+          // Every row remains reachable by scrolling above the fixed controls.
           final lastRow = find.descendant(of: find.byWidget(pages[index].bodyWidget!), matching: find.byType(Row)).last;
+          final scrollView = find.ancestor(of: lastRow, matching: find.byType(SingleChildScrollView));
+          final scrollable = find.descendant(of: scrollView, matching: find.byType(Scrollable));
+          final position = tester.state<ScrollableState>(scrollable).position;
+          position.jumpTo(position.maxScrollExtent);
+          await tester.pump();
           final rowBottom = tester.getBottomLeft(lastRow).dy;
           expect(rowBottom, greaterThan(0));
           expect(
