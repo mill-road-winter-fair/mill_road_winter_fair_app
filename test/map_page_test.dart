@@ -47,6 +47,92 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('failed directions do not start tracking or enter navigation mode', (tester) async {
+      final previousKey = googleMapsDirectionsApiKey;
+      final previousHeaders = googleMapsDirectionsHeaders;
+      final previousLocation = currentLatLng;
+      final previousNavigation = navigationInProgress;
+      googleMapsDirectionsApiKey = '';
+      googleMapsDirectionsHeaders = {'test': 'test'};
+      navigationInProgress = false;
+      const locationChannel = MethodChannel('flutter.baseflow.com/geolocator');
+      const streamChannel = MethodChannel('flutter.baseflow.com/geolocator_updates');
+      const toastChannel = MethodChannel('PonnamKarthik/fluttertoast');
+      final toastCalls = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, (call) async {
+        toastCalls.add(call);
+        return true;
+      });
+      var streamStarts = 0;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(locationChannel, (call) async {
+        if (call.method == 'getCurrentPosition') {
+          return {'latitude': 52.2, 'longitude': 0.14};
+        }
+        return null;
+      });
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(streamChannel, (call) async {
+        if (call.method == 'listen') streamStarts++;
+        return null;
+      });
+      addTearDown(() {
+        googleMapsDirectionsApiKey = previousKey;
+        googleMapsDirectionsHeaders = previousHeaders;
+        currentLatLng = previousLocation;
+        navigationInProgress = previousNavigation;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(locationChannel, null);
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(streamChannel, null);
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(toastChannel, null);
+      });
+      await tester.pumpWithClock(MaterialApp(
+        home: Scaffold(body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService())),
+      ));
+      await tester.pumpAndSettle();
+      currentLatLng = const LatLng(52.2, 0.14);
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+
+      await state.doTheNavigation('SIMPLE-Event', const LatLng(52.21, 0.15), false);
+      await tester.pump();
+
+      expect(navigationInProgress, isFalse);
+      expect(state.polylines, isEmpty);
+      expect(streamStarts, 0);
+      expect(state.markers.containsKey(const MarkerId(aSimpleMarkerId)), isFalse);
+      expect(toastCalls, hasLength(1));
+      expect(toastCalls.single.method, 'showToast');
+      expect(toastCalls.single.arguments['msg'], 'Failed to get route directions.');
+      expect(toastCalls.single.arguments['gravity'], 'center');
+      expect(find.byType(SnackBar), findsNothing);
+      expect(tester.takeException(), isNull);
+
+      // Exercise the real entry point: requesting directions pushes a new map
+      // page, which starts navigation from its first post-frame callback
+      toastCalls.clear();
+      Navigator.of(state.context).push(MaterialPageRoute<void>(
+        builder: (_) => MapPage(
+          listings: listings,
+          onTabSelected: (_) {},
+          analyticsService: FakeAnalyticsService(),
+          destinationId: 'SIMPLE-Event',
+          destinationLatLng: const LatLng(52.21, 0.15),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MapPage), findsOneWidget);
+      expect(tester.state<MapPageState>(find.byType(MapPage)), same(state));
+      expect(Navigator.of(state.context).canPop(), isFalse);
+      expect(find.text('Directions'), findsNothing);
+      expect(toastCalls, hasLength(1));
+      expect(toastCalls.single.method, 'showToast');
+      expect(toastCalls.single.arguments['msg'], 'Failed to get route directions.');
+      expect(toastCalls.single.arguments['gravity'], 'center');
+      expect(find.byType(SnackBar), findsNothing);
+      expect(navigationInProgress, isFalse);
+      expect(streamStarts, 0);
+      expect(tester.takeException(), isNull);
+      await tester.pump(const Duration(seconds: 4));
+    });
+
     for (final bottomSafeArea in [0.0, 24.0, 34.0, 48.0]) {
       testWidgets('search map meets the keyboard with a $bottomSafeArea bottom safe area and restores when dismissed', (tester) async {
         tester.view.devicePixelRatio = 1;

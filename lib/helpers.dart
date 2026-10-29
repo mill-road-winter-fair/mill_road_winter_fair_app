@@ -1620,3 +1620,50 @@ bool isWidgetFullyVisible(BuildContext context) {
       offset.dx >= 0 &&
       offset.dx + size.width <= viewportSize.width;
 }
+
+Future<T> requestRoute<T>(Future<T> Function() request, {
+  Duration timeout = const Duration(seconds: 10),
+  // maxAttempts includes the initial request.
+  int maxAttempts = 3,
+}) {
+  if (maxAttempts < 1) {
+    throw ArgumentError.value(maxAttempts, 'maxAttempts', 'Must be at least 1');
+  }
+  Future<T> attemptRequests() async {
+    // Retry timeouts and socket failures, with one deadline for the whole operation.
+    final elapsed = Stopwatch()..start();
+    // Retries wait 250ms, then 500ms (capped at one second for extra attempts).
+    var retryDelay = const Duration(milliseconds: 250);
+    const maxRetryDelay = Duration(seconds: 1);
+    for (var attempt = 1; ; attempt++) {
+      final remaining = timeout - elapsed.elapsed;
+      if (remaining <= Duration.zero) {
+        throw TimeoutException('Directions request deadline expired', timeout);
+      }
+      // Each attempt gets at most three seconds, capped by the remaining total budget.
+      const attemptLimit = Duration(seconds: 3);
+      final attemptTimeout = remaining < attemptLimit ? remaining : attemptLimit;
+      // Do not retry HttpException: flutter_polyline_points 3.1.0 wraps both transport
+      // and parsing failures in it, without preserving a typed cause. Invalid responses
+      // and other exceptions must propagate immediately rather than be retried blindly.
+      try {
+        // Timed-out futures may still finish, so [request] must not mutate UI state.
+        return await request().timeout(attemptTimeout);
+      } on TimeoutException {
+        if (attempt >= maxAttempts) rethrow;
+      } on SocketException {
+        if (attempt >= maxAttempts) rethrow;
+      }
+      // Backoff consumes the same budget; skip retries whose delay would exhaust it.
+      if (timeout - elapsed.elapsed <= retryDelay) {
+        throw TimeoutException('Insufficient time to retry directions request', timeout);
+      }
+      await Future<void>.delayed(retryDelay);
+      final nextDelay = retryDelay * 2;
+      retryDelay = nextDelay < maxRetryDelay ? nextDelay : maxRetryDelay;
+    }
+  }
+
+  // There is no separate outer timeout that could leave the retry loop running.
+  return attemptRequests();
+}
