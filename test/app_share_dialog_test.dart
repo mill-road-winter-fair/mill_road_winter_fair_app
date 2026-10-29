@@ -60,8 +60,8 @@ void main() {
           onPressed: () => displayAppShareDialog(context, analyticsService: analytics),
           child: const Text('Open'),
         );
-      })),
-    ));
+      },),),
+    ),);
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
   }
@@ -126,7 +126,7 @@ void main() {
     expect(shares.single.method, 'share');
     expect(shares.single.arguments['title'], 'Share the app');
     expect(shares.single.arguments['text'],
-        'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
+        'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/',);
     expect(toasts, isEmpty);
     expect(tester.takeException(), isNull);
   });
