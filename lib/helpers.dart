@@ -1627,6 +1627,8 @@ bool isWidgetFullyVisible(BuildContext context) {
 // and other exceptions must propagate immediately rather than be retried blindly.
 // maxAttempts includes the initial request.
 // Each attempt gets at most three seconds, capped by the remaining total budget.
+// Retries wait 250ms, then 500ms (capped at one second for extra attempts).
+// Backoff consumes the same budget; skip retries whose delay would exhaust it.
 // There is no separate outer timeout that could leave the retry loop running.
 // Timed-out futures may still finish, so [request] must not mutate UI state.
 Future<T> requestRoute<T>(Future<T> Function() request, {
@@ -1638,6 +1640,8 @@ Future<T> requestRoute<T>(Future<T> Function() request, {
   }
   Future<T> attemptRequests() async {
     final elapsed = Stopwatch()..start();
+    var retryDelay = const Duration(milliseconds: 250);
+    const maxRetryDelay = Duration(seconds: 1);
     for (var attempt = 1; ; attempt++) {
       final remaining = timeout - elapsed.elapsed;
       if (remaining <= Duration.zero) {
@@ -1652,6 +1656,12 @@ Future<T> requestRoute<T>(Future<T> Function() request, {
       } on SocketException {
         if (attempt >= maxAttempts) rethrow;
       }
+      if (timeout - elapsed.elapsed <= retryDelay) {
+        throw TimeoutException('Insufficient time to retry directions request', timeout);
+      }
+      await Future<void>.delayed(retryDelay);
+      final nextDelay = retryDelay * 2;
+      retryDelay = nextDelay < maxRetryDelay ? nextDelay : maxRetryDelay;
     }
   }
 
