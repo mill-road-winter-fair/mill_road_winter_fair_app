@@ -45,7 +45,7 @@ void main() {
       'Explore the map',
       'What do the map pins mean?',
       'Plan your day with the timetable',
-      'Find what brings you to the Fair',
+      'Find what you want at the Fair',
       'Visit our exciting attractions',
       'Make the app your own',
       'A few final things…',
@@ -97,7 +97,7 @@ void main() {
             expectTip('Nearby button', Icons.radar);
             expectTip('orientation', Icons.assistant_navigation);
             expectTip('map, listings and timetable pages', Icons.search);
-          case 'Find what brings you to the Fair':
+          case 'Find what you want at the Fair':
             expectTip('closeness to you', Icons.sort);
             expectTip('Tap the Filter icon', Icons.filter_alt);
             expectTip('hide finished events', Icons.access_time);
