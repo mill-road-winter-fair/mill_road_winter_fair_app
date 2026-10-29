@@ -98,7 +98,10 @@ Both Google Sheets must have these exact headers (column order is flexible):
 
 Format date columns as plain text to preserve the timezone. Use `Z` for UTC or
 an explicit offset such as `+01:00` for British Summer Time. The API must return
-the same shape as the listings endpoint: `{"values":[["id","title","body","starts_at","expires_at","enabled"],["2026-road-update-01","Road update","Please use the next crossing.","2026-12-05T10:00:00Z","2026-12-05T12:00:00Z",true]]}`.
+the same JSON shape as the listings endpoint:
+```json
+{"values":[["id","title","body","starts_at","expires_at","enabled"],["2026-road-update-01","Road update","Gwydir Street is closed to pedestrians.","2026-12-05T10:00:00Z","2026-12-05T12:00:00Z",true]]}
+```
 Missing/invalid fields, duplicate IDs, disabled rows, future rows and expired
 rows are skipped. Messages also stop being eligible 24 hours after `starts_at`,
 even if a later expiry is accidentally entered. Editing an existing ID does not
