@@ -50,18 +50,24 @@ void main() {
     tester.view.physicalSize = size;
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
-    await tester.pumpWidget(MaterialApp(
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
-        child: child!,
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              return TextButton(
+                onPressed: () => displayAppShareDialog(context, analyticsService: analytics),
+                child: const Text('Open'),
+              );
+            },
+          ),
+        ),
       ),
-      home: Scaffold(body: Builder(builder: (context) {
-        return TextButton(
-          onPressed: () => displayAppShareDialog(context, analyticsService: analytics),
-          child: const Text('Open'),
-        );
-      },),),
-    ),);
+    );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
   }
@@ -125,8 +131,10 @@ void main() {
     expect(shares, hasLength(1));
     expect(shares.single.method, 'share');
     expect(shares.single.arguments['title'], 'Share the app');
-    expect(shares.single.arguments['text'],
-        'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/',);
+    expect(
+      shares.single.arguments['text'],
+      'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/',
+    );
     expect(toasts, isEmpty);
     expect(tester.takeException(), isNull);
   });
