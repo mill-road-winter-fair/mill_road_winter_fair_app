@@ -43,8 +43,8 @@ void main() {
       'Welcome to the official\nMill Road Winter Fair app!',
       'Explore the map',
       'What do the map pins mean?',
-      'Find what brings you to the Fair',
       'Plan your day with the timetable',
+      'Find what brings you to the Fair',
       'Visit our exciting attractions',
       'Make the app your own',
       'A few final things…',
@@ -104,7 +104,9 @@ void main() {
             expectTip('to set a reminder', Icons.info);
           case 'Visit our exciting attractions':
             expectTip('Info button', Icons.info);
-            expectTip('Heart icon', Icons.favorite);
+            final heartRow = find.ancestor(of: find.textContaining('Heart icon'), matching: find.byType(Row));
+            final heart = find.descendant(of: heartRow, matching: find.byType(FaIcon));
+            expect(tester.widget<FaIcon>(heart).icon, FontAwesomeIcons.heart.data);
             expectTip('Walking icon', Icons.directions_walk);
             expectTip('Share a listing', Platform.isIOS ? Icons.ios_share : Icons.share);
             final bellRow = find.ancestor(
