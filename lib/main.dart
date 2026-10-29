@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/app_config.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
@@ -15,6 +16,7 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
 import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/in_app_notifications.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
@@ -23,12 +25,18 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
+  final notificationService = FairNotificationService(
+    endpoint: AppConfig.herokuNotificationsApi,
+    apiKey: AppConfig.herokuApiKey,
+    preferences: await SharedPreferences.getInstance(),
+  );
   if (analyticsEnabledForBuild) {
     // Release builds use the production Firebase project. Debug and profile
     // builds with DEV_ANALYTICS=true use the development project.
@@ -74,13 +82,21 @@ Future<void> main() async {
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
- await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
+ await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(
+   MultiProvider(
         providers: [
           Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
           Provider<UrlLauncher>(create: (_) => const SystemUrlLauncher()),
         ],
-        child: RootWidget(firstExecution: firstExecution, analyticsService: analyticsService, startupCacheFallback: startupCacheFallback.future),
-      )));
+        child: RootWidget(
+            firstExecution: firstExecution,
+            analyticsService: analyticsService,
+            startupCacheFallback: startupCacheFallback.future,
+            notificationService: notificationService,
+        ),
+      ),
+    ),
+ );
 
   // Refresh after rendering so a slow or unavailable network cannot block startup.
   startupCacheFallback.complete(await _refreshListingsAfterStartup());
@@ -108,10 +124,11 @@ Future<bool> _refreshListingsAfterStartup() async {
 }
 
 class RootWidget extends StatefulWidget {
+  final FairNotificationService? notificationService;
   final bool firstExecution;
   final AnalyticsService analyticsService;
   final Future<bool>? startupCacheFallback;
-  const RootWidget({super.key, required this.firstExecution, required this.analyticsService, this.startupCacheFallback});
+  const RootWidget({super.key, required this.firstExecution, required this.analyticsService, this.startupCacheFallback, this.notificationService});
 
   @override
   State<RootWidget> createState() => _RootWidgetState();
@@ -133,11 +150,12 @@ class _RootWidgetState extends State<RootWidget> {
             analyticsService: widget.analyticsService,
             onFinished: () => setState(() => _showWelcomeScreen = false),
           )
-        : MyApp(firstExecution: false, analyticsService: widget.analyticsService, startupCacheFallback: widget.startupCacheFallback);
+        : MyApp(firstExecution: false, analyticsService: widget.analyticsService, startupCacheFallback: widget.startupCacheFallback, notificationService: widget.notificationService);
   }
 }
 
 class MyApp extends StatefulWidget {
+  final FairNotificationService? notificationService;
   final bool firstExecution;
   final AnalyticsService analyticsService;
   final Future<bool>? startupCacheFallback;
@@ -146,12 +164,14 @@ class MyApp extends StatefulWidget {
     required this.firstExecution,
     required this.analyticsService,
     this.startupCacheFallback,
+    this.notificationService,
   });
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  final _navigatorKey = GlobalKey<NavigatorState>();
   @override
   void initState() {
     super.initState();
@@ -202,6 +222,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         final ThemeData darkTheme = appThemes['dark'] ?? appThemes['light']!;
         mapStyle = getMapStyleForThemeKey(selectedThemeKey);
         return MaterialApp(
+          navigatorKey: _navigatorKey,
+          builder: widget.notificationService == null ? null : (context, child) =>
+              FairNotificationHost(service: widget.notificationService!, navigatorKey: _navigatorKey, child: child!),
           title: fairName,
           themeMode: resolvedThemeMode,
           theme: isAuto
