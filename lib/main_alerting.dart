@@ -1,15 +1,20 @@
-import 'dart:io';
+// Dart SDK imports
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
-import 'package:intl/intl.dart' as intl;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'dart:io';
+
+// App imports
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+
+// Third-party imports
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 bool alertsPermissionGranted = false; // whether the user has granted permission for notifications+alerts
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();

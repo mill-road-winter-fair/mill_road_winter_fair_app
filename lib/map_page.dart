@@ -1,18 +1,13 @@
-import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
+// Dart SDK imports
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
+
+// App imports
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/app_config.dart';
 import 'package:mill_road_winter_fair_app/category_tools.dart';
+import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -21,6 +16,16 @@ import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
+
+// Third-party imports
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -169,17 +174,16 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   Future<void> _ensureDirectionsConfigLoaded() async {
     if (googleMapsDirectionsHeaders == null || googleMapsDirectionsHeaders!.isEmpty) {
-      await dotenv.load(fileName: ".env");
       if (Platform.isAndroid) {
-        googleMapsDirectionsApiKey = dotenv.env['ANDROID_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        final androidSigningKey = dotenv.env['SIGNING_KEY'] ?? '';
+        googleMapsDirectionsApiKey = AppConfig.androidDirectionsApiKey;
+        final androidSigningKey = AppConfig.androidCertificateFingerprint;
         googleMapsDirectionsHeaders = {
           "X-Android-Package": "com.theberridge.mill_road_winter_fair_app",
           "X-Android-Cert": androidSigningKey,
         };
       } else if (Platform.isIOS) {
-        googleMapsDirectionsApiKey = dotenv.env['IOS_GOOGLE_MAPS_DIRECTIONS_API_KEY'] ?? '';
-        final iosBundleId = dotenv.env['IOS_BUNDLE_ID'] ?? '';
+        googleMapsDirectionsApiKey = AppConfig.iosDirectionsApiKey;
+        final iosBundleId = AppConfig.iosBundleId;
         googleMapsDirectionsHeaders = {
           "X-Ios-Bundle-Identifier": iosBundleId,
         };
@@ -1856,6 +1860,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       setVisibleMarkerLists();
       addAllVisibleMarkers();
       establishLocation();
+      timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
     } finally {
       setState(() {
         isRefreshing = false;
@@ -1975,7 +1980,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         }
 
         if (_listingLookup.isEmpty) { // if another page did a refresh
-          _listingLookup = buildListingLookup(listings); 
+          _listingLookup = buildListingLookup(listings);
           setVisibleMarkerLists();
           addAllVisibleMarkers();
         }

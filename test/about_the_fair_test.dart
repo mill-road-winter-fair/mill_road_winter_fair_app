@@ -1,8 +1,4 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -10,8 +6,18 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+// Third-party imports
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+
+// Test helpers, fakes and mocks
 import 'fakes/fake_url_launcher.dart';
+import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 
 class RecordingNavigatorObserver extends NavigatorObserver {
@@ -196,38 +202,10 @@ void main() {
         // Set firstExecution to false to simulate normal app launch
         firstExecution = false;
 
-        // Minimal listings so pages render correctly
-        listings = [
-          {
-            'id': '1',
-            'visibleOnMap': 'TRUE',
-            'cancelled': 'FALSE',
-            'brickAndMortar': 'FALSE',
-            'emoji': '🍩',
-            'title': 'Glazed and Confused',
-            'subtitle': 'Doughnuts',
-            'groupID': '',
-            'food': 'TRUE',
-            'shopping': 'FALSE',
-            'charityCommunityInfo': 'FALSE',
-            'performanceMusic': 'FALSE',
-            'performanceChildrens': 'FALSE',
-            'performanceDance': 'FALSE',
-            'performanceOther': 'FALSE',
-            'visitExperience': 'FALSE',
-            'service': 'FALSE',
-            'business': 'FALSE',
-            'location': 'Gwydir St Car Park',
-            'description': 'Nice buns',
-            'email': '',
-            'website': 'https://www.glazedandconfused.com',
-            'phone': '01223 111111',
-            'latLng': '52.199687,0.138813',
-            'imageURL': '',
-            'startTime': '10:30',
-            'endTime': '16:30',
-          },
-        ];
+      // Minimal listings so pages render correctly
+      listings = [
+        mockListing('glazedAndConfused')
+      ];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
       await settle(tester);
@@ -255,7 +233,7 @@ void main() {
         expect(homePageState.index, 3);
 
         // 2) Select Stalls tab (index 2)
-        await tester.tap(find.text('Listings'));
+        await tester.tap(find.text('Listings').last);
         await settle(tester);
         expect(homePageState.index, 3);
 
