@@ -504,26 +504,29 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                       alignment: AlignmentGeometry.center,
                       child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png',
                           width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
-                  Wrap(spacing: 8, runSpacing: 8, children: [
-                    TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        analyticsService.logButtonTapped('share_app_share');
-                        Navigator.of(dialogContext).pop();
-                        shareApp(itemContext,
-                            'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
-                      },
-                      child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        analyticsService.logButtonTapped('share_app_close');
-                        Navigator.of(dialogContext).pop();
-                      },
-                      child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
-                    ),
-                  ]),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Wrap(alignment: WrapAlignment.end, spacing: 8, runSpacing: 8, children: [
+                      TextButton(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          analyticsService.logButtonTapped('share_app_share');
+                          Navigator.of(dialogContext).pop();
+                          shareApp(itemContext,
+                              'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
+                        },
+                        child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          analyticsService.logButtonTapped('share_app_close');
+                          Navigator.of(dialogContext).pop();
+                        },
+                        child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                      ),
+                    ]),
+                  ),
                 ]),
               ),
             ),
