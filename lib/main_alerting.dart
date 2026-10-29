@@ -369,6 +369,7 @@ class AlertScheduleStore {
       final refreshedAlertsStore = AlertScheduleStore.fromJson(jsonDecode(jsonString));
       alertsStore.alertSchedules.clear();
       alertsStore.alertSchedules.addAll(refreshedAlertsStore.alertSchedules);
+      alertsStore.nextId = refreshedAlertsStore.nextId;
     }
   }
 
