@@ -97,11 +97,11 @@ class FairScaffold extends StatelessWidget {
             ),
             centerTitle: false,
             actions: appBarActions.map((a) => SizedBox(width: 42, child: a)).toList(),
-            actionsPadding: EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
+            actionsPadding: const EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
-          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: homeButtonOffset),
+          floatingActionButtonLocation: const CenterDockedWithOffset(dyOffset: homeButtonOffset),
           floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
           resizeToAvoidBottomInset: false,
           floatingActionButton: (allowBack ?? false) ? null : SizedBox(
@@ -116,7 +116,7 @@ class FairScaffold extends StatelessWidget {
                 elevation: 4,
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
-                shape: CircleBorder(),
+                shape: const CircleBorder(),
                 onPressed: () {
                   HapticFeedback.selectionClick();
                   analyticsService.logButtonTapped('navigation_home');
@@ -129,7 +129,7 @@ class FairScaffold extends StatelessWidget {
           bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
             key: const ValueKey('navigation-bar-surface'),
             height: navigationBarHeight,
-            padding: EdgeInsets.only(right: 6), // to stop Favourites hitting edge
+            padding: const EdgeInsets.only(right: 6), // to stop Favourites hitting edge
             elevation: 0,
             color: colorScheme.primary,
             surfaceTintColor: Colors.transparent,
@@ -193,7 +193,7 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     iconSize: 30,
     selectedItemColor: colorscheme.onPrimary,
     unselectedItemColor: colorscheme.surfaceDim,
-    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+    selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
       analyticsService.logButtonTapped('navigation_${const ['map', 'timetable', 'home', 'listings', 'favourites'][selectedIndex]}');
@@ -905,7 +905,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
             decoration: BoxDecoration(
               color: bgColour,
               borderRadius: BorderRadius.circular(4),
-              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
+              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))],
             ),
             child: Text(theMessage, softWrap: true, style: theStyle),
           ),
@@ -1236,7 +1236,7 @@ Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, Build
 Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme) async {
   return showDialog<void>(context: context, builder: (BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.all(8), // margin from screen edges
+      insetPadding: const EdgeInsets.all(8), // margin from screen edges
       shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
       backgroundColor: colorScheme.surfaceContainerLowest,
       shadowColor: colorScheme.surfaceDim,
@@ -1248,9 +1248,9 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
         ),
         padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
         child: Column(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
-          ListTile(
+          const ListTile(
             visualDensity: VisualDensity(horizontal: -2, vertical: 2),
-            leading: const Icon(Icons.error, size: 36, color: Colors.red),
+            leading: Icon(Icons.error, size: 36, color: Colors.red),
             title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
@@ -1259,7 +1259,7 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 HapticFeedback.lightImpact();
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel')
+              child: const Text('Cancel')
             ),
             TextButton(
               onPressed: () async {
@@ -1267,9 +1267,9 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 Navigator.of(context).pop();
                 await openAppSettings();
               },
-              child: Text('Open Settings')
+              child: const Text('Open Settings')
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
           ]),
         ]),
       ),

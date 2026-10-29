@@ -27,7 +27,7 @@ void main() {
                   startTime: listing['startTime'] as String,
                   endTime: listing['endTime'] as String,
                   approxDistance: '',
-                  colorScheme: ColorScheme.light(),
+                  colorScheme: const ColorScheme.light(),
                 ),
               ),
             ),
