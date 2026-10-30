@@ -1477,7 +1477,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
       // Get route using Routes API
       pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(
-        timeout: Duration(seconds: 2), // default is 30; no-one will wait that long
+        timeout: const Duration(seconds: 2), // default is 30; no-one will wait that long
         request: request,
       );
 
