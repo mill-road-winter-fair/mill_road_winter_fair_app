@@ -1,10 +1,15 @@
-import 'fakes/fixed_date_time_provider.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
+
+// Third-party imports
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Test helpers, fakes and mocks
+import 'fakes/fixed_date_time_provider.dart';
 import 'pump_with_clock.dart';
 
 class RecordingNoticeAnalyticsService extends FakeAnalyticsService {
@@ -77,6 +82,27 @@ void main() {
       expect(analytics.buttons, ['listings_may_change_notice_ok']);
       expect(analytics.preferences, {'listing_update_notice': 'disabled'});
       onTest = true;
+    });
+
+    testWidgets('deferring the listings notice does not mark it as shown', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      onTest = false;
+      listingUpdateNoticeEnabled = true;
+      addTearDown(() => onTest = true);
+      final analytics = RecordingNoticeAnalyticsService();
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: beforeFairDateTimeProvider);
+
+      await ListingUpdateNotifier.maybeShowNotice(
+        tester.element(find.byType(SizedBox)),
+        analyticsService: analytics,
+        allowListingsMayChange: false,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Listings may change'), findsNothing);
+      expect(analytics.notices, isEmpty);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(beforeFairDateTimeProvider.now())), isNull);
     });
 
     testWidgets('tracks opting to keep the listings notice', (WidgetTester tester) async {
