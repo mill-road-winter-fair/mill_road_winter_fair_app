@@ -608,7 +608,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       ],
                     ),
                 )
-              : SizedBox(height: 6),
+              : const SizedBox(height: 6),
             ),
             Expanded(
               child: RefreshIndicator(
@@ -826,7 +826,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
     final effectiveSortingMethod = useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod;
     return MenuAnchor(
-      key: ValueKey('sortingdropdown'),
+      key: const ValueKey('sortingdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,
@@ -877,7 +877,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final menuEntryStyle = TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant);
     final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
     return MenuAnchor(
-      key: ValueKey('filterdropdown'),
+      key: const ValueKey('filterdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,
