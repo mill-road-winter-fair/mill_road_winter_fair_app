@@ -1,3 +1,4 @@
+// Third-party imports
 import 'package:flutter/material.dart';
 
 bool isNavBarVisible(BuildContext context) {

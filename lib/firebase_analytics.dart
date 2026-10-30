@@ -1,10 +1,13 @@
+// App imports
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Analytics is enabled automatically for release builds and can be opted into

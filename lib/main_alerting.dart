@@ -1,15 +1,20 @@
-import 'dart:io';
+// Dart SDK imports
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
-import 'package:intl/intl.dart' as intl;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'dart:io';
+
+// App imports
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+
+// Third-party imports
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 bool alertsPermissionGranted = false; // whether the user has granted permission for notifications+alerts
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -21,7 +26,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
   final IOSInitializationSettings initializationSettingsIOS = IOSInitializationSettings(
     requestAlertPermission: true,
     notificationCategories: [
-      DarwinNotificationCategory('UnderwayCategory', actions: <DarwinNotificationAction>[
+      const DarwinNotificationCategory('UnderwayCategory', actions: <DarwinNotificationAction>[
 //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('5MinsCategory', actions: <DarwinNotificationAction>[
@@ -63,7 +68,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
     alertsPermissionGranted = perms != null && perms.isEnabled && perms.isAlertEnabled;
   }
   if (Platform.isAndroid) {
-    final androidChannel = AndroidNotificationChannel(
+    final androidChannel = const AndroidNotificationChannel(
       'org.millroadwinterfair.MRWFapp', // id
       'Event alerts', // name
       description: 'Mill Road Winter Fair event alerts',
@@ -101,17 +106,17 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
   DateTime? newAlertTime;
   switch (notificationResponse.actionId) {
     case 'snooze5mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 5));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 5));
     case 'snooze10mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 10));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 10));
     case 'snooze15mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 15));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 15));
     case 'snooze20mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 20));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 20));
     case 'snooze30mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 30));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 30));
     case 'snoozeStart':
-      newAlertTime = [startTime, DateTime.now().add(Duration(minutes: 2))].reduce((a, b) => a.isAfter(b) ? a: b);
+      newAlertTime = [startTime, DateTime.now().add(const Duration(minutes: 2))].reduce((a, b) => a.isAfter(b) ? a: b);
   }
   if (newAlertTime != null) {
     tz.initializeTimeZones();
@@ -177,24 +182,24 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       []);
     case <= 10:
       return('5MinsCategory', [
-        AndroidNotificationAction('snoozeStart', 'Snooze to start'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze to start'),
       ]);
     case <= 19:
       return('15MinsCategory', [
-        AndroidNotificationAction('snooze5mins', 'Snooze 5'),
-        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
+        const AndroidNotificationAction('snooze5mins', 'Snooze 5'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
     case <= 35:
       return('30MinsCategory', [
-        AndroidNotificationAction('snooze10mins', 'Snooze 10'),
-        AndroidNotificationAction('snooze20mins', 'Snooze 20'),
-        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
+        const AndroidNotificationAction('snooze10mins', 'Snooze 10'),
+        const AndroidNotificationAction('snooze20mins', 'Snooze 20'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
     default:
       return('60MinsCategory',[
-        AndroidNotificationAction('snooze15mins', 'Snooze 15'),
-        AndroidNotificationAction('snooze30mins', 'Snooze 30'),
-        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
+        const AndroidNotificationAction('snooze15mins', 'Snooze 15'),
+        const AndroidNotificationAction('snooze30mins', 'Snooze 30'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
   }
 }
