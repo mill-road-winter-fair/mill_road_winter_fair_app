@@ -8,6 +8,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 
@@ -20,6 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Test helpers, fakes and mocks
 import 'fakes/fake_url_launcher.dart';
+import 'fakes/fixed_date_time_provider.dart';
 import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
 
@@ -57,6 +59,51 @@ void main() {
   });
 
   group('HomePage', () {
+    for (final destination in ['Map', 'Timetable', 'Listings', 'map shortcut', 'timetable shortcut', 'listings shortcut']) {
+      testWidgets('shows listings notice on first visit via $destination', (tester) async {
+        SharedPreferences.setMockInitialValues({});
+        listingUpdateNoticeEnabled = true;
+        onTest = true;
+        addTearDown(() => onTest = true);
+        listings = [mockListing('glazedAndConfused')];
+        await tester.pumpWithClock(
+          MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+          dateTimeProvider: FixedDateTimeProvider(fairDate.subtract(const Duration(days: 1))),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(tester.widget<MapPage>(find.byType(MapPage, skipOffstage: false)).allowListingsMayChangeNotice, isFalse);
+        expect(find.text('Listings may change'), findsNothing);
+        onTest = false;
+        final home = tester.state<HomePageState>(find.byType(HomePage));
+        home.setCurrentIndex(4);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(find.text('Listings may change'), findsNothing);
+        switch (destination) {
+          case 'map shortcut':
+            home.openMap(null);
+          case 'timetable shortcut':
+            home.openTimetable(false, null);
+          case 'listings shortcut':
+            home.openListings('all', null);
+          default:
+            await tester.tap(find.text(destination));
+        }
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(find.text('Listings may change'), findsOneWidget);
+        await tester.tap(find.text('OK'));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        home.setCurrentIndex(0);
+        home.setCurrentIndex(2);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(find.text('Listings may change'), findsNothing);
+      });
+    }
+
     testWidgets('displays correct title, BottomNavigationBar and buttons', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
