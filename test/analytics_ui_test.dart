@@ -66,7 +66,7 @@ void main() {
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
     await tester.pumpWithClock(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
-      0, (index) => analytics.calls.add('navigate:$index'), ColorScheme.light(), analyticsService: analytics,
+      0, (index) => analytics.calls.add('navigate:$index'), const ColorScheme.light(), analyticsService: analytics,
     ))));
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
@@ -86,7 +86,7 @@ void main() {
         description: listing['description'] as String, email: listing['email'] as String, website: listing['website'] as String, phoneNumber: listing['phone'] as String,
         imageURL: listing['imageURL'] as String, startTime: listing['startTime'] as String, endTime: listing['endTime'] as String, approxDistance: '', detailsVisible: false,
         listingFavourited: false, listingAlerted: false, inDialog: false, onGetDirections: () {},
-        onDetailsTapped: () => analytics.calls.add('details'), analyticsService: analytics, colorScheme: ColorScheme.light(),
+        onDetailsTapped: () => analytics.calls.add('details'), analyticsService: analytics, colorScheme: const ColorScheme.light(),
       ))));
       await tester.tap(find.byIcon(Icons.info));
       expect(analytics.calls, ['haptic', 'tap:listing_details', 'details']);
@@ -107,7 +107,7 @@ void main() {
         description: listing['description'] as String, email: listing['email'] as String, website: listing['website'] as String, phoneNumber: listing['phone'] as String,
         imageURL: listing['imageURL'] as String, startTime: listing['startTime'] as String, endTime: listing['endTime'] as String, approxDistance: '', detailsVisible: true,
         listingFavourited: false, listingAlerted: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
-        analyticsService: analytics, colorScheme: ColorScheme.light(),
+        analyticsService: analytics, colorScheme: const ColorScheme.light(),
       )))));
       // The sheet has one IconButton: the favourite control.
       await tester.tap(find.byType(IconButton));
@@ -152,7 +152,7 @@ void main() {
           email: 'test@example.com', website: '', phoneNumber: '0123456789',
           imageURL: '', startTime: '10:30', endTime: '16:30', approxDistance: '',
           detailsVisible: true, listingFavourited: false, inDialog: false,
-          onGetDirections: () {}, analyticsService: analytics, colorScheme: ColorScheme.light(), listingAlerted: false,
+          onGetDirections: () {}, analyticsService: analytics, colorScheme: const ColorScheme.light(), listingAlerted: false,
         ))),
       ));
       // Invoke the async callback to assert the existing error contract.

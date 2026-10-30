@@ -84,6 +84,7 @@ class ListingUpdateNotifier {
   static Future<void> maybeShowNotice(
     BuildContext context, {
     required AnalyticsService analyticsService,
+    bool allowListingsMayChange = true,
   }) async {
     if (onTest) {
       return;
@@ -91,6 +92,7 @@ class ListingUpdateNotifier {
 
     final noticeDate = context.read<DateTimeProvider>().now();
     final isListingsMayChange = isListingsMayChangeNotice(noticeDate);
+    if (isListingsMayChange && !allowListingsMayChange) return;
 
     // The dismissal preference applies only before the Fair. The notices on
     // the day and afterwards must always remain available.
