@@ -75,11 +75,11 @@ final Map<String, ThemeData> appThemes = {
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
       onSecondary: Colors.white,
       onSecondaryFixed: const Color.fromRGBO(35, 35, 10, 1), // favourites background
-      tertiary: const Color.fromRGBO(255, 196, 0, 1.0),
+      tertiary: const Color.fromRGBO(228, 199, 143, 1.0),
       error: Colors.orange,
       onError: Colors.black,
       surface: const Color.fromRGBO(44, 44, 44, 1.0),
-      surfaceDim: const Color.fromRGBO(30, 30, 30, 1.0),
+      surfaceDim: Colors.grey[400]!,
       onSurface: Colors.white,
       onSurfaceVariant: Colors.grey[300]!,
     ),

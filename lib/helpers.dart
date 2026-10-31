@@ -122,7 +122,7 @@ class FairScaffold extends StatelessWidget {
                   analyticsService.logButtonTapped('navigation_home');
                   onTabSelected(0);
                 },
-                child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, color: (currentTab == 0) ? colorScheme.onPrimary : colorScheme.surfaceDim),
+                child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, color: (currentTab == 0) ? colorScheme.tertiary : colorScheme.surfaceDim),
               ),
             ),
           ),
@@ -191,7 +191,7 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     selectedFontSize: 13,
     unselectedFontSize: 13,
     iconSize: 30,
-    selectedItemColor: colorscheme.onPrimary,
+    selectedItemColor: colorscheme.tertiary,
     unselectedItemColor: colorscheme.surfaceDim,
     selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
     onTap: (selectedIndex) {
@@ -210,8 +210,7 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
 }
 
 Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsService}) {
-  final colorScheme = Theme.of(context).colorScheme;
-  final menuStyle = TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onPrimary);
+  final menuStyle = const TextStyle(fontWeight: FontWeight.bold, color: Colors.white);
   return Drawer(
     child: Container(
       decoration: BoxDecoration(
@@ -249,7 +248,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: Icon(Icons.info, color: colorScheme.onPrimary),
+              leading: const Icon(Icons.info, color: Colors.white),
               title: Text('About the Fair', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -267,7 +266,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: Icon(Icons.warning, color: colorScheme.onPrimary),
+              leading: const Icon(Icons.warning, color: Colors.white),
               title: Text('Important information', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -286,7 +285,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: Icon(Icons.public, color: colorScheme.onPrimary),
+              leading: const Icon(Icons.public, color: Colors.white),
               title: Text('Visit our website', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -299,7 +298,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: Icon(Icons.email, color: colorScheme.onPrimary),
+              leading: const Icon(Icons.email, color: Colors.white),
               title: Text('Contact us', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -318,7 +317,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: Icon(Icons.volunteer_activism, color: colorScheme.onPrimary),
+              leading: const Icon(Icons.volunteer_activism, color: Colors.white),
               title: Text('Donate to the Fair', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
