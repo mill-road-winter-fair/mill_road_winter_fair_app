@@ -1,13 +1,18 @@
+// Dart SDK imports
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+
+// Third-party imports
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -247,7 +252,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
     final content = Opacity(opacity: (widget.detailsVisible == null) ? 0.3 : 1.0,
       child: Container(
         padding: (widget.inDialog)
-            ? EdgeInsets.all(0)
+            ? const EdgeInsets.all(0)
             : EdgeInsets.fromLTRB(4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 8,
                 4.0 + ((MediaQuery.of(context).size.height.toInt() - 500) / 30).toInt(), 12),
         child: Column(
@@ -270,7 +275,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                               0.2126, 0.7152, 0.0722, 0, 0,
                               0, 0, 0, 1, 0,
                             ]),
-                            child: Text('${widget.emoji} ', style: TextStyle(fontSize: 30)),
+                            child: Text('${widget.emoji} ', style: const TextStyle(fontSize: 30)),
                           ),
                         )
                       : Text('${widget.emoji} ', style: basicTitleStyle.copyWith(fontSize: 30)),
@@ -324,7 +329,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   ) else if (widget.brickAndMortar) GestureDetector(
                     onTap: () => showMiniPopup(context, brickAndMortarIconKey, 'A permanent shop or office building', analyticsService: widget.analyticsService),
                     key: brickAndMortarIconKey,
-                    child: Icon(Icons.store),
+                    child: const Icon(Icons.store),
                   ),
                 ],
               ),
@@ -384,7 +389,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                         : Colors.orange,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 if (widget.onGetDirections != null) ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     iconSize: 24,
@@ -638,7 +643,7 @@ Future<void> showListingDetailsDialog(
     builder: (_) => StatefulBuilder(
       builder: (ctx2, setStateDialog) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
+          insetPadding: const EdgeInsets.symmetric(horizontal: 12), // margin from screen edges
           shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
           backgroundColor: colorScheme.surfaceContainerLowest,
           shadowColor: colorScheme.surfaceContainerHighest,

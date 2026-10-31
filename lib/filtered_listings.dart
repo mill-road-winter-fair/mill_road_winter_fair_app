@@ -1,15 +1,10 @@
+// Dart SDK imports
 import 'dart:async';
-import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/expanded_listing_reveal.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/get_current_location.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -17,7 +12,17 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+
+// Third-party imports
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FilteredListingsPage extends StatefulWidget {
   final AnalyticsService analyticsService;
@@ -603,7 +608,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       ],
                     ),
                 )
-              : SizedBox(height: 6),
+              : const SizedBox(height: 6),
             ),
             Expanded(
               child: RefreshIndicator(
@@ -821,7 +826,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
     final effectiveSortingMethod = useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod;
     return MenuAnchor(
-      key: ValueKey('sortingdropdown'),
+      key: const ValueKey('sortingdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,
@@ -872,7 +877,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     final menuEntryStyle = TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant);
     final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
     return MenuAnchor(
-      key: ValueKey('filterdropdown'),
+      key: const ValueKey('filterdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,

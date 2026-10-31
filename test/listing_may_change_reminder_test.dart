@@ -84,6 +84,27 @@ void main() {
       onTest = true;
     });
 
+    testWidgets('deferring the listings notice does not mark it as shown', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      onTest = false;
+      listingUpdateNoticeEnabled = true;
+      addTearDown(() => onTest = true);
+      final analytics = RecordingNoticeAnalyticsService();
+      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: beforeFairDateTimeProvider);
+
+      await ListingUpdateNotifier.maybeShowNotice(
+        tester.element(find.byType(SizedBox)),
+        analyticsService: analytics,
+        allowListingsMayChange: false,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Listings may change'), findsNothing);
+      expect(analytics.notices, isEmpty);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt(ListingUpdateNotifier.lastShownKeyFor(beforeFairDateTimeProvider.now())), isNull);
+    });
+
     testWidgets('tracks opting to keep the listings notice', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
       onTest = false;

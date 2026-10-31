@@ -6,7 +6,6 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 
 // Third-party imports
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -20,9 +19,6 @@ void main() {
   setUp(() async {
     // default noop client
     mockClient = MockClient((request) async => http.Response('[]', 200));
-    dotenv.loadFromString(envString: '''
-    HEROKU_API=MOCK_API
-    ''');
   });
 
   group('ListingsErrorBranches', () {
