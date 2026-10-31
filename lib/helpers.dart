@@ -210,10 +210,12 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
 }
 
 Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsService}) {
+  final colorScheme = Theme.of(context).colorScheme;
+  final menuStyle = TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onPrimary);
   return Drawer(
     child: Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(begin: AlignmentGeometry.topCenter, end: AlignmentGeometry.bottomCenter,
+        gradient: LinearGradient(begin: AlignmentGeometry.center, end: AlignmentGeometry.bottomCenter,
         colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary])
       ),
       child: Column(
@@ -234,9 +236,9 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                       child: Image.asset('assets/MRWF26_leaflet_banner.png', fit: BoxFit.contain),
                     ),
                     Expanded(flex: 2, child: Container()),
-                    FittedBox(
+                    const FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text(' $fairDateTimes', style: TextStyle(color: Color.fromRGBO(228, 199, 143, 1), fontSize: 13, fontWeight: FontWeight.bold)),
+                      child: Text(' $fairDateTimes', style: TextStyle(color: Color.fromRGBO(210, 188, 140, 1), fontSize: 14, fontWeight: FontWeight.bold)),
                     ),
                     Expanded(flex: 2, child: Container())
                   ],
@@ -247,15 +249,14 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: const Icon(Icons.info),
-              title: const Text('About the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+              leading: Icon(Icons.info, color: colorScheme.onPrimary),
+              title: Text('About the Fair', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_about_fair');
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
-                Navigator.push(
-                    navigatorContext,
+                Navigator.push(navigatorContext,
                     MaterialPageRoute(
                         builder: (context) => AboutTheFairPage(
                               analyticsService: analyticsService,
@@ -266,8 +267,8 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: const Icon(Icons.warning),
-              title: const Text('Important information', style: TextStyle(fontWeight: FontWeight.bold)),
+              leading: Icon(Icons.warning, color: colorScheme.onPrimary),
+              title: Text('Important information', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_important_information');
@@ -285,8 +286,8 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: const Icon(Icons.public),
-              title: const Text('Visit our website', style: TextStyle(fontWeight: FontWeight.bold)),
+              leading: Icon(Icons.public, color: colorScheme.onPrimary),
+              title: Text('Visit our website', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_website');
@@ -298,8 +299,8 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: const Icon(Icons.email),
-              title: const Text('Contact us', style: TextStyle(fontWeight: FontWeight.bold)),
+              leading: Icon(Icons.email, color: colorScheme.onPrimary),
+              title: Text('Contact us', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_contact');
@@ -317,8 +318,8 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
           Expanded(
             flex: 4,
             child: ListTile(
-              leading: const Icon(Icons.volunteer_activism),
-              title: const Text('Donate to the Fair', style: TextStyle(fontWeight: FontWeight.bold)),
+              leading: Icon(Icons.volunteer_activism, color: colorScheme.onPrimary),
+              title: Text('Donate to the Fair', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_donate');

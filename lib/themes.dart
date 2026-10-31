@@ -40,11 +40,11 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(25, 41, 103, 1),
       onPrimary: Colors.white,
-      onPrimaryFixedVariant: Color.fromRGBO(244, 248, 255, 1), // timetable swimlanes
+      onPrimaryFixedVariant: const Color.fromRGBO(244, 248, 255, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(255, 242, 242, 1), // favourites background
-      tertiary: const Color.fromRGBO(137, 74, 151, 1),//gold 228,199,143
+      tertiary: const Color.fromRGBO(228, 199, 143, 1),//gold 228, 199, 143 // purple 137, 74, 151
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
@@ -71,7 +71,7 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.dark,
       primary: const Color.fromRGBO(25, 41, 103, 1),
       onPrimary: Colors.black,
-      onPrimaryFixedVariant: Color.fromRGBO(0, 16, 55, 1), // timetable swimlanes
+      onPrimaryFixedVariant: const Color.fromRGBO(0, 16, 55, 1), // timetable swimlanes
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
       onSecondary: Colors.white,
       onSecondaryFixed: const Color.fromRGBO(35, 35, 10, 1), // favourites background
