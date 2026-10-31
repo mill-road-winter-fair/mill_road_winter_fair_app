@@ -765,7 +765,7 @@ class _CachedLabel extends StatelessWidget {
               softWrap: false,
               style: TextStyle(fontSize: maxFontSize, fontWeight: FontWeight.bold, color: Colors.white, height: 0.9,
                 shadows: [
-                  const Shadow(blurRadius: 4, color: Colors.black),
+                  const Shadow(blurRadius: 2, color: Colors.black),
                   Shadow(blurRadius: 16, color: colourScheme.primary),
                 ],
               ),
