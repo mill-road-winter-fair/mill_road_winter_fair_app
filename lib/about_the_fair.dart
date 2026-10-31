@@ -111,7 +111,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
     'Anglia Ruskin University': 'https://www.aru.ac.uk/',
     'Hughes Hall': 'https://www.hughes.cam.ac.uk/',
     'Love Mill Road': 'https://www.lovemillroad.org.uk/',
-    'Regal Star Catering': 'https://www.lamaisondusteak.co.uk/',
     'Taank Optometrists': 'https://taank.co.uk/',
   };
 
@@ -259,7 +258,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'As well as highlights like parades, stalls, performances and children’s activities, '
                           'there is so much to discover in the community venues and businesses. '
-                          'This is only possible with local support, so please do consider '),
+                          'The Fair is only possible with local support, so please do consider '),
                         TextSpan(text: 'contributing', style: bodyStyle.copyWith(decoration: TextDecoration.underline, decorationColor: colorScheme.onSecondary), 
                           recognizer: TapGestureRecognizer()
                               ..onTap = () {
@@ -432,7 +431,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     SizedBox.shrink(),
                     FittedBox(
                       fit: BoxFit.fill,
-                      child: Image.asset("assets/infoPages/MRWF25_sponsor_logos.png"),
+                      child: Image.asset("assets/infoPages/MRWF26_sponsor_logos.png"),
                     ),
                     const SizedBox(height: 4),
                   ],
