@@ -1,10 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -56,7 +59,7 @@ class ListingUpdateNotifier {
   static Widget messageFor(DateTime now, BuildContext context) {
     if (DateUtils.isSameDay(fairDate, now)) {
       debugPrint('Current date is Fair date; showing special notice');
-      return Text('The fun starts at 10.30, and we’re looking forward to seeing '
+      return const Text('The fun starts at 10.30, and we’re looking forward to seeing '
           'you there.\n\n'
           'This app contains all the latest listings, updated if they '
           'change, so you can easily see what’s on when and where.\n\n'
@@ -65,23 +68,23 @@ class ListingUpdateNotifier {
 
     if (now.isAfter(fairDate)) {
       return Text.rich(TextSpan(children: [
-        TextSpan(text: 'Thank you to everyone who came to the 2026 Fair and made it '
+        const TextSpan(text: 'Thank you to everyone who came to the 2026 Fair and made it '
           'such a huge success.\n\n'
           'We‘ll be back in December 2027 and will be updating the app '
           'as the Fair approaches.\n\n'
           'Check back next year for the 2027 listings.\n\n'),
-        TextSpan(text: 'In the meantime, we’d be grateful if you could complete our '),
-        TextSpan(text: 'feedback survey', style: TextStyle(decoration: TextDecoration.underline), recognizer: TapGestureRecognizer()
+        const TextSpan(text: 'In the meantime, we’d be grateful if you could complete our '),
+        TextSpan(text: 'feedback survey', style: const TextStyle(decoration: TextDecoration.underline), recognizer: TapGestureRecognizer()
           ..onTap = () {
             HapticFeedback.lightImpact();
             context.read<UrlLauncher>().open(Uri.parse('https://tinyurl.com/3adveur9'));
           }
         ),
-        TextSpan(text: '.'),
+        const TextSpan(text: '.'),
       ]));
     }
 
-    return Text('Event details may change as the Fair approaches, but this app '
+    return const Text('Event details may change as the Fair approaches, but this app '
         'will always show the most up-to-date information.\n\n'
         'Check back for the latest listings.');
   }
@@ -93,6 +96,7 @@ class ListingUpdateNotifier {
   static Future<void> maybeShowNotice(
     BuildContext context, {
     required AnalyticsService analyticsService,
+    bool allowListingsMayChange = true,
   }) async {
     if (onTest) {
       return;
@@ -100,6 +104,7 @@ class ListingUpdateNotifier {
 
     final noticeDate = context.read<DateTimeProvider>().now();
     final isListingsMayChange = isListingsMayChangeNotice(noticeDate);
+    if (isListingsMayChange && !allowListingsMayChange) return;
 
     // The dismissal preference applies only before the Fair. The notices on
     // the day and afterwards must always remain available.
