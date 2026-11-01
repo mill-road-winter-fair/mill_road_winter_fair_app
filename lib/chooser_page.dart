@@ -856,7 +856,12 @@ double backgroundIntroOpacityForPhase(double progress, double reducedOpacity) {
 
 double logoIntroOpacityForPhase(double progress) {
   final clamped = progress.clamp(0.0, 1.0);
-  return Curves.easeOutCubic.transform(clamped).clamp(0.0, 1.0);
+  final fadeStart = 0.15;
+  final fadeEnd = 0.7;
+  if (clamped <= fadeStart) return 0.0;
+  if (clamped >= fadeEnd) return 1.0;
+  final local = (clamped - fadeStart) / (fadeEnd - fadeStart);
+  return Curves.easeInOutCubic.transform(local).clamp(0.0, 1.0);
 }
 
 
