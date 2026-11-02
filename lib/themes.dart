@@ -19,13 +19,13 @@ String getEffectiveThemeKey(String themeKey, [Brightness? brightness]) {
 String getMapStyleForThemeKey(String themeKey, [Brightness? brightness]) {
   switch (getEffectiveThemeKey(themeKey, brightness)) {
     case 'light':
+    case '2025':
       return standardMap;
     case 'dark':
+    case 'highContrast':
       return darkMap;
     case '2024':
       return retroMap;
-    case 'highContrast':
-      return darkMap;
     case 'colourBlindFriendly':
       return colourBlindMap;
     default:
@@ -44,7 +44,8 @@ final Map<String, ThemeData> appThemes = {
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(255, 242, 242, 1), // favourites background
-      tertiary: const Color.fromRGBO(228, 199, 143, 1),//gold 228, 199, 143 // purple 137, 74, 151
+      tertiary: const Color.fromRGBO(25, 41, 103, 1),
+      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements // purple 137, 74, 151
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
@@ -56,9 +57,13 @@ final Map<String, ThemeData> appThemes = {
       backgroundColor: Color.fromRGBO(25, 41, 103, 1),
       foregroundColor: Colors.white,
     ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(25, 41, 103, 1),
-      unselectedItemColor: Colors.grey,
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: const Color.fromRGBO(228, 199, 143, 1),
+      unselectedItemColor: Colors.grey[300]!,
+    ),
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
@@ -76,6 +81,7 @@ final Map<String, ThemeData> appThemes = {
       onSecondary: Colors.white,
       onSecondaryFixed: const Color.fromRGBO(35, 35, 10, 1), // favourites background
       tertiary: const Color.fromRGBO(228, 199, 143, 1.0),
+      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements // purple 137, 74, 151
       error: Colors.orange,
       onError: Colors.black,
       surface: const Color.fromRGBO(44, 44, 44, 1.0),
@@ -99,6 +105,43 @@ final Map<String, ThemeData> appThemes = {
     ),
     listTileTheme: const ListTileThemeData(
       tileColor: Color.fromRGBO(44, 44, 44, 1.0),
+      textColor: Colors.white,
+      iconColor: Colors.white,
+    ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+  ),
+  '2025': ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme(
+      brightness: Brightness.light,
+      primary: const Color.fromRGBO(166, 34, 43, 1),
+      onPrimary: Colors.white,
+      secondary: Colors.white,
+      onSecondary: Colors.black,
+      onSecondaryFixed: const Color.fromRGBO(255, 235, 235, 1), // favourites background
+      tertiary: const Color.fromRGBO(166, 34, 43, 1),
+      tertiaryFixed: Colors.grey[300], // some drawer and guide elements
+      error: Colors.orange,
+      onError: Colors.black,
+      surface: Colors.white,
+      surfaceDim: Colors.grey[300]!,
+      onSurface: Colors.black,
+      onSurfaceVariant: Colors.grey[700]!,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color.fromRGBO(166, 34, 43, 1),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey[300],
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Colors.white,
+    ),
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
@@ -112,6 +155,7 @@ final Map<String, ThemeData> appThemes = {
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(235, 235, 255, 1), // favourites background
       tertiary: const Color.fromRGBO(37, 63, 128, 1.0),
+      tertiaryFixed: Colors.white,
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
@@ -123,12 +167,16 @@ final Map<String, ThemeData> appThemes = {
       backgroundColor: Color.fromRGBO(37, 63, 128, 1.0),
       foregroundColor: Colors.white,
     ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(37, 63, 128, 1.0),
-      unselectedItemColor: Colors.grey,
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey[300],
     ),
     drawerTheme: const DrawerThemeData(
       backgroundColor: Colors.white,
+    ),
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),

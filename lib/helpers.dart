@@ -63,7 +63,8 @@ class FairScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SafeArea(
         top: false,
         left: false,
@@ -115,14 +116,14 @@ class FairScaffold extends StatelessWidget {
                 tooltip: 'Home',
                 elevation: 4,
                 backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
                 shape: const CircleBorder(),
                 onPressed: () {
                   HapticFeedback.selectionClick();
                   analyticsService.logButtonTapped('navigation_home');
                   onTabSelected(0);
                 },
-                child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, color: (currentTab == 0) ? colorScheme.tertiary : colorScheme.surfaceDim),
+                child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, 
+                    color: (currentTab == 0) ? theme.bottomNavigationBarTheme.selectedItemColor : theme.bottomNavigationBarTheme.unselectedItemColor),
               ),
             ),
           ),
@@ -136,7 +137,7 @@ class FairScaffold extends StatelessWidget {
             shape: const CircularNotchedRectangle(),
             notchMargin: 4,
             clipBehavior: Clip.antiAlias,
-            child: fairBottomNavigationBar(currentTab, onTabSelected, colorScheme, analyticsService: analyticsService),
+            child: fairBottomNavigationBar(currentTab, onTabSelected, theme, analyticsService: analyticsService),
           ),
         ));
   }
@@ -179,7 +180,7 @@ void showInfoToast(BuildContext context, String message) {
   );
 }
 
-BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, ColorScheme colorscheme, {required AnalyticsService analyticsService}) {
+BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, ThemeData theme, {required AnalyticsService analyticsService}) {
   // Visual order differs from the stable page indices used throughout the app.
   const tabOrder = [1, 2, 0, 3, 4];
   return BottomNavigationBar(
@@ -191,8 +192,8 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     selectedFontSize: 13,
     unselectedFontSize: 13,
     iconSize: 30,
-    selectedItemColor: colorscheme.tertiary,
-    unselectedItemColor: colorscheme.surfaceDim,
+    selectedItemColor: theme.bottomNavigationBarTheme.selectedItemColor,
+    unselectedItemColor: theme.bottomNavigationBarTheme.unselectedItemColor,
     selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
@@ -210,12 +211,13 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
 }
 
 Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsService}) {
+  final colorScheme = Theme.of(context).colorScheme;
   final menuStyle = const TextStyle(fontWeight: FontWeight.bold, color: Colors.white);
   return Drawer(
     child: Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(begin: AlignmentGeometry.center, end: AlignmentGeometry.bottomCenter,
-        colors: [Theme.of(context).colorScheme.primary, Theme.of(context).colorScheme.secondary])
+        colors: [colorScheme.primary, colorScheme.secondary])
       ),
       child: Column(
         spacing: 0,
@@ -224,27 +226,32 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 0,
             child: ConstrainedBox(
               constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 380),
-              child: DrawerHeader(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(flex: 4, child: Container()),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Image.asset('assets/MRWF26_leaflet_banner.png', fit: BoxFit.contain),
-                    ),
-                    Expanded(flex: 2, child: Container()),
-                    const FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(' $fairDateTimes', style: TextStyle(color: Color.fromRGBO(210, 188, 140, 1), fontSize: 14, fontWeight: FontWeight.bold)),
-                    ),
-                    Expanded(flex: 2, child: Container())
-                  ],
+              child: Theme( // only way to get rid of bottom side on a DrawerHeader
+                data: Theme.of(context).copyWith(dividerTheme: const DividerThemeData(color: Colors.transparent, thickness: 0, space: 0)),
+                child: DrawerHeader(
+                  decoration: BoxDecoration(border: Border.all(color: Colors.transparent)),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(flex: 4, child: Container()),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Image.asset('assets/MRWF26_leaflet_banner.png', fit: BoxFit.contain),
+                      ),
+                      Expanded(flex: 2, child: Container()),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(' $fairDateTimes', style: TextStyle(color: colorScheme.tertiaryFixed, fontSize: 14, fontWeight: FontWeight.bold)),
+                      ),
+                      Expanded(flex: 2, child: Container())
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
+          Expanded(flex: 0, child: Divider(color: colorScheme.tertiaryFixed, indent: 16, endIndent: 16, thickness: 2)),
           Expanded(
             flex: 4,
             child: ListTile(
@@ -348,7 +355,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   },
                   constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                   padding: EdgeInsets.zero,
-                  icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                  icon: FaIcon(FontAwesomeIcons.squareFacebook, size: 40, color: colorScheme.tertiaryFixed),
                 ),
                 IconButton(
                   tooltip: 'Open Mill Road Winter Fair on X',
@@ -360,7 +367,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   },
                   constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                   padding: EdgeInsets.zero,
-                  icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                  icon: FaIcon(FontAwesomeIcons.squareXTwitter, size: 40, color: colorScheme.tertiaryFixed),
                 ),
                 IconButton(
                   tooltip: 'Open Mill Road Winter Fair on Instagram',
@@ -372,7 +379,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   },
                   constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                   padding: EdgeInsets.zero,
-                  icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                  icon: FaIcon(FontAwesomeIcons.squareInstagram, size: 40, color: colorScheme.tertiaryFixed),
                 ),
                 IconButton(
                   tooltip: 'Open Mill Road Winter Fair on LinkedIn',
@@ -384,7 +391,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   },
                   constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                   padding: EdgeInsets.zero,
-                  icon: FaIcon(FontAwesomeIcons.linkedin, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                  icon: FaIcon(FontAwesomeIcons.linkedin, size: 40, color: colorScheme.tertiaryFixed),
                 ),
                 IconButton(
                   tooltip: 'Open Mill Road Winter Fair on Flickr',
@@ -396,7 +403,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   },
                   constraints: const BoxConstraints(minWidth: 50, minHeight: 50),
                   padding: EdgeInsets.zero,
-                  icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: Theme.of(context).colorScheme.tertiary),
+                  icon: FaIcon(FontAwesomeIcons.flickr, size: 40, color: colorScheme.tertiaryFixed),
                 ),
               ],
             ),
@@ -405,9 +412,9 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 2,
             child: SizedBox.expand(),
           ),
-          const Expanded(
+          Expanded(
             flex: 0,
-            child: Divider(),
+            child: Divider(color: colorScheme.tertiaryFixed, indent: 16, endIndent: 16, thickness: 2),
           ),
           Expanded(
             flex: 4,
