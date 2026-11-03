@@ -103,7 +103,7 @@ ValueNotifier<bool> staticChooserPage = ValueNotifier(onTest);
 final fairDate = DateTime(2026, 12, 5);
 const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
 
-// Duration threshold under which a listing will be an 'event' and on the timtable
+// Duration threshold under which a listing will be an 'event' and on the timetable
 const maxDurationToBeEvent = Duration(minutes: 120);
 
 // Title
