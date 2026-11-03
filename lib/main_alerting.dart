@@ -6,6 +6,7 @@ import 'dart:io';
 // App imports
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
 
 // Third-party imports
 import 'package:collection/collection.dart';
@@ -254,7 +255,7 @@ Future<int> updateAlertNoticePeriodById(int id, int noticePeriod, String listing
   final theAlert = store.alertSchedules.firstWhereOrNull((a) => a.id == id);
   int newId;
   if (theAlert == null) { // it must have been cleaned up by the app
-    newId = store.addAlert(listingId, noticePeriod, true);
+    newId = await store.addAlert(listingId, noticePeriod, true);
   } else {
     theAlert.noticePeriod = noticePeriod;
     newId = id;
@@ -319,8 +320,9 @@ class AlertScheduleStore {
 
   int? alertIdForListing(String listingId) => alertSchedules.firstWhereOrNull((a) => a.listingId == listingId)?.id;
 
-  int addAlert(String listingId, int noticePeriod, bool isScheduled) {
+  Future<int> addAlert(String listingId, int noticePeriod, bool isScheduled) async {
     debugPrint('AlertScheduleStore addAlert for listingId=$listingId');
+    if (listings.isEmpty) listings = await loadListingsFromCache(); // we're in the notification process
     final theListing = listings.firstWhereOrNull((l) => l['id'] == listingId);
     if (theListing == null) return -1;
     final newAlert = AlertSchedule(
