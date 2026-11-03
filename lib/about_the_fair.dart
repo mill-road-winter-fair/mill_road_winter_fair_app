@@ -37,7 +37,7 @@ class TextImageRow extends StatelessWidget {
         final availableWidth = constraints.maxWidth;
         final plainText = textSpan.toPlainText();
         final length = plainText.length;
-        final textProportion = (0.6 + (length - 150) / 1500).clamp(0.55, 0.75).toDouble();
+        final textProportion = (0.55 + (length - 150) / 1500).clamp(0.45, 0.65).toDouble();
         final spacing = imageOnLeft ? 16.0 : 2.0;
         final textWidth = availableWidth * textProportion - spacing / 2;
         final imageWidth = availableWidth - textWidth - spacing;
@@ -199,7 +199,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
   Widget build(BuildContext context) {
     debugPrint('AboutTheFairPage build() called');
     final colorScheme = Theme.of(context).colorScheme;
-    final bodyStyle = TextStyle(fontSize: 16);
+    final bodyStyle = const TextStyle(fontSize: 16);
     final headingStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colorScheme.primary);
     final eventsSubtitleStyle = TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: colorScheme.onPrimary);
     final eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: colorScheme.onPrimary);
@@ -260,93 +260,107 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                   children: [
                     Text('Your annual celebration of all that is great about Mill Road returns for its 21st year!', style: bodyStyle.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary)),
                     TextImageRow(
-                      textSpan: TextSpan(children: [
+                      textSpan: const TextSpan(children: [
                         TextSpan(text: 'As well as highlights like parades, stalls, performances and children’s activities, '
-                          'there is so much to discover in the community venues and businesses. '
-                          'The Fair is only possible with local support, so please do consider '),
-                        TextSpan(text: 'contributing', style: bodyStyle.copyWith(decoration: TextDecoration.underline, decorationColor: colorScheme.onSecondary), 
-                          recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                HapticFeedback.lightImpact();
-                                widget.analyticsService.logButtonTapped('aboutpage_contributing');
-                                context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
-                              },
-                        ),
-                        TextSpan(text: ' to keep it going. Be sure to come early and enjoy the best Fair yet!'),
+                          'there is so much to discover in the community venues and businesses. '),
+                        TextSpan(text: 'Be sure to come early and enjoy the best Fair yet!'),
                       ]),
                       imagePath: "assets/infoPages/charityCommunityInfo.png",
                       textStyle: bodyStyle,
                     ),
-                    SizedBox.shrink(),
-                    Container(color: colorScheme.tertiary, padding: EdgeInsets.all(4),
+                    Text.rich(style: bodyStyle, TextSpan(children: [
+                      const TextSpan(text: 'The Fair is only possible with local support, so please do consider '),
+                      TextSpan(text: 'donating', style: bodyStyle.copyWith(decoration: TextDecoration.underline, decorationColor: colorScheme.onSecondary), 
+                        recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              HapticFeedback.lightImpact();
+                              widget.analyticsService.logButtonTapped('aboutpage_donating');
+                              context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
+                            },
+                      ),
+                      const TextSpan(text: ' to keep it going.'),
+                    ])),
+                    const SizedBox.shrink(),
+                    Container(color: colorScheme.tertiary, padding: const EdgeInsets.all(4),
                       child: Text('The 2026 Fair will be held on Saturday 5th December, 10:30 to 16:30.', textAlign: TextAlign.center,
                       style: bodyStyle.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onPrimary)),
                     ),
-                    SizedBox.shrink(),
+                    const SizedBox.shrink(),
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Food and drink from around the world\n', style: headingStyle),
-                        TextSpan(text: 'Enjoy something delicious at food stalls, cafés and venues all along Mill Road, or visit the Food Fair in Gwydir Street Car park.'),
+                        const TextSpan(text: 'Enjoy something delicious at food stalls, cafés and venues all along Mill Road, or visit the Food Fair in Gwydir Street Car Park.'),
                       ]),
                       imagePath: "assets/infoPages/foodDrink.png",
                       imageOnLeft: true,
                       textStyle: bodyStyle,
                     ),
-                    SizedBox.shrink(),
+                    const SizedBox.shrink(),
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Fantastic live music and performance\n', style: headingStyle),
-                        TextSpan(text: 'With the main music stages at Donkey Common, Ditchburn Gardens, St Barnabas Church, Argyle Street Housing Co-op, '
-                          'St Philip’s Church and at the corner of Thoday Street, plus many busking spots along the street, there’s something for everyone.'),
+                        const TextSpan(text: 'The main music stages at Donkey Common, Ditchburn Gardens, St Barnabas Church, Argyle Street Housing Co-op, '
+                          'inside St Philip’s Church and at the corner of Thoday Street.'),
                       ]),
                       imagePath: "assets/infoPages/music.png",
                       textStyle: bodyStyle,
                     ),
-                    SizedBox.shrink(),
+                    Text.rich(style: bodyStyle, const TextSpan(children: [
+                      TextSpan(text: 'With many busking spots along the street, there’s something for everyone.'),
+                    ])),
+                    const SizedBox.shrink(),
                     TextImageRow(
                       textSpan: TextSpan(children: [
-                        TextSpan(text: 'Locally-made art and crafts\n', style: headingStyle),
-                        TextSpan(text: 'You’ll find plenty to choose from all along the street, with even more at Donkey Common, Petersfield Green, Ditchburn Gardens '
-                          'and Headly Street. There’s also work from local artists at ARU, the Six Bells, David Parr House, St Barnabas Centre and Romsey Mill.'),
+                        TextSpan(text: 'Local arts, crafts and goodies\n', style: headingStyle),
+                        const TextSpan(text: 'You’ll find lots of stalls at Donkey Common, Petersfield Green, Ditchburn Gardens '
+                          'and Headly Street, with even more all along the road. There’s also work from local artists at ARU, '
+                          'the Six Bells, David Parr House, St Barnabas Centre, Romsey Mill and The Edge Café.'),
                       ]),
                       imagePath: "assets/infoPages/shopping.png",
                       imageOnLeft: true,
                       textStyle: bodyStyle,
                     ),
-                    SizedBox.shrink(),
+                    const SizedBox.shrink(),
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Fun things to do with the family\n', style: headingStyle),
-                        TextSpan(text: 'Crafts at Mill Road Community Centre and Salvation Army, magic at Romsey Mill, hands-on science at the '
-                          'Salisbury Club and Dr. Who plus Santa at Ditchburn Place, the Empress the Cambridge Blue. And from 11.45 don’t miss '
-                          'the colourful dancers and musicians of the Coleridge Carnival Crew in the parade'),
+                        const TextSpan(text: 'There’s plenty for children, including crafts at Mill Road Community Centre and the Salvation Army Centre, '
+                          'magic and comedy at Romsey Mill, hands-on science at the Salisbury Club and Doctor Who at Zion Baptist Church. '),
                       ]),
                       imagePath: "assets/infoPages/childrens.png",
                       textStyle: bodyStyle,
                     ),
-                    SizedBox.shrink(),
+                    Text.rich(style: bodyStyle, const TextSpan(children: [
+                      TextSpan(text: 'Santa is busy appearing at The Empress, the Cambridge Blue, Ditchburn Place and Zion Baptist Church! '
+                        'There are also robotics demonstrations and workshops at ARU, along with storytelling and much more. '
+                        'From 11.45am, don’t miss the colourful dancers and musicians of the Coleridge Carnival Crew in the parade.'),
+                    ])),
+                    const SizedBox.shrink(),
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Guided walks\n', style: headingStyle),
-                        TextSpan(text: 'A 90-minute Mill Road history tour starts at 9am from the corner of Mortimer Road. £15 charge. '
-                          'Free tours of the historic cemetery are at 10am, 11am, 12.30pm and 2pm from the gates near Mackenzie Road.'),
+                        const TextSpan(text: 'A 90-minute Mill Road history tour starts outside St Barnabas Church at 9am (£15), '
+                          'and free tours of the historic cemetery are at 10am, 11am, 12.30pm and 2pm from the gates near Mackenzie Road.'),
                       ]),
                       imagePath: "assets/infoPages/visitExperience.png",
                       imageOnLeft: true,
                       textStyle: bodyStyle,
                     ),
-                    SizedBox.shrink(),
+                    const SizedBox.shrink(),
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Other highlights\n', style: headingStyle),
-                        TextSpan(text: 'This year, we have lots of events at ARU’s main building, accessed from Petersfield Green, including performances '
-                          'and art displays, the Film Festival and the Health Hub. Discover tours, children’s activities and more at Cambridge '
-                          'Central Mosque. Take a trip to the past with Mill Road History Society at the Bath House.'),
+                        const TextSpan(text: 'There’s lots to see and do at ARU’s main building, accessed from Petersfield Green, including children’s '
+                          'activities, art and films. Look out for health stalls in various locations including Romsey Co-op’s car park. '),
                       ]),
                       imagePath: "assets/infoPages/nearby.png",
                       textStyle: bodyStyle,
                     ),
-                    Column(crossAxisAlignment: CrossAxisAlignment.start,
+                    Text.rich(style: bodyStyle, const TextSpan(children: [
+                      TextSpan(text: 'Take a trip to the past with Mill Road History Society at the Bath House and find free books provided by Cambridge Literary '
+                        'Festival hidden all around the Fair.'),
+                    ])),
+                   Column(crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(child: Stack(
                           clipBehavior: Clip.none,
@@ -361,32 +375,32 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                   eventRow(colorScheme, '10:30', 'Winter Fair opens'),
                                   eventRow(colorScheme, '10:30', 'Fire engine pull\n',
                                     [
-                                      directionableLocation('East Road', eventsSubtitleLinkStyle, LatLng(52.202488, 0.131207)),
+                                      directionableLocation('East Road', eventsSubtitleLinkStyle, const LatLng(52.202488, 0.131207)),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
                                       directionableLocation('the bridge', eventsSubtitleLinkStyle, const LatLng(52.198682, 0.141051)),
                                     ],
                                   ),
                                   eventRow(colorScheme, '10:30', 'Opening ceremony\n',
-                                    [directionableLocation('Ditchburn Gardens', eventsSubtitleLinkStyle, LatLng(52.200389, 0.136465))],
+                                    [directionableLocation('Ditchburn Gardens', eventsSubtitleLinkStyle, const LatLng(52.200389, 0.136465))],
                                   ),
                                   eventRow(colorScheme, '11:45', 'Parade\n',
                                     [
-                                      directionableLocation('Salisbury Club', eventsSubtitleLinkStyle, LatLng(52.1970778, 0.1472252)),
+                                      directionableLocation('Salisbury Club', eventsSubtitleLinkStyle, const LatLng(52.1970778, 0.1472252)),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                      directionableLocation('Petersfield', eventsSubtitleLinkStyle, LatLng(52.202858, 0.132253)),
+                                      directionableLocation('Petersfield', eventsSubtitleLinkStyle, const LatLng(52.202858, 0.132253)),
                                     ],
                                   ),
                                   eventRow(colorScheme, '15:40', 'Final parade\n',
                                     [
                                       directionableLocation('Gwydir Street', eventsSubtitleLinkStyle, const LatLng(52.199627, 0.138407)),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                      directionableLocation('Petersfield', eventsSubtitleLinkStyle, LatLng(52.202858, 0.132253)),
+                                      directionableLocation('Petersfield', eventsSubtitleLinkStyle, const LatLng(52.202858, 0.132253)),
                                     ],
                                   ),
                                   eventRow(colorScheme, '16:15', 'All trading ends'),
                                   eventRow(colorScheme, '16:30', 'Winter Fair ends'),
                                   eventRow(colorScheme, '17:30', 'Roads fully open'),
-                                  TableRow(decoration: BoxDecoration(color: colorScheme.primary), children: [SizedBox(height: 10), SizedBox(height: 10)]),
+                                  TableRow(decoration: BoxDecoration(color: colorScheme.primary), children: const [SizedBox(height: 10), SizedBox(height: 10)]),
                                 ],
                               ),
                             ),
@@ -407,6 +421,18 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       ], 
                     ),
                     TextImageRow(
+                      textSpan: const TextSpan(
+                        children: [
+                          TextSpan(text: 'The Fair is organised and run by Mill Road Winter Fair CIC. We would like to thank all the volunteer organisers, '
+                            'helpers and performers who give their time freely every year to make the Fair possible.'),
+                        ],
+                      ),
+                      imagePath: "assets/infoPages/services.png",
+                      imageOnLeft: true,
+                      textStyle: bodyStyle,
+                    ),
+                    const SizedBox.shrink(),
+                    TextImageRow(
                       textSpan: TextSpan(
                         children: [
                           const TextSpan(text: 'We are grateful for the generous support of '),
@@ -416,24 +442,14 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                           const TextSpan(text: ''),
                           // Build sponsor spans with separators
                           ...sponsorSpans,
+                          const TextSpan(text: 'The Fair benefits from a Cambridge City Council Community Grant and the ongoing help of the '
+                            'Mill Road Traders Association.'),
                         ],
                       ),
                       imagePath: "assets/infoPages/shopping.png",
-                      imageOnLeft: true,
                       textStyle: bodyStyle,
                     ),
-                    SizedBox.shrink(),
-                    TextImageRow(
-                      textSpan: TextSpan(
-                        children: [
-                          const TextSpan(text: 'The Fair is organised and run by unpaid volunteers, consituted as Mill Road Winter Fair CIC. It benefits from a Cambridge City Council '
-                            'Community Grant, support from donors, and the ongoing help of the Mill Road Traders Association.'),
-                        ],
-                      ),
-                      imagePath: "assets/infoPages/services.png",
-                      textStyle: bodyStyle,
-                    ),
-                    SizedBox.shrink(),
+                    const SizedBox.shrink(),
                     FittedBox(
                       fit: BoxFit.fill,
                       child: Image.asset("assets/infoPages/MRWF26_sponsor_logos.png"),
