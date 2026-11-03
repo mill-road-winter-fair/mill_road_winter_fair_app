@@ -145,8 +145,10 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       debugPrint('notificationTapBackground: failed to parse endTime: $e');
       return;
     }
+    final possibleNewId = await updateAlertNoticePeriodById(notificationResponse.id!, noticePeriod, theEventAlert['listingId']);
+    if (possibleNewId == -1) return;
     final theAlert = AlertSchedule(
-      notificationResponse.id!, 
+      possibleNewId,
       theEventAlert['listingId'],
       theEventAlert['listingTitle'],
       theEventAlert['listingLocation'],
@@ -157,7 +159,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       null
     );
     flutterLocalNotificationsPlugin.zonedSchedule(
-      id: notificationResponse.id!,
+      id: possibleNewId,
       title: fairName,
       body: theMessage,
       payload: jsonEncode(theAlert),
@@ -168,8 +170,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
     );
-    await updateAlertNoticePeriodById(notificationResponse.id!, noticePeriod);
-    debugPrint('onDidReceiveBackgroundNotificationResponse scheduled new alert for $newAlertTime with message “$theMessage”');
+    debugPrint('onDidReceiveBackgroundNotificationResponse scheduled alert for $newAlertTime with message “$theMessage” new ID = $possibleNewId and old was ${notificationResponse.id!}');
   }
 }
 
@@ -244,16 +245,22 @@ Future<bool> requestAlertPermissions() async {
 }
 
 
-Future<void> updateAlertNoticePeriodById(int id, int noticePeriod) async {
+Future<int> updateAlertNoticePeriodById(int id, int noticePeriod, String listingId) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.reload(); // since it may be cached
   final jsonString = prefs.getString('alertsStore');
-  if (jsonString == null) return;
+  if (jsonString == null) return -1;
   final store = AlertScheduleStore.fromJson(jsonDecode(jsonString));
   final theAlert = store.alertSchedules.firstWhereOrNull((a) => a.id == id);
-  if (theAlert == null) return;
-  theAlert.noticePeriod = noticePeriod;
+  int newId;
+  if (theAlert == null) { // it must have been cleaned up by the app
+    newId = store.addAlert(listingId, noticePeriod, true);
+  } else {
+    theAlert.noticePeriod = noticePeriod;
+    newId = id;
+  }
   await prefs.setString('alertsStore', jsonEncode(store));
+  return newId;
 }
 
 
