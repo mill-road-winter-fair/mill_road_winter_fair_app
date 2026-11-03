@@ -57,6 +57,7 @@ Future<void> main() async {
   tz.initializeTimeZones();
   await initialiseFlutterLocalNotificationsPlugin();
   await loadSettings();
+  await alertsStore.removePastEventAlerts();
   alertsStore.loadEventAlerts();
   final AnalyticsService analyticsService;
   if (analyticsEnabledForBuild) {
