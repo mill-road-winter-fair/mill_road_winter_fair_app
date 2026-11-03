@@ -480,7 +480,7 @@ void main() {
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () async {
-                  await showNoPermissionsDialog(context, Theme.of(context).colorScheme);
+                  await showNoPermissionsDialog(context, Theme.of(context).colorScheme, 'To set reminders, you need to give this app permission to show alert notifications.');
                 },
                 child: const Text('Open dialog'),
               ),

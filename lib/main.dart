@@ -74,13 +74,15 @@ Future<void> main() async {
   // Check whether location services are enabled and permissions are granted to the app
   locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
   locationPermission = await Geolocator.checkPermission();
-  debugPrint(
-      'Location services enabled: $locationServicesEnabled, permission: $locationPermission');
+  debugPrint('Location services enabled: $locationServicesEnabled, permission: $locationPermission');
+  if (locationPermission == LocationPermission.denied) {
+    locationPermission = await Geolocator.requestPermission();
+  }
 
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
- await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
         providers: [
           Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
           Provider<UrlLauncher>(create: (_) => const SystemUrlLauncher()),
