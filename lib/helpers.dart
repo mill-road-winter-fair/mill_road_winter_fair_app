@@ -65,80 +65,87 @@ class FairScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return SafeArea(
-        top: false,
-        left: false,
-        right: false,
-        bottom: Platform.isAndroid && isNavBarVisible(context),
-        child: Scaffold(
-          backgroundColor: colorScheme.surfaceDim,
-          appBar: AppBar(
-            titleSpacing: 0,
-            leadingWidth: 44,
-            leading: (allowBack ?? false)
-                ? BackButton(onPressed: () {
+      top: false,
+      left: false,
+      right: false,
+      bottom: Platform.isAndroid && isNavBarVisible(context),
+      child: Scaffold(
+        backgroundColor: colorScheme.surfaceDim,
+        appBar: AppBar(
+          titleSpacing: 0,
+          leadingWidth: 44,
+          leading: (allowBack ?? false)
+              ? BackButton(
+                  onPressed: () {
                     HapticFeedback.lightImpact();
                     analyticsService.logButtonTapped('back');
                     Navigator.maybePop(context);
-                  })
-                : Builder(
-                    builder: (context) => IconButton(
-                      tooltip: 'Open navigation menu',
-                      icon: const Icon(Icons.menu),
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        analyticsService.logButtonTapped('drawer_open');
-                        Scaffold.of(context).openDrawer();
-                      },
-                    ),
+                  },
+                )
+              : Builder(
+                  builder: (context) => IconButton(
+                    tooltip: 'Open navigation menu',
+                    icon: const Icon(Icons.menu),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      analyticsService.logButtonTapped('drawer_open');
+                      Scaffold.of(context).openDrawer();
+                    },
                   ),
-            title: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
-            centerTitle: false,
-            actions: appBarActions.map((a) => SizedBox(width: 42, child: a)).toList(),
-            actionsPadding: const EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
+                ),
+          title: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(appBarTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           ),
-          body: body,
-          drawer: fairDrawer(context, analyticsService: analyticsService),
-          floatingActionButtonLocation: const CenterDockedWithOffset(dyOffset: homeButtonOffset),
-          floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
-          resizeToAvoidBottomInset: false,
-          floatingActionButton: (allowBack ?? false) ? null : SizedBox(
-            width: homeButtonSize,
-            height: homeButtonSize,
-            child: Semantics(
-              selected: currentTab == 0,
-              child: FloatingActionButton(
-                key: const ValueKey('home-navigation-button'),
-                heroTag: null,
-                tooltip: 'Home',
-                elevation: 4,
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                shape: const CircleBorder(),
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  analyticsService.logButtonTapped('navigation_home');
-                  onTabSelected(0);
-                },
-                child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, color: (currentTab == 0) ? colorScheme.onPrimary : colorScheme.surfaceDim),
+          centerTitle: false,
+          actions: appBarActions.map((a) => SizedBox(width: 42, child: a)).toList(),
+          actionsPadding: const EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
+        ),
+        body: body,
+        drawer: fairDrawer(context, analyticsService: analyticsService),
+        floatingActionButtonLocation: const CenterDockedWithOffset(dyOffset: homeButtonOffset),
+        floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+        resizeToAvoidBottomInset: false,
+        floatingActionButton: (allowBack ?? false)
+            ? null
+            : SizedBox(
+                width: homeButtonSize,
+                height: homeButtonSize,
+                child: Semantics(
+                  selected: currentTab == 0,
+                  child: FloatingActionButton(
+                    key: const ValueKey('home-navigation-button'),
+                    heroTag: null,
+                    tooltip: 'Home',
+                    elevation: 4,
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    shape: const CircleBorder(),
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      analyticsService.logButtonTapped('navigation_home');
+                      onTabSelected(0);
+                    },
+                    child: Image.asset('assets/icons/iconTransparent.png', width: 40, height: 40, color: (currentTab == 0) ? colorScheme.onPrimary : colorScheme.surfaceDim),
+                  ),
+                ),
               ),
-            ),
-          ),
-          bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
-            key: const ValueKey('navigation-bar-surface'),
-            height: navigationBarHeight,
-            padding: const EdgeInsets.only(right: 6), // to stop Favourites hitting edge
-            elevation: 0,
-            color: colorScheme.primary,
-            surfaceTintColor: Colors.transparent,
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 4,
-            clipBehavior: Clip.antiAlias,
-            child: fairBottomNavigationBar(currentTab, onTabSelected, colorScheme, analyticsService: analyticsService),
-          ),
-        ));
+        bottomNavigationBar: (allowBack ?? false)
+            ? null
+            : BottomAppBar(
+                key: const ValueKey('navigation-bar-surface'),
+                height: navigationBarHeight,
+                padding: const EdgeInsets.only(right: 6), // to stop Favourites hitting edge
+                elevation: 0,
+                color: colorScheme.primary,
+                surfaceTintColor: Colors.transparent,
+                shape: const CircularNotchedRectangle(),
+                notchMargin: 4,
+                clipBehavior: Clip.antiAlias,
+                child: fairBottomNavigationBar(currentTab, onTabSelected, colorScheme, analyticsService: analyticsService),
+              ),
+      ),
+    );
   }
 }
 
@@ -154,8 +161,7 @@ void showInfoToast(BuildContext context, String message) {
     toastDuration: const Duration(seconds: 2),
     positionedToastBuilder: (context, child, gravity) {
       final media = MediaQuery.of(context);
-      const navigationHeight = FairScaffold.navigationBarHeight +
-          FairScaffold.homeButtonSize / 2 - FairScaffold.homeButtonOffset;
+      const navigationHeight = FairScaffold.navigationBarHeight + FairScaffold.homeButtonSize / 2 - FairScaffold.homeButtonOffset;
       return Positioned(
         bottom: max(media.padding.bottom + navigationHeight, media.viewInsets.bottom) + 16,
         left: 24,
@@ -172,8 +178,11 @@ void showInfoToast(BuildContext context, String message) {
           color: colours.primary,
           borderRadius: BorderRadius.circular(theme.platform == TargetPlatform.iOS ? 10 : 40),
         ),
-        child: Text(message, textAlign: TextAlign.center,
-            style: TextStyle(color: colours.onPrimary, fontSize: 16)),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: colours.onPrimary, fontSize: 16),
+        ),
       ),
     ),
   );
@@ -232,9 +241,12 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                   Expanded(flex: 2, child: Container()),
                   FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text(' $fairDateTimes', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      ' $fairDateTimes',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  Expanded(flex: 2, child: Container())
+                  Expanded(flex: 2, child: Container()),
                 ],
               ),
             ),
@@ -251,11 +263,13 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
               Navigator.push(
-                  navigatorContext,
-                  MaterialPageRoute(
-                      builder: (context) => AboutTheFairPage(
-                            analyticsService: analyticsService,
-                          )));
+                navigatorContext,
+                MaterialPageRoute(
+                  builder: (context) => AboutTheFairPage(
+                    analyticsService: analyticsService,
+                  ),
+                ),
+              );
             },
           ),
         ),
@@ -270,11 +284,13 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
               Navigator.push(
-                  navigatorContext,
-                  MaterialPageRoute(
-                      builder: (context) => ImportantInfoPage(
-                            analyticsService: analyticsService,
-                          )));
+                navigatorContext,
+                MaterialPageRoute(
+                  builder: (context) => ImportantInfoPage(
+                    analyticsService: analyticsService,
+                  ),
+                ),
+              );
             },
           ),
         ),
@@ -416,11 +432,13 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
               Navigator.push(
-                  navigatorContext,
-                  MaterialPageRoute(
-                      builder: (context) => SettingsPage(
-                            analyticsService: analyticsService,
-                          )));
+                navigatorContext,
+                MaterialPageRoute(
+                  builder: (context) => SettingsPage(
+                    analyticsService: analyticsService,
+                  ),
+                ),
+              );
             },
           ),
         ),
@@ -435,11 +453,13 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
               final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
               Navigator.pop(context);
               Navigator.pushReplacement(
-                  navigatorContext,
-                  MaterialPageRoute(
-                      builder: (context) => WelcomeScreen(
-                            analyticsService: analyticsService,
-                          )));
+                navigatorContext,
+                MaterialPageRoute(
+                  builder: (context) => WelcomeScreen(
+                    analyticsService: analyticsService,
+                  ),
+                ),
+              );
             },
           ),
         ),
@@ -488,7 +508,10 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
     builder: (dialogContext) {
       return Dialog(
         insetPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
-        shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: colorScheme.onSecondary, width: 0.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
         backgroundColor: colorScheme.surfaceContainerLowest,
         shadowColor: colorScheme.surfaceDim,
         elevation: 3,
@@ -510,8 +533,9 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
                   const Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
                   const Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
                   Align(
-                      alignment: AlignmentGeometry.center,
-                      child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
+                    alignment: AlignmentGeometry.center,
+                    child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app'),
+                  ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: Wrap(
@@ -556,8 +580,7 @@ class CenterDockedWithOffset extends FloatingActionButtonLocation {
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final base = FloatingActionButtonLocation.centerDocked
-        .getOffset(scaffoldGeometry);
+    final base = FloatingActionButtonLocation.centerDocked.getOffset(scaffoldGeometry);
     return Offset(base.dx, base.dy + dyOffset);
   }
 }
@@ -607,126 +630,143 @@ void aboutDialog(BuildContext context, {required AnalyticsService analyticsServi
   final inflater = (MediaQuery.of(context).size.height.toInt() - 600).clamp(0, 250) / 50;
   final colorScheme = Theme.of(context).colorScheme;
   final textStyle = TextStyle(fontSize: 13.0 + inflater / 3);
-  final linkStyle =
-      TextStyle(fontSize: 12.5 + inflater / 3, decoration: TextDecoration.underline, decorationColor: colorScheme.tertiary, color: colorScheme.tertiary);
+  final linkStyle = TextStyle(fontSize: 12.5 + inflater / 3, decoration: TextDecoration.underline, decorationColor: colorScheme.tertiary, color: colorScheme.tertiary);
   final ScrollController aboutDialogScrollController = ScrollController();
 
   if (context.mounted) {
     await showDialog(
-        context: context,
-        builder: (dialogContext) {
-          return Dialog(
-              insetPadding: EdgeInsets.all(4.0 + inflater * 2),
-              child: LayoutBuilder(builder: (context, constraints) {
-                final maxWidth = constraints.maxWidth.clamp(350.0, 400.0);
-                return Container(
-                    constraints: BoxConstraints(maxWidth: maxWidth),
-                    padding: EdgeInsets.fromLTRB(16.0 + inflater * 2, 20, 10, 6),
-                    child: Scrollbar(
-                        controller: aboutDialogScrollController,
-                        thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
-                        thickness: 4,
-                        radius: const Radius.circular(8),
-                        child: SingleChildScrollView(
-                          controller: aboutDialogScrollController,
-                          child: Column(mainAxisSize: MainAxisSize.min, children: [
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -4 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(6.0), child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain)),
-                              title: Text(fairName, style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold)),
-                              subtitle: Text('v${packageInfo.version}', style: textStyle),
-                            ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.phone_android, size: 28),
-                              title: Text('Android app by Alexander Berridge', style: textStyle),
-                              subtitle: Text('https://theberridge.com', style: linkStyle),
-                              onTap: () async {
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          insetPadding: EdgeInsets.all(4.0 + inflater * 2),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final maxWidth = constraints.maxWidth.clamp(350.0, 400.0);
+              return Container(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                padding: EdgeInsets.fromLTRB(16.0 + inflater * 2, 20, 10, 6),
+                child: Scrollbar(
+                  controller: aboutDialogScrollController,
+                  thumbVisibility: Platform.isIOS ? false : true, // iOS has its own scrollbar style
+                  thickness: 4,
+                  radius: const Radius.circular(8),
+                  child: SingleChildScrollView(
+                    controller: aboutDialogScrollController,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity(horizontal: -4 + inflater, vertical: -4),
+                          contentPadding: EdgeInsets.zero,
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(6.0),
+                            child: Image.asset('assets/icons/icon.png', width: 28, fit: BoxFit.contain),
+                          ),
+                          title: Text(
+                            fairName,
+                            style: textStyle.copyWith(fontSize: 18 + inflater / 3, fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text('v${packageInfo.version}', style: textStyle),
+                        ),
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.phone_android, size: 28),
+                          title: Text('Android app by Alexander Berridge', style: textStyle),
+                          subtitle: Text('https://theberridge.com', style: linkStyle),
+                          onTap: () async {
+                            HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('about_alex');
+                            context.read<UrlLauncher>().open(Uri.parse('https://theberridge.com'));
+                          },
+                        ),
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.phone_iphone, size: 28),
+                          title: Text('iPhone version by Matt Whiting', style: textStyle),
+                          subtitle: Text('http://mattwhiting.com', style: linkStyle),
+                          onTap: () async {
+                            HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('about_matt');
+                            context.read<UrlLauncher>().open(Uri.parse('http://mattwhiting.com'));
+                          },
+                        ),
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.schedule, size: 28),
+                          title: Text('Timetable view based on Clashfinder Pal by Matt Whiting', style: textStyle),
+                          subtitle: Text('https://linktr.ee/cfpal', style: linkStyle),
+                          onTap: () async {
+                            HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('about_clashfinder');
+                            context.read<UrlLauncher>().open(Uri.parse('https://linktr.ee/cfpal'));
+                          },
+                        ),
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.palette_outlined, size: 28),
+                          title: Text('Illustrations by Clare McEwan', style: textStyle),
+                          subtitle: Text('https://www.artistsmarquee.co.uk', style: linkStyle),
+                          onTap: () async {
+                            HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('about_clare');
+                            context.read<UrlLauncher>().open(Uri.parse('https://www.artistsmarquee.co.uk/claremcewan'));
+                          },
+                        ),
+                        ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.feedback_outlined, size: 28),
+                          title: Text('Tell us if you like this app', style: textStyle),
+                          subtitle: Text('Open a feedback form', style: linkStyle),
+                          onTap: () async {
+                            HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('about_feedback');
+                            context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
+                          },
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          spacing: 10,
+                          children: [
+                            TextButton(
+                              onPressed: () {
                                 HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_alex');
-                                context.read<UrlLauncher>().open(Uri.parse('https://theberridge.com'));
+                                analyticsService.logButtonTapped('about_licenses');
+                                Navigator.of(dialogContext).pop();
+                                showLicensePage(context: context);
                               },
+                              child: Text('View licences', style: TextStyle(color: colorScheme.tertiary)),
                             ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.phone_iphone, size: 28),
-                              title: Text('iPhone version by Matt Whiting', style: textStyle),
-                              subtitle: Text('http://mattwhiting.com', style: linkStyle),
-                              onTap: () async {
+                            TextButton(
+                              onPressed: () {
                                 HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_matt');
-                                context.read<UrlLauncher>().open(Uri.parse('http://mattwhiting.com'));
+                                analyticsService.logButtonTapped('about_close');
+                                Navigator.of(dialogContext).pop();
                               },
+                              child: Text('Close', style: TextStyle(color: colorScheme.tertiary)),
                             ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.schedule, size: 28),
-                              title: Text('Timetable view based on Clashfinder Pal by Matt Whiting', style: textStyle),
-                              subtitle: Text('https://linktr.ee/cfpal', style: linkStyle),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_clashfinder');
-                                context.read<UrlLauncher>().open(Uri.parse('https://linktr.ee/cfpal'));
-                              },
-                            ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.palette_outlined, size: 28),
-                              title: Text('Illustrations by Clare McEwan', style: textStyle),
-                              subtitle: Text('https://www.artistsmarquee.co.uk', style: linkStyle),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_clare');
-                                context.read<UrlLauncher>().open(Uri.parse('https://www.artistsmarquee.co.uk/claremcewan'));
-                              },
-                            ),
-                            ListTile(
-                              dense: true,
-                              visualDensity: VisualDensity(horizontal: -3 + inflater, vertical: -4),
-                              contentPadding: EdgeInsets.zero,
-                              leading: const Icon(Icons.feedback_outlined, size: 28),
-                              title: Text('Tell us if you like this app', style: textStyle),
-                              subtitle: Text('Open a feedback form', style: linkStyle),
-                              onTap: () async {
-                                HapticFeedback.lightImpact();
-                                analyticsService.logButtonTapped('about_feedback');
-                                context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/app-feedback-form/'));
-                              },
-                            ),
-                            Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 10, children: [
-                              TextButton(
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  analyticsService.logButtonTapped('about_licenses');
-                                  Navigator.of(dialogContext).pop();
-                                  showLicensePage(context: context);
-                                },
-                                child: Text('View licences', style: TextStyle(color: colorScheme.tertiary)),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  HapticFeedback.lightImpact();
-                                  analyticsService.logButtonTapped('about_close');
-                                  Navigator.of(dialogContext).pop();
-                                },
-                                child: Text('Close', style: TextStyle(color: colorScheme.tertiary)),
-                              ),
-                            ]),
-                          ]),
-                        )));
-              }));
-        });
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -777,23 +817,29 @@ Widget contactUsDialog(BuildContext theBuildContext, {required AnalyticsService 
                         TextSpan(
                           children: [
                             const TextSpan(
-                                style: TextStyle(fontWeight: FontWeight.bold), text: 'For any important enquiries on the day of the Fair please phone '),
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              text: 'For any important enquiries on the day of the Fair please phone ',
+                            ),
                             TextSpan(
-                                text: '07486\u{00A0}398744',
-                                style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () async {
-                                    HapticFeedback.lightImpact();
-                                    analyticsService.logButtonTapped('contact_phone');
-                                    final Uri phoneUri = Uri(scheme: 'tel', path: '07486 398744');
-                                    final launcher = context.read<UrlLauncher>();
-                                    if (await launcher.canOpen(phoneUri)) {
-                                      await launcher.open(phoneUri);
-                                    } else {
-                                      throw Exception('Could not dial 07486 398744');
-                                    }
-                                  }),
-                            const TextSpan(style: TextStyle(fontWeight: FontWeight.bold), text: '.'),
+                              text: '07486\u{00A0}398744',
+                              style: const TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  HapticFeedback.lightImpact();
+                                  analyticsService.logButtonTapped('contact_phone');
+                                  final Uri phoneUri = Uri(scheme: 'tel', path: '07486 398744');
+                                  final launcher = context.read<UrlLauncher>();
+                                  if (await launcher.canOpen(phoneUri)) {
+                                    await launcher.open(phoneUri);
+                                  } else {
+                                    throw Exception('Could not dial 07486 398744');
+                                  }
+                                },
+                            ),
+                            const TextSpan(
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              text: '.',
+                            ),
                           ],
                         ),
                       ),
@@ -849,8 +895,7 @@ Widget _buildEmailLink(BuildContext context, String email, {required AnalyticsSe
   );
 }
 
-void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage,
-    {required AnalyticsService analyticsService, Color? fgColour, Color? bgColour}) {
+void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessage, {required AnalyticsService analyticsService, Color? fgColour, Color? bgColour}) {
   fgColour ??= Theme.of(itemContext).colorScheme.secondary;
   bgColour ??= Theme.of(itemContext).colorScheme.onSecondary;
 
@@ -896,19 +941,19 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
             removeMiniPopup();
           },
           child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: overlayW, // wrapping boundary
-          ),
-          child: Container(
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: bgColour,
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))],
+            constraints: BoxConstraints(
+              maxWidth: overlayW, // wrapping boundary
             ),
-            child: Text(theMessage, softWrap: true, style: theStyle),
-          ),
+            child: Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: bgColour,
+                borderRadius: BorderRadius.circular(4),
+                boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))],
+              ),
+              child: Text(theMessage, softWrap: true, style: theStyle),
+            ),
           ),
         ),
       ),
@@ -938,12 +983,12 @@ double estimateTextHeight({
   int? maxLines,
 }) {
   final tp = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: maxLines,
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
-      strutStyle: StrutStyle.fromTextStyle(style))
-    ..layout(maxWidth: maxWidth);
+    text: TextSpan(text: text, style: style),
+    maxLines: maxLines,
+    textDirection: TextDirection.ltr,
+    textScaler: MediaQuery.textScalerOf(context),
+    strutStyle: StrutStyle.fromTextStyle(style),
+  )..layout(maxWidth: maxWidth);
   return tp.size.height;
 }
 
@@ -1025,9 +1070,7 @@ int asTheCrowFlies(LatLng origin, LatLng destination) {
   const c = cos;
 
   // Haversine formula for calculating the central angle between two points on a sphere
-  var a = 0.5 -
-      c((destination.latitude - origin.latitude) * p) / 2 +
-      c(origin.latitude * p) * c(destination.latitude * p) * (1 - c((destination.longitude - origin.longitude) * p)) / 2;
+  var a = 0.5 - c((destination.latitude - origin.latitude) * p) / 2 + c(origin.latitude * p) * c(destination.latitude * p) * (1 - c((destination.longitude - origin.longitude) * p)) / 2;
 
   // Why have a fudge factor? It's a UX thing
   // Estimating distances usings straight line routes means that the estimation is inevitably shorter than the actual walking route
@@ -1141,8 +1184,8 @@ String buildListingShareText(
     final timing = startTimeText.isNotEmpty
         ? '\nStarts at $startTimeText'
         : endTimeText.isNotEmpty
-            ? '\nEnds at $endTimeText'
-            : '';
+        ? '\nEnds at $endTimeText'
+        : '';
     return '$theTitle at $theLocation, $fairName on ${formatFullDate(fairDate)}$timing\nhttps://www.millroadwinterfair.org/';
   }
 
@@ -1214,7 +1257,8 @@ String formatFullDate(DateTime date) {
 Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, BuildContext context) async {
   debugPrint('toggleListingAlert called for $listingID and desiredNoticePeriod=$desiredNoticePeriod');
   final colorScheme = Theme.of(context).colorScheme;
-  if (settingsOpened) { // button previously tapped when alert permissions weren't given; maybe they are now
+  if (settingsOpened) {
+    // button previously tapped when alert permissions weren't given; maybe they are now
     alertsPermissionGranted = await requestAlertPermissions();
     settingsOpened = false;
   }
@@ -1234,52 +1278,65 @@ Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, Build
 }
 
 Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme) async {
-  return showDialog<void>(context: context, builder: (BuildContext context) {
-    return Dialog(
-      insetPadding: const EdgeInsets.all(8), // margin from screen edges
-      shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
-      backgroundColor: colorScheme.surfaceContainerLowest,
-      shadowColor: colorScheme.surfaceDim,
-      elevation: 3,
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLowest,
+  return showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        insetPadding: const EdgeInsets.all(8), // margin from screen edges
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: colorScheme.onSecondary, width: 0.5),
           borderRadius: BorderRadius.circular(12),
         ),
-        padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
-        child: Column(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
-          const ListTile(
-            visualDensity: VisualDensity(horizontal: -2, vertical: 2),
-            leading: Icon(Icons.error, size: 36, color: Colors.red),
-            title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
+        backgroundColor: colorScheme.surfaceContainerLowest,
+        shadowColor: colorScheme.surfaceDim,
+        elevation: 3,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(12),
           ),
-          Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
-            TextButton(
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel')
-            ),
-            TextButton(
-              onPressed: () async {
-                HapticFeedback.lightImpact();
-                Navigator.of(context).pop();
-                await openAppSettings();
-              },
-              child: const Text('Open Settings')
-            ),
-            const SizedBox(width: 8),
-          ]),
-        ]),
-      ),
-    );
-  });
+          padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 12,
+            children: [
+              const ListTile(
+                visualDensity: VisualDensity(horizontal: -2, vertical: 2),
+                leading: Icon(Icons.error, size: 36, color: Colors.red),
+                title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                spacing: 12,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      HapticFeedback.lightImpact();
+                      Navigator.of(context).pop();
+                      await openAppSettings();
+                    },
+                    child: const Text('Open Settings'),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }
 
-
 Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String listingID) async {
-  await alertsStore.removePastEventAlerts();  // also refreshes from shared prefs in case of snooze
+  await alertsStore.removePastEventAlerts(); // also refreshes from shared prefs in case of snooze
   if (!context.mounted) return;
   final theListing = listings.firstWhereOrNull((l) => l['id'] == listingID);
   if (theListing == null) return;
@@ -1314,10 +1371,10 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
       id: newAlertId,
       title: fairName,
       body: (theAlertNoticePeriod > 0)
-        ? '${theListing['title']} starting at ${theListing['location']} in $theAlertNoticePeriod minutes (${theListing['startTime']})'
-        : '${theListing['title']} underway at ${theListing['location']} until ${theListing['endTime']}',
+          ? '${theListing['title']} starting at ${theListing['location']} in $theAlertNoticePeriod minutes (${theListing['startTime']})'
+          : '${theListing['title']} underway at ${theListing['location']} until ${theListing['endTime']}',
       payload: jsonEncode(alertsStore.alertSchedules.firstWhere((a) => a.id == newAlertId)),
-      scheduledDate: tz.TZDateTime.from(schedTime, tz.local),//todo
+      scheduledDate: tz.TZDateTime.from(schedTime, tz.local), //todo
       //scheduledDate: tz.TZDateTime.from(now.add(Duration(seconds: 3)), tz.local),
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
@@ -1329,12 +1386,9 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
           enableVibration: true,
           actions: androidNotificationActions,
         ),
-        iOS: DarwinNotificationDetails(
-          threadIdentifier: 'org.millroadwinterfair.MRWFapp',
-          categoryIdentifier: categoryID
-        ),
+        iOS: DarwinNotificationDetails(threadIdentifier: 'org.millroadwinterfair.MRWFapp', categoryIdentifier: categoryID),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
     String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
     if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
@@ -1344,7 +1398,6 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
     return;
   }
 }
-
 
 void showToast(BuildContext theContext, String theMessage, bool isError) {
   Fluttertoast.showToast(
@@ -1357,7 +1410,6 @@ void showToast(BuildContext theContext, String theMessage, bool isError) {
     timeInSecForIosWeb: 2,
   );
 }
-
 
 // Function to determine if the event has ended based on endTime string
 bool hasEventEnded(String endTime, DateTimeProvider dateTimeProvider) {
@@ -1378,7 +1430,6 @@ bool hasEventEnded(String endTime, DateTimeProvider dateTimeProvider) {
   }
 }
 
-
 // Function to determine if the event is today
 bool isItEventDay(DateTimeProvider dateTimeProvider) {
   return DateUtils.isSameDay(
@@ -1386,7 +1437,6 @@ bool isItEventDay(DateTimeProvider dateTimeProvider) {
     dateTimeProvider.now(),
   );
 }
-
 
 class AdaptiveImageText extends StatefulWidget {
   const AdaptiveImageText({
@@ -1553,7 +1603,6 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
   }
 }
 
-
 Future<void> ensureWidgetFullyVisible(GlobalKey key) async {
   final context = key.currentContext;
   if (context == null) return;
@@ -1615,8 +1664,5 @@ bool isWidgetFullyVisible(BuildContext context) {
   final offset = box.localToGlobal(Offset.zero, ancestor: viewport);
   final size = box.size;
   final viewportSize = viewport.paintBounds.size;
-  return offset.dy >= 0 &&
-      offset.dy + size.height <= viewportSize.height &&
-      offset.dx >= 0 &&
-      offset.dx + size.width <= viewportSize.width;
+  return offset.dy >= 0 && offset.dy + size.height <= viewportSize.height && offset.dx >= 0 && offset.dx + size.width <= viewportSize.width;
 }

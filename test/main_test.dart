@@ -108,9 +108,7 @@ void main() {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+      listings = [mockListing('glazedAndConfused')];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
@@ -126,9 +124,7 @@ void main() {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+      listings = [mockListing('glazedAndConfused')];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
@@ -164,7 +160,8 @@ void main() {
                 appBarTitle: 'Test',
                 body: const SizedBox(),
                 currentTab: 0,
-                onTabSelected: (_) {}, analyticsService: FakeAnalyticsService(),
+                onTabSelected: (_) {},
+                analyticsService: FakeAnalyticsService(),
               ),
             ),
           ),
@@ -259,9 +256,7 @@ void main() {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+      listings = [mockListing('glazedAndConfused')];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
@@ -279,9 +274,7 @@ void main() {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+      listings = [mockListing('glazedAndConfused')];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
@@ -299,9 +292,7 @@ void main() {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+      listings = [mockListing('glazedAndConfused')];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
@@ -323,9 +314,7 @@ void main() {
       tester.view.physicalSize = const Size(1080, 2400);
       addTearDown(tester.view.resetPhysicalSize);
 
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+      listings = [mockListing('glazedAndConfused')];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
@@ -348,9 +337,7 @@ void main() {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+      listings = [mockListing('glazedAndConfused')];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
@@ -370,9 +357,7 @@ void main() {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
 
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+      listings = [mockListing('glazedAndConfused')];
 
       await tester.pumpWithClock(MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()));
 
@@ -406,7 +391,10 @@ void main() {
       await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())));
 
       // show the dialog
-      showDialog(context: tester.element(find.byType(SizedBox)), builder: (context) => contactUsDialog(context, analyticsService: FakeAnalyticsService()));
+      showDialog(
+        context: tester.element(find.byType(SizedBox)),
+        builder: (context) => contactUsDialog(context, analyticsService: FakeAnalyticsService()),
+      );
       await tester.pumpAndSettle();
 
       // Check for some known email addresses
@@ -432,9 +420,7 @@ void main() {
       firstExecution = false;
 
       // Provide a dummy listing to avoid triggering API fetch/retries and timers in MapPage
-      listings = [
-        mockListing('glazedAndConfused')
-      ];
+      listings = [mockListing('glazedAndConfused')];
 
       // Provide initial mock values for shared preferences
       SharedPreferences.setMockInitialValues({});

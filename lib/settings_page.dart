@@ -40,7 +40,8 @@ Future<void> loadSettings() async {
     preferredRoadClosurePolygonVisible = prefs.getBool('preferredRoadClosurePolygonVisible') ?? true;
 
     // Keep the listings-change notice enabled by default for each fair year.
-    listingUpdateNoticeEnabled = prefs.getBool(
+    listingUpdateNoticeEnabled =
+        prefs.getBool(
           'listingUpdateNoticeEnabled${fairDate.year}',
         ) ??
         true;
@@ -97,7 +98,6 @@ Future<void> loadSettings() async {
 
     mapStyle = standardMap;
     favouriteListingKeys.value = {};
-
   }
 }
 
@@ -147,7 +147,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
     widget.analyticsService.setCurrentScreen('SettingsPage');
   }
 
-// Save settings to shared preferences
+  // Save settings to shared preferences
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
@@ -188,11 +188,11 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       suffixIconConstraints: BoxConstraints(minWidth: 40, maxHeight: 40),
     );
-    final settingSubtitleStyle = TextStyle(fontSize: 14,  color: Theme.of(context).colorScheme.onSurfaceVariant);
+    final settingSubtitleStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant);
     final List<DropdownOption> unitsOptions = [
       DropdownOption(title: 'Metric', subtitle: 'Metres and kilometres', value: DistanceUnits.metric),
       DropdownOption(title: 'Imperial', subtitle: 'Feet and miles', value: DistanceUnits.imperial),
-      DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge)
+      DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge),
     ];
     final List<DropdownOption> themeOptions = [
       DropdownOption(title: 'Auto', subtitle: 'Follow the device light/dark setting', value: 'auto'),
@@ -201,7 +201,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       DropdownOption(title: '2025 Light', subtitle: 'For last year’s Fair', value: '2025'),
       DropdownOption(title: '2024 Light', subtitle: 'For the Fair that blew away', value: '2024'),
       DropdownOption(title: 'High contrast', subtitle: 'For visual accessibility needs', value: 'highContrast'),
-      DropdownOption(title: 'Colour blind friendly', subtitle: 'For users with colour blindness', value: 'colourBlindFriendly')
+      DropdownOption(title: 'Colour blind friendly', subtitle: 'For users with colour blindness', value: 'colourBlindFriendly'),
     ];
     final List<DropdownOption> homePageOptions = [
       DropdownOption(title: 'Animated', subtitle: 'Spotlights the Fair’s offerings', value: false),
@@ -214,11 +214,15 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('back');
+                    Navigator.maybePop(context);
+                  },
+                )
+              : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Settings'),
@@ -246,155 +250,178 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     },
                     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     children: [
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Theme:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<String>(
-                          inputDecorationTheme: dropdownDecoration,
-                          initialSelection: themeNotifier.value,
-                          hintText: 'Select a visual theme',
-                          alignmentOffset: const Offset(-15, -60),
-                          expandedInsets: EdgeInsets.zero,
-                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                          dropdownMenuEntries: themeOptions.map((opt) {
-                            return DropdownMenuEntry<String>(
-                              value: opt.value,
-                              label: opt.title,
-                              labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                const SizedBox(height: 4),
-                                Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                const SizedBox(height: 4),
-                              ]),
-                            );
-                          }).toList(),
-                          onSelected: (value) {
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('theme_preference_option');
-                            if (value == null) return;
-                            widget.analyticsService.logThemePreferenceSet(value);
-                            selectedThemeKey = value;
-                            setState(() {
-                              _changeTheme(value);
-                              mapStyle = getMapStyleForThemeKey(value);
-                            });
-                            _saveSettings();
-                          },
-                        ),
-                      ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Alerts:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<int>(
-                          inputDecorationTheme: dropdownDecoration,
-                          initialSelection: alertNoticePeriod,
-                          hintText: 'Select notice period for alerts',
-                          alignmentOffset: const Offset(0, -60),
-                          expandedInsets: EdgeInsets.zero,
-                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                          dropdownMenuEntries: alertNoticePeriods.map((opt) {
-                            final theLabel = (opt == 0) ? 'At time of event' : '$opt minutes before';
-                            return DropdownMenuEntry<int>(
-                              value: opt,
-                              label: theLabel,
-                              labelWidget: Text(theLabel, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                            );
-                          }).toList(),
-                          onSelected: (int? value) {
-                            if (value == null) return;
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('alerts_preference_option');
-                            widget.analyticsService.logAlertNoticePeriodPreferenceSet(value);
-                            saveAlertNoticePeriod(value);
-                            setState(() { });
-                          },
-                        ),
-                      ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Distances:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<DistanceUnits>(
-                          inputDecorationTheme: dropdownDecoration,
-                          initialSelection: preferredDistanceUnits,
-                          hintText: 'Select units for map distances',
-                          alignmentOffset: const Offset(0, -60),
-                          expandedInsets: EdgeInsets.zero,
-                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                          dropdownMenuEntries: unitsOptions.map((opt) {
-                            return DropdownMenuEntry<DistanceUnits>(
-                              value: opt.value,
-                              label: opt.title,
-                              labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                const SizedBox(height: 4),
-                                Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                const SizedBox(height: 4),
-                              ]),
-                            );
-                          }).toList(),
-                          onSelected: (DistanceUnits? value) {
-                            if (value == null) return;
-                            HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
-                            widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
-                            setState(() {
-                              preferredDistanceUnits = value;
-                            });
-                            _saveSettings();
-                          },
-                        ),
-                      ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Home page:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<bool>(
-                          inputDecorationTheme: dropdownDecoration,
-                          initialSelection: staticChooserPage.value,
-                          hintText: 'Select style of home page',
-                          alignmentOffset: const Offset(0, -60),
-                          expandedInsets: EdgeInsets.zero,
-                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
-                          dropdownMenuEntries: homePageOptions.map((opt) {
-                            return DropdownMenuEntry<bool>(
-                              value: opt.value,
-                              label: opt.title,
-                              labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                const SizedBox(height: 4),
-                                Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                                const SizedBox(height: 4),
-                              ]),
-                            );
-                          }).toList(),
-                          onSelected: (bool? value) {
-                            setState(() {
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 12),
+                            child: Text('Theme:', style: settingLabelStyle),
+                          ),
+                          DropdownMenu<String>(
+                            inputDecorationTheme: dropdownDecoration,
+                            initialSelection: themeNotifier.value,
+                            hintText: 'Select a visual theme',
+                            alignmentOffset: const Offset(-15, -60),
+                            expandedInsets: EdgeInsets.zero,
+                            trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                            dropdownMenuEntries: themeOptions.map((opt) {
+                              return DropdownMenuEntry<String>(
+                                value: opt.value,
+                                label: opt.title,
+                                labelWidget: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 4),
+                                    Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                    Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                    const SizedBox(height: 4),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            onSelected: (value) {
                               HapticFeedback.selectionClick();
-                              staticChooserPage.value = value!;
-                            });
-                            _saveSettings();
-                          },
-                        ),
-                      ]),
+                              widget.analyticsService.logButtonTapped('theme_preference_option');
+                              if (value == null) return;
+                              widget.analyticsService.logThemePreferenceSet(value);
+                              selectedThemeKey = value;
+                              setState(() {
+                                _changeTheme(value);
+                                mapStyle = getMapStyleForThemeKey(value);
+                              });
+                              _saveSettings();
+                            },
+                          ),
+                        ],
+                      ),
+                      const TableRow(
+                        children: [
+                          SizedBox(height: 12),
+                          SizedBox(height: 12),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 12),
+                            child: Text('Alerts:', style: settingLabelStyle),
+                          ),
+                          DropdownMenu<int>(
+                            inputDecorationTheme: dropdownDecoration,
+                            initialSelection: alertNoticePeriod,
+                            hintText: 'Select notice period for alerts',
+                            alignmentOffset: const Offset(0, -60),
+                            expandedInsets: EdgeInsets.zero,
+                            trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                            dropdownMenuEntries: alertNoticePeriods.map((opt) {
+                              final theLabel = (opt == 0) ? 'At time of event' : '$opt minutes before';
+                              return DropdownMenuEntry<int>(
+                                value: opt,
+                                label: theLabel,
+                                labelWidget: Text(theLabel, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                              );
+                            }).toList(),
+                            onSelected: (int? value) {
+                              if (value == null) return;
+                              HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('alerts_preference_option');
+                              widget.analyticsService.logAlertNoticePeriodPreferenceSet(value);
+                              saveAlertNoticePeriod(value);
+                              setState(() {});
+                            },
+                          ),
+                        ],
+                      ),
+                      const TableRow(
+                        children: [
+                          SizedBox(height: 12),
+                          SizedBox(height: 12),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 12),
+                            child: Text('Distances:', style: settingLabelStyle),
+                          ),
+                          DropdownMenu<DistanceUnits>(
+                            inputDecorationTheme: dropdownDecoration,
+                            initialSelection: preferredDistanceUnits,
+                            hintText: 'Select units for map distances',
+                            alignmentOffset: const Offset(0, -60),
+                            expandedInsets: EdgeInsets.zero,
+                            trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                            dropdownMenuEntries: unitsOptions.map((opt) {
+                              return DropdownMenuEntry<DistanceUnits>(
+                                value: opt.value,
+                                label: opt.title,
+                                labelWidget: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 4),
+                                    Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                    Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                    const SizedBox(height: 4),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            onSelected: (DistanceUnits? value) {
+                              if (value == null) return;
+                              HapticFeedback.selectionClick();
+                              widget.analyticsService.logButtonTapped('distanceUnit_preference_option');
+                              widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
+                              setState(() {
+                                preferredDistanceUnits = value;
+                              });
+                              _saveSettings();
+                            },
+                          ),
+                        ],
+                      ),
+                      const TableRow(
+                        children: [
+                          SizedBox(height: 12),
+                          SizedBox(height: 12),
+                        ],
+                      ),
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 12),
+                            child: Text('Home page:', style: settingLabelStyle),
+                          ),
+                          DropdownMenu<bool>(
+                            inputDecorationTheme: dropdownDecoration,
+                            initialSelection: staticChooserPage.value,
+                            hintText: 'Select style of home page',
+                            alignmentOffset: const Offset(0, -60),
+                            expandedInsets: EdgeInsets.zero,
+                            trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                            dropdownMenuEntries: homePageOptions.map((opt) {
+                              return DropdownMenuEntry<bool>(
+                                value: opt.value,
+                                label: opt.title,
+                                labelWidget: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 4),
+                                    Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                    Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                    const SizedBox(height: 4),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            onSelected: (bool? value) {
+                              setState(() {
+                                HapticFeedback.selectionClick();
+                                staticChooserPage.value = value!;
+                              });
+                              _saveSettings();
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                   SwitchListTile(
@@ -405,9 +432,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          analyticsEnabledForBuild
-                              ? 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'
-                              : 'Analytics is disabled for this development run.',
+                          analyticsEnabledForBuild ? 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google.' : 'Analytics is disabled for this development run.',
                         ),
                         const SizedBox(height: 4),
                         RichText(
@@ -435,13 +460,13 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     value: analyticsEnabledForBuild ? usageAnalyticsEnabled ?? false : false,
                     onChanged: analyticsEnabledForBuild
                         ? (bool value) async {
-                      HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('analytics_preference_toggle');
-                      await widget.analyticsService.setAnalyticsEnabled(value);
-                      if (mounted) setState(() {});
-                    }
+                            HapticFeedback.selectionClick();
+                            widget.analyticsService.logButtonTapped('analytics_preference_toggle');
+                            await widget.analyticsService.setAnalyticsEnabled(value);
+                            if (mounted) setState(() {});
+                          }
                         : null,
-                  )
+                  ),
                 ],
               ),
             ),

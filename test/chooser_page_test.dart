@@ -65,8 +65,8 @@ void main() {
         MaterialApp(
           home: ChooserPage(
             theEvents: const [],
-            onOpenTimetable: (_, __) {},
-            onOpenListings: (_, __) {},
+            onOpenTimetable: (_, _) {},
+            onOpenListings: (_, _) {},
             onOpenMap: (_) {},
             onTabSelected: (_) {},
             analyticsService: FakeAnalyticsService(),
@@ -87,8 +87,8 @@ void main() {
         MaterialApp(
           home: ChooserPage(
             theEvents: const [],
-            onOpenTimetable: (_, __) {},
-            onOpenListings: (_, __) {},
+            onOpenTimetable: (_, _) {},
+            onOpenListings: (_, _) {},
             onOpenMap: (_) {},
             onTabSelected: (_) {},
             analyticsService: FakeAnalyticsService(),
@@ -106,8 +106,8 @@ void main() {
         MaterialApp(
           home: ChooserPage(
             theEvents: const [],
-            onOpenTimetable: (_, __) {},
-            onOpenListings: (_, __) {},
+            onOpenTimetable: (_, _) {},
+            onOpenListings: (_, _) {},
             onOpenMap: (_) {},
             onTabSelected: (_) {},
             analyticsService: FakeAnalyticsService(),

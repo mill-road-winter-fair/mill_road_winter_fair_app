@@ -24,9 +24,7 @@ void main() {
   group('ListingsErrorBranches', () {
     test('fetchListings returns cached listings on SocketException', () async {
       // Populate cached listings
-      listings = [
-        mockListing('cachedListing')
-      ];
+      listings = [mockListing('cachedListing')];
 
       // Make the client throw a SocketException
       mockClient = MockClient((request) async {
@@ -40,9 +38,7 @@ void main() {
     });
 
     test('fetchListings handles bad format (FormatException) and returns cached listings', () async {
-      listings = [
-        mockListing('cachedListing')
-      ];
+      listings = [mockListing('cachedListing')];
 
       // Return an invalid JSON body that will cause json.decode to throw
       mockClient = MockClient((request) async => http.Response('not a json', 200));

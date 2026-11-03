@@ -86,16 +86,18 @@ void main() {
   group('ListingsInfoSheet', () {
     for (final location in ['Mill Road', '']) {
       testWidgets('hides opening times for a brickAndMortar listing ${location.isEmpty ? 'in a group' : 'with a location'}', (WidgetTester tester) async {
-        await tester.pumpWidget(createWidgetUnderTest(
-          scenario: 'permanentShop',
-          location: location,
-          approxDistance: '',
-          detailsVisible: true,
-          listingFavourited: false,
-          listingAlerted: false,
-          onGetDirections: () {},
-          dateTimeProvider: dateTimeProvider,
-        ));
+        await tester.pumpWidget(
+          createWidgetUnderTest(
+            scenario: 'permanentShop',
+            location: location,
+            approxDistance: '',
+            detailsVisible: true,
+            listingFavourited: false,
+            listingAlerted: false,
+            onGetDirections: () {},
+            dateTimeProvider: dateTimeProvider,
+          ),
+        );
 
         expect(find.text('Mill Road Shop'), findsOneWidget);
         expect(find.text('Shopping', findRichText: true), findsOneWidget);
@@ -105,29 +107,32 @@ void main() {
     }
 
     testWidgets('AdaptiveImageText reserves space and caps the image height while loading', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: AdaptiveImageText(
-            imageUrl: 'https://example.com/image.jpg',
-            descriptionWidget: Text('A description'),
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: AdaptiveImageText(
+              imageUrl: 'https://example.com/image.jpg',
+              descriptionWidget: Text('A description'),
+            ),
           ),
         ),
-      ));
+      );
 
       final constrainedBoxes = tester.widgetList<ConstrainedBox>(find.byType(ConstrainedBox));
-      expect(constrainedBoxes.any((box) => box.constraints.maxHeight <= 180), isTrue,
-          reason: 'The image should reserve a maximum-height placeholder while the network image is loading.');
+      expect(constrainedBoxes.any((box) => box.constraints.maxHeight <= 180), isTrue, reason: 'The image should reserve a maximum-height placeholder while the network image is loading.');
     });
 
     testWidgets('AdaptiveImageText keeps the description visible when the image fails to load', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: AdaptiveImageText(
-            imageUrl: 'https://example.com/missing-image.jpg',
-            descriptionWidget: Text('A description'),
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: AdaptiveImageText(
+              imageUrl: 'https://example.com/missing-image.jpg',
+              descriptionWidget: Text('A description'),
+            ),
           ),
         ),
-      ));
+      );
 
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
@@ -136,14 +141,16 @@ void main() {
     });
 
     testWidgets('displays title, categories opening times and buttons', (WidgetTester tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: true,
-        onGetDirections: () {},
-        listingFavourited: false,
-        listingAlerted: false,
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+          detailsVisible: true,
+          onGetDirections: () {},
+          listingFavourited: false,
+          listingAlerted: false,
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
@@ -153,15 +160,17 @@ void main() {
     });
 
     testWidgets('displays title, categories opening times and directions button, but not website button', (WidgetTester tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        website: '',
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: true,
-        onGetDirections: () {},
-        listingFavourited: false,
-        listingAlerted: false,
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          website: '',
+          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+          detailsVisible: true,
+          onGetDirections: () {},
+          listingFavourited: false,
+          listingAlerted: false,
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       expect(find.text('🍩 '), findsOneWidget);
       expect(find.text('Glazed and Confused'), findsOneWidget);
@@ -179,21 +188,23 @@ void main() {
       });
 
       Future<void> pumpListing(WidgetTester tester) async {
-        await tester.pumpWidget(Provider<UrlLauncher>.value(
-          value: fakeUrlLauncher,
-          child: createWidgetUnderTest(
-            approxDistance: convertDistanceUnits(
-              approximateDistanceMetres,
-              DistanceUnits.metric,
+        await tester.pumpWidget(
+          Provider<UrlLauncher>.value(
+            value: fakeUrlLauncher,
+            child: createWidgetUnderTest(
+              approxDistance: convertDistanceUnits(
+                approximateDistanceMetres,
+                DistanceUnits.metric,
+              ),
+              detailsVisible: true,
+              onGetDirections: () {},
+              listingFavourited: false,
+              onDetailsTapped: () {},
+              listingAlerted: false,
+              dateTimeProvider: dateTimeProvider,
             ),
-            detailsVisible: true,
-            onGetDirections: () {},
-            listingFavourited: false,
-            onDetailsTapped: () {},
-            listingAlerted: false,
-            dateTimeProvider: dateTimeProvider,
           ),
-        ));
+        );
       }
 
       Future<void> expectTapLaunches(
@@ -250,17 +261,19 @@ void main() {
     testWidgets('calls onFavouriteTapped when heart button is pressed', (WidgetTester tester) async {
       bool favouriteCalled = false;
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: false,
-        onGetDirections: () {},
-        listingFavourited: false,
-        listingAlerted: false,
-        onFavouriteTapped: () {
-          favouriteCalled = true;
-        },
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+          detailsVisible: false,
+          onGetDirections: () {},
+          listingFavourited: false,
+          listingAlerted: false,
+          onFavouriteTapped: () {
+            favouriteCalled = true;
+          },
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       // Find the heart icon button. It's an IconButton containing a FaIcon.
       final heartButton = find.byType(IconButton).first;
@@ -277,17 +290,19 @@ void main() {
       bool detailsToggled = false;
 
       // Initial state: details NOT visible
-      await tester.pumpWidget(createWidgetUnderTest(
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: false,
-        onGetDirections: () {},
-        listingFavourited: false,
-        listingAlerted: false,
-        onDetailsTapped: () {
-          detailsToggled = true;
-        },
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+          detailsVisible: false,
+          onGetDirections: () {},
+          listingFavourited: false,
+          listingAlerted: false,
+          onDetailsTapped: () {
+            detailsToggled = true;
+          },
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       // Extra info should not be present
       expect(find.text('Nice buns'), findsNothing);
@@ -302,15 +317,17 @@ void main() {
       expect(detailsToggled, true);
 
       // Now pump with detailsVisible = true to simulate the state change
-      await tester.pumpWidget(createWidgetUnderTest(
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: true,
-        onGetDirections: () {},
-        listingFavourited: false,
-        listingAlerted: false,
-        onDetailsTapped: () {},
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+          detailsVisible: true,
+          onGetDirections: () {},
+          listingFavourited: false,
+          listingAlerted: false,
+          onDetailsTapped: () {},
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       // Extra info should now be present
       expect(find.text('Nice buns'), findsOneWidget);
@@ -320,16 +337,18 @@ void main() {
     testWidgets('calls onGetDirections when Get Directions button is pressed', (WidgetTester tester) async {
       bool directionsCalled = false;
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
-        detailsVisible: false,
-        onGetDirections: () {
-          directionsCalled = true;
-        },
-        listingFavourited: false,
-        listingAlerted: false,
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          approxDistance: convertDistanceUnits(approximateDistanceMetres, DistanceUnits.metric),
+          detailsVisible: false,
+          onGetDirections: () {
+            directionsCalled = true;
+          },
+          listingFavourited: false,
+          listingAlerted: false,
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       final getDirectionsButton = find.byIcon(Icons.directions_walk);
       expect(getDirectionsButton, findsOneWidget);
@@ -342,16 +361,18 @@ void main() {
     });
 
     testWidgets('formatted with line-through and red text when endTime has passed', (WidgetTester tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        startTime: '09:00',
-        endTime: '10:00', // Set to a time that has likely passed
-        approxDistance: '100m',
-        detailsVisible: false,
-        onGetDirections: () {},
-        listingFavourited: false,
-        listingAlerted: false,
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          startTime: '09:00',
+          endTime: '10:00', // Set to a time that has likely passed
+          approxDistance: '100m',
+          detailsVisible: false,
+          onGetDirections: () {},
+          listingFavourited: false,
+          listingAlerted: false,
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       final timeTextFinder = find.text('09:00—10:00');
       expect(timeTextFinder, findsOneWidget);
@@ -362,15 +383,17 @@ void main() {
     });
 
     testWidgets('formats cancelled listing with line-through text and a cancelled label', (WidgetTester tester) async {
-      await tester.pumpWidget(createWidgetUnderTest(
-        scenario: 'cancelledDoughnuts',
-        approxDistance: '100m',
-        detailsVisible: true,
-        onGetDirections: () {},
-        listingFavourited: false,
-        listingAlerted: false,
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          scenario: 'cancelledDoughnuts',
+          approxDistance: '100m',
+          detailsVisible: true,
+          onGetDirections: () {},
+          listingFavourited: false,
+          listingAlerted: false,
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       // Title should have line-through
       final emojiFinder = find.text('🍩 ');
@@ -423,35 +446,43 @@ void main() {
       bool favouriteCalled = false;
       bool directionsCalled = false;
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        scenario: 'cancelledDoughnuts',
-        approxDistance: '100m',
-        detailsVisible: false,
-        onGetDirections: () {
-          directionsCalled = true;
-        },
-        listingFavourited: false,
-        listingAlerted: false,
-        onFavouriteTapped: () {
-          favouriteCalled = true;
-        },
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          scenario: 'cancelledDoughnuts',
+          approxDistance: '100m',
+          detailsVisible: false,
+          onGetDirections: () {
+            directionsCalled = true;
+          },
+          listingFavourited: false,
+          listingAlerted: false,
+          onFavouriteTapped: () {
+            favouriteCalled = true;
+          },
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
-      final FaIcon favouriteIcon = tester.widget(find.descendant(
-        of: find.byType(IconButton).first,
-        matching: find.byType(FaIcon),
-      ));
-      final ElevatedButton directionsButton = tester.widget(find.ancestor(
-        of: find.byIcon(Icons.directions_walk),
-        matching: find.byType(ElevatedButton),
-      ));
+      final FaIcon favouriteIcon = tester.widget(
+        find.descendant(
+          of: find.byType(IconButton).first,
+          matching: find.byType(FaIcon),
+        ),
+      );
+      final ElevatedButton directionsButton = tester.widget(
+        find.ancestor(
+          of: find.byIcon(Icons.directions_walk),
+          matching: find.byType(ElevatedButton),
+        ),
+      );
       final Finder shareIcon = Platform.isAndroid ? find.byIcon(Icons.share) : find.byIcon(Icons.ios_share);
-      final ElevatedButton shareButton = tester.widget(find.ancestor(
-        of: shareIcon,
-        matching: find.byType(ElevatedButton),
-      ));
+      final ElevatedButton shareButton = tester.widget(
+        find.ancestor(
+          of: shareIcon,
+          matching: find.byType(ElevatedButton),
+        ),
+      );
 
       expect(favouriteButton.onPressed, isNull);
       expect(favouriteIcon.color, Theme.of(tester.element(find.byType(SpecificListingInfoSheet))).disabledColor);
@@ -469,24 +500,28 @@ void main() {
     testWidgets('allows a cancelled listing to be unfavourited', (WidgetTester tester) async {
       bool favouriteCalled = false;
 
-      await tester.pumpWidget(createWidgetUnderTest(
-        scenario: 'cancelledDoughnuts',
-        approxDistance: '100m',
-        detailsVisible: false,
-        onGetDirections: () {},
-        listingFavourited: true,
-        listingAlerted: false,
-        onFavouriteTapped: () {
-          favouriteCalled = true;
-        },
-        dateTimeProvider: dateTimeProvider,
-      ));
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          scenario: 'cancelledDoughnuts',
+          approxDistance: '100m',
+          detailsVisible: false,
+          onGetDirections: () {},
+          listingFavourited: true,
+          listingAlerted: false,
+          onFavouriteTapped: () {
+            favouriteCalled = true;
+          },
+          dateTimeProvider: dateTimeProvider,
+        ),
+      );
 
       final IconButton favouriteButton = tester.widget(find.byType(IconButton).first);
-      final FaIcon favouriteIcon = tester.widget(find.descendant(
-        of: find.byType(IconButton).first,
-        matching: find.byType(FaIcon),
-      ));
+      final FaIcon favouriteIcon = tester.widget(
+        find.descendant(
+          of: find.byType(IconButton).first,
+          matching: find.byType(FaIcon),
+        ),
+      );
 
       expect(favouriteButton.onPressed, isNotNull);
       expect(favouriteIcon.icon?.codePoint, FontAwesomeIcons.solidHeart.codePoint);

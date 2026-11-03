@@ -32,20 +32,19 @@ class _FakeResponse_0 extends _i1.SmartFake implements _i2.Response {
     Object parent,
     Invocation parentInvocation,
   ) : super(
-          parent,
-          parentInvocation,
-        );
+        parent,
+        parentInvocation,
+      );
 }
 
-class _FakeStreamedResponse_1 extends _i1.SmartFake
-    implements _i2.StreamedResponse {
+class _FakeStreamedResponse_1 extends _i1.SmartFake implements _i2.StreamedResponse {
   _FakeStreamedResponse_1(
     Object parent,
     Invocation parentInvocation,
   ) : super(
-          parent,
-          parentInvocation,
-        );
+        parent,
+        parentInvocation,
+      );
 }
 
 /// A class which mocks [Client].
@@ -62,20 +61,23 @@ class MockClient extends _i1.Mock implements _i2.Client {
     Map<String, String>? headers,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #head,
-          [url],
-          {#headers: headers},
-        ),
-        returnValue: _i3.Future<_i2.Response>.value(_FakeResponse_0(
-          this,
-          Invocation.method(
-            #head,
-            [url],
-            {#headers: headers},
-          ),
-        )),
-      ) as _i3.Future<_i2.Response>);
+            Invocation.method(
+              #head,
+              [url],
+              {#headers: headers},
+            ),
+            returnValue: _i3.Future<_i2.Response>.value(
+              _FakeResponse_0(
+                this,
+                Invocation.method(
+                  #head,
+                  [url],
+                  {#headers: headers},
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<_i2.Response>);
 
   @override
   _i3.Future<_i2.Response> get(
@@ -83,20 +85,23 @@ class MockClient extends _i1.Mock implements _i2.Client {
     Map<String, String>? headers,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #get,
-          [url],
-          {#headers: headers},
-        ),
-        returnValue: _i3.Future<_i2.Response>.value(_FakeResponse_0(
-          this,
-          Invocation.method(
-            #get,
-            [url],
-            {#headers: headers},
-          ),
-        )),
-      ) as _i3.Future<_i2.Response>);
+            Invocation.method(
+              #get,
+              [url],
+              {#headers: headers},
+            ),
+            returnValue: _i3.Future<_i2.Response>.value(
+              _FakeResponse_0(
+                this,
+                Invocation.method(
+                  #get,
+                  [url],
+                  {#headers: headers},
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<_i2.Response>);
 
   @override
   _i3.Future<_i2.Response> post(
@@ -106,28 +111,31 @@ class MockClient extends _i1.Mock implements _i2.Client {
     _i4.Encoding? encoding,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #post,
-          [url],
-          {
-            #headers: headers,
-            #body: body,
-            #encoding: encoding,
-          },
-        ),
-        returnValue: _i3.Future<_i2.Response>.value(_FakeResponse_0(
-          this,
-          Invocation.method(
-            #post,
-            [url],
-            {
-              #headers: headers,
-              #body: body,
-              #encoding: encoding,
-            },
-          ),
-        )),
-      ) as _i3.Future<_i2.Response>);
+            Invocation.method(
+              #post,
+              [url],
+              {
+                #headers: headers,
+                #body: body,
+                #encoding: encoding,
+              },
+            ),
+            returnValue: _i3.Future<_i2.Response>.value(
+              _FakeResponse_0(
+                this,
+                Invocation.method(
+                  #post,
+                  [url],
+                  {
+                    #headers: headers,
+                    #body: body,
+                    #encoding: encoding,
+                  },
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<_i2.Response>);
 
   @override
   _i3.Future<_i2.Response> put(
@@ -137,28 +145,31 @@ class MockClient extends _i1.Mock implements _i2.Client {
     _i4.Encoding? encoding,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #put,
-          [url],
-          {
-            #headers: headers,
-            #body: body,
-            #encoding: encoding,
-          },
-        ),
-        returnValue: _i3.Future<_i2.Response>.value(_FakeResponse_0(
-          this,
-          Invocation.method(
-            #put,
-            [url],
-            {
-              #headers: headers,
-              #body: body,
-              #encoding: encoding,
-            },
-          ),
-        )),
-      ) as _i3.Future<_i2.Response>);
+            Invocation.method(
+              #put,
+              [url],
+              {
+                #headers: headers,
+                #body: body,
+                #encoding: encoding,
+              },
+            ),
+            returnValue: _i3.Future<_i2.Response>.value(
+              _FakeResponse_0(
+                this,
+                Invocation.method(
+                  #put,
+                  [url],
+                  {
+                    #headers: headers,
+                    #body: body,
+                    #encoding: encoding,
+                  },
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<_i2.Response>);
 
   @override
   _i3.Future<_i2.Response> patch(
@@ -168,28 +179,31 @@ class MockClient extends _i1.Mock implements _i2.Client {
     _i4.Encoding? encoding,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #patch,
-          [url],
-          {
-            #headers: headers,
-            #body: body,
-            #encoding: encoding,
-          },
-        ),
-        returnValue: _i3.Future<_i2.Response>.value(_FakeResponse_0(
-          this,
-          Invocation.method(
-            #patch,
-            [url],
-            {
-              #headers: headers,
-              #body: body,
-              #encoding: encoding,
-            },
-          ),
-        )),
-      ) as _i3.Future<_i2.Response>);
+            Invocation.method(
+              #patch,
+              [url],
+              {
+                #headers: headers,
+                #body: body,
+                #encoding: encoding,
+              },
+            ),
+            returnValue: _i3.Future<_i2.Response>.value(
+              _FakeResponse_0(
+                this,
+                Invocation.method(
+                  #patch,
+                  [url],
+                  {
+                    #headers: headers,
+                    #body: body,
+                    #encoding: encoding,
+                  },
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<_i2.Response>);
 
   @override
   _i3.Future<_i2.Response> delete(
@@ -199,28 +213,31 @@ class MockClient extends _i1.Mock implements _i2.Client {
     _i4.Encoding? encoding,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #delete,
-          [url],
-          {
-            #headers: headers,
-            #body: body,
-            #encoding: encoding,
-          },
-        ),
-        returnValue: _i3.Future<_i2.Response>.value(_FakeResponse_0(
-          this,
-          Invocation.method(
-            #delete,
-            [url],
-            {
-              #headers: headers,
-              #body: body,
-              #encoding: encoding,
-            },
-          ),
-        )),
-      ) as _i3.Future<_i2.Response>);
+            Invocation.method(
+              #delete,
+              [url],
+              {
+                #headers: headers,
+                #body: body,
+                #encoding: encoding,
+              },
+            ),
+            returnValue: _i3.Future<_i2.Response>.value(
+              _FakeResponse_0(
+                this,
+                Invocation.method(
+                  #delete,
+                  [url],
+                  {
+                    #headers: headers,
+                    #body: body,
+                    #encoding: encoding,
+                  },
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<_i2.Response>);
 
   @override
   _i3.Future<String> read(
@@ -228,20 +245,23 @@ class MockClient extends _i1.Mock implements _i2.Client {
     Map<String, String>? headers,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #read,
-          [url],
-          {#headers: headers},
-        ),
-        returnValue: _i3.Future<String>.value(_i5.dummyValue<String>(
-          this,
-          Invocation.method(
-            #read,
-            [url],
-            {#headers: headers},
-          ),
-        )),
-      ) as _i3.Future<String>);
+            Invocation.method(
+              #read,
+              [url],
+              {#headers: headers},
+            ),
+            returnValue: _i3.Future<String>.value(
+              _i5.dummyValue<String>(
+                this,
+                Invocation.method(
+                  #read,
+                  [url],
+                  {#headers: headers},
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<String>);
 
   @override
   _i3.Future<_i6.Uint8List> readBytes(
@@ -249,39 +269,42 @@ class MockClient extends _i1.Mock implements _i2.Client {
     Map<String, String>? headers,
   }) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #readBytes,
-          [url],
-          {#headers: headers},
-        ),
-        returnValue: _i3.Future<_i6.Uint8List>.value(_i6.Uint8List(0)),
-      ) as _i3.Future<_i6.Uint8List>);
+            Invocation.method(
+              #readBytes,
+              [url],
+              {#headers: headers},
+            ),
+            returnValue: _i3.Future<_i6.Uint8List>.value(_i6.Uint8List(0)),
+          )
+          as _i3.Future<_i6.Uint8List>);
 
   @override
   _i3.Future<_i2.StreamedResponse> send(_i2.BaseRequest? request) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #send,
-          [request],
-        ),
-        returnValue:
-            _i3.Future<_i2.StreamedResponse>.value(_FakeStreamedResponse_1(
-          this,
-          Invocation.method(
-            #send,
-            [request],
-          ),
-        )),
-      ) as _i3.Future<_i2.StreamedResponse>);
+            Invocation.method(
+              #send,
+              [request],
+            ),
+            returnValue: _i3.Future<_i2.StreamedResponse>.value(
+              _FakeStreamedResponse_1(
+                this,
+                Invocation.method(
+                  #send,
+                  [request],
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<_i2.StreamedResponse>);
 
   @override
   void close() => super.noSuchMethod(
-        Invocation.method(
-          #close,
-          [],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(
+      #close,
+      [],
+    ),
+    returnValueForMissingStub: null,
+  );
 }
 
 /// A class which mocks [SharedPreferences].
@@ -293,59 +316,86 @@ class MockSharedPreferences extends _i1.Mock implements _i7.SharedPreferences {
   }
 
   @override
-  Set<String> getKeys() => (super.noSuchMethod(
-        Invocation.method(
-          #getKeys,
-          [],
-        ),
-        returnValue: <String>{},
-      ) as Set<String>);
+  Set<String> getKeys() =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #getKeys,
+              [],
+            ),
+            returnValue: <String>{},
+          )
+          as Set<String>);
 
   @override
-  Object? get(String? key) => (super.noSuchMethod(Invocation.method(
-        #get,
-        [key],
-      )) as Object?);
+  Object? get(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #get,
+              [key],
+            ),
+          )
+          as Object?);
 
   @override
-  bool? getBool(String? key) => (super.noSuchMethod(Invocation.method(
-        #getBool,
-        [key],
-      )) as bool?);
+  bool? getBool(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #getBool,
+              [key],
+            ),
+          )
+          as bool?);
 
   @override
-  int? getInt(String? key) => (super.noSuchMethod(Invocation.method(
-        #getInt,
-        [key],
-      )) as int?);
+  int? getInt(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #getInt,
+              [key],
+            ),
+          )
+          as int?);
 
   @override
-  double? getDouble(String? key) => (super.noSuchMethod(Invocation.method(
-        #getDouble,
-        [key],
-      )) as double?);
+  double? getDouble(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #getDouble,
+              [key],
+            ),
+          )
+          as double?);
 
   @override
-  String? getString(String? key) => (super.noSuchMethod(Invocation.method(
-        #getString,
-        [key],
-      )) as String?);
+  String? getString(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #getString,
+              [key],
+            ),
+          )
+          as String?);
 
   @override
-  bool containsKey(String? key) => (super.noSuchMethod(
-        Invocation.method(
-          #containsKey,
-          [key],
-        ),
-        returnValue: false,
-      ) as bool);
+  bool containsKey(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #containsKey,
+              [key],
+            ),
+            returnValue: false,
+          )
+          as bool);
 
   @override
   List<String>? getStringList(String? key) =>
-      (super.noSuchMethod(Invocation.method(
-        #getStringList,
-        [key],
-      )) as List<String>?);
+      (super.noSuchMethod(
+            Invocation.method(
+              #getStringList,
+              [key],
+            ),
+          )
+          as List<String>?);
 
   @override
   _i3.Future<bool> setBool(
@@ -353,15 +403,16 @@ class MockSharedPreferences extends _i1.Mock implements _i7.SharedPreferences {
     bool? value,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #setBool,
-          [
-            key,
-            value,
-          ],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+            Invocation.method(
+              #setBool,
+              [
+                key,
+                value,
+              ],
+            ),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
   _i3.Future<bool> setInt(
@@ -369,15 +420,16 @@ class MockSharedPreferences extends _i1.Mock implements _i7.SharedPreferences {
     int? value,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #setInt,
-          [
-            key,
-            value,
-          ],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+            Invocation.method(
+              #setInt,
+              [
+                key,
+                value,
+              ],
+            ),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
   _i3.Future<bool> setDouble(
@@ -385,15 +437,16 @@ class MockSharedPreferences extends _i1.Mock implements _i7.SharedPreferences {
     double? value,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #setDouble,
-          [
-            key,
-            value,
-          ],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+            Invocation.method(
+              #setDouble,
+              [
+                key,
+                value,
+              ],
+            ),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
   _i3.Future<bool> setString(
@@ -401,15 +454,16 @@ class MockSharedPreferences extends _i1.Mock implements _i7.SharedPreferences {
     String? value,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #setString,
-          [
-            key,
-            value,
-          ],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+            Invocation.method(
+              #setString,
+              [
+                key,
+                value,
+              ],
+            ),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
   _i3.Future<bool> setStringList(
@@ -417,50 +471,59 @@ class MockSharedPreferences extends _i1.Mock implements _i7.SharedPreferences {
     List<String>? value,
   ) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #setStringList,
-          [
-            key,
-            value,
-          ],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+            Invocation.method(
+              #setStringList,
+              [
+                key,
+                value,
+              ],
+            ),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
-  _i3.Future<bool> remove(String? key) => (super.noSuchMethod(
-        Invocation.method(
-          #remove,
-          [key],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+  _i3.Future<bool> remove(String? key) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #remove,
+              [key],
+            ),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
-  _i3.Future<bool> commit() => (super.noSuchMethod(
-        Invocation.method(
-          #commit,
-          [],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+  _i3.Future<bool> commit() =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #commit,
+              [],
+            ),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
-  _i3.Future<bool> clear() => (super.noSuchMethod(
-        Invocation.method(
-          #clear,
-          [],
-        ),
-        returnValue: _i3.Future<bool>.value(false),
-      ) as _i3.Future<bool>);
+  _i3.Future<bool> clear() =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #clear,
+              [],
+            ),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 
   @override
-  _i3.Future<void> reload() => (super.noSuchMethod(
-        Invocation.method(
-          #reload,
-          [],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+  _i3.Future<void> reload() =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #reload,
+              [],
+            ),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
 }

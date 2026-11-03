@@ -115,18 +115,22 @@ void main() {
         for (final inset in [0.0, 34.0, 48.0]) {
           tester.view.physicalSize = size;
           tester.view.padding = FakeViewPadding(bottom: inset);
-          await tester.pumpWidget(MaterialApp(
-            home: Builder(builder: (context) => FairScaffold(
-              appBarTitle: 'Fair',
-              currentTab: 3,
-              onTabSelected: (_) {},
-              analyticsService: FakeAnalyticsService(),
-              body: TextButton(
-                onPressed: () => showInfoToast(context, 'Hiding all events and performances that have passed'),
-                child: const Text('Change filter'),
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Builder(
+                builder: (context) => FairScaffold(
+                  appBarTitle: 'Fair',
+                  currentTab: 3,
+                  onTabSelected: (_) {},
+                  analyticsService: FakeAnalyticsService(),
+                  body: TextButton(
+                    onPressed: () => showInfoToast(context, 'Hiding all events and performances that have passed'),
+                    child: const Text('Change filter'),
+                  ),
+                ),
               ),
-            )),
-          ));
+            ),
+          );
           await tester.tap(find.text('Change filter'));
           await tester.pump(const Duration(milliseconds: 400));
           final toast = tester.getRect(find.byKey(const ValueKey('filter-toast')));
@@ -223,10 +227,16 @@ void main() {
       await loadSettings();
       preferredSortingMethod = SortingMethod.location;
       final locations = ['1-2 Mill Road', '92A York Street', 'Donkey Common', '3–4 Gwydir Street', '12a Kingston Street'];
-      final entries = locations.asMap().entries.map((entry) => <String, dynamic>{
-        ...testListing(id: 'numbered-location-${entry.key}', title: 'Venue ${entry.key}'),
-        'location': entry.value,
-      }).toList();
+      final entries = locations
+          .asMap()
+          .entries
+          .map(
+            (entry) => <String, dynamic>{
+              ...testListing(id: 'numbered-location-${entry.key}', title: 'Venue ${entry.key}'),
+              'location': entry.value,
+            },
+          )
+          .toList();
 
       await pumpFilteredListingsPage(tester, 'all', entries, []);
       final state = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;
@@ -400,7 +410,12 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: FilteredListingsPage(
-                filterCategory: 'all', analyticsService: analytics, listings: sampleListings, onTabSelected: (_) {}, onSubfilterChange: (_) {}),
+              filterCategory: 'all',
+              analyticsService: analytics,
+              listings: sampleListings,
+              onTabSelected: (_) {},
+              onSubfilterChange: (_) {},
+            ),
           ),
         ),
       );
