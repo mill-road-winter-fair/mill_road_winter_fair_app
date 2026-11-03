@@ -70,9 +70,8 @@ class ListingUpdateNotifier {
       return Text.rich(TextSpan(children: [
         const TextSpan(text: 'Thank you to everyone who came to the 2026 Fair and made it '
           'such a huge success.\n\n'
-          'We‘ll be back in December 2027 and will be updating the app '
-          'as the Fair approaches.\n\n'
-          'Check back next year for the 2027 listings.\n\n'),
+          'We‘ll be back in December 2027 and will be updating the app and listings '
+          'as the Fair approaches.\n\n'),
         const TextSpan(text: 'In the meantime, we’d be grateful if you could complete our '),
         TextSpan(text: 'feedback survey', style: const TextStyle(decoration: TextDecoration.underline), recognizer: TapGestureRecognizer()
           ..onTap = () {
