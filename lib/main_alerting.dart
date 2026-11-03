@@ -27,28 +27,28 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
     requestAlertPermission: true,
     notificationCategories: [
       const DarwinNotificationCategory('UnderwayCategory', actions: <DarwinNotificationAction>[
-      // DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('5MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-        // DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('15MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snooze5mins', 'Snooze for 5 minutes'),
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-        // DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('30MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snooze10mins', 'Snooze for 10 minutes'),
         DarwinNotificationAction.plain('snooze20mins', 'Snooze for 20 minutes'),
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-        // DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('60MinsCategory', actions: <DarwinNotificationAction>[
         DarwinNotificationAction.plain('snooze15mins', 'Snooze for 15 minutes'),
         DarwinNotificationAction.plain('snooze30mins', 'Snooze for 30 minutes'),
         DarwinNotificationAction.plain('snoozeStart', 'Snooze until start time'),
-        // DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
+//        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
     ]
   );
@@ -146,14 +146,14 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       return;
     }
     final theAlert = AlertSchedule(
-      notificationResponse.id!,
+      notificationResponse.id!, 
       theEventAlert['listingId'],
       theEventAlert['listingTitle'],
       theEventAlert['listingLocation'],
-      startTime,
-      endTime,
-      noticePeriod,
-      true,
+      startTime, 
+      endTime, 
+      noticePeriod, 
+      true, 
       null
     );
     flutterLocalNotificationsPlugin.zonedSchedule(
@@ -178,7 +178,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
   debugPrint('calculateAlertActionCategories with alertNoticePeriod=$theAlertNoticePeriod');
   switch (theAlertNoticePeriod) {
     case 0:
-      return('UnderwayCategory',
+      return('UnderwayCategory', 
       []);
     case <= 10:
       return('5MinsCategory', [
@@ -223,7 +223,7 @@ Future<bool> requestAlertPermissions() async {
       await plugin.requestNotificationsPermission();
       notificationsGranted = await plugin.areNotificationsEnabled() ?? false;
     }
-    computeAlertsPermissionGranted = exactAlarmsGranted && notificationsGranted;
+    computeAlertsPermissionGranted = exactAlarmsGranted && notificationsGranted;    
     debugPrint('requestAlertPermissions Android returning with computeAlertsPermissionGranted=$computeAlertsPermissionGranted');
    } else if (Platform.isIOS) {
     final plugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
@@ -276,8 +276,8 @@ class AlertSchedule {
     this.listingLocation,
     this.listingStartTime,
     this.listingEndTime,
-    this.noticePeriod,
-    this.isScheduled,
+    this.noticePeriod, 
+    this.isScheduled, 
     this.fromHighlight
   );
 
