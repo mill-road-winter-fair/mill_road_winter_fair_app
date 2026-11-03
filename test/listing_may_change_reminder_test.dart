@@ -54,6 +54,57 @@ void main() {
       );
     });
 
+    for (final platform in TargetPlatform.values) {
+      testWidgets('notices scroll with enlarged text on $platform', (tester) async {
+        tester.view.physicalSize = const Size(320, 360);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        onTest = false;
+        addTearDown(() => onTest = true);
+
+        for (final date in [
+          fairDate.subtract(const Duration(days: 1)),
+          fairDate,
+          fairDate.add(const Duration(days: 1)),
+        ]) {
+          SharedPreferences.setMockInitialValues({});
+          listingUpdateNoticeEnabled = true;
+          await tester.pumpWithClock(
+            MaterialApp(
+              theme: ThemeData(platform: platform),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(2)),
+                child: child!,
+              ),
+              home: const Scaffold(body: SizedBox()),
+            ),
+            dateTimeProvider: FixedDateTimeProvider(date),
+          );
+          final showNotice = ListingUpdateNotifier.maybeShowNotice(
+            tester.element(find.byType(Scaffold)),
+            analyticsService: FakeAnalyticsService(),
+          );
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+          expect(find.byType(Scrollbar), platform == TargetPlatform.android ? findsOneWidget : findsNothing);
+          final scrollable = find.descendant(of: find.byType(AlertDialog), matching: find.byType(Scrollable));
+          final position = tester.state<ScrollableState>(scrollable).position;
+          expect(position.maxScrollExtent, greaterThan(0));
+          await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -500));
+          await tester.pumpAndSettle();
+          expect(position.pixels, greaterThan(0));
+          expect(tester.takeException(), isNull);
+
+          await tester.tap(find.text('OK'));
+          await tester.pumpAndSettle();
+          await showNotice;
+          expect(find.byType(AlertDialog), findsNothing);
+        }
+      });
+    }
+
     testWidgets('can permanently dismiss the dialog', (WidgetTester tester) async {
       // Ensure no previous prefs — mock empty
       SharedPreferences.setMockInitialValues({});
