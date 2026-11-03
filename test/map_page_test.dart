@@ -734,6 +734,11 @@ void main() {
       expect(find.text('Doughnuts'), findsOneWidget);
       expect(find.text('11:00—15:00'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
+
+      await tester.flingFrom(tester.getTopLeft(find.byType(BottomSheet)) + const Offset(100, 16), const Offset(0, 350), 1200);
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheet), findsNothing);
+      expect(find.byType(MapPage), findsOneWidget);
     });
 
     testWidgets('Adds markers, opens modal bottom sheet for specific marker, and checks content', (WidgetTester tester) async {
@@ -770,6 +775,11 @@ void main() {
       expect(find.text('Mortimer Road (~135m away)'), findsOneWidget);
       expect(find.text('Telephone: 01223 222222'), findsOneWidget);
       expect(find.byIcon(Icons.directions_walk), findsOneWidget);
+
+      await tester.flingFrom(tester.getTopLeft(find.byType(BottomSheet)) + const Offset(100, 16), const Offset(0, 350), 1200);
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheet), findsNothing);
+      expect(find.byType(MapPage), findsOneWidget);
     });
 
     testWidgets('shows filter menu and interacts with filter options', (WidgetTester tester) async {
@@ -1097,6 +1107,11 @@ void main() {
       expect(mapPageState.markers[const MarkerId('26003')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('26004')]?.visible, false);
       expect(mapPageState.markers[const MarkerId('26005')]?.visible, false);
+
+      await tester.flingFrom(tester.getTopLeft(find.byType(BottomSheet)) + const Offset(100, 16), const Offset(0, 350), 1200);
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheet), findsNothing);
+      expect(mapPageState.filterSettings.values, everyElement(isFalse));
     });
 
     testWidgets('hideAllMarkers clears all markers', (tester) async {
