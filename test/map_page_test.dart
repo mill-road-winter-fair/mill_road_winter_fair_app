@@ -47,6 +47,43 @@ void main() {
   });
 
   group('MapPage', () {
+    for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+      testWidgets('filter menu adapts to available height on $platform', (tester) async {
+        firstExecution = false;
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(400, 900);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetPhysicalSize);
+
+        await tester.pumpWithClock(MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Scaffold(
+            body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+          ),
+        ));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byIcon(Icons.filter_alt));
+        await tester.pumpAndSettle();
+
+        final sheet = find.byType(BottomSheet);
+        final scrollable = find.descendant(of: sheet, matching: find.byType(Scrollable));
+        final position = tester.state<ScrollableState>(scrollable).position;
+        expect(position.maxScrollExtent, 0);
+        expect(find.descendant(of: sheet, matching: find.byType(Scrollbar)),
+            platform == TargetPlatform.android ? findsOneWidget : findsNothing);
+
+        tester.view.physicalSize = const Size(700, 480);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(position.maxScrollExtent, greaterThan(0));
+        await tester.scrollUntilVisible(find.text('Done'), 150, scrollable: scrollable);
+        await tester.tap(find.text('Done'));
+        await tester.pumpAndSettle();
+        expect(sheet, findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
     for (final bottomSafeArea in [0.0, 24.0, 34.0, 48.0]) {
       testWidgets('search map meets the keyboard with a $bottomSafeArea bottom safe area and restores when dismissed', (tester) async {
         tester.view.devicePixelRatio = 1;
