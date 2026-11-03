@@ -1,10 +1,7 @@
+// Dart SDK imports
 import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:introduction_screen/introduction_screen.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -12,8 +9,16 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// Third-party imports
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeScreen extends StatelessWidget {
   final AnalyticsService analyticsService;
@@ -191,21 +196,21 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
 
     final pages = [
       guidePage('Welcome to the official\nMill Road Winter Fair app!', [
-        tip(Icon(Icons.home),
+        tip(const Icon(Icons.home),
             'Using our new homepage, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
-        tip(Icon(Icons.music_note), 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
-        tip(Icon(Icons.map),
+        tip(const Icon(Icons.music_note), 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
+        tip(const Icon(Icons.map),
             'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and Favourites you\'ve saved.'),
-        tip(Icon(Icons.menu),
+        tip(const Icon(Icons.menu),
             'Use the menu in the top left for important information, settings and to share this app. You can read this app guide again there too.'),
       ]),
       guidePage('Explore the map', [
-        tip(Icon(Icons.home), 'Tap the Home button on the map to show the whole Fair.'),
-        tip(Icon(Icons.radar), 'Tap the Nearby button to see your location and nearby pins.'),
-        tip(Icon(Icons.satellite_alt), 'Switch between street and satellite maps as you prefer.'),
-        tip(Icon(Icons.assistant_navigation), 'Set the map to the orientation that works for you.'),
-        tip(Icon(Icons.search), 'Search for attractions on the map, listings and timetable pages.'),
-        tip(Icon(Icons.filter_alt), 'Choose which types of attraction you want to appear on the map.'),
+        tip(const Icon(Icons.home), 'Tap the Home button on the map to show the whole Fair.'),
+        tip(const Icon(Icons.radar), 'Tap the Nearby button to see your location and nearby pins.'),
+        tip(const Icon(Icons.satellite_alt), 'Switch between street and satellite maps as you prefer.'),
+        tip(const Icon(Icons.assistant_navigation), 'Set the map to the orientation that works for you.'),
+        tip(const Icon(Icons.search), 'Search for attractions on the map, listings and timetable pages.'),
+        tip(const Icon(Icons.filter_alt), 'Choose which types of attraction you want to appear on the map.'),
       ]),
       guidePage('What do the map pins mean?', [
         for (final key in subfilterCategoryLabels.keys)
@@ -233,34 +238,34 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         ),
       ]),
       guidePage('Plan your day with the timetable', [
-        tip(Icon(Icons.watch_later), 'See performances and shorter visits and experiences by time and location.'),
-        tip(Icon(Icons.pinch), 'Scroll across locations and up or down through the day. Pinch to adjust the timetable’s scale.'),
-        tip(Icon(Icons.filter_alt), 'Tap the Filter icon to cycle between music, non-music and everything.'),
-        tip(Icon(Icons.schedule), 'On the day, tap the Clock icon to show what’s on now or starting soon.'),
-        tip(Icon(Icons.info), 'Tap any event for more details, to save it as a favourite or to set a reminder.'),
+        tip(const Icon(Icons.watch_later), 'See performances and shorter visits and experiences by time and location.'),
+        tip(const Icon(Icons.pinch), 'Scroll across locations and up or down through the day. Pinch to adjust the timetable’s scale.'),
+        tip(const Icon(Icons.filter_alt), 'Tap the Filter icon to cycle between music, non-music and everything.'),
+        tip(const Icon(Icons.schedule), 'On the day, tap the Clock icon to show what’s on now or starting soon.'),
+        tip(const Icon(Icons.info), 'Tap any event for more details, to save it as a favourite or to set a reminder.'),
       ]),
       guidePage('Find what you want at the Fair', [
-        tip(Icon(Icons.ballot), 'Tap Listings to browse everything at the Fair.'),
-        tip(Icon(Icons.sort), 'Sort by name, location, closeness to you, or (for performances and events) start time.'),
-        tip(Icon(Icons.filter_alt), 'Tap the Filter icon to find just what you\'re looking for.'),
-        tip(Icon(Icons.access_time), 'Performance listings and favourites let you hide finished events or jump to what’s on now.'),
+        tip(const Icon(Icons.ballot), 'Tap Listings to browse everything at the Fair.'),
+        tip(const Icon(Icons.sort), 'Sort by name, location, closeness to you, or (for performances and events) start time.'),
+        tip(const Icon(Icons.filter_alt), 'Tap the Filter icon to find just what you\'re looking for.'),
+        tip(const Icon(Icons.access_time), 'Performance listings and favourites let you hide finished events or jump to what’s on now.'),
       ]),
       guidePage('Visit our exciting attractions', [
-        tip(Icon(Icons.info), 'Tap the Info button to find out more about any listing.'),
-        tip(FaIcon(FontAwesomeIcons.heart), 'Tap a listing’s Heart icon to save it. It will then appear in the Favourites tab.'),
-        tip(FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
-        tip(Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
+        tip(const Icon(Icons.info), 'Tap the Info button to find out more about any listing.'),
+        tip(const FaIcon(FontAwesomeIcons.heart), 'Tap a listing’s Heart icon to save it. It will then appear in the Favourites tab.'),
+        tip(const FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
+        tip(const Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
         tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
       ]),
       guidePage('Make the app your own', [
-        tip(Icon(Icons.palette), 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
-        tip(Icon(Icons.straighten), 'Choose the units used for distances.'),
-        tip(Icon(Icons.privacy_tip), 'You can choose whether to allow anonymous usage analytics.'),
-        tip(Icon(Icons.home), 'You can even disable animations on the home page, and choose your preferred notice period for notifications.'),
+        tip(const Icon(Icons.palette), 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
+        tip(const Icon(Icons.straighten), 'Choose the units used for distances.'),
+        tip(const Icon(Icons.privacy_tip), 'You can choose whether to allow anonymous usage analytics.'),
+        tip(const Icon(Icons.home), 'You can even disable animations on the home page, and choose your preferred notice period for notifications.'),
       ]),
       guidePage('A few final things…', [
-        tip(Icon(Icons.favorite), 'Thank you for visiting Mill Road Winter Fair and using our app.'),
-        tip(Icon(Icons.update), 'Listings may change before the Fair, so check back for the latest details.'),
+        tip(const Icon(Icons.favorite), 'Thank you for visiting Mill Road Winter Fair and using our app.'),
+        tip(const Icon(Icons.update), 'Listings may change before the Fair, so check back for the latest details.'),
         guideRow(
           Icon(Icons.report, size: 40, color: colourScheme.onSecondary),
           Text.rich(
@@ -409,9 +414,9 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             dotsDecorator: DotsDecorator(
               size: Size(12.0 * dotScale, 12.0 * dotScale),
               spacing: EdgeInsets.symmetric(horizontal: dotSpacing),
-              color: Color(0xFFBDBDBD),
+              color: const Color(0xFFBDBDBD),
               activeSize: Size(20.0 * dotScale, 10.0 * dotScale),
-              activeShape: RoundedRectangleBorder(
+              activeShape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
               ),
             ),
