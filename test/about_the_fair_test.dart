@@ -169,7 +169,6 @@ void main() {
         'Anglia Ruskin University': 'https://www.aru.ac.uk/',
         'Hughes Hall': 'https://www.hughes.cam.ac.uk/',
         'Love Mill Road': 'https://www.lovemillroad.org.uk/',
-        'Regal Star Catering': 'https://www.lamaisondusteak.co.uk/',
         'Taank Optometrists': 'https://taank.co.uk/',
       };
 
