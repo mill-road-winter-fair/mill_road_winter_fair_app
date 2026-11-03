@@ -663,8 +663,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         final expandedScrollBounds = ExpandedListingScrollBounds();
         showModalBottomSheet(
           context: context,
-          showDragHandle: false,
-          enableDrag: false,
+          showDragHandle: true,
+          enableDrag: true,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
           isScrollControlled: true,
           useSafeArea: true,
@@ -865,8 +865,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           // Show bottom sheet with listing information
           showModalBottomSheet(
             context: context,
-            showDragHandle: false,
-            enableDrag: false,
+            showDragHandle: true,
+            enableDrag: true,
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
             isScrollControlled: true,
             useSafeArea: true,
@@ -1043,6 +1043,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 0.95,
       context: context,
+      enableDrag: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
       builder: (BuildContext context) {
         return StatefulBuilder(
