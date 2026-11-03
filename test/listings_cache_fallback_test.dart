@@ -48,11 +48,13 @@ void main() {
 
   test('successful API refresh does not report a cache fallback', () async {
     var fallbacks = 0;
-    final client = MockClient((_) async => http.Response(
-          jsonEncode(mockListingsResponse([mockListing('glazedAndConfused')])),
-          200,
-          headers: {'content-type': 'application/json; charset=utf-8'},
-        ));
+    final client = MockClient(
+      (_) async => http.Response(
+        jsonEncode(mockListingsResponse([mockListing('glazedAndConfused')])),
+        200,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      ),
+    );
     addTearDown(client.close);
 
     final result = await fetchListings(client, onCacheFallback: () => fallbacks++);

@@ -59,11 +59,15 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
       bottom: Platform.isAndroid && isNavBarVisible(context),
       child: Scaffold(
         appBar: AppBar(
-          leading: Navigator.canPop(context) ? BackButton(onPressed: () {
-            HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('back');
-            Navigator.maybePop(context);
-          }) : null,
+          leading: Navigator.canPop(context)
+              ? BackButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('back');
+                    Navigator.maybePop(context);
+                  },
+                )
+              : null,
           title: const FittedBox(
             fit: BoxFit.scaleDown,
             child: Text('Analytics Information'),
@@ -246,9 +250,11 @@ class _AnalyticsExplanationPageState extends State<AnalyticsExplanationPage> wit
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
                                 widget.analyticsService.logButtonTapped('app_privacy_policy_link');
-                                context.read<UrlLauncher>().open(Uri.parse(
-                                  'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf',
-                                ));
+                                context.read<UrlLauncher>().open(
+                                  Uri.parse(
+                                    'https://www.millroadwinterfair.org/wp-content/uploads/2026/09/Mill-Road-Winter-Fair-App-Privacy-Policy.pdf',
+                                  ),
+                                );
                               },
                           ),
                           const TextSpan(text: '.'),

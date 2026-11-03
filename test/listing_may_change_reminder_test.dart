@@ -93,7 +93,10 @@ void main() {
       listingUpdateNoticeEnabled = true;
       addTearDown(() => onTest = true);
       final analytics = RecordingNoticeAnalyticsService();
-      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: beforeFairDateTimeProvider);
+      await tester.pumpWithClock(
+        const MaterialApp(home: Scaffold(body: SizedBox())),
+        dateTimeProvider: beforeFairDateTimeProvider,
+      );
 
       await ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),

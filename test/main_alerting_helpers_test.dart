@@ -19,8 +19,7 @@ import 'package:timezone/timezone.dart' as tz;
 // Test helpers, fakes and mocks
 import 'mocks/listings_mocks.dart';
 
-class _FakeAndroidFlutterLocalNotificationsPlugin
-    extends AndroidFlutterLocalNotificationsPlugin {
+class _FakeAndroidFlutterLocalNotificationsPlugin extends AndroidFlutterLocalNotificationsPlugin {
   final List<int> cancelledIds = <int>[];
   final List<Map<String, dynamic>> scheduled = <Map<String, dynamic>>[];
   bool notificationsEnabled = true;
@@ -31,16 +30,14 @@ class _FakeAndroidFlutterLocalNotificationsPlugin
   Future<bool> initialize({
     required AndroidInitializationSettings settings,
     DidReceiveNotificationResponseCallback? onDidReceiveNotificationResponse,
-    DidReceiveBackgroundNotificationResponseCallback?
-        onDidReceiveBackgroundNotificationResponse,
+    DidReceiveBackgroundNotificationResponseCallback? onDidReceiveBackgroundNotificationResponse,
   }) async {
     this.onDidReceiveNotificationResponse = onDidReceiveNotificationResponse;
     return true;
   }
 
   @override
-  Future<NotificationAppLaunchDetails?> getNotificationAppLaunchDetails() async =>
-      const NotificationAppLaunchDetails(false);
+  Future<NotificationAppLaunchDetails?> getNotificationAppLaunchDetails() async => const NotificationAppLaunchDetails(false);
 
   @override
   Future<void> zonedSchedule({
@@ -93,18 +90,15 @@ Future<void> _withAndroidPlatform(Future<void> Function() callback) async {
 void main() {
   setUp(() async {
     tzdata.initializeTimeZones();
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel('PonnamKarthik/fluttertoast'),
       (call) async => true,
     );
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel('flutter.baseflow.com/permissions/methods'),
       (call) async => true,
     );
-    FlutterLocalNotificationsPlatform.instance =
-        _FakeAndroidFlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlatform.instance = _FakeAndroidFlutterLocalNotificationsPlugin();
     SharedPreferences.setMockInitialValues({});
     listings = [
       mockListing('alertDoughnuts'),
@@ -129,8 +123,7 @@ void main() {
       final streamedResponse = notificationStream.stream.first;
 
       await _withAndroidPlatform(initialiseFlutterLocalNotificationsPlugin);
-      (FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin)
-          .onDidReceiveNotificationResponse!(response);
+      (FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).onDidReceiveNotificationResponse!(response);
 
       expect(await streamedResponse, same(response));
     });
@@ -199,32 +192,42 @@ void main() {
         'listingEndTime': validEnd.toIso8601String(),
       });
 
-      notificationTapBackground(NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        id: null,
-        payload: validPayload,
-      ));
-      notificationTapBackground(const NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        id: 1,
-        payload: null,
-      ));
-      notificationTapBackground(const NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        id: 1,
-        payload: '{',
-      ));
-      notificationTapBackground(NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotification,
-        id: 1,
-        payload: invalidStartPayload,
-      ));
-      notificationTapBackground(NotificationResponse(
-        notificationResponseType: NotificationResponseType.selectedNotificationAction,
-        id: 1,
-        actionId: 'unsupported-action',
-        payload: validPayload,
-      ));
+      notificationTapBackground(
+        NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotification,
+          id: null,
+          payload: validPayload,
+        ),
+      );
+      notificationTapBackground(
+        const NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotification,
+          id: 1,
+          payload: null,
+        ),
+      );
+      notificationTapBackground(
+        const NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotification,
+          id: 1,
+          payload: '{',
+        ),
+      );
+      notificationTapBackground(
+        NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotification,
+          id: 1,
+          payload: invalidStartPayload,
+        ),
+      );
+      notificationTapBackground(
+        NotificationResponse(
+          notificationResponseType: NotificationResponseType.selectedNotificationAction,
+          id: 1,
+          actionId: 'unsupported-action',
+          payload: validPayload,
+        ),
+      );
       await Future<void>.delayed(Duration.zero);
 
       expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isEmpty);
@@ -250,12 +253,14 @@ void main() {
         ];
 
         for (var index = 0; index < actionIds.length; index++) {
-          notificationTapBackground(NotificationResponse(
-            notificationResponseType: NotificationResponseType.selectedNotificationAction,
-            id: index + 1,
-            actionId: actionIds[index],
-            payload: payload,
-          ));
+          notificationTapBackground(
+            NotificationResponse(
+              notificationResponseType: NotificationResponseType.selectedNotificationAction,
+              id: index + 1,
+              actionId: actionIds[index],
+              payload: payload,
+            ),
+          );
           await Future<void>.delayed(Duration.zero);
         }
 
@@ -274,12 +279,14 @@ void main() {
           'listingEndTime': 'not-a-date',
         });
 
-        notificationTapBackground(NotificationResponse(
-          notificationResponseType: NotificationResponseType.selectedNotificationAction,
-          id: 1,
-          actionId: 'snooze5mins',
-          payload: payload,
-        ));
+        notificationTapBackground(
+          NotificationResponse(
+            notificationResponseType: NotificationResponseType.selectedNotificationAction,
+            id: 1,
+            actionId: 'snooze5mins',
+            payload: payload,
+          ),
+        );
         await Future<void>.delayed(Duration.zero);
 
         expect((FlutterLocalNotificationsPlatform.instance as _FakeAndroidFlutterLocalNotificationsPlugin).scheduled, isEmpty);

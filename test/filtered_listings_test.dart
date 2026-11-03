@@ -227,10 +227,16 @@ void main() {
       await loadSettings();
       preferredSortingMethod = SortingMethod.location;
       final locations = ['1-2 Mill Road', '92A York Street', 'Donkey Common', '3–4 Gwydir Street', '12a Kingston Street'];
-      final entries = locations.asMap().entries.map((entry) => <String, dynamic>{
-        ...testListing(id: 'numbered-location-${entry.key}', title: 'Venue ${entry.key}'),
-        'location': entry.value,
-      }).toList();
+      final entries = locations
+          .asMap()
+          .entries
+          .map(
+            (entry) => <String, dynamic>{
+              ...testListing(id: 'numbered-location-${entry.key}', title: 'Venue ${entry.key}'),
+              'location': entry.value,
+            },
+          )
+          .toList();
 
       await pumpFilteredListingsPage(tester, 'all', entries, []);
       final state = tester.state(find.byType(FilteredListingsPage)) as FilteredListingsPageState;

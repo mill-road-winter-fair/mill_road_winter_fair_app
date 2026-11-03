@@ -28,7 +28,7 @@ const listingHeaders = <String>[
   'latLng',
   'imageURL',
   'startTime',
-  'endTime'
+  'endTime',
 ];
 
 const _completeListing = <String, dynamic>{
@@ -302,27 +302,21 @@ final List<Map<String, dynamic>> categoryListingsMocks = List.unmodifiable([
 
 // Always return a fresh map: tests routinely change flags, times and IDs.
 Map<String, dynamic> mockListing(String scenario) {
-  final listing = scenario == 'longDescription'
-      ? _longDescriptionListing
-      : _listingScenarios[scenario];
+  final listing = scenario == 'longDescription' ? _longDescriptionListing : _listingScenarios[scenario];
   if (listing == null) throw ArgumentError.value(scenario, 'scenario');
   return Map<String, dynamic>.from(listing);
 }
 
 // Returns the mock category listing matching the given subcategory, replacing its ID with the supplied ID.
 Map<String, dynamic> listingFor(String id, String subcategory) => {
-      ...categoryListingsMocks
-          .singleWhere((listing) => listing[subcategory] == 'TRUE'),
-      'id': id,
-    };
+  ...categoryListingsMocks.singleWhere((listing) => listing[subcategory] == 'TRUE'),
+  'id': id,
+};
 
 // Encode the same fixtures in the spreadsheet API's column order.
-Map<String, dynamic> mockListingsResponse(
-        List<Map<String, dynamic>> listings) =>
-    {
-      'values': <List<dynamic>>[
-        List<dynamic>.from(listingHeaders),
-        for (final listing in listings)
-          [for (final header in listingHeaders) listing[header]],
-      ],
-    };
+Map<String, dynamic> mockListingsResponse(List<Map<String, dynamic>> listings) => {
+  'values': <List<dynamic>>[
+    List<dynamic>.from(listingHeaders),
+    for (final listing in listings) [for (final header in listingHeaders) listing[header]],
+  ],
+};
