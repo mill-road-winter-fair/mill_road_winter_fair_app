@@ -271,7 +271,7 @@ String markerAssetPath(String category) {
 String markerFrameAssetPath(String category) =>
     category == 'Group-PerformanceEvent' || category == 'Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
 
-Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
+Future<BitmapDescriptor> getColoredMarker(String category, Color color, {MapMarkerSize markerSize = MapMarkerSize.medium}) async {
   if (onTest == true) {
     // Return a default marker during unit tests to avoid crashes
     return BitmapDescriptor.defaultMarker;
@@ -320,7 +320,7 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
     final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-    return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: 32.0, width: 32.0);
+    return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: markerSize.dimension, width: markerSize.dimension);
   } catch (e) {
     debugPrint("Custom marker rendering failed: $e");
     return BitmapDescriptor.defaultMarker;

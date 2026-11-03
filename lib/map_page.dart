@@ -127,6 +127,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     themeNotifier.addListener(_onThemeChanged);
+    preferredMapMarkerSize.addListener(_onThemeChanged);
     debugPrint('MapPageState initState() called with destinationId=${widget.destinationId}');
     _ensureDirectionsConfigLoaded();
     _fetchListings = fetchExistingListings(http.Client());
@@ -483,7 +484,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
     // Create all marker bitmaps first, but only if not onTest
     if (onTest == false) {
-      if (bitmapDescriptors.isEmpty || bitmapDescriptorsThemeKey != getEffectiveThemeKey(selectedThemeKey)) {
+      if (bitmapDescriptors.isEmpty || bitmapDescriptorsThemeKey != getEffectiveThemeKey(selectedThemeKey) ||
+          bitmapDescriptorsMarkerSize != preferredMapMarkerSize.value) {
         await createAllMarkerBitmaps();
       }
     }
@@ -570,14 +572,16 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     const listingTypes = ['Food', 'Shopping', 'Charity/Community/Info', 'Music', 'Childrens', 'Dance', 'Other', 'Visit/Experience', 'Service', 'Business', 'Service-FirstAid', 'Service-Information', 'Service-Toilet',
             'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-PerformanceEvent'];
     final themeKey = getEffectiveThemeKey(selectedThemeKey);
+    final markerSize = preferredMapMarkerSize.value;
     final descriptors = <String, BitmapDescriptor>{};
     for (var listingType in listingTypes) {
-      descriptors[listingType] = await getColoredMarker(listingType, getCategoryColor(themeKey, listingType));
+      descriptors[listingType] = await getColoredMarker(listingType, getCategoryColor(themeKey, listingType), markerSize: markerSize);
     }
-    // Publish a complete palette together; a theme may change while images render.
-    if (themeKey != getEffectiveThemeKey(selectedThemeKey)) return createAllMarkerBitmaps();
+    // Publish a complete palette together; preferences may change while images render.
+    if (themeKey != getEffectiveThemeKey(selectedThemeKey) || markerSize != preferredMapMarkerSize.value) return createAllMarkerBitmaps();
     bitmapDescriptors = descriptors;
     bitmapDescriptorsThemeKey = themeKey;
+    bitmapDescriptorsMarkerSize = markerSize;
     return descriptors.isNotEmpty;
   }
 
@@ -1416,6 +1420,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     themeNotifier.removeListener(_onThemeChanged);
+    preferredMapMarkerSize.removeListener(_onThemeChanged);
     _searchAnalyticsTimer?.cancel();
     _searchController.dispose();
     debugPrint('MapPageState dispose() called');
