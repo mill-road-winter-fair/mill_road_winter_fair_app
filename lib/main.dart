@@ -1,56 +1,71 @@
+// Dart SDK imports
 import 'dart:async';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:provider/provider.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
 import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
+import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
-import 'package:mill_road_winter_fair_app/main_alerting.dart';
+
+// Third-party imports
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
-  // Release builds always use the production Firebase project. Debug and
-  // profile builds use the development project.
-  try {
-    await Firebase.initializeApp(
-      options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
-    );
-    debugPrint('main(): Firebase initialized successfully');
-  } on FirebaseException catch (e) {
-    if (e.code == 'duplicate-app') {
-      // Firebase was already initialized (e.g., by native side).
-      debugPrint('main(): Firebase already initialized: ${e.message}');
-    } else {
-      rethrow;
+  if (analyticsEnabledForBuild) {
+    // Release builds use the production Firebase project. Debug and profile
+    // builds with DEV_ANALYTICS=true use the development project.
+    try {
+      await Firebase.initializeApp(
+        options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
+      );
+      debugPrint('main(): Firebase initialized successfully');
+    } on FirebaseException catch (e) {
+      if (e.code == 'duplicate-app') {
+        // Firebase was already initialized (e.g., by native side).
+        debugPrint('main(): Firebase already initialized: ${e.message}');
+      } else {
+        rethrow;
+      }
     }
+  } else {
+    debugPrint('main(): Firebase analytics disabled for this build');
   }
   tz.initializeTimeZones();
   await initialiseFlutterLocalNotificationsPlugin();
   await loadSettings();
   alertsStore.loadEventAlerts();
-  final analyticsService = FirebaseAnalyticsService();
-  await analyticsService.initialize();
+  final AnalyticsService analyticsService;
+  if (analyticsEnabledForBuild) {
+    final firebaseAnalyticsService = FirebaseAnalyticsService();
+    await firebaseAnalyticsService.initialize();
+    analyticsService = firebaseAnalyticsService;
+  } else {
+    analyticsService = DisabledAnalyticsService();
+  }
 
   listings = await loadListingsFromCache();
   final startupCacheFallback = Completer<bool>();
@@ -60,22 +75,18 @@ Future<void> main() async {
   locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
   locationPermission = await Geolocator.checkPermission();
   debugPrint(
-    'Location services enabled: $locationServicesEnabled, permission: $locationPermission',
-  );
+      'Location services enabled: $locationServicesEnabled, permission: $locationPermission');
 
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then(
-    (value) => runApp(
-      MultiProvider(
+ await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
         providers: [
           Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
+          Provider<UrlLauncher>(create: (_) => const SystemUrlLauncher()),
         ],
         child: RootWidget(firstExecution: firstExecution, analyticsService: analyticsService, startupCacheFallback: startupCacheFallback.future),
-      ),
-    ),
-  );
+      )));
 
   // Refresh after rendering so a slow or unavailable network cannot block startup.
   startupCacheFallback.complete(await _refreshListingsAfterStartup());
@@ -172,6 +183,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.resumed) {
+      await alertsStore.removePastEventAlerts();
+      setState(() {});
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     debugPrint('MyApp build() called');
     return ValueListenableBuilder<String>(
@@ -191,7 +210,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         return MaterialApp(
           title: fairName,
           themeMode: resolvedThemeMode,
-          theme: isAuto ? appThemes['light'] : appThemes[selectedThemeKey] ?? baseTheme,
+          theme: isAuto
+              ? appThemes['light']
+              : appThemes[selectedThemeKey] ?? baseTheme,
           darkTheme: isAuto ? appThemes['dark'] : darkTheme,
           home: HomePage(key: homePageKey, analyticsService: widget.analyticsService, startupCacheFallback: widget.startupCacheFallback),
           navigatorObservers: [
@@ -214,11 +235,25 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> with RouteAware {
   int index = 0;
+  bool _listingNoticeRequested = false;
+
+  void _maybeShowListingNotice() {
+    // IndexedStack builds every tab at launch, so wait for a visible listings tab.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _listingNoticeRequested || index < 1 || index > 3) return;
+      _listingNoticeRequested = true;
+      ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
+    });
+  }
   // the following need to be in HomePageState to allow deep linking to configured pages
-  bool timetableOnlyNowOrSoon = false; // toggled on or off to show events now or in next hour
-  bool? timetableFilteredMusicOrNot; // toggled on (just music), off (all but music), null (all)
-  String? listingsSubfilterCategory; // all listings visible (null) or just the one category
-  int? mapNearestMarkerCount; // when opening the map, zoom in to this number nearby
+  bool timetableOnlyNowOrSoon =
+      false; // toggled on or off to show events now or in next hour
+  bool?
+      timetableFilteredMusicOrNot; // toggled on (just music), off (all but music), null (all)
+  String?
+      listingsSubfilterCategory; // all listings visible (null) or just the one category
+  int?
+      mapNearestMarkerCount; // when opening the map, zoom in to this number nearby
 
   static const screenNames = ['ChooserPage', 'MapPage', 'TimetablePage', 'ListingsPage', 'FavouritesPage'];
 
@@ -234,25 +269,23 @@ class HomePageState extends State<HomePage> with RouteAware {
       if (!mounted) return;
       if (usedCache == true) {
         final colours = Theme.of(context).colorScheme;
-        FToast()
-            .init(context)
-            .showToast(
-              gravity: ToastGravity.CENTER,
-              ignorePointer: true,
-              toastDuration: const Duration(seconds: 5),
-              child: Material(
-                color: colours.primary,
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  child: Text(
-                    'Unable to fetch listings. Showing cached listings instead, these may not be up to date.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: colours.onPrimary, fontSize: 16),
-                  ),
-                ),
+        FToast().init(context).showToast(
+          gravity: ToastGravity.CENTER,
+          ignorePointer: true,
+          toastDuration: const Duration(seconds: 5),
+          child: Material(
+            color: colours.primary,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              child: Text(
+                'Unable to fetch listings. Showing cached listings instead, these may not be up to date.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colours.onPrimary, fontSize: 16),
               ),
-            );
+            ),
+          ),
+        );
       }
     });
   }
@@ -280,6 +313,7 @@ class HomePageState extends State<HomePage> with RouteAware {
       index = newIndex;
       _trackScreen();
     });
+    _maybeShowListingNotice();
   }
 
   void listingsUpdated() {
@@ -287,6 +321,7 @@ class HomePageState extends State<HomePage> with RouteAware {
     if (!navigationInProgress) {
       mapPageKey.currentState?.addAllVisibleMarkers();
     }
+    timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
     if (mounted) {
       setState(() {});
     }
@@ -299,6 +334,7 @@ class HomePageState extends State<HomePage> with RouteAware {
       index = 2;
       _trackScreen();
     });
+    _maybeShowListingNotice();
   }
 
   void openListings(String filterCategory, String? subfilterCategory) {
@@ -307,6 +343,7 @@ class HomePageState extends State<HomePage> with RouteAware {
       index = (filterCategory == 'favourite') ? 4 : 3;
       _trackScreen();
     });
+    _maybeShowListingNotice();
   }
 
   void openMap(int? nearestMarkerCount) {
@@ -315,6 +352,7 @@ class HomePageState extends State<HomePage> with RouteAware {
       index = 1;
       _trackScreen();
     });
+    _maybeShowListingNotice();
   }
 
   void cancelMapNearest() {
@@ -326,8 +364,7 @@ class HomePageState extends State<HomePage> with RouteAware {
 
   void timetableFilterChange(bool newOnlyNowOrSoon, newFilteredMusicOrNot) {
     debugPrint(
-      'HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot',
-    );
+        'HomePageState timetableFilterChange called with newOnlyNowOrSoon=$newOnlyNowOrSoon newFilteredMusicOrNot=$newFilteredMusicOrNot');
     setState(() {
       timetableFilteredMusicOrNot = newFilteredMusicOrNot;
       timetableOnlyNowOrSoon = newOnlyNowOrSoon;
@@ -336,8 +373,7 @@ class HomePageState extends State<HomePage> with RouteAware {
 
   void listingsSubfilterChange(String? newSubfilterCategory) {
     debugPrint(
-      'HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory',
-    );
+        'HomePageState listingsSubfilterChange called with newSubfilterCategory=$newSubfilterCategory');
     setState(() {
       listingsSubfilterCategory = newSubfilterCategory;
     });
@@ -350,48 +386,45 @@ class HomePageState extends State<HomePage> with RouteAware {
   Widget build(BuildContext context) {
     final pages = [
       ChooserPage(
-        theEvents: listings,
-        isVisible: index == 0,
-        onTabSelected: setCurrentIndex,
-        onOpenTimetable: openTimetable,
-        onOpenListings: openListings,
-        onOpenMap: openMap,
-        analyticsService: widget.analyticsService,
-      ),
+          theEvents: listings,
+          isVisible: index == 0,
+          onTabSelected: setCurrentIndex,
+          onOpenTimetable: openTimetable,
+          onOpenListings: openListings,
+          onOpenMap: openMap,
+          analyticsService: widget.analyticsService),
       MapPage(
-        listings: listings,
-        key: mapPageKey,
-        nearestMarkerCount: mapNearestMarkerCount,
-        onTabSelected: setCurrentIndex,
-        cancelMapNearest: cancelMapNearest,
-        analyticsService: widget.analyticsService,
-      ),
+          listings: listings,
+          allowListingsMayChangeNotice: false,
+          key: mapPageKey,
+          nearestMarkerCount: mapNearestMarkerCount,
+          onTabSelected: setCurrentIndex,
+          cancelMapNearest: cancelMapNearest,
+          analyticsService: widget.analyticsService),
       TimetablePage(
-        theEvents: listings,
-        onTabSelected: setCurrentIndex,
-        filteredMusicOrNot: timetableFilteredMusicOrNot,
-        onlyNowOrSoon: timetableOnlyNowOrSoon,
-        onFilterChange: timetableFilterChange,
-        analyticsService: widget.analyticsService,
-      ),
+          theEvents: listings,
+          key: timetablePageKey,
+          onTabSelected: setCurrentIndex,
+          filteredMusicOrNot: timetableFilteredMusicOrNot,
+          onlyNowOrSoon: timetableOnlyNowOrSoon,
+          onFilterChange: timetableFilterChange,
+          analyticsService: widget.analyticsService),
       FilteredListingsPage(
-        filterCategory: "all",
-        subfilterCategory: listingsSubfilterCategory,
-        listings: listings,
-        key: _allListingsKey,
-        onTabSelected: setCurrentIndex,
-        onSubfilterChange: listingsSubfilterChange,
-        analyticsService: widget.analyticsService,
-      ),
+          filterCategory: "all",
+          subfilterCategory: listingsSubfilterCategory,
+          listings: listings,
+          key: _allListingsKey,
+          onTabSelected: setCurrentIndex,
+          onSubfilterChange: listingsSubfilterChange,
+          analyticsService: widget.analyticsService),
       FilteredListingsPage(
-        filterCategory: "favourite",
-        subfilterCategory: listingsSubfilterCategory,
-        listings: listings,
-        key: _savedListingsKey,
-        onTabSelected: setCurrentIndex,
-        onSubfilterChange: listingsSubfilterChange,
-        analyticsService: widget.analyticsService,
-      ),
+          filterCategory: "favourite",
+          subfilterCategory: listingsSubfilterCategory,
+          listings: listings,
+          key: _savedListingsKey,
+          onTabSelected: setCurrentIndex,
+          onSubfilterChange: listingsSubfilterChange,
+          analyticsService: widget.analyticsService),
     ];
     return IndexedStack(
       index: index,

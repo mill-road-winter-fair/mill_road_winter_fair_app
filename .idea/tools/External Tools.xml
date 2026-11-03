@@ -1,0 +1,9 @@
+<toolSet name="External Tools">
+  <tool name="Firebase Debug Mode" description="Enable Firebase Analytics DebugView for the development app" showInMainMenu="false" showInEditor="false" showInProject="false" showInSearchPopup="false" disabled="false" useConsole="true" showConsoleOnStdOut="false" showConsoleOnStdErr="true" synchronizeAfterRun="true">
+    <exec>
+      <option name="COMMAND" value="$USER_HOME$/AppData/Local/Android/Sdk/platform-tools/adb.exe" />
+      <option name="PARAMETERS" value="shell setprop debug.firebase.analytics.app com.theberridge.mill_road_winter_fair_app" />
+      <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
+    </exec>
+  </tool>
+</toolSet>

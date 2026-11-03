@@ -1,18 +1,23 @@
+// Dart SDK imports
 import 'dart:async';
 import 'dart:math';
+
+// App imports
+import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
+import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
+
+// Third-party imports
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:mill_road_winter_fair_app/helpers.dart';
-import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
-import 'package:mill_road_winter_fair_app/map_page.dart';
-import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,10 +40,10 @@ class TimetablePage extends StatefulWidget {
     super.key,
   });
   @override
-  State<TimetablePage> createState() => _TimetablePageState();
+  State<TimetablePage> createState() => TimetablePageState();
 }
 
-class _TimetablePageState extends State<TimetablePage> {
+class TimetablePageState extends State<TimetablePage> {
   late DateTimeProvider _dateTimeProvider;
   late ScrollController _horizontalScrollController;
   late ScrollController _verticalScrollController;
@@ -99,14 +104,13 @@ class _TimetablePageState extends State<TimetablePage> {
   // so app knows if the device has been rotated, and can restore any previous scroll/sizing
   void didChangeDependencies() {
     _dateTimeProvider = context.watch<DateTimeProvider>();
-    debugPrint('_TimetablePageState didChangeDependencies called');
+    debugPrint('TimetablePageState didChangeDependencies called');
     final Orientation currentOrientation = MediaQuery.orientationOf(context);
     if (_deviceOrientationSaved != null && currentOrientation != _deviceOrientationSaved) {
       // i.e. device has been rotated (or this is the first check)
       if (_deviceOrientationSaved != null) {
         debugPrint(
-          '_TimetablePageState didChangeDependencies: changed orientation, _deviceOrientation=$_deviceOrientationSaved currentOrientation=$currentOrientation',
-        );
+            'TimetablePageState didChangeDependencies: changed orientation, _deviceOrientation=$_deviceOrientationSaved currentOrientation=$currentOrientation');
       }
       removeMiniPopup();
       safeRemoveRoute(context, listingDetailsDialogRoute);
@@ -121,7 +125,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void loadScales() async {
-    debugPrint('_TimetablePageState loadScales called');
+    debugPrint('TimetablePageState loadScales called');
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     pixelsPerMinuteL = prefs.getDouble('pixelsPerMinuteL') ?? 0;
@@ -130,7 +134,7 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void saveScales() async {
-    debugPrint('_TimetablePageState saveScales called');
+    debugPrint('TimetablePageState saveScales called');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('pixelsPerMinuteP', pixelsPerMinuteP);
     await prefs.setDouble('pixelsPerMinuteL', pixelsPerMinuteL);
@@ -138,7 +142,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
   void calculateInitialScalesIfNeeded() async {
     if (pixelsPerMinuteP == 0 || pixelsPerMinuteL == 0) {
-      debugPrint('_TimetablePageState calculateInitialScalesIfNeeded estimating initial scale');
+      debugPrint('TimetablePageState calculateInitialScalesIfNeeded estimating initial scale');
       pixelsPerMinuteP = max(0.8, min(1.5, 1000 / max(240, spanMinutes)));
       pixelsPerMinuteL = max(0.8, min(1.5, 600 / max(240, spanMinutes)));
       saveScales();
@@ -154,7 +158,7 @@ class _TimetablePageState extends State<TimetablePage> {
       tick();
       _nowLineTimer = Timer.periodic(delay, (_) => tick());
     });
-    debugPrint('_TimetablePageState startClockUpdates started initially $initialDelay then every $delay for function $tick');
+    debugPrint('TimetablePageState startClockUpdates started initially $initialDelay then every $delay for function $tick');
   }
 
   void updateNowLine() {
@@ -162,8 +166,10 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
+    debugPrint('TimetablePageState prepareEvents called for ${theEvents.length} listings');
     Map<String, List<PositionedEvent>> preparedEvents = {};
     for (var ev in theEvents) {
+      if (ev['startTime'] == '' || ev['endTime'] == '') continue; // this can't be a timed event
       final startTime = combineDateAndTime(ev['startTime'], fairDate);
       final endTime = combineDateAndTime(ev['endTime'], fairDate);
       if (((ev['performanceMusic'] != null && ev['performanceMusic'] == 'TRUE') ||
@@ -210,15 +216,9 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(
-    Map<String, List<PositionedEvent>> theEvents,
-    bool onlyNowOrSoon,
-    bool? filteredMusicOrNot,
-    String searchQuery,
-    DateTime now,
-  ) {
+      Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, bool? filteredMusicOrNot, String searchQuery, DateTime now) {
     debugPrint(
-      '_TimetablePageState filterEventsAndComputeDefaults called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery',
-    );
+        'TimetablePageState filterEventsAndComputeDefaults called with onlyNowOrSoon=$onlyNowOrSoon filteredMusicOrNot=$filteredMusicOrNot searchQuery=$searchQuery');
     timelineMinStart = DateTime(9999);
     timelineMaxEnd = DateTime(0);
     Map<String, List<PositionedEvent>> theFilteredEvents = {};
@@ -227,7 +227,9 @@ class _TimetablePageState extends State<TimetablePage> {
       for (int i = 0; i < theEventsAtThisLocation.length; i++) {
         final ev = theEventsAtThisLocation[i];
         if (!ev.cancelled &&
-            (!onlyNowOrSoon || (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) || (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30))) &&
+            (!onlyNowOrSoon ||
+                (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) ||
+                (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30))) &&
             (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery)) &&
             (filteredMusicOrNot == null || (filteredMusicOrNot == true && ev.isMusic) || (filteredMusicOrNot == false && !ev.isMusic))) {
           if (theFilteredEvents.keys.contains(location.key)) {
@@ -266,31 +268,29 @@ class _TimetablePageState extends State<TimetablePage> {
       // the below minimum of 12 does cause overlap of small events when display scaled right down
       // but it's a trade-off between that and overflow exceptions
       final height = max(12.0, ev.endTime.difference(ev.startTime).inMinutes * pxPerMin);
-      out.add(
-        PositionedEvent(
-          startTime: ev.startTime,
-          endTime: ev.endTime,
-          location: ev.location,
-          name: ev.name,
-          subtitle: ev.subtitle,
-          id: ev.id,
-          cancelled: ev.cancelled,
-          emoji: ev.emoji,
-          description: ev.description,
-          latLng: ev.latLng,
-          imageURL: ev.imageURL,
-          brickAndMortar: ev.brickAndMortar,
-          email: ev.email,
-          website: ev.website,
-          phoneNumber: ev.phoneNumber,
-          isMusic: ev.isMusic,
-          lane: lane,
-          top: top + 2,
-          height: height,
-          left: 0, // will be calculated below
-          width: 0, // will be calculated below
-        ),
-      );
+      out.add(PositionedEvent(
+        startTime: ev.startTime,
+        endTime: ev.endTime,
+        location: ev.location,
+        name: ev.name,
+        subtitle: ev.subtitle,
+        id: ev.id,
+        cancelled: ev.cancelled,
+        emoji: ev.emoji,
+        description: ev.description,
+        latLng: ev.latLng,
+        imageURL: ev.imageURL,
+        brickAndMortar: ev.brickAndMortar,
+        email: ev.email,
+        website: ev.website,
+        phoneNumber: ev.phoneNumber,
+        isMusic: ev.isMusic,
+        lane: lane,
+        top: top + 2,
+        height: height,
+        left: 0, // will be calculated below
+        width: 0, // will be calculated below
+      ));
     }
     // After lanes assigned, compute widths: each event width = columnWidth * (1 / lanes)
     final laneCount = max(1, lanesEnds.length);
@@ -310,75 +310,73 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   Widget eventRect(PositionedEvent pe, ColorScheme colorScheme, bool isLandscape, GlobalKey? possibleKey) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const double minTitleFontSize = 10.5;
-        const double minTimeFontSize = 9.5;
-        const double step = 0.5;
+    return LayoutBuilder(builder: (context, constraints) {
+      const double minTitleFontSize = 10.5;
+      const double minTimeFontSize = 9.5;
+      const double step = 0.5;
 
-        // Snap helper (required by AutoSizeText)
-        double snap(double value, double min) {
-          final steps = ((value - min) / step).floor();
-          return min + steps * step;
-        }
+      // Snap helper (required by AutoSizeText)
+      double snap(double value, double min) {
+        final steps = ((value - min) / step).floor();
+        return min + steps * step;
+      }
 
-        final bool includeDate = !pe.brickAndMortar && (pe.height >= 42 && pe.width >= 80);
+      final bool includeDate = !pe.brickAndMortar && (pe.height >= 42 && pe.width >= 80);
 
-        final rawMaxTitleFontSize = min(
-          pe.height * 0.3,
-          pe.width * 0.3,
-        ).clamp(12.0, isLandscape ? 16.5 : 14.5);
-        final maxTitleFontSize = max(minTitleFontSize, snap(rawMaxTitleFontSize, minTitleFontSize));
-        final maxLines = (pe.height / (minTitleFontSize * 1.1)).floor() - (includeDate ? 1 : 0);
+      final rawMaxTitleFontSize = min(
+        pe.height * 0.3,
+        pe.width * 0.3,
+      ).clamp(12.0, isLandscape ? 16.5 : 14.5);
+      final maxTitleFontSize = max(minTitleFontSize, snap(rawMaxTitleFontSize, minTitleFontSize));
+      final maxLines = (pe.height / (minTitleFontSize * 1.1)).floor() - (includeDate ? 1 : 0);
 
-        final rawMaxTimeFontSize = (9.0 + 0.7 * (pe.width / 20)).clamp(8.0, 13.0);
-        final maxTimeFontSize = max(minTimeFontSize, snap(rawMaxTimeFontSize, minTimeFontSize));
+      final rawMaxTimeFontSize = (9.0 + 0.7 * (pe.width / 20)).clamp(8.0, 13.0);
+      final maxTimeFontSize = max(minTimeFontSize, snap(rawMaxTimeFontSize, minTimeFontSize));
 
-        return SizedBox(
-          width: constraints.maxWidth,
-          height: pe.height,
-          child: Column(
-            key: possibleKey,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Flexible(
-                fit: FlexFit.loose,
+      return SizedBox(
+        width: constraints.maxWidth,
+        height: pe.height,
+        child: Column(
+          key: possibleKey,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Flexible(
+              fit: FlexFit.loose,
+              child: AutoSizeText(
+                '${pe.name}\u{00AD}',
+                style: TextStyle(height: 0.95, fontSize: maxTitleFontSize, fontWeight: FontWeight.bold),
+                maxLines: maxLines,
+                minFontSize: minTitleFontSize,
+                maxFontSize: maxTitleFontSize,
+                stepGranularity: step,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis
+              ),
+            ),
+            if (includeDate) SizedBox(height: (pe.height * 0.05).clamp(2, pe.height * 0.25)),
+            if (includeDate)
+              Container(
+                height: 1.1 * maxTimeFontSize,
+                padding: const EdgeInsets.symmetric(horizontal: 1),
                 child: AutoSizeText(
-                  '${pe.name}\u{00AD}',
-                  style: TextStyle(height: 0.95, fontSize: maxTitleFontSize, fontWeight: FontWeight.bold),
-                  maxLines: maxLines,
-                  minFontSize: minTitleFontSize,
-                  maxFontSize: maxTitleFontSize,
+                  formatTimeRange(pe.startTime, pe.endTime),
+                  style: TextStyle(height: 1.1, fontSize: maxTimeFontSize, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant),
+                  maxLines: 1,
+                  minFontSize: minTimeFontSize,
+                  maxFontSize: maxTimeFontSize,
                   stepGranularity: step,
                   textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (includeDate) SizedBox(height: (pe.height * 0.05).clamp(2, pe.height * 0.25)),
-              if (includeDate)
-                Container(
-                  height: 1.1 * maxTimeFontSize,
-                  padding: const EdgeInsets.symmetric(horizontal: 1),
-                  child: AutoSizeText(
-                    formatTimeRange(pe.startTime, pe.endTime),
-                    style: TextStyle(height: 1.1, fontSize: maxTimeFontSize, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant),
-                    maxLines: 1,
-                    minFontSize: minTimeFontSize,
-                    maxFontSize: maxTimeFontSize,
-                    stepGranularity: step,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
+          ],
+        ),
+      );
+    });
   }
 
   void scrollToKey(GlobalKey theKey, double alignment) async {
-    debugPrint('_TimetablePageState scrollToKey called with theKey=$theKey alignment=$alignment');
+    debugPrint('TimetablePageState scrollToKey called with theKey=$theKey alignment=$alignment');
     final keyContext = theKey.currentContext;
     if (keyContext == null) return;
     final renderObject = keyContext.findRenderObject();
@@ -413,30 +411,29 @@ class _TimetablePageState extends State<TimetablePage> {
   }
 
   void _toggleFilteredMusicOrNot() {
-    debugPrint('_TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
+    debugPrint('TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
     bool? newFilteredMusicOrNot;
     String theMsg;
     (theMsg, newFilteredMusicOrNot) = switch (widget.filteredMusicOrNot) {
       null => ('Showing only music performances', true),
       true => ('Showing everything but music performances', false),
-      false => ('Showing all performances', null),
+      false => ('Showing all performances', null)
     };
     if (mounted) setState(() {});
     widget.analyticsService.logPreferenceSet(
-      'timetable_category',
-      newFilteredMusicOrNot == null
-          ? 'all'
-          : newFilteredMusicOrNot
-          ? 'music'
-          : 'other',
-    );
+        'timetable_category',
+        newFilteredMusicOrNot == null
+            ? 'all'
+            : newFilteredMusicOrNot
+                ? 'music'
+                : 'other');
     widget.onFilterChange.call(widget.onlyNowOrSoon, newFilteredMusicOrNot);
     showInfoToast(context, theMsg);
-    debugPrint('_TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
+    debugPrint('TimetablePageState _toggleFilteredMusicOrNot called with widget.filteredMusicOrNot=$widget.filteredMusicOrNot');
   }
 
   Future<void> refreshListings() async {
-    debugPrint('_TimetablePageState refreshListings called');
+    debugPrint('TimetablePageState refreshListings called');
     setState(() {
       loading = true;
     });
@@ -453,7 +450,7 @@ class _TimetablePageState extends State<TimetablePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!scaling) debugPrint('_TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
+    if (!scaling) debugPrint('TimetablePageState build called with loading=$loading filteredMusicOrNot=${widget.filteredMusicOrNot} onlyNowOrSoon=${widget.onlyNowOrSoon}');
     if (listings.isEmpty) {
       return FairScaffold(
         appBarTitle: 'Timetable',
@@ -488,9 +485,12 @@ class _TimetablePageState extends State<TimetablePage> {
       );
     }
 
-    if (thePreparedEvents.isEmpty) thePreparedEvents = prepareEvents(widget.theEvents); // if another page did a refresh
-
     final now = _dateTimeProvider.now();
+
+    if (thePreparedEvents.isEmpty) {
+      thePreparedEvents = prepareEvents(listings); // if another page did a refresh
+      theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
+    }
 
     if (widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
       // refilter to whole day or just now or soon; only do this if changed
@@ -528,10 +528,10 @@ class _TimetablePageState extends State<TimetablePage> {
     final subcategoryIconKey = GlobalKey();
     final searchIconKey = GlobalKey();
 
-    String appBarTitle = switch (widget.filteredMusicOrNot) {
+    String appBarTitle = switch(widget.filteredMusicOrNot) {
       true => 'Timetable (music)',
       false => 'Timetable (non-music)',
-      _ => 'Timetable',
+      _ => 'Timetable'
     };
 
     return FairScaffold(
@@ -543,23 +543,15 @@ class _TimetablePageState extends State<TimetablePage> {
           key: nowOrSoonIconKey,
           tooltip: widget.onlyNowOrSoon ? 'Show the full timetable' : 'Show what is on now or starting soon',
           onLongPress: () => showMiniPopup(
-            context,
-            nowOrSoonIconKey,
-            'Tap to switch between showing everything and showing just what’s on now or starting soon',
-            analyticsService: widget.analyticsService,
-          ),
+              context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon',
+              analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_now_or_soon_toggle');
             (isItEventDay(_dateTimeProvider))
                 ? _toggleOnlyNowOrSoon()
-                : showMiniPopup(
-                    context,
-                    nowOrSoonIconKey,
-                    '‘Now or soon’ is only available when the Fair is underway',
-                    fgColour: colorScheme.error,
-                    analyticsService: widget.analyticsService,
-                  );
+                : showMiniPopup(context, nowOrSoonIconKey, '‘Now or soon’ is only available when the Fair is underway',
+                    fgColour: colorScheme.error, analyticsService: widget.analyticsService);
           },
           style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((widget.onlyNowOrSoon) ? Colors.white.withAlpha(30) : null)),
           icon: Icon(
@@ -584,22 +576,15 @@ class _TimetablePageState extends State<TimetablePage> {
             theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
           },
           style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((widget.filteredMusicOrNot != null) ? Colors.white.withAlpha(30) : null)),
-          icon: Icon(switch (widget.filteredMusicOrNot) {
-            false => Icons.music_off,
-            true => Icons.music_note,
-            null => Icons.filter_alt,
-          }, size: 26),
+          icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
         ),
         IconButton(
           key: searchIconKey,
           tooltip: _isSearching ? 'Close timetable search' : 'Search the timetable',
           color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
           onLongPress: () => showMiniPopup(
-            context,
-            searchIconKey,
-            (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
-            analyticsService: widget.analyticsService,
-          ),
+              context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
+              analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_search_toggle');
@@ -618,11 +603,11 @@ class _TimetablePageState extends State<TimetablePage> {
         ),
       ],
       body: ValueListenableBuilder<Set<String>>(
-        valueListenable: favouriteListingKeys,
-        builder: (context, name, child) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              totalWidth = max(MediaQuery.sizeOf(context).width, theFilteredEvents.length * 100.0 + leftColumnWidth) - 2.0; // empirically the min size to fit whole times
+          valueListenable: favouriteListingKeys,
+          builder: (context, name, child) {
+            return LayoutBuilder(builder: (context, constraints) {
+              totalWidth = max(MediaQuery.sizeOf(context).width, theFilteredEvents.length * 100.0 + leftColumnWidth) -
+                  2.0; // empirically the min size to fit whole times
 
               if (!scaling) {
                 final currentOrientation = MediaQuery.orientationOf(context);
@@ -659,13 +644,8 @@ class _TimetablePageState extends State<TimetablePage> {
               }
 
               // Build time markers (every 30 or 60 minutes depending on span)
-              DateTime t = DateTime(
-                timelineMinStart.year,
-                timelineMinStart.month,
-                timelineMinStart.day,
-                timelineMinStart.hour,
-                (timelineMinStart.minute ~/ markInterval + 1) * markInterval,
-              );
+              DateTime t = DateTime(timelineMinStart.year, timelineMinStart.month, timelineMinStart.day, timelineMinStart.hour,
+                  (timelineMinStart.minute ~/ markInterval + 1) * markInterval);
               while (t.isBefore(timelineMaxEnd.add(Duration(minutes: markInterval)))) {
                 final top = max(0.0, t.difference(timelineMinStart).inMinutes * _dayPixelsPerMinute);
                 final timeLabel = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
@@ -703,326 +683,314 @@ class _TimetablePageState extends State<TimetablePage> {
               final hintTextSnippet = switch (widget.filteredMusicOrNot) {
                 null => 'all',
                 true => 'music',
-                false => 'non-music',
+                false => 'non-music'
               };
-              final theContent = Column(
-                children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: _isSearching
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                key: const ValueKey('searchBar'),
-                                color: colorScheme.surfaceDim,
-                                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
-                                padding: const EdgeInsets.all(8),
-                                child: SearchBar(
-                                  autoFocus: true,
-                                  controller: _searchController,
-                                  elevation: const WidgetStatePropertyAll(0),
-                                  hintText: 'Search $hintTextSnippet events...',
-                                  leading: const Icon(Icons.search),
-                                  trailing: [
-                                    IconButton(
-                                      iconSize: 20,
-                                      tooltip: _searchQuery.isEmpty ? 'Close search' : 'Clear search',
-                                      icon: const Icon(Icons.close),
-                                      onPressed: () {
-                                        HapticFeedback.lightImpact();
-                                        widget.analyticsService.logButtonTapped('timetable_search_close');
-                                        _searchAnalyticsTimer?.cancel();
-                                        setState(() {
-                                          if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
-                                          _searchQuery = '';
-                                          _searchController.clear();
-                                          theFilteredEvents = filterEventsAndComputeDefaults(
-                                            thePreparedEvents,
-                                            widget.onlyNowOrSoon,
-                                            widget.filteredMusicOrNot,
-                                            _searchQuery,
-                                            _dateTimeProvider.now(),
-                                          );
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                  onChanged: (value) {
-                                    _scheduleSearchAnalytics(value);
-                                    setState(() {
-                                      _searchQuery = value.toLowerCase();
-                                      theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                  (theErrorMessage != '')
-                      ? Align(
-                          alignment: Alignment.center,
-                          child: Padding(
-                            padding: const EdgeInsetsGeometry.all(60),
-                            child: Text(theErrorMessage, style: const TextStyle(fontSize: 16), textAlign: TextAlign.center),
-                          ),
-                        )
-                      : NotificationListener<ScrollNotification>(
-                          onNotification: (notification) {
-                            if (notification is ScrollStartNotification || notification is UserScrollNotification) {
-                              removeMiniPopup();
-                            }
-                            return false; // let scrolling continue
-                          },
-                          child: SingleChildScrollView(
-                            controller: _horizontalScrollController,
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.only(right: 2), // stop it crashing into edge
-                            child: Container(
-                              color: colorScheme.onPrimary,
-                              width: totalWidth,
-                              child: Column(
-                                children: [
-                                  // Fixed header row
-                                  Container(
-                                    color: colorScheme.surfaceContainerLowest,
-                                    height: 34,
-                                    child: Row(
-                                      spacing: 4,
-                                      children: [
-                                        Container(width: leftColumnWidth - 2),
-                                        for (final location in positioned.entries)
-                                          Builder(
-                                            builder: (itemContext) {
-                                              return Semantics(
-                                                button: true,
-                                                label: '${location.key}. Show full location name',
-                                                excludeSemantics: true,
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    HapticFeedback.lightImpact();
-                                                    widget.analyticsService.logButtonTapped('timetable_location');
-                                                    showMiniPopup(itemContext, null, location.key, analyticsService: widget.analyticsService);
-                                                  },
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      color: colorScheme.onSurfaceVariant,
-                                                      border: Border.all(width: 0.1),
-                                                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
-                                                    ),
-                                                    width: (totalWidth - leftColumnWidth) / cols - 4,
-                                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                                    alignment: AlignmentGeometry.center,
-                                                    child: AutoSizeText(
-                                                      location.key,
-                                                      softWrap: true,
-                                                      maxLines: 2,
-                                                      textAlign: TextAlign.center,
-                                                      style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.secondary),
-                                                      minFontSize: 11,
-                                                      maxFontSize: 15,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                      ],
-                                    ),
+              final theContent = Column(children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _isSearching
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              key: const ValueKey('searchBar'),
+                              color: colorScheme.surfaceDim,
+                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width, maxHeight: 52),
+                              padding: const EdgeInsets.all(8),
+                              child: SearchBar(
+                                autoFocus: true,
+                                controller: _searchController,
+                                elevation: const WidgetStatePropertyAll(0),
+                                hintText: 'Search $hintTextSnippet events...',
+                                leading: const Icon(Icons.search),
+                                trailing: [
+                                  IconButton(
+                                    iconSize: 20,
+                                    tooltip: _searchQuery.isEmpty ? 'Close search' : 'Clear search',
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () {
+                                      HapticFeedback.lightImpact();
+                                      widget.analyticsService.logButtonTapped('timetable_search_close');
+                                      _searchAnalyticsTimer?.cancel();
+                                      setState(() {
+                                        if (_searchQuery.isEmpty) _isSearching = false; // first click clears field; second closes search
+                                        _searchQuery = '';
+                                        _searchController.clear();
+                                        theFilteredEvents = filterEventsAndComputeDefaults(
+                                            thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
+                                      });
+                                    },
                                   ),
-                                  // Scrollable timeline content
-                                  SizedBox(
-                                    height: contentHeight,
-                                    child: GestureDetector(
-                                      onScaleStart: (details) {
-                                        if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
-                                        scaling = true;
-                                        startPixelsPerMinute = _dayPixelsPerMinute;
-                                      },
-                                      onScaleUpdate: (details) {
-                                        if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
-                                        final dampenedScale = 1 + (details.scale - 1) * 0.5;
-                                        final newdayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
-                                        if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
-                                          setState(() {
-                                            _dayPixelsPerMinute = max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
-                                          });
-                                        }
-                                      },
-                                      onScaleEnd: (_) async {
-                                        if (scaling) {
-                                          scaling = false;
-                                          if (!widget.onlyNowOrSoon) {
-                                            // don't save special 'now' scale
-                                            if (MediaQuery.orientationOf(context) == Orientation.landscape) {
-                                              if (_dayPixelsPerMinute != pixelsPerMinuteL) {
-                                                // only saved if genuinely changed
-                                                widget.analyticsService.logPreferenceSet('timetable_scale_landscape', _dayPixelsPerMinute.toStringAsFixed(2));
-                                                pixelsPerMinuteL = _dayPixelsPerMinute;
-                                                saveScales();
-                                              }
-                                            } else {
-                                              if (_dayPixelsPerMinute != pixelsPerMinuteP) {
-                                                // only saved if genuinely changed
-                                                widget.analyticsService.logPreferenceSet('timetable_scale_portrait', _dayPixelsPerMinute.toStringAsFixed(2));
-                                                pixelsPerMinuteP = _dayPixelsPerMinute;
-                                                saveScales();
-                                              }
+                                ],
+                                onChanged: (value) {
+                                  _scheduleSearchAnalytics(value);
+                                  setState(() {
+                                    _searchQuery = value.toLowerCase();
+                                    theFilteredEvents =
+                                        filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, _dateTimeProvider.now());
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                (theErrorMessage != '')
+                    ? Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                            padding: const EdgeInsetsGeometry.all(60),
+                            child: Text(theErrorMessage, style: const TextStyle(fontSize: 16), textAlign: TextAlign.center)))
+                    : NotificationListener<ScrollNotification>(
+                        onNotification: (notification) {
+                          if (notification is ScrollStartNotification || notification is UserScrollNotification) {
+                            removeMiniPopup();
+                          }
+                          return false; // let scrolling continue
+                        },
+                        child: SingleChildScrollView(
+                          controller: _horizontalScrollController,
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.only(right: 2), // stop it crashing into edge
+                          child: Container(
+                            color: colorScheme.onPrimary,
+                            width: totalWidth,
+                            child: Column(
+                              children: [
+                                // Fixed header row
+                                Container(
+                                  color: colorScheme.surfaceContainerLowest,
+                                  height: 34,
+                                  child: Row(
+                                    spacing: 4,
+                                    children: [
+                                      Container(width: leftColumnWidth - 2),
+                                      for (final location in positioned.entries)
+                                        Builder(builder: (itemContext) {
+                                          return Semantics(
+                                            button: true,
+                                            label: '${location.key}. Show full location name',
+                                            excludeSemantics: true,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                HapticFeedback.lightImpact();
+                                                widget.analyticsService.logButtonTapped('timetable_location');
+                                                showMiniPopup(itemContext, null, location.key, analyticsService: widget.analyticsService);
+                                              },
+                                              child: Container(
+                                              decoration: BoxDecoration(
+                                                color: colorScheme.onSurfaceVariant,
+                                                border: Border.all(width: 0.1),
+                                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
+                                              ),
+                                              width: (totalWidth - leftColumnWidth) / cols - 4,
+                                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                              alignment: AlignmentGeometry.center,
+                                              child: AutoSizeText(
+                                                location.key,
+                                                softWrap: true,
+                                                maxLines: 2,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.secondary),
+                                                minFontSize: 11,
+                                                maxFontSize: 15,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                    ],
+                                  ),
+                                ),
+                                // Scrollable timeline content
+                                SizedBox(
+                                  height: contentHeight,
+                                  child: GestureDetector(
+                                    onScaleStart: (details) {
+                                      if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
+                                      scaling = true;
+                                      startPixelsPerMinute = _dayPixelsPerMinute;
+                                    },
+                                    onScaleUpdate: (details) {
+                                      if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
+                                      final dampenedScale = 1 + (details.scale - 1) * 0.5;
+                                      final newdayPixelsPerMinute =
+                                          max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                      if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
+                                        setState(() {
+                                          _dayPixelsPerMinute =
+                                              max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                        });
+                                      }
+                                    },
+                                    onScaleEnd: (_) async {
+                                      if (scaling) {
+                                        scaling = false;
+                                        if (!widget.onlyNowOrSoon) {
+                                          // don't save special 'now' scale
+                                          if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+                                            if (_dayPixelsPerMinute != pixelsPerMinuteL) {
+                                              // only saved if genuinely changed
+                                              widget.analyticsService.logPreferenceSet('timetable_scale_landscape', _dayPixelsPerMinute.toStringAsFixed(2));
+                                              pixelsPerMinuteL = _dayPixelsPerMinute;
+                                              saveScales();
+                                            }
+                                          } else {
+                                            if (_dayPixelsPerMinute != pixelsPerMinuteP) {
+                                              // only saved if genuinely changed
+                                              widget.analyticsService.logPreferenceSet('timetable_scale_portrait', _dayPixelsPerMinute.toStringAsFixed(2));
+                                              pixelsPerMinuteP = _dayPixelsPerMinute;
+                                              saveScales();
                                             }
                                           }
-                                          setState(() {});
                                         }
-                                      },
-                                      child: SingleChildScrollView(
-                                        controller: _verticalScrollController,
-                                        physics: const ClampingScrollPhysics(),
-                                        scrollDirection: Axis.vertical,
-                                        key: const PageStorageKey('verticalList'),
-                                        child: SizedBox(
-                                          width: totalWidth,
-                                          height: timelineHeight,
-                                          child: Stack(
-                                            children: [
-                                              // time markers lines and labels and swim lanes
-                                              ...swimlanes,
-                                              // theme appropriate 'now' line
-                                              if (timelineMinStart.isBefore(now) && timelineMaxEnd.isAfter(now))
-                                                Positioned(
-                                                  key: nowLineKey,
-                                                  top: nowTop,
-                                                  left: 0,
-                                                  right: 0,
-                                                  child: Container(height: 3, color: Theme.of(context).colorScheme.primary),
-                                                ),
-                                              ...markers,
-                                              // Event stacks per column
+                                        setState(() {});
+                                      }
+                                    },
+                                    child: SingleChildScrollView(
+                                      controller: _verticalScrollController,
+                                      physics: const ClampingScrollPhysics(),
+                                      scrollDirection: Axis.vertical,
+                                      key: const PageStorageKey('verticalList'),
+                                      child: SizedBox(
+                                        width: totalWidth,
+                                        height: timelineHeight,
+                                        child: Stack(
+                                          children: [
+                                            // time markers lines and labels and swim lanes
+                                            ...swimlanes,
+                                            // theme appropriate 'now' line
+                                            if (timelineMinStart.isBefore(now) && timelineMaxEnd.isAfter(now))
                                               Positioned(
-                                                top: 0,
-                                                left: leftColumnWidth,
+                                                key: nowLineKey,
+                                                top: nowTop,
+                                                left: 0,
                                                 right: 0,
-                                                child: SizedBox(
-                                                  height: timelineHeight,
-                                                  child: Row(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      for (final location in positioned.entries)
-                                                        SizedBox(
-                                                          width: (totalWidth - leftColumnWidth) / cols,
-                                                          height: timelineHeight,
-                                                          child: Stack(
-                                                            children: [
-                                                              // For each event in this location, place positioned containers
-                                                              for (var pe in location.value) ...[
-                                                                (scaling)
-                                                                    ? Positioned(
-                                                                        top: pe.top,
-                                                                        left: pe.left,
-                                                                        width: pe.width,
-                                                                        height: pe.height,
+                                                child: Container(height: 3, color: Theme.of(context).colorScheme.primary),
+                                              ),
+                                            ...markers,
+                                            // Event stacks per column
+                                            Positioned(
+                                              top: 0,
+                                              left: leftColumnWidth,
+                                              right: 0,
+                                              child: SizedBox(
+                                                height: timelineHeight,
+                                                child: Row(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    for (final location in positioned.entries)
+                                                      SizedBox(
+                                                        width: (totalWidth - leftColumnWidth) / cols,
+                                                        height: timelineHeight,
+                                                        child: Stack(
+                                                          children: [
+                                                            // For each event in this location, place positioned containers
+                                                            for (var pe in location.value) ...[
+                                                              (scaling)
+                                                                  ? Positioned(
+                                                                      top: pe.top,
+                                                                      left: pe.left,
+                                                                      width: pe.width,
+                                                                      height: pe.height,
+                                                                      child: Container(
+                                                                        decoration: BoxDecoration(
+                                                                          color: colorScheme.secondary,
+                                                                          borderRadius: BorderRadius.circular(4),
+                                                                          boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: const Offset(2, 2), blurRadius: 3)],
+                                                                          border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
+                                                                        ),
+                                                                      ))
+                                                                  : Positioned(
+                                                                      top: pe.top,
+                                                                      left: pe.left,
+                                                                      width: pe.width,
+                                                                      height: pe.height,
+                                                                      child: Semantics(
+                                                                        button: true,
+                                                                        label:
+                                                                            '${pe.name}, ${pe.location}, ${pe.cancelled ? 'cancelled, ' : ''}${TimeOfDay.fromDateTime(pe.startTime).format(context)} to ${TimeOfDay.fromDateTime(pe.endTime).format(context)}. Show details',
+                                                                        excludeSemantics: true,
+                                                                        child: GestureDetector(
+                                                                        onTap: () {
+                                                                          HapticFeedback.lightImpact();
+                                                                          widget.analyticsService.logButtonTapped('timetable_listing');
+                                                                          showListingDetailsDialog(
+                                                                            context,
+                                                                            pe,
+                                                                            setState,
+                                                                            () async {
+                                                                              HapticFeedback.lightImpact();
+                                                                              await toggleListingAlert(pe.id, alertNoticePeriod, context);
+                                                                              setState(() { });
+                                                                            },
+                                                                            () async {
+                                                                              await Navigator.push(
+                                                                                context,
+                                                                                MaterialPageRoute(
+                                                                                  builder: (context) => MapPage(
+                                                                                    listings: listings,
+                                                                                    onTabSelected: (_) => {},
+                                                                                    destinationId: pe.id,
+                                                                                    destinationLatLng: pe.latLng,
+                                                                                    analyticsService: widget.analyticsService,
+                                                                                  )
+                                                                                )
+                                                                              );
+                                                                              if (mounted) widget.analyticsService.setCurrentScreen('TimetablePage');
+                                                                            },
+                                                                            analyticsService: widget.analyticsService,
+                                                                          );
+                                                                        },
                                                                         child: Container(
+                                                                          padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 1),
                                                                           decoration: BoxDecoration(
-                                                                            color: colorScheme.secondary,
+                                                                            color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
                                                                             borderRadius: BorderRadius.circular(4),
                                                                             boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: const Offset(2, 2), blurRadius: 3)],
-                                                                            border: Border.all(width: 0.2, color: colorScheme.surfaceContainerHighest),
+                                                                            border: Border.all(width: 0.2, color: colorScheme.onSecondary),
                                                                           ),
+                                                                          child: eventRect(pe, colorScheme, isLandscape, null),
                                                                         ),
-                                                                      )
-                                                                    : Positioned(
-                                                                        top: pe.top,
-                                                                        left: pe.left,
-                                                                        width: pe.width,
-                                                                        height: pe.height,
-                                                                        child: Semantics(
-                                                                          button: true,
-                                                                          label:
-                                                                              '${pe.name}, ${pe.location}, ${pe.cancelled ? 'cancelled, ' : ''}${TimeOfDay.fromDateTime(pe.startTime).format(context)} to ${TimeOfDay.fromDateTime(pe.endTime).format(context)}. Show details',
-                                                                          excludeSemantics: true,
-                                                                          child: GestureDetector(
-                                                                            onTap: () {
-                                                                              HapticFeedback.lightImpact();
-                                                                              widget.analyticsService.logButtonTapped('timetable_listing');
-                                                                              showListingDetailsDialog(
-                                                                                context,
-                                                                                pe,
-                                                                                setState,
-                                                                                () async {
-                                                                                  HapticFeedback.lightImpact();
-                                                                                  await toggleListingAlert(pe.id, alertNoticePeriod, context);
-                                                                                  setState(() {});
-                                                                                },
-                                                                                () async {
-                                                                                  await Navigator.push(
-                                                                                    context,
-                                                                                    MaterialPageRoute(
-                                                                                      builder: (context) => MapPage(
-                                                                                        listings: listings,
-                                                                                        onTabSelected: (_) => {},
-                                                                                        destinationId: pe.id,
-                                                                                        destinationLatLng: pe.latLng,
-                                                                                        analyticsService: widget.analyticsService,
-                                                                                      ),
-                                                                                    ),
-                                                                                  );
-                                                                                  if (mounted) widget.analyticsService.setCurrentScreen('TimetablePage');
-                                                                                },
-                                                                                analyticsService: widget.analyticsService,
-                                                                              );
-                                                                            },
-                                                                            child: Container(
-                                                                              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 1),
-                                                                              decoration: BoxDecoration(
-                                                                                color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
-                                                                                borderRadius: BorderRadius.circular(4),
-                                                                                boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: const Offset(2, 2), blurRadius: 3)],
-                                                                                border: Border.all(width: 0.2, color: colorScheme.onSecondary),
-                                                                              ),
-                                                                              child: eventRect(pe, colorScheme, isLandscape, null),
-                                                                            ),
-                                                                          ),
                                                                         ),
                                                                       ),
-                                                                if (!scaling && favouriteListingKeys.value.contains(pe.id))
-                                                                  Positioned(
-                                                                    top: pe.top + 1,
-                                                                    left: pe.left + pe.width - 15,
-                                                                    child: Icon(Icons.favorite, size: 14, color: Colors.red.withAlpha(120)),
-                                                                  ),
-                                                                if (!scaling && alertsStore.alertExists(pe.id))
-                                                                  Positioned(
-                                                                    top: pe.top + pe.height - 14,
-                                                                    left: pe.left + pe.width - 15,
-                                                                    child: FaIcon(FontAwesomeIcons.solidBell, size: 14, color: colorScheme.primary.withAlpha(140)),
-                                                                  ),
-                                                              ],
+                                                                    ),
+                                                              if (!scaling && favouriteListingKeys.value.contains(pe.id)) Positioned(
+                                                                top: pe.top + 1,
+                                                                left: pe.left + pe.width - 15,
+                                                                child: Icon(Icons.favorite, size: 14, color: Colors.red.withAlpha(120)),
+                                                                ),
+                                                              if (!scaling && alertsStore.alertExists(pe.id))
+                                                                Positioned(
+                                                                  top: pe.top + pe.height - 14,
+                                                                  left: pe.left + pe.width - 15,
+                                                                  child: FaIcon(FontAwesomeIcons.solidBell, size: 14, color: colorScheme.primary.withAlpha(140)),
+                                                              ),
                                                             ],
-                                                          ),
+                                                          ],
                                                         ),
-                                                    ],
-                                                  ),
+                                                      ),
+                                                  ],
                                                 ),
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                ],
-              );
+                      ),
+              ]);
               return theContent;
-            },
-          );
-        },
-      ),
+            });
+          }),
       analyticsService: widget.analyticsService,
     );
   }

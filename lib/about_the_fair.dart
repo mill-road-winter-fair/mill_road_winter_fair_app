@@ -1,14 +1,20 @@
+// Dart SDK imports
 import 'dart:io';
 import 'dart:math';
+
+// App imports
+import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
+
+// Third-party imports
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
-import 'package:mill_road_winter_fair_app/map_page.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:provider/provider.dart';
 
 class TextImageRow extends StatelessWidget {
   final TextSpan textSpan;
@@ -162,7 +168,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
     }
     HapticFeedback.lightImpact();
     widget.analyticsService.logButtonTapped('sponsor_${name.replaceAll(' ', '_')}_hyperlink');
-    launchUrl(Uri.parse(url));
+    context.read<UrlLauncher>().open(Uri.parse(url));
   }
 
   @override

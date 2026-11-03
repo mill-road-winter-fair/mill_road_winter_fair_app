@@ -1,9 +1,12 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
+
+// Third-party imports
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RecordingFirebaseAnalytics extends Fake implements FirebaseAnalytics {
@@ -94,6 +97,17 @@ void main() {
     expect((await SharedPreferences.getInstance()).getBool('usageAnalyticsEnabled'), isNull);
     expect(sdk.calls, ['collection:false', 'consent:false', 'collection:false']);
     expect(sdk.events, isEmpty);
+  });
+
+  test('build-disabled analytics cannot overwrite saved consent', () async {
+    usageAnalyticsEnabled = true;
+    final disabledService = DisabledAnalyticsService();
+
+    await disabledService.setAnalyticsEnabled(false);
+    await disabledService.setAnalyticsEnabled(true);
+
+    expect(usageAnalyticsEnabled, isTrue);
+    expect((await SharedPreferences.getInstance()).getBool('usageAnalyticsEnabled'), isNull);
   });
 
   test('saved opt-in restores properties without fabricating changes or an Unknown screen', () async {

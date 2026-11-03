@@ -1,9 +1,14 @@
+// Dart SDK imports
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+
+// App imports
+import 'package:mill_road_winter_fair_app/app_config.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 // SharedPreferences key for storing cached listings as JSON
@@ -51,10 +56,8 @@ Future<List<Map<String, dynamic>>> fetchListings(
 }) async {
   debugPrint('fetchListings called');
   try {
-    // Load environment variables
-    await dotenv.load(fileName: ".env");
-    String herokuApi = dotenv.env['HEROKU_API'] ?? '';
-    String herokuApiKey = dotenv.env['HEROKU_API_KEY'] ?? '';
+    String herokuApi = AppConfig.herokuApi;
+    String herokuApiKey = AppConfig.herokuApiKey;
     final uri = Uri.parse(herokuApi);
 
     final response = await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
@@ -64,7 +67,7 @@ Future<List<Map<String, dynamic>>> fetchListings(
     if (response.statusCode != 200) {
       for (var i = 0; i < 9; i++) {
         await Future.delayed(const Duration(seconds: 2));
-        final retryResponse = await client.get(uri);
+        final retryResponse = await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
         debugPrint(
           'Retry ${i + 1} response status: ${retryResponse.statusCode}',
         );

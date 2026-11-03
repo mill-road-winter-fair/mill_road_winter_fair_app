@@ -1,16 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
+import 'package:mill_road_winter_fair_app/timetable_page.dart';
+
+// Third-party imports
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Consolidated global variables used across the app.
 // Move only top-level variables here so other files can import a single source.
 
 // GlobalKeys for accessing state of various pages from other parts of the app:
-final GlobalKey<HomePageState> homePageKey = GlobalKey<HomePageState>();
-final GlobalKey<MapPageState> mapPageKey = GlobalKey<MapPageState>();
+final homePageKey = GlobalKey<HomePageState>();
+final mapPageKey = GlobalKey<MapPageState>();
+final timetablePageKey = GlobalKey<TimetablePageState>();
 
 // Flag set by tests (when true the app reduces/delays animation and timers).
 bool onTest = false;
@@ -24,7 +29,7 @@ bool navigationInProgress = false;
 // Identifier for a simple (non-group) marker.
 const String aSimpleMarkerId = 'SIMPLE';
 
-// API keys and headers for Google Maps Directions. Populated once at runtime from dotenv.
+// API keys and headers for Google Maps Directions. Populated once from AppConfig compile-time declarations.
 String googleMapsDirectionsApiKey = "";
 Map<String, String>? googleMapsDirectionsHeaders;
 

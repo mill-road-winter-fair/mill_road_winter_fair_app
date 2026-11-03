@@ -17,11 +17,15 @@ migrate_working_dir/
 *.ipr
 *.iws
 .idea/
+!.idea/
+.idea/*
+!.idea/tools/
+.idea/tools/*
+!.idea/tools/External Tools.xml
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# Local IDE launch settings may contain machine paths or credentials.
+.vscode/launch.json
+.run/
 
 # Flutter/Dart/Pub related
 **/doc/api/
