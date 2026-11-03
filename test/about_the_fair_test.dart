@@ -62,7 +62,7 @@ void main() {
           child: MaterialApp(
             home: AboutTheFairPage(analyticsService: FakeAnalyticsService()),
             navigatorObservers: [
-              if (navigatorObserver != null) navigatorObserver,
+              ?navigatorObserver,
             ],
           ),
         ),
