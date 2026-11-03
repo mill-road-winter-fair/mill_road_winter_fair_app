@@ -36,6 +36,12 @@ Future<void> loadSettings() async {
     // Load preferred map type from shared preferences
     preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
 
+    final savedMarkerSize = prefs.getString('preferredMapMarkerSize');
+    preferredMapMarkerSize.value = MapMarkerSize.values.firstWhere(
+      (size) => size.name == savedMarkerSize,
+      orElse: () => MapMarkerSize.medium,
+    );
+
     // Set default road closure polygon as visible
     preferredRoadClosurePolygonVisible = prefs.getBool('preferredRoadClosurePolygonVisible') ?? true;
 
@@ -89,6 +95,7 @@ Future<void> loadSettings() async {
     int savedMapStyleTypeIndex = 0;
     preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
     preferredRoadClosurePolygonVisible = true;
+    preferredMapMarkerSize.value = MapMarkerSize.medium;
     listingUpdateNoticeEnabled = true;
 
     selectedThemeKey = 'light';
@@ -151,6 +158,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
+    await prefs.setString('preferredMapMarkerSize', preferredMapMarkerSize.value.name);
     if (usageAnalyticsEnabled != null) {
       await prefs.setBool('usageAnalyticsEnabled', usageAnalyticsEnabled!);
     }
@@ -353,6 +361,38 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             widget.analyticsService.logDistanceUnitPreferenceSet(value.name);
                             setState(() {
                               preferredDistanceUnits = value;
+                            });
+                            _saveSettings();
+                          },
+                        ),
+                      ]),
+                      const TableRow(children: [
+                        SizedBox(height: 12),
+                        SizedBox(height: 12),
+                      ]),
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Map markers:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<MapMarkerSize>(
+                          inputDecorationTheme: dropdownDecoration,
+                          initialSelection: preferredMapMarkerSize.value,
+                          expandedInsets: EdgeInsets.zero,
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                          dropdownMenuEntries: MapMarkerSize.values.map((size) {
+                            return DropdownMenuEntry<MapMarkerSize>(
+                              value: size,
+                              label: size.label,
+                              labelWidget: Text(size.label, style: settingTitleStyle),
+                            );
+                          }).toList(),
+                          onSelected: (value) {
+                            if (value == null) return;
+                            HapticFeedback.selectionClick();
+                            widget.analyticsService.logButtonTapped('map_marker_size_preference_option');
+                            setState(() {
+                              preferredMapMarkerSize.value = value;
                             });
                             _saveSettings();
                           },
