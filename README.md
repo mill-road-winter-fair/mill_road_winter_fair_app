@@ -166,7 +166,7 @@ keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -vali
 
 8. Run the following command in the terminal:
 ```shell
-flutter build appbundle --release --dart-define-from-file=.env --dart-define=HEROKU_NOTIFICATIONS_API=https://mrwf.theberridge.com/notifications
+flutter build appbundle --release --dart-define-from-file=.env --dart-define=HEROKU_API=https://mrwf.theberridge.com/listings --dart-define=HEROKU_NOTIFICATIONS_API=https://mrwf.theberridge.com/notifications
 ```
 
 9. Upload the following file to the Google Play Console as a new release: `/build/app/outputs/bundle/release/app-release.aab`
@@ -178,21 +178,25 @@ flutter build appbundle --release --dart-define-from-file=.env --dart-define=HER
 1-5. Same steps as (and aligned with) Android 
     NB the build number has to have increased from the last one uploaded to Apple. 
 
-6. Run
-    flutter build ios --config-only --release --dart-define-from-file=.env
-    
-7. To get screen shots without 'DEBUG' (which Apple will reject) add this line to main.dart within MaterialApp() debugShowCheckedModeBanner:false
-   Get screen shots at the largest iPhone and iPad sizes (latest 6.9" Pro Max and 13" Pro), then remove the above.
+6. Ensure `ios/Runner/GoogleService-Info.plist` is the configuration downloaded from the production Firebase project (mrwf-app-analytics-prod) for the iOS app with bundle ID `org.millroadwinterfair.MRWFapp`, before building or archiving.
+
+7. Run the following command in the terminal:
+```shell
+flutter build ios --config-only --release --dart-define-from-file=.env --dart-define=HEROKU_API=https://mrwf.theberridge.com/listings --dart-define=HEROKU_NOTIFICATIONS_API=https://mrwf.theberridge.com/notifications
+```
+
+8. To get screenshots without 'DEBUG' (which Apple will reject) add this line to `main.dart` within `MaterialApp()`: `debugShowCheckedModeBanner:false`
+   Get screenshots at the largest iPhone and iPad sizes (latest 6.9" Pro Max and 13" Pro), then remove the above.
    
-8. In Xcode, go to Product -> Archive, and you will eventually see a new build in the Organiser window
+9. In Xcode, go to **Product** -> **Archive**, and you will eventually see a new build in the Organiser window.
 
-9. Click Distribute App, choose App Store Connect then click Distribute
+10. Click Distribute App, choose **App Store Connect** then click **Distribute**.
 
-10. In App Store Connect on the web, go to the app, then Distribution and click the + under iOS app
+11. In App Store Connect on the web, go to the app, then **Distribution** and click the **+** under iOS app.
 
-11. Fill in the version, add the screen shots, what's new etc., add the build, Save, then hit Add for Review, and wait for up to 48 hours
+12. Fill in the version, add the screenshots, what's new etc., add the build, Save, then hit **Add for Review**, and wait for up to 48 hours.
 
-12. Back in Xcode organiser, right-click on the new build, click Show in Finder, and upload this file to the Github release
+13. Back in Xcode organiser, right-click on the new build, click **Show in Finder**, and upload this file to the GitHub release
 
 
 ## Other Links

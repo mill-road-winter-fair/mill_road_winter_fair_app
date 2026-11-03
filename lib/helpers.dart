@@ -1,19 +1,11 @@
+// Dart SDK imports
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
-import 'package:collection/collection.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:intl/intl.dart' as intl;
-import 'package:timezone/timezone.dart' as tz;
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
@@ -21,13 +13,26 @@ import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart'
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
+import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
-import 'package:mill_road_winter_fair_app/main_alerting.dart';
-import 'package:permission_handler/permission_handler.dart';
+
+// Third-party imports
+import 'package:collection/collection.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 OverlayEntry? _miniPopupOverlayEntry; // widget that floats over a given widget as a 'tooltip'
 Timer? _miniPopupTimer; // times how long the above stays on screen
@@ -92,11 +97,11 @@ class FairScaffold extends StatelessWidget {
             ),
             centerTitle: false,
             actions: appBarActions.map((a) => SizedBox(width: 42, child: a)).toList(),
-            actionsPadding: EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
+            actionsPadding: const EdgeInsets.only(right: 2), // to stop highlight hitting screen edge
           ),
           body: body,
           drawer: fairDrawer(context, analyticsService: analyticsService),
-          floatingActionButtonLocation: CenterDockedWithOffset(dyOffset: homeButtonOffset),
+          floatingActionButtonLocation: const CenterDockedWithOffset(dyOffset: homeButtonOffset),
           floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
           resizeToAvoidBottomInset: false,
           floatingActionButton: (allowBack ?? false) ? null : SizedBox(
@@ -111,7 +116,7 @@ class FairScaffold extends StatelessWidget {
                 elevation: 4,
                 backgroundColor: colorScheme.primary,
                 foregroundColor: colorScheme.onPrimary,
-                shape: CircleBorder(),
+                shape: const CircleBorder(),
                 onPressed: () {
                   HapticFeedback.selectionClick();
                   analyticsService.logButtonTapped('navigation_home');
@@ -124,7 +129,7 @@ class FairScaffold extends StatelessWidget {
           bottomNavigationBar: (allowBack ?? false) ? null : BottomAppBar(
             key: const ValueKey('navigation-bar-surface'),
             height: navigationBarHeight,
-            padding: EdgeInsets.only(right: 6), // to stop Favourites hitting edge
+            padding: const EdgeInsets.only(right: 6), // to stop Favourites hitting edge
             elevation: 0,
             color: colorScheme.primary,
             surfaceTintColor: Colors.transparent,
@@ -188,7 +193,7 @@ BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSe
     iconSize: 30,
     selectedItemColor: colorscheme.onPrimary,
     unselectedItemColor: colorscheme.surfaceDim,
-    selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+    selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
     onTap: (selectedIndex) {
       HapticFeedback.selectionClick();
       analyticsService.logButtonTapped('navigation_${const ['map', 'timetable', 'home', 'listings', 'favourites'][selectedIndex]}');
@@ -479,53 +484,69 @@ void displayAppShareDialog(BuildContext itemContext, {required AnalyticsService 
   final colorScheme = Theme.of(itemContext).colorScheme;
 
   await showDialog(
-      context: itemContext,
-      builder: (dialogContext) {
-        return Dialog(
-          insetPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
-          shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
-          backgroundColor: colorScheme.surfaceContainerLowest,
-          shadowColor: colorScheme.surfaceDim,
-          elevation: 3,
-          child: IntrinsicHeight(
+    context: itemContext,
+    builder: (dialogContext) {
+      return Dialog(
+        insetPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 24), // margin from screen edges
+        shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
+        backgroundColor: colorScheme.surfaceContainerLowest,
+        shadowColor: colorScheme.surfaceDim,
+        elevation: 3,
+        child: Scrollbar(
+          thumbVisibility: Platform.isIOS ? false : true,
+          child: SingleChildScrollView(
+            primary: true,
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
               ),
               padding: const EdgeInsets.all(16),
-              child: Column(mainAxisSize: MainAxisSize.min, spacing: 8, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
-                Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
-                Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
-                Align(
-                    alignment: AlignmentGeometry.center,
-                    child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png',
-                        width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  TextButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      analyticsService.logButtonTapped('share_app_share');
-                      Navigator.of(dialogContext).pop();
-                      shareApp(itemContext,
-                          'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
-                    },
-                    child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold), 'Share this app'),
+                  const Text(style: TextStyle(fontSize: 14.0), 'This QR code links to a web page allowing someone to install the iOS or Android version of this app.'),
+                  const Text(style: TextStyle(fontSize: 14.0), 'Or tap ‘Share via message’ to send this link on to them via your choice of messaging app.'),
+                  Align(
+                      alignment: AlignmentGeometry.center,
+                      child: Image.asset('assets/www.millroadwinterfair.org_mrwf-app.QR.png', width: 150, height: 150, semanticLabel: 'QR code to install the Mill Road Winter Fair app')),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('share_app_share');
+                            Navigator.of(dialogContext).pop();
+                            shareApp(itemContext, 'I’m sharing the Mill Road Winter Fair app with you. Get it here for iOS and Android https://www.millroadwinterfair.org/mrwf-app/');
+                          },
+                          child: Text('Share via message', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            analyticsService.logButtonTapped('share_app_close');
+                            Navigator.of(dialogContext).pop();
+                          },
+                          child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
+                        ),
+                      ],
+                    ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      HapticFeedback.lightImpact();
-                      analyticsService.logButtonTapped('share_app_close');
-                      Navigator.of(dialogContext).pop();
-                    },
-                    child: Text('Close', style: TextStyle(color: Theme.of(itemContext).colorScheme.tertiary)),
-                  ),
-                ]),
-              ]),
+                ],
+              ),
             ),
           ),
-        );
-      });
+        ),
+      );
+    },
+  );
 }
 
 class CenterDockedWithOffset extends FloatingActionButtonLocation {
@@ -884,7 +905,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
             decoration: BoxDecoration(
               color: bgColour,
               borderRadius: BorderRadius.circular(4),
-              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: Offset(0, 2))],
+              boxShadow: [BoxShadow(color: bgColour!, blurRadius: 6, offset: const Offset(0, 2))],
             ),
             child: Text(theMessage, softWrap: true, style: theStyle),
           ),
@@ -1215,7 +1236,7 @@ Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, Build
 Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme) async {
   return showDialog<void>(context: context, builder: (BuildContext context) {
     return Dialog(
-      insetPadding: EdgeInsets.all(8), // margin from screen edges
+      insetPadding: const EdgeInsets.all(8), // margin from screen edges
       shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
       backgroundColor: colorScheme.surfaceContainerLowest,
       shadowColor: colorScheme.surfaceDim,
@@ -1227,9 +1248,9 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
         ),
         padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
         child: Column(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
-          ListTile(
+          const ListTile(
             visualDensity: VisualDensity(horizontal: -2, vertical: 2),
-            leading: const Icon(Icons.error, size: 36, color: Colors.red),
+            leading: Icon(Icons.error, size: 36, color: Colors.red),
             title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
@@ -1238,7 +1259,7 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 HapticFeedback.lightImpact();
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel')
+              child: const Text('Cancel')
             ),
             TextButton(
               onPressed: () async {
@@ -1246,9 +1267,9 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 Navigator.of(context).pop();
                 await openAppSettings();
               },
-              child: Text('Open Settings')
+              child: const Text('Open Settings')
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
           ]),
         ]),
       ),

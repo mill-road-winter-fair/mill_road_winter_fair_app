@@ -1,12 +1,7 @@
+// Dart SDK imports
 import 'dart:async';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
-import 'package:timezone/data/latest_all.dart' as tz;
+
+// App imports
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/app_config.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
@@ -18,14 +13,25 @@ import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/in_app_notifications.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
+import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
+
+// Third-party imports
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 Future<void> main() async {
   debugPrint('App starting: main() called');
@@ -252,6 +258,16 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> with RouteAware {
   int index = 0;
+  bool _listingNoticeRequested = false;
+
+  void _maybeShowListingNotice() {
+    // IndexedStack builds every tab at launch, so wait for a visible listings tab.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _listingNoticeRequested || index < 1 || index > 3) return;
+      _listingNoticeRequested = true;
+      ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
+    });
+  }
   // the following need to be in HomePageState to allow deep linking to configured pages
   bool timetableOnlyNowOrSoon =
       false; // toggled on or off to show events now or in next hour
@@ -320,6 +336,7 @@ class HomePageState extends State<HomePage> with RouteAware {
       index = newIndex;
       _trackScreen();
     });
+    _maybeShowListingNotice();
   }
 
   void listingsUpdated() {
@@ -340,6 +357,7 @@ class HomePageState extends State<HomePage> with RouteAware {
       index = 2;
       _trackScreen();
     });
+    _maybeShowListingNotice();
   }
 
   void openListings(String filterCategory, String? subfilterCategory) {
@@ -348,6 +366,7 @@ class HomePageState extends State<HomePage> with RouteAware {
       index = (filterCategory == 'favourite') ? 4 : 3;
       _trackScreen();
     });
+    _maybeShowListingNotice();
   }
 
   void openMap(int? nearestMarkerCount) {
@@ -356,6 +375,7 @@ class HomePageState extends State<HomePage> with RouteAware {
       index = 1;
       _trackScreen();
     });
+    _maybeShowListingNotice();
   }
 
   void cancelMapNearest() {
@@ -398,6 +418,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           analyticsService: widget.analyticsService),
       MapPage(
           listings: listings,
+          allowListingsMayChangeNotice: false,
           key: mapPageKey,
           nearestMarkerCount: mapNearestMarkerCount,
           onTabSelected: setCurrentIndex,

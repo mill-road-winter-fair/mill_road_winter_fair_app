@@ -1,12 +1,17 @@
+// Dart SDK imports
 import 'dart:io';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+// App imports
 import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
 import 'package:mill_road_winter_fair_app/android_nav_bar_detector.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
+
+// Third-party imports
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> loadSettings() async {
@@ -30,6 +35,12 @@ Future<void> loadSettings() async {
     int savedMapStyleTypeIndex = prefs.getInt('preferredMapStyleType') ?? 0;
     // Load preferred map type from shared preferences
     preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
+
+    final savedMarkerSize = prefs.getString('preferredMapMarkerSize');
+    preferredMapMarkerSize.value = MapMarkerSize.values.firstWhere(
+      (size) => size.name == savedMarkerSize,
+      orElse: () => MapMarkerSize.medium,
+    );
 
     // Set default road closure polygon as visible
     preferredRoadClosurePolygonVisible = prefs.getBool('preferredRoadClosurePolygonVisible') ?? true;
@@ -84,6 +95,7 @@ Future<void> loadSettings() async {
     int savedMapStyleTypeIndex = 0;
     preferredMapStyleType = MapStyleType.values[savedMapStyleTypeIndex];
     preferredRoadClosurePolygonVisible = true;
+    preferredMapMarkerSize.value = MapMarkerSize.medium;
     listingUpdateNoticeEnabled = true;
 
     selectedThemeKey = 'light';
@@ -146,6 +158,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('preferredDistanceUnits', preferredDistanceUnits.index);
+    await prefs.setString('preferredMapMarkerSize', preferredMapMarkerSize.value.name);
     if (usageAnalyticsEnabled != null) {
       await prefs.setBool('usageAnalyticsEnabled', usageAnalyticsEnabled!);
     }
@@ -173,8 +186,8 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final settingLabelStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-    final settingTitleStyle = TextStyle(fontSize: 15);
+    final settingLabelStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+    final settingTitleStyle = const TextStyle(fontSize: 15);
     const dropdownDecoration = InputDecorationTheme(
       enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 0.5)),
       isDense: true,
@@ -252,7 +265,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           hintText: 'Select a visual theme',
                           alignmentOffset: const Offset(-15, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: themeOptions.map((opt) {
                             return DropdownMenuEntry<String>(
                               value: opt.value,
@@ -294,7 +307,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           hintText: 'Select notice period for alerts',
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: alertNoticePeriods.map((opt) {
                             final theLabel = (opt == 0) ? 'At time of event' : '$opt minutes before';
                             return DropdownMenuEntry<int>(
@@ -328,7 +341,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           hintText: 'Select units for map distances',
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: unitsOptions.map((opt) {
                             return DropdownMenuEntry<DistanceUnits>(
                               value: opt.value,
@@ -360,6 +373,38 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                       TableRow(children: [
                         Padding(
                           padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Map markers:', style: settingLabelStyle),
+                        ),
+                        DropdownMenu<MapMarkerSize>(
+                          inputDecorationTheme: dropdownDecoration,
+                          initialSelection: preferredMapMarkerSize.value,
+                          expandedInsets: EdgeInsets.zero,
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                          dropdownMenuEntries: MapMarkerSize.values.map((size) {
+                            return DropdownMenuEntry<MapMarkerSize>(
+                              value: size,
+                              label: size.label,
+                              labelWidget: Text(size.label, style: settingTitleStyle),
+                            );
+                          }).toList(),
+                          onSelected: (value) {
+                            if (value == null) return;
+                            HapticFeedback.selectionClick();
+                            widget.analyticsService.logButtonTapped('map_marker_size_preference_option');
+                            setState(() {
+                              preferredMapMarkerSize.value = value;
+                            });
+                            _saveSettings();
+                          },
+                        ),
+                      ]),
+                      const TableRow(children: [
+                        SizedBox(height: 12),
+                        SizedBox(height: 12),
+                      ]),
+                      TableRow(children: [
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
                           child: Text('Home page:', style: settingLabelStyle),
                         ),
                         DropdownMenu<bool>(
@@ -368,7 +413,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           hintText: 'Select style of home page',
                           alignmentOffset: const Offset(0, -60),
                           expandedInsets: EdgeInsets.zero,
-                          trailingIcon: Icon(Icons.arrow_drop_down, size: 30),
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
                           dropdownMenuEntries: homePageOptions.map((opt) {
                             return DropdownMenuEntry<bool>(
                               value: opt.value,
@@ -399,7 +444,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           analyticsEnabledForBuild
                               ? 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'
                               : 'Analytics is disabled for this development run.',

@@ -40,7 +40,7 @@ class _FakeAndroidFlutterLocalNotificationsPlugin
 
   @override
   Future<NotificationAppLaunchDetails?> getNotificationAppLaunchDetails() async =>
-      NotificationAppLaunchDetails(false);
+      const NotificationAppLaunchDetails(false);
 
   @override
   Future<void> zonedSchedule({
@@ -122,7 +122,7 @@ void main() {
     });
 
     test('initialiseFlutterLocalNotificationsPlugin forwards notification responses to the stream', () async {
-      final response = NotificationResponse(
+      final response = const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 42,
       );
@@ -204,12 +204,12 @@ void main() {
         id: null,
         payload: validPayload,
       ));
-      notificationTapBackground(NotificationResponse(
+      notificationTapBackground(const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 1,
         payload: null,
       ));
-      notificationTapBackground(NotificationResponse(
+      notificationTapBackground(const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 1,
         payload: '{',

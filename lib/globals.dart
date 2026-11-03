@@ -1,10 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+// App imports
 import 'package:mill_road_winter_fair_app/main.dart';
 import 'package:mill_road_winter_fair_app/main_alerting.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
+
+// Third-party imports
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Consolidated global variables used across the app.
 // Move only top-level variables here so other files can import a single source.
@@ -45,6 +48,18 @@ enum MapStyleType { normal, hybrid }
 
 // The user's preferred map style type.
 late MapStyleType preferredMapStyleType;
+
+enum MapMarkerSize {
+  small('Small', 24.0),
+  medium('Medium', 32.0),
+  large('Large', 40.0);
+
+  const MapMarkerSize(this.label, this.dimension);
+  final String label;
+  final double dimension;
+}
+
+final preferredMapMarkerSize = ValueNotifier(MapMarkerSize.medium);
 
 // Define available sorting methods
 enum SortingMethod { alphabetical, nearest, startTime, location }
@@ -250,6 +265,7 @@ final List<LatLng> roadClosurePolygonPoints = [
 const centreOfFair = LatLng(52.199174, 0.140929);
 const mapInitialZoom = 14.1;
 String? bitmapDescriptorsThemeKey;
+MapMarkerSize? bitmapDescriptorsMarkerSize;
 Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // single cache of custom BitmapDescriptors to use as map markers
 
 // Listings subfilter keywords to labels and icons
