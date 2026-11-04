@@ -49,6 +49,18 @@ enum MapStyleType { normal, hybrid }
 // The user's preferred map style type.
 late MapStyleType preferredMapStyleType;
 
+enum MapMarkerSize {
+  small('Small', 24.0),
+  medium('Medium', 32.0),
+  large('Large', 40.0);
+
+  const MapMarkerSize(this.label, this.dimension);
+  final String label;
+  final double dimension;
+}
+
+final preferredMapMarkerSize = ValueNotifier(MapMarkerSize.medium);
+
 // Define available sorting methods
 enum SortingMethod { alphabetical, nearest, startTime, location }
 
@@ -253,6 +265,7 @@ final List<LatLng> roadClosurePolygonPoints = [
 const centreOfFair = LatLng(52.200266493002076, 0.14340665191411972); // 2026 data
 const mapInitialZoom = 14.497509956359863; // 2026 data, small screen
 String? bitmapDescriptorsThemeKey;
+MapMarkerSize? bitmapDescriptorsMarkerSize;
 Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // single cache of custom BitmapDescriptors to use as map markers
 
 // Listings subfilter keywords to labels and icons
