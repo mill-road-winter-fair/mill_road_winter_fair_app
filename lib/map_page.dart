@@ -1491,6 +1491,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         if (mounted) Navigator.pop(context);
         return;
       }
+      await getCurrentPosition();
     }
 
     // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
