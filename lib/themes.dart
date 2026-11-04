@@ -49,9 +49,9 @@ final Map<String, ThemeData> appThemes = {
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
-      surfaceDim: Colors.grey[300]!,
+      surfaceDim: Colors.grey[300],
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(25, 41, 103, 1),
@@ -59,7 +59,7 @@ final Map<String, ThemeData> appThemes = {
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       selectedItemColor: const Color.fromRGBO(228, 199, 143, 1),
-      unselectedItemColor: Colors.grey[300]!,
+      unselectedItemColor: Colors.grey[300],
     ),
     listTileTheme: const ListTileThemeData(
       textColor: Colors.black,
@@ -78,13 +78,13 @@ final Map<String, ThemeData> appThemes = {
       onSecondary: Colors.white,
       onSecondaryFixed: const Color.fromRGBO(35, 35, 10, 1), // favourites background
       tertiary: const Color.fromRGBO(228, 199, 143, 1.0),
-      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements // purple 137, 74, 151
+      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements
       error: Colors.orange,
       onError: Colors.black,
       surface: const Color.fromRGBO(44, 44, 44, 1.0),
-      surfaceDim: Colors.grey[400]!,
+      surfaceDim: Colors.grey[400],
       onSurface: Colors.white,
-      onSurfaceVariant: Colors.grey[300]!,
+      onSurfaceVariant: Colors.grey[300],
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(25, 41, 103, 1.0),
@@ -118,9 +118,9 @@ final Map<String, ThemeData> appThemes = {
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
-      surfaceDim: Colors.grey[300]!,
+      surfaceDim: Colors.grey[300],
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(166, 34, 43, 1),
@@ -152,7 +152,7 @@ final Map<String, ThemeData> appThemes = {
       surface: Colors.white,
       surfaceDim: Colors.grey,
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(37, 63, 128, 1.0),
@@ -179,10 +179,11 @@ final Map<String, ThemeData> appThemes = {
       onSecondary: Colors.yellow,
       onSecondaryFixed: const Color.fromRGBO(10, 35, 10, 1), // favourites background
       tertiary: Colors.lightGreenAccent,
+      tertiaryFixed: Colors.yellow, // some drawer elements
       error: Colors.black,
       onError: Colors.yellow,
       surface: Colors.black,
-      surfaceDim: Colors.grey[400]!,
+      surfaceDim: Colors.grey[400],
       onSurface: Colors.yellow,
       onSurfaceVariant: Colors.lightGreenAccent,
     ),
@@ -210,24 +211,30 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(102, 55, 133, 1.0),
       onPrimary: Colors.white,
-      secondary: const Color.fromRGBO(255, 196, 0, 1.0),
+      onPrimaryFixedVariant: const Color.fromRGBO(240, 235, 255, 1), // timetable swimlanes
+      secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(245, 235, 255, 1), // favourites background
       tertiary: const Color.fromRGBO(102, 55, 133, 1.0),
+      tertiaryFixed: Colors.yellow, // some drawer elements
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
-      surfaceDim: Colors.grey,
+      surfaceDim: Colors.grey[300],
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(102, 55, 133, 1.0),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0),
-      unselectedItemColor: Colors.grey,
+      selectedItemColor: Color.fromRGBO(228, 199, 143, 1),
+      unselectedItemColor: Colors.white,
+    ),
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
 ),
