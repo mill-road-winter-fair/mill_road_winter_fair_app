@@ -127,6 +127,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     themeNotifier.addListener(_onThemeChanged);
+    preferredMapMarkerSize.addListener(_onThemeChanged);
     debugPrint('MapPageState initState() called with destinationId=${widget.destinationId}');
     _ensureDirectionsConfigLoaded();
     _fetchListings = fetchExistingListings(http.Client());
@@ -483,7 +484,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
     // Create all marker bitmaps first, but only if not onTest
     if (onTest == false) {
-      if (bitmapDescriptors.isEmpty || bitmapDescriptorsThemeKey != getEffectiveThemeKey(selectedThemeKey)) {
+      if (bitmapDescriptors.isEmpty || bitmapDescriptorsThemeKey != getEffectiveThemeKey(selectedThemeKey) ||
+          bitmapDescriptorsMarkerSize != preferredMapMarkerSize.value) {
         await createAllMarkerBitmaps();
       }
     }
@@ -570,14 +572,16 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     const listingTypes = ['Food', 'Shopping', 'Charity/Community/Info', 'Music', 'Childrens', 'Dance', 'Other', 'Visit/Experience', 'Service', 'Business', 'Service-FirstAid', 'Service-Information', 'Service-Toilet',
             'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-PerformanceEvent'];
     final themeKey = getEffectiveThemeKey(selectedThemeKey);
+    final markerSize = preferredMapMarkerSize.value;
     final descriptors = <String, BitmapDescriptor>{};
     for (var listingType in listingTypes) {
-      descriptors[listingType] = await getColoredMarker(listingType, getCategoryColor(themeKey, listingType));
+      descriptors[listingType] = await getColoredMarker(listingType, getCategoryColor(themeKey, listingType), markerSize: markerSize);
     }
-    // Publish a complete palette together; a theme may change while images render.
-    if (themeKey != getEffectiveThemeKey(selectedThemeKey)) return createAllMarkerBitmaps();
+    // Publish a complete palette together; preferences may change while images render.
+    if (themeKey != getEffectiveThemeKey(selectedThemeKey) || markerSize != preferredMapMarkerSize.value) return createAllMarkerBitmaps();
     bitmapDescriptors = descriptors;
     bitmapDescriptorsThemeKey = themeKey;
+    bitmapDescriptorsMarkerSize = markerSize;
     return descriptors.isNotEmpty;
   }
 
@@ -664,7 +668,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         showModalBottomSheet(
           context: context,
           showDragHandle: false,
-          enableDrag: false,
+          enableDrag: true,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
           isScrollControlled: true,
           useSafeArea: true,
@@ -866,7 +870,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           showModalBottomSheet(
             context: context,
             showDragHandle: false,
-            enableDrag: false,
+            enableDrag: true,
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
             isScrollControlled: true,
             useSafeArea: true,
@@ -1038,6 +1042,25 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     updateMarkerVisibilityRespectingFilters(markers.keys.toList(), true);
   }
 
+  Widget _filterMarker(String category) {
+    return SizedBox.square(
+      dimension: 32,
+      child: ExcludeSemantics(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(markerFrameAssetPath(category)),
+            Image.asset(
+              markerAssetPath(category),
+              color: getCategoryColor(selectedThemeKey, category),
+              colorBlendMode: BlendMode.srcIn,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void showFilterMenu() {
     debugPrint('MapPageState showFilterMenu called');
     showModalBottomSheet(
@@ -1065,7 +1088,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Music'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['performanceMusic']!.iconData),
+                    secondary: _filterMarker('Music'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Music")),
                     value: filterSettings["Music"],
                     onChanged: (value) {
@@ -1084,7 +1107,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Dance'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['performanceDance']!.iconData),
+                    secondary: _filterMarker('Dance'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Dance")),
                     value: filterSettings["Dance"],
                     onChanged: (value) {
@@ -1101,7 +1124,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Other'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['performanceOther']!.iconData),
+                    secondary: _filterMarker('Other'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Other performances")),
                     value: filterSettings["Other"],
                     onChanged: (value) {
@@ -1118,7 +1141,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Childrens'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['performanceChildrens']!.iconData),
+                    secondary: _filterMarker('Childrens'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Children’s entertainment")),
                     value: filterSettings["Childrens"],
                     onChanged: (value) {
@@ -1135,7 +1158,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Visit/Experience'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['visitExperience']!.iconData),
+                    secondary: _filterMarker('Visit/Experience'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Visits and experiences")),
                     value: filterSettings["Visits/Experiences"],
                     onChanged: (value) {
@@ -1154,7 +1177,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Food'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['food']!.iconData),
+                    secondary: _filterMarker('Food'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Food and drink")),
                     value: filterSettings["Food"],
                     onChanged: (value) {
@@ -1173,7 +1196,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Shopping'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['shopping']!.iconData),
+                    secondary: _filterMarker('Shopping'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Shopping")),
                     value: filterSettings["Shopping"],
                     onChanged: (value) {
@@ -1192,7 +1215,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Charity/Community/Info'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['charityCommunityInfo']!.iconData),
+                    secondary: _filterMarker('Charity/Community/Info'),
                     title:  const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Charity, community, info")),
                     value: filterSettings["Charity/Community/Info"],
                     onChanged: (value) {
@@ -1211,7 +1234,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Business'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['business']!.iconData),
+                    secondary: _filterMarker('Business'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Other businesses")),
                     value: filterSettings["Business"],
                     onChanged: (value) {
@@ -1230,7 +1253,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     activeColor: getCategoryColor(selectedThemeKey, 'Service'),
                     contentPadding: const EdgeInsets.all(0),
                     horizontalTitleGap: 18,
-                    secondary: Icon(subfilterCategoryLabels['service']!.iconData),
+                    secondary: _filterMarker('Service'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Services")),
                     value: filterSettings["Services"],
                     onChanged: (value) {
@@ -1416,6 +1439,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     themeNotifier.removeListener(_onThemeChanged);
+    preferredMapMarkerSize.removeListener(_onThemeChanged);
     _searchAnalyticsTimer?.cancel();
     _searchController.dispose();
     debugPrint('MapPageState dispose() called');
