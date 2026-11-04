@@ -96,7 +96,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                   child:
                       ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Image.asset('assets/importantInfoPage/hiVis_cropped.jpg',
+                          child: Image.asset('assets/infoPages/hiVis_cropped.jpg',
                               fit: BoxFit.fitWidth, semanticLabel: 'Mill Road Winter Fair stewards wearing high-visibility jackets')),
                 ),
                 const SizedBox(height: 20),
@@ -109,7 +109,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                   constraints: const BoxConstraints(maxHeight: 250),
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
-                      child: Image.asset('assets/importantInfoPage/cautionVehicles_cropped.jpg',
+                      child: Image.asset('assets/infoPages/cautionVehicles_cropped.jpg',
                           fit: BoxFit.fitWidth, semanticLabel: 'A caution sign warning that vehicles may be moving through the Fair')),
                 ),
                 const SizedBox(height: 20),
@@ -129,7 +129,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                   constraints: const BoxConstraints(maxHeight: 250),
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
-                      child: Image.asset('assets/importantInfoPage/carousel01_cropped.jpg',
+                      child: Image.asset('assets/infoPages/carousel01_cropped.jpg',
                           fit: BoxFit.fitWidth, semanticLabel: 'Children riding a carousel at Mill Road Winter Fair')),
                 ),
                 const SizedBox(height: 20),

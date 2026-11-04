@@ -163,7 +163,7 @@ void main() {
       ));
       await settle(tester);
 
-      final background = find.image(const AssetImage('assets/welcomeScreen/chooserPage_background.jpg'));
+      final background = find.image(const AssetImage('assets/infoPages/chooserPage_background.jpg'));
       expect(background, findsOneWidget);
       expect(find.ancestor(of: background, matching: find.byType(PageView)), findsNothing);
       final backgroundRect = tester.getRect(background);

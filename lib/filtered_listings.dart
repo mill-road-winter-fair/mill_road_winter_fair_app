@@ -677,51 +677,54 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             borderRadius: BorderRadius.circular(8),
                                             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
                                           ),
-                                          child: SpecificListingInfoSheet(
-                                            scrollBounds: _expandedScrollBounds,
-                                            listingId: listing['id'],
-                                            cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                                            brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                                            emoji: listing['emoji'] ?? '',
-                                            title: listing['title'] ?? '',
-                                            subtitle: listing['subtitle'] ?? '',
-                                            location: listing['location'],
-                                            description: listing['description'] ?? '',
-                                            email: listing['email'] ?? '',
-                                            website: listing['website'] ?? '',
-                                            phoneNumber: listing['phone'] ?? '',
-                                            imageURL: listing['imageURL'] ?? '',
-                                            startTime: "${listing['startTime']}",
-                                            endTime: "${listing['endTime']}",
-                                            approxDistance: approximateDistance,
-                                            detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
-                                            listingFavourited: isFavourited,
-                                            listingAlerted: alertsStore.alertExists(listing['id']),
-                                            onDetailsTapped: () => toggleDetailsRow(index),
-                                            onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                            onGetDirections: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => MapPage(
-                                                    listings: listings,
-                                                    onTabSelected: (_) => {},
-                                                    destinationId: listing['id'],
-                                                    destinationLatLng: destinationLatLng,
-                                                    analyticsService: widget.analyticsService,
+                                          child: GestureDetector(
+                                            onTap: () => toggleDetailsRow(index),
+                                            child: SpecificListingInfoSheet(
+                                              scrollBounds: _expandedScrollBounds,
+                                              listingId: listing['id'],
+                                              cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                                              brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
+                                              emoji: listing['emoji'] ?? '',
+                                              title: listing['title'] ?? '',
+                                              subtitle: listing['subtitle'] ?? '',
+                                              location: listing['location'],
+                                              description: listing['description'] ?? '',
+                                              email: listing['email'] ?? '',
+                                              website: listing['website'] ?? '',
+                                              phoneNumber: listing['phone'] ?? '',
+                                              imageURL: listing['imageURL'] ?? '',
+                                              startTime: "${listing['startTime']}",
+                                              endTime: "${listing['endTime']}",
+                                              approxDistance: approximateDistance,
+                                              detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
+                                              listingFavourited: isFavourited,
+                                              listingAlerted: alertsStore.alertExists(listing['id']),
+                                              onDetailsTapped: () => toggleDetailsRow(index),
+                                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                              onGetDirections: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => MapPage(
+                                                      listings: listings,
+                                                      onTabSelected: (_) => {},
+                                                      destinationId: listing['id'],
+                                                      destinationLatLng: destinationLatLng,
+                                                      analyticsService: widget.analyticsService,
+                                                    )
                                                   )
-                                                )
-                                              );
-                                            },
-                                            onAlertTapped: () async {
-                                              HapticFeedback.lightImpact();
-                                              await toggleListingAlert(listing['id'], alertNoticePeriod, context);
-                                              setState(() { });
-                                            },
-                                            analyticsService: widget.analyticsService,
-                                            inDialog: false,
-                                            colorScheme: colorScheme,
-                                          )
+                                                );
+                                              },
+                                              onAlertTapped: () async {
+                                                HapticFeedback.lightImpact();
+                                                await toggleListingAlert(listing['id'], alertNoticePeriod, context);
+                                                setState(() { });
+                                              },
+                                              analyticsService: widget.analyticsService,
+                                              inDialog: false,
+                                              colorScheme: colorScheme,
+                                            )
+                                          ),
                                         ),
                                         const SizedBox(height: 8),
                                       ],
