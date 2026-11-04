@@ -668,7 +668,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         showModalBottomSheet(
           context: context,
           showDragHandle: false,
-          enableDrag: false,
+          enableDrag: true,
           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
           isScrollControlled: true,
           useSafeArea: true,
@@ -870,7 +870,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           showModalBottomSheet(
             context: context,
             showDragHandle: false,
-            enableDrag: false,
+            enableDrag: true,
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
             isScrollControlled: true,
             useSafeArea: true,
