@@ -141,6 +141,7 @@ class ListingUpdateNotifier {
         builder: (context, setState) => AlertDialog(
           title: Text(titleFor(noticeDate)),
           content: messageFor(noticeDate, context),
+          scrollable: true,
           actions: [
             if (isListingsMayChange)
               CheckboxListTile(
