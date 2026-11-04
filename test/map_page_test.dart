@@ -140,6 +140,32 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('marker size changes refresh existing markers without resetting filters', (tester) async {
+      addTearDown(() => preferredMapMarkerSize.value = MapMarkerSize.medium);
+      await tester.pumpWidget(MaterialApp(
+        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+      ));
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+      state.hideAllMarkers();
+      final before = Map<MarkerId, Marker>.of(state.markers);
+      expect(before, isNotEmpty);
+      preferredMapMarkerSize.value = MapMarkerSize.large;
+      await tester.pumpAndSettle();
+      expect(state.markers.keys, unorderedEquals(before.keys));
+      for (final entry in before.entries) {
+        final marker = state.markers[entry.key]!;
+        expect(identical(marker, entry.value), isFalse);
+        expect(marker.position, entry.value.position);
+        expect(marker.visible, entry.value.visible);
+        expect(marker.onTap, entry.value.onTap);
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+      preferredMapMarkerSize.value = MapMarkerSize.small;
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('clears a nearby request after build when no markers are visible', (tester) async {
       final previousLocation = currentLatLng;
       addTearDown(() => currentLatLng = previousLocation);
