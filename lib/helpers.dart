@@ -256,7 +256,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 4,
             child: ListTile(
               leading: const Icon(Icons.info, color: Colors.white),
-              title: Text('About the Fair', style: menuStyle),
+              title: Text('About the Fair', style: menuStyle, overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_about_fair');
@@ -274,7 +274,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 4,
             child: ListTile(
               leading: const Icon(Icons.warning, color: Colors.white),
-              title: Text('Important information', style: menuStyle),
+              title: Text('Important information', style: menuStyle, overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_important_information');
@@ -293,7 +293,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 4,
             child: ListTile(
               leading: const Icon(Icons.public, color: Colors.white),
-              title: Text('Visit our website', style: menuStyle),
+              title: Text('Visit our website', style: menuStyle, overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_website');
@@ -325,7 +325,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 4,
             child: ListTile(
               leading: const Icon(Icons.volunteer_activism, color: Colors.white),
-              title: Text('Donate to the Fair', style: menuStyle),
+              title: Text('Donate to the Fair', style: menuStyle, overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_donate');
@@ -420,7 +420,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 4,
             child: ListTile(
               leading: const Icon(Icons.settings),
-              title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_settings');
@@ -439,7 +439,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 4,
             child: ListTile(
               leading: const Icon(Icons.menu_book),
-              title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_app_guide');
@@ -458,7 +458,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 4,
             child: ListTile(
               leading: Icon((Platform.isIOS) ? Icons.ios_share : Icons.share),
-              title: const Text('Share this app', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: const Text('Share this app', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
@@ -472,7 +472,7 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
             flex: 4,
             child: ListTile(
               leading: const Icon(Icons.info),
-              title: const Text('About this app', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: const Text('About this app', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
                 analyticsService.logButtonTapped('drawer_about_app');
