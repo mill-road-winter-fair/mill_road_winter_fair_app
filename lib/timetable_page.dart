@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math';
 
 // App imports
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -20,6 +21,15 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class LocationEvents {
+  final LatLng location;
+  final List<PositionedEvent> events;
+  LocationEvents(
+    this.location,
+    this.events,
+  );    
+}
 
 class TimetablePage extends StatefulWidget {
   final List<Map<String, dynamic>> theEvents;
@@ -167,7 +177,7 @@ class TimetablePageState extends State<TimetablePage> {
 
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
     debugPrint('TimetablePageState prepareEvents called for ${theEvents.length} listings');
-    Map<String, List<PositionedEvent>> preparedEvents = {};
+    Map<String, LocationEvents> preparedEvents = {};
     for (var ev in theEvents) {
       if (ev['startTime'] == '' || ev['endTime'] == '') continue; // this can't be a timed event
       final startTime = combineDateAndTime(ev['startTime'], fairDate);
@@ -178,7 +188,7 @@ class TimetablePageState extends State<TimetablePage> {
               (ev['performanceOther'] != null && ev['performanceOther'] == 'TRUE') ||
               (ev['visitExperience'] != null && ev['visitExperience'] == 'TRUE')) &&
           endTime.difference(startTime) < maxDurationToBeEvent) {
-        final eventLocation = ev['location'];
+        String? eventLocation = ev['location'];
         final thePreparedEvent = PositionedEvent(
           startTime: startTime,
           endTime: endTime,
@@ -203,17 +213,37 @@ class TimetablePageState extends State<TimetablePage> {
           width: 0, // will be computed later
         );
         if (preparedEvents.keys.contains(eventLocation)) {
-          preparedEvents[eventLocation]!.add(thePreparedEvent);
+          preparedEvents[eventLocation]!.events.add(thePreparedEvent);
         } else if (eventLocation != null) {
-          preparedEvents[eventLocation] = [thePreparedEvent];
+          preparedEvents[eventLocation] = LocationEvents(stringToLatLng(ev['latLng']), [thePreparedEvent]);
         }
       }
     }
-    preparedEvents.forEach((loc, events) => events.sort((a, b) => a.startTime.compareTo(b.startTime)));
-    return Map.fromEntries(
-      preparedEvents.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+
+    // combine all single event locations into one
+    List<PositionedEvent> singleEvents = [];
+    preparedEvents.removeWhere((loc, eventLocation) {
+      if (eventLocation.events.length == 1) {
+        singleEvents.addAll(eventLocation.events);
+        return true;
+      }
+      return false;
+    });
+
+    // sort from West (East Road) to East (Coleridge Road)
+    preparedEvents.forEach((loc, eventLocation) => eventLocation.events.sort((a, b) => a.startTime.compareTo(b.startTime)));
+    final allPreparedEvents = Map<String, List<PositionedEvent>>.fromEntries(
+      (preparedEvents.entries.toList()
+        ..sort((a, b) => a.value.location.longitude.compareTo(b.value.location.longitude)))
+          .map((entry) => MapEntry(entry.key, entry.value.events)),
     );
+
+    // add on the single events column if it contains anything
+    if (singleEvents.isNotEmpty) allPreparedEvents['Other venues'] = singleEvents;
+
+    return allPreparedEvents;
   }
+
 
   Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(
       Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, bool? filteredMusicOrNot, String searchQuery, DateTime now) {
