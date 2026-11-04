@@ -76,8 +76,8 @@ class TextImageRow extends StatelessWidget {
 
 // Make a row in the events table. Needed as can't style the entire table or pad an entire row in one go
 TableRow eventRow(BuildContext context, String eventTime, String eventTitle, [List<TextSpan>? eventSubtitle]) {
-  var eventsTimeStyle = TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
-  var eventsTitleStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
+  var eventsTimeStyle = const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white, height: 1.2);
+  var eventsTitleStyle = const TextStyle(fontSize: 14, color: Colors.white, height: 1.2);
 
   final List<TextSpan> allTitleSpans;
 
@@ -187,8 +187,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
   Widget build(BuildContext context) {
     debugPrint('AboutTheFairPage build() called');
     var bodyStyle = TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.tertiary);
-    var eventsSubtitleStyle = TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onPrimary, height: 1.2);
-    var eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.onPrimary);
+    var eventsSubtitleStyle = const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.white, height: 1.2);
+    var eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: Colors.white);
 
     // Build a list of TextSpans for sponsors so we can special-case the Bush entry
     final List<TextSpan> sponsorSpans = [];
@@ -290,9 +290,9 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                         verticalAlignment: TableCellVerticalAlignment.middle,
                                         child: Container(
                                           padding: const EdgeInsets.only(left: 4),
-                                          child: Text('Key events',
+                                          child: const Text('Key events',
                                               style: TextStyle(
-                                                  fontSize: 24, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary, height: 1.0)),
+                                                  fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white, height: 1.0)),
                                         ),
                                       ),
                                       TableCell(
