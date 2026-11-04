@@ -84,6 +84,7 @@ class ListingUpdateNotifier {
   static Future<void> maybeShowNotice(
     BuildContext context, {
     required AnalyticsService analyticsService,
+    bool allowListingsMayChange = true,
   }) async {
     if (onTest) {
       return;
