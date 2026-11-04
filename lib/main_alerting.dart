@@ -6,6 +6,7 @@ import 'dart:io';
 // App imports
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
 
 // Third-party imports
 import 'package:collection/collection.dart';
@@ -145,8 +146,10 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       debugPrint('notificationTapBackground: failed to parse endTime: $e');
       return;
     }
+    final possibleNewId = await updateAlertNoticePeriodById(notificationResponse.id!, noticePeriod, theEventAlert['listingId']);
+    if (possibleNewId == -1) return;
     final theAlert = AlertSchedule(
-      notificationResponse.id!, 
+      possibleNewId,
       theEventAlert['listingId'],
       theEventAlert['listingTitle'],
       theEventAlert['listingLocation'],
@@ -157,7 +160,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       null
     );
     flutterLocalNotificationsPlugin.zonedSchedule(
-      id: notificationResponse.id!,
+      id: possibleNewId,
       title: fairName,
       body: theMessage,
       payload: jsonEncode(theAlert),
@@ -168,8 +171,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
     );
-    await updateAlertNoticePeriodById(notificationResponse.id!, noticePeriod);
-    debugPrint('onDidReceiveBackgroundNotificationResponse scheduled new alert for $newAlertTime with message “$theMessage”');
+    debugPrint('onDidReceiveBackgroundNotificationResponse scheduled alert for $newAlertTime with message “$theMessage” new ID = $possibleNewId and old was ${notificationResponse.id!}');
   }
 }
 
@@ -244,16 +246,22 @@ Future<bool> requestAlertPermissions() async {
 }
 
 
-Future<void> updateAlertNoticePeriodById(int id, int noticePeriod) async {
+Future<int> updateAlertNoticePeriodById(int id, int noticePeriod, String listingId) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.reload(); // since it may be cached
   final jsonString = prefs.getString('alertsStore');
-  if (jsonString == null) return;
+  if (jsonString == null) return -1;
   final store = AlertScheduleStore.fromJson(jsonDecode(jsonString));
   final theAlert = store.alertSchedules.firstWhereOrNull((a) => a.id == id);
-  if (theAlert == null) return;
-  theAlert.noticePeriod = noticePeriod;
+  int newId;
+  if (theAlert == null) { // it must have been cleaned up by the app
+    newId = await store.addAlert(listingId, noticePeriod, true);
+  } else {
+    theAlert.noticePeriod = noticePeriod;
+    newId = id;
+  }
   await prefs.setString('alertsStore', jsonEncode(store));
+  return newId;
 }
 
 
@@ -312,8 +320,9 @@ class AlertScheduleStore {
 
   int? alertIdForListing(String listingId) => alertSchedules.firstWhereOrNull((a) => a.listingId == listingId)?.id;
 
-  int addAlert(String listingId, int noticePeriod, bool isScheduled) {
+  Future<int> addAlert(String listingId, int noticePeriod, bool isScheduled) async {
     debugPrint('AlertScheduleStore addAlert for listingId=$listingId');
+    if (listings.isEmpty) listings = await loadListingsFromCache(); // we're in the notification process
     final theListing = listings.firstWhereOrNull((l) => l['id'] == listingId);
     if (theListing == null) return -1;
     final newAlert = AlertSchedule(
@@ -346,6 +355,8 @@ class AlertScheduleStore {
     await refreshEventAlertSchedules();
     final now = DateTime.now();
     alertSchedules.removeWhere((a) => a.listingStartTime.subtract(Duration(minutes: a.noticePeriod)).isBefore(now));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('alertsStore', jsonEncode(this));
   }
 
   void saveAllEventAlerts() async {
@@ -372,6 +383,7 @@ class AlertScheduleStore {
       final refreshedAlertsStore = AlertScheduleStore.fromJson(jsonDecode(jsonString));
       alertsStore.alertSchedules.clear();
       alertsStore.alertSchedules.addAll(refreshedAlertsStore.alertSchedules);
+      alertsStore.nextId = refreshedAlertsStore.nextId;
     }
   }
 

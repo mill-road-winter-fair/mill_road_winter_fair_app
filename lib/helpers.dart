@@ -1322,7 +1322,7 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
       theAlertNoticePeriod = desiredNoticePeriod;
     }
     (categoryID, androidNotificationActions) = calculateAlertActionCategories(theAlertNoticePeriod);
-    final newAlertId = alertsStore.addAlert(listingID, theAlertNoticePeriod, true);
+    final newAlertId = await alertsStore.addAlert(listingID, theAlertNoticePeriod, true);
     final schedTime = theListingStart.subtract(Duration(minutes: theAlertNoticePeriod));
     flutterLocalNotificationsPlugin.zonedSchedule(
       id: newAlertId,
@@ -1352,7 +1352,7 @@ Future<void> setTheAlert(BuildContext context, int desiredNoticePeriod, String l
     );
     String theMessage = 'Alert for ${theListing['title']} has been scheduled for ${formatTime(schedTime)}';
     if (theListingStart.difference(DateTime.now()).inHours >= 24) theMessage += ' on ${formatFullDate(theListingStart)}';
-    showToast(context, '$theMessage.', false);
+    if (context.mounted) showToast(context, '$theMessage.', false);
     alertsStore.saveAllEventAlerts();
     debugPrint('setTheAlert scheduled new alert with ID $newAlertId in $theAlertNoticePeriod minutes at $schedTime with message “$theMessage”');
     return;
