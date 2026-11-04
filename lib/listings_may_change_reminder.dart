@@ -102,14 +102,14 @@ class ListingUpdateNotifier {
       // Emergency alert overrides all else, and will show at every app launch
       dialogTitle = emergencyAlertText!.title;
       dialogContent = emergencyAlertText!.body;
-      
+
     } else {
 
       isListingsMayChange = isListingsMayChangeNotice(noticeDate);
 
       // The dismissal preference applies only before the Fair. The notices on
       // the day and afterwards must always remain available.
-      if (!context.mounted || (isListingsMayChange && (!listingUpdateNoticeEnabled || !(prefs.getBool(preferenceKey) ?? true)))) {
+      if (!context.mounted || (isListingsMayChange && (!allowListingsMayChange || !listingUpdateNoticeEnabled || !(prefs.getBool(preferenceKey) ?? true)))) {
         return;
       }
 
