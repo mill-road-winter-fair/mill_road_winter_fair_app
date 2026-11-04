@@ -2134,7 +2134,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -2165,7 +2165,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -2220,7 +2220,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -2261,7 +2261,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: colorScheme.primary,
+                          color: colorScheme.tertiary,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -2300,7 +2300,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(

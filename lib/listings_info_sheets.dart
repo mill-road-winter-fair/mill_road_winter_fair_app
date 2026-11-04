@@ -543,7 +543,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Website: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.tertiary), text: 'Website: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.website),
                 ],
               ),
@@ -571,7 +571,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Email: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.tertiary), text: 'Email: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.email),
                 ],
               ),
@@ -598,7 +598,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Telephone: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.tertiary), text: 'Telephone: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.phoneNumber),
                 ],
               ),

@@ -65,9 +65,6 @@ final Map<String, ThemeData> appThemes = {
       textColor: Colors.black,
       iconColor: Colors.black,
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
-    ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   'dark': ThemeData(
@@ -96,9 +93,6 @@ final Map<String, ThemeData> appThemes = {
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
       unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
@@ -136,9 +130,6 @@ final Map<String, ThemeData> appThemes = {
       selectedItemColor: Colors.white,
       unselectedItemColor: Colors.grey[300],
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
-    ),
     listTileTheme: const ListTileThemeData(
       textColor: Colors.black,
       iconColor: Colors.black,
@@ -171,9 +162,6 @@ final Map<String, ThemeData> appThemes = {
       selectedItemColor: Colors.white,
       unselectedItemColor: Colors.grey[300],
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
-    ),
     listTileTheme: const ListTileThemeData(
       textColor: Colors.black,
       iconColor: Colors.black,
@@ -182,41 +170,38 @@ final Map<String, ThemeData> appThemes = {
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
-    colorScheme: const ColorScheme(
+    colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: Color.fromRGBO(255, 243, 0, 1.0),
+      primary: const Color.fromRGBO(37, 63, 128, 1.0),
       onPrimary: Colors.black,
-      secondary: Color.fromRGBO(255, 243, 0, 1.0),
-      onSecondary: Colors.black,
-      onSecondaryFixed: Color.fromRGBO(10, 35, 10, 1), // favourites background
-      tertiary: Color.fromRGBO(8, 255, 0, 1.0),
-      error: Colors.orange,
-      onError: Colors.black,
+      onPrimaryFixedVariant: const Color.fromRGBO(0, 16, 55, 1), // timetable swimlanes
+      secondary: Colors.black,
+      onSecondary: Colors.yellow,
+      onSecondaryFixed: const Color.fromRGBO(10, 35, 10, 1), // favourites background
+      tertiary: Colors.lightGreenAccent,
+      error: Colors.black,
+      onError: Colors.yellow,
       surface: Colors.black,
-      surfaceDim: Colors.grey,
-      onSurface: Color.fromRGBO(255, 243, 0, 1.0),
-      onSurfaceVariant: Color.fromRGBO(0, 255, 244, 1.0),
+      surfaceDim: Colors.grey[400]!,
+      onSurface: Colors.yellow,
+      onSurfaceVariant: Colors.lightGreenAccent,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.black,
-      foregroundColor: Color.fromRGBO(255, 243, 0, 1.0),
+      backgroundColor: Color.fromRGBO(25, 41, 103, 1.0),
+      foregroundColor: Colors.yellow,
     ),
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0),
-      ),
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.black,
+    bottomNavigationBarTheme:  BottomNavigationBarThemeData(
+      selectedItemColor: Colors.yellow,
+      unselectedItemColor: Colors.grey[300],
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
     ),
-    listTileTheme: const ListTileThemeData(tileColor: Colors.black),
+    listTileTheme: const ListTileThemeData(
+      tileColor: Colors.black,
+      textColor: Colors.white,
+      iconColor: Colors.white,
+    ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
 ),
   'colourBlindFriendly': ThemeData(
@@ -243,9 +228,6 @@ final Map<String, ThemeData> appThemes = {
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0),
       unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
 ),
