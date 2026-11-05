@@ -612,7 +612,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: refreshListings,
+                onRefresh: () {
+                  HapticFeedback.lightImpact();
+                  return refreshListings();
+                },
                 backgroundColor: colorScheme.primary,
                 color: colorScheme.onPrimary,
                 child: Container(
@@ -676,7 +679,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
                                           ),
                                           child: GestureDetector(
-                                            onTap: () => toggleDetailsRow(index),
+                                            onTap: () {
+                                              HapticFeedback.lightImpact();
+                                              toggleDetailsRow(index);
+                                            },
                                             child: SpecificListingInfoSheet(
                                               scrollBounds: _expandedScrollBounds,
                                               listingId: listing['id'],
@@ -863,6 +869,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.sort),
           tooltip: 'Choose how to sort listings',
           onPressed: () {
+            HapticFeedback.lightImpact();
             if (controller.isOpen) {
               controller.close();
             } else {
@@ -905,6 +912,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.filter_alt, size: 26),
           tooltip: 'Choose which types of listings to show',
           onPressed: () {
+            HapticFeedback.lightImpact();
             if (controller.isOpen) {
               controller.close();
             } else {

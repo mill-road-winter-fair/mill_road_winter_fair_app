@@ -203,6 +203,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
 
 
   void _selectHotspot(int index) {
+    HapticFeedback.lightImpact();
     _idleTimer?.cancel();
     setState(() { _chosenHotspotID = index; });
     _animationController?.stop(canceled: false);
@@ -487,12 +488,18 @@ class _ChooserContent extends StatelessWidget {
         Positioned(top: 20, left: 0, right: 0,
           child: Align(
             alignment: Alignment.center,
-            child: GestureDetector(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
-              },
-              child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
+            child: Tooltip(
+              message: 'About the Fair',
+              child: Semantics(
+                button: true,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
+                  },
+                  child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
+                ),
+              ),
             ),
           ),
         ),
@@ -620,19 +627,29 @@ class _AnimatedHotspot extends StatelessWidget {
       top: hotspot.top,
       width: hotspot.size!.width,
       height: hotspot.size!.height,
-      child: _HotspotLayers(
-        hotspot: hotspot,
-        index: index,
-        visibleCount: visibleCount,
-        paintPhase: paintPhase,
-        entranceProgress: entranceProgress,
-        secondPhaseProgress: secondPhaseProgress,
-        backgroundIntroProgress: backgroundIntroProgress,
-        initialEntranceComplete: initialEntranceComplete,
-        staticChooserPage: staticChooserPage,
-        isSelected: isSelected,
-        colourScheme: colourScheme,
+      child: Semantics(
+        button: true,
+        label: hotspot.label.replaceAll('\n', ' '),
         onTap: onTap,
+        excludeSemantics: true,
+        child: Tooltip(
+          message: hotspot.label.replaceAll('\n', ' '),
+          excludeFromSemantics: true,
+          child: _HotspotLayers(
+            hotspot: hotspot,
+            index: index,
+            visibleCount: visibleCount,
+            paintPhase: paintPhase,
+            entranceProgress: entranceProgress,
+            secondPhaseProgress: secondPhaseProgress,
+            backgroundIntroProgress: backgroundIntroProgress,
+            initialEntranceComplete: initialEntranceComplete,
+            staticChooserPage: staticChooserPage,
+            isSelected: isSelected,
+            colourScheme: colourScheme,
+            onTap: onTap,
+          ),
+        ),
       ),
     );
   }
