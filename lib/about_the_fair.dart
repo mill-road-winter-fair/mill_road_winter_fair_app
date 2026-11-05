@@ -198,11 +198,11 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     debugPrint('AboutTheFairPage build() called');
-    var bodyStyle = TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.tertiary);
+    var bodyStyle = TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSecondary);
     var eventsSubtitleStyle = const TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: Colors.white, height: 1.2);
     var eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: Colors.white);
     final colorScheme = Theme.of(context).colorScheme;
-    final headingStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colorScheme.primary);
+    final headingStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colorScheme.tertiary);
 
     // Build a list of TextSpans for sponsors so we can special-case the Bush entry
     final List<TextSpan> sponsorSpans = [];
@@ -258,7 +258,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                 child: Column(
                   spacing: 10,
                   children: [
-                    Text('Your annual celebration of all that is great about Mill Road returns for its 21st year!', style: bodyStyle.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                    Text('Your annual celebration of all that is great about Mill Road returns for its 21st year!', style: bodyStyle.copyWith(fontWeight: FontWeight.bold, color: colorScheme.tertiary)),
                     TextImageRow(
                       textSpan: const TextSpan(children: [
                         TextSpan(text: 'As well as highlights like parades, stalls, performances and children’s activities, '
@@ -407,7 +407,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                 padding: const EdgeInsets.all(8),
                                 color: colorScheme.primary,
                                 alignment: Alignment.centerLeft,
-                                child: Text('Key events', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: colorScheme.onPrimary, height: 1.0),
+                                child: const Text('Key events', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white, height: 1.0),
                                 ),
                               ),
                             ),
