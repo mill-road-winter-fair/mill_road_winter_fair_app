@@ -185,7 +185,7 @@ final Map<String, ThemeData> appThemes = {
       error: Colors.black,
       onError: Colors.yellow,
       surface: Colors.black,
-      surfaceDim: Colors.grey[400],
+      surfaceDim: Colors.grey[800],
       onSurface: Colors.yellow,
       onSurfaceVariant: Colors.lightGreenAccent,
     ),
