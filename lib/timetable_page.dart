@@ -701,7 +701,7 @@ class TimetablePageState extends State<TimetablePage> {
                         fontSize: 12.5,
                         fontWeight: FontWeight.bold,
                         color: colorScheme.onSurfaceVariant,
-                        shadows: [Shadow(color: colorScheme.onPrimary, offset: const Offset(0, 0), blurRadius: 2)],
+                        shadows: [Shadow(color: colorScheme.secondary, offset: const Offset(0, 0), blurRadius: 2)],
                       ),
                     ),
                   ),
@@ -788,7 +788,7 @@ class TimetablePageState extends State<TimetablePage> {
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(right: 2), // stop it crashing into edge
                           child: Container(
-                            color: colorScheme.onPrimary,
+                            color: colorScheme.secondary,
                             width: totalWidth,
                             child: Column(
                               children: [
@@ -981,7 +981,7 @@ class TimetablePageState extends State<TimetablePage> {
                                                                         child: Container(
                                                                           padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 1),
                                                                           decoration: BoxDecoration(
-                                                                            color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
+                                                                            color: (favouriteListingKeys.value.contains(pe.id)) ? colorScheme.onSecondaryFixed : colorScheme.secondary,
                                                                             borderRadius: BorderRadius.circular(4),
                                                                             boxShadow: [BoxShadow(color: colorScheme.surfaceContainerLow, offset: const Offset(2, 2), blurRadius: 3)],
                                                                             border: Border.all(width: 0.2, color: colorScheme.onSecondary),

@@ -670,7 +670,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                         Container(
                                           width: constraints.maxWidth - 10,
                                           decoration: BoxDecoration(
-                                            color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.onPrimary,
+                                            color: (isFavourited) ? colorScheme.onSecondaryFixed : colorScheme.secondary,
                                             border: Border.all(color: colorScheme.primary, width: 0.5),
                                             borderRadius: BorderRadius.circular(8),
                                             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
