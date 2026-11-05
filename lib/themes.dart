@@ -258,7 +258,7 @@ String markerAssetPath(String category) {
     case 'Business':
       assetPath = 'assets/mapMarkers/businessMarker.png';
     case 'Group-PerformanceEvent':
-      assetPath = 'assets/mapMarkers/performanceEventGroupMarker.png';
+      assetPath = 'assets/mapMarkers/performanceEventMarker.png';
     case 'Mixed':
       assetPath = 'assets/mapMarkers/mixedGroupMarker.png';
     default:
@@ -269,7 +269,7 @@ String markerAssetPath(String category) {
 }
 
 String markerFrameAssetPath(String category) =>
-    category == 'Group-PerformanceEvent' || category == 'Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
+    category == 'Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
 
 Future<BitmapDescriptor> getColoredMarker(String category, Color color, {MapMarkerSize markerSize = MapMarkerSize.medium}) async {
   if (onTest == true) {
