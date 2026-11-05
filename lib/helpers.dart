@@ -174,7 +174,7 @@ void showInfoToast(BuildContext context, String message) {
           borderRadius: BorderRadius.circular(theme.platform == TargetPlatform.iOS ? 10 : 40),
         ),
         child: Text(message, textAlign: TextAlign.center,
-            style: TextStyle(color: colours.onPrimary, fontSize: 16)),
+            style: const TextStyle(color: Colors.white, fontSize: 16)),
       ),
     ),
   );
@@ -881,7 +881,7 @@ void showMiniPopup(BuildContext itemContext, GlobalKey? theKey, String theMessag
   final itemSize = box.size;
   final screenWidth = MediaQuery.sizeOf(itemContext).width;
   final overlayW = min(max(theMessage.length / 0.25, 155.0), 230.0);
-  final theStyle = TextStyle(fontSize: 13.0, decoration: TextDecoration.none, fontWeight: FontWeight.normal, color: fgColour);
+  final theStyle = TextStyle(fontSize: 14.0, decoration: TextDecoration.none, fontWeight: FontWeight.normal, color: fgColour);
   final overlayH = estimateTextHeight(text: theMessage, style: theStyle, maxWidth: overlayW, context: itemContext);
   const gap = 4.0;
   final theDuration = (theMessage.length / 25).toInt() + 2;
