@@ -73,7 +73,7 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.dark,
       primary: const Color.fromRGBO(25, 41, 103, 1),
       onPrimary: Colors.black,
-      onPrimaryFixedVariant: const Color.fromRGBO(0, 16, 55, 1), // timetable swimlanes
+      onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
       onSecondary: Colors.white,
       onSecondaryFixed: const Color.fromRGBO(35, 35, 10, 1), // favourites background
@@ -110,6 +110,7 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(166, 34, 43, 1),
       onPrimary: Colors.white,
+      onPrimaryFixedVariant: const Color.fromRGBO(255, 245, 245, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(255, 235, 235, 1), // favourites background
@@ -142,6 +143,7 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(37, 63, 128, 1.0),
       onPrimary: Colors.white,
+      onPrimaryFixedVariant: const Color.fromRGBO(244, 248, 255, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(235, 235, 255, 1), // favourites background
@@ -174,7 +176,7 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.dark,
       primary: const Color.fromRGBO(37, 63, 128, 1.0),
       onPrimary: Colors.black,
-      onPrimaryFixedVariant: const Color.fromRGBO(0, 16, 55, 1), // timetable swimlanes
+      onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
       secondary: Colors.black,
       onSecondary: Colors.yellow,
       onSecondaryFixed: const Color.fromRGBO(10, 35, 10, 1), // favourites background
@@ -211,7 +213,7 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(102, 55, 133, 1.0),
       onPrimary: Colors.white,
-      onPrimaryFixedVariant: const Color.fromRGBO(240, 235, 255, 1), // timetable swimlanes
+      onPrimaryFixedVariant: const Color.fromRGBO(248, 242, 255, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(245, 235, 255, 1), // favourites background

@@ -174,7 +174,7 @@ void showInfoToast(BuildContext context, String message) {
           borderRadius: BorderRadius.circular(theme.platform == TargetPlatform.iOS ? 10 : 40),
         ),
         child: Text(message, textAlign: TextAlign.center,
-            style: TextStyle(color: colours.onPrimary, fontSize: 16)),
+            style: const TextStyle(color: Colors.white, fontSize: 16)),
       ),
     ),
   );
