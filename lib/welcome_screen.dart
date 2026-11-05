@@ -137,8 +137,8 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       safeArea: 160,
       pageColor: colourScheme.secondary.withValues(alpha: 0.85),
     );
-    Widget guideRow(Widget icon, Widget content) => Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+    Widget guideRow(Widget icon, Widget content, {bool dense = false}) => Padding(
+          padding: EdgeInsets.only(bottom: (dense) ? 6 : 16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -177,6 +177,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     Widget category(String key, String colourKey) => guideRow(
           marker(colourKey),
           Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
+          dense: true,
         );
 
     PageViewModel guidePage(String title, List<Widget> children) {
@@ -231,10 +232,12 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         guideRow(
           marker('Group-PerformanceEvent'),
           Text('Multiple performances and events at one location', style: bodyStyle),
+          dense: true,
         ),
         guideRow(
           marker('Mixed'),
           Text('A mix of any of these categories', style: bodyStyle),
+          dense: true,
         ),
       ]),
       guidePage('Plan your day with the timetable', [
