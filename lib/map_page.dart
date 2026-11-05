@@ -544,7 +544,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         msg: 'No matching listings found',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
+        textColor: Colors.white,
         fontSize: 16,
         toastLength: Toast.LENGTH_SHORT,
         timeInSecForIosWeb: 2,
@@ -1377,7 +1377,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         msg: 'Location services and permissions are required to determine directions',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
+        textColor: Colors.white,
         fontSize: 16,
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
@@ -1568,7 +1568,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Text(message, textAlign: TextAlign.center, style: TextStyle(color: colours.onPrimary, fontSize: 16),
+          child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
         ),
       ),
@@ -1594,7 +1594,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         msg: 'Unable to determine your location',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
+        textColor: Colors.white,
         fontSize: 16,
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
@@ -1622,7 +1622,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           : 'Nearest venues are more than 500m away, so please try again when you’re at the Fair.',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
+        textColor: Colors.white,
         fontSize: 16,
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
@@ -2161,7 +2161,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -2192,7 +2192,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -2247,7 +2247,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -2288,7 +2288,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: colorScheme.primary,
+                          color: colorScheme.tertiary,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -2327,7 +2327,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(

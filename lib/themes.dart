@@ -19,13 +19,13 @@ String getEffectiveThemeKey(String themeKey, [Brightness? brightness]) {
 String getMapStyleForThemeKey(String themeKey, [Brightness? brightness]) {
   switch (getEffectiveThemeKey(themeKey, brightness)) {
     case 'light':
+    case '2025':
       return standardMap;
     case 'dark':
+    case 'highContrast':
       return darkMap;
     case '2024':
       return retroMap;
-    case 'highContrast':
-      return darkMap;
     case 'colourBlindFriendly':
       return colourBlindMap;
     default:
@@ -38,29 +38,32 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.light,
-      primary: const Color.fromRGBO(166, 34, 43, 1),
+      primary: const Color.fromRGBO(25, 41, 103, 1),
       onPrimary: Colors.white,
+      onPrimaryFixedVariant: const Color.fromRGBO(244, 248, 255, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
-      onSecondaryFixed: const Color.fromRGBO(255, 235, 235, 1), // favourites background
-      tertiary: const Color.fromRGBO(166, 34, 43, 1),
+      onSecondaryFixed: const Color.fromRGBO(255, 242, 242, 1), // favourites background
+      tertiary: const Color.fromRGBO(25, 41, 103, 1),
+      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements // purple 137, 74, 151
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
-      surfaceDim: Colors.grey[300]!,
+      surfaceDim: Colors.grey[300],
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(166, 34, 43, 1),
+      backgroundColor: Color.fromRGBO(25, 41, 103, 1),
       foregroundColor: Colors.white,
     ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(166, 34, 43, 1),
-      unselectedItemColor: Colors.grey,
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: const Color.fromRGBO(228, 199, 143, 1),
+      unselectedItemColor: Colors.grey[300],
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
@@ -68,35 +71,69 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: const Color.fromRGBO(255, 196, 0, 1.0),
+      primary: const Color.fromRGBO(25, 41, 103, 1),
       onPrimary: Colors.black,
+      onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
       onSecondary: Colors.white,
       onSecondaryFixed: const Color.fromRGBO(35, 35, 10, 1), // favourites background
-      tertiary: const Color.fromRGBO(255, 196, 0, 1.0),
+      tertiary: const Color.fromRGBO(228, 199, 143, 1.0),
+      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements
       error: Colors.orange,
       onError: Colors.black,
       surface: const Color.fromRGBO(44, 44, 44, 1.0),
-      surfaceDim: const Color.fromRGBO(30, 30, 30, 1.0),
+      surfaceDim: Colors.grey[400],
       onSurface: Colors.white,
-      onSurfaceVariant: Colors.grey[300]!,
+      onSurfaceVariant: Colors.grey[300],
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
+      backgroundColor: Color.fromRGBO(25, 41, 103, 1.0),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
       unselectedItemColor: Colors.grey,
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
-    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
     ),
     listTileTheme: const ListTileThemeData(
       tileColor: Color.fromRGBO(44, 44, 44, 1.0),
+      textColor: Colors.white,
+      iconColor: Colors.white,
+    ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+  ),
+  '2025': ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme(
+      brightness: Brightness.light,
+      primary: const Color.fromRGBO(166, 34, 43, 1),
+      onPrimary: Colors.white,
+      onPrimaryFixedVariant: const Color.fromRGBO(255, 245, 245, 1), // timetable swimlanes
+      secondary: Colors.white,
+      onSecondary: Colors.black,
+      onSecondaryFixed: const Color.fromRGBO(255, 235, 235, 1), // favourites background
+      tertiary: const Color.fromRGBO(166, 34, 43, 1),
+      tertiaryFixed: Colors.grey[300], // some drawer and guide elements
+      error: Colors.orange,
+      onError: Colors.black,
+      surface: Colors.white,
+      surfaceDim: Colors.grey[300],
+      onSurface: Colors.black,
+      onSurfaceVariant: Colors.grey[700],
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color.fromRGBO(166, 34, 43, 1),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey[300],
+    ),
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
@@ -106,67 +143,68 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(37, 63, 128, 1.0),
       onPrimary: Colors.white,
+      onPrimaryFixedVariant: const Color.fromRGBO(244, 248, 255, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(235, 235, 255, 1), // favourites background
       tertiary: const Color.fromRGBO(37, 63, 128, 1.0),
+      tertiaryFixed: Colors.white,
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
       surfaceDim: Colors.grey,
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(37, 63, 128, 1.0),
       foregroundColor: Colors.white,
     ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(37, 63, 128, 1.0),
-      unselectedItemColor: Colors.grey,
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey[300],
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
-    colorScheme: const ColorScheme(
+    colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: Color.fromRGBO(255, 243, 0, 1.0),
+      primary: const Color.fromRGBO(37, 63, 128, 1.0),
       onPrimary: Colors.black,
-      secondary: Color.fromRGBO(255, 243, 0, 1.0),
-      onSecondary: Colors.black,
-      onSecondaryFixed: Color.fromRGBO(10, 35, 10, 1), // favourites background
-      tertiary: Color.fromRGBO(8, 255, 0, 1.0),
-      error: Colors.orange,
-      onError: Colors.black,
+      onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
+      secondary: Colors.black,
+      onSecondary: Colors.yellow,
+      onSecondaryFixed: const Color.fromRGBO(10, 35, 10, 1), // favourites background
+      tertiary: Colors.lightGreenAccent,
+      tertiaryFixed: Colors.yellow, // some drawer elements
+      error: Colors.black,
+      onError: Colors.yellow,
       surface: Colors.black,
-      surfaceDim: Colors.grey,
-      onSurface: Color.fromRGBO(255, 243, 0, 1.0),
-      onSurfaceVariant: Color.fromRGBO(0, 255, 244, 1.0),
+      surfaceDim: Colors.grey[400],
+      onSurface: Colors.yellow,
+      onSurfaceVariant: Colors.lightGreenAccent,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.black,
-      foregroundColor: Color.fromRGBO(255, 243, 0, 1.0),
+      backgroundColor: Color.fromRGBO(25, 41, 103, 1.0),
+      foregroundColor: Colors.yellow,
     ),
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0),
-      ),
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.black,
+    bottomNavigationBarTheme:  BottomNavigationBarThemeData(
+      selectedItemColor: Colors.yellow,
+      unselectedItemColor: Colors.grey[300],
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
     ),
-    listTileTheme: const ListTileThemeData(tileColor: Colors.black),
+    listTileTheme: const ListTileThemeData(
+      tileColor: Colors.black,
+      textColor: Colors.white,
+      iconColor: Colors.white,
+    ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
 ),
   'colourBlindFriendly': ThemeData(
@@ -175,27 +213,30 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(102, 55, 133, 1.0),
       onPrimary: Colors.white,
-      secondary: const Color.fromRGBO(255, 196, 0, 1.0),
+      onPrimaryFixedVariant: const Color.fromRGBO(248, 242, 255, 1), // timetable swimlanes
+      secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(245, 235, 255, 1), // favourites background
       tertiary: const Color.fromRGBO(102, 55, 133, 1.0),
+      tertiaryFixed: Colors.yellow, // some drawer elements
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
-      surfaceDim: Colors.grey,
+      surfaceDim: Colors.grey[300],
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(102, 55, 133, 1.0),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0),
-      unselectedItemColor: Colors.grey,
+      selectedItemColor: Color.fromRGBO(228, 199, 143, 1),
+      unselectedItemColor: Colors.white,
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
 ),
@@ -330,7 +371,7 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color, {MapMark
 Color getCategoryColor(String selectedThemeKey, String category) {
   final effectiveThemeKey = getEffectiveThemeKey(selectedThemeKey);
   Color color;
-  if (effectiveThemeKey == "light") {
+  if (effectiveThemeKey == "light" || effectiveThemeKey == "2025") {
     color = switch(category) {
       "Food" || "Group-Food" => const Color.fromRGBO(255, 156, 26, 1.0),
       "Shopping" || "Group-Shopping" => const Color.fromRGBO(209, 85, 89, 1.0),
