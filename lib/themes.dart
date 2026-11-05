@@ -174,7 +174,7 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: const Color.fromRGBO(37, 63, 128, 1.0),
+      primary: Colors.black,
       onPrimary: Colors.black,
       onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
       secondary: Colors.black,
@@ -190,7 +190,8 @@ final Map<String, ThemeData> appThemes = {
       onSurfaceVariant: Colors.lightGreenAccent,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(25, 41, 103, 1.0),
+      backgroundColor: Colors.black,
+      surfaceTintColor: Colors.transparent,
       foregroundColor: Colors.yellow,
     ),
     bottomNavigationBarTheme:  BottomNavigationBarThemeData(
