@@ -1357,6 +1357,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       Position position = await getCurrentPosition();
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
       if  (!await updatePolyline(currentLatLng, destination)) {
+        doingAPushNavigation = false;
         WidgetsBinding.instance.addPostFrameCallback((_) { // since googlemap() may overwrite it with its own initialCameraPosition
           _moveCameraToBounds(
             LatLng(min(currentLatLng.latitude, destination.latitude), min(currentLatLng.longitude, destination.longitude)),
@@ -1500,6 +1501,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
       // Get route using Routes API
       pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(
+        timeout: const Duration(seconds: 2), // default is 30; no-one will wait that long
         request: request,
       );
 
@@ -1538,10 +1540,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       return true;
     } on SocketException catch (e) {
       debugPrint("MapPageState updatePolyline Network error while fetching route: $e");
-      _handlePolylineError("Network connection issue, so route will not be shown. Please check your connection and swipe back to try again.");
+      _handlePolylineError("Network connection issue, so route will not be shown. Please check your connection and swipe back if you’d like to try again.");
     } on HttpException catch (e) {
       debugPrint("MapPageState updatePolyline HTTP error while fetching route: $e");
-      _handlePolylineError("Error retrieving map data, so route will not be shown. Please check your connection and swipe back to try again.");
+      _handlePolylineError("Error retrieving map data, so route will not be shown. Please check your connection and swipe back if you’d like to try again.");
     } on FormatException catch (e) {
       debugPrint("MapPageState updatePolyline Data format error: $e");
       _handlePolylineError("Unexpected data format from directions API, so route will not be shown.");
@@ -1554,6 +1556,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void _handlePolylineError(String message) {
     debugPrint('MapPageState _handlePolylineError error: $message');
+    if (!mounted) return;
     final colours = Theme.of(context).colorScheme;
     // Show a toast with the error
     FToast().init(context).showToast(
