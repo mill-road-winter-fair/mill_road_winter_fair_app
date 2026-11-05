@@ -1273,7 +1273,7 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 HapticFeedback.lightImpact();
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel')
+              child: Text('Cancel', style: TextStyle(color: colorScheme.tertiary))
             ),
             TextButton(
               onPressed: () async {
@@ -1281,7 +1281,7 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 Navigator.of(context).pop();
                 await openAppSettings();
               },
-              child: const Text('Open Settings')
+              child: Text('Open Settings', style: TextStyle(color: colorScheme.tertiary))
             ),
             const SizedBox(width: 8),
           ]),
