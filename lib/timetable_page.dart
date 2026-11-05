@@ -178,17 +178,21 @@ class TimetablePageState extends State<TimetablePage> {
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
     debugPrint('TimetablePageState prepareEvents called for ${theEvents.length} listings');
     Map<String, LocationEvents> preparedEvents = {};
+    Map<String, int> locationEventTotals = {};
     for (var ev in theEvents) {
       if (ev['startTime'] == '' || ev['endTime'] == '') continue; // this can't be a timed event
       final startTime = combineDateAndTime(ev['startTime'], fairDate);
       final endTime = combineDateAndTime(ev['endTime'], fairDate);
-      if (((ev['performanceMusic'] != null && ev['performanceMusic'] == 'TRUE') ||
-              (ev['performanceChildrens'] != null && ev['performanceChildrens'] == 'TRUE') ||
-              (ev['performanceDance'] != null && ev['performanceDance'] == 'TRUE') ||
-              (ev['performanceOther'] != null && ev['performanceOther'] == 'TRUE') ||
-              (ev['visitExperience'] != null && ev['visitExperience'] == 'TRUE')) &&
-          endTime.difference(startTime) < maxDurationToBeEvent) {
+      if (((ev['performanceMusic'] ?? false) == 'TRUE' || (ev['performanceChildrens']  ?? false) == 'TRUE' ||
+              (ev['performanceDance']  ?? false) == 'TRUE' || (ev['performanceOther']  ?? false) == 'TRUE' ||
+              (ev['visitExperience']  ?? false) == 'TRUE') && endTime.difference(startTime) < maxDurationToBeEvent) {
         String? eventLocation = ev['location'];
+        if (eventLocation == null) continue;
+        if (locationEventTotals.containsKey(eventLocation)) {
+          locationEventTotals[eventLocation] = locationEventTotals[eventLocation]! + 1;
+        } else {
+          locationEventTotals[eventLocation] = 1;
+        }
         final thePreparedEvent = PositionedEvent(
           startTime: startTime,
           endTime: endTime,
@@ -214,7 +218,7 @@ class TimetablePageState extends State<TimetablePage> {
         );
         if (preparedEvents.keys.contains(eventLocation)) {
           preparedEvents[eventLocation]!.events.add(thePreparedEvent);
-        } else if (eventLocation != null) {
+        } else {
           preparedEvents[eventLocation] = LocationEvents(stringToLatLng(ev['latLng']), [thePreparedEvent]);
         }
       }
@@ -223,7 +227,7 @@ class TimetablePageState extends State<TimetablePage> {
     // combine all single event locations into one
     List<PositionedEvent> singleEvents = [];
     preparedEvents.removeWhere((loc, eventLocation) {
-      if (eventLocation.events.length == 1) {
+      if (locationEventTotals[loc] == 1) {
         singleEvents.addAll(eventLocation.events);
         return true;
       }
