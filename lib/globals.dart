@@ -113,7 +113,7 @@ ValueNotifier<bool> staticChooserPage = ValueNotifier(onTest);
 // Fair date (and times) for this year
 // Also used by the listing-update notifier.
 final fairDate = DateTime(2026, 12, 5);
-const fairDateTimes = 'Saturday 5 December 2026 10:30—16:30';
+const fairDateTimes = 'Saturday 5 December 10:30—16:30';
 
 // Duration threshold under which a listing will be an 'event' and on the timtable
 const maxDurationToBeEvent = Duration(minutes: 120);
@@ -262,8 +262,8 @@ final List<LatLng> roadClosurePolygonPoints = [
 ];
 
 // Map defaults and markers
-const centreOfFair = LatLng(52.199174, 0.140929);
-const mapInitialZoom = 14.1;
+const centreOfFair = LatLng(52.200266493002076, 0.14340665191411972); // 2026 data
+const mapInitialZoom = 14.497509956359863; // 2026 data, small screen
 String? bitmapDescriptorsThemeKey;
 MapMarkerSize? bitmapDescriptorsMarkerSize;
 Map<String, BitmapDescriptor> bitmapDescriptors = <String, BitmapDescriptor>{}; // single cache of custom BitmapDescriptors to use as map markers

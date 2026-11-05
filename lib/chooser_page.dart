@@ -46,18 +46,22 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
 
   AnimationController? _animationController;
   AnimationController? _initialEntranceController;
+  AnimationController? _backgroundIntroController;
   AnimationController? _secondPhaseController;
   Timer? _idleTimer;
   int? _chosenHotspotID;
   List<Hotspot> hotspots = [];
   Future<void>? _hotspotsFuture;
   final ValueNotifier<double> _secondPhaseProgress = ValueNotifier<double>(0.0);
+  final ValueNotifier<double> _backgroundIntroProgress = ValueNotifier<double>(0.0);
 
   static const int _idleAnimationSteps = 60; // throttling: larger is smoother but dearer
   static const int _entranceAnimationSteps = 300; // throttling: larger is smoother but dearer
   static const int _idleAnimationPeriod = 6; // for an entire cycle
   static const int _entranceAnimationPeriod = 10; // from just background to all icons
   static const int _restartIdleAnimationPeriod = 3; // after how much inactivity to start again
+  static const Duration _backgroundIntroDuration = Duration(milliseconds: 3000);
+  static const double _backgroundReducedOpacity = 0.48;
   final ValueNotifier<double> _paintPhase = ValueNotifier<double>(0.0);
   final ValueNotifier<double> _entranceProgress = ValueNotifier<double>(0.0);
   int _lastPaintStep = -1;
@@ -74,28 +78,31 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     _initialEntranceController = AnimationController(vsync: this, duration: const Duration(seconds: _entranceAnimationPeriod))
       ..addListener(_updateEntranceProgress)
       ..addStatusListener(_entranceStatusChanged);
-    _secondPhaseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
-    _secondPhaseController!.addListener(() {
-      _secondPhaseProgress.value = _secondPhaseController!.value;
-    });
+    _backgroundIntroController = AnimationController(vsync: this, duration: _backgroundIntroDuration)
+      ..addListener(_updateBackgroundIntroProgress)
+      ..addStatusListener(_backgroundIntroStatusChanged);
+    _secondPhaseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700))
+      ..addListener(_updateSecondPhaseProgress);
     staticChooserPage.addListener(_staticChooserPageChanged);
     if (staticChooserPage.value) {
       _initialEntranceComplete = true;
       _entranceProgress.value = 1.0;
       _secondPhaseProgress.value = 1.0;
+      _backgroundIntroProgress.value = 1.0;
     }
-}
-
+  }
 
   @override
   void dispose() {
     staticChooserPage.removeListener(_staticChooserPageChanged);
     _animationController?..removeListener(_updatePaintPhase)..dispose();
     _initialEntranceController?..removeListener(_updateEntranceProgress)..removeStatusListener(_entranceStatusChanged)..dispose();
+    _backgroundIntroController?..removeListener(_updateBackgroundIntroProgress)..removeStatusListener(_backgroundIntroStatusChanged)..dispose();
     _secondPhaseController?..removeListener(_updateSecondPhaseProgress)..dispose();
     _paintPhase.dispose();
     _entranceProgress.dispose();
     _secondPhaseProgress.dispose();
+    _backgroundIntroProgress.dispose();
     _idleTimer?.cancel();
     super.dispose();
   }
@@ -118,21 +125,23 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
       _idleTimer?.cancel();
       _animationController?.stop(canceled: false);
       _initialEntranceController?.stop(canceled: false);
+      _backgroundIntroController?.stop(canceled: false);
       setState(() { _initialEntranceComplete = true; });
       _entranceProgress.value = 1.0;
       _secondPhaseProgress.value = 1.0;
+      _backgroundIntroProgress.value = 1.0;
       _paintPhase.value = 0.0;
     } else {
       _idleTimer?.cancel();
       setState(() {
-        _initialEntranceStarted = true;
+        _initialEntranceStarted = false;
         _initialEntranceComplete = false;
       });
       _entranceProgress.value = 0.0;
       _secondPhaseProgress.value = 0.0;
+      _backgroundIntroProgress.value = 0.0;
       _lastEntranceStep = -1;
-      _initialEntranceController?.forward(from: 0.0);
-      _animationController?.repeat();
+      _backgroundIntroController?.forward(from: 0.0);
     }
   }
 
@@ -152,6 +161,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     _entranceProgress.value = step / _entranceAnimationSteps;
   }
 
+  void _updateBackgroundIntroProgress() {
+    _backgroundIntroProgress.value = _backgroundIntroController!.value;
+  }
+
   void _updateSecondPhaseProgress() {
     _secondPhaseProgress.value = _secondPhaseController!.value;
   }
@@ -160,6 +173,13 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     if (status == AnimationStatus.completed && mounted) {
       setState(() { _initialEntranceComplete = true; });
       _secondPhaseController?.forward(from: 0.0);
+    }
+  }
+
+  void _backgroundIntroStatusChanged(AnimationStatus status) {
+    if (status == AnimationStatus.completed && mounted && !staticChooserPage.value) {
+      _initialEntranceController?.forward(from: 0.0);
+      _animationController?.repeat();
     }
   }
 
@@ -203,10 +223,13 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         labelRightOffset: 0,
         labelTopOffset: 0,
         left: -0.03,
-        top: 0.01,
+        top: -0.01,
         scale: 1,
         assetPath: 'assets/infoPages/foodDrink.png',
-        theTap: () => widget.onOpenListings('all', 'food'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_food');
+          widget.onOpenListings('all', 'food');
+        },
       ),
       Hotspot(
         label: 'Music',
@@ -217,7 +240,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: -0.005,
         scale: 1,
         assetPath: 'assets/infoPages/music.png',
-        theTap: () => widget.onOpenTimetable(false, true),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_music');
+          widget.onOpenTimetable(false, true);
+        },
       ),
       Hotspot(
         label: 'Children’s',
@@ -225,10 +251,13 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         labelRightOffset: 0,
         labelTopOffset: 0.033,
         left: 0.35,
-        top: 0.18,
+        top: 0.16,
         scale: 1.05,
         assetPath: 'assets/infoPages/childrens.png',
-        theTap: () => widget.onOpenListings('all', 'performanceChildrens'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_childrens');
+          widget.onOpenListings('all', 'performanceChildrens');
+        },
       ),
       Hotspot(
         label: 'Shopping',
@@ -239,7 +268,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.28,
         scale: 1,
         assetPath: 'assets/infoPages/shopping.png',
-        theTap: () => widget.onOpenListings('all', 'shopping'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_shopping');
+          widget.onOpenListings('all', 'shopping');
+        },
       ),
       Hotspot(
         label: 'Charity,\nCommunity\n& Info',
@@ -250,7 +282,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.29,
         scale: 1,
         assetPath: 'assets/infoPages/charityCommunityInfo.png',
-        theTap: () => widget.onOpenListings('all', 'charityCommunityInfo'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_community');
+          widget.onOpenListings('all', 'charityCommunityInfo');
+        },
       ),
       Hotspot(
         label: 'Visit &\nExperience',
@@ -261,7 +296,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.56,
         scale: 1,
         assetPath: 'assets/infoPages/visitExperience.png',
-        theTap: () => widget.onOpenListings('all', 'visitExperience'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_visits');
+          widget.onOpenListings('all', 'visitExperience');
+        },
       ),
       Hotspot(
         label: 'Services',
@@ -272,7 +310,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.69,
         scale: 1,
         assetPath: 'assets/infoPages/services.png',
-        theTap: () => widget.onOpenListings('all', 'service'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_services');
+          widget.onOpenListings('all', 'service');
+        },
       ),
       Hotspot(
         label: 'Nearby',
@@ -283,7 +324,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.70,
         scale: 0.9,
         assetPath: 'assets/infoPages/nearby.png',
-        theTap: () => widget.onOpenMap(10),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_nearby');
+          widget.onOpenMap(10);
+        },
       ),
     ];
 
@@ -316,8 +360,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
       if (!mounted || staticChooserPage.value) return;
       if (!_initialEntranceStarted) {
         _initialEntranceStarted = true;
-        _initialEntranceController?.forward(from: 0.0);
-        _animationController?.repeat();
+        _backgroundIntroController?.forward(from: 0.0);
       }
     });
 
@@ -383,6 +426,8 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
                         staticChooserPage: staticChooserPage.value,
                         entranceProgress: _entranceProgress,
                         secondPhaseProgress: _secondPhaseProgress,
+                        backgroundIntroProgress: _backgroundIntroProgress,
+                        backgroundReducedOpacity: _backgroundReducedOpacity,
                         initialEntranceComplete: _initialEntranceComplete,
                         chosenHotspotID: _chosenHotspotID,
                         colourScheme: colourScheme,
@@ -413,6 +458,8 @@ class _ChooserContent extends StatelessWidget {
     required this.staticChooserPage,
     required this.entranceProgress,
     required this.secondPhaseProgress,
+    required this.backgroundIntroProgress,
+    required this.backgroundReducedOpacity,
     required this.initialEntranceComplete,
     required this.chosenHotspotID,
     required this.colourScheme,
@@ -426,6 +473,8 @@ class _ChooserContent extends StatelessWidget {
   final bool staticChooserPage;
   final ValueListenable<double> entranceProgress;
   final ValueListenable<double> secondPhaseProgress;
+  final ValueListenable<double> backgroundIntroProgress;
+  final double backgroundReducedOpacity;
   final bool initialEntranceComplete;
   final int? chosenHotspotID;
   final ColorScheme colourScheme;
@@ -440,7 +489,10 @@ class _ChooserContent extends StatelessWidget {
 
     return Stack(fit: StackFit.expand,
       children: [
-        const RepaintBoundary(child: _ChooserBackground()),
+        RepaintBoundary(child: _ChooserBackground(
+          backgroundIntroProgress: backgroundIntroProgress,
+          reducedOpacity: backgroundReducedOpacity,
+        )),
         for (int index = 0; index < hotspots.length; index++)
           _AnimatedHotspot(
             hotspot: hotspots[index],
@@ -449,6 +501,7 @@ class _ChooserContent extends StatelessWidget {
             paintPhase: paintPhase,
             entranceProgress: entranceProgress,
             secondPhaseProgress: secondPhaseProgress,
+            backgroundIntroProgress: backgroundIntroProgress,
             initialEntranceComplete: initialEntranceComplete,
             staticChooserPage: staticChooserPage,
             isSelected: chosenHotspotID == index,
@@ -461,9 +514,10 @@ class _ChooserContent extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('home_about_fair');
                 Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
               },
-              child: const RepaintBoundary(child: _ChooserLogo()),
+              child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
             ),
           ),
         ),
@@ -477,21 +531,39 @@ class _ChooserContent extends StatelessWidget {
 
 class _ChooserBackground extends StatelessWidget {
 
-  const _ChooserBackground();
+  const _ChooserBackground({
+    required this.backgroundIntroProgress,
+    required this.reducedOpacity,
+  });
+
+  final ValueListenable<double> backgroundIntroProgress;
+  final double reducedOpacity;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset('assets/infoPages/chooserPage_background.jpg', fit: BoxFit.fill),
-        Positioned.fill(
-          child: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-            child: Container(color: Colors.white.withAlpha(150)),
+    return ValueListenableBuilder<double>(
+      valueListenable: backgroundIntroProgress,
+      builder: (context, progress, _) {
+        final opacity = backgroundIntroOpacityForPhase(progress, reducedOpacity);
+        final blurProgress = (1.0 - opacity) / (1.0 - reducedOpacity);
+        final overlayAlpha = (blurProgress * 150.0).clamp(0.0, 150.0).round();
+        final blurSigma = (blurProgress * 4.0).clamp(0.0, 4.0);
+        return Opacity(
+          opacity: opacity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset('assets/infoPages/chooserPage_background.jpg', fit: BoxFit.fill),
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ui.ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+                  child: Container(color: Colors.white.withAlpha(overlayAlpha)),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -500,20 +572,36 @@ class _ChooserBackground extends StatelessWidget {
 
 class _ChooserLogo extends StatelessWidget {
 
-  const _ChooserLogo();
+  const _ChooserLogo({
+    required this.backgroundIntroProgress,
+  });
+
+  final ValueListenable<double> backgroundIntroProgress;
 
   @override
   Widget build(BuildContext context) {
-    return SimpleShadow(
-      opacity: 1,
-      color: Colors.white,
-      sigma: 6,
-      offset: const Offset(3, 3),
-      child: Image.asset(
-        'assets/infoPages/MRWF_logo_transparent.png',
-        fit: BoxFit.contain,
-        width: MediaQuery.sizeOf(context).width * 0.5,
-      ),
+    return ValueListenableBuilder<double>(
+      valueListenable: backgroundIntroProgress,
+      builder: (context, progress, _) {
+        final opacity = logoIntroOpacityForPhase(progress);
+        return IgnorePointer(
+          ignoring: opacity <= 0.0,
+          child: Opacity(
+            opacity: opacity,
+            child: SimpleShadow(
+              opacity: 1,
+              color: Colors.white,
+              sigma: 6,
+              offset: const Offset(3, 3),
+              child: Image.asset(
+                'assets/infoPages/MRWF_logo_transparent.png',
+                fit: BoxFit.contain,
+                width: MediaQuery.sizeOf(context).width * 0.5,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -529,6 +617,7 @@ class _AnimatedHotspot extends StatelessWidget {
     required this.paintPhase,
     required this.entranceProgress,
     required this.secondPhaseProgress,
+    required this.backgroundIntroProgress,
     required this.initialEntranceComplete,
     required this.staticChooserPage,
     required this.isSelected,
@@ -542,6 +631,7 @@ class _AnimatedHotspot extends StatelessWidget {
   final ValueListenable<double> paintPhase;
   final ValueListenable<double> entranceProgress;
   final ValueListenable<double> secondPhaseProgress;
+  final ValueListenable<double> backgroundIntroProgress;
   final bool initialEntranceComplete;
   final bool staticChooserPage;
   final bool isSelected;
@@ -562,6 +652,7 @@ class _AnimatedHotspot extends StatelessWidget {
         paintPhase: paintPhase,
         entranceProgress: entranceProgress,
         secondPhaseProgress: secondPhaseProgress,
+        backgroundIntroProgress: backgroundIntroProgress,
         initialEntranceComplete: initialEntranceComplete,
         staticChooserPage: staticChooserPage,
         isSelected: isSelected,
@@ -583,6 +674,7 @@ class _HotspotLayers extends StatelessWidget {
     required this.paintPhase,
     required this.entranceProgress,
     required this.secondPhaseProgress,
+    required this.backgroundIntroProgress,
     required this.initialEntranceComplete,
     required this.staticChooserPage,
     required this.isSelected,
@@ -596,6 +688,7 @@ class _HotspotLayers extends StatelessWidget {
   final ValueListenable<double> paintPhase;
   final ValueListenable<double> entranceProgress;
   final ValueListenable<double> secondPhaseProgress;
+  final ValueListenable<double> backgroundIntroProgress;
   final bool initialEntranceComplete;
   final bool staticChooserPage;
   final bool isSelected;
@@ -604,7 +697,7 @@ class _HotspotLayers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final animation = Listenable.merge([paintPhase, entranceProgress, secondPhaseProgress]);
+    final animation = Listenable.merge([paintPhase, entranceProgress, secondPhaseProgress, backgroundIntroProgress]);
     return AnimatedBuilder(
       animation: animation,
       builder: (context, _) {
@@ -776,6 +869,24 @@ class _CachedLabel extends StatelessWidget {
     ]);
   }
 
+}
+
+
+double backgroundIntroOpacityForPhase(double progress, double reducedOpacity) {
+  final clamped = progress.clamp(0.0, 1.0);
+  final eased = Curves.easeInOutCubic.transform(clamped);
+  return (1.0 - ((1.0 - reducedOpacity) * eased)).clamp(reducedOpacity, 1.0);
+}
+
+
+double logoIntroOpacityForPhase(double progress) {
+  final clamped = progress.clamp(0.0, 1.0);
+  final fadeStart = 0.15;
+  final fadeEnd = 0.7;
+  if (clamped <= fadeStart) return 0.0;
+  if (clamped >= fadeEnd) return 1.0;
+  final local = (clamped - fadeStart) / (fadeEnd - fadeStart);
+  return Curves.easeInOutCubic.transform(local).clamp(0.0, 1.0);
 }
 
 
