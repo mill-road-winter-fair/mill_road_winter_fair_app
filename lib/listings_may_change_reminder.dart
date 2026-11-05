@@ -1,3 +1,5 @@
+import 'dart:io';
+
 // App imports
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
@@ -126,70 +128,60 @@ class ListingUpdateNotifier {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => ScrollConfiguration(
-        behavior: const _NoticeScrollBehavior(),
-        child: StatefulBuilder(
-          builder: (context, setState) => AlertDialog(
-            scrollable: true,
-            title: Text(titleFor(noticeDate)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(messageFor(noticeDate)),
-                if (isListingsMayChange)
-                  CheckboxListTile(
-                    value: dontShowAgain,
-                    onChanged: (value) {
-                      HapticFeedback.selectionClick();
-                      analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
-                      setState(() => dontShowAgain = value ?? false);
-                    },
-                    title: const Text("Don't show this again"),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  HapticFeedback.lightImpact();
-                  analyticsService.logButtonTapped('${analyticsId}_ok');
-                  if (isListingsMayChange) {
-                    listingUpdateNoticeEnabled = !dontShowAgain;
-                    await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
-                    await analyticsService.logPreferenceSet(
-                      'listing_update_notice',
-                      listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
-                    );
-                  }
-                  if (dialogContext.mounted) {
-                    Navigator.of(dialogContext).pop();
-                  }
-                },
-                child: const Text('OK'),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(titleFor(noticeDate)),
+          content: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: Scrollbar(
+              thumbVisibility: Platform.isIOS ? false : true,
+              child: SingleChildScrollView(
+                primary: true,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(messageFor(noticeDate)),
+                    if (isListingsMayChange)
+                      CheckboxListTile(
+                        value: dontShowAgain,
+                        onChanged: (value) {
+                          HapticFeedback.selectionClick();
+                          analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
+                          setState(() => dontShowAgain = value ?? false);
+                        },
+                        title: const Text("Don't show this again"),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                      ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('${analyticsId}_ok');
+                if (isListingsMayChange) {
+                  listingUpdateNoticeEnabled = !dontShowAgain;
+                  await prefs.setBool(preferenceKey, listingUpdateNoticeEnabled);
+                  await analyticsService.logPreferenceSet(
+                    'listing_update_notice',
+                    listingUpdateNoticeEnabled ? 'enabled' : 'disabled',
+                  );
+                }
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
         ),
       ),
-    );
-  }
-}
-
-class _NoticeScrollBehavior extends MaterialScrollBehavior {
-  const _NoticeScrollBehavior();
-
-  @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
-    if (getPlatform(context) != TargetPlatform.android) return child;
-
-    return Scrollbar(
-      controller: details.controller,
-      thumbVisibility: true,
-      child: child,
     );
   }
 }
