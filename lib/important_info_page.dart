@@ -68,6 +68,9 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     debugPrint('ImportantInfoPage build() called');
+    final colorScheme = Theme.of(context).colorScheme;
+    final bodyStyle = TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSecondary);
+    final headingStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: colorScheme.tertiary);
     return SafeArea(
       top: false,
       left: false,
@@ -99,7 +102,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                           child: Image.asset('assets/infoPages/hiVis_cropped.jpg',
                               fit: BoxFit.fitWidth, semanticLabel: 'Mill Road Winter Fair stewards wearing high-visibility jackets')),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 bulletPoint('Stewards wearing hi-vis jackets are available to assist you.'),
                 bulletPoint('To help ensure everyone’s safety, please comply promptly with any instructions from stewards.'),
                 bulletPoint('If you see anything unsafe or suspicious, please report it to a steward immediately.'),
@@ -113,17 +116,17 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                           fit: BoxFit.fitWidth, semanticLabel: 'A caution sign warning that vehicles may be moving through the Fair')),
                 ),
                 const SizedBox(height: 20),
-                const Text('Caution – vehicles!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-                const SizedBox(height: 15),
+                Text('Caution – vehicles!', style: headingStyle),
+                const SizedBox(height: 10),
                 bulletPoint(
                     'Whilst certain roads (as shown on the map) will be closed to traffic (including cyclists and scooters) between 9am and 5.30pm, there will be some vehicle movement.'),
                 bulletPoint('Pedestrians should exercise particular care before the road is fully closed.', isBold: true),
                 bulletPoint('Re-opening will occur gradually, so drivers and pedestrians should take extreme care.', isBold: true),
                 bulletPoint('Pedestrians will be required to make way for emergency and other vehicles within the closure area, from time to time.'),
                 const SizedBox(height: 15),
-                const Text('First aid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                Text('First aid', style: headingStyle),
                 const SizedBox(height: 10),
-                const Text('If you require first aid, ask the nearest steward or go to Mill Road Baptist Church.'),
+                Text('If you require first aid, ask the nearest steward or go to Mill Road Baptist Church.', style: bodyStyle),
                 const SizedBox(height: 20),
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 250),
@@ -133,19 +136,18 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                           fit: BoxFit.fitWidth, semanticLabel: 'Children riding a carousel at Mill Road Winter Fair')),
                 ),
                 const SizedBox(height: 20),
-                const Text('Coming with children?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                Text('Coming with children?', style: headingStyle),
                 const SizedBox(height: 10),
                 bulletPoint('Please arrange your own family meeting point in case you become separated.'),
                 bulletPoint('Report missing children to any steward.'),
                 const SizedBox(height: 15),
-                const Text('Keep the pavement clear! Keep the Fair alive!', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                Text('Keep the pavement clear!\nKeep the Fair alive!', style: headingStyle, textAlign: TextAlign.center),
                 const SizedBox(height: 10),
                 Text.rich(
                   TextSpan(
                     children: [
-                      const TextSpan(
-                          text:
-                              'If your business is within the road closure, please read the Important Safety Guidelines for Local Businesses you have been sent or available at: '),
+                      TextSpan(text: 'If your business is within the road closure, please read the Important Safety Guidelines for Local Businesses '
+                          'you have been sent or available at: ', style: bodyStyle),
                       TextSpan(
                           text: 'www.millroadwinterfair.org/businesses-info',
                           style: const TextStyle(decoration: TextDecoration.underline),
@@ -159,14 +161,13 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                   ),
                 ),
                 const SizedBox(height: 15),
-                const Text('Road closure', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                Text('Road closure', style: headingStyle),
                 const SizedBox(height: 10),
                 Text.rich(
                   TextSpan(
                     children: [
-                      const TextSpan(
-                          text:
-                              'To find out more about the road closure, please read the Road Closure Notice distributed separately or available at: '),
+                      TextSpan(text: 'To find out more about the road closure, please read the Road Closure Notice '
+                          'distributed separately or available at: ', style: bodyStyle),
                       TextSpan(
                           text: 'www.millroadwinterfair.org/important-info',
                           style: const TextStyle(decoration: TextDecoration.underline),
@@ -180,7 +181,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                   ),
                 ),
                 const SizedBox(height: 15),
-                const Text('Updates and contact', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                Text('Updates and contact', style: headingStyle),
                 const SizedBox(height: 10),
                 bulletPoint('Follow Mill Road Winter Fair on social media for the latest news and updates, and download the app for the latest listings.'),
                 bulletPoint(
@@ -197,11 +198,14 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                   ),
                 ),
                 const SizedBox(height: 15),
-                const Text('Our responsibilities', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                Text('Our responsibilities', style: headingStyle),
                 const SizedBox(height: 10),
-                const Text(
-                    'The Fair (MRWF) is organised by unpaid volunteers, constituted as Mill Road Winter Fair CIC, who plan stalls, activities and entertainment at designated locations throughout the road closure and Donkey Common, Petersfield Green, Ditchburn Gardens and Gwydir Street Car Park. Official MRWF stalls are issued with certificates to display. MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of other traders and organisers.'),
-                const SizedBox(height: 10),
+                Text('The Fair (MRWF) is organised by unpaid volunteers, constituted as Mill Road Winter Fair CIC, who plan stalls, '
+                    'activities and entertainment at designated locations throughout the road closure and Donkey Common, Petersfield Green, '
+                    'Ditchburn Gardens and Gwydir Street Car Park. Official MRWF stalls are issued with certificates to display. '
+                    'MRWF takes every reasonable effort to ensure the safety of its actions. MRWF accepts no liability for the activities of '
+                    'other traders and organisers.', style: bodyStyle),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -220,7 +224,7 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
           Expanded(
             child: Text.rich(
               TextSpan(text: theText, children: [if (link != null) link]),
-              style: TextStyle(height: 1.3, fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+              style:  TextStyle(height: 1.3, fontSize: 16, fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
             ),
           ),
         ],
