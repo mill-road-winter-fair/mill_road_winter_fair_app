@@ -279,12 +279,12 @@ class HomePageState extends State<HomePage> with RouteAware {
           child: Material(
             color: colours.primary,
             borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Text(
                 'Unable to fetch listings. Showing cached listings instead, these may not be up to date.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: colours.onPrimary, fontSize: 16),
+                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           ),

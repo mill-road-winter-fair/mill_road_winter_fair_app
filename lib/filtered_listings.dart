@@ -255,7 +255,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           msg: 'Location services and permissions are required to determine distances',
           gravity: ToastGravity.CENTER,
           backgroundColor: Theme.of(context).colorScheme.primary,
-          textColor: Theme.of(context).colorScheme.onPrimary,
+          textColor: Colors.white,
           fontSize: 16,
           toastLength: Toast.LENGTH_LONG,
           timeInSecForIosWeb: 4,
