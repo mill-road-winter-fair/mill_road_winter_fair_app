@@ -125,6 +125,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   @override
   void initState() {
+    super.initState();
+    if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addObserver(this);
     themeNotifier.addListener(_onThemeChanged);
     preferredMapMarkerSize.addListener(_onThemeChanged);
@@ -135,8 +137,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     setVisibleMarkerLists();
     addAllVisibleMarkers();
     _establishLocationAndRefreshMap();
-    establishLocation();
-    if (widget.destinationId != null && widget.destinationId!.isNotEmpty && widget.destinationLatLng != null) doingAPushNavigation = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
       if (!mounted) return;
@@ -145,10 +145,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           allowListingsMayChange: widget.allowListingsMayChangeNotice);
       if (doingAPushNavigation ?? false) {
         doingAPushNavigation = false;
-        doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
+        doTheNavigation(widget.destinationId!, widget.destinationLatLng!);
       }
     });
-    super.initState();
   }
 
   @override
@@ -545,7 +544,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         msg: 'No matching listings found',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
+        textColor: Colors.white,
         fontSize: 16,
         toastLength: Toast.LENGTH_SHORT,
         timeInSecForIosWeb: 2,
@@ -1350,24 +1349,34 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     );
   }
 
-  Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
+  Future<void> doTheNavigation(String id, LatLng destination) async {
     // If user has location tracking enabled
     if (currentLatLng != null) {
       hideAllMarkers();
       // Get the user's current location
       Position position = await getCurrentPosition();
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-      await updatePolyline(currentLatLng, destination);
-      // Set the camera position once, at the beginning of the navigation
-      _setMapCameraToFitPolyline(polylines);
-      // Start location updates
-      await startLocationUpdates(destination);
+      if  (!await updatePolyline(currentLatLng, destination)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) { // since googlemap() may overwrite it with its own initialCameraPosition
+          _moveCameraToBounds(
+            LatLng(min(currentLatLng.latitude, destination.latitude), min(currentLatLng.longitude, destination.longitude)),
+            LatLng(max(currentLatLng.latitude, destination.latitude), max(currentLatLng.longitude, destination.longitude)),
+          );
+        });
+        // Start location updates without a poyline
+        await startLocationUpdates(null);
+      } else {
+        // Set the camera position once, at the beginning of the navigation
+        _setMapCameraToFitPolyline(polylines);
+        // Start location updates
+        await startLocationUpdates(destination);
+      }
     } else {
       Fluttertoast.showToast(
         msg: 'Location services and permissions are required to determine directions',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
+        textColor: Colors.white,
         fontSize: 16,
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
@@ -1449,7 +1458,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     super.dispose();
   }
 
-  Future<void> startLocationUpdates(LatLng destination) async {
+  Future<void> startLocationUpdates(LatLng? destination) async {
     debugPrint('MapPageState startLocationUpdates called');
     // Store the destination
     _destination = destination;
@@ -1471,7 +1480,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     });
   }
 
-  Future<void> updatePolyline(LatLng origin, LatLng destination) async {
+  Future<bool> updatePolyline(LatLng origin, LatLng destination) async {
     debugPrint('MapPageState updatePolyline called');
     try {
       await _ensureDirectionsConfigLoaded();
@@ -1526,38 +1535,38 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
         _distanceToDestination = convertDistanceUnits(distanceMetres, preferredDistanceUnits);
       });
+      return true;
     } on SocketException catch (e) {
       debugPrint("MapPageState updatePolyline Network error while fetching route: $e");
-      _handlePolylineError("Network connection issue. Please try again.");
+      _handlePolylineError("Network connection issue, so route will not be shown. Please check your connection and swipe back to try again.");
     } on HttpException catch (e) {
       debugPrint("MapPageState updatePolyline HTTP error while fetching route: $e");
-      _handlePolylineError("Error retrieving route data. Please check your connection and try again.");
+      _handlePolylineError("Error retrieving map data, so route will not be shown. Please check your connection and swipe back to try again.");
     } on FormatException catch (e) {
       debugPrint("MapPageState updatePolyline Data format error: $e");
-      _handlePolylineError("Unexpected data format from directions API.");
+      _handlePolylineError("Unexpected data format from directions API, so route will not be shown.");
     } on Exception catch (e, stack) {
       debugPrint("MapPageState updatePolyline Unexpected error fetching directions: $e\n$stack");
-      _handlePolylineError("Failed to get route directions.");
+      _handlePolylineError("Failed to get route directions, so route will not be shown.");
     }
+    return false;
   }
 
   void _handlePolylineError(String message) {
-    setState(() {
-      polylines.clear();
-      _distanceToDestination = null;
-      hideAllMarkers();
-      addAllVisibleMarkers();
-      _setMapCameraToFitMapMarkers();
-      navigationInProgress = false;
-    });
     debugPrint('MapPageState _handlePolylineError error: $message');
-    // Show a snackbar with the error
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        content: Text(
-          message,
-          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+    final colours = Theme.of(context).colorScheme;
+    // Show a toast with the error
+    FToast().init(context).showToast(
+      gravity: ToastGravity.CENTER,
+      ignorePointer: true,
+      toastDuration: const Duration(seconds: 5),
+      child: Material(
+        color: colours.primary,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
         ),
       ),
     );
@@ -1582,7 +1591,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         msg: 'Unable to determine your location',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
+        textColor: Colors.white,
         fontSize: 16,
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
@@ -1610,7 +1619,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           : 'Nearest venues are more than 500m away, so please try again when you’re at the Fair.',
         gravity: ToastGravity.CENTER,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Theme.of(context).colorScheme.onPrimary,
+        textColor: Colors.white,
         fontSize: 16,
         toastLength: Toast.LENGTH_LONG,
         timeInSecForIosWeb: 4,
@@ -1670,15 +1679,17 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void _moveCameraToBounds(LatLng southwest, LatLng northeast) {
     debugPrint('MapPageState moveCameraToBounds called with southwest=$southwest northeast=$northeast');
+    // add some extra padding, inversely proportional to the distance across the area, so corners aren't off screen
+    double extraPaddingForSmallArea = (0.00006 / pow(pow(northeast.latitude - southwest.latitude, 2) + pow(northeast.longitude - southwest.longitude, 2), 0.5)).clamp(0, 0.1);
     switch (preferredMapOrientation) {
       case MapOrientation.adaptive:
         const double westUpBearing = 290;
-        final double westUpPadding = mapHeight! * 0.05;
+        final double westUpPadding = mapHeight! * (0.07 + extraPaddingForSmallArea);
         _moveCameraToBoundsWithRotation(southwest, northeast, westUpPadding, westUpBearing);
         break;
       case MapOrientation.alwaysNorth:
         const double northUpBearing = 0;
-        double northUpPadding = mapWidth! * 0.05;
+        double northUpPadding = mapWidth! * (0.05 + extraPaddingForSmallArea);
         _moveCameraToBoundsWithRotation(southwest, northeast, northUpPadding, northUpBearing);
         break;
     }
@@ -2094,7 +2105,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           _controller = controller;
                           if (listings.isNotEmpty) {
                             // We should have listings by this point so set the camera to their bounds
-                            _setMapCameraToFitMapMarkers();
+                            if (widget.destinationId == null) _setMapCameraToFitMapMarkers();
                           }
                         },
                         initialCameraPosition: CameraPosition(
@@ -2132,7 +2143,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   children: [
                     if (navigationInProgress == false)
                       FloatingActionButton(
-                        heroTag: 'homeBtn',
+                        heroTag: null,
                         tooltip: 'Show the whole Fair map',
                         onPressed: () {
                           HapticFeedback.lightImpact();
@@ -2147,7 +2158,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -2164,7 +2175,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (navigationInProgress == false && locationServicesEnabled == true &&
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
-                        heroTag: 'nearbyAttractionsBtn',
+                        heroTag: null,
                         tooltip: 'Show nearby attractions',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
@@ -2178,7 +2189,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -2195,7 +2206,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     if (locationServicesEnabled == true && navigationInProgress &&
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
-                        heroTag: 'centreOnUserBtn',
+                        heroTag: null,
                         tooltip: 'Centre the map on your location',
                         onPressed: () async {
                           HapticFeedback.lightImpact();
@@ -2233,7 +2244,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -2247,7 +2258,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         ),
                       ),
                     FloatingActionButton(
-                      heroTag: 'mapTypeBtn',
+                      heroTag: null,
                       tooltip: mapType == MapType.normal ? 'Switch to satellite map' : 'Switch to street map',
                       onPressed: () {
                         HapticFeedback.lightImpact();
@@ -2274,7 +2285,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: colorScheme.primary,
+                          color: colorScheme.tertiary,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -2289,7 +2300,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     ),
                     if (navigationInProgress == false)
                       FloatingActionButton(
-                        heroTag: 'mapBearingBtn',
+                        heroTag: null,
                         tooltip: preferredMapOrientation == MapOrientation.adaptive ? 'Keep north at the top' : 'Use direction of travel',
                         onPressed: () {
                           HapticFeedback.lightImpact();
@@ -2313,7 +2324,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colorScheme.primary,
+                            color: colorScheme.tertiary,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(

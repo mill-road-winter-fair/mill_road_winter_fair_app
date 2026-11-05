@@ -31,6 +31,14 @@ void main() {
       expect(hotspotEntranceOpacityForIndex(0, 0.5, totalHotspots: 0), 1.0);
     });
 
+    test('intro phase fades the background to the reduced opacity and reveals the logo', () {
+      expect(backgroundIntroOpacityForPhase(0.0, 0.58), 1.0);
+      expect(backgroundIntroOpacityForPhase(1.0, 0.58), closeTo(0.58, 0.01));
+      expect(logoIntroOpacityForPhase(0.0), 0.0);
+      expect(logoIntroOpacityForPhase(0.5), greaterThan(0.0));
+      expect(logoIntroOpacityForPhase(1.0), 1.0);
+    });
+
     test('hotspotLabelOpacityForPhase stays between 30% and 100%', () {
       for (var index = 0; index < 5; index++) {
         for (var phase = 0.0; phase <= 1.0; phase += 0.1) {
