@@ -489,6 +489,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         IconButton(
           key: hidePastIconKey,
           tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
+          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_hidePastListings) ? Colors.white.withAlpha(30) : null)),
           onLongPress: !canTogglePastListings ? null : () => showMiniPopup(context, hidePastIconKey,
               (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
           onPressed: () {
@@ -511,7 +512,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             }
           },
           icon: Icon(
-            (_hidePastListings) ? Icons.free_cancellation : Icons.history_toggle_off,
+            Icons.history_toggle_off,
             size:24,
             color: (canTogglePastListings && isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
           ),
