@@ -64,9 +64,9 @@ class TextImageRow extends StatelessWidget {
 }
 
 
-// Make a row in the events table. Needed as can't style the entire table or pad an entire row in one go
 TableRow eventRow(ColorScheme colorScheme, String eventTime, String eventTitle, [List<TextSpan>? eventSubtitle]) {
-  var eventsTitleStyle = TextStyle(fontSize: 17, color: colorScheme.onPrimary, height: 1.2);
+// Make a row in the events table. Needed as can't style the entire table or pad an entire row in one go
+  var eventsTitleStyle = const TextStyle(fontSize: 17, color: Colors.white, height: 1.2);
   var eventsTimeStyle = eventsTitleStyle.copyWith(fontWeight: FontWeight.bold);
 
   final List<TextSpan> allTitleSpans;
@@ -198,11 +198,11 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     debugPrint('AboutTheFairPage build() called');
+    var bodyStyle = TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSecondary);
+    var eventsSubtitleStyle = const TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: Colors.white, height: 1.2);
+    var eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: Colors.white);
     final colorScheme = Theme.of(context).colorScheme;
-    final bodyStyle = const TextStyle(fontSize: 16);
-    final headingStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colorScheme.primary);
-    final eventsSubtitleStyle = TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: colorScheme.onPrimary);
-    final eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: colorScheme.onPrimary);
+    final headingStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colorScheme.tertiary);
 
     // Build a list of TextSpans for sponsors so we can special-case the Bush entry
     final List<TextSpan> sponsorSpans = [];
@@ -258,7 +258,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                 child: Column(
                   spacing: 10,
                   children: [
-                    Text('Your annual celebration of all that is great about Mill Road returns for its 21st year!', style: bodyStyle.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                    Text('Your annual celebration of all that is great about Mill Road returns for its 21st year!', style: bodyStyle.copyWith(fontWeight: FontWeight.bold, color: colorScheme.tertiary)),
                     TextImageRow(
                       textSpan: const TextSpan(children: [
                         TextSpan(text: 'As well as highlights like parades, stalls, performances and children’s activities, '
@@ -313,8 +313,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Local arts, crafts and goodies\n', style: headingStyle),
                         const TextSpan(text: 'You’ll find lots of stalls at Donkey Common, Petersfield Green, Ditchburn Gardens '
-                          'and Headly Street, with even more all along the road. There’s also work from local artists at ARU, '
-                          'the Six Bells, David Parr House, St Barnabas Centre, Romsey Mill and The Edge Café.'),
+                          'and Headly Street, with even more all along the road. There’s also work from local artists at ARU and other venues.'),
                       ]),
                       imagePath: "assets/infoPages/shopping.png",
                       imageOnLeft: true,
@@ -324,23 +323,21 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Fun things to do with the family\n', style: headingStyle),
-                        const TextSpan(text: 'There’s plenty for children, including crafts at Mill Road Community Centre and the Salvation Army Centre, '
-                          'magic and comedy at Romsey Mill, hands-on science at the Salisbury Club and Doctor Who at Zion Baptist Church. '),
+                        const TextSpan(text: 'There’s plenty for children, including crafts, magic, comedy, hands-on science and Doctor Who. '
+                        'Santa is busy appearing at several venues! '
+                        'There are also robotics demonstrations and workshops, storytelling and much more. '
+                        'From 11.45am, don’t miss the colourful dancers and musicians of the Coleridge Carnival Crew in the parade.'
+                        ),
                       ]),
                       imagePath: "assets/infoPages/childrens.png",
                       textStyle: bodyStyle,
                     ),
-                    Text.rich(style: bodyStyle, const TextSpan(children: [
-                      TextSpan(text: 'Santa is busy appearing at The Empress, the Cambridge Blue, Ditchburn Place and Zion Baptist Church! '
-                        'There are also robotics demonstrations and workshops at ARU, along with storytelling and much more. '
-                        'From 11.45am, don’t miss the colourful dancers and musicians of the Coleridge Carnival Crew in the parade.'),
-                    ])),
                     const SizedBox.shrink(),
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Guided walks\n', style: headingStyle),
                         const TextSpan(text: 'A 90-minute Mill Road history tour starts outside St Barnabas Church at 9am (£15), '
-                          'and free tours of the historic cemetery are at 10am, 11am, 12.30pm and 2pm from the gates near Mackenzie Road.'),
+                          'and free tours of the historic cemetery are at 10am, 11am, 12.30pm and 2pm.'),
                       ]),
                       imagePath: "assets/infoPages/visitExperience.png",
                       imageOnLeft: true,
@@ -357,7 +354,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       textStyle: bodyStyle,
                     ),
                     Text.rich(style: bodyStyle, const TextSpan(children: [
-                      TextSpan(text: 'Take a trip to the past with Mill Road History Society at the Bath House and find free books provided by Cambridge Literary '
+                      TextSpan(text: 'Take a trip to the past with Mill Road History Society and find free books provided by Cambridge Literary '
                         'Festival hidden all around the Fair.'),
                     ])),
                    Column(crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,7 +407,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                 padding: const EdgeInsets.all(8),
                                 color: colorScheme.primary,
                                 alignment: Alignment.centerLeft,
-                                child: Text('Key events', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: colorScheme.onPrimary, height: 1.0),
+                                child: const Text('Key events', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white, height: 1.0),
                                 ),
                               ),
                             ),

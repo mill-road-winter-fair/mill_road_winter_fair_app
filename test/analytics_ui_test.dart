@@ -66,7 +66,7 @@ void main() {
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
     await tester.pumpWithClock(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
-      0, (index) => analytics.calls.add('navigate:$index'), const ColorScheme.light(), analyticsService: analytics,
+      0, (index) => analytics.calls.add('navigate:$index'), ThemeData(), analyticsService: analytics,
     ))));
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);

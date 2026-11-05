@@ -1,13 +1,15 @@
+import 'dart:io';
+
 // App imports
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
-import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 
 // Third-party imports
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -69,9 +71,9 @@ class ListingUpdateNotifier {
     if (now.isAfter(fairDate)) {
       return Text.rich(TextSpan(children: [
         const TextSpan(text: 'Thank you to everyone who came to the 2026 Fair and made it '
-          'such a huge success.\n\n'
-          'We‘ll be back in December 2027 and will be updating the app and listings '
-          'as the Fair approaches.\n\n'),
+            'such a huge success.\n\n'
+            'We‘ll be back in December 2027 and will be updating the app and listings '
+            'as the Fair approaches.\n\n'),
         const TextSpan(text: 'In the meantime, we’d be grateful if you could complete our '),
         TextSpan(text: 'feedback survey', style: const TextStyle(decoration: TextDecoration.underline), recognizer: TapGestureRecognizer()
           ..onTap = () {
@@ -140,22 +142,36 @@ class ListingUpdateNotifier {
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           title: Text(titleFor(noticeDate)),
-          content: messageFor(noticeDate, context),
-          scrollable: true,
-          actions: [
-            if (isListingsMayChange)
-              CheckboxListTile(
-                value: dontShowAgain,
-                onChanged: (value) {
-                  HapticFeedback.selectionClick();
-                  analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
-                  setState(() => dontShowAgain = value ?? false);
-                },
-                title: const Text("Don't show this again"),
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
-                dense: true,
+          content: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: Scrollbar(
+              thumbVisibility: Platform.isIOS ? false : true,
+              child: SingleChildScrollView(
+                primary: true,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    messageFor(noticeDate, context),
+                    if (isListingsMayChange)
+                      CheckboxListTile(
+                        value: dontShowAgain,
+                        onChanged: (value) {
+                          HapticFeedback.selectionClick();
+                          analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
+                          setState(() => dontShowAgain = value ?? false);
+                        },
+                        title: const Text("Don't show this again"),
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                      ),
+                  ],
+                ),
               ),
+            ),
+          ),
+          actions: [
             TextButton(
               onPressed: () async {
                 HapticFeedback.lightImpact();
