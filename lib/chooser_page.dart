@@ -226,7 +226,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: -0.01,
         scale: 1,
         assetPath: 'assets/infoPages/foodDrink.png',
-        theTap: () => widget.onOpenListings('all', 'food'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_food');
+          widget.onOpenListings('all', 'food');
+        },
       ),
       Hotspot(
         label: 'Music',
@@ -237,7 +240,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: -0.005,
         scale: 1,
         assetPath: 'assets/infoPages/music.png',
-        theTap: () => widget.onOpenTimetable(false, true),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_music');
+          widget.onOpenTimetable(false, true);
+        },
       ),
       Hotspot(
         label: 'Children’s',
@@ -248,7 +254,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.16,
         scale: 1.05,
         assetPath: 'assets/infoPages/childrens.png',
-        theTap: () => widget.onOpenListings('all', 'performanceChildrens'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_childrens');
+          widget.onOpenListings('all', 'performanceChildrens');
+        },
       ),
       Hotspot(
         label: 'Shopping',
@@ -259,7 +268,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.28,
         scale: 1,
         assetPath: 'assets/infoPages/shopping.png',
-        theTap: () => widget.onOpenListings('all', 'shopping'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_shopping');
+          widget.onOpenListings('all', 'shopping');
+        },
       ),
       Hotspot(
         label: 'Charity,\nCommunity\n& Info',
@@ -270,7 +282,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.29,
         scale: 1,
         assetPath: 'assets/infoPages/charityCommunityInfo.png',
-        theTap: () => widget.onOpenListings('all', 'charityCommunityInfo'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_community');
+          widget.onOpenListings('all', 'charityCommunityInfo');
+        },
       ),
       Hotspot(
         label: 'Visit &\nExperience',
@@ -281,7 +296,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.56,
         scale: 1,
         assetPath: 'assets/infoPages/visitExperience.png',
-        theTap: () => widget.onOpenListings('all', 'visitExperience'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_visits');
+          widget.onOpenListings('all', 'visitExperience');
+        },
       ),
       Hotspot(
         label: 'Services',
@@ -292,7 +310,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.69,
         scale: 1,
         assetPath: 'assets/infoPages/services.png',
-        theTap: () => widget.onOpenListings('all', 'service'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_services');
+          widget.onOpenListings('all', 'service');
+        },
       ),
       Hotspot(
         label: 'Nearby',
@@ -303,7 +324,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.70,
         scale: 0.9,
         assetPath: 'assets/infoPages/nearby.png',
-        theTap: () => widget.onOpenMap(10),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_nearby');
+          widget.onOpenMap(10);
+        },
       ),
     ];
 
@@ -490,6 +514,7 @@ class _ChooserContent extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 HapticFeedback.lightImpact();
+                analyticsService.logButtonTapped('home_about_fair');
                 Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
               },
               child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
