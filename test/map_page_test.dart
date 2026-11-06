@@ -69,14 +69,27 @@ void main() {
         final scrollable = find.descendant(of: sheet, matching: find.byType(Scrollable));
         final position = tester.state<ScrollableState>(scrollable).position;
         expect(position.maxScrollExtent, 0);
-        expect(find.descendant(of: sheet, matching: find.byType(Scrollbar)),
-            platform == TargetPlatform.android ? findsOneWidget : findsNothing);
+        expect(find.descendant(of: sheet, matching: find.byType(Scrollbar)), findsOneWidget);
 
         tester.view.physicalSize = const Size(700, 480);
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
         expect(position.maxScrollExtent, greaterThan(0));
-        await tester.scrollUntilVisible(find.text('Done'), 150, scrollable: scrollable);
+        final fixedControls = [
+          find.text('Filter map layers'),
+          find.text('Show all'),
+          find.text('Hide all'),
+          find.text('Done'),
+        ];
+        final initialPositions = fixedControls.map(tester.getTopLeft).toList();
+        for (final control in fixedControls) {
+          expect(control.hitTestable(), findsOneWidget);
+        }
+        await tester.drag(scrollable, const Offset(0, -300));
+        await tester.pumpAndSettle();
+        expect(position.pixels, greaterThan(0));
+        expect(fixedControls.map(tester.getTopLeft).toList(), initialPositions);
+        expect(find.text('Shade road closures').hitTestable(), findsOneWidget);
         await tester.tap(find.text('Done'));
         await tester.pumpAndSettle();
         expect(sheet, findsNothing);
