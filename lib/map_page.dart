@@ -1053,17 +1053,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            final content = Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+            final scrollView = SingleChildScrollView(
+              controller: _filterMenuScrollController,
+              primary: false,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Filter map layers",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.left,
-                  ),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Music'),
@@ -1265,6 +1260,32 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       widget.analyticsService.logRoadClosurePolygonPreferenceSet(value);
                     },
                   ),
+                ],
+              ),
+            );
+            final content = Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Filter map layers",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left,
+                  ),
+                  Flexible(
+                    child: Scrollbar(
+                      controller: _filterMenuScrollController,
+                      thumbVisibility: Platform.isIOS ? false : true,
+                      thickness: 4,
+                      radius: const Radius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: scrollView,
+                      ),
+                    ),
+                  ),
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
@@ -1325,23 +1346,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 ],
               ),
             );
-            final scrollView = SingleChildScrollView(
-              controller: _filterMenuScrollController,
-              primary: false,
-              child: content,
-            );
             return SafeArea(
               top: false,
-              child: ScrollConfiguration(
-                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                child: Theme.of(context).platform == TargetPlatform.android
-                    ? Scrollbar(
-                        controller: _filterMenuScrollController,
-                        thumbVisibility: true,
-                        child: scrollView,
-                      )
-                    : scrollView,
-              ),
+              child: content,
             );
           },
         );
