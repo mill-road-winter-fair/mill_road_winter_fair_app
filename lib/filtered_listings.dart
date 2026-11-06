@@ -681,6 +681,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           child: GestureDetector(
                                             onTap: () {
                                               HapticFeedback.lightImpact();
+                                              widget.analyticsService.logButtonTapped('listing_row', listingId: listing['id'], listingName: listing['title']);
                                               toggleDetailsRow(index);
                                             },
                                             child: SpecificListingInfoSheet(
@@ -870,6 +871,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           tooltip: 'Choose how to sort listings',
           onPressed: () {
             HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('listings_sort_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {
@@ -913,6 +915,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           tooltip: 'Choose which types of listings to show',
           onPressed: () {
             HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('listings_filter_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {
