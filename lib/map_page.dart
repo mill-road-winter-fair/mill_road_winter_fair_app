@@ -1111,11 +1111,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Dance"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('dance_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Dance"] = value!;
                       });
                       final idList = _performanceDanceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('dance', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1128,11 +1130,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Other"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('other_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Other"] = value!;
                       });
                       final idList = _performanceOtherMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('other', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1145,11 +1149,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Childrens"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('childrens_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Childrens"] = value!;
                       });
                       final idList = _performanceChildrensMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('childrens', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1301,6 +1307,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   });
                                   showAllMarkers();
                                   widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
+                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(true);
                                   updateRoadClosurePolygonVisibility(true);
                                 },
                                 icon: const Icon(Icons.filter_alt),
@@ -1318,6 +1325,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   });
                                   hideAllMarkers();
                                   widget.analyticsService.logMapMarkerFilterPreferenceSet('all', false);
+                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(false);
                                   updateRoadClosurePolygonVisibility(false);
                                 },
                                 icon: const Icon(Icons.filter_alt_off),
@@ -1357,6 +1365,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       Position position = await getCurrentPosition();
       LatLng currentLatLng = LatLng(position.latitude, position.longitude);
       if  (!await updatePolyline(currentLatLng, destination)) {
+        doingAPushNavigation = false;
         WidgetsBinding.instance.addPostFrameCallback((_) { // since googlemap() may overwrite it with its own initialCameraPosition
           _moveCameraToBounds(
             LatLng(min(currentLatLng.latitude, destination.latitude), min(currentLatLng.longitude, destination.longitude)),
@@ -1500,6 +1509,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
       // Get route using Routes API
       pl.RoutesApiResponse response = await _polylinePoints.getRouteBetweenCoordinatesV2(
+        timeout: const Duration(seconds: 2), // default is 30; no-one will wait that long
         request: request,
       );
 
@@ -1538,10 +1548,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       return true;
     } on SocketException catch (e) {
       debugPrint("MapPageState updatePolyline Network error while fetching route: $e");
-      _handlePolylineError("Network connection issue, so route will not be shown. Please check your connection and swipe back to try again.");
+      _handlePolylineError("Network connection issue, so route will not be shown. Please check your connection and swipe back if you’d like to try again.");
     } on HttpException catch (e) {
       debugPrint("MapPageState updatePolyline HTTP error while fetching route: $e");
-      _handlePolylineError("Error retrieving map data, so route will not be shown. Please check your connection and swipe back to try again.");
+      _handlePolylineError("Error retrieving map data, so route will not be shown. Please check your connection and swipe back if you’d like to try again.");
     } on FormatException catch (e) {
       debugPrint("MapPageState updatePolyline Data format error: $e");
       _handlePolylineError("Unexpected data format from directions API, so route will not be shown.");
@@ -1554,6 +1564,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void _handlePolylineError(String message) {
     debugPrint('MapPageState _handlePolylineError error: $message');
+    if (!mounted) return;
     final colours = Theme.of(context).colorScheme;
     // Show a toast with the error
     FToast().init(context).showToast(
@@ -2363,10 +2374,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         widget.analyticsService.logButtonTapped('distance_to_destination');
                         _setMapCameraToFitPolyline(polylines);
                       },
-                      icon: Icon(Icons.directions, color: colorScheme.onPrimary),
+                      icon: const Icon(Icons.directions, color: Colors.white),
                       label: Text(
                         _distanceToDestination!,
-                        style: TextStyle(fontSize: 18, color: colorScheme.onPrimary),
+                        style: const TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),

@@ -72,7 +72,7 @@ final Map<String, ThemeData> appThemes = {
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
       primary: const Color.fromRGBO(25, 41, 103, 1),
-      onPrimary: Colors.black,
+      onPrimary: const Color.fromRGBO(40, 40, 40, 1.0),
       onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
       onSecondary: Colors.white,
@@ -82,7 +82,7 @@ final Map<String, ThemeData> appThemes = {
       error: Colors.orange,
       onError: Colors.black,
       surface: const Color.fromRGBO(44, 44, 44, 1.0),
-      surfaceDim: Colors.grey[400],
+      surfaceDim: Colors.grey[800],
       onSurface: Colors.white,
       onSurfaceVariant: Colors.grey[300],
     ),
