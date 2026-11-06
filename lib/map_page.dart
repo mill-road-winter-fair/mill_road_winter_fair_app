@@ -2069,6 +2069,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         IconButton(
                           iconSize: 20,
                           icon: const Icon(Icons.close),
+                          tooltip: _searchQuery.isEmpty ? 'Close search' : 'Clear search',
                           onPressed: () async {
                             HapticFeedback.lightImpact();
                             widget.analyticsService.logButtonTapped('map_search_clear');

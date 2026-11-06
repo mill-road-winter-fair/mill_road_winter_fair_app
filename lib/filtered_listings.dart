@@ -612,7 +612,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: refreshListings,
+                onRefresh: () {
+                  HapticFeedback.lightImpact();
+                  return refreshListings();
+                },
                 backgroundColor: colorScheme.primary,
                 color: colorScheme.onPrimary,
                 child: Container(
@@ -677,6 +680,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           ),
                                           child: GestureDetector(
                                             onTap: () {
+                                              HapticFeedback.lightImpact();
                                               widget.analyticsService.logButtonTapped('listing_row', listingId: listing['id'], listingName: listing['title']);
                                               toggleDetailsRow(index);
                                             },
@@ -866,6 +870,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.sort),
           tooltip: 'Choose how to sort listings',
           onPressed: () {
+            HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('listings_sort_menu_toggle');
             if (controller.isOpen) {
               controller.close();
@@ -909,6 +914,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.filter_alt, size: 26),
           tooltip: 'Choose which types of listings to show',
           onPressed: () {
+            HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('listings_filter_menu_toggle');
             if (controller.isOpen) {
               controller.close();
