@@ -614,7 +614,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               child: RefreshIndicator(
                 onRefresh: refreshListings,
                 backgroundColor: colorScheme.primary,
-                color: colorScheme.onPrimary,
+                color: Colors.white,
                 child: Container(
                   color: colorScheme.surfaceDim,
                   child: LayoutBuilder(builder: (context, constraints) {
