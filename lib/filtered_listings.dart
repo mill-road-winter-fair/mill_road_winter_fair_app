@@ -799,7 +799,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         },
                       ),
                       (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0))
-                          ? Padding(
+                          ? SingleChildScrollView(
                               padding: const EdgeInsetsGeometry.all(10),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -813,7 +813,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
                                     '${filterCategory == 'favourite' ? ' in your Favourites' : ' found'}.'
                                   ),
-                                  if (filterCategory == 'favourite' && _searchQuery.isEmpty && widget.subfilterCategory == null) Text(style: messageStyle, textAlign: TextAlign.center, 
+                                  if (filterCategory == 'favourite' && _searchQuery.isEmpty) Text(style: messageStyle, textAlign: TextAlign.center, 
                                     'You can add Favourites by tapping the red heart icon on a listing.'
                                   ),
                                   if (_searchQuery.isNotEmpty) ...[
