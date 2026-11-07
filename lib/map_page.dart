@@ -2374,10 +2374,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         widget.analyticsService.logButtonTapped('distance_to_destination');
                         _setMapCameraToFitPolyline(polylines);
                       },
-                      icon: Icon(Icons.directions, color: colorScheme.onPrimary),
+                      icon: const Icon(Icons.directions, color: Colors.white),
                       label: Text(
                         _distanceToDestination!,
-                        style: TextStyle(fontSize: 18, color: colorScheme.onPrimary),
+                        style: const TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),
