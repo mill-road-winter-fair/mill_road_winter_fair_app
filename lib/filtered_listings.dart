@@ -128,14 +128,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       final name = (listing['title'] ?? '').toString().toLowerCase();
       final location = (listing['location'] ?? '').toString().toLowerCase();
       final subtitle = (listing['subtitle'] ?? '').toString().toLowerCase();
-      return name.contains(_searchQuery) || location.contains(_searchQuery) || subtitle.contains(_searchQuery);
+      final genericTerms = (listing['genericTerms'] ?? '').toString().toLowerCase();
+      return name.contains(_searchQuery) || location.contains(_searchQuery) || subtitle.contains(_searchQuery) || genericTerms.contains(_searchQuery);
     }).toList();
   }
 
   List<Map<String, dynamic>> _applySorting(List<Map<String, dynamic>> allListings) {
+    debugPrint('_applySorting called for ${allListings.length} listings');
+    if (allListings.isEmpty) return []; // not an exception, as this is normal for Favourites
     try {
-      if (allListings.isEmpty) throw Exception("No listings exist");
-
       if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
           preferredSortingMethod == SortingMethod.nearest) {
         // User prefers distance sorting but has disabled location permissions, change their preferred sorting method

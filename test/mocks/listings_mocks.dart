@@ -272,6 +272,20 @@ final _longDescriptionListing = {
 };
 
 // Each subcategory has exactly one flag enabled.
+Map<String, dynamic> _listingWithGenericTerms(Map<String, dynamic> listing) {
+  var terms = '';
+  if ((listing['food'] ?? '') == 'TRUE') terms += 'food ';
+  if ((listing['performanceMusic'] ?? '') == 'TRUE') terms += 'performances music ';
+  if ((listing['performanceChildrens'] ?? '') == 'TRUE') terms += 'performances childrens kids family ';
+  if ((listing['performanceDance'] ?? '') == 'TRUE') terms += 'performances dance ';
+  if ((listing['visitExperience'] ?? '') == 'TRUE') terms += 'visits experiences ';
+
+  return {
+    ...listing,
+    'genericTerms': terms,
+  };
+}
+
 final List<Map<String, dynamic>> categoryListingsMocks = List.unmodifiable([
   for (final (id, category, title, location) in [
     ('26020', 'food', 'Wok This Way', 'Mill Road'),
@@ -285,7 +299,7 @@ final List<Map<String, dynamic>> categoryListingsMocks = List.unmodifiable([
     ('26028', 'service', 'The Helpful Hedgehog', 'Catharine Street'),
     ('26029', 'business', 'Pencil Pushers United', 'Coleridge Road'),
   ])
-    Map<String, dynamic>.unmodifiable({
+    Map<String, dynamic>.unmodifiable(_listingWithGenericTerms({
       ..._completeListing,
       'id': id,
       'food': 'FALSE',
@@ -297,7 +311,7 @@ final List<Map<String, dynamic>> categoryListingsMocks = List.unmodifiable([
       'email': 'hello@$category.example',
       'website': 'https://$category.example',
       'imageURL': 'https://$category.example/stall.jpg',
-    }),
+    })),
 ]);
 
 // Always return a fresh map: tests routinely change flags, times and IDs.
@@ -306,15 +320,15 @@ Map<String, dynamic> mockListing(String scenario) {
       ? _longDescriptionListing
       : _listingScenarios[scenario];
   if (listing == null) throw ArgumentError.value(scenario, 'scenario');
-  return Map<String, dynamic>.from(listing);
+  return _listingWithGenericTerms(Map<String, dynamic>.from(listing));
 }
 
 // Returns the mock category listing matching the given subcategory, replacing its ID with the supplied ID.
-Map<String, dynamic> listingFor(String id, String subcategory) => {
+Map<String, dynamic> listingFor(String id, String subcategory) => _listingWithGenericTerms({
       ...categoryListingsMocks
           .singleWhere((listing) => listing[subcategory] == 'TRUE'),
       'id': id,
-    };
+    });
 
 // Encode the same fixtures in the spreadsheet API's column order.
 Map<String, dynamic> mockListingsResponse(
