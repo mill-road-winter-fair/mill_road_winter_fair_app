@@ -134,9 +134,9 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   }
 
   List<Map<String, dynamic>> _applySorting(List<Map<String, dynamic>> allListings) {
+    debugPrint('_applySorting called for ${allListings.length} listings');
+    if (allListings.isEmpty) return []; // not an exception, as this is normal for Favourites
     try {
-      if (allListings.isEmpty) throw Exception("No listings exist");
-
       if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
           preferredSortingMethod == SortingMethod.nearest) {
         // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
