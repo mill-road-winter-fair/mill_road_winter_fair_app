@@ -796,11 +796,14 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         },
                       ),
                       (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0))
-                          ? Center(
-                              child: Container(
-                                padding: const EdgeInsets.all(24.0),
-                                alignment: Alignment.center,
-                                child: Text(
+                          ? Padding(
+                              padding: const EdgeInsetsGeometry.all(24),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Text(
                                     style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
                                     textAlign: TextAlign.center,
                                     'No'
@@ -812,6 +815,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
                                     '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
                                     '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}'),
+                                ],
                               ),
                             )
                           : const SizedBox.shrink(),
