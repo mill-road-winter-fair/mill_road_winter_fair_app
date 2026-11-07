@@ -338,6 +338,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called with filterCategory=$filterCategory and subfilterCategory=${widget.subfilterCategory}');
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final appBarTheme = Theme.of(context).appBarTheme;
+    final messageStyle = TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold);
+
     // Show error if there are no listings
     if (listings.isEmpty) {
       return FairScaffold(
@@ -353,7 +358,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               Text(
                 "Unable to retrieve listings",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                style: messageStyle,
               ),
               const SizedBox(height: 20),
               isRefreshing
@@ -415,8 +420,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
     int? firstVisibleIndex; // will be used to store the first listing that is actually visible
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final appBarTheme = Theme.of(context).appBarTheme;
     final canScrollToNow = filterCategory == 'favourite' || isShowingJustPerformance;
     final canTogglePastListings = canScrollToNow || _hidePastListings;
     final nowOrSoonIconKey = GlobalKey();
@@ -797,24 +800,44 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                       ),
                       (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0))
                           ? Padding(
-                              padding: const EdgeInsetsGeometry.all(24),
+                              padding: const EdgeInsetsGeometry.all(10),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.max,
+                                spacing: 15,
                                 children: [
-                                  Text(
-                                    style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.center,
-                                    'No'
-                                    '${widget.subfilterCategory != null ? ' ${subfilterCategoryLabels[widget.subfilterCategory]!.label}' : ''}'
+                                  Text(style: messageStyle, textAlign: TextAlign.center,
+                                    'No ${widget.subfilterCategory != null ? subfilterCategoryLabels[widget.subfilterCategory]!.label : ''}'
                                     ' listings'
                                     '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
-                                    '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
-                                    '${(widget.subfilterCategory != null && _isSearching) ? '\n\nTap the magnifying glass to close search, then ‘Show’ to change what type of listings are displayed.' : ''}'
-                                    '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
-                                    '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
-                                    '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}'),
+                                    '${filterCategory == 'favourite' ? ' in your Favourites' : ' found'}.'
+                                  ),
+                                  if (widget.subfilterCategory != null) ...[
+                                    Text(style: messageStyle, textAlign: TextAlign.center, 'The filter icon above changes what type of listings are displayed, or tap this button to stop filtering.'),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        HapticFeedback.lightImpact();
+                                        widget.analyticsService.logButtonTapped('switchOffFilter_listings');
+                                        widget.onSubfilterChange(null);
+                                      },
+                                      icon: const Icon(Icons.filter_alt, size: 32),
+                                      label: Text('Switch from ${subfilterCategoryLabels[widget.subfilterCategory]!.label} to everything'),
+                                    ),
+                                  ],
+                                  if (filterCategory == 'favourite') ...[
+                                    Text(style: messageStyle, textAlign: TextAlign.center, '‘Listings’ below or this button will display all (not just Favourite) listings.'),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        HapticFeedback.lightImpact();
+                                        widget.analyticsService.logButtonTapped('switchOffFavourites_listings');
+                                        widget.onTabSelected(3); // in future, this could preserve search as well
+                                      },
+                                      icon: const Icon(Icons.ballot, size: 32),
+                                      label: const Text('View all listings, not just Favourites'),
+                                    ),
+                                  ],
+                                  if (_searchQuery.isNotEmpty) Text(style: messageStyle, textAlign: TextAlign.center, 'Tap ‘X’ in the bar above to clear your search, or the magnifying glass to close search.'),
                                 ],
                               ),
                             )
