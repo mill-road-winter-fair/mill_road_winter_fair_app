@@ -255,7 +255,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           msg: 'Location services and permissions are required to determine distances',
           gravity: ToastGravity.CENTER,
           backgroundColor: Theme.of(context).colorScheme.primary,
-          textColor: Theme.of(context).colorScheme.onPrimary,
+          textColor: Colors.white,
           fontSize: 16,
           toastLength: Toast.LENGTH_LONG,
           timeInSecForIosWeb: 4,
@@ -615,7 +615,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               child: RefreshIndicator(
                 onRefresh: refreshListings,
                 backgroundColor: colorScheme.primary,
-                color: colorScheme.onPrimary,
+                color: Colors.white,
                 child: Container(
                   color: colorScheme.surfaceDim,
                   child: LayoutBuilder(builder: (context, constraints) {
@@ -677,7 +677,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
                                           ),
                                           child: GestureDetector(
-                                            onTap: () => toggleDetailsRow(index),
+                                            onTap: () {
+                                              widget.analyticsService.logButtonTapped('listing_row', listingId: listing['id'], listingName: listing['title']);
+                                              toggleDetailsRow(index);
+                                            },
                                             child: SpecificListingInfoSheet(
                                               scrollBounds: _expandedScrollBounds,
                                               listingId: listing['id'],
@@ -827,35 +830,35 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Widget _buildSortingDropdown(BuildContext context, bool isPerformance) {
     final colorScheme = Theme.of(context).colorScheme;
     final menuEntryStyle = TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant);
-    final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
+    final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.onSecondary, fontWeight: FontWeight.bold);
     final effectiveSortingMethod = useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod;
     return MenuAnchor(
       key: const ValueKey('sortingdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,
-          child: Text("Sort by", style: menuEntryStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
+          child: Text("Sort by", style: menuEntryStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: colorScheme.tertiary)),
         ),
         if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
           MenuItemButton(
             onPressed: () => sortingDropdownCallback(SortingMethod.nearest),
-            leadingIcon: Icon(Icons.directions_walk, size: 20, color: (effectiveSortingMethod == SortingMethod.nearest) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+            leadingIcon: Icon(Icons.directions_walk, size: 20, color: (effectiveSortingMethod == SortingMethod.nearest) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
             child: Text("Nearest", style: (effectiveSortingMethod == SortingMethod.nearest) ? selectedMenuEntryStyle : menuEntryStyle),
           ),
         MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.location),
-          leadingIcon: Icon(Icons.signpost, size: 20, color: (effectiveSortingMethod == SortingMethod.location) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          leadingIcon: Icon(Icons.signpost, size: 20, color: (effectiveSortingMethod == SortingMethod.location) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
           child: Text("Location (a–z)", style: (effectiveSortingMethod == SortingMethod.location) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.alphabetical),
-          leadingIcon: Icon(Icons.sort_by_alpha, size: 20, color: (effectiveSortingMethod == SortingMethod.alphabetical) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          leadingIcon: Icon(Icons.sort_by_alpha, size: 20, color: (effectiveSortingMethod == SortingMethod.alphabetical) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
           child: Text("Name (a–z)", style: (effectiveSortingMethod == SortingMethod.alphabetical) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         if (isPerformance || filterCategory == 'favourite')
           MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.startTime),
-            leadingIcon: Icon(Icons.alarm, size: 20, color: (effectiveSortingMethod == SortingMethod.startTime) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+            leadingIcon: Icon(Icons.alarm, size: 20, color: (effectiveSortingMethod == SortingMethod.startTime) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
             child: Text("Start time", style: (effectiveSortingMethod == SortingMethod.startTime) ? selectedMenuEntryStyle : menuEntryStyle),
           ),
       ],
@@ -864,6 +867,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.sort),
           tooltip: 'Choose how to sort listings',
           onPressed: () {
+            widget.analyticsService.logButtonTapped('listings_sort_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {
@@ -879,23 +883,23 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Widget _buildFilteringDropdown(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final menuEntryStyle = TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant);
-    final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
+    final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.onSecondary, fontWeight: FontWeight.bold);
     return MenuAnchor(
       key: const ValueKey('filterdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,
-          child: Text("Show", style: menuEntryStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
+          child: Text("Show", style: menuEntryStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: colorScheme.tertiary)),
         ),
         MenuItemButton(
           onPressed: () => filteringDropdownCallback(null),
-          leadingIcon: Icon(Icons.all_inclusive, size: 20, color: (widget.subfilterCategory == null) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          leadingIcon: Icon(Icons.all_inclusive, size: 20, color: (widget.subfilterCategory == null) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
           child: Text("Everything", style: (widget.subfilterCategory == null) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         ...subfilterCategoryLabels.entries.map((e) {
           return MenuItemButton(
             onPressed: () => filteringDropdownCallback(e.key),
-            leadingIcon: Icon(e.value.iconData, size: 20, color: (widget.subfilterCategory == e.key) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+            leadingIcon: Icon(e.value.iconData, size: 20, color: (widget.subfilterCategory == e.key) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
             child: Text(e.value.label, style: (widget.subfilterCategory == e.key) ? selectedMenuEntryStyle : menuEntryStyle),
           );
         })
@@ -906,6 +910,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.filter_alt, size: 26),
           tooltip: 'Choose which types of listings to show',
           onPressed: () {
+            widget.analyticsService.logButtonTapped('listings_filter_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {

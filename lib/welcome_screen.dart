@@ -137,17 +137,17 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       safeArea: 160,
       pageColor: colourScheme.secondary.withValues(alpha: 0.85),
     );
-    Widget guideRow(Widget icon, Widget content, {bool dense = false}) => Padding(
-          padding: EdgeInsets.only(bottom: (dense) ? 6 : 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(width: 40, child: Center(child: icon)),
-              const SizedBox(width: 8),
-              Expanded(child: content),
-            ],
-          ),
-        );
+    Widget guideRow(Widget icon, Widget content, {double botPadding = 16}) => Padding(
+      padding: EdgeInsets.only(bottom: botPadding),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(width: 40, child: Center(child: icon)),
+          const SizedBox(width: 8),
+          Expanded(child: content),
+        ],
+      ),
+    );
 
     Widget tip(Widget icon, String text) => guideRow(
       IconTheme(
@@ -161,24 +161,24 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     );
 
     Widget marker(String category) => ExcludeSemantics(
-          child: SizedBox(
-            width: 40,
-            height: 40,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(markerFrameAssetPath(category)),
-                Image.asset(markerAssetPath(category), color: getCategoryColor(selectedThemeKey, category), colorBlendMode: BlendMode.srcIn),
-              ],
-            ),
-          ),
-        );
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(markerFrameAssetPath(category)),
+            Image.asset(markerAssetPath(category), color: getCategoryColor(selectedThemeKey, category), colorBlendMode: BlendMode.srcIn),
+          ],
+        ),
+      ),
+    );
 
     Widget category(String key, String colourKey) => guideRow(
-          marker(colourKey),
-          Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
-          dense: true,
-        );
+      marker(colourKey),
+      Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
+      botPadding: 8,
+    );
 
     PageViewModel guidePage(String title, List<Widget> children) {
       // Honour the device text size and wrap at the available width. Longer
@@ -232,12 +232,12 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         guideRow(
           marker('Group-PerformanceEvent'),
           Text('Multiple performances and events at one location', style: bodyStyle),
-          dense: true,
+          botPadding: 6,
         ),
         guideRow(
           marker('Mixed'),
-          Text('A mix of any of these categories', style: bodyStyle),
-          dense: true,
+          botPadding: 6,
+          Text('Any mix of these categories', style: bodyStyle),
         ),
       ]),
       guidePage('Plan your day with the timetable', [
@@ -360,11 +360,11 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                  child: FittedBox(
+                  style: ElevatedButton.styleFrom(backgroundColor: colourScheme.primary),
+                  child: const FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text('Take me straight to the Fair!',
-                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
+                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                   onPressed: () {
                     HapticFeedback.heavyImpact();
@@ -390,10 +390,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             dotsFlex: dotsFlex,
             nextFlex: buttonFlex,
             showBackButton: false,
-            back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
+            back: Icon(Icons.arrow_back, color: colourScheme.tertiary),
             skip: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
+                child: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: colourScheme.tertiaryFixed))),
             overrideNext: (context, onPressed) => Tooltip(
               message: 'Next page',
               excludeFromSemantics: true,
@@ -405,19 +405,20 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                         widget.analyticsService.logButtonTapped('next_WelcomeScreen');
                         onPressed();
                       },
-                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
+                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: colourScheme.tertiaryFixed),
               ),
             ),
             done: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
+                child: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: colourScheme.tertiaryFixed))),
             curve: Curves.fastLinearToSlowEaseIn,
             controlsMargin: controlsMargin,
             controlsPadding: controlsPadding,
             dotsDecorator: DotsDecorator(
               size: Size(12.0 * dotScale, 12.0 * dotScale),
               spacing: EdgeInsets.symmetric(horizontal: dotSpacing),
-              color: const Color(0xFFBDBDBD),
+              color: colourScheme.tertiaryFixed,
+              activeColor: Colors.white,
               activeSize: Size(20.0 * dotScale, 10.0 * dotScale),
               activeShape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
