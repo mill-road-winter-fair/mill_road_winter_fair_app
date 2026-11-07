@@ -813,6 +813,26 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
                                     '${filterCategory == 'favourite' ? ' in your Favourites' : ' found'}.'
                                   ),
+                                  if (filterCategory == 'favourite' && _searchQuery.isEmpty && widget.subfilterCategory == null) Text(style: messageStyle, textAlign: TextAlign.center, 
+                                    'You can add Favourites by tapping the red heart icon on a listing.'
+                                  ),
+                                  if (_searchQuery.isNotEmpty) ...[
+                                    Text(style: messageStyle, textAlign: TextAlign.center, 'Tap the magnifying glass above or this button to clear and close search.'),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        HapticFeedback.lightImpact();
+                                        widget.analyticsService.logButtonTapped('clearCloseSearch_listings');
+                                        setState(() {
+                                          _searchAnalyticsTimer?.cancel();
+                                          _searchQuery = '';
+                                          _searchController.text = '';
+                                          _isSearching = false;
+                                        });
+                                      },
+                                      icon: const Icon(Icons.search_off, size: 32),
+                                      label: const Text('Clear and close search'),
+                                    ),
+                                  ],
                                   if (widget.subfilterCategory != null) ...[
                                     Text(style: messageStyle, textAlign: TextAlign.center, 'The filter icon above changes what type of listings are displayed, or tap this button to stop filtering.'),
                                     ElevatedButton.icon(
@@ -826,7 +846,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                     ),
                                   ],
                                   if (filterCategory == 'favourite') ...[
-                                    Text(style: messageStyle, textAlign: TextAlign.center, '‘Listings’ below or this button will display all (not just Favourite) listings.'),
+                                    Text(style: messageStyle, textAlign: TextAlign.center, 'Tapping ‘Listings’ below or this button will display all (not just Favourite) listings.'),
                                     ElevatedButton.icon(
                                       onPressed: () {
                                         HapticFeedback.lightImpact();
@@ -837,7 +857,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       label: const Text('View all listings, not just Favourites'),
                                     ),
                                   ],
-                                  if (_searchQuery.isNotEmpty) Text(style: messageStyle, textAlign: TextAlign.center, 'Tap ‘X’ in the bar above to clear your search, or the magnifying glass to close search.'),
                                 ],
                               ),
                             )
