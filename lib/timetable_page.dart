@@ -243,7 +243,10 @@ class TimetablePageState extends State<TimetablePage> {
     );
 
     // add on the single events column if it contains anything
-    if (singleEvents.isNotEmpty) allPreparedEvents['Other venues'] = singleEvents;
+    if (singleEvents.isNotEmpty) {
+      singleEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
+      allPreparedEvents['Other venues'] = singleEvents;
+    }
 
     return allPreparedEvents;
   }
