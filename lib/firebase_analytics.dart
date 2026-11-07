@@ -151,6 +151,10 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'shopping': 'map_filter_shopping',
       'charityCommunityInfo': 'map_filter_community',
       'performances': 'map_filter_performances',
+      'dance': 'map_filter_dance',
+      'other': 'map_filter_other',
+      'childrens': 'map_filter_childrens',
+      'business': 'map_filter_business',
       'visitsExperiences': 'map_filter_visits',
       'services': 'map_filter_services',
     };
@@ -334,6 +338,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'theme': selectedThemeKey,
       'sorting_method': preferredSortingMethod.name,
       'map_type': preferredMapStyleType.name,
+      'map_marker_size': preferredMapMarkerSize.value.name,
+      'home_page_style': staticChooserPage.value ? 'static' : 'animated',
       'map_orientation': preferredMapOrientation.name,
       'road_closure': preferredRoadClosurePolygonVisible.toString(),
     };

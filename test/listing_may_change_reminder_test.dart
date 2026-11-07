@@ -1,9 +1,13 @@
+// Dart SDK imports
+import 'dart:io';
+
 // App imports
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 
 // Third-party imports
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,6 +57,65 @@ void main() {
         'Thank you!',
       );
     });
+
+    for (final platform in TargetPlatform.values) {
+      testWidgets('notices scroll with enlarged text on $platform', (tester) async {
+        tester.view.physicalSize = const Size(320, 640);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        onTest = false;
+        addTearDown(() => onTest = true);
+
+        for (final date in [
+          fairDate.subtract(const Duration(days: 1)),
+          fairDate,
+          fairDate.add(const Duration(days: 1)),
+        ]) {
+          SharedPreferences.setMockInitialValues({});
+          listingUpdateNoticeEnabled = true;
+          await tester.pumpWithClock(
+            MaterialApp(
+              theme: ThemeData(platform: platform),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(2)),
+                child: child!,
+              ),
+              home: const Scaffold(body: SizedBox()),
+            ),
+            dateTimeProvider: FixedDateTimeProvider(date),
+          );
+          final showNotice = ListingUpdateNotifier.maybeShowNotice(
+            tester.element(find.byType(Scaffold)),
+            analyticsService: FakeAnalyticsService(),
+          );
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+          expect(find.byType(Scrollbar), findsOneWidget);
+          if (platform == TargetPlatform.iOS) {
+            expect(tester.widget<CupertinoScrollbar>(find.byType(CupertinoScrollbar)).thumbVisibility, !Platform.isIOS);
+          }
+          final title = find.text(ListingUpdateNotifier.titleFor(date));
+          final titlePosition = tester.getTopLeft(title);
+          final buttonPosition = tester.getTopLeft(find.text('OK'));
+          final scrollable = find.descendant(of: find.byType(AlertDialog), matching: find.byType(Scrollable));
+          final position = tester.state<ScrollableState>(scrollable).position;
+          expect(position.maxScrollExtent, greaterThan(0));
+          await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -500));
+          await tester.pumpAndSettle();
+          expect(position.pixels, greaterThan(0));
+          expect(tester.getTopLeft(title), titlePosition);
+          expect(tester.getTopLeft(find.text('OK')), buttonPosition);
+          expect(tester.takeException(), isNull);
+
+          await tester.tap(find.text('OK'));
+          await tester.pumpAndSettle();
+          await showNotice;
+          expect(find.byType(AlertDialog), findsNothing);
+        }
+      });
+    }
 
     testWidgets('can permanently dismiss the dialog', (WidgetTester tester) async {
       // Ensure no previous prefs — mock empty

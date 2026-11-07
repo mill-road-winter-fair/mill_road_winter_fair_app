@@ -6,6 +6,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
@@ -37,6 +38,10 @@ class RecordingAnalyticsService extends FakeAnalyticsService {
   @override
   Future<void> logDistanceUnitPreferenceSet(String unit) async => calls.add('unit:$unit');
   @override
+  Future<void> logPreferenceSet(String preference, String value) async => calls.add('preference:$preference:$value');
+  @override
+  Future<void> logMapMarkerFilterPreferenceSet(String category, bool visible) async => calls.add('filter:$category:$visible');
+  @override
   Future<void> showAnalyticsConsentDialog(BuildContext context) async => calls.add('consent_prompt');
 }
 
@@ -66,7 +71,7 @@ void main() {
 
   testWidgets('navigation logs once after haptics and before invoking the callback', (tester) async {
     await tester.pumpWithClock(MaterialApp(home: Scaffold(bottomNavigationBar: fairBottomNavigationBar(
-      0, (index) => analytics.calls.add('navigate:$index'), const ColorScheme.light(), analyticsService: analytics,
+      0, (index) => analytics.calls.add('navigate:$index'), ThemeData(), analyticsService: analytics,
     ))));
     await tester.tap(find.text('Map'));
     expect(analytics.calls, ['haptic', 'tap:navigation_map', 'navigate:1']);
@@ -204,6 +209,40 @@ void main() {
     await tester.tap(find.text('Dark'));
     await tester.pumpAndSettle();
     expect(analytics.calls, ['haptic', 'tap:theme_preference_option', 'theme:dark']);
+  });
+
+  testWidgets('new settings record the chosen values', (tester) async {
+    final previousStyle = staticChooserPage.value;
+    staticChooserPage.value = false;
+    addTearDown(() => staticChooserPage.value = previousStyle);
+    await tester.pumpWithClock(MaterialApp(home: SettingsPage(analyticsService: analytics)));
+    analytics.calls.clear();
+    await tester.tap(find.text('Medium'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Large'));
+    await tester.pumpAndSettle();
+    expect(analytics.calls, ['haptic', 'tap:map_marker_size_preference_option', 'preference:map_marker_size:large']);
+    analytics.calls.clear();
+    await tester.tap(find.text('Animated'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Static'));
+    await tester.pumpAndSettle();
+    expect(analytics.calls, ['haptic', 'tap:home_page_preference_option', 'preference:home_page_style:static']);
+  });
+
+  testWidgets('performance map filters record each selected value once', (tester) async {
+    await tester.pumpWithClock(MaterialApp(home: MapPage(
+      listings: listings, onTabSelected: (_) {}, analyticsService: analytics,
+    )));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Choose which map markers to show'));
+    await tester.pumpAndSettle();
+    for (final entry in {'Dance': 'dance', 'Other performances': 'other', 'Children’s entertainment': 'childrens'}.entries) {
+      analytics.calls.clear();
+      await tester.tap(find.text(entry.key));
+      await tester.pumpAndSettle();
+      expect(analytics.calls, ['haptic', 'tap:${entry.value}_mapMarker_filter_toggle', 'filter:${entry.value}:false']);
+    }
   });
 
   testWidgets('analytics explanation lists tracked and untracked data', (tester) async {

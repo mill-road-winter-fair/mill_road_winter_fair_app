@@ -71,7 +71,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       title,
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
+                      style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ),
@@ -97,7 +97,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   fit: BoxFit.scaleDown,
                   child: Row(spacing: 8, children:[
-                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: colorScheme.onPrimary, semanticLabel: subfilterCategoryLabels[c]?.label)
+                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: Colors.white, semanticLabel: subfilterCategoryLabels[c]?.label)
                   ]),
                 ),
               ),
@@ -107,7 +107,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   flex: 10,
                   child: Text(
                     approxDistance,
-                    style: TextStyle(fontSize: 14, color: colorScheme.onPrimary),
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
                     textAlign: TextAlign.end,
                   ),
                 ),
@@ -360,7 +360,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     size: 25,
                     color: widget.cancelled && !widget.listingFavourited
                         ? Theme.of(context).disabledColor
-                        : widget.colorScheme.primary,
+                        : Colors.red,
                   ),
                 ),
                 if (isItAnEvent) IconButton(
@@ -386,7 +386,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     size: 25,
                     color: (widget.cancelled && !widget.listingAlerted || !isItAlertable)
                         ? Theme.of(context).disabledColor
-                        : Theme.of(context).colorScheme.primary,
+                        : Colors.orange,
                   ),
                 ),
                 const Spacer(),
@@ -543,7 +543,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Website: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.tertiary), text: 'Website: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.website),
                 ],
               ),
@@ -571,7 +571,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Email: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.tertiary), text: 'Email: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.email),
                 ],
               ),
@@ -598,7 +598,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Telephone: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.tertiary), text: 'Telephone: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.phoneNumber),
                 ],
               ),
