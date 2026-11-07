@@ -852,15 +852,18 @@ class _CachedLabel extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           width: hotspot.size!.width - hotspot.labelLeftOffset - hotspot.labelRightOffset,
           child: RepaintBoundary(
-            child: FittedBox(fit: BoxFit.scaleDown, child: Text(
-              hotspot.label,
-              textAlign: TextAlign.center,
-              softWrap: false,
-              style: TextStyle(fontSize: maxFontSize, fontWeight: FontWeight.bold, color: Colors.white, height: 0.9,
-                shadows: [
-                  const Shadow(blurRadius: 4, color: Colors.black),
-                  Shadow(blurRadius: 16, color: colourScheme.primary),
-                ],
+            child: FittedBox(fit: BoxFit.scaleDown, child: MediaQuery.withClampedTextScaling(
+              maxScaleFactor: 1.5,
+              child: Text(
+                hotspot.label,
+                textAlign: TextAlign.center,
+                softWrap: false,
+                style: TextStyle(fontSize: maxFontSize, fontWeight: FontWeight.bold, color: Colors.white, height: 0.9,
+                  shadows: [
+                    const Shadow(blurRadius: 4, color: Colors.black),
+                    Shadow(blurRadius: 16, color: colourScheme.primary),
+                  ],
+                ),
               ),
             )),
           ),
