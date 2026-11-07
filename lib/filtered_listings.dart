@@ -128,7 +128,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       final name = (listing['title'] ?? '').toString().toLowerCase();
       final location = (listing['location'] ?? '').toString().toLowerCase();
       final subtitle = (listing['subtitle'] ?? '').toString().toLowerCase();
-      return name.contains(_searchQuery) || location.contains(_searchQuery) || subtitle.contains(_searchQuery);
+      final genericTerms = (listing['genericTerms'] ?? '').toString().toLowerCase();
+      return name.contains(_searchQuery) || location.contains(_searchQuery) || subtitle.contains(_searchQuery) || genericTerms.contains(_searchQuery);
     }).toList();
   }
 
