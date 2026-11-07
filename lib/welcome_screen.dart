@@ -259,10 +259,11 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
       ]),
       guidePage('Make the app your own', [
-        tip(const Icon(Icons.palette), 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
+        tip(const Icon(Icons.settings), 'Find Settings from the top-left menu and home page.'),
+        tip(const Icon(Icons.palette), 'Here, choose one of our colourful themes including high contrast and colour blind friendly options.'),
         tip(const Icon(Icons.straighten), 'Choose the units used for distances.'),
-        tip(const Icon(Icons.privacy_tip), 'You can choose whether to allow anonymous usage analytics.'),
-        tip(const Icon(Icons.home), 'You can even disable animations on the home page, and choose your preferred notice period for notifications.'),
+        tip(const Icon(Icons.privacy_tip), 'Choose whether to allow anonymous usage analytics.'),
+        tip(const Icon(Icons.home), 'You can even disable home page animations and choose a preferred notice period for alerts.'),
       ]),
       guidePage('A few final things…', [
         tip(const Icon(Icons.favorite), 'Thank you for visiting Mill Road Winter Fair and using our app.'),

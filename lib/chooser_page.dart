@@ -8,6 +8,7 @@ import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 // Third-party imports
 import 'package:flutter/foundation.dart';
@@ -412,6 +413,21 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
             currentTab: 0,
             onTabSelected: widget.onTabSelected,
             analyticsService: widget.analyticsService,
+            appBarActions: [
+              IconButton(
+                tooltip: 'Go to Settings to customise the app',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  widget.analyticsService.logButtonTapped('homepage_settings');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(analyticsService: widget.analyticsService)));
+                },
+                icon: Icon(
+                  Icons.settings,
+                  size: 24,
+                  color: Theme.of(context).appBarTheme.foregroundColor,
+                ),
+              ),
+            ],
             body: RepaintBoundary(
               child: LayoutBuilder(
                 builder: (context, constraints) {
