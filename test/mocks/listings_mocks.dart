@@ -275,9 +275,10 @@ final _longDescriptionListing = {
 Map<String, dynamic> _listingWithGenericTerms(Map<String, dynamic> listing) {
   var terms = '';
   if ((listing['food'] ?? '') == 'TRUE') terms += 'food ';
-  if ((listing['performanceMusic'] ?? '') == 'TRUE') terms += 'performances music ';
+  if ((listing['performanceMusic'] ?? '') == 'TRUE') terms += 'performances music buskers ';
   if ((listing['performanceChildrens'] ?? '') == 'TRUE') terms += 'performances childrens kids family ';
   if ((listing['performanceDance'] ?? '') == 'TRUE') terms += 'performances dance ';
+  if ((listing['performanceOther'] ?? '') == 'TRUE') terms += 'performances ';
   if ((listing['visitExperience'] ?? '') == 'TRUE') terms += 'visits experiences ';
 
   return {
