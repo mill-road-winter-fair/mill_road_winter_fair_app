@@ -1,8 +1,11 @@
+// App imports
+import 'package:mill_road_winter_fair_app/chooser_page.dart';
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
-import 'package:mill_road_winter_fair_app/chooser_page.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
 
 void main() {
   setUp(() {
@@ -26,6 +29,14 @@ void main() {
 
     test('hotspotEntranceOpacityForIndex handles empty totals defensively', () {
       expect(hotspotEntranceOpacityForIndex(0, 0.5, totalHotspots: 0), 1.0);
+    });
+
+    test('intro phase fades the background to the reduced opacity and reveals the logo', () {
+      expect(backgroundIntroOpacityForPhase(0.0, 0.58), 1.0);
+      expect(backgroundIntroOpacityForPhase(1.0, 0.58), closeTo(0.58, 0.01));
+      expect(logoIntroOpacityForPhase(0.0), 0.0);
+      expect(logoIntroOpacityForPhase(0.5), greaterThan(0.0));
+      expect(logoIntroOpacityForPhase(1.0), 1.0);
     });
 
     test('hotspotLabelOpacityForPhase stays between 30% and 100%', () {

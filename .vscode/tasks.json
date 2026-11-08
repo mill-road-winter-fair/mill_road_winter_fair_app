@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Firebase Debug Mode",
+      "type": "process",
+      "command": "${env:LOCALAPPDATA}\\Android\\Sdk\\platform-tools\\adb.exe",
+      "args": [
+        "shell",
+        "setprop",
+        "debug.firebase.analytics.app",
+        "com.theberridge.mill_road_winter_fair_app"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

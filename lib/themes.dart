@@ -1,9 +1,14 @@
 // Define available themes
+// Dart SDK imports
 import 'dart:ui' as ui;
+
+// App imports
+import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
 
 String getEffectiveThemeKey(String themeKey, [Brightness? brightness]) {
   if (themeKey != 'auto') return themeKey;
@@ -14,13 +19,13 @@ String getEffectiveThemeKey(String themeKey, [Brightness? brightness]) {
 String getMapStyleForThemeKey(String themeKey, [Brightness? brightness]) {
   switch (getEffectiveThemeKey(themeKey, brightness)) {
     case 'light':
+    case '2025':
       return standardMap;
     case 'dark':
+    case 'highContrast':
       return darkMap;
     case '2024':
       return retroMap;
-    case 'highContrast':
-      return darkMap;
     case 'colourBlindFriendly':
       return colourBlindMap;
     default:
@@ -33,29 +38,32 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.light,
-      primary: const Color.fromRGBO(166, 34, 43, 1),
+      primary: const Color.fromRGBO(25, 41, 103, 1),
       onPrimary: Colors.white,
+      onPrimaryFixedVariant: const Color.fromRGBO(244, 248, 255, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
-      onSecondaryFixed: const Color.fromRGBO(255, 235, 235, 1), // favourites background
-      tertiary: const Color.fromRGBO(166, 34, 43, 1),
+      onSecondaryFixed: const Color.fromRGBO(255, 242, 242, 1), // favourites background
+      tertiary: const Color.fromRGBO(25, 41, 103, 1),
+      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements // purple 137, 74, 151
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
-      surfaceDim: Colors.grey[300]!,
+      surfaceDim: Colors.grey[300],
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(166, 34, 43, 1),
+      backgroundColor: Color.fromRGBO(25, 41, 103, 1),
       foregroundColor: Colors.white,
     ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(166, 34, 43, 1),
-      unselectedItemColor: Colors.grey,
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: const Color.fromRGBO(228, 199, 143, 1),
+      unselectedItemColor: Colors.grey[300],
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
@@ -63,35 +71,69 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: const Color.fromRGBO(255, 196, 0, 1.0),
-      onPrimary: Colors.black,
+      primary: const Color.fromRGBO(25, 41, 103, 1),
+      onPrimary: const Color.fromRGBO(40, 40, 40, 1.0),
+      onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
       onSecondary: Colors.white,
       onSecondaryFixed: const Color.fromRGBO(35, 35, 10, 1), // favourites background
-      tertiary: const Color.fromRGBO(255, 196, 0, 1.0),
+      tertiary: const Color.fromRGBO(228, 199, 143, 1.0),
+      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements
       error: Colors.orange,
       onError: Colors.black,
       surface: const Color.fromRGBO(44, 44, 44, 1.0),
-      surfaceDim: const Color.fromRGBO(30, 30, 30, 1.0),
+      surfaceDim: Colors.grey[800],
       onSurface: Colors.white,
-      onSurfaceVariant: Colors.grey[300]!,
+      onSurfaceVariant: Colors.grey[300],
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
+      backgroundColor: Color.fromRGBO(25, 41, 103, 1.0),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
       unselectedItemColor: Colors.grey,
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Color.fromRGBO(44, 44, 44, 1.0),
-    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
     ),
     listTileTheme: const ListTileThemeData(
       tileColor: Color.fromRGBO(44, 44, 44, 1.0),
+      textColor: Colors.white,
+      iconColor: Colors.white,
+    ),
+    shadowColor: const Color.fromRGBO(0,0,0, 0.2),
+  ),
+  '2025': ThemeData(
+    useMaterial3: true,
+    colorScheme: ColorScheme(
+      brightness: Brightness.light,
+      primary: const Color.fromRGBO(166, 34, 43, 1),
+      onPrimary: Colors.white,
+      onPrimaryFixedVariant: const Color.fromRGBO(255, 245, 245, 1), // timetable swimlanes
+      secondary: Colors.white,
+      onSecondary: Colors.black,
+      onSecondaryFixed: const Color.fromRGBO(255, 235, 235, 1), // favourites background
+      tertiary: const Color.fromRGBO(166, 34, 43, 1),
+      tertiaryFixed: Colors.grey[300], // some drawer and guide elements
+      error: Colors.orange,
+      onError: Colors.black,
+      surface: Colors.white,
+      surfaceDim: Colors.grey[300],
+      onSurface: Colors.black,
+      onSurfaceVariant: Colors.grey[700],
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color.fromRGBO(166, 34, 43, 1),
+      foregroundColor: Colors.white,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey[300],
+    ),
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
@@ -101,67 +143,69 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(37, 63, 128, 1.0),
       onPrimary: Colors.white,
+      onPrimaryFixedVariant: const Color.fromRGBO(244, 248, 255, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(235, 235, 255, 1), // favourites background
       tertiary: const Color.fromRGBO(37, 63, 128, 1.0),
+      tertiaryFixed: Colors.white,
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
       surfaceDim: Colors.grey,
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(37, 63, 128, 1.0),
       foregroundColor: Colors.white,
     ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(37, 63, 128, 1.0),
-      unselectedItemColor: Colors.grey,
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey[300],
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
   ),
   'highContrast': ThemeData(
     useMaterial3: true,
-    colorScheme: const ColorScheme(
+    colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: Color.fromRGBO(255, 243, 0, 1.0),
+      primary: Colors.black,
       onPrimary: Colors.black,
-      secondary: Color.fromRGBO(255, 243, 0, 1.0),
-      onSecondary: Colors.black,
-      onSecondaryFixed: Color.fromRGBO(10, 35, 10, 1), // favourites background
-      tertiary: Color.fromRGBO(8, 255, 0, 1.0),
-      error: Colors.orange,
-      onError: Colors.black,
+      onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
+      secondary: Colors.black,
+      onSecondary: Colors.yellow,
+      onSecondaryFixed: const Color.fromRGBO(10, 35, 10, 1), // favourites background
+      tertiary: Colors.lightGreenAccent,
+      tertiaryFixed: Colors.yellow, // some drawer elements
+      error: Colors.black,
+      onError: Colors.yellow,
       surface: Colors.black,
-      surfaceDim: Colors.grey,
-      onSurface: Color.fromRGBO(255, 243, 0, 1.0),
-      onSurfaceVariant: Color.fromRGBO(0, 255, 244, 1.0),
+      surfaceDim: Colors.grey[800],
+      onSurface: Colors.yellow,
+      onSurfaceVariant: Colors.lightGreenAccent,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.black,
-      foregroundColor: Color.fromRGBO(255, 243, 0, 1.0),
+      surfaceTintColor: Colors.transparent,
+      foregroundColor: Colors.yellow,
     ),
-    iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(
-        foregroundColor: const Color.fromRGBO(8, 255, 0, 1.0),
-      ),
-    ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(8, 255, 0, 1.0),
-      unselectedItemColor: Colors.grey,
-    ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.black,
+    bottomNavigationBarTheme:  BottomNavigationBarThemeData(
+      selectedItemColor: Colors.yellow,
+      unselectedItemColor: Colors.grey[300],
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(4, 113, 0, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
+      style: ElevatedButton.styleFrom(backgroundColor: const Color.fromRGBO(30, 30, 30, 1.0), foregroundColor: Colors.white, iconColor: Colors.white),
     ),
-    listTileTheme: const ListTileThemeData(tileColor: Colors.black),
+    listTileTheme: const ListTileThemeData(
+      tileColor: Colors.black,
+      textColor: Colors.white,
+      iconColor: Colors.white,
+    ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
 ),
   'colourBlindFriendly': ThemeData(
@@ -170,27 +214,30 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(102, 55, 133, 1.0),
       onPrimary: Colors.white,
-      secondary: const Color.fromRGBO(255, 196, 0, 1.0),
+      onPrimaryFixedVariant: const Color.fromRGBO(248, 242, 255, 1), // timetable swimlanes
+      secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(245, 235, 255, 1), // favourites background
       tertiary: const Color.fromRGBO(102, 55, 133, 1.0),
+      tertiaryFixed: Colors.yellow, // some drawer elements
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
-      surfaceDim: Colors.grey,
+      surfaceDim: Colors.grey[300],
       onSurface: Colors.black,
-      onSurfaceVariant: Colors.grey[700]!,
+      onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Color.fromRGBO(102, 55, 133, 1.0),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(102, 55, 133, 1.0),
-      unselectedItemColor: Colors.grey,
+      selectedItemColor: Color.fromRGBO(228, 199, 143, 1),
+      unselectedItemColor: Colors.white,
     ),
-    drawerTheme: const DrawerThemeData(
-      backgroundColor: Colors.white,
+    listTileTheme: const ListTileThemeData(
+      textColor: Colors.black,
+      iconColor: Colors.black,
     ),
     shadowColor: const Color.fromRGBO(0,0,0, 0.2),
 ),
@@ -216,9 +263,8 @@ String nightMap =
 String aubergineMap =
     '[{"elementType":"geometry","stylers":[{"color":"#1d2c4d"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#8ec3b9"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#1a3646"}]},{"featureType":"administrative.country","elementType":"geometry.stroke","stylers":[{"color":"#4b6878"}]},{"featureType":"administrative.land_parcel","elementType":"labels.text.fill","stylers":[{"color":"#64779e"}]},{"featureType":"administrative.province","elementType":"geometry.stroke","stylers":[{"color":"#4b6878"}]},{"featureType":"landscape.man_made","elementType":"geometry.stroke","stylers":[{"color":"#334e87"}]},{"featureType":"landscape.natural","elementType":"geometry","stylers":[{"color":"#023e58"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#283d6a"}]},{"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#6f9ba5"}]},{"featureType":"poi","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#023e58"}]},{"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#3C7680"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#304a7d"}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"color":"#98a5be"}]},{"featureType":"road","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#2c6675"}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#255763"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#b0d5ce"}]},{"featureType":"road.highway","elementType":"labels.text.stroke","stylers":[{"color":"#023e58"}]},{"featureType":"transit","elementType":"labels.text.fill","stylers":[{"color":"#98a5be"}]},{"featureType":"transit","elementType":"labels.text.stroke","stylers":[{"color":"#1d2c4d"}]},{"featureType":"transit.line","elementType":"geometry.fill","stylers":[{"color":"#283d6a"}]},{"featureType":"transit.station","elementType":"geometry","stylers":[{"color":"#3a4762"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#0e1626"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#4e6d70"}]},{"featureType":"transit.line","elementType":"geometry","stylers":[{"visibility":"on"}]}]';
 
-Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
+String markerAssetPath(String category) {
   late String assetPath;
-  final ByteData backdropData;
 
   switch (category) {
     case 'Group-Food':
@@ -254,23 +300,29 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
     case 'Business':
       assetPath = 'assets/mapMarkers/businessMarker.png';
     case 'Group-PerformanceEvent':
-      assetPath = 'assets/mapMarkers/performanceEventGroupMarker.png';
-    case 'Mixed':
+      assetPath = 'assets/mapMarkers/performanceEventMarker.png';
+    case 'Group-Mixed':
       assetPath = 'assets/mapMarkers/mixedGroupMarker.png';
+    case 'Mixed':
+      assetPath = 'assets/mapMarkers/mixedMarker.png';
+    default:
+      throw ArgumentError.value(category, 'category', 'Unknown map marker category');
   }
 
-  // Adjust the asset path if this is a group and load the relevant backdrop image (frame)
-  if (category == 'Group-PerformanceEvent' || category == 'Mixed') {
-    backdropData = await rootBundle.load("assets/mapMarkers/groupMarkerIconFrameThin.png");
-  } else {
-    backdropData = await rootBundle.load("assets/mapMarkers/markerIconFrame.png");
-  }
+  return assetPath;
+}
 
+String markerFrameAssetPath(String category) =>
+    category == 'Group-Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
+
+Future<BitmapDescriptor> getColoredMarker(String category, Color color, {MapMarkerSize markerSize = MapMarkerSize.medium}) async {
   if (onTest == true) {
     // Return a default marker during unit tests to avoid crashes
     return BitmapDescriptor.defaultMarker;
   }
   try {
+    final assetPath = markerAssetPath(category);
+    final backdropData = await rootBundle.load(markerFrameAssetPath(category));
     int markerPixelSize = 288;
     final ui.Codec backdropCodec = await ui.instantiateImageCodec(
       backdropData.buffer.asUint8List(),
@@ -312,7 +364,7 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
     final ByteData? byteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-    return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: 32.0, width: 32.0);
+    return BitmapDescriptor.bytes(pngBytes, imagePixelRatio: 1.0, height: markerSize.dimension, width: markerSize.dimension);
   } catch (e) {
     debugPrint("Custom marker rendering failed: $e");
     return BitmapDescriptor.defaultMarker;
@@ -322,7 +374,7 @@ Future<BitmapDescriptor> getColoredMarker(String category, Color color) async {
 Color getCategoryColor(String selectedThemeKey, String category) {
   final effectiveThemeKey = getEffectiveThemeKey(selectedThemeKey);
   Color color;
-  if (effectiveThemeKey == "light") {
+  if (effectiveThemeKey == "light" || effectiveThemeKey == "2025") {
     color = switch(category) {
       "Food" || "Group-Food" => const Color.fromRGBO(255, 156, 26, 1.0),
       "Shopping" || "Group-Shopping" => const Color.fromRGBO(209, 85, 89, 1.0),
@@ -331,7 +383,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(79, 184, 75, 1.0),
       "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(84, 145, 245, 1.0),
-      "Mixed" => const Color.fromRGBO(166, 34, 43, 1),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
     };
   } else if (effectiveThemeKey == "dark") {
@@ -343,7 +395,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(7, 128, 0, 1.0),
       "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(29, 112, 198, 1.0),
-      "Mixed" => const Color.fromRGBO(166, 34, 43, 1),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
     };
   } else if (effectiveThemeKey == "2024") {
@@ -355,7 +407,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 115, 37, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(37, 63, 128, 1.0),
       "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
-      "Mixed" => const Color.fromRGBO(37, 63, 128, 1.0),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(37, 63, 128, 1.0),
       _ => const Color.fromRGBO(0, 0, 0, 1.0),
     };
   } else if (effectiveThemeKey == "highContrast") {
@@ -367,7 +419,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(28, 213, 0, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 187, 255, 1.0),
       "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
-      "Mixed" => const Color.fromRGBO(0, 51, 255, 1.0),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(0, 51, 255, 1.0),
       _ => const Color.fromRGBO(0, 0, 0, 1.0),
     };
   } else if (effectiveThemeKey == "colourBlindFriendly") {
@@ -379,7 +431,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 158, 115, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 114, 178, 1.0),
       "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
-      "Mixed" => const Color.fromRGBO(102, 55, 133, 1.0),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(102, 55, 133, 1.0),
       _ => const Color.fromRGBO(255, 0, 0, 1.0),
     };
   } else {

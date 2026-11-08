@@ -1,9 +1,14 @@
+// Dart SDK imports
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+
+// App imports
+import 'package:mill_road_winter_fair_app/app_config.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 // SharedPreferences key for storing cached listings as JSON
@@ -50,10 +55,8 @@ Future<List<Map<String, dynamic>>> fetchListings(
 }) async {
   debugPrint('fetchListings called');
   try {
-    // Load environment variables
-    await dotenv.load(fileName: ".env");
-    String herokuApi = dotenv.env['HEROKU_API'] ?? '';
-    String herokuApiKey = dotenv.env['HEROKU_API_KEY'] ?? '';
+    String herokuApi = AppConfig.herokuApi;
+    String herokuApiKey = AppConfig.herokuApiKey;
     final uri = Uri.parse(herokuApi);
 
     final response =
@@ -64,7 +67,7 @@ Future<List<Map<String, dynamic>>> fetchListings(
     if (response.statusCode != 200) {
       for (var i = 0; i < 9; i++) {
         await Future.delayed(const Duration(seconds: 2));
-        final retryResponse = await client.get(uri);
+        final retryResponse = await client.get(uri, headers: {'X-Api-Key': herokuApiKey});
         debugPrint(
             'Retry ${i + 1} response status: ${retryResponse.statusCode}');
         if (retryResponse.statusCode == 200) {
@@ -128,7 +131,7 @@ List<Map<String, dynamic>> _parseListings(String body) {
       (rows.first as List<dynamic>).map((h) => h?.toString() ?? '').toList();
   final headerCount = headers.length;
 
-  return rows.skip(1).map((row) {
+  List<Map<String, dynamic>>  mappedCells = rows.skip(1).map((row) {
     // Each `row` (after row 1) should be a list of cells. Make a mutable copy.
     final cells = List<dynamic>.from(row as List<dynamic>);
 
@@ -150,6 +153,18 @@ List<Map<String, dynamic>> _parseListings(String body) {
       cells.cast<dynamic>(),
     );
   }).toList();
+
+  for (var i = 0; i < mappedCells.length; i++) {
+    mappedCells[i]['genericTerms'] = '';
+    if ((mappedCells[i]['food'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'food ';
+    if ((mappedCells[i]['performanceMusic'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances music buskers ';
+    if ((mappedCells[i]['performanceChildrens'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances childrens kids family ';
+    if ((mappedCells[i]['performanceDance'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances dance ';
+    if ((mappedCells[i]['performanceOther'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances ';
+    if ((mappedCells[i]['visitExperience'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'visits experiences ';
+  }
+  
+  return mappedCells;
 }
 
 // Fetch listings only if we don't already have them

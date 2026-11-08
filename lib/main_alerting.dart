@@ -1,15 +1,21 @@
-import 'dart:io';
+// Dart SDK imports
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
-import 'package:intl/intl.dart' as intl;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
+import 'dart:io';
+
+// App imports
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/listings.dart';
+
+// Third-party imports
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 bool alertsPermissionGranted = false; // whether the user has granted permission for notifications+alerts
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -21,7 +27,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
   final IOSInitializationSettings initializationSettingsIOS = IOSInitializationSettings(
     requestAlertPermission: true,
     notificationCategories: [
-      DarwinNotificationCategory('UnderwayCategory', actions: <DarwinNotificationAction>[
+      const DarwinNotificationCategory('UnderwayCategory', actions: <DarwinNotificationAction>[
 //        DarwinNotificationAction.plain('show', 'Show', options: <DarwinNotificationActionOption>{DarwinNotificationActionOption.foreground}),
       ], options: <DarwinNotificationCategoryOption>{DarwinNotificationCategoryOption.hiddenPreviewShowTitle}),
       DarwinNotificationCategory('5MinsCategory', actions: <DarwinNotificationAction>[
@@ -63,7 +69,7 @@ Future<void> initialiseFlutterLocalNotificationsPlugin() async {
     alertsPermissionGranted = perms != null && perms.isEnabled && perms.isAlertEnabled;
   }
   if (Platform.isAndroid) {
-    final androidChannel = AndroidNotificationChannel(
+    final androidChannel = const AndroidNotificationChannel(
       'org.millroadwinterfair.MRWFapp', // id
       'Event alerts', // name
       description: 'Mill Road Winter Fair event alerts',
@@ -101,17 +107,17 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
   DateTime? newAlertTime;
   switch (notificationResponse.actionId) {
     case 'snooze5mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 5));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 5));
     case 'snooze10mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 10));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 10));
     case 'snooze15mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 15));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 15));
     case 'snooze20mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 20));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 20));
     case 'snooze30mins':
-      newAlertTime = DateTime.now().add(Duration(minutes: 30));
+      newAlertTime = DateTime.now().add(const Duration(minutes: 30));
     case 'snoozeStart':
-      newAlertTime = [startTime, DateTime.now().add(Duration(minutes: 2))].reduce((a, b) => a.isAfter(b) ? a: b);
+      newAlertTime = [startTime, DateTime.now().add(const Duration(minutes: 2))].reduce((a, b) => a.isAfter(b) ? a: b);
   }
   if (newAlertTime != null) {
     tz.initializeTimeZones();
@@ -140,8 +146,10 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       debugPrint('notificationTapBackground: failed to parse endTime: $e');
       return;
     }
+    final possibleNewId = await updateAlertNoticePeriodById(notificationResponse.id!, noticePeriod, theEventAlert['listingId']);
+    if (possibleNewId == -1) return;
     final theAlert = AlertSchedule(
-      notificationResponse.id!, 
+      possibleNewId,
       theEventAlert['listingId'],
       theEventAlert['listingTitle'],
       theEventAlert['listingLocation'],
@@ -152,7 +160,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       null
     );
     flutterLocalNotificationsPlugin.zonedSchedule(
-      id: notificationResponse.id!,
+      id: possibleNewId,
       title: fairName,
       body: theMessage,
       payload: jsonEncode(theAlert),
@@ -163,8 +171,7 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle
     );
-    await updateAlertNoticePeriodById(notificationResponse.id!, noticePeriod);
-    debugPrint('onDidReceiveBackgroundNotificationResponse scheduled new alert for $newAlertTime with message “$theMessage”');
+    debugPrint('onDidReceiveBackgroundNotificationResponse scheduled alert for $newAlertTime with message “$theMessage” new ID = $possibleNewId and old was ${notificationResponse.id!}');
   }
 }
 
@@ -177,24 +184,24 @@ void notificationTapBackground(NotificationResponse notificationResponse) async 
       []);
     case <= 10:
       return('5MinsCategory', [
-        AndroidNotificationAction('snoozeStart', 'Snooze to start'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze to start'),
       ]);
     case <= 19:
       return('15MinsCategory', [
-        AndroidNotificationAction('snooze5mins', 'Snooze 5'),
-        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
+        const AndroidNotificationAction('snooze5mins', 'Snooze 5'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
     case <= 35:
       return('30MinsCategory', [
-        AndroidNotificationAction('snooze10mins', 'Snooze 10'),
-        AndroidNotificationAction('snooze20mins', 'Snooze 20'),
-        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
+        const AndroidNotificationAction('snooze10mins', 'Snooze 10'),
+        const AndroidNotificationAction('snooze20mins', 'Snooze 20'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
     default:
       return('60MinsCategory',[
-        AndroidNotificationAction('snooze15mins', 'Snooze 15'),
-        AndroidNotificationAction('snooze30mins', 'Snooze 30'),
-        AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
+        const AndroidNotificationAction('snooze15mins', 'Snooze 15'),
+        const AndroidNotificationAction('snooze30mins', 'Snooze 30'),
+        const AndroidNotificationAction('snoozeStart', 'Snooze ’til start'),
       ]);
   }
 }
@@ -239,16 +246,22 @@ Future<bool> requestAlertPermissions() async {
 }
 
 
-Future<void> updateAlertNoticePeriodById(int id, int noticePeriod) async {
+Future<int> updateAlertNoticePeriodById(int id, int noticePeriod, String listingId) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.reload(); // since it may be cached
   final jsonString = prefs.getString('alertsStore');
-  if (jsonString == null) return;
+  if (jsonString == null) return -1;
   final store = AlertScheduleStore.fromJson(jsonDecode(jsonString));
   final theAlert = store.alertSchedules.firstWhereOrNull((a) => a.id == id);
-  if (theAlert == null) return;
-  theAlert.noticePeriod = noticePeriod;
+  int newId;
+  if (theAlert == null) { // it must have been cleaned up by the app
+    newId = await store.addAlert(listingId, noticePeriod, true);
+  } else {
+    theAlert.noticePeriod = noticePeriod;
+    newId = id;
+  }
   await prefs.setString('alertsStore', jsonEncode(store));
+  return newId;
 }
 
 
@@ -307,8 +320,9 @@ class AlertScheduleStore {
 
   int? alertIdForListing(String listingId) => alertSchedules.firstWhereOrNull((a) => a.listingId == listingId)?.id;
 
-  int addAlert(String listingId, int noticePeriod, bool isScheduled) {
+  Future<int> addAlert(String listingId, int noticePeriod, bool isScheduled) async {
     debugPrint('AlertScheduleStore addAlert for listingId=$listingId');
+    if (listings.isEmpty) listings = await loadListingsFromCache(); // we're in the notification process
     final theListing = listings.firstWhereOrNull((l) => l['id'] == listingId);
     if (theListing == null) return -1;
     final newAlert = AlertSchedule(
@@ -336,10 +350,13 @@ class AlertScheduleStore {
     alertSchedules.removeWhere((a) => a.id == theId);
   }
 
-  void removePastEventAlerts() {
+  Future<void> removePastEventAlerts() async {
     debugPrint('AlertScheduleStore removePastEventAlerts called');
+    await refreshEventAlertSchedules();
     final now = DateTime.now();
     alertSchedules.removeWhere((a) => a.listingStartTime.subtract(Duration(minutes: a.noticePeriod)).isBefore(now));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('alertsStore', jsonEncode(this));
   }
 
   void saveAllEventAlerts() async {
@@ -366,6 +383,7 @@ class AlertScheduleStore {
       final refreshedAlertsStore = AlertScheduleStore.fromJson(jsonDecode(jsonString));
       alertsStore.alertSchedules.clear();
       alertsStore.alertSchedules.addAll(refreshedAlertsStore.alertSchedules);
+      alertsStore.nextId = refreshedAlertsStore.nextId;
     }
   }
 

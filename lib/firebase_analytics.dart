@@ -1,10 +1,19 @@
+// App imports
+import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
+import 'package:mill_road_winter_fair_app/globals.dart';
+
+// Third-party imports
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mill_road_winter_fair_app/analytics_explanation_page.dart';
-import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Analytics is enabled automatically for release builds and can be opted into
+// for debug/profile builds with `--dart-define=DEV_ANALYTICS=true`.
+const bool devAnalyticsEnabled = bool.fromEnvironment('DEV_ANALYTICS');
+const bool analyticsEnabledForBuild = kReleaseMode || devAnalyticsEnabled;
 
 // A service class to handle analytics events, using Firebase Analytics in production and a fake implementation for testing
 class FirebaseAnalyticsService implements AnalyticsService {
@@ -142,6 +151,10 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'shopping': 'map_filter_shopping',
       'charityCommunityInfo': 'map_filter_community',
       'performances': 'map_filter_performances',
+      'dance': 'map_filter_dance',
+      'other': 'map_filter_other',
+      'childrens': 'map_filter_childrens',
+      'business': 'map_filter_business',
       'visitsExperiences': 'map_filter_visits',
       'services': 'map_filter_services',
     };
@@ -325,6 +338,8 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'theme': selectedThemeKey,
       'sorting_method': preferredSortingMethod.name,
       'map_type': preferredMapStyleType.name,
+      'map_marker_size': preferredMapMarkerSize.value.name,
+      'home_page_style': staticChooserPage.value ? 'static' : 'animated',
       'map_orientation': preferredMapOrientation.name,
       'road_closure': preferredRoadClosurePolygonVisible.toString(),
     };
@@ -506,4 +521,11 @@ class FakeAnalyticsService implements AnalyticsService {
   Future<void> showAnalyticsConsentDialog(BuildContext context) async {
     // Do nothing
   }
+}
+
+// A no-op service used when analytics is disabled for the entire build.
+// Unlike [FakeAnalyticsService], attempting to opt in does not alter the in-memory or persisted user preference.
+class DisabledAnalyticsService extends FakeAnalyticsService {
+  @override
+  Future<void> setAnalyticsEnabled(bool enabled) async {}
 }
