@@ -1996,8 +1996,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             break;
         }
 
-        final searchIconKey = GlobalKey();
-        final filterIconKey = GlobalKey();
         final colorScheme = Theme.of(context).colorScheme;
         final appBarTheme = Theme.of(context).appBarTheme;
 
@@ -2011,10 +2009,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           onTabSelected: widget.onTabSelected,
           appBarActions: [
             if (navigationInProgress == false) IconButton(
-              key: filterIconKey,
               tooltip: 'Choose which map markers to show',
               color: appBarTheme.foregroundColor,
-              onLongPress: () => showMiniPopup(context, filterIconKey, 'Tap to choose which map markers to show or hide', analyticsService: widget.analyticsService),
               onPressed: () {
                 HapticFeedback.lightImpact();
                 widget.analyticsService.logButtonTapped('map_filter_open');
@@ -2025,10 +2021,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               icon: const Icon(Icons.filter_alt, size: 26),
             ),
             if (doingAPushNavigation == null && !navigationInProgress) IconButton(
-              key: searchIconKey,
               tooltip: _isSearching ? 'Close map search' : 'Search the map',
               color: appBarTheme.foregroundColor,
-              onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar', analyticsService: widget.analyticsService),
               onPressed: () async {
                 HapticFeedback.lightImpact();
                 widget.analyticsService.logButtonTapped('map_search_toggle');

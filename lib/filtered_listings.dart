@@ -431,7 +431,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         IconButton(
           key: nowOrSoonIconKey,
           tooltip: 'Scroll to what is on now or starting soon',
-          onLongPress: !canScrollToNow ? null : () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canScrollToNow) {
@@ -489,8 +488,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         IconButton(
           key: hidePastIconKey,
           tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
-          onLongPress: !canTogglePastListings ? null : () => showMiniPopup(context, hidePastIconKey,
-              (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canTogglePastListings) {
