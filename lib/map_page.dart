@@ -1405,15 +1405,17 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         await startLocationUpdates(destination);
       }
     } else {
-      Fluttertoast.showToast(
-        msg: 'Location services and permissions are required to determine directions',
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Colors.white,
-        fontSize: 16,
-        toastLength: Toast.LENGTH_LONG,
-        timeInSecForIosWeb: 4,
-      );
+      await showNoPermissionsDialog(context, colorScheme, 'To calculate directions, you need to give this app permission to know your location.');
+      locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
+      locationPermission = await Geolocator.checkPermission();
+      if (!locationServicesEnabled || locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
+        locationPermission = await Geolocator.requestPermission();
+      }
+      if (!locationServicesEnabled || locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
+        if (mounted) Navigator.pop(context);
+        return;
+      }
+      await getCurrentPosition();
     }
 
     // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
