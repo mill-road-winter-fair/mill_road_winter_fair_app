@@ -120,8 +120,8 @@ void main() {
             expect(iconTheme.size, 40);
             expect(iconTheme.color, Theme.of(tester.element(bell)).colorScheme.onSecondary);
           case 'Make the app your own':
-            expectTip('disable animations on the home page', Icons.home);
-            expectTip('preferred notice period for notifications', Icons.home);
+            expectTip('disable home page animations', Icons.home);
+            expectTip('preferred notice period for alerts', Icons.home);
         }
         if (title != pageTitles.last) {
           await tester.tap(find.byIcon(Icons.arrow_forward));

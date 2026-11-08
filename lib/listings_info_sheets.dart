@@ -71,7 +71,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       title,
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
+                      style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ),
@@ -97,7 +97,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   fit: BoxFit.scaleDown,
                   child: Row(spacing: 8, children:[
-                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: colorScheme.onPrimary, semanticLabel: subfilterCategoryLabels[c]?.label)
+                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: Colors.white, semanticLabel: subfilterCategoryLabels[c]?.label)
                   ]),
                 ),
               ),
@@ -107,7 +107,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                   flex: 10,
                   child: Text(
                     approxDistance,
-                    style: TextStyle(fontSize: 14, color: colorScheme.onPrimary),
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
                     textAlign: TextAlign.end,
                   ),
                 ),
@@ -327,9 +327,15 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                             ),
                     ),
                   ) else if (widget.brickAndMortar) GestureDetector(
-                    onTap: () => showMiniPopup(context, brickAndMortarIconKey, 'A permanent shop or office building', analyticsService: widget.analyticsService),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      showMiniPopup(context, brickAndMortarIconKey, 'A permanent shop or office building', analyticsService: widget.analyticsService);
+                    },
                     key: brickAndMortarIconKey,
-                    child: const Icon(Icons.store),
+                    child: Tooltip(
+                      message: 'A permanent shop or office building',
+                      child: Semantics(button: true, child: const Icon(Icons.store)),
+                    ),
                   ),
                 ],
               ),
@@ -364,6 +370,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   ),
                 ),
                 if (isItAnEvent) IconButton(
+                  tooltip: widget.listingAlerted ? 'Remove alert' : 'Set an alert',
                   onPressed: (widget.cancelled && !alertsStore.alertExists(widget.listingId))
                       ? null
                       : (isItAlertable)
@@ -373,7 +380,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           setState(() { });
                           widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
                         }
-                      : () => showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance', analyticsService: widget.analyticsService),
+                      : () {
+                          HapticFeedback.lightImpact();
+                          showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance', analyticsService: widget.analyticsService);
+                        },
                   padding: const EdgeInsets.all(0),
                   key: alertIconKey,
                   style: ElevatedButton.styleFrom(
@@ -405,7 +415,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           widget.analyticsService.logDirectionsToListingRequested(widget.title);
                           widget.onGetDirections?.call(); // null-safe
                         },
-                  child: const Icon(Icons.directions_walk, semanticLabel: 'Get walking directions'),
+                  child: const Tooltip(message: 'Get walking directions', child: Icon(Icons.directions_walk)),
                 ),
                 // only display the Details button if there are details to display (and they're not always shown i.e. single bottom modal)
                 if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
@@ -430,7 +440,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
                       widget.onDetailsTapped?.call();
                     },
-                    child: Icon(Icons.info, semanticLabel: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details'),
+                    child: Tooltip(message: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details', child: const Icon(Icons.info)),
                   ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -452,9 +462,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       );
                       widget.analyticsService.logButtonTapped('share_listing', listingId: widget.listingId, listingName: widget.title);
                   },
-                  child: (Platform.isAndroid)
-                      ? const Icon(Icons.share, semanticLabel: 'Share listing')
-                      : const Icon(Icons.ios_share, semanticLabel: 'Share listing'),
+                  child: Tooltip(
+                    message: 'Share listing',
+                    child: Icon(Platform.isAndroid ? Icons.share : Icons.ios_share),
+                  ),
                   ),
               ],
             ),

@@ -174,7 +174,7 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: const Color.fromRGBO(37, 63, 128, 1.0),
+      primary: Colors.black,
       onPrimary: Colors.black,
       onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
       secondary: Colors.black,
@@ -185,12 +185,13 @@ final Map<String, ThemeData> appThemes = {
       error: Colors.black,
       onError: Colors.yellow,
       surface: Colors.black,
-      surfaceDim: Colors.grey[400],
+      surfaceDim: Colors.grey[800],
       onSurface: Colors.yellow,
       onSurfaceVariant: Colors.lightGreenAccent,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(25, 41, 103, 1.0),
+      backgroundColor: Colors.black,
+      surfaceTintColor: Colors.transparent,
       foregroundColor: Colors.yellow,
     ),
     bottomNavigationBarTheme:  BottomNavigationBarThemeData(
@@ -299,9 +300,11 @@ String markerAssetPath(String category) {
     case 'Business':
       assetPath = 'assets/mapMarkers/businessMarker.png';
     case 'Group-PerformanceEvent':
-      assetPath = 'assets/mapMarkers/performanceEventGroupMarker.png';
-    case 'Mixed':
+      assetPath = 'assets/mapMarkers/performanceEventMarker.png';
+    case 'Group-Mixed':
       assetPath = 'assets/mapMarkers/mixedGroupMarker.png';
+    case 'Mixed':
+      assetPath = 'assets/mapMarkers/mixedMarker.png';
     default:
       throw ArgumentError.value(category, 'category', 'Unknown map marker category');
   }
@@ -310,7 +313,7 @@ String markerAssetPath(String category) {
 }
 
 String markerFrameAssetPath(String category) =>
-    category == 'Group-PerformanceEvent' || category == 'Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
+    category == 'Group-Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
 
 Future<BitmapDescriptor> getColoredMarker(String category, Color color, {MapMarkerSize markerSize = MapMarkerSize.medium}) async {
   if (onTest == true) {
@@ -380,7 +383,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(79, 184, 75, 1.0),
       "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(84, 145, 245, 1.0),
-      "Mixed" => const Color.fromRGBO(166, 34, 43, 1),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
     };
   } else if (effectiveThemeKey == "dark") {
@@ -392,7 +395,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(7, 128, 0, 1.0),
       "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(29, 112, 198, 1.0),
-      "Mixed" => const Color.fromRGBO(166, 34, 43, 1),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
     };
   } else if (effectiveThemeKey == "2024") {
@@ -404,7 +407,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 115, 37, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(37, 63, 128, 1.0),
       "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
-      "Mixed" => const Color.fromRGBO(37, 63, 128, 1.0),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(37, 63, 128, 1.0),
       _ => const Color.fromRGBO(0, 0, 0, 1.0),
     };
   } else if (effectiveThemeKey == "highContrast") {
@@ -416,7 +419,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(28, 213, 0, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 187, 255, 1.0),
       "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
-      "Mixed" => const Color.fromRGBO(0, 51, 255, 1.0),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(0, 51, 255, 1.0),
       _ => const Color.fromRGBO(0, 0, 0, 1.0),
     };
   } else if (effectiveThemeKey == "colourBlindFriendly") {
@@ -428,7 +431,7 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 158, 115, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 114, 178, 1.0),
       "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
-      "Mixed" => const Color.fromRGBO(102, 55, 133, 1.0),
+      "Mixed" || "Group-Mixed" => const Color.fromRGBO(102, 55, 133, 1.0),
       _ => const Color.fromRGBO(255, 0, 0, 1.0),
     };
   } else {
