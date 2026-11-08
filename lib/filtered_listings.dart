@@ -434,7 +434,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         IconButton(
           key: nowOrSoonIconKey,
           tooltip: 'Scroll to what is on now or starting soon',
-          onLongPress: !canScrollToNow ? null : () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canScrollToNow) {
@@ -493,8 +492,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           key: hidePastIconKey,
           tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
           style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_hidePastListings) ? Colors.white.withAlpha(30) : null)),
-          onLongPress: !canTogglePastListings ? null : () => showMiniPopup(context, hidePastIconKey,
-              (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canTogglePastListings) {
@@ -616,7 +613,10 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: refreshListings,
+                onRefresh: () {
+                  HapticFeedback.lightImpact();
+                  return refreshListings();
+                },
                 backgroundColor: colorScheme.primary,
                 color: Colors.white,
                 child: Container(
@@ -681,6 +681,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           ),
                                           child: GestureDetector(
                                             onTap: () {
+                                              HapticFeedback.lightImpact();
                                               widget.analyticsService.logButtonTapped('listing_row', listingId: listing['id'], listingName: listing['title']);
                                               toggleDetailsRow(index);
                                             },
@@ -818,7 +819,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
                                       '${filterCategory == 'favourite' ? ' in your Favourites' : ' found'}.'
                                     ),
-                                    if (filterCategory == 'favourite' && _searchQuery.isEmpty) Text(style: messageStyle, textAlign: TextAlign.center, 
+                                    if (filterCategory == 'favourite' && _searchQuery.isEmpty) Text(style: messageStyle, textAlign: TextAlign.center,
                                       'You can add Favourites by tapping the red heart icon on a listing.'
                                     ),
                                     if (_searchQuery.isNotEmpty) ...[
@@ -918,6 +919,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.sort),
           tooltip: 'Choose how to sort listings',
           onPressed: () {
+            HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('listings_sort_menu_toggle');
             if (controller.isOpen) {
               controller.close();
@@ -961,6 +963,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.filter_alt, size: 26),
           tooltip: 'Choose which types of listings to show',
           onPressed: () {
+            HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('listings_filter_menu_toggle');
             if (controller.isOpen) {
               controller.close();

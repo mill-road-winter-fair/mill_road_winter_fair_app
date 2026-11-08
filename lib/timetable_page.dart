@@ -562,8 +562,6 @@ class TimetablePageState extends State<TimetablePage> {
     final List<Widget> markers = [];
     final List<Widget> swimlanes = [];
     final nowOrSoonIconKey = GlobalKey();
-    final subcategoryIconKey = GlobalKey();
-    final searchIconKey = GlobalKey();
 
     String appBarTitle = switch(widget.filteredMusicOrNot) {
       true => 'Timetable (music)',
@@ -579,9 +577,6 @@ class TimetablePageState extends State<TimetablePage> {
         IconButton(
           key: nowOrSoonIconKey,
           tooltip: widget.onlyNowOrSoon ? 'Show the full timetable' : 'Show what is on now or starting soon',
-          onLongPress: () => showMiniPopup(
-              context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon',
-              analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_now_or_soon_toggle');
@@ -598,14 +593,12 @@ class TimetablePageState extends State<TimetablePage> {
           ),
         ),
         IconButton(
-          key: subcategoryIconKey,
           tooltip: switch (widget.filteredMusicOrNot) {
             null => 'Showing all performances. Show only music',
             true => 'Showing only music. Show everything except music',
             false => 'Showing everything except music. Show all performances',
           },
           color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_category_toggle');
@@ -616,12 +609,8 @@ class TimetablePageState extends State<TimetablePage> {
           icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
         ),
         IconButton(
-          key: searchIconKey,
           tooltip: _isSearching ? 'Close timetable search' : 'Search the timetable',
           color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
-          onLongPress: () => showMiniPopup(
-              context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
-              analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_search_toggle');
