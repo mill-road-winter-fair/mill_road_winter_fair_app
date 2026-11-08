@@ -141,7 +141,7 @@ void main() {
       expect(find.text('Visit our website'), findsOneWidget);
       expect(find.text('Contact us'), findsOneWidget);
       expect(find.text('Donate to the Fair'), findsOneWidget);
-      expect(find.byType(IconButton), findsExactly(6));
+      expect(find.byType(IconButton), findsExactly(7));
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('App guide'), findsOneWidget);
       expect(find.text('Share this app'), findsOneWidget);

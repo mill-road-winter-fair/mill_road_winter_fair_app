@@ -97,6 +97,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
   final ScrollController _roadClosuresDialogScrollController = ScrollController();
+  final ScrollController _filterMenuScrollController = ScrollController();
   // Declare default filters
   final Map<String, bool> filterSettings = {
     'Food': true,
@@ -569,7 +570,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('MapPageState createAllMarkerBitmaps called');
     const listingTypes = ['Food', 'Shopping', 'Charity/Community/Info', 'Music', 'Childrens', 'Dance', 'Other', 'Visit/Experience', 'Service', 'Business', 'Service-FirstAid', 'Service-Information', 'Service-Toilet',
-            'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-PerformanceEvent'];
+            'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-Mixed', 'Group-PerformanceEvent'];
     final themeKey = getEffectiveThemeKey(selectedThemeKey);
     final markerSize = preferredMapMarkerSize.value;
     final descriptors = <String, BitmapDescriptor>{};
@@ -623,7 +624,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     if (catCount > 1 && catCount == perfOrEventCount) {
       type = 'Group-PerformanceEvent';
     } else if (catCount != 1 || !isGroupSingleCategory(parentListing['groupID'], listings)) {
-      type = 'Mixed';
+      type = 'Group-Mixed';
     } else {
       type = 'Group-${getCategory(parentListing)}';
     }
@@ -1065,23 +1066,17 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 0.95,
       context: context,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+            final scrollView = SingleChildScrollView(
+              controller: _filterMenuScrollController,
+              primary: false,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text(
-                      "Filter map layers",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.left,
-                    )
-                  ]),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Music'),
@@ -1289,6 +1284,32 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       widget.analyticsService.logRoadClosurePolygonPreferenceSet(value);
                     },
                   ),
+                ],
+              ),
+            );
+            final content = Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Filter map layers",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left,
+                  ),
+                  Flexible(
+                    child: Scrollbar(
+                      controller: _filterMenuScrollController,
+                      thumbVisibility: Platform.isIOS ? false : true,
+                      thickness: 4,
+                      radius: const Radius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: scrollView,
+                      ),
+                    ),
+                  ),
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
@@ -1347,9 +1368,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
                 ],
               ),
+            );
+            return SafeArea(
+              top: false,
+              child: content,
             );
           },
         );
@@ -1460,6 +1484,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     preferredMapMarkerSize.removeListener(_onThemeChanged);
     _searchAnalyticsTimer?.cancel();
     _searchController.dispose();
+    _filterMenuScrollController.dispose();
     debugPrint('MapPageState dispose() called');
     // Cancel the location subscription when the page is disposed
     _positionStream?.cancel();
@@ -2369,10 +2394,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         widget.analyticsService.logButtonTapped('distance_to_destination');
                         _setMapCameraToFitPolyline(polylines);
                       },
-                      icon: Icon(Icons.directions, color: colorScheme.onPrimary),
+                      icon: const Icon(Icons.directions, color: Colors.white),
                       label: Text(
                         _distanceToDestination!,
-                        style: TextStyle(fontSize: 18, color: colorScheme.onPrimary),
+                        style: const TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),
