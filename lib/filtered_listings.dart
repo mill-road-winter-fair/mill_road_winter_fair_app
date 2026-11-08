@@ -799,66 +799,71 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         },
                       ),
                       (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0))
-                          ? SingleChildScrollView(
-                              padding: const EdgeInsetsGeometry.all(10),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.max,
-                                spacing: 15,
-                                children: [
-                                  Text(style: messageStyle, textAlign: TextAlign.center,
-                                    'No ${widget.subfilterCategory != null ? subfilterCategoryLabels[widget.subfilterCategory]!.label : ''}'
-                                    ' listings'
-                                    '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
-                                    '${filterCategory == 'favourite' ? ' in your Favourites' : ' found'}.'
-                                  ),
-                                  if (filterCategory == 'favourite' && _searchQuery.isEmpty) Text(style: messageStyle, textAlign: TextAlign.center, 
-                                    'You can add Favourites by tapping the red heart icon on a listing.'
-                                  ),
-                                  if (_searchQuery.isNotEmpty) ...[
-                                    Text(style: messageStyle, textAlign: TextAlign.center, 'Tap the magnifying glass above or this button to clear and close search.'),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        HapticFeedback.lightImpact();
-                                        widget.analyticsService.logButtonTapped('clearCloseSearch_listings');
-                                        setState(() {
-                                          _searchAnalyticsTimer?.cancel();
-                                          _searchQuery = '';
-                                          _searchController.text = '';
-                                          _isSearching = false;
-                                        });
-                                      },
-                                      icon: const Icon(Icons.search_off, size: 32),
-                                      label: const Text('Clear and close search'),
+                          ? Scrollbar(
+                              thumbVisibility: Platform.isIOS ? false : true,
+                              thickness: 4,
+                              radius: const Radius.circular(8),
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsetsGeometry.all(10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.max,
+                                  spacing: 15,
+                                  children: [
+                                    Text(style: messageStyle, textAlign: TextAlign.center,
+                                      'No ${widget.subfilterCategory != null ? subfilterCategoryLabels[widget.subfilterCategory]!.label : ''}'
+                                      ' listings'
+                                      '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
+                                      '${filterCategory == 'favourite' ? ' in your Favourites' : ' found'}.'
                                     ),
-                                  ],
-                                  if (widget.subfilterCategory != null) ...[
-                                    Text(style: messageStyle, textAlign: TextAlign.center, 'The filter icon above changes what type of listings are displayed, or tap this button to stop filtering.'),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        HapticFeedback.lightImpact();
-                                        widget.analyticsService.logButtonTapped('switchOffFilter_listings');
-                                        widget.onSubfilterChange(null);
-                                      },
-                                      icon: const Icon(Icons.filter_alt, size: 32),
-                                      label: Text('Switch from ${subfilterCategoryLabels[widget.subfilterCategory]!.label} to everything'),
+                                    if (filterCategory == 'favourite' && _searchQuery.isEmpty) Text(style: messageStyle, textAlign: TextAlign.center, 
+                                      'You can add Favourites by tapping the red heart icon on a listing.'
                                     ),
+                                    if (_searchQuery.isNotEmpty) ...[
+                                      Text(style: messageStyle, textAlign: TextAlign.center, 'Tap the magnifying glass above or this button to clear and close search.'),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('clearCloseSearch_listings');
+                                          setState(() {
+                                            _searchAnalyticsTimer?.cancel();
+                                            _searchQuery = '';
+                                            _searchController.text = '';
+                                            _isSearching = false;
+                                          });
+                                        },
+                                        icon: const Icon(Icons.search_off, size: 32),
+                                        label: const Text('Clear and close search'),
+                                      ),
+                                    ],
+                                    if (widget.subfilterCategory != null) ...[
+                                      Text(style: messageStyle, textAlign: TextAlign.center, 'The filter icon above changes what type of listings are displayed, or tap this button to stop filtering.'),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('switchOffFilter_listings');
+                                          widget.onSubfilterChange(null);
+                                        },
+                                        icon: const Icon(Icons.filter_alt, size: 32),
+                                        label: Text('Switch from ${subfilterCategoryLabels[widget.subfilterCategory]!.label} to everything'),
+                                      ),
+                                    ],
+                                    if (filterCategory == 'favourite') ...[
+                                      Text(style: messageStyle, textAlign: TextAlign.center, 'Tapping ‘Listings’ below or this button will display all (not just Favourite) listings.'),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('switchOffFavourites_listings');
+                                          widget.onTabSelected(3); // in future, this could preserve search as well
+                                        },
+                                        icon: const Icon(Icons.ballot, size: 32),
+                                        label: const Text('View all listings, not just Favourites'),
+                                      ),
+                                    ],
                                   ],
-                                  if (filterCategory == 'favourite') ...[
-                                    Text(style: messageStyle, textAlign: TextAlign.center, 'Tapping ‘Listings’ below or this button will display all (not just Favourite) listings.'),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        HapticFeedback.lightImpact();
-                                        widget.analyticsService.logButtonTapped('switchOffFavourites_listings');
-                                        widget.onTabSelected(3); // in future, this could preserve search as well
-                                      },
-                                      icon: const Icon(Icons.ballot, size: 32),
-                                      label: const Text('View all listings, not just Favourites'),
-                                    ),
-                                  ],
-                                ],
-                              ),
+                                ),
+                              )
                             )
                           : const SizedBox.shrink(),
                     ]);
