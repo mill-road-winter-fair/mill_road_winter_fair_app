@@ -56,9 +56,9 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
   final ValueNotifier<double> _backgroundIntroProgress = ValueNotifier<double>(0.0);
 
   static const int _idleAnimationSteps = 60; // throttling: larger is smoother but dearer
-  static const int _entranceAnimationSteps = 300; // throttling: larger is smoother but dearer
+  static const int _entranceAnimationSteps = 100; // throttling: larger is smoother but dearer
   static const int _idleAnimationPeriod = 6; // for an entire cycle
-  static const int _entranceAnimationPeriod = 10; // from just background to all icons
+  static const int _entranceAnimationPeriod = 5; // from just background to all icons
   static const int _restartIdleAnimationPeriod = 3; // after how much inactivity to start again
   static const Duration _backgroundIntroDuration = Duration(milliseconds: 3000);
   static const double _backgroundReducedOpacity = 0.48;
