@@ -1342,7 +1342,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
                 ],
               ),
             );
