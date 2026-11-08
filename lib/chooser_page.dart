@@ -8,6 +8,7 @@ import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 // Third-party imports
 import 'package:flutter/foundation.dart';
@@ -203,6 +204,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
 
 
   void _selectHotspot(int index) {
+    HapticFeedback.lightImpact();
     _idleTimer?.cancel();
     setState(() { _chosenHotspotID = index; });
     _animationController?.stop(canceled: false);
@@ -412,6 +414,21 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
             currentTab: 0,
             onTabSelected: widget.onTabSelected,
             analyticsService: widget.analyticsService,
+            appBarActions: [
+              IconButton(
+                tooltip: 'Go to Settings to customise the app',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  widget.analyticsService.logButtonTapped('homepage_settings');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(analyticsService: widget.analyticsService)));
+                },
+                icon: Icon(
+                  Icons.settings,
+                  size: 24,
+                  color: Theme.of(context).appBarTheme.foregroundColor,
+                ),
+              ),
+            ],
             body: RepaintBoundary(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -511,13 +528,19 @@ class _ChooserContent extends StatelessWidget {
         Positioned(top: 20, left: 0, right: 0,
           child: Align(
             alignment: Alignment.center,
-            child: GestureDetector(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('home_about_fair');
-                Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
-              },
-              child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
+            child: Tooltip(
+              message: 'About the Fair',
+              child: Semantics(
+                button: true,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    analyticsService.logButtonTapped('home_about_fair');
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
+                  },
+                  child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
+                ),
+              ),
             ),
           ),
         ),
@@ -645,19 +668,29 @@ class _AnimatedHotspot extends StatelessWidget {
       top: hotspot.top,
       width: hotspot.size!.width,
       height: hotspot.size!.height,
-      child: _HotspotLayers(
-        hotspot: hotspot,
-        index: index,
-        visibleCount: visibleCount,
-        paintPhase: paintPhase,
-        entranceProgress: entranceProgress,
-        secondPhaseProgress: secondPhaseProgress,
-        backgroundIntroProgress: backgroundIntroProgress,
-        initialEntranceComplete: initialEntranceComplete,
-        staticChooserPage: staticChooserPage,
-        isSelected: isSelected,
-        colourScheme: colourScheme,
+      child: Semantics(
+        button: true,
+        label: hotspot.label.replaceAll('\n', ' '),
         onTap: onTap,
+        excludeSemantics: true,
+        child: Tooltip(
+          message: hotspot.label.replaceAll('\n', ' '),
+          excludeFromSemantics: true,
+          child: _HotspotLayers(
+            hotspot: hotspot,
+            index: index,
+            visibleCount: visibleCount,
+            paintPhase: paintPhase,
+            entranceProgress: entranceProgress,
+            secondPhaseProgress: secondPhaseProgress,
+            backgroundIntroProgress: backgroundIntroProgress,
+            initialEntranceComplete: initialEntranceComplete,
+            staticChooserPage: staticChooserPage,
+            isSelected: isSelected,
+            colourScheme: colourScheme,
+            onTap: onTap,
+          ),
+        ),
       ),
     );
   }
