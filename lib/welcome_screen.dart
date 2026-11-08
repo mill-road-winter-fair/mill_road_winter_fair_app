@@ -138,16 +138,16 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       pageColor: colourScheme.secondary.withValues(alpha: 0.85),
     );
     Widget guideRow(Widget icon, Widget content, {double botPadding = 16}) => Padding(
-          padding: EdgeInsets.only(bottom: botPadding),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(width: 40, child: Center(child: icon)),
-              const SizedBox(width: 8),
-              Expanded(child: content),
-            ],
-          ),
-        );
+      padding: EdgeInsets.only(bottom: botPadding),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(width: 40, child: Center(child: icon)),
+          const SizedBox(width: 8),
+          Expanded(child: content),
+        ],
+      ),
+    );
 
     Widget tip(Widget icon, String text) => guideRow(
       IconTheme(
@@ -161,24 +161,24 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     );
 
     Widget marker(String category) => ExcludeSemantics(
-          child: SizedBox(
-            width: 40,
-            height: 40,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(markerFrameAssetPath(category)),
-                Image.asset(markerAssetPath(category), color: getCategoryColor(selectedThemeKey, category), colorBlendMode: BlendMode.srcIn),
-              ],
-            ),
-          ),
-        );
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(markerFrameAssetPath(category)),
+            Image.asset(markerAssetPath(category), color: getCategoryColor(selectedThemeKey, category), colorBlendMode: BlendMode.srcIn),
+          ],
+        ),
+      ),
+    );
 
     Widget category(String key, String colourKey) => guideRow(
-          marker(colourKey),
-          Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
-          botPadding: 8,
-        );
+      marker(colourKey),
+      Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
+      botPadding: 8,
+    );
 
     PageViewModel guidePage(String title, List<Widget> children) {
       // Honour the device text size and wrap at the available width. Longer
@@ -232,9 +232,11 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         guideRow(
           marker('Group-PerformanceEvent'),
           Text('Multiple performances and events at one location', style: bodyStyle),
+          botPadding: 6,
         ),
         guideRow(
           marker('Mixed'),
+          botPadding: 6,
           Text('Any mix of these categories', style: bodyStyle),
         ),
       ]),

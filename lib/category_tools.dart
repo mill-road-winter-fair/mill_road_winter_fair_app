@@ -30,7 +30,11 @@ String getCategory(Map<String, dynamic> listing) {
 
   if (catCount > 1) {
     if (catCount == perfOrEventCount) return 'Group-PerformanceEvent';
-    return 'Mixed';
+    if (listing['groupParent'] == 'TRUE') {
+      return 'Group-Mixed';
+    } else {
+      return 'Mixed';
+    }
   } else {
     if (listing['business'] == 'TRUE') {
       return 'Business';

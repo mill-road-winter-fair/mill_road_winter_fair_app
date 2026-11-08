@@ -569,7 +569,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('MapPageState createAllMarkerBitmaps called');
     const listingTypes = ['Food', 'Shopping', 'Charity/Community/Info', 'Music', 'Childrens', 'Dance', 'Other', 'Visit/Experience', 'Service', 'Business', 'Service-FirstAid', 'Service-Information', 'Service-Toilet',
-            'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-PerformanceEvent'];
+            'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-Mixed', 'Group-PerformanceEvent'];
     final themeKey = getEffectiveThemeKey(selectedThemeKey);
     final markerSize = preferredMapMarkerSize.value;
     final descriptors = <String, BitmapDescriptor>{};
@@ -623,7 +623,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     if (catCount > 1 && catCount == perfOrEventCount) {
       type = 'Group-PerformanceEvent';
     } else if (catCount != 1 || !isGroupSingleCategory(parentListing['groupID'], listings)) {
-      type = 'Mixed';
+      type = 'Group-Mixed';
     } else {
       type = 'Group-${getCategory(parentListing)}';
     }
