@@ -210,6 +210,7 @@ class TimetablePageState extends State<TimetablePage> {
           website: ev['website'] ?? '',
           phoneNumber: ev['phone'] ?? '',
           isMusic: ((ev['performanceMusic'] ?? '') == 'TRUE'),
+          genericTerms: ev['genericTerms'] ?? '',
           lane: 0, // will be computed later
           top: 0, // will be computed later
           height: 0, // will be computed later
@@ -267,7 +268,7 @@ class TimetablePageState extends State<TimetablePage> {
             (!onlyNowOrSoon ||
                 (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) ||
                 (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30))) &&
-            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery)) &&
+            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery) || ev.genericTerms.toString().toLowerCase().contains(_searchQuery)) &&
             (filteredMusicOrNot == null || (filteredMusicOrNot == true && ev.isMusic) || (filteredMusicOrNot == false && !ev.isMusic))) {
           if (theFilteredEvents.keys.contains(location.key)) {
             theFilteredEvents[location.key]!.add(ev);
@@ -322,6 +323,7 @@ class TimetablePageState extends State<TimetablePage> {
         website: ev.website,
         phoneNumber: ev.phoneNumber,
         isMusic: ev.isMusic,
+        genericTerms: ev.genericTerms,
         lane: lane,
         top: top + 2,
         height: height,
