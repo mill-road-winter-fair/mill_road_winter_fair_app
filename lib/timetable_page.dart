@@ -422,7 +422,7 @@ class TimetablePageState extends State<TimetablePage> {
     if (renderObject is! RenderBox) return;
     final viewport = RenderAbstractViewport.of(renderObject);
     final offset = viewport.getOffsetToReveal(renderObject, alignment).offset;
-    if (offset.isFinite) {
+    if (offset.isFinite && _verticalScrollController.hasClients) {
       // all good so we've got a proper scroll to do
       await _verticalScrollController.animateTo(
         offset,
@@ -545,7 +545,7 @@ class TimetablePageState extends State<TimetablePage> {
       });
     } else if (_searchQuery.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _verticalScrollController.animateTo(0, duration: const Duration(milliseconds: 100), curve: Curves.easeIn);
+        if (_verticalScrollController.hasClients) _verticalScrollController.animateTo(0, duration: const Duration(milliseconds: 100), curve: Curves.easeIn);
       });
     }
 
