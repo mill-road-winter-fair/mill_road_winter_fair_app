@@ -202,7 +202,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   final Map<String, int> _markerPositionCounts = <String, int>{};
   bool _isSearching = false; // true when the search bar is open (with/without text)
   CameraPosition? _currentCamera; // saves the camera position as it is moved by user or programmatically
-  CameraPosition? _cameraBeforeNavigation; // to be able to restore camera position after navigation
   CameraPosition? _cameraBeforeSearch; // to be able to restore camera position after search
   late ColorScheme colorScheme; // will be set in build
   bool get hasActiveMarkerFilters => filterSettings.values.any((isEnabled) => !isEnabled);
@@ -1560,42 +1559,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
 
-  void cancelNavigation() async {
-    debugPrint('MapPageState cancelNavigation called');
-    // Halt the location subscription
-    _positionStream?.cancel();
-
-    // Clear the polylines
-    polylines.clear();
-
-    // Re-add the polygons
-    if (preferredRoadClosurePolygonVisible) {
-      _polygons.add(roadClosurePolygon());
-    }
-
-    // Reset the distance to destination
-    _distanceToDestination = null;
-
-    // Remove any simple marker shown
-    markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
-
-    // Show markers which have enabled filters
-    showFilteredMarkers();
-
-    // Set navigation as not in progress
-    navigationInProgress = false;
-
-    // Reset the camera position
-    if (_cameraBeforeNavigation == null) {
-      _setMapCameraToFitMapMarkers();
-    } else {
-      await _controller!.animateCamera(CameraUpdate.newCameraPosition(_cameraBeforeNavigation!));
-      _cameraBeforeNavigation = null;
-    }
-
-    setState(() {});
-  }
-
   Set<Circle> get _pulsingHalo {
     if (!widget.isVisible) return {};
     if (currentLatLng == null) return {};
@@ -2263,7 +2226,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   mapHeight = contentHeight - (_isSearching ? 56 : 0);
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
-                      if (didPop && navigationInProgress) cancelNavigation();
+                      if (didPop && navigationInProgress) navigationInProgress = false;
                     },
                     child: SizedBox(
                       height: contentHeight,
