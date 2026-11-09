@@ -22,6 +22,7 @@ class GroupListingInfoSheet extends StatelessWidget {
   final List<String> categories;
   final String startTime;
   final String endTime;
+  final String description;
   final String approxDistance;
   final ColorScheme colorScheme;
 
@@ -31,6 +32,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     required this.categories,
     required this.startTime,
     required this.endTime,
+    required this.description,
     required this.approxDistance,
     required this.colorScheme,
     super.key,
@@ -58,6 +60,7 @@ class GroupListingInfoSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 4,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -113,6 +116,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                 ),
             ],
           ),
+          if (description != '') Text(description, style: const TextStyle(fontSize: 14, color: Colors.white)),
         ],
       ),
     );
