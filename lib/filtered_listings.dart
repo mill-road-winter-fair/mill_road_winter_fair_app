@@ -384,11 +384,13 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     // Step 1a: Filter by category
     List<Map<String, dynamic>> categoryFiltered = [];
     if (filterCategory == 'all' || filterCategory == '') {
-      categoryFiltered = listings;
+      categoryFiltered = listings.where((listing) => listing['groupParent'] == 'FALSE' || listing['description'] != '').toList();
     } else if (filterCategory == 'favourite') {
-      categoryFiltered = listings.where((listing) => favouriteListingKeys.value.contains(listing['id'])).toList();
+      categoryFiltered = listings.where((listing) => (listing['groupParent'] == 'FALSE' || listing['description'] != '')
+          && favouriteListingKeys.value.contains(listing['id'])).toList();
     } else {
-      categoryFiltered = listings.where((listing) => listing[filterCategory] == 'TRUE').toList();
+      categoryFiltered = listings.where((listing) => (listing['groupParent'] == 'FALSE' || listing['description'] != '')
+          && listing[filterCategory] == 'TRUE').toList();
     }
 
     // Step 1b: Filter by subcategory (e.g. "Food", "Music", etc.)
