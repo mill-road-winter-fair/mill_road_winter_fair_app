@@ -278,7 +278,7 @@ Map<String, dynamic> _listingWithGenericTerms(Map<String, dynamic> listing) {
   if ((listing['performanceMusic'] ?? '') == 'TRUE') terms += 'performances music buskers ';
   if ((listing['performanceChildrens'] ?? '') == 'TRUE') terms += 'performances childrens kids family ';
   if ((listing['performanceDance'] ?? '') == 'TRUE') terms += 'performances dance ';
-  if ((listing['performanceOther'] ?? '') == 'TRUE') terms += 'performances events ';
+  if ((listing['performanceOther'] ?? '') == 'TRUE') terms += 'performances ';
   if ((listing['visitExperience'] ?? '') == 'TRUE') terms += 'visits experiences ';
 
   return {

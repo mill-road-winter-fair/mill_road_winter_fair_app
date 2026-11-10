@@ -160,7 +160,7 @@ List<Map<String, dynamic>> _parseListings(String body) {
     if ((mappedCells[i]['performanceMusic'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances music buskers ';
     if ((mappedCells[i]['performanceChildrens'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances childrens kids family ';
     if ((mappedCells[i]['performanceDance'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances dance ';
-    if ((mappedCells[i]['performanceOther'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances events ';
+    if ((mappedCells[i]['performanceOther'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances ';
     if ((mappedCells[i]['visitExperience'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'visits experiences ';
   }
   
