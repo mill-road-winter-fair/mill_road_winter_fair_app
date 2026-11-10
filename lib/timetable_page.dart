@@ -210,6 +210,7 @@ class TimetablePageState extends State<TimetablePage> {
           website: ev['website'] ?? '',
           phoneNumber: ev['phone'] ?? '',
           isMusic: ((ev['performanceMusic'] ?? '') == 'TRUE'),
+          genericTerms: ev['genericTerms'] ?? '',
           lane: 0, // will be computed later
           top: 0, // will be computed later
           height: 0, // will be computed later
@@ -267,7 +268,7 @@ class TimetablePageState extends State<TimetablePage> {
             (!onlyNowOrSoon ||
                 (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) ||
                 (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30))) &&
-            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery)) &&
+            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery) || ev.genericTerms.toString().toLowerCase().contains(_searchQuery)) &&
             (filteredMusicOrNot == null || (filteredMusicOrNot == true && ev.isMusic) || (filteredMusicOrNot == false && !ev.isMusic))) {
           if (theFilteredEvents.keys.contains(location.key)) {
             theFilteredEvents[location.key]!.add(ev);
@@ -322,6 +323,7 @@ class TimetablePageState extends State<TimetablePage> {
         website: ev.website,
         phoneNumber: ev.phoneNumber,
         isMusic: ev.isMusic,
+        genericTerms: ev.genericTerms,
         lane: lane,
         top: top + 2,
         height: height,
@@ -420,7 +422,7 @@ class TimetablePageState extends State<TimetablePage> {
     if (renderObject is! RenderBox) return;
     final viewport = RenderAbstractViewport.of(renderObject);
     final offset = viewport.getOffsetToReveal(renderObject, alignment).offset;
-    if (offset.isFinite) {
+    if (offset.isFinite && _verticalScrollController.hasClients) {
       // all good so we've got a proper scroll to do
       await _verticalScrollController.animateTo(
         offset,
@@ -543,7 +545,7 @@ class TimetablePageState extends State<TimetablePage> {
       });
     } else if (_searchQuery.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _verticalScrollController.animateTo(0, duration: const Duration(milliseconds: 100), curve: Curves.easeIn);
+        if (_verticalScrollController.hasClients) _verticalScrollController.animateTo(0, duration: const Duration(milliseconds: 100), curve: Curves.easeIn);
       });
     }
 
