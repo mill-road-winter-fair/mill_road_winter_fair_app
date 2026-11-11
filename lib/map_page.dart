@@ -470,7 +470,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       if (listing == null) continue;
       final shouldBeVisible = _searchQuery.isEmpty
           || listing['location'].toString().toLowerCase().contains(_searchQuery)
-          || listing['title'].toString().toLowerCase().contains(_searchQuery);
+          || listing['title'].toString().toLowerCase().contains(_searchQuery)
+          || listing['genericTerms'].toString().toLowerCase().contains(_searchQuery);
       markers[id] = currentMarker.copyWith(visibleParam: shouldBeVisible);
       if (shouldBeVisible) {
         found = true;
@@ -515,7 +516,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         final listing = listingsById[id.value];
         if (listing == null) continue;
         markers[id] = currentMarker.copyWith(
-          visibleParam: (_searchQuery.isEmpty || listing['location'].toString().toLowerCase().contains(_searchQuery)),
+          visibleParam: (_searchQuery.isEmpty 
+              || listing['location'].toString().toLowerCase().contains(_searchQuery)
+              || listing['genericTerms'].toString().toLowerCase().contains(_searchQuery)),
         );
       }
     });
@@ -614,7 +617,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     for (var listing in listings) {
       if (_searchQuery.isEmpty
           ? listing['visibleOnMap'] == 'TRUE'
-          : ['title', 'location'].any((field) => (listing[field] ?? '').toString().toLowerCase().contains(_searchQuery))
+          : ['title', 'location', 'genericTerms'].any((field) => (listing[field] ?? '').toString().toLowerCase().contains(_searchQuery))
       ) {
         // Add Group markers
         if (listing['groupParent'] == 'TRUE' && listing['cancelled'] == 'FALSE') {
