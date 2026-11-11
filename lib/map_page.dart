@@ -109,7 +109,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     'Other': true,
     'Visit/Experience': true,
     'Business': true,
-    'Services': true,
+    'Service': true,
   };
   int? detailsVisibleIndex; // which listing (if any) on modal bottom sheet has details button selected
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
@@ -1241,12 +1241,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     horizontalTitleGap: 18,
                     secondary: _filterMarker('Service'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Services")),
-                    value: filterSettings["Services"],
+                    value: filterSettings["Service"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       widget.analyticsService.logButtonTapped('services_mapMarker_filter_toggle');
                       setState(() {
-                        filterSettings["Services"] = value!;
+                        filterSettings["Service"] = value!;
                       });
                       final idList = _serviceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
@@ -1880,7 +1880,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         filterSettings['Charity/Community/Info'] == false &&
         filterSettings['Visit/Experience'] == false &&
         filterSettings['Business'] == false &&
-        filterSettings['Services'] == false) {
+        filterSettings['Service'] == false) {
       widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
       final idList = _foodMarkerIds +
           _shoppingMarkerIds +
@@ -1901,7 +1901,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         filterSettings['Charity/Community/Info'] = true;
         filterSettings['Visit/Experience'] = true;
         filterSettings['Business'] = true;
-        filterSettings['Services'] = true;
+        filterSettings['Service'] = true;
         updateMarkerVisibilityIgnoringFilters(idList, true);
       });
     }
