@@ -107,9 +107,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     'Childrens': true,
     'Dance': true,
     'Other': true,
-    'Visits/Experiences': true,
+    'Visit/Experience': true,
     'Business': true,
-    'Services': true,
+    'Service': true,
   };
   int? detailsVisibleIndex; // which listing (if any) on modal bottom sheet has details button selected
   bool? doingAPushNavigation; // if we're being asked to navigate by another page (false = finished)
@@ -411,20 +411,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void updateMarkerVisibilityRespectingFilters(List<MarkerId> idList, bool visibleState) {
     debugPrint('MapPageState updateMarkerVisibilityRespectingFilters called');
-
-    // 1. Define category mapping to avoid repetition and hardcoded strings.
-    const categoryMapping = {
-      'Food': 'food',
-      'Shopping': 'shopping',
-      'Charity/Community/Info': 'charityCommunityInfo',
-      'Music': 'performanceMusic',
-      'Childrens': 'performanceChildrens',
-      'Dance': 'performanceDance',
-      'Other': 'performanceOther',
-      'Visits/Experiences': 'visitExperience',
-      'Business': 'business',
-      'Services': 'service',
-    };
 
     setState(() {
       for (final id in idList) {
@@ -840,10 +826,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     //debugPrint('MapPageState addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = _positionForMarker(stringToLatLng(listing['latLng']));
     MarkerId markerId = MarkerId(listing['id'].toString());
-    final (catCount, perfOrEventCount) = countCategories(listing);
-    final type = catCount == 1
-        ? getCategory(listing)
-        : catCount == perfOrEventCount ? 'Group-PerformanceEvent' : 'Mixed';
+    final type = getCategory(listing);
     _markerTypes[markerId] = type;
     final customMarker = _iconForMarkerType(type);
 
@@ -1163,12 +1146,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     horizontalTitleGap: 18,
                     secondary: _filterMarker('Visit/Experience'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Visits and experiences")),
-                    value: filterSettings["Visits/Experiences"],
+                    value: filterSettings["Visit/Experience"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       widget.analyticsService.logButtonTapped('visits_experiences_mapMarker_filter_toggle');
                       setState(() {
-                        filterSettings["Visits/Experiences"] = value!;
+                        filterSettings["Visit/Experience"] = value!;
                       });
                       final idList = _visitExperienceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
@@ -1258,12 +1241,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     horizontalTitleGap: 18,
                     secondary: _filterMarker('Service'),
                     title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Services")),
-                    value: filterSettings["Services"],
+                    value: filterSettings["Service"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
                       widget.analyticsService.logButtonTapped('services_mapMarker_filter_toggle');
                       setState(() {
-                        filterSettings["Services"] = value!;
+                        filterSettings["Service"] = value!;
                       });
                       final idList = _serviceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
@@ -1895,9 +1878,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         filterSettings['Dance'] == false &&
         filterSettings['Other'] == false &&
         filterSettings['Charity/Community/Info'] == false &&
-        filterSettings['Visits/Experiences'] == false &&
+        filterSettings['Visit/Experience'] == false &&
         filterSettings['Business'] == false &&
-        filterSettings['Services'] == false) {
+        filterSettings['Service'] == false) {
       widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
       final idList = _foodMarkerIds +
           _shoppingMarkerIds +
@@ -1916,9 +1899,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         filterSettings['Dance'] = true;
         filterSettings['Other'] = true;
         filterSettings['Charity/Community/Info'] = true;
-        filterSettings['Visits/Experiences'] = true;
+        filterSettings['Visit/Experience'] = true;
         filterSettings['Business'] = true;
-        filterSettings['Services'] = true;
+        filterSettings['Service'] = true;
         updateMarkerVisibilityIgnoringFilters(idList, true);
       });
     }

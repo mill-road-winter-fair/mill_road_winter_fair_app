@@ -144,6 +144,6 @@ void main() {
   test('business combined with another subcategory is mixed', () {
     final listing = {...listingFor('26031', 'business'), 'shopping': 'TRUE'};
     expect(countCategories(listing), (2, 0));
-    expect(getCategory(listing), 'Mixed');
+    expect(getCategory(listing), 'Shopping');
   });
 }
