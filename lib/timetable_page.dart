@@ -153,8 +153,8 @@ class TimetablePageState extends State<TimetablePage> {
   void calculateInitialScalesIfNeeded() async {
     if (pixelsPerMinuteP == 0 || pixelsPerMinuteL == 0) {
       debugPrint('TimetablePageState calculateInitialScalesIfNeeded estimating initial scale');
-      pixelsPerMinuteP = max(0.8, min(1.5, 1000 / max(240, spanMinutes)));
-      pixelsPerMinuteL = max(0.8, min(1.5, 600 / max(240, spanMinutes)));
+      pixelsPerMinuteP = max(0.8, min(2.0, 1000 / max(240, spanMinutes)));
+      pixelsPerMinuteL = max(0.8, min(2.0, 600 / max(240, spanMinutes)));
       saveScales();
     }
   }
@@ -845,11 +845,11 @@ class TimetablePageState extends State<TimetablePage> {
                                       if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
                                       final dampenedScale = 1 + (details.scale - 1) * 0.5;
                                       final newdayPixelsPerMinute =
-                                          max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                          max(((constraints.maxHeight - 40) / spanMinutes), min(2.0, startPixelsPerMinute * dampenedScale));
                                       if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
                                         setState(() {
                                           _dayPixelsPerMinute =
-                                              max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                              max(((constraints.maxHeight - 40) / spanMinutes), min(2.0, startPixelsPerMinute * dampenedScale));
                                         });
                                       }
                                     },
