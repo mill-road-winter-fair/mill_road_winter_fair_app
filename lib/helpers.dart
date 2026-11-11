@@ -1250,7 +1250,7 @@ Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, Build
 }
 
 Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme, String theMessage) async {
-  return showDialog<void>(context: context, builder: (BuildContext context) {
+  await showDialog<void>(context: context, builder: (BuildContext context) {
     return Dialog(
       insetPadding: const EdgeInsets.all(8), // margin from screen edges
       shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
@@ -1267,7 +1267,7 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
           ListTile(
             visualDensity: const VisualDensity(horizontal: -2, vertical: 2),
             leading: const Icon(Icons.error, size: 36, color: Colors.red),
-            title: Text('$theMessage Click below to open Settings to enable this.'),
+            title: Text('$theMessage\n\nTap Open Settings below to enable this, then tap Close when done.'),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
             TextButton(
@@ -1275,12 +1275,11 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 HapticFeedback.lightImpact();
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel', style: TextStyle(color: colorScheme.tertiary))
+              child: Text('Close', style: TextStyle(color: colorScheme.tertiary))
             ),
             TextButton(
               onPressed: () async {
                 HapticFeedback.lightImpact();
-                Navigator.of(context).pop();
                 await openAppSettings();
               },
               child: Text('Open Settings', style: TextStyle(color: colorScheme.tertiary))

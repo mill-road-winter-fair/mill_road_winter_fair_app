@@ -1503,28 +1503,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   Future<void> doTheNavigation(String id, LatLng destination) async {
     // If user has location tracking enabled
-    if (currentLatLng != null) {
-      hideAllMarkers();
-      // Get the user's current location
-      Position position = await getCurrentPosition();
-      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-      if  (!await updatePolyline(currentLatLng, destination)) {
-        doingAPushNavigation = false;
-        WidgetsBinding.instance.addPostFrameCallback((_) { // since googlemap() may overwrite it with its own initialCameraPosition
-          _moveCameraToBounds(
-            LatLng(min(currentLatLng.latitude, destination.latitude), min(currentLatLng.longitude, destination.longitude)),
-            LatLng(max(currentLatLng.latitude, destination.latitude), max(currentLatLng.longitude, destination.longitude)),
-          );
-        });
-        // Start location updates without a poyline
-        await startLocationUpdates(null);
-      } else {
-        // Set the camera position once, at the beginning of the navigation
-        _setMapCameraToFitPolyline(polylines);
-        // Start location updates
-        await startLocationUpdates(destination);
-      }
-    } else {
+    if (currentLatLng == null) {
       await showNoPermissionsDialog(context, colorScheme, 'To calculate directions, you need to give this app permission to know your location.');
       locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
       locationPermission = await Geolocator.checkPermission();
@@ -1535,7 +1514,27 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         if (mounted) Navigator.pop(context);
         return;
       }
-      await getCurrentPosition();
+    }
+    hideAllMarkers();
+    // Get the user's current location
+    Position position = await getCurrentPosition();
+    currentLatLng = LatLng(position.latitude, position.longitude);
+    if (currentLatLng == null) return;
+    if  (!await updatePolyline(currentLatLng!, destination)) {
+      doingAPushNavigation = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) { // since googlemap() may overwrite it with its own initialCameraPosition
+        _moveCameraToBounds(
+          LatLng(min(currentLatLng!.latitude, destination.latitude), min(currentLatLng!.longitude, destination.longitude)),
+          LatLng(max(currentLatLng!.latitude, destination.latitude), max(currentLatLng!.longitude, destination.longitude)),
+        );
+      });
+      // Start location updates without a poyline
+      await startLocationUpdates(null);
+    } else {
+      // Set the camera position once, at the beginning of the navigation
+      _setMapCameraToFitPolyline(polylines);
+      // Start location updates
+      await startLocationUpdates(destination);
     }
 
     // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
@@ -1602,10 +1601,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   Future<void> startLocationUpdates(LatLng? destination) async {
     debugPrint('MapPageState startLocationUpdates called');
     // Cancel any running _positionStream
-
     _positionStream?.cancel();
     // Store the destination
     _destination = destination;
+    // Check if we can actually track location
+    locationPermission = await Geolocator.checkPermission();
+    if (!locationServicesEnabled || locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
+      locationPermission = await Geolocator.requestPermission();
+    }
+    if (!locationServicesEnabled || locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) return;
 
     // Start listening for location updates
     _positionStream = Geolocator.getPositionStream(
@@ -1616,7 +1620,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     ).listen((Position position) async {
       // Update the user's current location
       currentLatLng = LatLng(position.latitude, position.longitude);
-
       // If a destination is set, get new directions and update the polyline
       if (_destination != null) {
         await updatePolyline(currentLatLng!, _destination!);
