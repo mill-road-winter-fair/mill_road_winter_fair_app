@@ -412,20 +412,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   void updateMarkerVisibilityRespectingFilters(List<MarkerId> idList, bool visibleState) {
     debugPrint('MapPageState updateMarkerVisibilityRespectingFilters called');
 
-    // 1. Define category mapping to avoid repetition and hardcoded strings.
-    const categoryMapping = {
-      'Food': 'food',
-      'Shopping': 'shopping',
-      'Charity/Community/Info': 'charityCommunityInfo',
-      'Music': 'performanceMusic',
-      'Childrens': 'performanceChildrens',
-      'Dance': 'performanceDance',
-      'Other': 'performanceOther',
-      'Visits/Experiences': 'visitExperience',
-      'Business': 'business',
-      'Services': 'service',
-    };
-
     setState(() {
       for (final id in idList) {
         final currentMarker = markers[id];
