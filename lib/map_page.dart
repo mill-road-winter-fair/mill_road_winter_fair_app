@@ -840,10 +840,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     //debugPrint('MapPageState addSpecificMarker called for marker ID: ${listing['id']}');
     LatLng destinationLatLng = _positionForMarker(stringToLatLng(listing['latLng']));
     MarkerId markerId = MarkerId(listing['id'].toString());
-    final (catCount, perfOrEventCount) = countCategories(listing);
-    final type = catCount == 1
-        ? getCategory(listing)
-        : catCount == perfOrEventCount ? 'Group-PerformanceEvent' : 'Mixed';
+    final type = getCategory(listing);
     _markerTypes[markerId] = type;
     final customMarker = _iconForMarkerType(type);
 
