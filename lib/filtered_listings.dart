@@ -236,6 +236,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       listings = await fetchListings(http.Client());
       mapPageKey.currentState?.setVisibleMarkerLists();
       if (navigationInProgress == false) {
+        await mapPageKey.currentState?.addAllVisibleMarkers();
         mapPageKey.currentState?.showFilteredMarkers();
       }
       timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
