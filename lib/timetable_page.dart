@@ -268,7 +268,7 @@ class TimetablePageState extends State<TimetablePage> {
             (!onlyNowOrSoon ||
                 (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) ||
                 (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30))) &&
-            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery) || ev.genericTerms.toString().toLowerCase().contains(_searchQuery)) &&
+            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery) || ev.location.toString().toLowerCase().contains(_searchQuery) || ev.genericTerms.toString().toLowerCase().contains(_searchQuery)) &&
             (filteredMusicOrNot == null || (filteredMusicOrNot == true && ev.isMusic) || (filteredMusicOrNot == false && !ev.isMusic))) {
           if (theFilteredEvents.keys.contains(location.key)) {
             theFilteredEvents[location.key]!.add(ev);
