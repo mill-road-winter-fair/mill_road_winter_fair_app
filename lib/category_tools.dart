@@ -15,7 +15,7 @@ final Map<String, String> categoryMapping = {
   'Childrens': 'performanceChildrens',
   'Dance': 'performanceDance',
   'Other': 'performanceOther',
-  'Visits/Experiences': 'visitExperience',
+  'Visit/Experience': 'visitExperience',
   'Business': 'business',
   'Services': 'service',
 };
