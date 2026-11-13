@@ -409,7 +409,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
               await setAnalyticsEnabled(false);
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('No thanks'),
+            child: Text('No thanks', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
           ),
           TextButton(
             onPressed: () async {
@@ -418,7 +418,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
               await setAnalyticsEnabled(true);
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('I agree'),
+            child: Text('I agree', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
           ),
         ],
       ),
