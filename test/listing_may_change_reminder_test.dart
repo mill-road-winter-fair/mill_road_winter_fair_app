@@ -8,7 +8,7 @@ import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 
 // Third-party imports
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
