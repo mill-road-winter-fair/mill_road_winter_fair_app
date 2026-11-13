@@ -6,6 +6,20 @@ import 'package:flutter/cupertino.dart';
 
 // Some things in the app (mainly the map markers & filters) are currently dependent on the category of a listing. This file contains helper functions to determine the category of a listing based on its attributes.
 
+// Define category mapping to avoid repetition and hardcoded strings.
+final Map<String, String> categoryMapping = {
+  'Food': 'food',
+  'Shopping': 'shopping',
+  'Charity/Community/Info': 'charityCommunityInfo',
+  'Music': 'performanceMusic',
+  'Childrens': 'performanceChildrens',
+  'Dance': 'performanceDance',
+  'Other': 'performanceOther',
+  'Visit/Experience': 'visitExperience',
+  'Service': 'service',
+  'Business': 'business',
+};
+
 (int, int) countCategories(Map<String, dynamic> listing) {
   // Start with counts of 0
   int count = 0;
@@ -30,11 +44,8 @@ String getCategory(Map<String, dynamic> listing) {
 
   if (catCount > 1) {
     if (catCount == perfOrEventCount) return 'Group-PerformanceEvent';
-    if (listing['groupParent'] == 'TRUE') {
-      return 'Group-Mixed';
-    } else {
-      return 'Mixed';
-    }
+    if ((listing['business'] ?? 'FALSE') == 'TRUE') return categoryMapping.entries.firstWhere((c) => (listing[c.value] ?? 'FALSE') == 'TRUE').key;
+    return 'Mixed';
   } else {
     if (listing['business'] == 'TRUE') {
       return 'Business';
