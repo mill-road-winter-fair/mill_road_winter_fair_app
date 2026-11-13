@@ -15,6 +15,7 @@ import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
+import 'package:mill_road_winter_fair_app/navigation_camera.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Third-party imports
@@ -63,10 +64,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   @override
-  void didPush() => widget.analyticsService.setCurrentScreen('MapPage');
+  void didPush() => widget.analyticsService.setCurrentScreen(_isDirections ? 'DirectionsPage' : 'MapPage');
 
   @override
-  void didPopNext() => widget.analyticsService.setCurrentScreen('MapPage');
+  void didPopNext() => widget.analyticsService.setCurrentScreen(_isDirections ? 'DirectionsPage' : 'MapPage');
   late Future<List<Map<String, dynamic>>> _fetchListings;
   late List<MarkerId> _foodMarkerIds;
   late List<MarkerId> _shoppingMarkerIds;
@@ -90,11 +91,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   late double _compassBearing;
   double? mapWidth;
   double? mapHeight;
+  bool _navigationCameraFitted = false;
+  bool _followNavigation = false;
+  Position? _navigationPosition;
   String? _distanceToDestination;
+  Map<String, dynamic>? _navigationListing;
   StreamSubscription<Position>? _positionStream;
   LatLng? _destination; // To store the destination
   GoogleMapController? _controller;
-  IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
   final ScrollController _roadClosuresDialogScrollController = ScrollController();
   final ScrollController _filterMenuScrollController = ScrollController();
@@ -123,6 +127,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   CameraPosition? _cameraBeforeSearch; // to be able to restore camera position after search
   late ColorScheme colorScheme; // will be set in build
   bool get hasActiveMarkerFilters => filterSettings.values.any((isEnabled) => !isEnabled);
+  bool navigationInProgress = false;
+  bool get _isDirections => widget.destinationId != null || navigationInProgress;
 
   @override
   void initState() {
@@ -138,15 +144,16 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     setVisibleMarkerLists();
     addAllVisibleMarkers();
     _establishLocationAndRefreshMap();
+    establishLocation();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
+      if (preferredRoadClosurePolygonVisible && !_isDirections) _polygons.add(roadClosurePolygon());
       if (!mounted) return;
       ListingUpdateNotifier.maybeShowNotice(context,
           analyticsService: widget.analyticsService,
           allowListingsMayChange: widget.allowListingsMayChangeNotice);
-      if (doingAPushNavigation ?? false) {
-        doingAPushNavigation = false;
-        doTheNavigation(widget.destinationId!, widget.destinationLatLng!);
+      if (widget.destinationId != null && widget.destinationLatLng != null) {
+        doTheNavigation(widget.destinationId!, widget.destinationLatLng!, true);
       }
     });
   }
@@ -492,9 +499,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         await createAllMarkerBitmaps();
       }
     }
-    if (!mounted) return;
-
-    // Ensure the markers list is empty
+    // Initial bitmap loading must never clear a Directions destination.
+    if (!mounted || _isDirections) return;
     markers.clear();
     _markerTypes.clear();
     _markerPositionCounts.clear();
@@ -1384,29 +1390,69 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     );
   }
 
-  Future<void> doTheNavigation(String id, LatLng destination) async {
+  Future<void> getDirections(String id, LatLng destination, bool navigatorPop) async {
+    final navigator = Navigator.of(context);
+    if (navigatorPop) navigator.pop();
+    await navigator.push(MaterialPageRoute<void>(
+      builder: (_) => MapPage(
+        listings: widget.listings,
+        onTabSelected: widget.onTabSelected,
+        destinationId: id,
+        destinationLatLng: destination,
+        analyticsService: widget.analyticsService,
+      ),
+    ));
+  }
+  Future<void> doTheNavigation(String id, LatLng destination, bool navigatorPop) async {
+    if (!mounted) return;
+    _navigationCameraFitted = false;
+    _followNavigation = false;
+    _navigationPosition = null;
+    _cameraBeforeNavigation = _currentCamera;
+    hideAllMarkers();
+    _polygons.clear();
+    final destinationListing = getListingById(id);
+    setState(() {
+      navigationInProgress = true;
+      _destination = destination;
+      _navigationListing = destinationListing == null || destinationListing.isEmpty ? null : destinationListing;
+    });
+
+    // Directions can open before the normal map has loaded its marker assets.
+    if (!onTest && bitmapDescriptors.isEmpty) await createAllMarkerBitmaps();
+    if (!mounted) return;
+
+    // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
+    const int aSimpleMarkerIdLen = aSimpleMarkerId.length;
+    if (id.length > aSimpleMarkerIdLen && id.substring(0, aSimpleMarkerIdLen) == aSimpleMarkerId) {
+      if (id.length > (aSimpleMarkerIdLen + 1)) {
+        addSimpleMarker(id.substring(aSimpleMarkerIdLen + 1), destination);
+      } else {
+        debugPrint('MapPageState doTheNavigation Adding Event type simple marker as category was not specified: $id');
+        addSimpleMarker('Event', destination);
+      }
+    } else {
+      // Keep main's cached lookup and tolerate listings removed by a refresh.
+      if (destinationListing != null && destinationListing.isNotEmpty) {
+        addSpecificMarker(destinationListing);
+      }
+    }
+
+    setState(() {});
+
     // If user has location tracking enabled
     if (currentLatLng != null) {
-      hideAllMarkers();
       // Get the user's current location
       Position position = await getCurrentPosition();
-      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-      if  (!await updatePolyline(currentLatLng, destination)) {
-        doingAPushNavigation = false;
-        WidgetsBinding.instance.addPostFrameCallback((_) { // since googlemap() may overwrite it with its own initialCameraPosition
-          _moveCameraToBounds(
-            LatLng(min(currentLatLng.latitude, destination.latitude), min(currentLatLng.longitude, destination.longitude)),
-            LatLng(max(currentLatLng.latitude, destination.latitude), max(currentLatLng.longitude, destination.longitude)),
-          );
-        });
-        // Start location updates without a poyline
-        await startLocationUpdates(null);
-      } else {
-        // Set the camera position once, at the beginning of the navigation
-        _setMapCameraToFitPolyline(polylines);
-        // Start location updates
-        await startLocationUpdates(destination);
-      }
+      _navigationPosition = position;
+      currentLatLng = LatLng(position.latitude, position.longitude);
+      if (!mounted) return;
+      await updatePolyline(currentLatLng!, destination);
+      if (!mounted) return;
+      // Set the camera position once, at the beginning of the navigation
+      _fitNavigationCameraOnce();
+      // Start location updates
+      await startLocationUpdates(destination);
     } else {
       Fluttertoast.showToast(
         msg: 'Location services and permissions are required to determine directions',
@@ -1419,22 +1465,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       );
     }
 
-    // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
-    const int aSimpleMarkerIdLen = aSimpleMarkerId.length;
-    if (id.length > aSimpleMarkerIdLen && id.substring(0, aSimpleMarkerIdLen) == aSimpleMarkerId) {
-      if (id.length > (aSimpleMarkerIdLen + 1)) {
-        addSimpleMarker(id.substring(aSimpleMarkerIdLen + 1), destination);
-      } else {
-        debugPrint('MapPageState doTheNavigation Adding Event type simple marker as category was not specified: $id');
-        addSimpleMarker('Event', destination);
-      }
-    } else {
-      // Add destination map marker (efficient lookup)
-      final destinationListing = getListingById(id);
-      if (destinationListing != null && destinationListing.isNotEmpty) {
-        addSpecificMarker(destinationListing);
-      }
-    }
+    if (!mounted) return;
 
     setState(() {
       // Set navigation as in progress; do this late so cancel button isn't available before nav starts
@@ -1445,6 +1476,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   void cancelNavigation() async {
     debugPrint('MapPageState cancelNavigation called');
+    _destination = null;
+    _navigationListing = null;
+    _followNavigation = false;
+    _navigationPosition = null;
     // Halt the location subscription
     _positionStream?.cancel();
 
@@ -1507,8 +1542,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         distanceFilter: 3,
       ),
     ).listen((Position position) async {
+      if (!mounted || _destination != destination) return;
+      _navigationPosition = position;
       // Update the user's current location
       currentLatLng = LatLng(position.latitude, position.longitude);
+
+      _updateFollowingCamera();
 
       // If a destination is set, get new directions and update the polyline
       if (_destination != null) {
@@ -1735,8 +1774,33 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
 
+  void toggleNavigationView() {
+    if (currentLatLng == null || polylines.isEmpty) return;
+    setState(() => _followNavigation = !_followNavigation);
+    if (_followNavigation) {
+      _updateFollowingCamera();
+    } else {
+      _setMapCameraToFitPolyline(polylines);
+    }
+  }
+
+  void _updateFollowingCamera() {
+    if (!mounted || !_followNavigation || currentLatLng == null || polylines.isEmpty) return;
+    final camera = navigationCamera(currentLatLng!, polylines.first.points, position: _navigationPosition);
+    _controller?.animateCamera(CameraUpdate.newCameraPosition(camera));
+  }
+  void _fitNavigationCameraOnce() {
+    if (_followNavigation || _navigationCameraFitted || _controller == null || polylines.isEmpty ||
+        currentLatLng == null || mapWidth == null || mapHeight == null) {
+      return;
+    }
+    _navigationCameraFitted = true;
+    _setMapCameraToFitPolyline(polylines);
+  }
+
   void _setMapCameraToFitPolyline(Set<Polyline> polylines) {
     debugPrint('MapPageState _setMapCameraToFitPolyline called');
+    if (currentLatLng == null || polylines.isEmpty || mapWidth == null || mapHeight == null) return;
 
     double bearing; // the bearing to set the camera to, based on preference
     double padding; // extra space on the map around the polyline and source marker
@@ -1765,7 +1829,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       padding = mapWidth! * (0.07 + extraPaddingForShortTrips);
     } else {
       bearing = 290;
-      padding = mapHeight! * (0.10 + extraPaddingForShortTrips); // need a bit more space to avoid navigation distance marker
+      padding = mapHeight! * (0.10 + extraPaddingForShortTrips);
     }
 
     _moveCameraToBoundsWithRotation(
@@ -1887,6 +1951,52 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     }
   }
 
+  Widget _buildDestinationCard(BuildContext context, Map<String, dynamic> listing) {
+    final colors = Theme.of(context).colorScheme;
+    String field(String key) => listing[key]?.toString().trim() ?? '';
+    final times = [field('startTime'), field('endTime')].where((time) => time.isNotEmpty).join('–');
+
+    Widget row(String text, {Widget? leading, double fontSize = 12, FontWeight? weight}) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 24, child: Center(child: leading)),
+          const SizedBox(width: 6),
+          Expanded(child: Text(text, style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: weight,
+            color: colors.onSurface,
+          ))),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Destination', style: TextStyle(fontSize: 11, color: colors.primary)),
+        const SizedBox(height: 4),
+        row(
+          field('title'),
+          leading: field('emoji').isEmpty ? null : Text(field('emoji'),
+            style: TextStyle(fontSize: 15, color: colors.onSurface)),
+          fontSize: 15,
+          weight: FontWeight.bold,
+        ),
+        if (field('subtitle').isNotEmpty)
+          row(field('subtitle'), fontSize: 13),
+        if (field('location').isNotEmpty) ...[
+          const SizedBox(height: 6),
+          row(field('location'), leading: Icon(Icons.place_outlined, size: 16, color: colors.onSurface)),
+        ],
+        if (listing['brickAndMortar'] != 'TRUE' && times.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          row(times, leading: Icon(Icons.schedule, size: 16, color: colors.onSurface)),
+        ],
+      ],
+    );
+  }
   void enableAllFiltersIfAllOff() {
     if (filterSettings['Food'] == false &&
         filterSettings['Shopping'] == false &&
@@ -1999,7 +2109,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         }
 
         if (_listingLookup.isEmpty) { // if another page did a refresh
-          _listingLookup = buildListingLookup(listings); 
+          _listingLookup = buildListingLookup(listings);
           setVisibleMarkerLists();
           addAllVisibleMarkers();
         }
@@ -2024,19 +2134,22 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             break;
         }
 
+        final searchIconKey = GlobalKey();
+        final filterIconKey = GlobalKey();
         final colorScheme = Theme.of(context).colorScheme;
         final appBarTheme = Theme.of(context).appBarTheme;
 
         return FairScaffold(
           appBarTitle:
-              (navigationInProgress || doingAPushNavigation != null) ? 'Directions'
+              _isDirections ? 'Directions'
               : (widget.nearestMarkerCount != null) ? 'Nearby attractions'
               : (hasActiveMarkerFilters) ? 'Map (filtered)'
               : 'Map',
           currentTab: 1,
           onTabSelected: widget.onTabSelected,
           appBarActions: [
-            if (navigationInProgress == false) IconButton(
+            if (!_isDirections) IconButton(
+              key: filterIconKey,
               tooltip: 'Choose which map markers to show',
               color: appBarTheme.foregroundColor,
               onPressed: () {
@@ -2048,7 +2161,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((hasActiveMarkerFilters) ? Colors.white.withAlpha(30) : null)),
               icon: const Icon(Icons.filter_alt, size: 26),
             ),
-            if (doingAPushNavigation == null && !navigationInProgress) IconButton(
+            if (!_isDirections) IconButton(
+              key: searchIconKey,
               tooltip: _isSearching ? 'Close map search' : 'Search the map',
               color: appBarTheme.foregroundColor,
               onPressed: () async {
@@ -2069,11 +2183,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               icon: const Icon(Icons.search, size: 26),
             ),
           ],
-          allowBack: (doingAPushNavigation != null),
+          allowBack: (widget.destinationId != null),
           body: Column(children: [
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
-              child: (_isSearching && !navigationInProgress) ? Row(
+              child: (_isSearching && !_isDirections) ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
@@ -2113,7 +2227,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
                   // The non-resizing scaffold keeps the bottom navigation's safe
                   // area while the keyboard is open, so it is already excluded.
-                  final furnitureHeight = doingAPushNavigation != null
+                  final furnitureHeight = widget.destinationId != null
                       ? 0.0
                       : FairScaffold.navigationBarHeight + MediaQuery.of(context).viewPadding.bottom;
                   final contentHeight = (constraints.maxHeight - (keyboardHeight - furnitureHeight).clamp(0.0, double.infinity))
@@ -2137,7 +2251,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         mapToolbarEnabled: false,
                         onMapCreated: (GoogleMapController controller) {
                           _controller = controller;
-                          if (listings.isNotEmpty) {
+                          if (_followNavigation) {
+                            _updateFollowingCamera();
+                          } else if (polylines.isNotEmpty) {
+                            _fitNavigationCameraOnce();
+                          } else if (listings.isNotEmpty && (!_isDirections || currentLatLng == null)) {
                             // We should have listings by this point so set the camera to their bounds
                             if (widget.destinationId == null) _setMapCameraToFitMapMarkers();
                           }
@@ -2175,7 +2293,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (navigationInProgress == false)
+                    if (!_isDirections)
                       FloatingActionButton(
                         heroTag: null,
                         tooltip: 'Show the whole Fair map',
@@ -2205,7 +2323,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           child: const Icon(Icons.home),
                         ),
                       ),
-                    // Nearby attractions button (only shown when location services are enabled and permission has been granted)
+                    // Centre-on-user button (only shown when location services are enabled and permission has been granted)
                     if (navigationInProgress == false && locationServicesEnabled == true &&
                         (locationPermission == LocationPermission.always || locationPermission == LocationPermission.whileInUse))
                       FloatingActionButton(
@@ -2300,13 +2418,11 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         setState(() {
                           if (mapType == MapType.normal) {
                             mapType = MapType.hybrid;
-                            _layersIcon = Icons.map;
                             preferredMapStyleType = MapStyleType.hybrid;
                             _saveSettings();
                             widget.analyticsService.logMapTypePreferenceSet('hybrid');
                           } else {
                             mapType = MapType.normal;
-                            _layersIcon = Icons.satellite_alt;
                             preferredMapStyleType = MapStyleType.normal;
                             _saveSettings();
                             widget.analyticsService.logMapTypePreferenceSet('normal');
@@ -2329,10 +2445,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                               offset: const Offset(2, 2))
                           ],
                         ),
-                        child: Icon(_layersIcon),
+                        child: Icon(mapType == MapType.normal ? Icons.satellite_alt : Icons.map),
                       ),
                     ),
-                    if (navigationInProgress == false)
+                    if (!_isDirections)
                       FloatingActionButton(
                         heroTag: null,
                         tooltip: preferredMapOrientation == MapOrientation.adaptive ? 'Keep north at the top' : 'Use direction of travel',
@@ -2379,33 +2495,34 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   ],
                 ),
               ),
-              if (_distanceToDestination != null)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        iconSize: 30,
-                        backgroundColor: colorScheme.primary,
-                        visualDensity: const VisualDensity(horizontal: 2, vertical: 0),
-                        padding: const EdgeInsets.all(0),
-                        elevation: 3,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        widget.analyticsService.logButtonTapped('distance_to_destination');
-                        _setMapCameraToFitPolyline(polylines);
-                      },
-                      icon: const Icon(Icons.directions, color: Colors.white),
-                      label: Text(
-                        _distanceToDestination!,
-                        style: const TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                    ),
+              if (_navigationListing != null || _distanceToDestination != null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: NavigationBottomRow(
+                  key: ValueKey(_navigationListing?['id']),
+                  destinationCard: _navigationListing == null ? null : _buildDestinationCard(context, _navigationListing!),
+                  distance: _distanceToDestination,
+                  following: _followNavigation,
+                  onDestinationExpanded: () => widget.analyticsService.logButtonTapped(
+                    'destination_card_expand',
+                    listingId: _navigationListing?['id']?.toString(),
+                    listingName: _navigationListing?['title']?.toString(),
+                  ),
+                  onDestinationMinimised: () => widget.analyticsService.logButtonTapped(
+                    'destination_card_minimise',
+                    listingId: _navigationListing?['id']?.toString(),
+                    listingName: _navigationListing?['title']?.toString(),
+                  ),
+                  onDistancePressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.analyticsService.logButtonTapped('distance_to_destination');
+                    toggleNavigationView();
+                  },
                   ),
                 ),
-              if (preferredRoadClosurePolygonVisible && navigationInProgress == false)
+              if (preferredRoadClosurePolygonVisible && !_isDirections)
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
@@ -2473,5 +2590,200 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         );
       },
     );
+  }
+}
+
+// Floating destination card, including the device's bottom safe area.
+class NavigationBottomRow extends StatefulWidget {
+  const NavigationBottomRow({super.key, this.destinationCard, this.distance, required this.onDistancePressed,
+    this.onDestinationExpanded, this.onDestinationMinimised, this.following = false});
+
+  final Widget? destinationCard;
+  final bool following;
+  final String? distance;
+  final VoidCallback onDistancePressed;
+  final VoidCallback? onDestinationExpanded;
+  final VoidCallback? onDestinationMinimised;
+
+  @override
+  State<NavigationBottomRow> createState() => _NavigationBottomRowState();
+}
+
+class _NavigationBottomRowState extends State<NavigationBottomRow> {
+  Timer? _collapseTimer;
+  bool _expanded = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleCollapse();
+  }
+
+  @override
+  void didUpdateWidget(NavigationBottomRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.destinationCard == null && widget.destinationCard != null) {
+      _expanded = true;
+      _scheduleCollapse();
+    }
+  }
+
+  void _scheduleCollapse() {
+    _collapseTimer?.cancel();
+    if (widget.destinationCard == null) return;
+    _collapseTimer = Timer(const Duration(seconds: 5), () {
+      if (mounted) setState(() => _expanded = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _collapseTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      minimum: const EdgeInsets.fromLTRB(12, 12, 12, 30),
+      child: LayoutBuilder(builder: (context, constraints) {
+        final hasDestination = widget.destinationCard != null;
+        final compactWidth = 24.0 + (hasDestination ? 40 : 0) +
+            (hasDestination && widget.distance != null ? 12 : 0) +
+            (widget.distance != null ? 120 : 0);
+        return Align(
+          alignment: Alignment.bottomLeft,
+          heightFactor: 1,
+          child: Material(
+            elevation: 3,
+            color: Theme.of(context).colorScheme.surface,
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 0.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOutCubic,
+              alignment: Alignment.bottomLeft,
+              child: SizedBox(
+                width: hasDestination && _expanded ? constraints.maxWidth : min(compactWidth, constraints.maxWidth),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (hasDestination)
+                        Expanded(
+                          child: _expanded ? widget.destinationCard! : SizedBox.square(
+                            dimension: 40,
+                            child: Material(
+                              shape: const CircleBorder(),
+                              elevation: 3,
+                              color: Theme.of(context).colorScheme.primary,
+                              clipBehavior: Clip.antiAlias,
+                              child: IconButton(
+                                tooltip: 'Show destination details',
+                                style: IconButton.styleFrom(shape: const CircleBorder()),
+                                onPressed: () {
+                                  _collapseTimer?.cancel();
+                                  HapticFeedback.lightImpact();
+                                  widget.onDestinationExpanded?.call();
+                                  setState(() => _expanded = true);
+                                },
+                                icon: Icon(
+                                  Icons.location_on,
+                                  size: 22,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (hasDestination && (widget.distance != null || _expanded)) const SizedBox(width: 12),
+                      if (widget.distance != null || (hasDestination && _expanded))
+                        SizedBox(
+                          width: widget.distance != null ? 120 : 40,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (widget.distance != null)
+                                NavigationDistanceButton(distance: widget.distance!, onPressed: widget.onDistancePressed, following: widget.following),
+                              if (hasDestination && _expanded) ...[
+                                if (widget.distance != null) const SizedBox(height: 8),
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: SizedBox.square(
+                                    dimension: 40,
+                                    child: Material(
+                                      shape: const CircleBorder(),
+                                      elevation: 3,
+                                      color: Theme.of(context).colorScheme.primary,
+                                      clipBehavior: Clip.antiAlias,
+                                      child: IconButton(
+                                        tooltip: 'Minimise destination details',
+                                        style: IconButton.styleFrom(shape: const CircleBorder()),
+                                        onPressed: () {
+                                          _collapseTimer?.cancel();
+                                          HapticFeedback.lightImpact();
+                                          widget.onDestinationMinimised?.call();
+                                          setState(() => _expanded = false);
+                                        },
+                                        icon: Icon(Icons.chevron_left, color: Theme.of(context).colorScheme.onPrimary),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+// Remaining distance and route overview action within the navigation row.
+class NavigationDistanceButton extends StatelessWidget {
+  const NavigationDistanceButton({super.key, required this.distance, required this.onPressed, this.following = false});
+
+  final String distance;
+  final bool following;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: following ? 'Show whole route' : 'Follow my journey in 3D',
+      child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        minimumSize: const Size(0, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        elevation: 3,
+      ),
+      onPressed: onPressed,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(following ? Icons.navigation : Icons.directions, size: 22),
+          const SizedBox(width: 4),
+          Flexible(child: Text(distance, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+        ],
+      ),
+    ));
   }
 }
