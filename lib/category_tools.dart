@@ -2,7 +2,7 @@
 import 'package:mill_road_winter_fair_app/globals.dart';
 
 // Third-party imports
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 // Some things in the app (mainly the map markers & filters) are currently dependent on the category of a listing. This file contains helper functions to determine the category of a listing based on its attributes.
 
