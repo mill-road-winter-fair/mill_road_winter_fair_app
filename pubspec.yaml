@@ -60,6 +60,8 @@ dependencies:
   permission_handler: ^13.0.2
   provider: ^6.1.5+1
   simple_shadow: ^0.3.1
+  material_ui: any
+  cupertino_ui: any
 
 dev_dependencies:
   flutter_test:
