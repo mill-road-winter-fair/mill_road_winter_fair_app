@@ -1623,7 +1623,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       // If a destination is set, get new directions and update the polyline
       if (_destination != null) {
         await updatePolyline(currentLatLng!, _destination!);
-        _setMapCameraToFitPolyline(polylines);
       }
     });
   }
