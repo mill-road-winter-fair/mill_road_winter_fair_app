@@ -15,8 +15,8 @@ final Map<String, String> categoryMapping = {
   'Childrens': 'performanceChildrens',
   'Dance': 'performanceDance',
   'Other': 'performanceOther',
-  'Visits/Experiences': 'visitExperience',
-  'Services': 'service',
+  'Visit/Experience': 'visitExperience',
+  'Service': 'service',
 };
 
 (int, int) countCategories(Map<String, dynamic> listing) {
