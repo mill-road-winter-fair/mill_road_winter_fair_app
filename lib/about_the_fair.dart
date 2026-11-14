@@ -337,7 +337,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Guided walks\n', style: headingStyle),
                         const TextSpan(text: 'A 90-minute Mill Road history tour starts outside St Barnabas Church at 9am (£15), '
-                          'and free tours of the historic cemetery are at 10am, 11am, 12.30pm and 2pm.'),
+                          'and free tours of the historic cemetery are at 10am, 11.15am and 12.30pm.'),
                       ]),
                       imagePath: "assets/infoPages/visitExperience.png",
                       imageOnLeft: true,
