@@ -226,7 +226,6 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 'performanceDance': 'Dance',
                 'performanceOther': 'Other',
                 'visitExperience': 'Visit/Experience',
-                'business': 'Business',
                 'service': 'Service',
               }[key]!),
         guideRow(

@@ -16,7 +16,6 @@ final Map<String, String> categoryMapping = {
   'Dance': 'performanceDance',
   'Other': 'performanceOther',
   'Visits/Experiences': 'visitExperience',
-  'Business': 'business',
   'Services': 'service',
 };
 
@@ -47,9 +46,6 @@ String getCategory(Map<String, dynamic> listing) {
     if ((listing['business'] ?? 'FALSE') == 'TRUE') return categoryMapping.entries.firstWhere((c) => (listing[c.value] ?? 'FALSE') == 'TRUE').key;
     return 'Mixed';
   } else {
-    if (listing['business'] == 'TRUE') {
-      return 'Business';
-    }
     if (listing['food'] == 'TRUE') {
       return 'Food';
     }

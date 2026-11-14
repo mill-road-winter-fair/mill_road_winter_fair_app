@@ -298,8 +298,6 @@ String markerAssetPath(String category) {
     case 'Service-Toilet':
     case 'Service':
       assetPath = 'assets/mapMarkers/servicesMarker.png';
-    case 'Business':
-      assetPath = 'assets/mapMarkers/businessMarker.png';
     case 'Group-PerformanceEvent':
       assetPath = 'assets/mapMarkers/performanceEventMarker.png';
     case 'Group-Mixed':
@@ -382,7 +380,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(190, 110, 230, 1.0),
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(150, 80, 0, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(79, 184, 75, 1.0),
-      "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(84, 145, 245, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
@@ -394,7 +391,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(183, 13, 204, 1.0),
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(150, 80, 0, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(7, 128, 0, 1.0),
-      "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(29, 112, 198, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
@@ -407,7 +403,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(204, 161, 51, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 115, 37, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(37, 63, 128, 1.0),
-      "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(37, 63, 128, 1.0),
       _ => const Color.fromRGBO(0, 0, 0, 1.0),
     };
@@ -419,7 +414,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(237, 201, 0, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(28, 213, 0, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 187, 255, 1.0),
-      "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(0, 51, 255, 1.0),
       _ => const Color.fromRGBO(0, 0, 0, 1.0),
     };
@@ -431,7 +425,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(240, 228, 66, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 158, 115, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 114, 178, 1.0),
-      "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(102, 55, 133, 1.0),
       _ => const Color.fromRGBO(255, 0, 0, 1.0),
     };

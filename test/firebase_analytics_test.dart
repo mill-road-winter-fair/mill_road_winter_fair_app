@@ -185,9 +185,9 @@ void main() {
   test('show/hide all updates every map filter property', () async {
     usageAnalyticsEnabled = true;
     await service.logMapMarkerFilterPreferenceSet('all', false);
-    expect(sdk.properties.length, 10);
+    expect(sdk.properties.length, 9);
     expect(sdk.properties.values, everyElement('false'));
-    for (final category in ['dance', 'other', 'childrens', 'business']) {
+    for (final category in ['dance', 'other', 'childrens']) {
       await service.logMapMarkerFilterPreferenceSet(category, true);
       expect(sdk.properties['map_filter_$category'], 'true');
       expect(sdk.events.last['parameters'], {'filter_type': 'map_marker', 'category': category, 'is_enabled': 1});

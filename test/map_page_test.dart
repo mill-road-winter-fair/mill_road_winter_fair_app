@@ -1039,7 +1039,6 @@ void main() {
       expect(find.widgetWithText(CheckboxListTile, "Dance"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Other performances"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Visits and experiences"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Other businesses"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
 
       // Test Food checkbox

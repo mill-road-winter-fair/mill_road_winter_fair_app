@@ -574,7 +574,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               'charityCommunityInfo' => 'Search charity, community & info...',
                               'visitExperience' => 'Search visits & experiences...',
                               'service' => 'Search services...',
-                              'business' => 'Search other local businesses...',
                               _ => 'Search all listings...',
                             },
                             leading: const Icon(Icons.search),

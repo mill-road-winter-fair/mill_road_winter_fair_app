@@ -76,7 +76,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   late List<MarkerId> _performanceDanceMarkerIds;
   late List<MarkerId> _performanceOtherMarkerIds;
   late List<MarkerId> _visitExperienceMarkerIds;
-  late List<MarkerId> _businessMarkerIds;
   late List<MarkerId> _serviceMarkerIds;
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // For displaying the map markers
   final Map<MarkerId, String> _markerTypes = {};
@@ -108,7 +107,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     'Dance': true,
     'Other': true,
     'Visits/Experiences': true,
-    'Business': true,
     'Services': true,
   };
   int? detailsVisibleIndex; // which listing (if any) on modal bottom sheet has details button selected
@@ -422,7 +420,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       'Dance': 'performanceDance',
       'Other': 'performanceOther',
       'Visits/Experiences': 'visitExperience',
-      'Business': 'business',
       'Services': 'service',
     };
 
@@ -463,7 +460,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     _performanceDanceMarkerIds = [];
     _performanceOtherMarkerIds = [];
     _visitExperienceMarkerIds = [];
-    _businessMarkerIds = [];
     _serviceMarkerIds = [];
 
     final allListings = listings as List;
@@ -477,7 +473,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       if (listing['performanceDance'] == "TRUE") _performanceDanceMarkerIds.add(MarkerId(listing['id'].toString()));
       if (listing['performanceOther'] == "TRUE") _performanceOtherMarkerIds.add(MarkerId(listing['id'].toString()));
       if (listing['visitExperience'] == "TRUE") _visitExperienceMarkerIds.add(MarkerId(listing['id'].toString()));
-      if (listing['business'] == "TRUE") _businessMarkerIds.add(MarkerId(listing['id'].toString()));
       if (listing['service'] == "TRUE") _serviceMarkerIds.add(MarkerId(listing['id'].toString()));
     }
   }
@@ -572,7 +567,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('MapPageState createAllMarkerBitmaps called');
-    const listingTypes = ['Food', 'Shopping', 'Charity/Community/Info', 'Music', 'Childrens', 'Dance', 'Other', 'Visit/Experience', 'Service', 'Business', 'Service-FirstAid', 'Service-Information', 'Service-Toilet',
+    const listingTypes = ['Food', 'Shopping', 'Charity/Community/Info', 'Music', 'Childrens', 'Dance', 'Other', 'Visit/Experience', 'Service', 'Service-FirstAid', 'Service-Information', 'Service-Toilet',
             'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-Mixed', 'Group-PerformanceEvent'];
     final themeKey = getEffectiveThemeKey(selectedThemeKey);
     final markerSize = preferredMapMarkerSize.value;
@@ -1025,7 +1020,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     debugPrint('MapPageState hideAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
       _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds
-          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, false
+          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, false
     );
   }
 
@@ -1033,7 +1028,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     debugPrint('MapPageState showAllMarkers called');
     updateMarkerVisibilityIgnoringFilters(
       _foodMarkerIds + _shoppingMarkerIds + _charityCommunityInfoMarkerIds + _performanceMusicMarkerIds + _performanceChildrensMarkerIds
-          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _businessMarkerIds + _serviceMarkerIds, true
+          + _performanceDanceMarkerIds + _performanceOtherMarkerIds + _visitExperienceMarkerIds + _serviceMarkerIds, true
     );
   }
 
@@ -1227,25 +1222,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       final idList = _charityCommunityInfoMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
                       widget.analyticsService.logMapMarkerFilterPreferenceSet('charityCommunityInfo', value);
-                    },
-                  ),
-                  CheckboxListTile(
-                    visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
-                    activeColor: getCategoryColor(selectedThemeKey, 'Business'),
-                    contentPadding: const EdgeInsets.all(0),
-                    horizontalTitleGap: 18,
-                    secondary: _filterMarker('Business'),
-                    title: const FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text("Other businesses")),
-                    value: filterSettings["Business"],
-                    onChanged: (value) {
-                      HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('business_mapMarker_filter_toggle');
-                      setState(() {
-                        filterSettings["Business"] = value!;
-                      });
-                      final idList = _businessMarkerIds;
-                      updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('business', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1893,7 +1869,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         filterSettings['Other'] == false &&
         filterSettings['Charity/Community/Info'] == false &&
         filterSettings['Visits/Experiences'] == false &&
-        filterSettings['Business'] == false &&
         filterSettings['Services'] == false) {
       widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
       final idList = _foodMarkerIds +
@@ -1914,7 +1889,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         filterSettings['Other'] = true;
         filterSettings['Charity/Community/Info'] = true;
         filterSettings['Visits/Experiences'] = true;
-        filterSettings['Business'] = true;
         filterSettings['Services'] = true;
         updateMarkerVisibilityIgnoringFilters(idList, true);
       });
