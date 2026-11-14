@@ -29,6 +29,75 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+class _ThrottledAnimation extends Animation<double> {
+  _ThrottledAnimation(this._source, {required this.frameInterval}) : assert(frameInterval > 0);
+
+  final Animation<double> _source;
+  final int frameInterval;
+  final List<VoidCallback> _listeners = <VoidCallback>[];
+  final List<AnimationStatusListener> _statusListeners = <AnimationStatusListener>[];
+  int _ticks = 0;
+
+  @override
+  double get value => _source.value;
+
+  @override
+  AnimationStatus get status => _source.status;
+
+  @override
+  void addListener(VoidCallback listener) {
+    if (!_listeners.contains(listener)) {
+      _listeners.add(listener);
+    }
+    if (_listeners.length == 1) {
+      _source.addListener(_handleSourceTick);
+      _source.addStatusListener(_handleStatusTick);
+    }
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+    if (_listeners.isEmpty) {
+      _source.removeListener(_handleSourceTick);
+      _source.removeStatusListener(_handleStatusTick);
+    }
+  }
+
+  @override
+  void addStatusListener(AnimationStatusListener listener) {
+    if (!_statusListeners.contains(listener)) {
+      _statusListeners.add(listener);
+    }
+    if (_statusListeners.length == 1) {
+      _source.addStatusListener(_handleStatusTick);
+    }
+  }
+
+  @override
+  void removeStatusListener(AnimationStatusListener listener) {
+    _statusListeners.remove(listener);
+    if (_statusListeners.isEmpty) {
+      _source.removeStatusListener(_handleStatusTick);
+    }
+  }
+
+  void _handleSourceTick() {
+    _ticks += 1;
+    if (_ticks % frameInterval == 0) {
+      for (final listener in List<VoidCallback>.from(_listeners)) {
+        listener();
+      }
+    }
+  }
+
+  void _handleStatusTick(AnimationStatus status) {
+    for (final listener in List<AnimationStatusListener>.from(_statusListeners)) {
+      listener(status);
+    }
+  }
+}
+
 class MapPage extends StatefulWidget {
   final List<Map<String, dynamic>> listings;
   final ValueChanged<int> onTabSelected;
@@ -36,8 +105,9 @@ class MapPage extends StatefulWidget {
   final String? destinationId; // optional if we'll be showing directions to somewhere
   final LatLng? destinationLatLng; // optional if we'll be showing directions to somewhere
   final int? nearestMarkerCount; // optional if we'll be zooming in to nearest X markers
-  final AnalyticsService analyticsService;
+  final bool isVisible;
   final bool allowListingsMayChangeNotice;
+  final AnalyticsService analyticsService;
 
   const MapPage(
       {super.key,
@@ -47,6 +117,7 @@ class MapPage extends StatefulWidget {
       this.destinationId,
       this.destinationLatLng,
       this.nearestMarkerCount,
+      this.isVisible = true,
       this.allowListingsMayChangeNotice = true,
       required this.analyticsService});
 
@@ -54,7 +125,7 @@ class MapPage extends StatefulWidget {
   MapPageState createState() => MapPageState();
 }
 
-class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserver {
+class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserver, SingleTickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -63,10 +134,22 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   @override
-  void didPush() => widget.analyticsService.setCurrentScreen('MapPage');
+  void didPush() {
+    _setDotPulseVisible(true);
+    widget.analyticsService.setCurrentScreen('MapPage');
+  }
 
   @override
-  void didPopNext() => widget.analyticsService.setCurrentScreen('MapPage');
+  void didPushNext() => _setDotPulseVisible(false);
+
+  @override
+  void didPop() => _setDotPulseVisible(false);
+
+  @override
+  void didPopNext() {
+    _setDotPulseVisible(true);
+    widget.analyticsService.setCurrentScreen('MapPage');
+  }
   late Future<List<Map<String, dynamic>>> _fetchListings;
   late List<MarkerId> _foodMarkerIds;
   late List<MarkerId> _shoppingMarkerIds;
@@ -119,10 +202,30 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   final Map<String, int> _markerPositionCounts = <String, int>{};
   bool _isSearching = false; // true when the search bar is open (with/without text)
   CameraPosition? _currentCamera; // saves the camera position as it is moved by user or programmatically
-  CameraPosition? _cameraBeforeNavigation; // to be able to restore camera position after navigation
   CameraPosition? _cameraBeforeSearch; // to be able to restore camera position after search
   late ColorScheme colorScheme; // will be set in build
   bool get hasActiveMarkerFilters => filterSettings.values.any((isEnabled) => !isEnabled);
+  Animation<double> dotPulse = const AlwaysStoppedAnimation<double>(1.0); // for the user's location dot on iOS
+  AnimationController? dotPulseController; // for the user's location dot on iOS
+
+  void _setDotPulseVisible(bool isVisible) {
+    final controller = dotPulseController;
+    if (controller == null) return;
+
+    final shouldAnimate = widget.isVisible && isVisible;
+    if (shouldAnimate) {
+      if (!controller.isAnimating) controller.repeat(reverse: false);
+      return;
+    }
+
+    if (controller.isAnimating) controller.stop(canceled: false);
+  }
+
+  void _syncDotPulseWithDisplayState() {
+    final lifecycleState = WidgetsBinding.instance.lifecycleState;
+    final isAppActive = lifecycleState == null || lifecycleState == AppLifecycleState.resumed || lifecycleState == AppLifecycleState.inactive;
+    _setDotPulseVisible(widget.isVisible && isAppActive);
+  }
 
   @override
   void initState() {
@@ -149,11 +252,23 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!);
       }
     });
+    if (Platform.isIOS) {
+      dotPulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
+      dotPulse = _ThrottledAnimation(
+        CurvedAnimation(parent: dotPulseController!, curve: Curves.easeInOut),
+        frameInterval: 5,
+      );
+      _syncDotPulseWithDisplayState();
+      startLocationUpdates(null);
+    }
   }
 
   @override
   void didUpdateWidget(covariant MapPage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.isVisible != widget.isVisible) {
+      _syncDotPulseWithDisplayState();
+    }
     final nearestMarkerCount = widget.nearestMarkerCount;
     if (nearestMarkerCount != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -564,6 +679,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    final isPageVisible = state == AppLifecycleState.resumed || state == AppLifecycleState.inactive;
+    _setDotPulseVisible(isPageVisible);
     if (_isSearching && (state == AppLifecycleState.hidden ||
         state == AppLifecycleState.paused || state == AppLifecycleState.detached)) {
       unawaited(_resetSearch());
@@ -1386,37 +1503,38 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   Future<void> doTheNavigation(String id, LatLng destination) async {
     // If user has location tracking enabled
-    if (currentLatLng != null) {
-      hideAllMarkers();
-      // Get the user's current location
-      Position position = await getCurrentPosition();
-      LatLng currentLatLng = LatLng(position.latitude, position.longitude);
-      if  (!await updatePolyline(currentLatLng, destination)) {
-        doingAPushNavigation = false;
-        WidgetsBinding.instance.addPostFrameCallback((_) { // since googlemap() may overwrite it with its own initialCameraPosition
-          _moveCameraToBounds(
-            LatLng(min(currentLatLng.latitude, destination.latitude), min(currentLatLng.longitude, destination.longitude)),
-            LatLng(max(currentLatLng.latitude, destination.latitude), max(currentLatLng.longitude, destination.longitude)),
-          );
-        });
-        // Start location updates without a poyline
-        await startLocationUpdates(null);
-      } else {
-        // Set the camera position once, at the beginning of the navigation
-        _setMapCameraToFitPolyline(polylines);
-        // Start location updates
-        await startLocationUpdates(destination);
+    if (currentLatLng == null) {
+      await showNoPermissionsDialog(context, colorScheme, 'To calculate directions, you need to give this app permission to know your location.');
+      locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
+      locationPermission = await Geolocator.checkPermission();
+      if (!locationServicesEnabled || locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
+        locationPermission = await Geolocator.requestPermission();
       }
+      if (!locationServicesEnabled || locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
+        if (mounted) Navigator.pop(context);
+        return;
+      }
+    }
+    hideAllMarkers();
+    // Get the user's current location
+    Position position = await getCurrentPosition();
+    currentLatLng = LatLng(position.latitude, position.longitude);
+    if (currentLatLng == null) return;
+    if  (!await updatePolyline(currentLatLng!, destination)) {
+      doingAPushNavigation = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) { // since googlemap() may overwrite it with its own initialCameraPosition
+        _moveCameraToBounds(
+          LatLng(min(currentLatLng!.latitude, destination.latitude), min(currentLatLng!.longitude, destination.longitude)),
+          LatLng(max(currentLatLng!.latitude, destination.latitude), max(currentLatLng!.longitude, destination.longitude)),
+        );
+      });
+      // Start location updates without a poyline
+      await startLocationUpdates(null);
     } else {
-      Fluttertoast.showToast(
-        msg: 'Location services and permissions are required to determine directions',
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        textColor: Colors.white,
-        fontSize: 16,
-        toastLength: Toast.LENGTH_LONG,
-        timeInSecForIosWeb: 4,
-      );
+      // Set the camera position once, at the beginning of the navigation
+      _setMapCameraToFitPolyline(polylines);
+      // Start location updates
+      await startLocationUpdates(destination);
     }
 
     // SIMPLE ids come from non-listing source e.g. Key Events table on About The Fair
@@ -1443,40 +1561,21 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
 
-  void cancelNavigation() async {
-    debugPrint('MapPageState cancelNavigation called');
-    // Halt the location subscription
-    _positionStream?.cancel();
-
-    // Clear the polylines
-    polylines.clear();
-
-    // Re-add the polygons
-    if (preferredRoadClosurePolygonVisible) {
-      _polygons.add(roadClosurePolygon());
-    }
-
-    // Reset the distance to destination
-    _distanceToDestination = null;
-
-    // Remove any simple marker shown
-    markers.removeWhere((key, marker) => marker.markerId.value == aSimpleMarkerId);
-
-    // Show markers which have enabled filters
-    showFilteredMarkers();
-
-    // Set navigation as not in progress
-    navigationInProgress = false;
-
-    // Reset the camera position
-    if (_cameraBeforeNavigation == null) {
-      _setMapCameraToFitMapMarkers();
-    } else {
-      await _controller!.animateCamera(CameraUpdate.newCameraPosition(_cameraBeforeNavigation!));
-      _cameraBeforeNavigation = null;
-    }
-
-    setState(() {});
+  Set<Circle> get _pulsingHalo {
+    if (!widget.isVisible) return {};
+    if (currentLatLng == null) return {};
+    if (_currentCamera == null) return {};
+    final t = Curves.easeOut.transform(dotPulse.value);
+    return {
+      Circle(
+        circleId: const CircleId('user_halo'),
+        center: currentLatLng!,
+        radius: (1 + t) * 700000 / pow(2, _currentCamera!.zoom),
+        strokeWidth: 2,
+        strokeColor: Colors.blue.withAlpha(130 - (90 * t).toInt()),
+        fillColor: Colors.blue.withAlpha(50 - (40 * t).toInt()),
+      ),
+    };
   }
 
   @override
@@ -1492,13 +1591,25 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     // Cancel the location subscription when the page is disposed
     _positionStream?.cancel();
     _controller?.dispose();
+    if (dotPulseController != null) {
+      dotPulseController!.stop(canceled: false);
+      dotPulseController!.dispose();
+    }
     super.dispose();
   }
 
   Future<void> startLocationUpdates(LatLng? destination) async {
     debugPrint('MapPageState startLocationUpdates called');
+    // Cancel any running _positionStream
+    _positionStream?.cancel();
     // Store the destination
     _destination = destination;
+    // Check if we can actually track location
+    locationPermission = await Geolocator.checkPermission();
+    if (!locationServicesEnabled || locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
+      locationPermission = await Geolocator.requestPermission();
+    }
+    if (!locationServicesEnabled || locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) return;
 
     // Start listening for location updates
     _positionStream = Geolocator.getPositionStream(
@@ -1509,7 +1620,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     ).listen((Position position) async {
       // Update the user's current location
       currentLatLng = LatLng(position.latitude, position.longitude);
-
       // If a destination is set, get new directions and update the polyline
       if (_destination != null) {
         await updatePolyline(currentLatLng!, _destination!);
@@ -2121,49 +2231,55 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                   mapHeight = contentHeight - (_isSearching ? 56 : 0);
                   return PopScope(
                     onPopInvokedWithResult: (didPop, result) {
-                      if (didPop && navigationInProgress) cancelNavigation();
+                      if (didPop && navigationInProgress) navigationInProgress = false;
                     },
                     child: SizedBox(
                       height: contentHeight,
-                      child: GoogleMap(
-                        style: mapStyle,
-                        mapType: mapType,
-                        rotateGesturesEnabled: false,
-                        compassEnabled: false,
-                        myLocationEnabled: locationServicesEnabled &&
-                            (locationPermission == LocationPermission.always ||
-                                locationPermission == LocationPermission.whileInUse),
-                        myLocationButtonEnabled: false,
-                        mapToolbarEnabled: false,
-                        onMapCreated: (GoogleMapController controller) {
-                          _controller = controller;
-                          if (listings.isNotEmpty) {
-                            // We should have listings by this point so set the camera to their bounds
-                            if (widget.destinationId == null) _setMapCameraToFitMapMarkers();
-                          }
+                      child: AnimatedBuilder(
+                        animation: dotPulse,
+                        builder: (context, _) {
+                          return GoogleMap(
+                            style: mapStyle,
+                            mapType: mapType,
+                            rotateGesturesEnabled: false,
+                            compassEnabled: false,
+                            myLocationEnabled: locationServicesEnabled &&
+                                (locationPermission == LocationPermission.always ||
+                                    locationPermission == LocationPermission.whileInUse),
+                            myLocationButtonEnabled: false,
+                            mapToolbarEnabled: false,
+                            onMapCreated: (GoogleMapController controller) {
+                              _controller = controller;
+                              if (listings.isNotEmpty) {
+                                // We should have listings by this point so set the camera to their bounds
+                                if (widget.destinationId == null) _setMapCameraToFitMapMarkers();
+                              }
+                            },
+                            initialCameraPosition: CameraPosition(
+                              target: centreOfFair,
+                              zoom: mapInitialZoom,
+                              bearing: _mapBearing,
+                            ),
+                            onCameraMove: (CameraPosition position) {
+                              //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
+                              _currentCamera = position;
+                              setState(() {
+                                switch (preferredMapOrientation) {
+                                  case MapOrientation.adaptive:
+                                    _compassBearing = 90;
+                                    break;
+                                  case MapOrientation.alwaysNorth:
+                                    _compassBearing = 0;
+                                    break;
+                                }
+                              });
+                            },
+                            polygons: _polygons,
+                            markers: markers.values.toSet(),
+                            circles: (Platform.isIOS) ? _pulsingHalo : {},
+                            polylines: polylines
+                          );
                         },
-                        initialCameraPosition: CameraPosition(
-                          target: centreOfFair,
-                          zoom: mapInitialZoom,
-                          bearing: _mapBearing,
-                        ),
-                        onCameraMove: (CameraPosition position) {
-                          //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
-                          _currentCamera = position;
-                          setState(() {
-                            switch (preferredMapOrientation) {
-                              case MapOrientation.adaptive:
-                                _compassBearing = 90;
-                                break;
-                              case MapOrientation.alwaysNorth:
-                                _compassBearing = 0;
-                                break;
-                            }
-                          });
-                        },
-                        polygons: _polygons,
-                        markers: markers.values.toSet(),
-                        polylines: polylines
                       ),
                     ),
                   );
