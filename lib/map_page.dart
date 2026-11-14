@@ -476,10 +476,15 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     }
     if (!mounted) return;
 
-    // Ensure the markers list is empty
+    // Clear existing markers and allow the map to process the removal before adding replacements.
+    // Updating markers with the same IDs in a single frame can cause Google Maps to reconcile custom 
+    // bitmap markers incorrectly, resulting in some markers not being displayed.
+    // Waiting for the next frame ensures the removal is processed before new markers are added.
     markers.clear();
     _markerTypes.clear();
     _markerPositionCounts.clear();
+    setState(() {});
+    await WidgetsBinding.instance.endOfFrame;
 
     for (var listing in listings) {
       if (_searchQuery.isEmpty
