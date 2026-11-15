@@ -172,7 +172,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       if (preferredSortingMethod == SortingMethod.alphabetical || useFallbackSorting == true) {
         // Sort by name; if this is the same sort by end time
         allListings.sort((a, b) {
-          final nameCompare = a['title'].compareTo(b['title']);
+          final nameCompare = (a['title'] as String).toLowerCase().compareTo((b['title'] as String).toLowerCase());
           return nameCompare != 0 ? nameCompare : a['endTime'].compareTo(b['endTime']);
         });
       } else if (preferredSortingMethod == SortingMethod.nearest) {
