@@ -645,8 +645,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           return listingGroupID == targetGroupID;
         }).toList();
 
-        // Sort listings: startTime → title
+        // Sort listings: startTime → title, with the group's 'venue' listing coming top if one exists
         relatedListings.sort((a, b) {
+          final aPriority = a['title'] == parentListing['title'] ? 0 : 1;
+          final bPriority = b['title'] == parentListing['title'] ? 0 : 1;
+          final priorityCompare = aPriority.compareTo(bPriority);
+          if (priorityCompare != 0) return priorityCompare;
           final timeCompare = a['startTime'].compareTo(b['startTime']);
           if (timeCompare != 0) return timeCompare;
           return a['title'].compareTo(b['title']);
