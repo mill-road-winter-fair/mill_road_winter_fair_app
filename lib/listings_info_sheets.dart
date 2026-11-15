@@ -24,6 +24,7 @@ class GroupListingInfoSheet extends StatelessWidget {
   final String endTime;
   final String approxDistance;
   final ColorScheme colorScheme;
+  final AnalyticsService analyticsService;
 
   const GroupListingInfoSheet({
     this.brickAndMortar = false,
@@ -33,6 +34,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     required this.endTime,
     required this.approxDistance,
     required this.colorScheme,
+    required this.analyticsService,
     super.key,
   });
 
@@ -90,21 +92,29 @@ class GroupListingInfoSheet extends StatelessWidget {
           // const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 8,
             children: [
               Expanded(
-                flex: 10,
+                flex: 100,
                 child: FittedBox(
                   alignment: Alignment.centerLeft,
                   fit: BoxFit.scaleDown,
-                  child: Row(spacing: 8, children:[
-                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: Colors.white, semanticLabel: subfilterCategoryLabels[c]?.label)
-                  ]),
+                  child: Row(spacing: 2, children: categories.map((c) {
+                    final key = GlobalKey();
+                    return IconButton(
+                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                      visualDensity: const VisualDensity(horizontal: -4),
+                      key: key,
+                      onPressed: () => showMiniPopup(context, key, subfilterCategoryLabels[c]!.label, analyticsService: analyticsService),
+                      icon: Icon(subfilterCategoryLabels[c]?.iconData, color: Colors.white, semanticLabel: subfilterCategoryLabels[c]?.label, size: 24),
+                    );
+                  }).toList()),
                 ),
               ),
-              const Expanded(flex: 1, child: SizedBox(width: 2)),
+              const Spacer(),
               if (currentLatLng != null)
                 Expanded(
-                  flex: 10,
+                  flex: 100,
                   child: Text(
                     approxDistance,
                     style: const TextStyle(fontSize: 14, color: Colors.white),
