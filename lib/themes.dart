@@ -40,12 +40,12 @@ final Map<String, ThemeData> appThemes = {
       brightness: Brightness.light,
       primary: const Color.fromRGBO(25, 41, 103, 1),
       onPrimary: Colors.white,
-      onPrimaryFixedVariant: const Color.fromRGBO(244, 248, 255, 1), // timetable swimlanes
+      onPrimaryFixedVariant: const Color.fromRGBO(241, 242, 249, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(255, 242, 242, 1), // favourites background
       tertiary: const Color.fromRGBO(25, 41, 103, 1),
-      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements // purple 137, 74, 151
+      tertiaryFixed: const Color.fromRGBO(238, 209, 150, 1), // some drawer elements // purple 137, 74, 151
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
@@ -91,7 +91,7 @@ final Map<String, ThemeData> appThemes = {
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
+      selectedItemColor: Color.fromRGBO(228, 199, 143, 1.0),
       unselectedItemColor: Colors.grey,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(

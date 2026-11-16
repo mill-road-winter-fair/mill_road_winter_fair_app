@@ -808,7 +808,7 @@ class TimetablePageState extends State<TimetablePage> {
                                               },
                                               child: Container(
                                               decoration: BoxDecoration(
-                                                color: colorScheme.onSurfaceVariant,
+                                                color: colorScheme.tertiaryFixed,
                                                 border: Border.all(width: 0.1),
                                                 borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
                                               ),
@@ -820,7 +820,7 @@ class TimetablePageState extends State<TimetablePage> {
                                                 softWrap: true,
                                                 maxLines: 2,
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.secondary),
+                                                style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.primary),
                                                 minFontSize: 11,
                                                 maxFontSize: 15,
                                                 overflow: TextOverflow.ellipsis,
