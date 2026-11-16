@@ -428,7 +428,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                   child: const Tooltip(message: 'Get walking directions', child: Icon(Icons.directions_walk)),
                 ),
                 // only display the Details button if there are details to display (and they're not always shown i.e. single bottom modal)
-                if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
+                if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty || widget.imageURL.isNotEmpty))
                   ElevatedButton(
                     style: (widget.detailsVisible ?? false)
                         ? ElevatedButton.styleFrom(
@@ -536,7 +536,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 0,
       children: [
-        if (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty) const SizedBox(height: 8),
+        if (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty || widget.imageURL.isNotEmpty) const SizedBox(height: 8),
         if (widget.description.isNotEmpty) ...[
           const SizedBox(height: 8),
           if (widget.imageURL.isNotEmpty) AdaptiveImageText(
