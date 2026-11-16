@@ -563,6 +563,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
                           child: SearchBar(
                             autoFocus: true,
+                            smartDashesType: SmartDashesType.disabled,
+                            smartQuotesType: SmartQuotesType.disabled,
                             controller: _searchController,
                             elevation: const WidgetStatePropertyAll(0),
                             hintText: switch (widget.subfilterCategory) {
