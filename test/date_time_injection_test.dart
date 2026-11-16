@@ -1,4 +1,5 @@
 // App imports
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 
@@ -28,6 +29,7 @@ void main() {
                   endTime: listing['endTime'] as String,
                   approxDistance: '',
                   colorScheme: const ColorScheme.light(),
+                  analyticsService: FakeAnalyticsService(),
                 ),
               ),
             ),
