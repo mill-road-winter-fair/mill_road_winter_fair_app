@@ -8,7 +8,7 @@ import 'package:mill_road_winter_fair_app/main_alerting.dart';
 
 // Third-party imports
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
