@@ -714,7 +714,6 @@ Future<void> showListingDetailsDialog(
                     },
                     onGetDirections: () async {
                       HapticFeedback.lightImpact();
-                      safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
                       onGetDirections.call();
                     },
                     onAlertTapped: () async {
