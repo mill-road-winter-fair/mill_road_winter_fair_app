@@ -97,6 +97,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
   final ScrollController _roadClosuresDialogScrollController = ScrollController();
+  final ScrollController _filterMenuScrollController = ScrollController();
   // Declare default filters
   final Map<String, bool> filterSettings = {
     'Food': true,
@@ -354,7 +355,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       if (listing == null) continue;
       final shouldBeVisible = _searchQuery.isEmpty
           || listing['location'].toString().toLowerCase().contains(_searchQuery)
-          || listing['title'].toString().toLowerCase().contains(_searchQuery);
+          || listing['title'].toString().toLowerCase().contains(_searchQuery)
+          || listing['genericTerms'].toString().toLowerCase().contains(_searchQuery);
       markers[id] = currentMarker.copyWith(visibleParam: shouldBeVisible);
       if (shouldBeVisible) {
         found = true;
@@ -399,7 +401,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         final listing = listingsById[id.value];
         if (listing == null) continue;
         markers[id] = currentMarker.copyWith(
-          visibleParam: (_searchQuery.isEmpty || listing['location'].toString().toLowerCase().contains(_searchQuery)),
+          visibleParam: (_searchQuery.isEmpty 
+              || listing['location'].toString().toLowerCase().contains(_searchQuery)
+              || listing['genericTerms'].toString().toLowerCase().contains(_searchQuery)),
         );
       }
     });
@@ -498,7 +502,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     for (var listing in listings) {
       if (_searchQuery.isEmpty
           ? listing['visibleOnMap'] == 'TRUE'
-          : ['title', 'location'].any((field) => (listing[field] ?? '').toString().toLowerCase().contains(_searchQuery))
+          : ['title', 'location', 'genericTerms'].any((field) => (listing[field] ?? '').toString().toLowerCase().contains(_searchQuery))
       ) {
         // Add Group markers
         if (listing['groupParent'] == 'TRUE' && listing['cancelled'] == 'FALSE') {
@@ -569,7 +573,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   Future<bool> createAllMarkerBitmaps() async {
     debugPrint('MapPageState createAllMarkerBitmaps called');
     const listingTypes = ['Food', 'Shopping', 'Charity/Community/Info', 'Music', 'Childrens', 'Dance', 'Other', 'Visit/Experience', 'Service', 'Business', 'Service-FirstAid', 'Service-Information', 'Service-Toilet',
-            'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-PerformanceEvent'];
+            'Group-Food', 'Group-Shopping', 'Group-Charity/Community/Info', 'Group-Music', 'Group-Childrens', 'Group-Dance', 'Group-Other', 'Group-Visit/Experience', 'Group-Service', 'Mixed', 'Group-Mixed', 'Group-PerformanceEvent'];
     final themeKey = getEffectiveThemeKey(selectedThemeKey);
     final markerSize = preferredMapMarkerSize.value;
     final descriptors = <String, BitmapDescriptor>{};
@@ -623,7 +627,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     if (catCount > 1 && catCount == perfOrEventCount) {
       type = 'Group-PerformanceEvent';
     } else if (catCount != 1 || !isGroupSingleCategory(parentListing['groupID'], listings)) {
-      type = 'Mixed';
+      type = 'Group-Mixed';
     } else {
       type = 'Group-${getCategory(parentListing)}';
     }
@@ -1065,23 +1069,17 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 0.95,
       context: context,
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16.0))),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+            final scrollView = SingleChildScrollView(
+              controller: _filterMenuScrollController,
+              primary: false,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text(
-                      "Filter map layers",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.left,
-                    )
-                  ]),
                   CheckboxListTile(
                     visualDensity: const VisualDensity(vertical: -4, horizontal: -4),
                     activeColor: getCategoryColor(selectedThemeKey, 'Music'),
@@ -1111,11 +1109,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Dance"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('dance_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Dance"] = value!;
                       });
                       final idList = _performanceDanceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('dance', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1128,11 +1128,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Other"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('other_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Other"] = value!;
                       });
                       final idList = _performanceOtherMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('other', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1145,11 +1147,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Childrens"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
+                      widget.analyticsService.logButtonTapped('childrens_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Childrens"] = value!;
                       });
                       final idList = _performanceChildrensMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
+                      widget.analyticsService.logMapMarkerFilterPreferenceSet('childrens', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1283,6 +1287,32 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       widget.analyticsService.logRoadClosurePolygonPreferenceSet(value);
                     },
                   ),
+                ],
+              ),
+            );
+            final content = Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Filter map layers",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left,
+                  ),
+                  Flexible(
+                    child: Scrollbar(
+                      controller: _filterMenuScrollController,
+                      thumbVisibility: Platform.isIOS ? false : true,
+                      thickness: 4,
+                      radius: const Radius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: scrollView,
+                      ),
+                    ),
+                  ),
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
@@ -1301,6 +1331,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   });
                                   showAllMarkers();
                                   widget.analyticsService.logMapMarkerFilterPreferenceSet('all', true);
+                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(true);
                                   updateRoadClosurePolygonVisibility(true);
                                 },
                                 icon: const Icon(Icons.filter_alt),
@@ -1318,6 +1349,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   });
                                   hideAllMarkers();
                                   widget.analyticsService.logMapMarkerFilterPreferenceSet('all', false);
+                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(false);
                                   updateRoadClosurePolygonVisibility(false);
                                 },
                                 icon: const Icon(Icons.filter_alt_off),
@@ -1339,9 +1371,12 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
                 ],
               ),
+            );
+            return SafeArea(
+              top: false,
+              child: content,
             );
           },
         );
@@ -1452,6 +1487,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     preferredMapMarkerSize.removeListener(_onThemeChanged);
     _searchAnalyticsTimer?.cancel();
     _searchController.dispose();
+    _filterMenuScrollController.dispose();
     debugPrint('MapPageState dispose() called');
     // Cancel the location subscription when the page is disposed
     _positionStream?.cancel();
@@ -1988,8 +2024,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
             break;
         }
 
-        final searchIconKey = GlobalKey();
-        final filterIconKey = GlobalKey();
         final colorScheme = Theme.of(context).colorScheme;
         final appBarTheme = Theme.of(context).appBarTheme;
 
@@ -2003,10 +2037,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
           onTabSelected: widget.onTabSelected,
           appBarActions: [
             if (navigationInProgress == false) IconButton(
-              key: filterIconKey,
               tooltip: 'Choose which map markers to show',
               color: appBarTheme.foregroundColor,
-              onLongPress: () => showMiniPopup(context, filterIconKey, 'Tap to choose which map markers to show or hide', analyticsService: widget.analyticsService),
               onPressed: () {
                 HapticFeedback.lightImpact();
                 widget.analyticsService.logButtonTapped('map_filter_open');
@@ -2017,10 +2049,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
               icon: const Icon(Icons.filter_alt, size: 26),
             ),
             if (doingAPushNavigation == null && !navigationInProgress) IconButton(
-              key: searchIconKey,
               tooltip: _isSearching ? 'Close map search' : 'Search the map',
               color: appBarTheme.foregroundColor,
-              onLongPress: () => showMiniPopup(context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar', analyticsService: widget.analyticsService),
               onPressed: () async {
                 HapticFeedback.lightImpact();
                 widget.analyticsService.logButtonTapped('map_search_toggle');
@@ -2061,6 +2091,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         IconButton(
                           iconSize: 20,
                           icon: const Icon(Icons.close),
+                          tooltip: _searchQuery.isEmpty ? 'Close search' : 'Clear search',
                           onPressed: () async {
                             HapticFeedback.lightImpact();
                             widget.analyticsService.logButtonTapped('map_search_clear');
@@ -2366,10 +2397,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                         widget.analyticsService.logButtonTapped('distance_to_destination');
                         _setMapCameraToFitPolyline(polylines);
                       },
-                      icon: Icon(Icons.directions, color: colorScheme.onPrimary),
+                      icon: const Icon(Icons.directions, color: Colors.white),
                       label: Text(
                         _distanceToDestination!,
-                        style: TextStyle(fontSize: 18, color: colorScheme.onPrimary),
+                        style: const TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),

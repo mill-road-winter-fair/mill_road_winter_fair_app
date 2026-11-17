@@ -131,7 +131,7 @@ List<Map<String, dynamic>> _parseListings(String body) {
       (rows.first as List<dynamic>).map((h) => h?.toString() ?? '').toList();
   final headerCount = headers.length;
 
-  return rows.skip(1).expand((row) {
+  List<Map<String, dynamic>>  mappedCells = rows.skip(1).expand((row) {
     // Each `row` (after row 1) should be a list of cells. Make a mutable copy.
     final cells = List<dynamic>.from(row as List<dynamic>);
 
@@ -161,6 +161,18 @@ List<Map<String, dynamic>> _parseListings(String body) {
       return <Map<String, dynamic>>[listing];
     }
   }).toList();
+
+  for (var i = 0; i < mappedCells.length; i++) {
+    mappedCells[i]['genericTerms'] = '';
+    if ((mappedCells[i]['food'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'food ';
+    if ((mappedCells[i]['performanceMusic'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances music buskers ';
+    if ((mappedCells[i]['performanceChildrens'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances childrens kids family ';
+    if ((mappedCells[i]['performanceDance'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances dance ';
+    if ((mappedCells[i]['performanceOther'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'performances events ';
+    if ((mappedCells[i]['visitExperience'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'visits experiences ';
+  }
+  
+  return mappedCells;
 }
 
 // Fetch listings only if we don't already have them

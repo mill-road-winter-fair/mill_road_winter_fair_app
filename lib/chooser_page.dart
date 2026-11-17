@@ -8,6 +8,7 @@ import 'package:mill_road_winter_fair_app/about_the_fair.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 // Third-party imports
 import 'package:flutter/foundation.dart';
@@ -56,9 +57,9 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
   final ValueNotifier<double> _backgroundIntroProgress = ValueNotifier<double>(0.0);
 
   static const int _idleAnimationSteps = 60; // throttling: larger is smoother but dearer
-  static const int _entranceAnimationSteps = 300; // throttling: larger is smoother but dearer
+  static const int _entranceAnimationSteps = 100; // throttling: larger is smoother but dearer
   static const int _idleAnimationPeriod = 6; // for an entire cycle
-  static const int _entranceAnimationPeriod = 10; // from just background to all icons
+  static const int _entranceAnimationPeriod = 5; // from just background to all icons
   static const int _restartIdleAnimationPeriod = 3; // after how much inactivity to start again
   static const Duration _backgroundIntroDuration = Duration(milliseconds: 3000);
   static const double _backgroundReducedOpacity = 0.48;
@@ -203,6 +204,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
 
 
   void _selectHotspot(int index) {
+    HapticFeedback.lightImpact();
     _idleTimer?.cancel();
     setState(() { _chosenHotspotID = index; });
     _animationController?.stop(canceled: false);
@@ -226,7 +228,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: -0.01,
         scale: 1,
         assetPath: 'assets/infoPages/foodDrink.png',
-        theTap: () => widget.onOpenListings('all', 'food'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_food');
+          widget.onOpenListings('all', 'food');
+        },
       ),
       Hotspot(
         label: 'Music',
@@ -237,7 +242,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: -0.005,
         scale: 1,
         assetPath: 'assets/infoPages/music.png',
-        theTap: () => widget.onOpenTimetable(false, true),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_music');
+          widget.onOpenTimetable(false, true);
+        },
       ),
       Hotspot(
         label: 'Children’s',
@@ -248,7 +256,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.16,
         scale: 1.05,
         assetPath: 'assets/infoPages/childrens.png',
-        theTap: () => widget.onOpenListings('all', 'performanceChildrens'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_childrens');
+          widget.onOpenListings('all', 'performanceChildrens');
+        },
       ),
       Hotspot(
         label: 'Shopping',
@@ -259,7 +270,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.28,
         scale: 1,
         assetPath: 'assets/infoPages/shopping.png',
-        theTap: () => widget.onOpenListings('all', 'shopping'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_shopping');
+          widget.onOpenListings('all', 'shopping');
+        },
       ),
       Hotspot(
         label: 'Charity,\nCommunity\n& Info',
@@ -270,7 +284,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.29,
         scale: 1,
         assetPath: 'assets/infoPages/charityCommunityInfo.png',
-        theTap: () => widget.onOpenListings('all', 'charityCommunityInfo'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_community');
+          widget.onOpenListings('all', 'charityCommunityInfo');
+        },
       ),
       Hotspot(
         label: 'Visit &\nExperience',
@@ -281,7 +298,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.56,
         scale: 1,
         assetPath: 'assets/infoPages/visitExperience.png',
-        theTap: () => widget.onOpenListings('all', 'visitExperience'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_visits');
+          widget.onOpenListings('all', 'visitExperience');
+        },
       ),
       Hotspot(
         label: 'Services',
@@ -292,7 +312,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.69,
         scale: 1,
         assetPath: 'assets/infoPages/services.png',
-        theTap: () => widget.onOpenListings('all', 'service'),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_services');
+          widget.onOpenListings('all', 'service');
+        },
       ),
       Hotspot(
         label: 'Nearby',
@@ -303,7 +326,10 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         top: 0.70,
         scale: 0.9,
         assetPath: 'assets/infoPages/nearby.png',
-        theTap: () => widget.onOpenMap(10),
+        theTap: () {
+          widget.analyticsService.logButtonTapped('home_nearby');
+          widget.onOpenMap(10);
+        },
       ),
     ];
 
@@ -388,6 +414,21 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
             currentTab: 0,
             onTabSelected: widget.onTabSelected,
             analyticsService: widget.analyticsService,
+            appBarActions: [
+              IconButton(
+                tooltip: 'Go to Settings to customise the app',
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  widget.analyticsService.logButtonTapped('homepage_settings');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(analyticsService: widget.analyticsService)));
+                },
+                icon: Icon(
+                  Icons.settings,
+                  size: 24,
+                  color: Theme.of(context).appBarTheme.foregroundColor,
+                ),
+              ),
+            ],
             body: RepaintBoundary(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -487,12 +528,19 @@ class _ChooserContent extends StatelessWidget {
         Positioned(top: 20, left: 0, right: 0,
           child: Align(
             alignment: Alignment.center,
-            child: GestureDetector(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
-              },
-              child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
+            child: Tooltip(
+              message: 'About the Fair',
+              child: Semantics(
+                button: true,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    analyticsService.logButtonTapped('home_about_fair');
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage(analyticsService: analyticsService)));
+                  },
+                  child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
+                ),
+              ),
             ),
           ),
         ),
@@ -620,19 +668,29 @@ class _AnimatedHotspot extends StatelessWidget {
       top: hotspot.top,
       width: hotspot.size!.width,
       height: hotspot.size!.height,
-      child: _HotspotLayers(
-        hotspot: hotspot,
-        index: index,
-        visibleCount: visibleCount,
-        paintPhase: paintPhase,
-        entranceProgress: entranceProgress,
-        secondPhaseProgress: secondPhaseProgress,
-        backgroundIntroProgress: backgroundIntroProgress,
-        initialEntranceComplete: initialEntranceComplete,
-        staticChooserPage: staticChooserPage,
-        isSelected: isSelected,
-        colourScheme: colourScheme,
+      child: Semantics(
+        button: true,
+        label: hotspot.label.replaceAll('\n', ' '),
         onTap: onTap,
+        excludeSemantics: true,
+        child: Tooltip(
+          message: hotspot.label.replaceAll('\n', ' '),
+          excludeFromSemantics: true,
+          child: _HotspotLayers(
+            hotspot: hotspot,
+            index: index,
+            visibleCount: visibleCount,
+            paintPhase: paintPhase,
+            entranceProgress: entranceProgress,
+            secondPhaseProgress: secondPhaseProgress,
+            backgroundIntroProgress: backgroundIntroProgress,
+            initialEntranceComplete: initialEntranceComplete,
+            staticChooserPage: staticChooserPage,
+            isSelected: isSelected,
+            colourScheme: colourScheme,
+            onTap: onTap,
+          ),
+        ),
       ),
     );
   }
@@ -827,15 +885,18 @@ class _CachedLabel extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           width: hotspot.size!.width - hotspot.labelLeftOffset - hotspot.labelRightOffset,
           child: RepaintBoundary(
-            child: FittedBox(fit: BoxFit.scaleDown, child: Text(
-              hotspot.label,
-              textAlign: TextAlign.center,
-              softWrap: false,
-              style: TextStyle(fontSize: maxFontSize, fontWeight: FontWeight.bold, color: Colors.white, height: 0.9,
-                shadows: [
-                  const Shadow(blurRadius: 4, color: Colors.black),
-                  Shadow(blurRadius: 16, color: colourScheme.primary),
-                ],
+            child: FittedBox(fit: BoxFit.scaleDown, child: MediaQuery.withClampedTextScaling(
+              maxScaleFactor: 1.5,
+              child: Text(
+                hotspot.label,
+                textAlign: TextAlign.center,
+                softWrap: false,
+                style: TextStyle(fontSize: maxFontSize, fontWeight: FontWeight.bold, color: Colors.white, height: 0.9,
+                  shadows: [
+                    const Shadow(blurRadius: 4, color: Colors.black),
+                    Shadow(blurRadius: 16, color: colourScheme.primary),
+                  ],
+                ),
               ),
             )),
           ),

@@ -978,6 +978,7 @@ class PositionedEvent {
   final String website;
   final String phoneNumber;
   final bool isMusic;
+  final String genericTerms;
   final int lane;
   double top;
   double height;
@@ -1000,6 +1001,7 @@ class PositionedEvent {
     required this.website,
     required this.phoneNumber,
     required this.isMusic,
+    required this.genericTerms,
     required this.lane,
     required this.top,
     required this.height,
