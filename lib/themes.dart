@@ -38,13 +38,13 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.light,
-      primary: const Color.fromRGBO(25, 41, 103, 1),
+      primary: const Color.fromRGBO(28, 21, 111, 1),
       onPrimary: Colors.white,
       onPrimaryFixedVariant: const Color.fromRGBO(241, 242, 249, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(255, 242, 242, 1), // favourites background
-      tertiary: const Color.fromRGBO(25, 41, 103, 1),
+      tertiary: const Color.fromRGBO(28, 21, 111, 1),
       tertiaryFixed: const Color.fromRGBO(238, 209, 150, 1), // some drawer elements // purple 137, 74, 151
       error: Colors.orange,
       onError: Colors.black,
@@ -54,7 +54,7 @@ final Map<String, ThemeData> appThemes = {
       onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(25, 41, 103, 1),
+      backgroundColor: Color.fromRGBO(28, 21, 111, 1),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -71,7 +71,7 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: const Color.fromRGBO(25, 41, 103, 1),
+      primary: const Color.fromRGBO(28, 21, 111, 1),
       onPrimary: const Color.fromRGBO(40, 40, 40, 1.0),
       onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
@@ -87,7 +87,7 @@ final Map<String, ThemeData> appThemes = {
       onSurfaceVariant: Colors.grey[300],
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(25, 41, 103, 1.0),
+      backgroundColor: Color.fromRGBO(28, 21, 111, 1),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
