@@ -181,7 +181,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text("Don't show this again"));
+      await tester.tap(find.text("Don’t show this again"));
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
       await showNotice;
