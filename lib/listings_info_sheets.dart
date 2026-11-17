@@ -707,11 +707,13 @@ Future<void> showListingDetailsDialog(
                     listingFavourited: favouriteListingKeys.value.contains(event.id),
                     listingAlerted: alertsStore.alertExists(event.id),
                     onFavouriteTapped: () {
+                      HapticFeedback.lightImpact();
                       favouriteOrNotListing(event);
                       setStateFunction.call;
                       setStateDialog(() {});
                     },
                     onGetDirections: () async {
+                      HapticFeedback.lightImpact();
                       safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
                       onGetDirections.call();
                     },
