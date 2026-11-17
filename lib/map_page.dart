@@ -175,7 +175,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   double? mapHeight;
   String? _distanceToDestination;
   StreamSubscription<Position>? _positionStream;
-  LatLng? _destination; // To store the destination
   GoogleMapController? _controller;
   IconData _layersIcon = Icons.satellite_alt;
   bool isRefreshing = false;
@@ -251,16 +250,16 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         doingAPushNavigation = false;
         doTheNavigation(widget.destinationId!, widget.destinationLatLng!);
       }
+      if (Platform.isIOS) {
+        dotPulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
+        dotPulse = _ThrottledAnimation(
+          CurvedAnimation(parent: dotPulseController!, curve: Curves.easeInOut),
+          frameInterval: 5,
+        );
+        _syncDotPulseWithDisplayState();
+        startLocationUpdates(null);
+      }
     });
-    if (Platform.isIOS) {
-      dotPulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500));
-      dotPulse = _ThrottledAnimation(
-        CurvedAnimation(parent: dotPulseController!, curve: Curves.easeInOut),
-        frameInterval: 5,
-      );
-      _syncDotPulseWithDisplayState();
-      startLocationUpdates(null);
-    }
   }
 
   @override
@@ -679,7 +678,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    debugPrint('MapPageState didChangeAppLifecycleState to $state with _positionStream=$_positionStream');
     final isPageVisible = state == AppLifecycleState.resumed || state == AppLifecycleState.inactive;
+    if (Platform.isIOS && _positionStream == null) startLocationUpdates(null);
     _setDotPulseVisible(isPageVisible);
     if (_isSearching && (state == AppLifecycleState.hidden ||
         state == AppLifecycleState.paused || state == AppLifecycleState.detached)) {
@@ -1502,6 +1503,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<void> doTheNavigation(String id, LatLng destination) async {
+    debugPrint('MapPageState doTheNavigation called for id=$id and destination=$destination');
     // If user has location tracking enabled
     if (currentLatLng == null) {
       await showNoPermissionsDialog(context, colorScheme, 'To calculate directions, you need to give this app permission to know your location.');
@@ -1599,11 +1601,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   }
 
   Future<void> startLocationUpdates(LatLng? destination) async {
-    debugPrint('MapPageState startLocationUpdates called');
+    debugPrint('MapPageState startLocationUpdates called with destination=$destination');
     // Cancel any running _positionStream
     _positionStream?.cancel();
-    // Store the destination
-    _destination = destination;
     // Check if we can actually track location
     locationPermission = await Geolocator.checkPermission();
     if (!locationServicesEnabled || locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) {
@@ -1621,14 +1621,14 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
       // Update the user's current location
       currentLatLng = LatLng(position.latitude, position.longitude);
       // If a destination is set, get new directions and update the polyline
-      if (_destination != null) {
-        await updatePolyline(currentLatLng!, _destination!);
+      if (destination != null) {
+        await updatePolyline(currentLatLng!, destination);
       }
     });
   }
 
   Future<bool> updatePolyline(LatLng origin, LatLng destination) async {
-    debugPrint('MapPageState updatePolyline called');
+    debugPrint('MapPageState updatePolyline called with origin=$origin and destination=$destination');
     try {
       await _ensureDirectionsConfigLoaded();
 
