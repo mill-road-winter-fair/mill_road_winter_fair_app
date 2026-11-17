@@ -134,7 +134,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
     _fetchListings = fetchExistingListings(http.Client());
     _listingLookup = buildListingLookup(listings);
     setVisibleMarkerLists();
-    addAllVisibleMarkers();
+    if (!(doingAPushNavigation ?? false)) addAllVisibleMarkers();
     _establishLocationAndRefreshMap();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (preferredRoadClosurePolygonVisible) _polygons.add(roadClosurePolygon());
