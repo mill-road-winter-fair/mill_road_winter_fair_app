@@ -8,7 +8,7 @@ import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart'
 
 // Third-party imports
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
