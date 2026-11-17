@@ -131,6 +131,8 @@ List<Map<String, dynamic>> _parseListings(String body) {
       (rows.first as List<dynamic>).map((h) => h?.toString() ?? '').toList();
   final headerCount = headers.length;
 
+  ({String title, String body})? newEmergencyAlertText;
+
   List<Map<String, dynamic>>  mappedCells = rows.skip(1).expand((row) {
     // Each `row` (after row 1) should be a list of cells. Make a mutable copy.
     final cells = List<dynamic>.from(row as List<dynamic>);
@@ -154,7 +156,7 @@ List<Map<String, dynamic>> _parseListings(String body) {
     );
 
     if ((listing['title'] ?? '') == emergencyAlertFlag && listing['description'] != null) {
-      emergencyAlertText = (title: listing['subtitle'], body: listing['description']);
+      newEmergencyAlertText = (title: listing['subtitle'], body: listing['description']);
       debugPrint('_parseListings got emergency alert of ${listing['description']}');
       return const <Map<String, dynamic>>[];
     } else {
@@ -172,6 +174,8 @@ List<Map<String, dynamic>> _parseListings(String body) {
     if ((mappedCells[i]['visitExperience'] ?? '') == 'TRUE') mappedCells[i]['genericTerms'] += 'visits experiences ';
   }
   
+  emergencyAlertText = newEmergencyAlertText; // if one wasn't found, this will reset the message
+
   return mappedCells;
 }
 
