@@ -290,7 +290,6 @@ class HomePageState extends State<HomePage> with RouteAware {
           ),
         );
       }
-      ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
     });
   }
 
