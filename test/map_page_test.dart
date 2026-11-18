@@ -1133,7 +1133,7 @@ void main() {
       expect(mapPageState.markers[const MarkerId('26005')]?.visible, true);
 
       // Test Services checkbox
-      mapPageState.filterSettings['Services'] = false;
+      mapPageState.filterSettings['Service'] = false;
       mapPageState.showFilteredMarkers();
       await tester.pump();
       expect(mapPageState.markers.isNotEmpty, true);
