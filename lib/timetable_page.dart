@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math';
 
 // App imports
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
 import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -13,13 +14,22 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 
 // Third-party imports
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class LocationEvents {
+  final LatLng location;
+  final List<PositionedEvent> events;
+  LocationEvents(
+    this.location,
+    this.events,
+  );    
+}
 
 class TimetablePage extends StatefulWidget {
   final List<Map<String, dynamic>> theEvents;
@@ -143,8 +153,8 @@ class TimetablePageState extends State<TimetablePage> {
   void calculateInitialScalesIfNeeded() async {
     if (pixelsPerMinuteP == 0 || pixelsPerMinuteL == 0) {
       debugPrint('TimetablePageState calculateInitialScalesIfNeeded estimating initial scale');
-      pixelsPerMinuteP = max(0.8, min(1.5, 1000 / max(240, spanMinutes)));
-      pixelsPerMinuteL = max(0.8, min(1.5, 600 / max(240, spanMinutes)));
+      pixelsPerMinuteP = max(0.8, min(2.0, 1000 / max(240, spanMinutes)));
+      pixelsPerMinuteL = max(0.8, min(2.0, 600 / max(240, spanMinutes)));
       saveScales();
     }
   }
@@ -167,18 +177,22 @@ class TimetablePageState extends State<TimetablePage> {
 
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
     debugPrint('TimetablePageState prepareEvents called for ${theEvents.length} listings');
-    Map<String, List<PositionedEvent>> preparedEvents = {};
+    Map<String, LocationEvents> preparedEvents = {};
+    Map<String, int> locationEventTotals = {};
     for (var ev in theEvents) {
       if (ev['startTime'] == '' || ev['endTime'] == '') continue; // this can't be a timed event
       final startTime = combineDateAndTime(ev['startTime'], fairDate);
       final endTime = combineDateAndTime(ev['endTime'], fairDate);
-      if (((ev['performanceMusic'] != null && ev['performanceMusic'] == 'TRUE') ||
-              (ev['performanceChildrens'] != null && ev['performanceChildrens'] == 'TRUE') ||
-              (ev['performanceDance'] != null && ev['performanceDance'] == 'TRUE') ||
-              (ev['performanceOther'] != null && ev['performanceOther'] == 'TRUE') ||
-              (ev['visitExperience'] != null && ev['visitExperience'] == 'TRUE')) &&
-          endTime.difference(startTime) < maxDurationToBeEvent) {
-        final eventLocation = ev['location'];
+      if (((ev['performanceMusic'] ?? false) == 'TRUE' || (ev['performanceChildrens']  ?? false) == 'TRUE' ||
+              (ev['performanceDance']  ?? false) == 'TRUE' || (ev['performanceOther']  ?? false) == 'TRUE' ||
+              (ev['visitExperience']  ?? false) == 'TRUE') && endTime.difference(startTime) < maxDurationToBeEvent) {
+        String? eventLocation = ev['location'];
+        if (eventLocation == null) continue;
+        if (locationEventTotals.containsKey(eventLocation)) {
+          locationEventTotals[eventLocation] = locationEventTotals[eventLocation]! + 1;
+        } else {
+          locationEventTotals[eventLocation] = 1;
+        }
         final thePreparedEvent = PositionedEvent(
           startTime: startTime,
           endTime: endTime,
@@ -196,6 +210,7 @@ class TimetablePageState extends State<TimetablePage> {
           website: ev['website'] ?? '',
           phoneNumber: ev['phone'] ?? '',
           isMusic: ((ev['performanceMusic'] ?? '') == 'TRUE'),
+          genericTerms: ev['genericTerms'] ?? '',
           lane: 0, // will be computed later
           top: 0, // will be computed later
           height: 0, // will be computed later
@@ -203,17 +218,40 @@ class TimetablePageState extends State<TimetablePage> {
           width: 0, // will be computed later
         );
         if (preparedEvents.keys.contains(eventLocation)) {
-          preparedEvents[eventLocation]!.add(thePreparedEvent);
-        } else if (eventLocation != null) {
-          preparedEvents[eventLocation] = [thePreparedEvent];
+          preparedEvents[eventLocation]!.events.add(thePreparedEvent);
+        } else {
+          preparedEvents[eventLocation] = LocationEvents(stringToLatLng(ev['latLng']), [thePreparedEvent]);
         }
       }
     }
-    preparedEvents.forEach((loc, events) => events.sort((a, b) => a.startTime.compareTo(b.startTime)));
-    return Map.fromEntries(
-      preparedEvents.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+
+    // combine all single event locations into one
+    List<PositionedEvent> singleEvents = [];
+    preparedEvents.removeWhere((loc, eventLocation) {
+      if (locationEventTotals[loc] == 1) {
+        singleEvents.addAll(eventLocation.events);
+        return true;
+      }
+      return false;
+    });
+
+    // sort from West (East Road) to East (Coleridge Road)
+    preparedEvents.forEach((loc, eventLocation) => eventLocation.events.sort((a, b) => a.startTime.compareTo(b.startTime)));
+    final allPreparedEvents = Map<String, List<PositionedEvent>>.fromEntries(
+      (preparedEvents.entries.toList()
+        ..sort((a, b) => a.value.location.longitude.compareTo(b.value.location.longitude)))
+          .map((entry) => MapEntry(entry.key, entry.value.events)),
     );
+
+    // add on the single events column if it contains anything
+    if (singleEvents.isNotEmpty) {
+      singleEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
+      allPreparedEvents['Other venues'] = singleEvents;
+    }
+
+    return allPreparedEvents;
   }
+
 
   Map<String, List<PositionedEvent>> filterEventsAndComputeDefaults(
       Map<String, List<PositionedEvent>> theEvents, bool onlyNowOrSoon, bool? filteredMusicOrNot, String searchQuery, DateTime now) {
@@ -230,7 +268,7 @@ class TimetablePageState extends State<TimetablePage> {
             (!onlyNowOrSoon ||
                 (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) ||
                 (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30))) &&
-            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery)) &&
+            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery) || ev.location.toString().toLowerCase().contains(_searchQuery) || ev.genericTerms.toString().toLowerCase().contains(_searchQuery)) &&
             (filteredMusicOrNot == null || (filteredMusicOrNot == true && ev.isMusic) || (filteredMusicOrNot == false && !ev.isMusic))) {
           if (theFilteredEvents.keys.contains(location.key)) {
             theFilteredEvents[location.key]!.add(ev);
@@ -285,6 +323,7 @@ class TimetablePageState extends State<TimetablePage> {
         website: ev.website,
         phoneNumber: ev.phoneNumber,
         isMusic: ev.isMusic,
+        genericTerms: ev.genericTerms,
         lane: lane,
         top: top + 2,
         height: height,
@@ -383,7 +422,7 @@ class TimetablePageState extends State<TimetablePage> {
     if (renderObject is! RenderBox) return;
     final viewport = RenderAbstractViewport.of(renderObject);
     final offset = viewport.getOffsetToReveal(renderObject, alignment).offset;
-    if (offset.isFinite) {
+    if (offset.isFinite && _verticalScrollController.hasClients) {
       // all good so we've got a proper scroll to do
       await _verticalScrollController.animateTo(
         offset,
@@ -506,7 +545,7 @@ class TimetablePageState extends State<TimetablePage> {
       });
     } else if (_searchQuery.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _verticalScrollController.animateTo(0, duration: const Duration(milliseconds: 100), curve: Curves.easeIn);
+        if (_verticalScrollController.hasClients) _verticalScrollController.animateTo(0, duration: const Duration(milliseconds: 100), curve: Curves.easeIn);
       });
     }
 
@@ -525,8 +564,6 @@ class TimetablePageState extends State<TimetablePage> {
     final List<Widget> markers = [];
     final List<Widget> swimlanes = [];
     final nowOrSoonIconKey = GlobalKey();
-    final subcategoryIconKey = GlobalKey();
-    final searchIconKey = GlobalKey();
 
     String appBarTitle = switch(widget.filteredMusicOrNot) {
       true => 'Timetable (music)',
@@ -542,9 +579,6 @@ class TimetablePageState extends State<TimetablePage> {
         IconButton(
           key: nowOrSoonIconKey,
           tooltip: widget.onlyNowOrSoon ? 'Show the full timetable' : 'Show what is on now or starting soon',
-          onLongPress: () => showMiniPopup(
-              context, nowOrSoonIconKey, 'Tap to switch between showing everything and showing just what’s on now or starting soon',
-              analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_now_or_soon_toggle');
@@ -561,14 +595,12 @@ class TimetablePageState extends State<TimetablePage> {
           ),
         ),
         IconButton(
-          key: subcategoryIconKey,
           tooltip: switch (widget.filteredMusicOrNot) {
             null => 'Showing all performances. Show only music',
             true => 'Showing only music. Show everything except music',
             false => 'Showing everything except music. Show all performances',
           },
           color: appBarTheme.foregroundColor,
-          onLongPress: () => showMiniPopup(context, subcategoryIconKey, 'Tap to switch between showing just music, everything but music, or everything', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_category_toggle');
@@ -579,12 +611,8 @@ class TimetablePageState extends State<TimetablePage> {
           icon: Icon(switch (widget.filteredMusicOrNot) { false => Icons.music_off, true => Icons.music_note, null => Icons.filter_alt }, size: 26),
         ),
         IconButton(
-          key: searchIconKey,
           tooltip: _isSearching ? 'Close timetable search' : 'Search the timetable',
           color: (_isSearching) ? Colors.yellow : colorScheme.onSecondary,
-          onLongPress: () => showMiniPopup(
-              context, searchIconKey, (_isSearching) ? 'Tap to close the search bar and cancel your search' : 'Tap to open the search bar',
-              analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             widget.analyticsService.logButtonTapped('timetable_search_toggle');
@@ -638,7 +666,7 @@ class TimetablePageState extends State<TimetablePage> {
                     top: 0,
                     left: 12 + leftColumnWidth + i * (totalWidth - leftColumnWidth) / cols,
                     height: spanMinutes * _dayPixelsPerMinute + 8,
-                    child: Container(color: colorScheme.surfaceDim, width: (totalWidth - leftColumnWidth) / cols - 22),
+                    child: Container(color: colorScheme.onPrimaryFixedVariant, width: (totalWidth - leftColumnWidth) / cols - 22),
                   ),
                 );
               }
@@ -780,7 +808,7 @@ class TimetablePageState extends State<TimetablePage> {
                                               },
                                               child: Container(
                                               decoration: BoxDecoration(
-                                                color: colorScheme.onSurfaceVariant,
+                                                color: colorScheme.tertiaryFixed,
                                                 border: Border.all(width: 0.1),
                                                 borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
                                               ),
@@ -792,7 +820,7 @@ class TimetablePageState extends State<TimetablePage> {
                                                 softWrap: true,
                                                 maxLines: 2,
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.secondary),
+                                                style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.primary),
                                                 minFontSize: 11,
                                                 maxFontSize: 15,
                                                 overflow: TextOverflow.ellipsis,
@@ -817,11 +845,11 @@ class TimetablePageState extends State<TimetablePage> {
                                       if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
                                       final dampenedScale = 1 + (details.scale - 1) * 0.5;
                                       final newdayPixelsPerMinute =
-                                          max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                          max(((constraints.maxHeight - 40) / spanMinutes), min(2.0, startPixelsPerMinute * dampenedScale));
                                       if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
                                         setState(() {
                                           _dayPixelsPerMinute =
-                                              max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                              max(((constraints.maxHeight - 40) / spanMinutes), min(2.0, startPixelsPerMinute * dampenedScale));
                                         });
                                       }
                                     },

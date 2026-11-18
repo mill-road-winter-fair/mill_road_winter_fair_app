@@ -10,7 +10,7 @@ import 'package:mill_road_winter_fair_app/listings.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 // Third-party imports
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -30,7 +30,6 @@ const expectedSubcategories = {
   'performanceOther': 'Other performances',
   'visitExperience': 'Visits & experiences',
   'service': 'Services',
-  'business': 'Other businesses',
 };
 
 String categoryListingId(String category) =>
@@ -81,7 +80,6 @@ void main() {
               'performanceOther': 'Other',
               'visitExperience': 'Visit/Experience',
               'service': 'Service', 
-              'business': 'Business',
             }[entry.key]);
     });
 
@@ -141,9 +139,4 @@ void main() {
     }
   }
 
-  test('business combined with another subcategory is mixed', () {
-    final listing = {...listingFor('26031', 'business'), 'shopping': 'TRUE'};
-    expect(countCategories(listing), (2, 0));
-    expect(getCategory(listing), 'Mixed');
-  });
 }

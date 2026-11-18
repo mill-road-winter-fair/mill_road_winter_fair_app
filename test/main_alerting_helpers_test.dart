@@ -8,7 +8,7 @@ import 'package:mill_road_winter_fair_app/main_alerting.dart';
 
 // Third-party imports
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -232,6 +232,9 @@ void main() {
 
     test('notificationTapBackground schedules each supported snooze action', () async {
       await _withAndroidPlatform(() async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('alertsStore', jsonEncode(AlertScheduleStore.initial()));
+
         final startTime = DateTime.now().add(const Duration(hours: 2));
         final endTime = startTime.add(const Duration(hours: 1));
         final payload = jsonEncode({
@@ -308,7 +311,7 @@ void main() {
       ], 8);
       await prefs.setString('alertsStore', jsonEncode(store));
 
-      await updateAlertNoticePeriodById(7, 30);
+      await updateAlertNoticePeriodById(7, 30, '26009');
 
       final savedJson = prefs.getString('alertsStore');
       expect(savedJson, isNotNull);
@@ -317,22 +320,24 @@ void main() {
     });
 
     test('updateAlertNoticePeriodById ignores missing persistence and unknown ids', () async {
-      await updateAlertNoticePeriodById(999, 30);
+      await updateAlertNoticePeriodById(999, 30, '26009');
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('alertsStore', jsonEncode(AlertScheduleStore.initial()));
-      await updateAlertNoticePeriodById(999, 30);
+      await updateAlertNoticePeriodById(999, 30, '26009');
 
-      expect(AlertScheduleStore.fromJson(jsonDecode(prefs.getString('alertsStore')!)).alertSchedules, isEmpty);
+      final saved = AlertScheduleStore.fromJson(jsonDecode(prefs.getString('alertsStore')!));
+      expect(saved.alertSchedules, hasLength(1));
+      expect(saved.alertSchedules.single.listingId, '26009');
     });
 
     test('AlertScheduleStore can add, find, and remove alerts and purge expired ones', () async {
       final store = AlertScheduleStore.initial();
-      final id = store.addAlert('26009', 15, true);
+      final id = await store.addAlert('26009', 15, true);
 
       expect(id, 0);
       expect(store[0].listingId, '26009');
-      expect(store.addAlert('missing-listing', 15, true), -1);
+      expect(await store.addAlert('missing-listing', 15, true), -1);
       expect(store.alertExists('26009'), isTrue);
       expect(store.alertIdForListing('26009'), 0);
 
@@ -480,7 +485,7 @@ void main() {
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () async {
-                  await showNoPermissionsDialog(context, Theme.of(context).colorScheme);
+                  await showNoPermissionsDialog(context, Theme.of(context).colorScheme, 'To set reminders, you need to give this app permission to show alert notifications.');
                 },
                 child: const Text('Open dialog'),
               ),
@@ -493,10 +498,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('need to give this app permission'), findsOneWidget);
-      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Close'), findsOneWidget);
       expect(find.text('Open Settings'), findsOneWidget);
 
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
       expect(find.textContaining('need to give this app permission'), findsNothing);
     });
@@ -573,7 +578,7 @@ void main() {
       expect(find.text('Open Settings'), findsOneWidget);
       await tester.tap(find.text('Open Settings'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('need to give this app permission'), findsNothing);
+      expect(find.textContaining('need to give this app permission'), findsOneWidget);
     });
 
     testWidgets('setTheAlert cancels an existing scheduled alert for the listing', (tester) async {

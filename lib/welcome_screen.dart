@@ -13,7 +13,7 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 // Third-party imports
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:introduction_screen/introduction_screen.dart';
@@ -137,17 +137,17 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       safeArea: 160,
       pageColor: colourScheme.secondary.withValues(alpha: 0.85),
     );
-    Widget guideRow(Widget icon, Widget content) => Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(width: 40, child: Center(child: icon)),
-              const SizedBox(width: 8),
-              Expanded(child: content),
-            ],
-          ),
-        );
+    Widget guideRow(Widget icon, Widget content, {double botPadding = 16}) => Padding(
+      padding: EdgeInsets.only(bottom: botPadding),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(width: 40, child: Center(child: icon)),
+          const SizedBox(width: 8),
+          Expanded(child: content),
+        ],
+      ),
+    );
 
     Widget tip(Widget icon, String text) => guideRow(
       IconTheme(
@@ -161,23 +161,24 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     );
 
     Widget marker(String category) => ExcludeSemantics(
-          child: SizedBox(
-            width: 40,
-            height: 40,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(markerFrameAssetPath(category)),
-                Image.asset(markerAssetPath(category), color: getCategoryColor(selectedThemeKey, category), colorBlendMode: BlendMode.srcIn),
-              ],
-            ),
-          ),
-        );
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(markerFrameAssetPath(category)),
+            Image.asset(markerAssetPath(category), color: getCategoryColor(selectedThemeKey, category), colorBlendMode: BlendMode.srcIn),
+          ],
+        ),
+      ),
+    );
 
     Widget category(String key, String colourKey) => guideRow(
-          marker(colourKey),
-          Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
-        );
+      marker(colourKey),
+      Text(subfilterCategoryLabels[key]!.label, style: bodyStyle),
+      botPadding: 8,
+    );
 
     PageViewModel guidePage(String title, List<Widget> children) {
       // Honour the device text size and wrap at the available width. Longer
@@ -197,10 +198,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     final pages = [
       guidePage('Welcome to the official\nMill Road Winter Fair app!', [
         tip(const Icon(Icons.home),
-            'Using our new homepage, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
-        tip(const Icon(Icons.music_note), 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
+            'Using our new home page, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
+        tip(const Icon(Icons.music_note), 'Tap Music on the home page to open the music timetable, or Nearby to find things around you on the map.'),
         tip(const Icon(Icons.map),
-            'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and Favourites you\'ve saved.'),
+            'Use the buttons at the bottom of the screen to switch between the Home page, Map, Timetable, Listings and Favourites you’ve saved.'),
         tip(const Icon(Icons.menu),
             'Use the menu in the top left for important information, settings and to share this app. You can read this app guide again there too.'),
       ]),
@@ -225,20 +226,21 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 'performanceDance': 'Dance',
                 'performanceOther': 'Other',
                 'visitExperience': 'Visit/Experience',
-                'business': 'Business',
                 'service': 'Service',
               }[key]!),
         guideRow(
           marker('Group-PerformanceEvent'),
           Text('Multiple performances and events at one location', style: bodyStyle),
+          botPadding: 6,
         ),
         guideRow(
           marker('Mixed'),
-          Text('A mix of any of these categories', style: bodyStyle),
+          botPadding: 6,
+          Text('Any mix of these categories', style: bodyStyle),
         ),
       ]),
       guidePage('Plan your day with the timetable', [
-        tip(const Icon(Icons.watch_later), 'See performances and shorter visits and experiences by time and location.'),
+        tip(const Icon(Icons.watch_later), 'See performances and shorter visits and experiences by time and location (from West to East along Mill Road).'),
         tip(const Icon(Icons.pinch), 'Scroll across locations and up or down through the day. Pinch to adjust the timetable’s scale.'),
         tip(const Icon(Icons.filter_alt), 'Tap the Filter icon to cycle between music, non-music and everything.'),
         tip(const Icon(Icons.schedule), 'On the day, tap the Clock icon to show what’s on now or starting soon.'),
@@ -247,7 +249,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       guidePage('Find what you want at the Fair', [
         tip(const Icon(Icons.ballot), 'Tap Listings to browse everything at the Fair.'),
         tip(const Icon(Icons.sort), 'Sort by name, location, closeness to you, or (for performances and events) start time.'),
-        tip(const Icon(Icons.filter_alt), 'Tap the Filter icon to find just what you\'re looking for.'),
+        tip(const Icon(Icons.filter_alt), 'Tap the Filter icon to find just what you’re looking for.'),
         tip(const Icon(Icons.access_time), 'Performance listings and favourites let you hide finished events or jump to what’s on now.'),
       ]),
       guidePage('Visit our exciting attractions', [
@@ -255,13 +257,14 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(const FaIcon(FontAwesomeIcons.heart), 'Tap a listing’s Heart icon to save it. It will then appear in the Favourites tab.'),
         tip(const FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
         tip(const Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
-        tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
+        tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you’re headed.'),
       ]),
       guidePage('Make the app your own', [
-        tip(const Icon(Icons.palette), 'In Settings choose one of our colourful themes. These include high contrast and colour blind friendly options.'),
+        tip(const Icon(Icons.settings), 'Find Settings from the top-left menu and home page.'),
+        tip(const Icon(Icons.palette), 'Here, choose one of our colourful themes including high contrast and colour blind friendly options.'),
         tip(const Icon(Icons.straighten), 'Choose the units used for distances.'),
-        tip(const Icon(Icons.privacy_tip), 'You can choose whether to allow anonymous usage analytics.'),
-        tip(const Icon(Icons.home), 'You can even disable animations on the home page, and choose your preferred notice period for notifications.'),
+        tip(const Icon(Icons.privacy_tip), 'Choose whether to allow anonymous usage analytics.'),
+        tip(const Icon(Icons.home), 'You can even disable home page animations and choose a preferred notice period for alerts.'),
       ]),
       guidePage('A few final things…', [
         tip(const Icon(Icons.favorite), 'Thank you for visiting Mill Road Winter Fair and using our app.'),
@@ -342,7 +345,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            'assets/welcomeScreen/chooserPage_background.jpg',
+            'assets/infoPages/chooserPage_background.jpg',
             fit: BoxFit.cover,
             excludeFromSemantics: true,
           ),
@@ -357,11 +360,11 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                  child: FittedBox(
+                  style: ElevatedButton.styleFrom(backgroundColor: colourScheme.primary),
+                  child: const FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text('Take me straight to the Fair!',
-                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimary)),
+                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                   onPressed: () {
                     HapticFeedback.heavyImpact();
@@ -387,10 +390,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
             dotsFlex: dotsFlex,
             nextFlex: buttonFlex,
             showBackButton: false,
-            back: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.tertiary),
+            back: Icon(Icons.arrow_back, color: colourScheme.tertiary),
             skip: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
+                child: Text('Skip', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: colourScheme.tertiaryFixed))),
             overrideNext: (context, onPressed) => Tooltip(
               message: 'Next page',
               excludeFromSemantics: true,
@@ -402,19 +405,20 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                         widget.analyticsService.logButtonTapped('next_WelcomeScreen');
                         onPressed();
                       },
-                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: Theme.of(context).colorScheme.tertiary),
+                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: colourScheme.tertiaryFixed),
               ),
             ),
             done: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.tertiary))),
+                child: Text('Done', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: colourScheme.tertiaryFixed))),
             curve: Curves.fastLinearToSlowEaseIn,
             controlsMargin: controlsMargin,
             controlsPadding: controlsPadding,
             dotsDecorator: DotsDecorator(
               size: Size(12.0 * dotScale, 12.0 * dotScale),
               spacing: EdgeInsets.symmetric(horizontal: dotSpacing),
-              color: const Color(0xFFBDBDBD),
+              color: colourScheme.tertiaryFixed,
+              activeColor: Colors.white,
               activeSize: Size(20.0 * dotScale, 10.0 * dotScale),
               activeShape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),

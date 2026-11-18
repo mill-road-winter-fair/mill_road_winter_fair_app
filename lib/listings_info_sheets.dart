@@ -10,7 +10,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 
 // Third-party imports
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +24,7 @@ class GroupListingInfoSheet extends StatelessWidget {
   final String endTime;
   final String approxDistance;
   final ColorScheme colorScheme;
+  final AnalyticsService analyticsService;
 
   const GroupListingInfoSheet({
     this.brickAndMortar = false,
@@ -33,6 +34,7 @@ class GroupListingInfoSheet extends StatelessWidget {
     required this.endTime,
     required this.approxDistance,
     required this.colorScheme,
+    required this.analyticsService,
     super.key,
   });
 
@@ -71,7 +73,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     child: Text(
                       title,
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
+                      style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ),
@@ -90,24 +92,32 @@ class GroupListingInfoSheet extends StatelessWidget {
           // const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            spacing: 8,
             children: [
               Expanded(
-                flex: 10,
+                flex: 100,
                 child: FittedBox(
                   alignment: Alignment.centerLeft,
                   fit: BoxFit.scaleDown,
-                  child: Row(spacing: 8, children:[
-                    for (final c in categories) Icon(subfilterCategoryLabels[c]?.iconData, color: colorScheme.onPrimary, semanticLabel: subfilterCategoryLabels[c]?.label)
-                  ]),
+                  child: Row(spacing: 2, children: categories.map((c) {
+                    final key = GlobalKey();
+                    return IconButton(
+                      padding: const EdgeInsets.symmetric(horizontal: 0),
+                      visualDensity: const VisualDensity(horizontal: -4),
+                      key: key,
+                      onPressed: () => showMiniPopup(context, key, subfilterCategoryLabels[c]!.label, analyticsService: analyticsService),
+                      icon: Icon(subfilterCategoryLabels[c]?.iconData, color: Colors.white, semanticLabel: subfilterCategoryLabels[c]?.label, size: 24),
+                    );
+                  }).toList()),
                 ),
               ),
-              const Expanded(flex: 1, child: SizedBox(width: 2)),
+              const Spacer(),
               if (currentLatLng != null)
                 Expanded(
-                  flex: 10,
+                  flex: 100,
                   child: Text(
                     approxDistance,
-                    style: TextStyle(fontSize: 14, color: colorScheme.onPrimary),
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
                     textAlign: TextAlign.end,
                   ),
                 ),
@@ -327,9 +337,15 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                             ),
                     ),
                   ) else if (widget.brickAndMortar) GestureDetector(
-                    onTap: () => showMiniPopup(context, brickAndMortarIconKey, 'A permanent shop or office building', analyticsService: widget.analyticsService),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      showMiniPopup(context, brickAndMortarIconKey, 'A permanent shop or office building', analyticsService: widget.analyticsService);
+                    },
                     key: brickAndMortarIconKey,
-                    child: const Icon(Icons.store),
+                    child: Tooltip(
+                      message: 'A permanent shop or office building',
+                      child: Semantics(button: true, child: const Icon(Icons.store)),
+                    ),
                   ),
                 ],
               ),
@@ -360,10 +376,11 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     size: 25,
                     color: widget.cancelled && !widget.listingFavourited
                         ? Theme.of(context).disabledColor
-                        : widget.colorScheme.primary,
+                        : Colors.red,
                   ),
                 ),
                 if (isItAnEvent) IconButton(
+                  tooltip: widget.listingAlerted ? 'Remove alert' : 'Set an alert',
                   onPressed: (widget.cancelled && !alertsStore.alertExists(widget.listingId))
                       ? null
                       : (isItAlertable)
@@ -373,7 +390,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           setState(() { });
                           widget.analyticsService.logButtonTapped('alert_listing', listingId: widget.listingId, listingName: widget.title);
                         }
-                      : () => showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance', analyticsService: widget.analyticsService),
+                      : () {
+                          HapticFeedback.lightImpact();
+                          showMiniPopup(context, alertIconKey, 'Can’t set an alert more than a week in advance', analyticsService: widget.analyticsService);
+                        },
                   padding: const EdgeInsets.all(0),
                   key: alertIconKey,
                   style: ElevatedButton.styleFrom(
@@ -386,7 +406,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                     size: 25,
                     color: (widget.cancelled && !widget.listingAlerted || !isItAlertable)
                         ? Theme.of(context).disabledColor
-                        : Theme.of(context).colorScheme.primary,
+                        : Colors.orange,
                   ),
                 ),
                 const Spacer(),
@@ -405,10 +425,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                           widget.analyticsService.logDirectionsToListingRequested(widget.title);
                           widget.onGetDirections?.call(); // null-safe
                         },
-                  child: const Icon(Icons.directions_walk, semanticLabel: 'Get walking directions'),
+                  child: const Tooltip(message: 'Get walking directions', child: Icon(Icons.directions_walk)),
                 ),
                 // only display the Details button if there are details to display (and they're not always shown i.e. single bottom modal)
-                if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty))
+                if (widget.onDetailsTapped != null && (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty || widget.imageURL.isNotEmpty))
                   ElevatedButton(
                     style: (widget.detailsVisible ?? false)
                         ? ElevatedButton.styleFrom(
@@ -430,7 +450,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       widget.analyticsService.logButtonTapped('listing_details', listingId: widget.listingId, listingName: widget.title);
                       widget.onDetailsTapped?.call();
                     },
-                    child: Icon(Icons.info, semanticLabel: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details'),
+                    child: Tooltip(message: (widget.detailsVisible ?? false) ? 'Hide listing details' : 'Show listing details', child: const Icon(Icons.info)),
                   ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -452,9 +472,10 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
                       );
                       widget.analyticsService.logButtonTapped('share_listing', listingId: widget.listingId, listingName: widget.title);
                   },
-                  child: (Platform.isAndroid)
-                      ? const Icon(Icons.share, semanticLabel: 'Share listing')
-                      : const Icon(Icons.ios_share, semanticLabel: 'Share listing'),
+                  child: Tooltip(
+                    message: 'Share listing',
+                    child: Icon(Platform.isAndroid ? Icons.share : Icons.ios_share),
+                  ),
                   ),
               ],
             ),
@@ -515,7 +536,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 0,
       children: [
-        if (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty) const SizedBox(height: 8),
+        if (widget.description.isNotEmpty || widget.website.isNotEmpty || widget.email.isNotEmpty || widget.phoneNumber.isNotEmpty || widget.imageURL.isNotEmpty) const SizedBox(height: 8),
         if (widget.description.isNotEmpty) ...[
           const SizedBox(height: 8),
           if (widget.imageURL.isNotEmpty) AdaptiveImageText(
@@ -543,7 +564,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Website: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.tertiary), text: 'Website: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.website),
                 ],
               ),
@@ -571,7 +592,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Email: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.tertiary), text: 'Email: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.email),
                 ],
               ),
@@ -598,7 +619,7 @@ class _SpecificListingInfoSheetState extends State<SpecificListingInfoSheet> {
             child: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.primary), text: 'Telephone: '),
+                  TextSpan(style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: widget.colorScheme.tertiary), text: 'Telephone: '),
                   TextSpan(style: const TextStyle(fontSize: 13, decoration: TextDecoration.underline), text: widget.phoneNumber),
                 ],
               ),
@@ -686,12 +707,13 @@ Future<void> showListingDetailsDialog(
                     listingFavourited: favouriteListingKeys.value.contains(event.id),
                     listingAlerted: alertsStore.alertExists(event.id),
                     onFavouriteTapped: () {
+                      HapticFeedback.lightImpact();
                       favouriteOrNotListing(event);
                       setStateFunction.call;
                       setStateDialog(() {});
                     },
                     onGetDirections: () async {
-                      safeRemoveRoute(context, listingDetailsDialogRoute); // i.e. pop this dialog
+                      HapticFeedback.lightImpact();
                       onGetDirections.call();
                     },
                     onAlertTapped: () async {

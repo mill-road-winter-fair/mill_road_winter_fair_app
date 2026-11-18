@@ -14,7 +14,7 @@ import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 import 'package:mill_road_winter_fair_app/map_page.dart';
 
 // Third-party imports
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -128,14 +128,15 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       final name = (listing['title'] ?? '').toString().toLowerCase();
       final location = (listing['location'] ?? '').toString().toLowerCase();
       final subtitle = (listing['subtitle'] ?? '').toString().toLowerCase();
-      return name.contains(_searchQuery) || location.contains(_searchQuery) || subtitle.contains(_searchQuery);
+      final genericTerms = (listing['genericTerms'] ?? '').toString().toLowerCase();
+      return name.contains(_searchQuery) || location.contains(_searchQuery) || subtitle.contains(_searchQuery) || genericTerms.contains(_searchQuery);
     }).toList();
   }
 
   List<Map<String, dynamic>> _applySorting(List<Map<String, dynamic>> allListings) {
+    debugPrint('_applySorting called for ${allListings.length} listings');
+    if (allListings.isEmpty) return []; // not an exception, as this is normal for Favourites
     try {
-      if (allListings.isEmpty) throw Exception("No listings exist");
-
       if ((locationPermission == LocationPermission.denied || locationPermission == LocationPermission.deniedForever) &&
           preferredSortingMethod == SortingMethod.nearest) {
         // User prefers distance sorting but has disabled location permissions, change their preferred sorting method
@@ -171,7 +172,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       if (preferredSortingMethod == SortingMethod.alphabetical || useFallbackSorting == true) {
         // Sort by name; if this is the same sort by end time
         allListings.sort((a, b) {
-          final nameCompare = a['title'].compareTo(b['title']);
+          final nameCompare = (a['title'] as String).toLowerCase().compareTo((b['title'] as String).toLowerCase());
           return nameCompare != 0 ? nameCompare : a['endTime'].compareTo(b['endTime']);
         });
       } else if (preferredSortingMethod == SortingMethod.nearest) {
@@ -235,7 +236,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       listings = await fetchListings(http.Client());
       mapPageKey.currentState?.setVisibleMarkerLists();
       if (navigationInProgress == false) {
-        mapPageKey.currentState?.addAllVisibleMarkers();
+        await mapPageKey.currentState?.addAllVisibleMarkers();
+        mapPageKey.currentState?.showFilteredMarkers();
       }
       timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
       establishLocation();
@@ -255,7 +257,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           msg: 'Location services and permissions are required to determine distances',
           gravity: ToastGravity.CENTER,
           backgroundColor: Theme.of(context).colorScheme.primary,
-          textColor: Theme.of(context).colorScheme.onPrimary,
+          textColor: Colors.white,
           fontSize: 16,
           toastLength: Toast.LENGTH_LONG,
           timeInSecForIosWeb: 4,
@@ -338,6 +340,11 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   @override
   Widget build(BuildContext context) {
     debugPrint('FilteredListingsPageState build() called with filterCategory=$filterCategory and subfilterCategory=${widget.subfilterCategory}');
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final appBarTheme = Theme.of(context).appBarTheme;
+    final messageStyle = TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold);
+
     // Show error if there are no listings
     if (listings.isEmpty) {
       return FairScaffold(
@@ -353,7 +360,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
               Text(
                 "Unable to retrieve listings",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Theme.of(context).colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
+                style: messageStyle,
               ),
               const SizedBox(height: 20),
               isRefreshing
@@ -415,8 +422,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
     }
     int? firstVisibleIndex; // will be used to store the first listing that is actually visible
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final appBarTheme = Theme.of(context).appBarTheme;
     final canScrollToNow = filterCategory == 'favourite' || isShowingJustPerformance;
     final canTogglePastListings = canScrollToNow || _hidePastListings;
     final nowOrSoonIconKey = GlobalKey();
@@ -431,7 +436,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         IconButton(
           key: nowOrSoonIconKey,
           tooltip: 'Scroll to what is on now or starting soon',
-          onLongPress: !canScrollToNow ? null : () => showMiniPopup(context, nowOrSoonIconKey, 'Tap to scroll to now to see what’s on or starting soon', analyticsService: widget.analyticsService),
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canScrollToNow) {
@@ -489,8 +493,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
         IconButton(
           key: hidePastIconKey,
           tooltip: _hidePastListings ? 'Show past events and performances' : 'Hide past events and performances',
-          onLongPress: !canTogglePastListings ? null : () => showMiniPopup(context, hidePastIconKey,
-              (_hidePastListings) ? 'Tap to show all events and performances' : 'Tap to hide events and performances that have passed', analyticsService: widget.analyticsService),
+          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll((_hidePastListings) ? Colors.white.withAlpha(30) : null)),
           onPressed: () {
             HapticFeedback.lightImpact();
             if (!canTogglePastListings) {
@@ -511,7 +514,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             }
           },
           icon: Icon(
-            (_hidePastListings) ? Icons.free_cancellation : Icons.history_toggle_off,
+            Icons.history_toggle_off,
             size:24,
             color: (canTogglePastListings && isItEventDay(_dateTimeProvider)) ? appBarTheme.foregroundColor : appBarTheme.foregroundColor?.withAlpha(130),
           ),
@@ -560,6 +563,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
                           child: SearchBar(
                             autoFocus: true,
+                            smartDashesType: SmartDashesType.disabled,
+                            smartQuotesType: SmartQuotesType.disabled,
                             controller: _searchController,
                             elevation: const WidgetStatePropertyAll(0),
                             hintText: switch (widget.subfilterCategory) {
@@ -572,7 +577,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               'charityCommunityInfo' => 'Search charity, community & info...',
                               'visitExperience' => 'Search visits & experiences...',
                               'service' => 'Search services...',
-                              'business' => 'Search other local businesses...',
                               _ => 'Search all listings...',
                             },
                             leading: const Icon(Icons.search),
@@ -612,9 +616,12 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: refreshListings,
+                onRefresh: () {
+                  HapticFeedback.lightImpact();
+                  return refreshListings();
+                },
                 backgroundColor: colorScheme.primary,
-                color: colorScheme.onPrimary,
+                color: Colors.white,
                 child: Container(
                   color: colorScheme.surfaceDim,
                   child: LayoutBuilder(builder: (context, constraints) {
@@ -675,51 +682,58 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             borderRadius: BorderRadius.circular(8),
                                             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 3, offset: Offset(0, 2))],
                                           ),
-                                          child: SpecificListingInfoSheet(
-                                            scrollBounds: _expandedScrollBounds,
-                                            listingId: listing['id'],
-                                            cancelled: listing['cancelled'] == 'TRUE' ? true : false,
-                                            brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
-                                            emoji: listing['emoji'] ?? '',
-                                            title: listing['title'] ?? '',
-                                            subtitle: listing['subtitle'] ?? '',
-                                            location: listing['location'],
-                                            description: listing['description'] ?? '',
-                                            email: listing['email'] ?? '',
-                                            website: listing['website'] ?? '',
-                                            phoneNumber: listing['phone'] ?? '',
-                                            imageURL: listing['imageURL'] ?? '',
-                                            startTime: "${listing['startTime']}",
-                                            endTime: "${listing['endTime']}",
-                                            approxDistance: approximateDistance,
-                                            detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
-                                            listingFavourited: isFavourited,
-                                            listingAlerted: alertsStore.alertExists(listing['id']),
-                                            onDetailsTapped: () => toggleDetailsRow(index),
-                                            onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
-                                            onGetDirections: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => MapPage(
-                                                    listings: listings,
-                                                    onTabSelected: (_) => {},
-                                                    destinationId: listing['id'],
-                                                    destinationLatLng: destinationLatLng,
-                                                    analyticsService: widget.analyticsService,
-                                                  )
-                                                )
-                                              );
-                                            },
-                                            onAlertTapped: () async {
+                                          child: GestureDetector(
+                                            onTap: () {
                                               HapticFeedback.lightImpact();
-                                              await toggleListingAlert(listing['id'], alertNoticePeriod, context);
-                                              setState(() { });
+                                              widget.analyticsService.logButtonTapped('listing_row', listingId: listing['id'], listingName: listing['title']);
+                                              toggleDetailsRow(index);
                                             },
-                                            analyticsService: widget.analyticsService,
-                                            inDialog: false,
-                                            colorScheme: colorScheme,
-                                          )
+                                            child: SpecificListingInfoSheet(
+                                              scrollBounds: _expandedScrollBounds,
+                                              listingId: listing['id'],
+                                              cancelled: listing['cancelled'] == 'TRUE' ? true : false,
+                                              brickAndMortar: listing['brickAndMortar'] == 'TRUE' ? true : false,
+                                              emoji: listing['emoji'] ?? '',
+                                              title: listing['title'] ?? '',
+                                              subtitle: listing['subtitle'] ?? '',
+                                              location: listing['location'],
+                                              description: listing['description'] ?? '',
+                                              email: listing['email'] ?? '',
+                                              website: listing['website'] ?? '',
+                                              phoneNumber: listing['phone'] ?? '',
+                                              imageURL: listing['imageURL'] ?? '',
+                                              startTime: "${listing['startTime']}",
+                                              endTime: "${listing['endTime']}",
+                                              approxDistance: approximateDistance,
+                                              detailsVisible: (detailsVisibleIndex == null) ? false : (detailsVisibleIndex == index) ? true : null,
+                                              listingFavourited: isFavourited,
+                                              listingAlerted: alertsStore.alertExists(listing['id']),
+                                              onDetailsTapped: () => toggleDetailsRow(index),
+                                              onFavouriteTapped: () => favouriteOrNotListing(listing['id']),
+                                              onGetDirections: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => MapPage(
+                                                      listings: listings,
+                                                      onTabSelected: (_) => {},
+                                                      destinationId: listing['id'],
+                                                      destinationLatLng: destinationLatLng,
+                                                      analyticsService: widget.analyticsService,
+                                                    )
+                                                  )
+                                                );
+                                              },
+                                              onAlertTapped: () async {
+                                                HapticFeedback.lightImpact();
+                                                await toggleListingAlert(listing['id'], alertNoticePeriod, context);
+                                                setState(() { });
+                                              },
+                                              analyticsService: widget.analyticsService,
+                                              inDialog: false,
+                                              colorScheme: colorScheme,
+                                            )
+                                          ),
                                         ),
                                         const SizedBox(height: 8),
                                       ],
@@ -790,23 +804,71 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                         },
                       ),
                       (filteredListings.isEmpty || (_hidePastListings && findFirstNextListingIndex(filteredListings) < 0))
-                          ? Center(
-                              child: Container(
-                                padding: const EdgeInsets.all(24.0),
-                                alignment: Alignment.center,
-                                child: Text(
-                                    style: TextStyle(color: colorScheme.tertiary, fontSize: 16, fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.center,
-                                    'No'
-                                    '${widget.subfilterCategory != null ? ' ${subfilterCategoryLabels[widget.subfilterCategory]!.label}' : ''}'
-                                    ' listings'
-                                    '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
-                                    '${filterCategory == 'favourite' ? ' in your favourites' : ' found'}.'
-                                    '${(widget.subfilterCategory != null && _isSearching) ? '\n\nTap the magnifying glass to close search, then ‘Show’ to change what type of listings are displayed.' : ''}'
-                                    '${(widget.subfilterCategory != null && !_isSearching) ? '\n\nUse ‘Show’ above to change what type of listings are displayed.' : ''}'
-                                    '${filterCategory == 'favourite' ? '\n\nTap ‘Listings’ below to display all (not just favourite) listings.' : ''}'
-                                    '${_searchQuery.isNotEmpty ? '\n\nTap ‘X’ in the bar above to clear your search.' : ''}'),
-                              ),
+                          ? Scrollbar(
+                              thumbVisibility: Platform.isIOS ? false : true,
+                              thickness: 4,
+                              radius: const Radius.circular(8),
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsetsGeometry.all(10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.max,
+                                  spacing: 15,
+                                  children: [
+                                    Text(style: messageStyle, textAlign: TextAlign.center,
+                                      'No ${widget.subfilterCategory != null ? subfilterCategoryLabels[widget.subfilterCategory]!.label : ''}'
+                                      ' listings'
+                                      '${_searchQuery.isNotEmpty ? ' containing ‘$_searchQuery’' : ''}'
+                                      '${filterCategory == 'favourite' ? ' in your Favourites' : ' found'}.'
+                                    ),
+                                    if (filterCategory == 'favourite' && _searchQuery.isEmpty) Text(style: messageStyle, textAlign: TextAlign.center,
+                                      'You can add Favourites by tapping the red heart icon on a listing.'
+                                    ),
+                                    if (_searchQuery.isNotEmpty) ...[
+                                      Text(style: messageStyle, textAlign: TextAlign.center, 'Tap the magnifying glass above or this button to clear and close search.'),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('clearCloseSearch_listings');
+                                          setState(() {
+                                            _searchAnalyticsTimer?.cancel();
+                                            _searchQuery = '';
+                                            _searchController.text = '';
+                                            _isSearching = false;
+                                          });
+                                        },
+                                        icon: const Icon(Icons.search_off, size: 32),
+                                        label: const Text('Clear and close search'),
+                                      ),
+                                    ],
+                                    if (widget.subfilterCategory != null) ...[
+                                      Text(style: messageStyle, textAlign: TextAlign.center, 'The filter icon above changes what type of listings are displayed, or tap this button to stop filtering.'),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('switchOffFilter_listings');
+                                          widget.onSubfilterChange(null);
+                                        },
+                                        icon: const Icon(Icons.filter_alt, size: 32),
+                                        label: Text('Switch from ${subfilterCategoryLabels[widget.subfilterCategory]!.label} to everything'),
+                                      ),
+                                    ],
+                                    if (filterCategory == 'favourite') ...[
+                                      Text(style: messageStyle, textAlign: TextAlign.center, 'Tapping ‘Listings’ below or this button will display all (not just Favourite) listings.'),
+                                      ElevatedButton.icon(
+                                        onPressed: () {
+                                          HapticFeedback.lightImpact();
+                                          widget.analyticsService.logButtonTapped('switchOffFavourites_listings');
+                                          widget.onTabSelected(3); // in future, this could preserve search as well
+                                        },
+                                        icon: const Icon(Icons.ballot, size: 32),
+                                        label: const Text('View all listings, not just Favourites'),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              )
                             )
                           : const SizedBox.shrink(),
                     ]);
@@ -823,35 +885,35 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Widget _buildSortingDropdown(BuildContext context, bool isPerformance) {
     final colorScheme = Theme.of(context).colorScheme;
     final menuEntryStyle = TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant);
-    final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
+    final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.onSecondary, fontWeight: FontWeight.bold);
     final effectiveSortingMethod = useFallbackSorting ? SortingMethod.alphabetical : preferredSortingMethod;
     return MenuAnchor(
       key: const ValueKey('sortingdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,
-          child: Text("Sort by", style: menuEntryStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
+          child: Text("Sort by", style: menuEntryStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: colorScheme.tertiary)),
         ),
         if (locationPermission == LocationPermission.whileInUse || locationPermission == LocationPermission.always)
           MenuItemButton(
             onPressed: () => sortingDropdownCallback(SortingMethod.nearest),
-            leadingIcon: Icon(Icons.directions_walk, size: 20, color: (effectiveSortingMethod == SortingMethod.nearest) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+            leadingIcon: Icon(Icons.directions_walk, size: 20, color: (effectiveSortingMethod == SortingMethod.nearest) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
             child: Text("Nearest", style: (effectiveSortingMethod == SortingMethod.nearest) ? selectedMenuEntryStyle : menuEntryStyle),
           ),
         MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.location),
-          leadingIcon: Icon(Icons.signpost, size: 20, color: (effectiveSortingMethod == SortingMethod.location) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          leadingIcon: Icon(Icons.signpost, size: 20, color: (effectiveSortingMethod == SortingMethod.location) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
           child: Text("Location (a–z)", style: (effectiveSortingMethod == SortingMethod.location) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.alphabetical),
-          leadingIcon: Icon(Icons.sort_by_alpha, size: 20, color: (effectiveSortingMethod == SortingMethod.alphabetical) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          leadingIcon: Icon(Icons.sort_by_alpha, size: 20, color: (effectiveSortingMethod == SortingMethod.alphabetical) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
           child: Text("Name (a–z)", style: (effectiveSortingMethod == SortingMethod.alphabetical) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         if (isPerformance || filterCategory == 'favourite')
           MenuItemButton(
           onPressed: () => sortingDropdownCallback(SortingMethod.startTime),
-            leadingIcon: Icon(Icons.alarm, size: 20, color: (effectiveSortingMethod == SortingMethod.startTime) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+            leadingIcon: Icon(Icons.alarm, size: 20, color: (effectiveSortingMethod == SortingMethod.startTime) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
             child: Text("Start time", style: (effectiveSortingMethod == SortingMethod.startTime) ? selectedMenuEntryStyle : menuEntryStyle),
           ),
       ],
@@ -860,6 +922,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.sort),
           tooltip: 'Choose how to sort listings',
           onPressed: () {
+            HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('listings_sort_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {
@@ -875,23 +939,23 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
   Widget _buildFilteringDropdown(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final menuEntryStyle = TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant);
-    final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold);
+    final selectedMenuEntryStyle = menuEntryStyle.copyWith(color: colorScheme.onSecondary, fontWeight: FontWeight.bold);
     return MenuAnchor(
       key: const ValueKey('filterdropdown'),
       menuChildren: [
         MenuItemButton(
           onPressed: null,
-          child: Text("Show", style: menuEntryStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
+          child: Text("Show", style: menuEntryStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: colorScheme.tertiary)),
         ),
         MenuItemButton(
           onPressed: () => filteringDropdownCallback(null),
-          leadingIcon: Icon(Icons.all_inclusive, size: 20, color: (widget.subfilterCategory == null) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+          leadingIcon: Icon(Icons.all_inclusive, size: 20, color: (widget.subfilterCategory == null) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
           child: Text("Everything", style: (widget.subfilterCategory == null) ? selectedMenuEntryStyle : menuEntryStyle),
         ),
         ...subfilterCategoryLabels.entries.map((e) {
           return MenuItemButton(
             onPressed: () => filteringDropdownCallback(e.key),
-            leadingIcon: Icon(e.value.iconData, size: 20, color: (widget.subfilterCategory == e.key) ? colorScheme.primary : colorScheme.onSurfaceVariant),
+            leadingIcon: Icon(e.value.iconData, size: 20, color: (widget.subfilterCategory == e.key) ? colorScheme.onSecondary : colorScheme.onSurfaceVariant),
             child: Text(e.value.label, style: (widget.subfilterCategory == e.key) ? selectedMenuEntryStyle : menuEntryStyle),
           );
         })
@@ -902,6 +966,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           icon: const Icon(Icons.filter_alt, size: 26),
           tooltip: 'Choose which types of listings to show',
           onPressed: () {
+            HapticFeedback.lightImpact();
+            widget.analyticsService.logButtonTapped('listings_filter_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {

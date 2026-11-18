@@ -9,7 +9,7 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 
 // Third-party imports
-import 'package:flutter/material.dart' hide RootWidget;
+import 'package:material_ui/material_ui.dart' hide RootWidget;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -120,8 +120,8 @@ void main() {
             expect(iconTheme.size, 40);
             expect(iconTheme.color, Theme.of(tester.element(bell)).colorScheme.onSecondary);
           case 'Make the app your own':
-            expectTip('disable animations on the home page', Icons.home);
-            expectTip('preferred notice period for notifications', Icons.home);
+            expectTip('disable home page animations', Icons.home);
+            expectTip('preferred notice period for alerts', Icons.home);
         }
         if (title != pageTitles.last) {
           await tester.tap(find.byIcon(Icons.arrow_forward));
@@ -163,7 +163,7 @@ void main() {
       ));
       await settle(tester);
 
-      final background = find.image(const AssetImage('assets/welcomeScreen/chooserPage_background.jpg'));
+      final background = find.image(const AssetImage('assets/infoPages/chooserPage_background.jpg'));
       expect(background, findsOneWidget);
       expect(find.ancestor(of: background, matching: find.byType(PageView)), findsNothing);
       final backgroundRect = tester.getRect(background);

@@ -1,9 +1,10 @@
 // App imports
+import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 
 // Third-party imports
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Test helpers, fakes and mocks
@@ -28,6 +29,7 @@ void main() {
                   endTime: listing['endTime'] as String,
                   approxDistance: '',
                   colorScheme: const ColorScheme.light(),
+                  analyticsService: FakeAnalyticsService(),
                 ),
               ),
             ),

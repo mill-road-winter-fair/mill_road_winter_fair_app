@@ -5,7 +5,7 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 // Third-party imports
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -185,8 +185,13 @@ void main() {
   test('show/hide all updates every map filter property', () async {
     usageAnalyticsEnabled = true;
     await service.logMapMarkerFilterPreferenceSet('all', false);
-    expect(sdk.properties.length, 6);
+    expect(sdk.properties.length, 9);
     expect(sdk.properties.values, everyElement('false'));
+    for (final category in ['dance', 'other', 'childrens']) {
+      await service.logMapMarkerFilterPreferenceSet(category, true);
+      expect(sdk.properties['map_filter_$category'], 'true');
+      expect(sdk.events.last['parameters'], {'filter_type': 'map_marker', 'category': category, 'is_enabled': 1});
+    }
     await service.logMapMarkerFilterPreferenceSet('shopping', true);
     expect(sdk.properties['map_filter_shopping'], 'true');
     expect(sdk.events.last['parameters'], {'filter_type': 'map_marker', 'category': 'shopping', 'is_enabled': 1});
