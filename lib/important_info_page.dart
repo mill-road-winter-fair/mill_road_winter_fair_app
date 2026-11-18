@@ -10,7 +10,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 
 // Third-party imports
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
@@ -102,7 +102,9 @@ class _ImportantInfoPageState extends State<ImportantInfoPage> with RouteAware {
                           child: Image.asset('assets/infoPages/hiVis_cropped.jpg',
                               fit: BoxFit.fitWidth, semanticLabel: 'Mill Road Winter Fair stewards wearing high-visibility jackets')),
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 20),
+                Text('Safety and security', style: headingStyle),
+                const SizedBox(height: 10),
                 bulletPoint('Stewards wearing hi-vis jackets are available to assist you.'),
                 bulletPoint('To help ensure everyone’s safety, please comply promptly with any instructions from stewards.'),
                 bulletPoint('If you see anything unsafe or suspicious, please report it to a steward immediately.'),

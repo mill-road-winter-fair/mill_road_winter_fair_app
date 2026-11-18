@@ -5,7 +5,7 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/timetable_page.dart';
 
 // Third-party imports
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -290,7 +290,6 @@ const Map<String, SubfilterLabel> subfilterCategoryLabels = {
   'food': SubfilterLabel('Food & drink', Icons.fastfood, false),
   'shopping': SubfilterLabel('Shopping', Icons.local_offer, false),
   'charityCommunityInfo': SubfilterLabel('Charity, community, info', Icons.volunteer_activism, false),
-  'business': SubfilterLabel('Other businesses', Icons.business, false),
   'service': SubfilterLabel('Services', Icons.family_restroom, false)
 };
 

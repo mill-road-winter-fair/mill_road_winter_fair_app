@@ -20,7 +20,7 @@ import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 // Third-party imports
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -1241,7 +1241,7 @@ Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, Build
     alertsPermissionGranted = await requestAlertPermissions();
     if (!alertsPermissionGranted) {
       settingsOpened = true;
-      if (context.mounted) await showNoPermissionsDialog(context, colorScheme);
+      if (context.mounted) await showNoPermissionsDialog(context, colorScheme, 'To set reminders, you need to give this app permission to show alert notifications.');
     } else {
       if (!context.mounted) return;
       await setTheAlert(context, desiredNoticePeriod, listingID);
@@ -1249,8 +1249,8 @@ Future<void> toggleListingAlert(String listingID, int desiredNoticePeriod, Build
   }
 }
 
-Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme) async {
-  return showDialog<void>(context: context, builder: (BuildContext context) {
+Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorScheme, String theMessage) async {
+  await showDialog<void>(context: context, builder: (BuildContext context) {
     return Dialog(
       insetPadding: const EdgeInsets.all(8), // margin from screen edges
       shape: RoundedRectangleBorder(side: BorderSide(color: colorScheme.onSecondary, width: 0.5), borderRadius: BorderRadius.circular(12)),
@@ -1264,10 +1264,10 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
         ),
         padding: const EdgeInsets.fromLTRB(0, 16, 4, 16),
         child: Column(mainAxisSize: MainAxisSize.min, spacing: 12, children: [
-          const ListTile(
-            visualDensity: VisualDensity(horizontal: -2, vertical: 2),
-            leading: Icon(Icons.error, size: 36, color: Colors.red),
-            title: Text('To set reminders, you need to give this app permission to show alert notifications. Click below to open Settings to enable this.'),
+          ListTile(
+            visualDensity: const VisualDensity(horizontal: -2, vertical: 2),
+            leading: const Icon(Icons.error, size: 36, color: Colors.red),
+            title: Text('$theMessage\n\nTap Open Settings below to enable this, then tap Close when done.'),
           ),
           Row(mainAxisAlignment: MainAxisAlignment.end, spacing: 12, children: [
             TextButton(
@@ -1275,12 +1275,11 @@ Future<void> showNoPermissionsDialog(BuildContext context, ColorScheme colorSche
                 HapticFeedback.lightImpact();
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel', style: TextStyle(color: colorScheme.tertiary))
+              child: Text('Close', style: TextStyle(color: colorScheme.tertiary))
             ),
             TextButton(
               onPressed: () async {
                 HapticFeedback.lightImpact();
-                Navigator.of(context).pop();
                 await openAppSettings();
               },
               child: Text('Open Settings', style: TextStyle(color: colorScheme.tertiary))
@@ -1554,11 +1553,9 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
   Widget _buildImage({double? width}) {
     return SizedBox(
       width: width,
-      height: width == null ? _maxImageHeight : null,
       child: Image.network(
         widget.imageUrl,
         width: width,
-        height: width == null ? _maxImageHeight : null,
         fit: BoxFit.contain,
         alignment: Alignment.center,
         errorBuilder: (context, error, stackTrace) {

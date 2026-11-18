@@ -1,5 +1,5 @@
 // Third-party imports
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 bool isNavBarVisible(BuildContext context) {
   final bottomInset = MediaQuery.of(context).padding.bottom;

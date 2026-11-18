@@ -1,7 +1,7 @@
 // Dart SDK imports
 import 'dart:io';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -299,7 +299,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Fantastic live music and performance\n', style: headingStyle),
-                        const TextSpan(text: 'The main music stages at Donkey Common, Ditchburn Gardens, St Barnabas Church, Argyle Street Housing Co-op, '
+                        const TextSpan(text: 'The main music stages are at Donkey Common, Ditchburn Gardens, St Barnabas Church, Argyle Street Housing Co-op, '
                           'inside St Philip’s Church and at the corner of Thoday Street.'),
                       ]),
                       imagePath: "assets/infoPages/music.png",
@@ -337,7 +337,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Guided walks\n', style: headingStyle),
                         const TextSpan(text: 'A 90-minute Mill Road history tour starts outside St Barnabas Church at 9am (£15), '
-                          'and free tours of the historic cemetery are at 10am, 11am, 12.30pm and 2pm.'),
+                          'and free tours of the historic cemetery are at 10am, 11.15am and 12.30pm.'),
                       ]),
                       imagePath: "assets/infoPages/visitExperience.png",
                       imageOnLeft: true,

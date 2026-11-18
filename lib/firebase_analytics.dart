@@ -6,7 +6,7 @@ import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -154,7 +154,6 @@ class FirebaseAnalyticsService implements AnalyticsService {
       'dance': 'map_filter_dance',
       'other': 'map_filter_other',
       'childrens': 'map_filter_childrens',
-      'business': 'map_filter_business',
       'visitsExperiences': 'map_filter_visits',
       'services': 'map_filter_services',
     };
@@ -409,7 +408,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
               await setAnalyticsEnabled(false);
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('No thanks'),
+            child: Text('No thanks', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
           ),
           TextButton(
             onPressed: () async {
@@ -418,7 +417,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
               await setAnalyticsEnabled(true);
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('I agree'),
+            child: Text('I agree', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
           ),
         ],
       ),

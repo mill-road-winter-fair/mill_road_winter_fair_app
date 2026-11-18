@@ -15,7 +15,7 @@ import 'package:mill_road_winter_fair_app/map_page.dart';
 import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 
 // Third-party imports
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -173,7 +173,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       if (preferredSortingMethod == SortingMethod.alphabetical || useFallbackSorting == true) {
         // Sort by name; if this is the same sort by end time
         allListings.sort((a, b) {
-          final nameCompare = a['title'].compareTo(b['title']);
+          final nameCompare = (a['title'] as String).toLowerCase().compareTo((b['title'] as String).toLowerCase());
           return nameCompare != 0 ? nameCompare : a['endTime'].compareTo(b['endTime']);
         });
       } else if (preferredSortingMethod == SortingMethod.nearest) {
@@ -237,7 +237,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
       listings = await fetchListings(http.Client());
       mapPageKey.currentState?.setVisibleMarkerLists();
       if (navigationInProgress == false) {
-        mapPageKey.currentState?.addAllVisibleMarkers();
+        await mapPageKey.currentState?.addAllVisibleMarkers();
+        mapPageKey.currentState?.showFilteredMarkers();
       }
       timetablePageKey.currentState?.thePreparedEvents = {}; // will trigger a re-prepare
       establishLocation();
@@ -564,6 +565,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                           constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 16, maxHeight: 36),
                           child: SearchBar(
                             autoFocus: true,
+                            smartDashesType: SmartDashesType.disabled,
+                            smartQuotesType: SmartQuotesType.disabled,
                             controller: _searchController,
                             elevation: const WidgetStatePropertyAll(0),
                             hintText: switch (widget.subfilterCategory) {
@@ -576,7 +579,6 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                               'charityCommunityInfo' => 'Search charity, community & info...',
                               'visitExperience' => 'Search visits & experiences...',
                               'service' => 'Search services...',
-                              'business' => 'Search other local businesses...',
                               _ => 'Search all listings...',
                             },
                             leading: const Icon(Icons.search),

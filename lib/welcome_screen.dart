@@ -13,7 +13,7 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 // Third-party imports
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:introduction_screen/introduction_screen.dart';
@@ -198,10 +198,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     final pages = [
       guidePage('Welcome to the official\nMill Road Winter Fair app!', [
         tip(const Icon(Icons.home),
-            'Using our new homepage, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
-        tip(const Icon(Icons.music_note), 'Tap Music on the homepage to open the music timetable, or Nearby to find things around you on the map.'),
+            'Using our new home page, tap one of the colourful characters to explore food and drink, shopping, children’s activities and more.'),
+        tip(const Icon(Icons.music_note), 'Tap Music on the home page to open the music timetable, or Nearby to find things around you on the map.'),
         tip(const Icon(Icons.map),
-            'Use the buttons at the bottom of the screen to switch between the Homepage, Map, Timetable, Listings and Favourites you\'ve saved.'),
+            'Use the buttons at the bottom of the screen to switch between the Home page, Map, Timetable, Listings and Favourites you’ve saved.'),
         tip(const Icon(Icons.menu),
             'Use the menu in the top left for important information, settings and to share this app. You can read this app guide again there too.'),
       ]),
@@ -226,7 +226,6 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 'performanceDance': 'Dance',
                 'performanceOther': 'Other',
                 'visitExperience': 'Visit/Experience',
-                'business': 'Business',
                 'service': 'Service',
               }[key]!),
         guideRow(
@@ -241,7 +240,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         ),
       ]),
       guidePage('Plan your day with the timetable', [
-        tip(const Icon(Icons.watch_later), 'See performances and shorter visits and experiences by time and location.'),
+        tip(const Icon(Icons.watch_later), 'See performances and shorter visits and experiences by time and location (from West to East along Mill Road).'),
         tip(const Icon(Icons.pinch), 'Scroll across locations and up or down through the day. Pinch to adjust the timetable’s scale.'),
         tip(const Icon(Icons.filter_alt), 'Tap the Filter icon to cycle between music, non-music and everything.'),
         tip(const Icon(Icons.schedule), 'On the day, tap the Clock icon to show what’s on now or starting soon.'),
@@ -250,7 +249,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
       guidePage('Find what you want at the Fair', [
         tip(const Icon(Icons.ballot), 'Tap Listings to browse everything at the Fair.'),
         tip(const Icon(Icons.sort), 'Sort by name, location, closeness to you, or (for performances and events) start time.'),
-        tip(const Icon(Icons.filter_alt), 'Tap the Filter icon to find just what you\'re looking for.'),
+        tip(const Icon(Icons.filter_alt), 'Tap the Filter icon to find just what you’re looking for.'),
         tip(const Icon(Icons.access_time), 'Performance listings and favourites let you hide finished events or jump to what’s on now.'),
       ]),
       guidePage('Visit our exciting attractions', [
@@ -258,7 +257,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
         tip(const FaIcon(FontAwesomeIcons.heart), 'Tap a listing’s Heart icon to save it. It will then appear in the Favourites tab.'),
         tip(const FaIcon(FontAwesomeIcons.bell), 'Tap the Bell icon to set a reminder for any listing.'),
         tip(const Icon(Icons.directions_walk), 'Tap the Walking icon for directions.'),
-        tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you\'re headed.'),
+        tip(Icon((Platform.isIOS) ? Icons.ios_share : Icons.share), 'Share a listing with friends to tell them where you’re headed.'),
       ]),
       guidePage('Make the app your own', [
         tip(const Icon(Icons.settings), 'Find Settings from the top-left menu and home page.'),

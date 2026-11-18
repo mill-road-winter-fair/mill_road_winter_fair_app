@@ -8,7 +8,7 @@ import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart'
 
 // Third-party imports
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -173,12 +173,14 @@ class ListingUpdateNotifier {
                     if (isListingsMayChange)
                       CheckboxListTile(
                         value: dontShowAgain,
+                        checkColor: Theme.of(context).colorScheme.onPrimary,
+                        fillColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.tertiary),
                         onChanged: (value) {
                           HapticFeedback.selectionClick();
                           analyticsService.logButtonTapped('${analyticsId}_dont_show_again_toggle');
                           setState(() => dontShowAgain = value ?? false);
                         },
-                        title: const Text("Don't show this again"),
+                        title: const Text("Don’t show this again"),
                         controlAffinity: ListTileControlAffinity.leading,
                         contentPadding: EdgeInsets.zero,
                         dense: true,
@@ -205,7 +207,7 @@ class ListingUpdateNotifier {
                   Navigator.of(dialogContext).pop();
                 }
               },
-              child: const Text('OK'),
+              child: Text('OK', style: TextStyle(color: Theme.of(context).colorScheme.tertiary)),
             ),
           ],
         ),

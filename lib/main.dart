@@ -22,7 +22,7 @@ import 'package:mill_road_winter_fair_app/welcome_screen.dart';
 // Third-party imports
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -75,13 +75,15 @@ Future<void> main() async {
   // Check whether location services are enabled and permissions are granted to the app
   locationServicesEnabled = await Geolocator.isLocationServiceEnabled();
   locationPermission = await Geolocator.checkPermission();
-  debugPrint(
-      'Location services enabled: $locationServicesEnabled, permission: $locationPermission');
+  debugPrint('Location services enabled: $locationServicesEnabled, permission: $locationPermission');
+  if (locationPermission == LocationPermission.denied) {
+    locationPermission = await Geolocator.requestPermission();
+  }
 
   // Lock app in portrait rotation and run main app
   // If this is the first execution run the welcome screen, otherwise just run the app normally
   debugPrint('Setting preferred orientation and running app');
- await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((value) => runApp(MultiProvider(
         providers: [
           Provider<DateTimeProvider>(create: (_) => const SystemDateTimeProvider()),
           Provider<UrlLauncher>(create: (_) => const SystemUrlLauncher()),
@@ -402,7 +404,8 @@ class HomePageState extends State<HomePage> with RouteAware {
           nearestMarkerCount: mapNearestMarkerCount,
           onTabSelected: setCurrentIndex,
           cancelMapNearest: cancelMapNearest,
-          analyticsService: widget.analyticsService),
+          analyticsService: widget.analyticsService,
+          isVisible: index == 1),
       TimetablePage(
           theEvents: listings,
           key: timetablePageKey,

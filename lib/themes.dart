@@ -6,7 +6,7 @@ import 'dart:ui' as ui;
 import 'package:mill_road_winter_fair_app/globals.dart';
 
 // Third-party imports
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -38,14 +38,14 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.light,
-      primary: const Color.fromRGBO(25, 41, 103, 1),
+      primary: const Color.fromRGBO(28, 21, 111, 1),
       onPrimary: Colors.white,
-      onPrimaryFixedVariant: const Color.fromRGBO(244, 248, 255, 1), // timetable swimlanes
+      onPrimaryFixedVariant: const Color.fromRGBO(241, 242, 249, 1), // timetable swimlanes
       secondary: Colors.white,
       onSecondary: Colors.black,
       onSecondaryFixed: const Color.fromRGBO(255, 242, 242, 1), // favourites background
-      tertiary: const Color.fromRGBO(25, 41, 103, 1),
-      tertiaryFixed: const Color.fromRGBO(228, 199, 143, 1), // some drawer elements // purple 137, 74, 151
+      tertiary: const Color.fromRGBO(28, 21, 111, 1),
+      tertiaryFixed: const Color.fromRGBO(238, 209, 150, 1), // some drawer elements // purple 137, 74, 151
       error: Colors.orange,
       onError: Colors.black,
       surface: Colors.white,
@@ -54,7 +54,7 @@ final Map<String, ThemeData> appThemes = {
       onSurfaceVariant: Colors.grey[700],
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(25, 41, 103, 1),
+      backgroundColor: Color.fromRGBO(28, 21, 111, 1),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -71,7 +71,7 @@ final Map<String, ThemeData> appThemes = {
     useMaterial3: true,
     colorScheme: ColorScheme(
       brightness: Brightness.dark,
-      primary: const Color.fromRGBO(25, 41, 103, 1),
+      primary: const Color.fromRGBO(28, 21, 111, 1),
       onPrimary: const Color.fromRGBO(40, 40, 40, 1.0),
       onPrimaryFixedVariant: const Color.fromRGBO(0, 20, 35, 1), // timetable swimlanes
       secondary: const Color.fromRGBO(44, 44, 44, 1.0),
@@ -87,11 +87,11 @@ final Map<String, ThemeData> appThemes = {
       onSurfaceVariant: Colors.grey[300],
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color.fromRGBO(25, 41, 103, 1.0),
+      backgroundColor: Color.fromRGBO(28, 21, 111, 1),
       foregroundColor: Colors.white,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      selectedItemColor: Color.fromRGBO(255, 196, 0, 1.0),
+      selectedItemColor: Color.fromRGBO(228, 199, 143, 1.0),
       unselectedItemColor: Colors.grey,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -268,6 +268,7 @@ String markerAssetPath(String category) {
 
   switch (category) {
     case 'Group-Food':
+      assetPath = 'assets/mapMarkers/foodGroupMarker.png';
     case 'Food':
       assetPath = 'assets/mapMarkers/foodMarker.png';
     case 'Group-Shopping':
@@ -297,8 +298,6 @@ String markerAssetPath(String category) {
     case 'Service-Toilet':
     case 'Service':
       assetPath = 'assets/mapMarkers/servicesMarker.png';
-    case 'Business':
-      assetPath = 'assets/mapMarkers/businessMarker.png';
     case 'Group-PerformanceEvent':
       assetPath = 'assets/mapMarkers/performanceEventMarker.png';
     case 'Group-Mixed':
@@ -313,7 +312,7 @@ String markerAssetPath(String category) {
 }
 
 String markerFrameAssetPath(String category) =>
-    category == 'Group-Mixed' ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
+    (category == 'Group-Mixed' || category == 'Group-Food') ? 'assets/mapMarkers/groupMarkerIconFrameThin.png' : 'assets/mapMarkers/markerIconFrame.png';
 
 Future<BitmapDescriptor> getColoredMarker(String category, Color color, {MapMarkerSize markerSize = MapMarkerSize.medium}) async {
   if (onTest == true) {
@@ -381,7 +380,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(190, 110, 230, 1.0),
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(150, 80, 0, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(79, 184, 75, 1.0),
-      "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(84, 145, 245, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
@@ -393,7 +391,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Music" || "Group-Music" || "Childrens" || "Group-Childrens" || "Dance" || "Group-Dance" || "Other" || "Group-Other" || "Group-PerformanceEvent" => const Color.fromRGBO(183, 13, 204, 1.0),
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(150, 80, 0, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(7, 128, 0, 1.0),
-      "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(29, 112, 198, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(166, 34, 43, 1),
       _ => const Color.fromRGBO(150, 150, 150, 1.0),
@@ -406,7 +403,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(204, 161, 51, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 115, 37, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(37, 63, 128, 1.0),
-      "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(37, 63, 128, 1.0),
       _ => const Color.fromRGBO(0, 0, 0, 1.0),
     };
@@ -418,7 +414,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(237, 201, 0, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(28, 213, 0, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 187, 255, 1.0),
-      "Business" => const Color.fromRGBO(180, 180, 180, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(0, 51, 255, 1.0),
       _ => const Color.fromRGBO(0, 0, 0, 1.0),
     };
@@ -430,7 +425,6 @@ Color getCategoryColor(String selectedThemeKey, String category) {
       "Charity/Community/Info" || "Group-Charity/Community/Info" => const Color.fromRGBO(240, 228, 66, 1.0),
       "Visit/Experience" || "Group-Visit/Experience" => const Color.fromRGBO(0, 158, 115, 1.0),
       final type when type.startsWith("Service") || type == "Group-Service" => const Color.fromRGBO(0, 114, 178, 1.0),
-      "Business" => const Color.fromRGBO(130, 130, 130, 1.0),
       "Mixed" || "Group-Mixed" => const Color.fromRGBO(102, 55, 133, 1.0),
       _ => const Color.fromRGBO(255, 0, 0, 1.0),
     };
