@@ -298,7 +298,6 @@ final List<Map<String, dynamic>> categoryListingsMocks = List.unmodifiable([
     ('26026', 'performanceOther', 'Mildly Amazing Magic', 'Gwydir Street'),
     ('26027', 'visitExperience', 'The Curious Cupboard', 'Cavendish Road'),
     ('26028', 'service', 'The Helpful Hedgehog', 'Catharine Street'),
-    ('26029', 'business', 'Pencil Pushers United', 'Coleridge Road'),
   ])
     Map<String, dynamic>.unmodifiable(_listingWithGenericTerms({
       ..._completeListing,

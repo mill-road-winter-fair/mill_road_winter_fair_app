@@ -742,6 +742,7 @@ void main() {
 
       // Configure the map marker filter
       mapPageState.filterSettings["Food"] = true;
+      await tester.pumpAndSettle();
 
       // Verify that the expected marker was added
       expect(mapPageState.markers.isNotEmpty, true);
@@ -787,6 +788,7 @@ void main() {
       // Obtain the state after mounting
       final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
       mapPageState.addAllVisibleMarkers();
+      await tester.pumpAndSettle();
 
       // Simulate a tap on the map marker
       const markerId = MarkerId('26101');
@@ -828,6 +830,7 @@ void main() {
       // Obtain the state after mounting
       final mapPageState = tester.state<MapPageState>(find.byType(MapPage));
       mapPageState.addAllVisibleMarkers();
+      await tester.pumpAndSettle();
 
       // Simulate a tap on the map marker
       const markerId = MarkerId('26012');
@@ -1016,6 +1019,7 @@ void main() {
       // Obtain the state after mounting
       mapPageState = tester.state<MapPageState>(find.byType(MapPage));
       mapPageState.addAllVisibleMarkers();
+      await tester.pumpAndSettle();
 
       // Verify that the expected marker was added
       expect(mapPageState.markers.isNotEmpty, true);
@@ -1042,7 +1046,6 @@ void main() {
       expect(find.widgetWithText(CheckboxListTile, "Dance"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Other performances"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Visits and experiences"), findsOneWidget);
-      expect(find.widgetWithText(CheckboxListTile, "Other businesses"), findsOneWidget);
       expect(find.widgetWithText(CheckboxListTile, "Services"), findsOneWidget);
 
       // Test Food checkbox using direct state toggling, which is stable under the animated UI.
@@ -1204,6 +1207,7 @@ void main() {
       // Obtain the state after mounting
       final mapPageState = tester.state(find.byType(MapPage)) as MapPageState;
       mapPageState.addAllVisibleMarkers();
+      await tester.pumpAndSettle();
 
       expect(mapPageState.markers.isNotEmpty, true);
       expect(mapPageState.markers[const MarkerId('26001')]?.visible, true);

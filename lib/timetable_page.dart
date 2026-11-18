@@ -153,8 +153,8 @@ class TimetablePageState extends State<TimetablePage> {
   void calculateInitialScalesIfNeeded() async {
     if (pixelsPerMinuteP == 0 || pixelsPerMinuteL == 0) {
       debugPrint('TimetablePageState calculateInitialScalesIfNeeded estimating initial scale');
-      pixelsPerMinuteP = max(0.8, min(1.5, 1000 / max(240, spanMinutes)));
-      pixelsPerMinuteL = max(0.8, min(1.5, 600 / max(240, spanMinutes)));
+      pixelsPerMinuteP = max(0.8, min(2.0, 1000 / max(240, spanMinutes)));
+      pixelsPerMinuteL = max(0.8, min(2.0, 600 / max(240, spanMinutes)));
       saveScales();
     }
   }
@@ -268,7 +268,7 @@ class TimetablePageState extends State<TimetablePage> {
             (!onlyNowOrSoon ||
                 (ev.startTime.isBefore(now) && ev.endTime.difference(now).inMinutes >= -5) ||
                 (ev.startTime.isAfter(now) && (ev.startTime.difference(now).inMinutes <= 30))) &&
-            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery) || ev.genericTerms.toString().toLowerCase().contains(_searchQuery)) &&
+            (searchQuery == '' || ev.name.toString().toLowerCase().contains(_searchQuery) || ev.location.toString().toLowerCase().contains(_searchQuery) || ev.genericTerms.toString().toLowerCase().contains(_searchQuery)) &&
             (filteredMusicOrNot == null || (filteredMusicOrNot == true && ev.isMusic) || (filteredMusicOrNot == false && !ev.isMusic))) {
           if (theFilteredEvents.keys.contains(location.key)) {
             theFilteredEvents[location.key]!.add(ev);
@@ -808,7 +808,7 @@ class TimetablePageState extends State<TimetablePage> {
                                               },
                                               child: Container(
                                               decoration: BoxDecoration(
-                                                color: colorScheme.onSurfaceVariant,
+                                                color: colorScheme.tertiaryFixed,
                                                 border: Border.all(width: 0.1),
                                                 borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), topRight: Radius.circular(4)),
                                               ),
@@ -820,7 +820,7 @@ class TimetablePageState extends State<TimetablePage> {
                                                 softWrap: true,
                                                 maxLines: 2,
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.secondary),
+                                                style: TextStyle(fontSize: 15, height: 1.2, fontWeight: FontWeight.bold, color: colorScheme.primary),
                                                 minFontSize: 11,
                                                 maxFontSize: 15,
                                                 overflow: TextOverflow.ellipsis,
@@ -845,11 +845,11 @@ class TimetablePageState extends State<TimetablePage> {
                                       if (widget.onlyNowOrSoon || details.pointerCount < 2) return; // ignore drags
                                       final dampenedScale = 1 + (details.scale - 1) * 0.5;
                                       final newdayPixelsPerMinute =
-                                          max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                          max(((constraints.maxHeight - 40) / spanMinutes), min(2.0, startPixelsPerMinute * dampenedScale));
                                       if (newdayPixelsPerMinute != _dayPixelsPerMinute) {
                                         setState(() {
                                           _dayPixelsPerMinute =
-                                              max(((constraints.maxHeight - 40) / spanMinutes), min(1.5, startPixelsPerMinute * dampenedScale));
+                                              max(((constraints.maxHeight - 40) / spanMinutes), min(2.0, startPixelsPerMinute * dampenedScale));
                                         });
                                       }
                                     },

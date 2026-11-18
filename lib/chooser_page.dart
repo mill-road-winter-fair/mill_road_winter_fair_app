@@ -355,7 +355,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
     await Future.wait([
       ...hotspots.map((hotspot) => precacheImage(hotspot.imageProvider!, context)),
       precacheImage(const AssetImage('assets/infoPages/chooserPage_background.jpg'), context),
-      precacheImage(const AssetImage('assets/infoPages/MRWF_logo_transparent.png'), context),
+      precacheImage(const AssetImage('assets/MRWF26_leaflet_banner.png'), context),
     ]);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -525,7 +525,7 @@ class _ChooserContent extends StatelessWidget {
             colourScheme: colourScheme,
             onTap: () => onHotspotTap(index),
           ),
-        Positioned(top: 20, left: 0, right: 0,
+        Positioned(top: 12, left: 0, right: 0,
           child: Align(
             alignment: Alignment.center,
             child: Tooltip(
@@ -613,11 +613,10 @@ class _ChooserLogo extends StatelessWidget {
             opacity: opacity,
             child: SimpleShadow(
               opacity: 1,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSecondary,
               sigma: 6,
-              offset: const Offset(3, 3),
               child: Image.asset(
-                'assets/infoPages/MRWF_logo_transparent.png',
+                'assets/MRWF26_leaflet_banner.png',
                 fit: BoxFit.contain,
                 width: MediaQuery.sizeOf(context).width * 0.5,
               ),

@@ -1553,11 +1553,9 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
   Widget _buildImage({double? width}) {
     return SizedBox(
       width: width,
-      height: width == null ? _maxImageHeight : null,
       child: Image.network(
         widget.imageUrl,
         width: width,
-        height: width == null ? _maxImageHeight : null,
         fit: BoxFit.contain,
         alignment: Alignment.center,
         errorBuilder: (context, error, stackTrace) {
