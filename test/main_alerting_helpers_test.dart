@@ -485,7 +485,7 @@ void main() {
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () async {
-                  await showNoPermissionsDialog(context, Theme.of(context).colorScheme);
+                  await showNoPermissionsDialog(context, Theme.of(context).colorScheme, 'To set reminders, you need to give this app permission to show alert notifications.');
                 },
                 child: const Text('Open dialog'),
               ),
@@ -498,10 +498,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('need to give this app permission'), findsOneWidget);
-      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Close'), findsOneWidget);
       expect(find.text('Open Settings'), findsOneWidget);
 
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
       expect(find.textContaining('need to give this app permission'), findsNothing);
     });
@@ -578,7 +578,7 @@ void main() {
       expect(find.text('Open Settings'), findsOneWidget);
       await tester.tap(find.text('Open Settings'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('need to give this app permission'), findsNothing);
+      expect(find.textContaining('need to give this app permission'), findsOneWidget);
     });
 
     testWidgets('setTheAlert cancels an existing scheduled alert for the listing', (tester) async {
