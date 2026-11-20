@@ -220,7 +220,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       DropdownOption(title: 'Static', subtitle: 'Stays boringly fixed', value: true),
     ];
     final List<DropdownOption> analyticsOptions = [
-      DropdownOption(title: 'Share', subtitle: 'Allow Google and us to see your activity', value: true),
+      DropdownOption(title: 'Share', subtitle: 'Allow Google and the Fair to see your activity', value: true),
       DropdownOption(title: 'Don’t share', subtitle: 'Keep your activity private', value: false),
     ];
     return SafeArea(
@@ -259,10 +259,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                     spacing: 8,
                     children: [
                       if (firstExecution) ...[
-                        Text('Please customise the app to your preferences, then tap the ‘Done’ button below', style: settingLabelStyle, textAlign: TextAlign.center),
+                        Text('Please customise the app to your preferences, then tap ‘Done’ below.', style: settingLabelStyle, textAlign: TextAlign.center),
                         const SizedBox.shrink(),
                       ],
-                      Text('Choose a visual colour scheme for the app', style: settingDescriptorStyle, textAlign: TextAlign.center),
+                      Text('Choose a visual colour scheme', style: settingDescriptorStyle, textAlign: TextAlign.center),
                       Row(children: [
                         Expanded(flex: 3, child: Padding(
                           padding: const EdgeInsetsDirectional.only(end: 12),
