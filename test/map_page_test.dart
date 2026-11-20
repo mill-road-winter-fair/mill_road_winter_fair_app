@@ -800,6 +800,7 @@ void main() {
     testWidgets('Adds markers, opens modal bottom sheet for group marker, and checks content', (WidgetTester tester) async {
       // Set firstExecution to false to simulate normal app launch
       firstExecution = false;
+      preferredDistanceUnits = DistanceUnits.metric;
 
       // Override user location global
       currentLatLng = const LatLng(52.199174, 0.140929);

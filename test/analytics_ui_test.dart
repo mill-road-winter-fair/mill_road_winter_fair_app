@@ -198,7 +198,7 @@ void main() {
   testWidgets('settings logs taps and the new preference value', (tester) async {
     await tester.pumpWithClock(MaterialApp(home: SettingsPage(analyticsService: analytics)));
     analytics.calls.clear();
-    await tester.tap(find.text('Metric'));
+    await tester.tap(find.text('British'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Imperial'));
     await tester.pumpAndSettle();
