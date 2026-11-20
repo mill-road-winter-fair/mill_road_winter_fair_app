@@ -68,7 +68,7 @@ enum SortingMethod { alphabetical, nearest, startTime, location }
 late SortingMethod preferredSortingMethod;
 
 // Define available distance units
-enum DistanceUnits { metric, imperial, british, walking, cambridge }
+enum DistanceUnits { british, metric, imperial, walking, cambridge }
 
 // Set default distance units
 late DistanceUnits preferredDistanceUnits;

@@ -200,9 +200,9 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
     );
     final settingSubtitleStyle = TextStyle(fontSize: 14,  color: colorScheme.onSurfaceVariant);
     final List<DropdownOption> unitsOptions = [
+      DropdownOption(title: 'British', subtitle: 'Metres and miles', value: DistanceUnits.british),
       DropdownOption(title: 'Metric', subtitle: 'Metres and kilometres', value: DistanceUnits.metric),
       DropdownOption(title: 'Imperial', subtitle: 'Feet and miles', value: DistanceUnits.imperial),
-      DropdownOption(title: 'British', subtitle: 'Metres and miles', value: DistanceUnits.british),
       DropdownOption(title: 'Walking time', subtitle: 'Minutes at a leisurely pace', value: DistanceUnits.walking),
       DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge),
     ];
