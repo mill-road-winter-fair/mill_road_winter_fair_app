@@ -33,6 +33,7 @@ void main() {
   // Mock location services and permissions
   locationServicesEnabled = true;
   locationPermission = LocationPermission.always;
+  firstExecution = false;
 
   // Mock user settings before tests run
   setUpAll(() async {
