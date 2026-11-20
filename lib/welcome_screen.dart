@@ -361,10 +361,10 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: colourScheme.primary),
-                  child: const FittedBox(
+                  child: FittedBox(
                     fit: BoxFit.scaleDown,
-                    child: Text('Take me straight to the Fair!',
-                        style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white)),
+                    child: Text('Take me ${(firstExecution) ? 'straight' : 'back'} to the Fair!',
+                        style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                   onPressed: () {
                     HapticFeedback.heavyImpact();
