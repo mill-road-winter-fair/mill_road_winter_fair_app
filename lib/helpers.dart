@@ -1419,7 +1419,7 @@ class AdaptiveImageText extends StatefulWidget {
 
 class _AdaptiveImageTextState extends State<AdaptiveImageText> {
   static const double _inlineImageWidth = 160;
-  static const double _maxImageHeight = 180;
+  static const double _maxImageHeight = 160;
   static const double _loadingImageHeight = 120;
 
   Future<ui.Image>? _imageFuture;
