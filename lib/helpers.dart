@@ -1465,7 +1465,7 @@ class _AdaptiveImageTextState extends State<AdaptiveImageText> {
         if (snapshot.hasError) return _buildFallbackLayout(showErrorText: true);
         if (!snapshot.hasData) return _buildLoadingLayout();
         final image = snapshot.data!;
-        final imageIsLandscape = image.width > image.height;
+        final imageIsLandscape = image.width > (image.height * 1.2); // so nearly-square images still appear to the side, to waste less space
         return imageIsLandscape ? _buildVerticalLayout() : _buildHorizontalLayout();
       },
     );
