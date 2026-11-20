@@ -47,6 +47,35 @@ void main() {
   });
 
   group('MapPage', () {
+    testWidgets('reopening the app guide preserves map filters', (tester) async {
+      final originalRoadClosureVisibility = preferredRoadClosurePolygonVisible;
+      addTearDown(() => preferredRoadClosurePolygonVisible = originalRoadClosureVisibility);
+      firstExecution = false;
+      await tester.pumpWithClock(MaterialApp(
+        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+      ));
+      await tester.pumpAndSettle();
+      final state = tester.state<MapPageState>(find.byType(MapPage));
+
+      await tester.tap(find.byIcon(Icons.filter_alt));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hide all'));
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+      expect(state.filterSettings.values, everyElement(isFalse));
+
+      tester.state<ScaffoldState>(find.byType(Scaffold).first).openDrawer();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('App guide'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take me straight to the Fair!'));
+      await tester.pumpAndSettle();
+
+      expect(tester.state<MapPageState>(find.byType(MapPage)), same(state));
+      expect(state.filterSettings.values, everyElement(isFalse));
+      expect(tester.takeException(), isNull);
+    });
+
     for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
       testWidgets('filter menu adapts to available height on $platform', (tester) async {
         firstExecution = false;

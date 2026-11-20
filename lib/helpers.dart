@@ -266,7 +266,9 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                     MaterialPageRoute(
                         builder: (context) => AboutTheFairPage(
                               analyticsService: analyticsService,
-                            )));
+                        ),
+                    ),
+                );
               },
             ),
           ),
@@ -285,7 +287,9 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                     MaterialPageRoute(
                         builder: (context) => ImportantInfoPage(
                               analyticsService: analyticsService,
-                            )));
+                        ),
+                    ),
+                );
               },
             ),
           ),
@@ -431,7 +435,9 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                     MaterialPageRoute(
                         builder: (context) => SettingsPage(
                               analyticsService: analyticsService,
-                            )));
+                        ),
+                    ),
+                );
               },
             ),
           ),
@@ -445,12 +451,15 @@ Drawer fairDrawer(BuildContext context, {required AnalyticsService analyticsServ
                 analyticsService.logButtonTapped('drawer_app_guide');
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
-                Navigator.pushReplacement(
+                Navigator.push(
                     navigatorContext,
                     MaterialPageRoute(
                         builder: (context) => WelcomeScreen(
                               analyticsService: analyticsService,
-                            )));
+                              onFinished: () => Navigator.pop(context),
+                        ),
+                    ),
+                );
               },
             ),
           ),

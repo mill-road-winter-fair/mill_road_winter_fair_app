@@ -31,7 +31,7 @@ class WelcomeScreen extends StatelessWidget {
     debugPrint('WelcomeScreen build() called');
     // The app guide shares the existing navigator and its route observer.
     if (Navigator.maybeOf(context) != null) {
-      return OnBoardingPage(analyticsService: analyticsService);
+      return OnBoardingPage(analyticsService: analyticsService, onFinished: onFinished);
     }
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
