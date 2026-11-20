@@ -64,6 +64,26 @@ const _completeListing = <String, dynamic>{
 
 // Named scenarios keep test selection independent of array order.
 final _listingScenarios = <String, Map<String, dynamic>>{
+  'morningPerformance': {
+    ..._completeListing,
+    'id': 'morning',
+    'title': 'Morning performance',
+    'location': 'Mill Road',
+    'performanceMusic': 'TRUE',
+    'startTime': '10:30',
+    'endTime': '11:00',
+    'imageURL': '',
+  },
+  'noonPerformance': {
+    ..._completeListing,
+    'id': 'noon',
+    'title': 'Noon performance',
+    'location': 'Mill Road',
+    'performanceMusic': 'TRUE',
+    'startTime': '12:00',
+    'endTime': '12:30',
+    'imageURL': '',
+  },
   'glazedAndConfused': {
     ..._completeListing,
     'id': '26001',
