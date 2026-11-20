@@ -393,7 +393,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     Text.rich(style: bodyStyle, TextSpan(children: [
                       const TextSpan(text: 'Take a trip to the past with '),
                       directionableLocation('Mill Road History Society', bodyLinkStyle, const LatLng(52.199813,0.138641), 'Visit/Experience'),
-                      const TextSpan(text: 'and find free books provided by Cambridge Literary Festival hidden all around the Fair.'),
+                      const TextSpan(text: ' and find free books provided by Cambridge Literary Festival hidden all around the Fair.'),
                     ])),
                    Column(crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
