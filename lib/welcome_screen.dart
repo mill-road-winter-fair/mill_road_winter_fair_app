@@ -76,13 +76,15 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   }
 
   void _onIntroEnd(BuildContext context) async {
-    await Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => SettingsPage(analyticsService: widget.analyticsService),
-      ),
-    );
-    firstExecution = false;
-    _saveSettings();
+    if (firstExecution) {
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => SettingsPage(analyticsService: widget.analyticsService),
+        ),
+      );
+      firstExecution = false;
+      _saveSettings();
+    }
     if (widget.onFinished != null) {
       widget.onFinished!();
       return;
