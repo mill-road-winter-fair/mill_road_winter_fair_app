@@ -40,7 +40,11 @@ void main() {
     await loadSettings();
   });
 
-    group('WelcomeScreen', () {
+  setUp(() {
+    firstExecution = false;
+  });
+
+  group('WelcomeScreen', () {
     const pageTitles = [
       'Welcome to the official\nMill Road Winter Fair app!',
       'Explore the map',
@@ -243,7 +247,7 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
         SharedPreferences.setMockInitialValues({});
-        firstExecution = false;
+        firstExecution = true;
         var finished = false;
         await tester.pumpWidget(MaterialApp(
           builder: (context, child) => MediaQuery(
@@ -286,6 +290,13 @@ void main() {
         }
         await tester.tap(find.text('Done'));
         await settle(tester);
+        expect(find.byType(SettingsPage), findsOneWidget);
+        expect(find.text('Done'), findsOneWidget);
+        await tester.pumpAndSettle();
+        final settingsDone = tester.widget<ElevatedButton>(find.descendant(of: find.byType(SettingsPage), matching: find.byType(ElevatedButton)).last);
+        settingsDone.onPressed!();
+        await settle(tester);
+
         expect(finished, isTrue);
         expect((await SharedPreferences.getInstance()).getBool('firstExecution'), isFalse);
         expect(tester.takeException(), isNull);
@@ -359,6 +370,14 @@ void main() {
       await tester.tap(find.text('Skip'));
       await settle(tester);
 
+      // The first-run onboarding flow now opens Settings before the Fair.
+      expect(find.byType(SettingsPage), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
+      await tester.pumpAndSettle();
+      final settingsDone = tester.widget<ElevatedButton>(find.descendant(of: find.byType(SettingsPage), matching: find.byType(ElevatedButton)).last);
+      settingsDone.onPressed!();
+      await settle(tester);
+
       // Verify that the main themed application shell is now displayed
       expect(find.byType(MyApp), findsOneWidget);
 
@@ -424,17 +443,7 @@ void main() {
       expect(find.text('Done'), findsOneWidget);
       await tester.tap(find.text('Done'));
       await settle(tester);
-
-      // Verify that the main themed application shell is now displayed
-      expect(find.byType(MyApp), findsOneWidget);
-
-      // Handle the 20s toast timer from ListingUpdateNotifier.maybeShowNotice
-      await tester.pump(const Duration(seconds: 21));
-      await settle(tester);
-
-      // Check that shared prefs have been updated
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getBool('firstExecution'), isFalse);
+      expect(find.byType(SettingsPage), findsOneWidget);
     });
 
     testWidgets('Take me straight to the Fair button saves settings and navigates', (WidgetTester tester) async {
@@ -467,6 +476,14 @@ void main() {
 
       // Tap the footer button
       await tester.tap(find.text('Take me straight to the Fair!'));
+      await settle(tester);
+
+      // The footer action now leads to first-run Settings before the Fair.
+      expect(find.byType(SettingsPage), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
+      await tester.pumpAndSettle();
+      final settingsDone = tester.widget<ElevatedButton>(find.descendant(of: find.byType(SettingsPage), matching: find.byType(ElevatedButton)).last);
+      settingsDone.onPressed!();
       await settle(tester);
 
       // Verify that the main themed application shell is now displayed

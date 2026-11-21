@@ -186,8 +186,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final settingLabelStyle = const TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-    final settingTitleStyle = const TextStyle(fontSize: 15);
+    final colorScheme = Theme.of(context).colorScheme;
+    final settingLabelStyle = TextStyle(fontSize: 16, color: colorScheme.onSecondary);
+    final settingTitleStyle = TextStyle(fontSize: 15, color: colorScheme.onSecondary);
+    final settingDescriptorStyle = TextStyle(fontSize: 15, color: colorScheme.tertiary, fontWeight: FontWeight.bold);
     const dropdownDecoration = InputDecorationTheme(
       enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 0.5)),
       isDense: true,
@@ -196,11 +198,13 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       suffixIconConstraints: BoxConstraints(minWidth: 40, maxHeight: 40),
     );
-    final settingSubtitleStyle = TextStyle(fontSize: 14,  color: Theme.of(context).colorScheme.onSurfaceVariant);
+    final settingSubtitleStyle = TextStyle(fontSize: 14,  color: colorScheme.onSurfaceVariant);
     final List<DropdownOption> unitsOptions = [
+      DropdownOption(title: 'British', subtitle: 'Metres and miles', value: DistanceUnits.british),
       DropdownOption(title: 'Metric', subtitle: 'Metres and kilometres', value: DistanceUnits.metric),
       DropdownOption(title: 'Imperial', subtitle: 'Feet and miles', value: DistanceUnits.imperial),
-      DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge)
+      DropdownOption(title: 'Walking time', subtitle: 'Minutes at a leisurely pace', value: DistanceUnits.walking),
+      DropdownOption(title: 'Cambridge', subtitle: 'Punt lengths', value: DistanceUnits.cambridge),
     ];
     final List<DropdownOption> themeOptions = [
       DropdownOption(title: 'Auto', subtitle: 'Follow the device light/dark setting', value: 'auto'),
@@ -215,6 +219,10 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
       DropdownOption(title: 'Animated', subtitle: 'Spotlights the Fair’s offerings', value: false),
       DropdownOption(title: 'Static', subtitle: 'Stays boringly fixed', value: true),
     ];
+    final List<DropdownOption> analyticsOptions = [
+      DropdownOption(title: 'Share', subtitle: 'Allow Google and the Fair to see your activity', value: true),
+      DropdownOption(title: 'Don’t share', subtitle: 'Keep your activity private', value: false),
+    ];
     return SafeArea(
       top: false,
       left: false,
@@ -227,9 +235,9 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
             widget.analyticsService.logButtonTapped('back');
             Navigator.maybePop(context);
           }) : null,
-          title: const FittedBox(
+          title: FittedBox(
             fit: BoxFit.scaleDown,
-            child: Text('Settings'),
+            child: Text((firstExecution) ? 'Make the app your own' : 'Settings'),
           ),
         ),
         body: Container(
@@ -246,23 +254,24 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Table(
-                    // Share the label width while dropdowns fill the remaining space.
-                    columnWidths: const {
-                      0: IntrinsicColumnWidth(),
-                      1: FlexColumnWidth(),
-                    },
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 8,
                     children: [
-                      TableRow(children: [
-                        Padding(
+                      if (firstExecution) ...[
+                        Text('Please customise the app to your preferences, then tap ‘Done’ below.', style: settingLabelStyle, textAlign: TextAlign.center),
+                        const SizedBox.shrink(),
+                      ],
+                      Text('Choose a visual colour scheme', style: settingDescriptorStyle, textAlign: TextAlign.center),
+                      Row(children: [
+                        Expanded(flex: 3, child: Padding(
                           padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Theme:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<String>(
+                          child: Text('Theme', style: settingLabelStyle, textAlign: TextAlign.end),
+                        )),
+                        Expanded(flex: 5, child: DropdownMenu<String>(
                           inputDecorationTheme: dropdownDecoration,
                           initialSelection: themeNotifier.value,
-                          hintText: 'Select a visual theme',
+                          hintText: 'Select a visual colour scheme',
                           alignmentOffset: const Offset(-15, -60),
                           expandedInsets: EdgeInsets.zero,
                           trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
@@ -290,18 +299,16 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        ),
+                        )),
                       ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
+                      const SizedBox(height: 2),
+                      Text('When would you like event alerts?', style: settingDescriptorStyle, textAlign: TextAlign.center),
+                      Row(children: [
+                        Expanded(flex: 3, child: Padding(
                           padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Alerts:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<int>(
+                          child: Text('Notify me', style: settingLabelStyle, textAlign: TextAlign.end),
+                        )),
+                        Expanded(flex: 5, child: DropdownMenu<int>(
                           inputDecorationTheme: dropdownDecoration,
                           initialSelection: alertNoticePeriod,
                           hintText: 'Select notice period for alerts',
@@ -324,18 +331,16 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             saveAlertNoticePeriod(value);
                             setState(() { });
                           },
-                        ),
+                        )),
                       ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
+                      const SizedBox(height: 2),
+                      Text('How should distance to locations appear?', style: settingDescriptorStyle, textAlign: TextAlign.center),
+                      Row(children: [
+                        Expanded(flex: 3, child: Padding(
                           padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Distances:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<DistanceUnits>(
+                          child: Text('Units', style: settingLabelStyle, textAlign: TextAlign.end),
+                        )),
+                        Expanded(flex: 5, child: DropdownMenu<DistanceUnits>(
                           inputDecorationTheme: dropdownDecoration,
                           initialSelection: preferredDistanceUnits,
                           hintText: 'Select units for map distances',
@@ -364,18 +369,16 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        ),
+                        )),
                       ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
+                      const SizedBox(height: 2),
+                      Text('Select the size of markers on the map', style: settingDescriptorStyle, textAlign: TextAlign.center),
+                      Row(children: [
+                        Expanded(flex: 3, child: Padding(
                           padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Map markers:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<MapMarkerSize>(
+                          child: Text('Map markers', style: settingLabelStyle, textAlign: TextAlign.end),
+                        )),
+                        Expanded(flex: 5, child: DropdownMenu<MapMarkerSize>(
                           inputDecorationTheme: dropdownDecoration,
                           initialSelection: preferredMapMarkerSize.value,
                           expandedInsets: EdgeInsets.zero,
@@ -397,18 +400,16 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        ),
+                        )),
                       ]),
-                      const TableRow(children: [
-                        SizedBox(height: 12),
-                        SizedBox(height: 12),
-                      ]),
-                      TableRow(children: [
-                        Padding(
+                      const SizedBox(height: 2),
+                      Text('Should the home page be animated?', style: settingDescriptorStyle, textAlign: TextAlign.center),
+                      Row(children: [
+                        Expanded(flex: 3, child: Padding(
                           padding: const EdgeInsetsDirectional.only(end: 12),
-                          child: Text('Home page:', style: settingLabelStyle),
-                        ),
-                        DropdownMenu<bool>(
+                          child: Text('Home page', style: settingLabelStyle, textAlign: TextAlign.end),
+                        )),
+                        Expanded(flex: 5, child: DropdownMenu<bool>(
                           inputDecorationTheme: dropdownDecoration,
                           initialSelection: staticChooserPage.value,
                           hintText: 'Select style of home page',
@@ -437,30 +438,18 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                             });
                             _saveSettings();
                           },
-                        ),
+                        )),
                       ]),
-                    ],
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    activeThumbColor: Theme.of(context).colorScheme.tertiary,
-                    title: Text('Allow analytics', style: settingLabelStyle),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          analyticsEnabledForBuild
-                              ? 'Help us improve the app and the Fair by sharing anonymous usage data with us and Google.'
-                              : 'Analytics is disabled for this development run.',
-                        ),
-                        const SizedBox(height: 4),
-                        RichText(
-                          text: TextSpan(
-                            text: 'What does this mean?',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.tertiary,
-                              decoration: TextDecoration.underline,
-                            ),
+                      const SizedBox(height: 2),
+                      RichText(
+                        textScaler: MediaQuery.textScalerOf(context),
+                        textAlign: TextAlign.center,
+                        text: TextSpan(children: [
+                          TextSpan(text: (analyticsEnabledForBuild) ? 'Will you share your app usage?  ' : 'Analytics disabled for dev  ', 
+                              style: settingDescriptorStyle),
+                          TextSpan(
+                            text: 'What’s this?',
+                            style: settingDescriptorStyle.copyWith(decoration: TextDecoration.underline, fontWeight: FontWeight.normal),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 HapticFeedback.lightImpact();
@@ -473,19 +462,56 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                                 );
                               },
                           ),
+                        ]),
+                      ),
+                      Row(children: [
+                        Expanded(flex: 3, child: Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 12),
+                          child: Text('Analytics', style: settingLabelStyle, textAlign: TextAlign.end),
+                        )),
+                        Expanded(flex: 5, child: DropdownMenu<bool>(
+                          inputDecorationTheme: dropdownDecoration,
+                          initialSelection: analyticsEnabledForBuild ? usageAnalyticsEnabled ?? false : false,
+                          hintText: 'Share usage data with us and Google',
+                          alignmentOffset: const Offset(0, -60),
+                          expandedInsets: EdgeInsets.zero,
+                          trailingIcon: const Icon(Icons.arrow_drop_down, size: 30),
+                          dropdownMenuEntries: analyticsOptions.map((opt) {
+                            return DropdownMenuEntry<bool>(
+                              value: opt.value,
+                              label: opt.title,
+                              labelWidget: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                const SizedBox(height: 4),
+                                Text(opt.title, style: settingTitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                Text(opt.subtitle, style: settingSubtitleStyle, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                                const SizedBox(height: 4),
+                              ]),
+                            );
+                          }).toList(),
+                          onSelected: (value) => (analyticsEnabledForBuild)
+                              ? (bool value) async {
+                                HapticFeedback.selectionClick();
+                                widget.analyticsService.logButtonTapped('analytics_preference_toggle');
+                                await widget.analyticsService.setAnalyticsEnabled(value);
+                                if (mounted) setState(() {});
+                              }
+                            : null,
+                        )),
+                      ]),
+                      if (firstExecution) ...[
+                        const SizedBox(height: 2),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            widget.analyticsService.logButtonTapped('firstsettings_done');
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.check_circle),
+                          label: const Text('Done'),
                         ),
                       ],
-                    ),
-                    value: analyticsEnabledForBuild ? usageAnalyticsEnabled ?? false : false,
-                    onChanged: analyticsEnabledForBuild
-                        ? (bool value) async {
-                      HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('analytics_preference_toggle');
-                      await widget.analyticsService.setAnalyticsEnabled(value);
-                      if (mounted) setState(() {});
-                    }
-                        : null,
-                  )
+                    ],
+                  ),
                 ],
               ),
             ),

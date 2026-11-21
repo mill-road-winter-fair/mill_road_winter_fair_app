@@ -8,6 +8,7 @@ import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/important_info_page.dart';
 import 'package:mill_road_winter_fair_app/main.dart';
+import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Third-party imports
@@ -74,13 +75,21 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     await prefs.setBool('firstExecution', false);
   }
 
-  void _onIntroEnd(BuildContext context) {
-    firstExecution = false;
-    _saveSettings();
+  void _onIntroEnd(BuildContext context) async {
+    if (firstExecution) {
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => SettingsPage(analyticsService: widget.analyticsService),
+        ),
+      );
+      firstExecution = false;
+      _saveSettings();
+    }
     if (widget.onFinished != null) {
       widget.onFinished!();
       return;
     }
+    if (!context.mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => HomePage(analyticsService: widget.analyticsService),
