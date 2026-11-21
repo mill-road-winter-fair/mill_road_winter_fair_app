@@ -842,6 +842,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                 endTime: "${parentListing['endTime']}",
                                 approxDistance: distanceMessage,
                                 colorScheme: colorScheme,
+                                description: parentListing['description'] ?? '',
                                 analyticsService: widget.analyticsService,
                               ),
                             ),
