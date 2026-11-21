@@ -78,8 +78,8 @@ class GroupListingInfoSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              if (!brickAndMortar) const Expanded(flex: 1, child: SizedBox(width: 2)),
-              if (!brickAndMortar) Expanded(
+              const Expanded(flex: 1, child: SizedBox(width: 2)),
+              Expanded(
                 flex: 7,
                 child: Text(
                   "$startTime—$endTime",
