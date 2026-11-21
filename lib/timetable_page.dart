@@ -53,7 +53,7 @@ class TimetablePage extends StatefulWidget {
   State<TimetablePage> createState() => TimetablePageState();
 }
 
-class TimetablePageState extends State<TimetablePage> {
+class TimetablePageState extends State<TimetablePage> with WidgetsBindingObserver {
   late DateTimeProvider _dateTimeProvider;
   late ScrollController _horizontalScrollController;
   late ScrollController _verticalScrollController;
@@ -84,6 +84,7 @@ class TimetablePageState extends State<TimetablePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _horizontalScrollController = ScrollController();
     _verticalScrollController = ScrollController();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
@@ -93,6 +94,7 @@ class TimetablePageState extends State<TimetablePage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _horizontalScrollController.dispose();
     _verticalScrollController.dispose();
     _nowLineTimer?.cancel();
@@ -161,10 +163,10 @@ class TimetablePageState extends State<TimetablePage> {
 
   void startClockUpdates(VoidCallback tick) {
     final now = _dateTimeProvider.now();
-    final delay = Duration(seconds: (60 / _dayPixelsPerMinute).toInt());
+    final delay = Duration(seconds: widget.onlyNowOrSoon ? 30 : (60 / _dayPixelsPerMinute).toInt());
     final initialDelay = delay - Duration(seconds: now.second, milliseconds: now.millisecond);
     _nowLineTimer?.cancel();
-    Future.delayed(initialDelay, () {
+    _nowLineTimer = Timer(initialDelay, () {
       tick();
       _nowLineTimer = Timer.periodic(delay, (_) => tick());
     });
@@ -173,6 +175,11 @@ class TimetablePageState extends State<TimetablePage> {
 
   void updateNowLine() {
     if (mounted) setState(() {});
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) updateNowLine();
   }
 
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
@@ -531,16 +538,21 @@ class TimetablePageState extends State<TimetablePage> {
       theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
     }
 
-    if (widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
-      // refilter to whole day or just now or soon; only do this if changed
+    if (widget.onlyNowOrSoon || widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
+      // Time-dependent results must also be refreshed when the clock changes.
       _onlyNowOrSoonSaved = widget.onlyNowOrSoon;
       _filteredMusicOrNotSaved = widget.filteredMusicOrNot;
       theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
     }
     calculateInitialScalesIfNeeded();
+    if (widget.onlyNowOrSoon) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _nowLineTimer == null) startClockUpdates(updateNowLine);
+      });
+    }
     if (fairDate.difference(now).inDays == 0 && timelineMinStart.isBefore(now) && timelineMaxEnd.isAfter(now)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_nowLineTimer == null) startClockUpdates(updateNowLine);
+        if (mounted && _nowLineTimer == null) startClockUpdates(updateNowLine);
         if (!widget.onlyNowOrSoon && _searchQuery.isEmpty) scrollToKey(nowLineKey, 0.3);
       });
     } else if (_searchQuery.isNotEmpty) {
