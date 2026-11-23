@@ -838,8 +838,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                             _isSearching = false;
                                           });
                                         },
-                                        icon: const Icon(Icons.search_off, size: 32),
-                                        label: const Text('Clear and close search'),
+                                        icon: const Icon(Icons.search_off, size: 28),
+                                        label: const Text('Clear and close search', style: TextStyle(height: 1.1)),
                                       ),
                                     ],
                                     if (widget.subfilterCategory != null) ...[
@@ -850,8 +850,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           widget.analyticsService.logButtonTapped('switchOffFilter_listings');
                                           widget.onSubfilterChange(null);
                                         },
-                                        icon: const Icon(Icons.filter_alt, size: 32),
-                                        label: Text('Switch from ${subfilterCategoryLabels[widget.subfilterCategory]!.label} to everything'),
+                                        icon: const Icon(Icons.filter_alt, size: 28),
+                                        label: Text('Switch from ${subfilterCategoryLabels[widget.subfilterCategory]!.label} to everything', style: const TextStyle(height: 1.1)),
                                       ),
                                     ],
                                     if (filterCategory == 'favourite') ...[
@@ -862,8 +862,8 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           widget.analyticsService.logButtonTapped('switchOffFavourites_listings');
                                           widget.onTabSelected(3); // in future, this could preserve search as well
                                         },
-                                        icon: const Icon(Icons.ballot, size: 32),
-                                        label: const Text('View all listings, not just Favourites'),
+                                        icon: const Icon(Icons.ballot, size: 28),
+                                        label: const Text('View all listings, not just Favourites', style: TextStyle(height: 1.1)),
                                       ),
                                     ],
                                   ],
