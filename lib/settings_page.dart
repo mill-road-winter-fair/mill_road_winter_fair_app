@@ -57,7 +57,7 @@ Future<void> loadSettings() async {
     preferredSortingMethod = SortingMethod.values[savedSortingIndex];
 
     // Set default distance unit as metric (0 in the index)
-    int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 0;
+    int savedUnitIndex = prefs.getInt('preferredDistanceUnits') ?? 3;
     // Load preferred distance unit from shared preferences
     preferredDistanceUnits = DistanceUnits.values[savedUnitIndex];
 
