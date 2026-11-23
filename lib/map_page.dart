@@ -203,6 +203,8 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
   bool get hasActiveMarkerFilters => filterSettings.values.any((isEnabled) => !isEnabled);
   Animation<double> dotPulse = const AlwaysStoppedAnimation<double>(1.0); // for the user's location dot on iOS
   AnimationController? dotPulseController; // for the user's location dot on iOS
+  bool showingNearest = false; // when asked to show nearby attractions
+  bool autoCameraMove = false; // if camera movement has been initiated by app, rather than user
 
   void _setDotPulseVisible(bool isVisible) {
     final controller = dotPulseController;
@@ -1768,6 +1770,10 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         ),
       ),
     );
+    setState(() {
+      autoCameraMove = true;
+      showingNearest = true;
+    });
   }
 
   void _setMapCameraToFitMapMarkers() {
@@ -2105,7 +2111,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
         return FairScaffold(
           appBarTitle:
               (navigationInProgress || doingAPushNavigation != null) ? 'Directions'
-              : (widget.nearestMarkerCount != null) ? 'Nearby attractions'
+              : (showingNearest) ? 'Nearby attractions'
               : (hasActiveMarkerFilters) ? 'Map (filtered)'
               : 'Map',
           currentTab: 1,
@@ -2228,6 +2234,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                             onCameraMove: (CameraPosition position) {
                               //debugPrint('MapPageState onCameraMove called'); // noisy; uncomment if working on CameraPosition
                               _currentCamera = position;
+                              if (!autoCameraMove) showingNearest = false;
                               setState(() {
                                 switch (preferredMapOrientation) {
                                   case MapOrientation.adaptive:
@@ -2238,6 +2245,9 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                     break;
                                 }
                               });
+                            },
+                            onCameraIdle: () {
+                              autoCameraMove = false;
                             },
                             polygons: _polygons,
                             markers: markers.values.toSet(),
@@ -2264,6 +2274,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                           HapticFeedback.lightImpact();
                           widget.analyticsService.logButtonTapped('home');
                           widget.cancelMapNearest?.call();
+                          showingNearest = false;
                           enableAllFiltersIfAllOff();
                           _setMapCameraToFitMapMarkers();
                         },
