@@ -68,7 +68,7 @@ void main() {
         addTearDown(() => onTest = true);
         listings = [mockListing('glazedAndConfused')];
         await tester.pumpWithClock(
-          MyApp(firstExecution: false, analyticsService: FakeAnalyticsService()),
+          const MyApp(firstExecution: false),
           dateTimeProvider: FixedDateTimeProvider(fairDate.subtract(const Duration(days: 1))),
         );
         await tester.pump();
@@ -113,7 +113,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       expect(find.textContaining('Welcome'), findsOneWidget);
 
@@ -131,7 +131,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump();
@@ -271,7 +271,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -291,7 +291,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -311,7 +311,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -335,7 +335,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -360,7 +360,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.tap(find.byIcon(Icons.menu));
       await tester.pump(const Duration(milliseconds: 500));
@@ -382,7 +382,7 @@ void main() {
         mockListing('glazedAndConfused')
       ];
 
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
 
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -452,7 +452,7 @@ void main() {
       favouriteListingKeys.value = {...favouriteListingKeys.value, '26001'};
 
       // Pump MyApp which contains the AppBar with the snowflake button
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
       await tester.pump();
 
       // Tap the Favourites button the NavBar

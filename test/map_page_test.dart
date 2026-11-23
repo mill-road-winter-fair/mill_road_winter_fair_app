@@ -6,7 +6,18 @@ import 'package:mill_road_winter_fair_app/settings_page.dart';
 import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:provider/provider.dart';
 
+// Third-party imports
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Test helpers, fakes and mocks
 import 'fakes/fake_analytics_service.dart';
+import 'mocks/listings_mocks.dart';
+import 'pump_with_clock.dart';
+
 
 class RecordingMapAnalyticsService extends FakeAnalyticsService {
   final buttons = <String>[];
@@ -22,17 +33,6 @@ class RecordingMapAnalyticsService extends FakeAnalyticsService {
     filters.add((category, visible));
   }
 }
-
-// Third-party imports
-import 'package:material_ui/material_ui.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-// Test helpers, fakes and mocks
-import 'mocks/listings_mocks.dart';
-import 'pump_with_clock.dart';
 
 void main() {
   // We're on test
@@ -70,7 +70,7 @@ void main() {
       addTearDown(() => preferredRoadClosurePolygonVisible = originalRoadClosureVisibility);
       firstExecution = false;
       await tester.pumpWithClock(MaterialApp(
-        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+        home: MapPage(listings: listings, onTabSelected: (_) {}),
       ));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
@@ -105,7 +105,7 @@ void main() {
         await tester.pumpWithClock(MaterialApp(
           theme: ThemeData(platform: platform),
           home: Scaffold(
-            body: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+            body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
         ));
         await tester.pumpAndSettle();
@@ -243,7 +243,7 @@ void main() {
     testWidgets('marker size changes refresh existing markers without resetting filters', (tester) async {
       addTearDown(() => preferredMapMarkerSize.value = MapMarkerSize.medium);
       await tester.pumpWidget(MaterialApp(
-        home: MapPage(listings: listings, onTabSelected: (_) {}, analyticsService: FakeAnalyticsService()),
+        home: MapPage(listings: listings, onTabSelected: (_) {}),
       ));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
@@ -430,7 +430,7 @@ void main() {
     testWidgets('dot pulse pauses while the map page is hidden and resumes when visible', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: true),
+          body: MapPage(listings: listings, onTabSelected: (_) {}, isVisible: true),
         ),
       ));
 
@@ -442,7 +442,7 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: false),
+          body: MapPage(listings: listings, onTabSelected: (_) {}, isVisible: false),
         ),
       ));
 
@@ -456,7 +456,7 @@ void main() {
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
-          body: MapPage(listings: listings, analyticsService: FakeAnalyticsService(), onTabSelected: (_) {}, isVisible: true),
+          body: MapPage(listings: listings, onTabSelected: (_) {}, isVisible: true),
         ),
       ));
 

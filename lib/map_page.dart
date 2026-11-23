@@ -18,13 +18,14 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 
 // Third-party imports
 import 'package:flutter/gestures.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart' as pl; // need prefix as Route conflicts with material.dart
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -116,7 +117,7 @@ class MapPage extends StatefulWidget {
       this.destinationLatLng,
       this.nearestMarkerCount,
       this.isVisible = true,
-      this.allowListingsMayChangeNotice = true);
+      this.allowListingsMayChangeNotice = true});
 
   @override
   MapPageState createState() => MapPageState();
@@ -839,7 +840,6 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                 approxDistance: distanceMessage,
                                 colorScheme: colorScheme,
                                 description: parentListing['description'] ?? '',
-                                analyticsService: widget.analyticsService,
                               ),
                             ),
                             Flexible(
@@ -1217,13 +1217,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Dance"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('dance_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('dance_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Dance"] = value!;
                       });
                       final idList = _performanceDanceMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('dance', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('dance', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1236,13 +1236,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Other"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('other_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('other_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Other"] = value!;
                       });
                       final idList = _performanceOtherMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('other', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('other', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1255,13 +1255,13 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                     value: filterSettings["Childrens"],
                     onChanged: (value) {
                       HapticFeedback.selectionClick();
-                      widget.analyticsService.logButtonTapped('childrens_mapMarker_filter_toggle');
+                      context.read<AnalyticsService>().logButtonTapped('childrens_mapMarker_filter_toggle');
                       setState(() {
                         filterSettings["Childrens"] = value!;
                       });
                       final idList = _performanceChildrensMarkerIds;
                       updateMarkerVisibilityRespectingFilters(idList, value!);
-                      widget.analyticsService.logMapMarkerFilterPreferenceSet('childrens', value);
+                      context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('childrens', value);
                     },
                   ),
                   CheckboxListTile(
@@ -1420,7 +1420,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   });
                                   showAllMarkers();
                                   context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('all', true);
-                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(true);
+                                  context.read<AnalyticsService>().logRoadClosurePolygonPreferenceSet(true);
                                   updateRoadClosurePolygonVisibility(true);
                                 },
                                 icon: const Icon(Icons.filter_alt),
@@ -1438,7 +1438,7 @@ class MapPageState extends State<MapPage> with RouteAware, WidgetsBindingObserve
                                   });
                                   hideAllMarkers();
                                   context.read<AnalyticsService>().logMapMarkerFilterPreferenceSet('all', false);
-                                  widget.analyticsService.logRoadClosurePolygonPreferenceSet(false);
+                                  context.read<AnalyticsService>().logRoadClosurePolygonPreferenceSet(false);
                                   updateRoadClosurePolygonVisibility(false);
                                 },
                                 icon: const Icon(Icons.filter_alt_off),

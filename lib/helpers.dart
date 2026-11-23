@@ -135,7 +135,7 @@ class FairScaffold extends StatelessWidget {
             shape: const CircularNotchedRectangle(),
             notchMargin: 4,
             clipBehavior: Clip.antiAlias,
-            child: fairBottomNavigationBar(currentTab, onTabSelected, theme),
+            child: fairBottomNavigationBar(context, currentTab, onTabSelected, theme),
           ),
         ));
   }
@@ -178,7 +178,7 @@ void showInfoToast(BuildContext context, String message) {
   );
 }
 
-BottomNavigationBar fairBottomNavigationBar(int index, ValueChanged<int> onTabSelected, ThemeData theme) {
+BottomNavigationBar fairBottomNavigationBar(BuildContext context, int index, ValueChanged<int> onTabSelected, ThemeData theme) {
   // Visual order differs from the stable page indices used throughout the app.
   const tabOrder = [1, 2, 0, 3, 4];
   return BottomNavigationBar(
@@ -257,14 +257,12 @@ Drawer fairDrawer(BuildContext context) {
               title: Text('About the Fair', style: menuStyle, overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('drawer_about_fair');
+                context.read<AnalyticsService>().logButtonTapped('drawer_about_fair');
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
                 Navigator.push(navigatorContext,
                     MaterialPageRoute(
-                        builder: (context) => AboutTheFairPage(
-                              analyticsService: analyticsService,
-                        ),
+                        builder: (context) => const AboutTheFairPage(),
                     ),
                 );
               },
@@ -277,15 +275,13 @@ Drawer fairDrawer(BuildContext context) {
               title: Text('Important information', style: menuStyle, overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('drawer_important_information');
+                context.read<AnalyticsService>().logButtonTapped('drawer_important_information');
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
                 Navigator.push(
                     navigatorContext,
                     MaterialPageRoute(
-                        builder: (context) => ImportantInfoPage(
-                              analyticsService: analyticsService,
-                        ),
+                        builder: (context) => const ImportantInfoPage(),
                     ),
                 );
               },
@@ -298,7 +294,7 @@ Drawer fairDrawer(BuildContext context) {
               title: Text('Visit our website', style: menuStyle, overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('drawer_website');
+                context.read<AnalyticsService>().logButtonTapped('drawer_website');
                 Navigator.pop(context);
                 context.read<UrlLauncher>().open(Uri.parse('https://www.millroadwinterfair.org/'));
               },
@@ -311,13 +307,13 @@ Drawer fairDrawer(BuildContext context) {
               title: Text('Contact us', style: menuStyle),
               onTap: () {
                 HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('drawer_contact');
+                context.read<AnalyticsService>().logButtonTapped('drawer_contact');
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
                 showDialog(
                   context: navigatorContext,
                   builder: (BuildContext context) {
-                    return contactUsDialog(context, analyticsService: analyticsService);
+                    return contactUsDialog(context);
                   },
                 );
               },
@@ -330,7 +326,7 @@ Drawer fairDrawer(BuildContext context) {
               title: Text('Donate to the Fair', style: menuStyle, overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('drawer_donate');
+                context.read<AnalyticsService>().logButtonTapped('drawer_donate');
                 Navigator.pop(context);
                 context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
               },
@@ -351,7 +347,7 @@ Drawer fairDrawer(BuildContext context) {
                   tooltip: 'Open Mill Road Winter Fair on Facebook',
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    analyticsService.logButtonTapped('drawer_facebook');
+                    context.read<AnalyticsService>().logButtonTapped('drawer_facebook');
                     Navigator.pop(context);
                     context.read<UrlLauncher>().open(Uri.parse('https://www.facebook.com/MillRoadWinterFair/'));
                   },
@@ -363,7 +359,7 @@ Drawer fairDrawer(BuildContext context) {
                   tooltip: 'Open Mill Road Winter Fair on X',
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    analyticsService.logButtonTapped('drawer_x');
+                    context.read<AnalyticsService>().logButtonTapped('drawer_x');
                     Navigator.pop(context);
                     context.read<UrlLauncher>().open(Uri.parse('https://x.com/millroadfair'));
                   },
@@ -375,7 +371,7 @@ Drawer fairDrawer(BuildContext context) {
                   tooltip: 'Open Mill Road Winter Fair on Instagram',
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    analyticsService.logButtonTapped('drawer_instagram');
+                    context.read<AnalyticsService>().logButtonTapped('drawer_instagram');
                     Navigator.pop(context);
                     context.read<UrlLauncher>().open(Uri.parse('https://www.instagram.com/millroadwinterfair/'));
                   },
@@ -387,7 +383,7 @@ Drawer fairDrawer(BuildContext context) {
                   tooltip: 'Open Mill Road Winter Fair on LinkedIn',
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    analyticsService.logButtonTapped('drawer_linkedin');
+                    context.read<AnalyticsService>().logButtonTapped('drawer_linkedin');
                     Navigator.pop(context);
                     context.read<UrlLauncher>().open(Uri.parse('https://www.linkedin.com/company/mill-road-winter-fair/'));
                   },
@@ -399,7 +395,7 @@ Drawer fairDrawer(BuildContext context) {
                   tooltip: 'Open Mill Road Winter Fair on Flickr',
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    analyticsService.logButtonTapped('drawer_flickr');
+                    context.read<AnalyticsService>().logButtonTapped('drawer_flickr');
                     Navigator.pop(context);
                     context.read<UrlLauncher>().open(Uri.parse('https://www.flickr.com/people/millroadwinterfair/'));
                   },
@@ -425,15 +421,13 @@ Drawer fairDrawer(BuildContext context) {
               title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('drawer_settings');
+                context.read<AnalyticsService>().logButtonTapped('drawer_settings');
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
                 Navigator.push(
                     navigatorContext,
                     MaterialPageRoute(
-                        builder: (context) => SettingsPage(
-                              analyticsService: analyticsService,
-                        ),
+                        builder: (context) => const SettingsPage(),
                     ),
                 );
               },
@@ -446,14 +440,13 @@ Drawer fairDrawer(BuildContext context) {
               title: const Text('App guide', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('drawer_app_guide');
+                context.read<AnalyticsService>().logButtonTapped('drawer_app_guide');
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
                 Navigator.push(
                     navigatorContext,
                     MaterialPageRoute(
                         builder: (context) => WelcomeScreen(
-                              analyticsService: analyticsService,
                               onFinished: () => Navigator.pop(context),
                         ),
                     ),
@@ -470,8 +463,8 @@ Drawer fairDrawer(BuildContext context) {
                 HapticFeedback.lightImpact();
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
-                analyticsService.logButtonTapped('share_this_app');
-                displayAppShareDialog(navigatorContext, analyticsService: analyticsService);
+                context.read<AnalyticsService>().logButtonTapped('share_this_app');
+                displayAppShareDialog(navigatorContext);
               },
             ),
           ),
@@ -482,10 +475,10 @@ Drawer fairDrawer(BuildContext context) {
               title: const Text('About this app', style: TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
               onTap: () {
                 HapticFeedback.lightImpact();
-                analyticsService.logButtonTapped('drawer_about_app');
+                context.read<AnalyticsService>().logButtonTapped('drawer_about_app');
                 final navigatorContext = Navigator.of(context).context; // parent context (above the drawer)
                 Navigator.pop(context);
-                aboutDialog(navigatorContext, analyticsService: analyticsService);
+                aboutDialog(navigatorContext);
               },
             ),
           ),

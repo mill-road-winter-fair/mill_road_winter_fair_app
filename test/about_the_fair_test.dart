@@ -16,12 +16,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 // Test helpers, fakes and mocks
+import 'fakes/fake_analytics_service.dart';
 import 'fakes/fake_url_launcher.dart';
 import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
-
-import 'fakes/fake_analytics_service.dart';
-import 'fakes/fake_url_launcher.dart';
 
 class RecordingNavigatorObserver extends NavigatorObserver {
   final List<Route<dynamic>> pushedRoutes = [];
@@ -68,7 +66,7 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            home: AboutTheFairPage(),
+            home: const AboutTheFairPage(),
             navigatorObservers: [
               if (navigatorObserver != null) navigatorObserver,
             ],
@@ -206,7 +204,7 @@ void main() {
         // Minimal listings so pages render correctly
         listings = [mockListing('glazedAndConfused')];
 
-        await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MyApp(firstExecution: false)));
+        await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)));
         await settle(tester);
 
         // Obtain the HomePage state

@@ -81,7 +81,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
     }
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => HomePage(),
+        builder: (_) => const HomePage(),
       ),
     );
   }
@@ -90,7 +90,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
   void initState() {
     debugPrint('OnBoardingPageState initState() called');
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => widget.analyticsService.showAnalyticsConsentDialog(context));
+    WidgetsBinding.instance.addPostFrameCallback((_) => context.read<AnalyticsService>().showAnalyticsConsentDialog(context));
   }
 
   @override
@@ -280,7 +280,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                     ..onTap = () {
                       HapticFeedback.lightImpact();
                       context.read<AnalyticsService>().logButtonTapped('importantInfo_hyperlink');
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ImportantInfoPage()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const ImportantInfoPage()));
                     },
                 ),
                 const TextSpan(text: ' about the Fair and its facilities.'),

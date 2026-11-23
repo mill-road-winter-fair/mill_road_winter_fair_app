@@ -17,6 +17,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 // Test helpers, fakes and mocks
+import 'fakes/fake_analytics_service.dart';
 import 'fakes/fake_url_launcher.dart';
 import 'fakes/fixed_date_time_provider.dart';
 import 'mocks/listings_mocks.dart';

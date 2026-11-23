@@ -1,5 +1,4 @@
 // App imports
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/listings_info_sheets.dart';
 
@@ -30,7 +29,6 @@ void main() {
                   approxDistance: '',
                   colorScheme: const ColorScheme.light(),
                   description: listing['description'] as String,
-                  analyticsService: FakeAnalyticsService(),
                 ),
               ),
             ),

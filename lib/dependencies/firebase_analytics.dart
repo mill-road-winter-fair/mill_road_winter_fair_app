@@ -415,7 +415,7 @@ class FirebaseAnalyticsService implements AnalyticsService {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AnalyticsExplanationPage(),
+                        builder: (context) => const AnalyticsExplanationPage(),
                       ),
                     );
                     if (context.mounted) setCurrentScreen(previousScreen);

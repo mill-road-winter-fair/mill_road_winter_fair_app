@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Test helpers, fakes and mocks
@@ -57,8 +58,8 @@ void main() {
       final previousOnTest = onTest;
       onTest = false;
       addTearDown(() => onTest = previousOnTest);
-      await tester.pumpWidget(MaterialApp(
-        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      await tester.pumpWidget(const MaterialApp(
+        home: OnBoardingPage(),
       ));
       await settle(tester);
 
@@ -76,8 +77,8 @@ void main() {
     });
 
     testWidgets('guide explains map, listing, reminder and settings controls on their pages', (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+      await tester.pumpWidget(const MaterialApp(
+        home: OnBoardingPage(),
       ));
       await settle(tester);
 
@@ -141,7 +142,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(Provider<AnalyticsService>.value(
         value: FakeAnalyticsService(),
-        child: MaterialApp(
+        child: const MaterialApp(
         home: OnBoardingPage(),
       )));
       await settle(tester);
@@ -164,7 +165,7 @@ void main() {
     testWidgets('background stays fixed while panels are swiped', (tester) async {
       await tester.pumpWidget(Provider<AnalyticsService>.value(
         value: FakeAnalyticsService(),
-        child: MaterialApp(
+        child: const MaterialApp(
         home: OnBoardingPage(),
       )));
       await settle(tester);
@@ -204,7 +205,7 @@ void main() {
             child: child!,
           ),
         ),
-        home: OnBoardingPage(analyticsService: FakeAnalyticsService()),
+        home: const OnBoardingPage(),
       ));
       await settle(tester);
 
@@ -308,7 +309,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget to test that the app correctly chooses the WelcomeScreen
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const RootWidget(firstExecution: true)));
 
       // Verify that the WelcomeScreen is displayed
       expect(find.byType(WelcomeScreen), findsOneWidget);
@@ -332,7 +333,7 @@ void main() {
       ];
 
       // Pump the RootWidget
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: false)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const RootWidget(firstExecution: false)));
 
       // Verify that WelcomeScreen is NOT displayed
       expect(find.byType(WelcomeScreen), findsNothing);
@@ -359,7 +360,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const RootWidget(firstExecution: true)));
 
       // Verify the 'Skip' button is present and tap it
       expect(find.text('Skip'), findsOneWidget);
@@ -386,7 +387,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const RootWidget(firstExecution: true)));
 
       // Verify we are on the first page
       expect(find.text('Welcome to the official\nMill Road Winter Fair app!'), findsOneWidget);
@@ -417,7 +418,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       // Pump the RootWidget
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const RootWidget(firstExecution: true)));
 
       // Advance through the onboarding slides to reach the last page
       final nextButton = find.byIcon(Icons.arrow_forward);
@@ -467,7 +468,7 @@ void main() {
 
       // Pump the RootWidget
       firstExecution = true;
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: RootWidget(firstExecution: true)));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const RootWidget(firstExecution: true)));
 
       // The footer button text should be present
       expect(find.text('Take me straight to the Fair!'), findsOneWidget);

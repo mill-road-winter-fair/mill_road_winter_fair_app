@@ -2,11 +2,12 @@
 import 'dart:async';
 
 // App imports
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/chooser_page.dart';
 import 'package:mill_road_winter_fair_app/dependencies/date_time_provider.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/dependencies/launch_url_provider.dart';
 import 'package:mill_road_winter_fair_app/filtered_listings.dart';
-import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/firebase_options_dev.dart' as dev;
 import 'package:mill_road_winter_fair_app/firebase_options_prod.dart' as prod;
 import 'package:mill_road_winter_fair_app/globals.dart';
@@ -35,7 +36,6 @@ Future<void> main() async {
   // Ensure all bindings are initialized before async calls
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
   try {
     await Firebase.initializeApp(
       options: firebaseOptionsForBuildMode(isRelease: kReleaseMode),
@@ -235,7 +235,7 @@ class HomePageState extends State<HomePage> with RouteAware {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _listingNoticeRequested || index < 1 || index > 3) return;
       _listingNoticeRequested = true;
-      ListingUpdateNotifier.maybeShowNotice(context, analyticsService: widget.analyticsService);
+      ListingUpdateNotifier.maybeShowNotice(context);
     });
   }
   // the following need to be in HomePageState to allow deep linking to configured pages

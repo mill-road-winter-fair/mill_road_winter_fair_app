@@ -10,13 +10,13 @@ import 'package:mill_road_winter_fair_app/listings_may_change_reminder.dart';
 import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Test helpers, fakes and mocks
+import 'fakes/fake_analytics_service.dart';
 import 'fakes/fixed_date_time_provider.dart';
 import 'pump_with_clock.dart';
-
-import 'fakes/fake_analytics_service.dart';
 
 class RecordingNoticeAnalyticsService extends FakeAnalyticsService {
   final notices = <String>[];
@@ -89,7 +89,6 @@ void main() {
           );
           final showNotice = ListingUpdateNotifier.maybeShowNotice(
             tester.element(find.byType(Scaffold)),
-            analyticsService: FakeAnalyticsService(),
           );
           await tester.pumpAndSettle();
 
@@ -157,7 +156,6 @@ void main() {
 
       await ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),
-        analyticsService: analytics,
         allowListingsMayChange: false,
       );
       await tester.pumpAndSettle();

@@ -32,7 +32,7 @@ void main() {
 
   group('SettingsPage', () {
     testWidgets('displays correct initial state', (WidgetTester tester) async {
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: SettingsPage())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: SettingsPage())));
 
       // Verify the Distance Units section
       expect(find.text('Distances:'), findsOneWidget);
@@ -64,7 +64,7 @@ void main() {
     });
 
     testWidgets('changes and persists every marker size', (tester) async {
-      await tester.pumpWidget(MaterialApp(home: SettingsPage(analyticsService: FakeAnalyticsService())));
+      await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
       var currentLabel = 'Medium';
       for (final size in [MapMarkerSize.small, MapMarkerSize.large, MapMarkerSize.medium]) {
         await tester.tap(find.text(currentLabel));
@@ -79,7 +79,7 @@ void main() {
     });
 
     testWidgets('changes theme to 2025 Light', (WidgetTester tester) async {
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: SettingsPage())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: SettingsPage())));
 
       // Tap on dropdown to open it
       await tester.tap(find.text('Light'));
@@ -107,7 +107,7 @@ void main() {
     });
 
     testWidgets('changes distance units to Imperial', (WidgetTester tester) async {
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: SettingsPage())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: SettingsPage())));
 
       // Tap on dropdown to open it
       await tester.tap(find.text('Metric'));
@@ -127,7 +127,7 @@ void main() {
     });
 
     testWidgets('changes theme to Dark', (WidgetTester tester) async {
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: SettingsPage())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: SettingsPage())));
 
       // Tap on dropdown to open it
       await tester.tap(find.text('Light'));
@@ -142,7 +142,7 @@ void main() {
     });
 
     testWidgets('changes theme to Auto', (WidgetTester tester) async {
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: SettingsPage())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: SettingsPage())));
 
       // Tap on dropdown to open it
       await tester.tap(find.text('Light'));
@@ -156,7 +156,7 @@ void main() {
     });
 
     testWidgets('changes theme to Colour Blind Friendly', (WidgetTester tester) async {
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: SettingsPage())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: SettingsPage())));
 
       // Tap on dropdown to open it
       await tester.tap(find.text('Light'));
@@ -171,7 +171,7 @@ void main() {
     });
 
     testWidgets('persists settings after selection', (WidgetTester tester) async {
-      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: SettingsPage())));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: SettingsPage())));
 
       // Change distance units to Cambridge
       await tester.tap(find.text('Metric'));

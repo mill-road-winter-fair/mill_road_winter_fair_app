@@ -12,6 +12,7 @@ import 'package:mill_road_winter_fair_app/themes.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> loadSettings() async {
@@ -389,8 +390,8 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           onSelected: (value) {
                             if (value == null) return;
                             HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('map_marker_size_preference_option');
-                            widget.analyticsService.logPreferenceSet('map_marker_size', value.name);
+                            context.read<AnalyticsService>().logButtonTapped('map_marker_size_preference_option');
+                            context.read<AnalyticsService>().logPreferenceSet('map_marker_size', value.name);
                             setState(() {
                               preferredMapMarkerSize.value = value;
                             });
@@ -429,8 +430,8 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                           onSelected: (bool? value) {
                             if (value == null) return;
                             HapticFeedback.selectionClick();
-                            widget.analyticsService.logButtonTapped('home_page_preference_option');
-                            widget.analyticsService.logPreferenceSet('home_page_style', value ? 'static' : 'animated');
+                            context.read<AnalyticsService>().logButtonTapped('home_page_preference_option');
+                            context.read<AnalyticsService>().logPreferenceSet('home_page_style', value ? 'static' : 'animated');
                             setState(() {
                               staticChooserPage.value = value;
                             });
@@ -467,7 +468,7 @@ class _SettingsPageState extends State<SettingsPage> with RouteAware {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => AnalyticsExplanationPage(),
+                                    builder: (context) => const AnalyticsExplanationPage(),
                                   ),
                                 );
                               },

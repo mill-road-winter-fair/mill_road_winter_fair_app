@@ -177,7 +177,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
       style: style,
       recognizer: TapGestureRecognizer()..onTap = () {
         HapticFeedback.lightImpact();
-        widget.analyticsService.logButtonTapped('directionableLocation_hyperlink');
+        context.read<AnalyticsService>().logButtonTapped('directionableLocation_hyperlink');
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -186,7 +186,6 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
               onTabSelected: (_) => {},
               destinationId: '$aSimpleMarkerId $theLocationCat',
               destinationLatLng: locationLatLng,
-              analyticsService: widget.analyticsService,
             ),
           ),
         );
@@ -276,7 +275,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                         recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               HapticFeedback.lightImpact();
-                              widget.analyticsService.logButtonTapped('aboutpage_donating');
+                              context.read<AnalyticsService>().logButtonTapped('aboutpage_donating');
                               context.read<UrlLauncher>().open(Uri.parse('https://www.justgiving.com/crowdfunding/millroad-winterfair'));
                             },
                       ),

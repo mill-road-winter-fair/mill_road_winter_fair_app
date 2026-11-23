@@ -5,16 +5,17 @@ import 'dart:ui' as ui;
 
 // App imports
 import 'package:mill_road_winter_fair_app/about_the_fair.dart';
-import 'package:simple_shadow/simple_shadow.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/globals.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
 import 'package:mill_road_winter_fair_app/settings_page.dart';
 
 // Third-party imports
 import 'package:flutter/foundation.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:simple_shadow/simple_shadow.dart';
+import 'package:provider/provider.dart';
 
 class ChooserPage extends StatefulWidget {
   const ChooserPage({
@@ -226,7 +227,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/foodDrink.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_food');
+          context.read<AnalyticsService>().logButtonTapped('home_food');
           widget.onOpenListings('all', 'food');
         },
       ),
@@ -240,7 +241,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/music.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_music');
+          context.read<AnalyticsService>().logButtonTapped('home_music');
           widget.onOpenTimetable(false, true);
         },
       ),
@@ -254,7 +255,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1.05,
         assetPath: 'assets/infoPages/childrens.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_childrens');
+          context.read<AnalyticsService>().logButtonTapped('home_childrens');
           widget.onOpenListings('all', 'performanceChildrens');
         },
       ),
@@ -268,7 +269,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/shopping.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_shopping');
+          context.read<AnalyticsService>().logButtonTapped('home_shopping');
           widget.onOpenListings('all', 'shopping');
         },
       ),
@@ -282,7 +283,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/charityCommunityInfo.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_community');
+          context.read<AnalyticsService>().logButtonTapped('home_community');
           widget.onOpenListings('all', 'charityCommunityInfo');
         },
       ),
@@ -296,7 +297,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/visitExperience.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_visits');
+          context.read<AnalyticsService>().logButtonTapped('home_visits');
           widget.onOpenListings('all', 'visitExperience');
         },
       ),
@@ -310,7 +311,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 1,
         assetPath: 'assets/infoPages/services.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_services');
+          context.read<AnalyticsService>().logButtonTapped('home_services');
           widget.onOpenListings('all', 'service');
         },
       ),
@@ -324,7 +325,7 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
         scale: 0.9,
         assetPath: 'assets/infoPages/nearby.png',
         theTap: () {
-          widget.analyticsService.logButtonTapped('home_nearby');
+          context.read<AnalyticsService>().logButtonTapped('home_nearby');
           widget.onOpenMap(10);
         },
       ),
@@ -415,8 +416,8 @@ class _ChooserPageState extends State<ChooserPage> with TickerProviderStateMixin
                 tooltip: 'Go to Settings to customise the app',
                 onPressed: () {
                   HapticFeedback.lightImpact();
-                  widget.analyticsService.logButtonTapped('homepage_settings');
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(analyticsService: widget.analyticsService)));
+                  context.read<AnalyticsService>().logButtonTapped('homepage_settings');
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsPage()));
                 },
                 icon: Icon(
                   Icons.settings,
@@ -528,8 +529,8 @@ class _ChooserContent extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    analyticsService.logButtonTapped('home_about_fair');
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => AboutTheFairPage()));
+                    context.read<AnalyticsService>().logButtonTapped('home_about_fair');
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutTheFairPage()));
                   },
                   child: RepaintBoundary(child: _ChooserLogo(backgroundIntroProgress: backgroundIntroProgress)),
                 ),

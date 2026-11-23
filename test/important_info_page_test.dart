@@ -15,12 +15,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 // Test helpers, fakes and mocks
+import 'fakes/fake_analytics_service.dart';
 import 'fakes/fake_url_launcher.dart';
 import 'mocks/listings_mocks.dart';
 import 'pump_with_clock.dart';
-
-import 'fakes/fake_analytics_service.dart';
-import 'fakes/fake_url_launcher.dart';
 
 Future<void> settle(WidgetTester tester) async {
   await tester.pump();
@@ -42,7 +40,7 @@ void main() {
 
   group('ImportantInfoPage', () {
     testWidgets('displays expected headings and content', (WidgetTester tester) async {
-      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(home: ImportantInfoPage())));
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: ImportantInfoPage())));
 
       // Verify headings
       expect(find.text('Important information'), findsOneWidget);
@@ -67,7 +65,7 @@ void main() {
 
       await tester.pumpWithClock(Provider<AnalyticsService>.value(
           value: FakeAnalyticsService(),
-          child: MyApp(
+          child: const MyApp(
             firstExecution: false,
           )));
       await settle(tester);
@@ -145,7 +143,7 @@ void main() {
             Provider<AnalyticsService>.value(value: FakeAnalyticsService()),
             Provider<UrlLauncher>.value(value: fakeUrlLauncher),
           ],
-          child: MaterialApp(
+          child: const MaterialApp(
             home: ImportantInfoPage(),
           ),
         ));

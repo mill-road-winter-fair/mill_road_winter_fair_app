@@ -25,7 +25,6 @@ class GroupListingInfoSheet extends StatelessWidget {
   final String approxDistance;
   final ColorScheme colorScheme;
   final String description;
-  final AnalyticsService analyticsService;
 
   const GroupListingInfoSheet({
     this.brickAndMortar = false,
@@ -36,7 +35,6 @@ class GroupListingInfoSheet extends StatelessWidget {
     required this.approxDistance,
     required this.colorScheme,
     required this.description,
-    required this.analyticsService,
     super.key,
   });
 
@@ -107,7 +105,7 @@ class GroupListingInfoSheet extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 0),
                       visualDensity: const VisualDensity(horizontal: -4),
                       key: key,
-                      onPressed: () => showMiniPopup(context, key, subfilterCategoryLabels[c]!.label, analyticsService: analyticsService),
+                      onPressed: () => showMiniPopup(context, key, subfilterCategoryLabels[c]!.label),
                       icon: Icon(subfilterCategoryLabels[c]?.iconData, color: Colors.white, semanticLabel: subfilterCategoryLabels[c]?.label, size: 24),
                     );
                   }).toList()),

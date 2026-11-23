@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mill_road_winter_fair_app/firebase_analytics.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+
+import 'fakes/fake_analytics_service.dart';
 
 class RecordingAnalytics extends FakeAnalyticsService {
   final buttons = <String>[];
@@ -60,7 +61,7 @@ void main() {
           body: Builder(
             builder: (context) {
               return TextButton(
-                onPressed: () => displayAppShareDialog(context, analyticsService: analytics),
+                onPressed: () => displayAppShareDialog(context),
                 child: const Text('Open'),
               );
             },

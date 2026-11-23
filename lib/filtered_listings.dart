@@ -682,7 +682,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                           child: GestureDetector(
                                             onTap: () {
                                               HapticFeedback.lightImpact();
-                                              widget.analyticsService.logButtonTapped('listing_row', listingId: listing['id'], listingName: listing['title']);
+                                              context.read<AnalyticsService>().logButtonTapped('listing_row', listingId: listing['id'], listingName: listing['title']);
                                               toggleDetailsRow(index);
                                             },
                                             child: SpecificListingInfoSheet(
@@ -825,7 +825,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           HapticFeedback.lightImpact();
-                                          widget.analyticsService.logButtonTapped('clearCloseSearch_listings');
+                                          context.read<AnalyticsService>().logButtonTapped('clearCloseSearch_listings');
                                           setState(() {
                                             _searchAnalyticsTimer?.cancel();
                                             _searchQuery = '';
@@ -842,7 +842,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           HapticFeedback.lightImpact();
-                                          widget.analyticsService.logButtonTapped('switchOffFilter_listings');
+                                          context.read<AnalyticsService>().logButtonTapped('switchOffFilter_listings');
                                           widget.onSubfilterChange(null);
                                         },
                                         icon: const Icon(Icons.filter_alt, size: 28),
@@ -854,7 +854,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
                                       ElevatedButton.icon(
                                         onPressed: () {
                                           HapticFeedback.lightImpact();
-                                          widget.analyticsService.logButtonTapped('switchOffFavourites_listings');
+                                          context.read<AnalyticsService>().logButtonTapped('switchOffFavourites_listings');
                                           widget.onTabSelected(3); // in future, this could preserve search as well
                                         },
                                         icon: const Icon(Icons.ballot, size: 28),
@@ -917,7 +917,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           tooltip: 'Choose how to sort listings',
           onPressed: () {
             HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('listings_sort_menu_toggle');
+            context.read<AnalyticsService>().logButtonTapped('listings_sort_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {
@@ -961,7 +961,7 @@ class FilteredListingsPageState extends State<FilteredListingsPage> {
           tooltip: 'Choose which types of listings to show',
           onPressed: () {
             HapticFeedback.lightImpact();
-            widget.analyticsService.logButtonTapped('listings_filter_menu_toggle');
+            context.read<AnalyticsService>().logButtonTapped('listings_filter_menu_toggle');
             if (controller.isOpen) {
               controller.close();
             } else {
