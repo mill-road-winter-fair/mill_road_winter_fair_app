@@ -37,6 +37,7 @@ class TimetablePage extends StatefulWidget {
   final Function(bool, bool?) onFilterChange;
   final String? listingToShow;
   final bool onlyNowOrSoon;
+  final bool isVisible;
   final bool? filteredMusicOrNot;
   final AnalyticsService analyticsService;
   const TimetablePage({
@@ -45,6 +46,7 @@ class TimetablePage extends StatefulWidget {
     required this.onFilterChange,
     this.listingToShow,
     required this.onlyNowOrSoon,
+    this.isVisible = true,
     this.filteredMusicOrNot,
     required this.analyticsService,
     super.key,
@@ -59,6 +61,8 @@ class TimetablePageState extends State<TimetablePage> with WidgetsBindingObserve
   late ScrollController _verticalScrollController;
   final TextEditingController _searchController = TextEditingController();
   Timer? _nowLineTimer;
+  bool _appIsActive = true;
+  bool get _clockUpdatesEnabled => widget.isVisible && _appIsActive;
   Timer? _searchAnalyticsTimer;
   final nowLineKey = GlobalKey();
   late double _dayPixelsPerMinute; // scale for the current day view, whatever its orientation
@@ -85,11 +89,19 @@ class TimetablePageState extends State<TimetablePage> with WidgetsBindingObserve
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _appIsActive = WidgetsBinding.instance.lifecycleState == null || WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
     _horizontalScrollController = ScrollController();
     _verticalScrollController = ScrollController();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     thePreparedEvents = prepareEvents(widget.theEvents);
     loadScales();
+  }
+
+  @override
+  void didUpdateWidget(covariant TimetablePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.isVisible) _stopClockUpdates();
+    // Becoming visible triggers a build, which refreshes results and restarts the clock.
   }
 
   @override
@@ -162,8 +174,9 @@ class TimetablePageState extends State<TimetablePage> with WidgetsBindingObserve
   }
 
   void startClockUpdates(VoidCallback tick) {
+    if (!mounted || !_clockUpdatesEnabled) return;
     final now = _dateTimeProvider.now();
-    final delay = Duration(seconds: widget.onlyNowOrSoon ? 30 : (60 / _dayPixelsPerMinute).toInt());
+    const delay = Duration(minutes: 1);
     final initialDelay = delay - Duration(seconds: now.second, milliseconds: now.millisecond);
     _nowLineTimer?.cancel();
     _nowLineTimer = Timer(initialDelay, () {
@@ -174,12 +187,22 @@ class TimetablePageState extends State<TimetablePage> with WidgetsBindingObserve
   }
 
   void updateNowLine() {
-    if (mounted) setState(() {});
+    if (mounted && _clockUpdatesEnabled) setState(() {});
+  }
+
+  void _stopClockUpdates() {
+    _nowLineTimer?.cancel();
+    _nowLineTimer = null;
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) updateNowLine();
+    _appIsActive = state == AppLifecycleState.resumed;
+    if (_appIsActive) {
+      updateNowLine();
+    } else {
+      _stopClockUpdates();
+    }
   }
 
   Map<String, List<PositionedEvent>> prepareEvents(List<Map<String, dynamic>> theEvents) {
@@ -538,7 +561,7 @@ class TimetablePageState extends State<TimetablePage> with WidgetsBindingObserve
       theFilteredEvents = filterEventsAndComputeDefaults(thePreparedEvents, widget.onlyNowOrSoon, widget.filteredMusicOrNot, _searchQuery, now);
     }
 
-    if (widget.onlyNowOrSoon || widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
+    if ((widget.onlyNowOrSoon && _clockUpdatesEnabled) || widget.onlyNowOrSoon != _onlyNowOrSoonSaved || widget.filteredMusicOrNot != _filteredMusicOrNotSaved) {
       // Time-dependent results must also be refreshed when the clock changes.
       _onlyNowOrSoonSaved = widget.onlyNowOrSoon;
       _filteredMusicOrNotSaved = widget.filteredMusicOrNot;

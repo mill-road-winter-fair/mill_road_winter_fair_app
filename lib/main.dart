@@ -407,6 +407,7 @@ class HomePageState extends State<HomePage> with RouteAware {
           isVisible: index == 1),
       TimetablePage(
           theEvents: listings,
+          isVisible: index == 2,
           key: timetablePageKey,
           onTabSelected: setCurrentIndex,
           filteredMusicOrNot: timetableFilteredMusicOrNot,
