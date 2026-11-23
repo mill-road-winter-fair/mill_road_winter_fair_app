@@ -64,7 +64,7 @@ void main() {
     });
 
     testWidgets('changes and persists every marker size', (tester) async {
-      await tester.pumpWidget(const MaterialApp(home: SettingsPage()));
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(home: SettingsPage())));
       var currentLabel = 'Medium';
       for (final size in [MapMarkerSize.small, MapMarkerSize.large, MapMarkerSize.medium]) {
         await tester.tap(find.text(currentLabel));

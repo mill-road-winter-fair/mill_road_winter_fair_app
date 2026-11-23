@@ -58,9 +58,9 @@ void main() {
       final previousOnTest = onTest;
       onTest = false;
       addTearDown(() => onTest = previousOnTest);
-      await tester.pumpWidget(const MaterialApp(
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(
         home: OnBoardingPage(),
-      ));
+      )));
       await settle(tester);
 
       // Wait beyond the former 150-second automatic advance interval.
@@ -77,9 +77,9 @@ void main() {
     });
 
     testWidgets('guide explains map, listing, reminder and settings controls on their pages', (tester) async {
-      await tester.pumpWidget(const MaterialApp(
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MaterialApp(
         home: OnBoardingPage(),
-      ));
+      )));
       await settle(tester);
 
       // Check each instruction alongside its control icon on the current page.
@@ -197,7 +197,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       final textScale = ValueNotifier(1.0);
       addTearDown(textScale.dispose);
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(
         builder: (context, child) => ValueListenableBuilder<double>(
           valueListenable: textScale,
           builder: (context, scale, _) => MediaQuery(
@@ -206,7 +206,7 @@ void main() {
           ),
         ),
         home: const OnBoardingPage(),
-      ));
+      )));
       await settle(tester);
 
       for (var index = 0; index < pageTitles.length; index++) {

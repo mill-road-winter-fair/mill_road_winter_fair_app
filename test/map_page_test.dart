@@ -69,9 +69,9 @@ void main() {
       final originalRoadClosureVisibility = preferredRoadClosurePolygonVisible;
       addTearDown(() => preferredRoadClosurePolygonVisible = originalRoadClosureVisibility);
       firstExecution = false;
-      await tester.pumpWithClock(MaterialApp(
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(
         home: MapPage(listings: listings, onTabSelected: (_) {}),
-      ));
+      )));
       await tester.pumpAndSettle();
       final state = tester.state<MapPageState>(find.byType(MapPage));
 
@@ -102,12 +102,12 @@ void main() {
         addTearDown(tester.view.resetDevicePixelRatio);
         addTearDown(tester.view.resetPhysicalSize);
 
-        await tester.pumpWithClock(MaterialApp(
+        await tester.pumpWithClock(Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(
           theme: ThemeData(platform: platform),
           home: Scaffold(
             body: MapPage(listings: listings, onTabSelected: (_) {}),
           ),
-        ));
+        )));
         await tester.pumpAndSettle();
         await tester.tap(find.byIcon(Icons.filter_alt));
         await tester.pumpAndSettle();

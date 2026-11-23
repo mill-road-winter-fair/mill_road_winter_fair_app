@@ -102,7 +102,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       final listing = mockListing('listing');
-      await tester.pumpWithClock(MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: analytics, child: MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
         listingId: '26002',
         cancelled: listing['cancelled'] == 'TRUE', brickAndMortar: listing['brickAndMortar'] == 'TRUE',
         emoji: listing['emoji'] as String, title: listing['title'] as String, subtitle: listing['subtitle'] as String, location: listing['location'] as String,
@@ -110,7 +110,7 @@ void main() {
         imageURL: listing['imageURL'] as String, startTime: listing['startTime'] as String, endTime: listing['endTime'] as String, approxDistance: '', detailsVisible: false,
         listingFavourited: false, listingAlerted: false, inDialog: false, onGetDirections: () {},
         onDetailsTapped: () => analytics.calls.add('details'), colorScheme: const ColorScheme.light(),
-      ))));
+      )))));
       await tester.tap(find.byIcon(Icons.info));
       expect(analytics.calls, ['haptic', 'tap:listing_details', 'details']);
       expect(analytics.buttonEvents.single, {'button_id': 'listing_details', 'listing_id': '26002', 'listing_name': 'Listing'});
@@ -124,14 +124,14 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWithClock(Provider<UrlLauncher>.value(value: launcher, child: MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: analytics, child: Provider<UrlLauncher>.value(value: launcher, child: MaterialApp(theme: appThemes['light'], home: Scaffold(body: SpecificListingInfoSheet(
         listingId: '26018', cancelled: listing['cancelled'] == 'TRUE', brickAndMortar: listing['brickAndMortar'] == 'TRUE',
         emoji: listing['emoji'] as String, title: listing['title'] as String, subtitle: listing['subtitle'] as String, location: listing['location'] as String,
         description: listing['description'] as String, email: listing['email'] as String, website: listing['website'] as String, phoneNumber: listing['phone'] as String,
         imageURL: listing['imageURL'] as String, startTime: listing['startTime'] as String, endTime: listing['endTime'] as String, approxDistance: '', detailsVisible: true,
         listingFavourited: false, listingAlerted: false, inDialog: inDialog, onGetDirections: () {}, onDetailsTapped: () {}, onFavouriteTapped: () {},
         colorScheme: const ColorScheme.light(),
-      )))));
+      ))))));
       // The sheet has one IconButton: the favourite control.
       await tester.tap(find.byType(IconButton));
       await tester.tap(find.byIcon(Icons.directions_walk));
@@ -287,7 +287,7 @@ void main() {
     final previousStyle = staticChooserPage.value;
     staticChooserPage.value = false;
     addTearDown(() => staticChooserPage.value = previousStyle);
-    await tester.pumpWithClock(const MaterialApp(home: SettingsPage()));
+    await tester.pumpWithClock(Provider<AnalyticsService>.value(value: analytics, child: const MaterialApp(home: SettingsPage())));
     analytics.calls.clear();
     await tester.tap(find.text('Medium'));
     await tester.pumpAndSettle();
@@ -303,9 +303,9 @@ void main() {
   });
 
   testWidgets('performance map filters record each selected value once', (tester) async {
-    await tester.pumpWithClock(MaterialApp(home: MapPage(
+    await tester.pumpWithClock(Provider<AnalyticsService>.value(value: analytics, child: MaterialApp(home: MapPage(
       listings: listings, onTabSelected: (_) {},
-    )));
+    ))));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Choose which map markers to show'));
     await tester.pumpAndSettle();

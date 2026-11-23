@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mill_road_winter_fair_app/helpers.dart';
+import 'package:mill_road_winter_fair_app/dependencies/firebase_analytics.dart';
+import 'package:provider/provider.dart';
 
 import 'fakes/fake_analytics_service.dart';
 
@@ -52,7 +54,7 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(tester.view.resetPhysicalSize);
     await tester.pumpWidget(
-      MaterialApp(
+      Provider<AnalyticsService>.value(value: analytics, child: MaterialApp(
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(textScale)),
           child: child!,
@@ -67,7 +69,7 @@ void main() {
             },
           ),
         ),
-      ),
+      )),
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();

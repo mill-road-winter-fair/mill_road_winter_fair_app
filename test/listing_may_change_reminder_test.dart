@@ -77,14 +77,14 @@ void main() {
           SharedPreferences.setMockInitialValues({});
           listingUpdateNoticeEnabled = true;
           await tester.pumpWithClock(
-            MaterialApp(
+            Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: MaterialApp(
               theme: ThemeData(platform: platform),
               builder: (context, child) => MediaQuery(
                 data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(2)),
                 child: child!,
               ),
               home: const Scaffold(body: SizedBox()),
-            ),
+            )),
             dateTimeProvider: FixedDateTimeProvider(date),
           );
           final showNotice = ListingUpdateNotifier.maybeShowNotice(
@@ -152,7 +152,7 @@ void main() {
       listingUpdateNoticeEnabled = true;
       addTearDown(() => onTest = true);
       final analytics = RecordingNoticeAnalyticsService();
-      await tester.pumpWithClock(const MaterialApp(home: Scaffold(body: SizedBox())), dateTimeProvider: beforeFairDateTimeProvider);
+      await tester.pumpWithClock(Provider<AnalyticsService>.value(value: analytics, child: const MaterialApp(home: Scaffold(body: SizedBox()))), dateTimeProvider: beforeFairDateTimeProvider);
 
       await ListingUpdateNotifier.maybeShowNotice(
         tester.element(find.byType(SizedBox)),

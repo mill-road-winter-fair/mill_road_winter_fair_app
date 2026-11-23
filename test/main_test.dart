@@ -68,7 +68,7 @@ void main() {
         addTearDown(() => onTest = true);
         listings = [mockListing('glazedAndConfused')];
         await tester.pumpWithClock(
-          const MyApp(firstExecution: false),
+          Provider<AnalyticsService>.value(value: FakeAnalyticsService(), child: const MyApp(firstExecution: false)),
           dateTimeProvider: FixedDateTimeProvider(fairDate.subtract(const Duration(days: 1))),
         );
         await tester.pump();
