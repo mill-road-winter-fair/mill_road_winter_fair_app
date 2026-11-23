@@ -172,7 +172,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
     context.read<UrlLauncher>().open(Uri.parse(url));
   }
 
-  TextSpan directionableLocation(String location, TextStyle style, LatLng locationLatLng) {
+  TextSpan directionableLocation(String location, TextStyle style, LatLng locationLatLng, String theLocationCat) {
     return TextSpan(
       text: location,
       style: style,
@@ -185,7 +185,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
             builder: (context) => MapPage(
               listings: listings,
               onTabSelected: (_) => {},
-              destinationId: '$aSimpleMarkerId Visit/Experience',
+              destinationId: '$aSimpleMarkerId $theLocationCat',
               destinationLatLng: locationLatLng,
               analyticsService: widget.analyticsService,
             ),
@@ -198,16 +198,17 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     debugPrint('AboutTheFairPage build() called');
-    var bodyStyle = TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSecondary);
-    var eventsSubtitleStyle = const TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: Colors.white, height: 1.2);
-    var eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: Colors.white);
     final colorScheme = Theme.of(context).colorScheme;
+    final bodyStyle = TextStyle(fontSize: 16, color: colorScheme.onSecondary);
+    final bodyLinkStyle = bodyStyle.copyWith(decoration: TextDecoration.underline, decorationColor: colorScheme.onSecondary.withAlpha(80));
+    final eventsSubtitleStyle = const TextStyle(fontSize: 15, fontStyle: FontStyle.italic, color: Colors.white, height: 1.2);
+    final eventsSubtitleLinkStyle = eventsSubtitleStyle.copyWith(decoration: TextDecoration.underline, decorationColor: Colors.white.withAlpha(160));
     final headingStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: colorScheme.tertiary);
 
     // Build a list of TextSpans for sponsors so we can special-case the Bush entry
     final List<TextSpan> sponsorSpans = [];
     final sponsorKeys = _sponsorUrls.keys.toList();
-    final sponsorLinkStyle = const TextStyle(decoration: TextDecoration.underline);
+    final sponsorLinkStyle = TextStyle(decoration: TextDecoration.underline, decorationColor: colorScheme.onSecondary.withAlpha(80));
     for (var i = 0; i < sponsorKeys.length; i++) {
       final name = sponsorKeys[i];
       final isLast = i == sponsorKeys.length - 1;
@@ -270,7 +271,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     ),
                     Text.rich(style: bodyStyle, TextSpan(children: [
                       const TextSpan(text: 'The Fair is only possible with local support, so please do consider '),
-                      TextSpan(text: 'donating', style: bodyStyle.copyWith(decoration: TextDecoration.underline, decorationColor: colorScheme.onSecondary), 
+                      TextSpan(text: 'donating', style: bodyLinkStyle, 
                         recognizer: TapGestureRecognizer()
                             ..onTap = () {
                               HapticFeedback.lightImpact();
@@ -289,7 +290,10 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Food and drink from around the world\n', style: headingStyle),
-                        const TextSpan(text: 'Enjoy something delicious at food stalls, cafés and venues all along Mill Road, or visit the Food Fair in Gwydir Street Car Park.'),
+                        const WidgetSpan(child: SizedBox(height: 24)),
+                        TextSpan(text: 'Enjoy something delicious at food stalls, cafés and venues all along Mill Road, or visit the Food Fair in ', style: bodyStyle),
+                        directionableLocation('Gwydir Street Car Park', bodyLinkStyle, const LatLng(52.19984694988538, 0.13900104656457335), 'Food'),
+                        TextSpan(text: '.', style: bodyStyle),
                       ]),
                       imagePath: "assets/infoPages/foodDrink.png",
                       imageOnLeft: true,
@@ -299,8 +303,20 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Fantastic live music and performance\n', style: headingStyle),
-                        const TextSpan(text: 'The main music stages are at Donkey Common, Ditchburn Gardens, St Barnabas Church, Argyle Street Housing Co-op, '
-                          'inside St Philip’s Church and at the corner of Thoday Street.'),
+                        const WidgetSpan(child: SizedBox(height: 24)),
+                        const TextSpan(text: 'The main music stages are at '),
+                        directionableLocation('Donkey Common', bodyLinkStyle, const LatLng(52.201937,0.132062), 'Group-Music'),
+                        const TextSpan(text: ', '),
+                        directionableLocation('Ditchburn Gardens', bodyLinkStyle, const LatLng(52.200137,0.137234), 'Group-Music'),
+                        const TextSpan(text: ', '),
+                        directionableLocation('St Barnabas Church', bodyLinkStyle, const LatLng(52.199679453760716, 0.1377880789742335), 'Group-Music'),
+                        const TextSpan(text: ', '),
+                        directionableLocation('Argyle Street Housing Co-op', bodyLinkStyle, const LatLng(52.198212,0.141797), 'Group-Music'),
+                        const TextSpan(text: ', inside '),
+                        directionableLocation('St Philip’s Church', bodyLinkStyle, const LatLng(52.197437,0.145813), 'Group-Music'),
+                        const TextSpan(text: ' and at the corner of '),
+                        directionableLocation('Thoday Street', bodyLinkStyle, const LatLng(52.197362,0.146141), 'Group-Music'),
+                        const TextSpan(text: '.'),
                       ]),
                       imagePath: "assets/infoPages/music.png",
                       textStyle: bodyStyle,
@@ -312,8 +328,18 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Local arts, crafts and goodies\n', style: headingStyle),
-                        const TextSpan(text: 'You’ll find lots of stalls at Donkey Common, Petersfield Green, Ditchburn Gardens '
-                          'and Headly Street, with even more all along the road. There’s also work from local artists at ARU and other venues.'),
+                        const WidgetSpan(child: SizedBox(height: 24)),
+                        const TextSpan(text: 'You’ll find lots of stalls at '),
+                        directionableLocation('Donkey Common', bodyLinkStyle, const LatLng(52.201937,0.132062), 'Group-Shopping'),
+                        const TextSpan(text: ', '),
+                        directionableLocation('Petersfield Green', bodyLinkStyle, const LatLng(52.20286503151598, 0.13230772934008359), 'Group-Shopping'),
+                        const TextSpan(text: ', '),
+                        directionableLocation('Ditchburn Gardens', bodyLinkStyle, const LatLng(52.200137,0.137234), 'Group-Shopping'),
+                        const TextSpan(text: ' and '),
+                        directionableLocation('Headly Street', bodyLinkStyle, const LatLng(52.199567842297476, 0.14000593124907548), 'Group-Shopping'),
+                        const TextSpan(text: ', with even more all along the road. There’s also work from local artists at '),
+                        directionableLocation('ARU', bodyLinkStyle, const LatLng(52.203338,0.133984), 'Visit/Experience'),
+                        const TextSpan(text: ' and other venues.'),
                       ]),
                       imagePath: "assets/infoPages/shopping.png",
                       imageOnLeft: true,
@@ -323,6 +349,7 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Fun things to do with the family\n', style: headingStyle),
+                        const WidgetSpan(child: SizedBox(height: 24)),
                         const TextSpan(text: 'There’s plenty for children, including crafts, magic, comedy, hands-on science and Doctor Who. '
                         'Santa is busy appearing at several venues! '
                         'There are also robotics demonstrations and workshops, storytelling and much more. '
@@ -336,8 +363,12 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Guided walks\n', style: headingStyle),
-                        const TextSpan(text: 'A 90-minute Mill Road history tour starts outside St Barnabas Church at 9am (£15), '
-                          'and free tours of the historic cemetery are at 10am, 11.15am and 12.30pm.'),
+                        const WidgetSpan(child: SizedBox(height: 24)),
+                        const TextSpan(text: 'A 90-minute Mill Road history tour starts outside '),
+                        directionableLocation('St Barnabas Church', bodyLinkStyle, const LatLng(52.199562,0.137813), 'Visit/Experience'),
+                        const TextSpan(text: ' at 9am (£15), and free tours of the historic '),
+                        directionableLocation('cemetery', bodyLinkStyle, const LatLng(52.20128502817897, 0.13533081811293912), 'Visit/Experience'),
+                        const TextSpan(text: ' are at 10am, 11.15am and 12.30pm.'),
                       ]),
                       imagePath: "assets/infoPages/visitExperience.png",
                       imageOnLeft: true,
@@ -347,15 +378,22 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                     TextImageRow(
                       textSpan: TextSpan(children: [
                         TextSpan(text: 'Other highlights\n', style: headingStyle),
-                        const TextSpan(text: 'There’s lots to see and do at ARU’s main building, accessed from Petersfield Green, including children’s '
-                          'activities, art and films. Look out for health stalls in various locations including Romsey Co-op’s car park. '),
+                        const WidgetSpan(child: SizedBox(height: 24)),
+                        const TextSpan(text: 'There’s lots to see and do at '),
+                        directionableLocation('ARU’s main building', bodyLinkStyle, const LatLng(52.203338,0.133984), 'Visit/Experience'),
+                        const TextSpan(text: ', accessed from '),
+                        directionableLocation('Petersfield Green', bodyLinkStyle, const LatLng(52.20286503151598, 0.13230772934008359), 'Visit/Experience'),
+                        const TextSpan(text: ', including children’s activities, art and films. Look out for health stalls in various locations including '),
+                        directionableLocation('Romsey Co-op’s car park', bodyLinkStyle, const LatLng(52.1978589332436, 0.14546174896765768), 'Charity/Community/Info'),
+                        const TextSpan(text: '.'),
                       ]),
-                      imagePath: "assets/infoPages/nearby.png",
+                      imagePath: "assets/infoPages/charityCommunityInfo.png",
                       textStyle: bodyStyle,
                     ),
-                    Text.rich(style: bodyStyle, const TextSpan(children: [
-                      TextSpan(text: 'Take a trip to the past with Mill Road History Society and find free books provided by Cambridge Literary '
-                        'Festival hidden all around the Fair.'),
+                    Text.rich(style: bodyStyle, TextSpan(children: [
+                      const TextSpan(text: 'Take a trip to the past with '),
+                      directionableLocation('Mill Road History Society', bodyLinkStyle, const LatLng(52.199813,0.138641), 'Visit/Experience'),
+                      const TextSpan(text: ' and find free books provided by Cambridge Literary Festival hidden all around the Fair.'),
                     ])),
                    Column(crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -372,26 +410,26 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                   eventRow(colorScheme, '10:30', 'Winter Fair opens'),
                                   eventRow(colorScheme, '10:30', 'Fire engine pull\n',
                                     [
-                                      directionableLocation('East Road', eventsSubtitleLinkStyle, const LatLng(52.202488, 0.131207)),
+                                      directionableLocation('East Road', eventsSubtitleLinkStyle, const LatLng(52.202488, 0.131207), 'Visit/Experience'),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                      directionableLocation('the bridge', eventsSubtitleLinkStyle, const LatLng(52.198682, 0.141051)),
+                                      directionableLocation('the bridge', eventsSubtitleLinkStyle, const LatLng(52.198682, 0.141051), 'Visit/Experience'),
                                     ],
                                   ),
                                   eventRow(colorScheme, '10:30', 'Opening ceremony\n',
-                                    [directionableLocation('Ditchburn Gardens', eventsSubtitleLinkStyle, const LatLng(52.200389, 0.136465))],
+                                    [directionableLocation('Ditchburn Gardens', eventsSubtitleLinkStyle, const LatLng(52.200389, 0.136465), 'Visit/Experience')],
                                   ),
                                   eventRow(colorScheme, '11:45', 'Parade\n',
                                     [
-                                      directionableLocation('Salisbury Club', eventsSubtitleLinkStyle, const LatLng(52.1970778, 0.1472252)),
+                                      directionableLocation('Salisbury Club', eventsSubtitleLinkStyle, const LatLng(52.1970778, 0.1472252), 'Visit/Experience'),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                      directionableLocation('Petersfield', eventsSubtitleLinkStyle, const LatLng(52.202858, 0.132253)),
+                                      directionableLocation('Petersfield', eventsSubtitleLinkStyle, const LatLng(52.202858, 0.132253), 'Visit/Experience'),
                                     ],
                                   ),
                                   eventRow(colorScheme, '15:40', 'Final parade\n',
                                     [
-                                      directionableLocation('Gwydir Street', eventsSubtitleLinkStyle, const LatLng(52.199627, 0.138407)),
+                                      directionableLocation('Gwydir Street', eventsSubtitleLinkStyle, const LatLng(52.199627, 0.138407), 'Visit/Experience'),
                                       TextSpan(text: ' to ', style: eventsSubtitleStyle),
-                                      directionableLocation('Petersfield', eventsSubtitleLinkStyle, const LatLng(52.202858, 0.132253)),
+                                      directionableLocation('Petersfield', eventsSubtitleLinkStyle, const LatLng(52.202858, 0.132253), 'Visit/Experience'),
                                     ],
                                   ),
                                   eventRow(colorScheme, '16:15', 'All trading ends'),
@@ -411,8 +449,8 @@ class _AboutTheFairPageState extends State<AboutTheFairPage> with RouteAware {
                                 ),
                               ),
                             ),
-                            Positioned(top: 0, right: 0, child: Image.asset('assets/infoPages/charityCommunityInfo.png', fit: BoxFit.contain, height: 145)),
-                            Positioned(bottom: 0, right: 0, child: Image.asset('assets/infoPages/visitExperience.png', fit: BoxFit.contain, height: 120)),
+                            Positioned(top: 0, right: 0, child: Image.asset('assets/infoPages/visitExperience.png', fit: BoxFit.contain, height: 130)),
+                            Positioned(bottom: 0, right: 0, child: Image.asset('assets/infoPages/nearby.png', fit: BoxFit.contain, height: 140)),
                           ],
                         )),
                       ], 
