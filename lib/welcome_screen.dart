@@ -406,7 +406,7 @@ class OnBoardingPageState extends State<OnBoardingPage> with RouteAware {
                         widget.analyticsService.logButtonTapped('next_WelcomeScreen');
                         onPressed();
                       },
-                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: colourScheme.tertiaryFixed),
+                child: Icon(Icons.arrow_forward, semanticLabel: 'Next page', color: colourScheme.tertiaryFixed, size: 24),
               ),
             ),
             done: FittedBox(
