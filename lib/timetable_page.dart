@@ -185,7 +185,7 @@ class TimetablePageState extends State<TimetablePage> {
       final endTime = combineDateAndTime(ev['endTime'], fairDate);
       if (((ev['performanceMusic'] ?? false) == 'TRUE' || (ev['performanceChildrens']  ?? false) == 'TRUE' ||
               (ev['performanceDance']  ?? false) == 'TRUE' || (ev['performanceOther']  ?? false) == 'TRUE' ||
-              (ev['visitExperience']  ?? false) == 'TRUE') && endTime.difference(startTime) < maxDurationToBeEvent) {
+              (ev['visitExperience']  ?? false) == 'TRUE') && endTime.difference(startTime) <= maxDurationToBeEvent) {
         String? eventLocation = ev['location'];
         if (eventLocation == null) continue;
         if (locationEventTotals.containsKey(eventLocation)) {

@@ -267,7 +267,6 @@ class HomePageState extends State<HomePage> with RouteAware {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      widget.analyticsService.showAnalyticsConsentDialog(context);
       final usedCache = await widget.startupCacheFallback;
       if (!mounted) return;
       if (usedCache == true) {

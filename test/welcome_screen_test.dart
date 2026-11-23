@@ -33,13 +33,14 @@ void main() {
   // Mock location services and permissions
   locationServicesEnabled = true;
   locationPermission = LocationPermission.always;
+  firstExecution = false;
 
   // Mock user settings before tests run
   setUpAll(() async {
     await loadSettings();
   });
 
-  group('WelcomeScreen', () {
+    group('WelcomeScreen', () {
     const pageTitles = [
       'Welcome to the official\nMill Road Winter Fair app!',
       'Explore the map',
@@ -209,8 +210,8 @@ void main() {
           final page = tester.widget<IntroductionScreen>(find.byType(IntroductionScreen)).pages![index];
           final body = find.byWidget(page.bodyWidget!);
           final row = find.descendant(of: body, matching: find.byType(Row)).first;
-          expect(tester.getRect(row).left, closeTo(32, 0.01));
-          expect(tester.getRect(row).right, closeTo(288, 0.01));
+          expect(tester.getRect(row).left, closeTo(16, 0.01));
+          expect(tester.getRect(row).right, closeTo(304, 0.01));
 
           final bodyText = find.descendant(of: body, matching: find.byType(Text)).first;
           for (final content in [bodyText, find.byWidget(page.titleWidget!)]) {
@@ -242,6 +243,7 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
         SharedPreferences.setMockInitialValues({});
+        firstExecution = false;
         var finished = false;
         await tester.pumpWidget(MaterialApp(
           builder: (context, child) => MediaQuery(
@@ -275,7 +277,7 @@ void main() {
                   .getTopLeft(find.byIcon(Icons.arrow_forward).evaluate().isNotEmpty ? find.byIcon(Icons.arrow_forward) : find.text('Done'))
                   .dy));
           expect(tester.takeException(), isNull);
-          expect(find.text('Take me straight to the Fair!').hitTestable(), findsOneWidget);
+          expect(find.text('Take me back to the Fair!').hitTestable(), findsOneWidget);
 
           if (index < pages.length - 1) {
             await tester.tap(find.byIcon(Icons.arrow_forward));
